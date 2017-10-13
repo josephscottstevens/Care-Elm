@@ -1,6 +1,5 @@
-module Hello exposing (..)
+module Hello exposing (comments)
 
-import Html exposing (Html, text, div)
 import Json.Decode exposing (..)
 
 xRaw = """
@@ -35,8 +34,8 @@ decoder =
 x : Result String (List Comment)
 x = decodeString decoder xRaw
 
-getHtml : Html msg
-getHtml =
+comments : List Comment
+comments =
     case x of
-        Err t -> div [] [text t]
-        Ok t -> div [] (t |> List.map (\n -> div [] [text n.msg]))
+        Err t -> []
+        Ok t -> t
