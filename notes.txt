@@ -1,0 +1,17 @@
+install NPM
+    https://www.npmjs.com/get-npm
+
+install elm runtime
+    open powershell
+    type "npm install -g elm"
+
+install vs code
+    https://code.visualstudio.com/download
+
+install Elm extension for vscode
+    Pres Control + Shift + X
+    search for "elm"
+    select elm Language support for visual studio code
+    press green install button
+
+perhaps... node_modules folder is needed... or the step to get that there?
