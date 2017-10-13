@@ -1,4 +1,8 @@
 import Hello exposing (comments)
 import Html exposing (Html, text, div)
 
-main = comments |> List.map (\t -> div [] [text t.msg])
+x : List (Html msg)
+x = comments |> List.map (\t -> div [] [text t.msg])
+
+main : Html msg
+main = div [] x
