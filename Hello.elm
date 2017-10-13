@@ -35,8 +35,8 @@ decoder =
 x : Result String (List Comment)
 x = decodeString decoder xRaw
 
-main : Html msg
-main =
+getHtml : Html msg
+getHtml =
     case x of
         Err t -> div [] [text t]
         Ok t -> div [] (t |> List.map (\n -> div [] [text n.msg]))
