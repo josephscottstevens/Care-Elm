@@ -1,41 +1,60 @@
-module Hello exposing (comments)
+module Hello exposing (tasks)
 
 import Json.Decode exposing (..)
 
-xRaw = """
+testData : String
+testData = """
     {"data": 
     [ {
-        "num": 1, 
-        "msg": "thing1"
+        "id": 103723, 
+        "priority": "high",
+        "title": "CARE MANAGER OR WELLNESS COORDINATOR TO PERFORM MONTHLY WELLNESS REVIEW",
+        "name": "Oglesby-Odom, Gwendolyn",
+        "initiatedOn": "10/01/2017 09:00:00 EST",
+        "dueAt": "11/01/2017 11:38:56 EST",
+        "closed": true
+
       },
       {
-        "num": 2, 
-        "msg": "thing2"
+        "id": 103722, 
+        "priority": "medium",
+        "title": "CARE MANAGER TO CREATE A CARE PLAN",
+        "name": "Oglesby-Odom, Gwendolyn",
+        "initiatedOn": "09/01/2017 09:00:00 EST",
+        "dueAt": "10/19/2017 14:16:03 EST",
+        "closed": false
       }
     ]}
     """
 
-type alias Comment =
+type alias Task =
     {
-        num : Int
-    ,   msg : String
+        id : Int
+    ,   priority : String
+    ,   title : String
+    ,   name : String
+    ,   initiatedOn : String
+    ,   dueAt : String
+    ,   closed : Bool
     }
-nestedDecoder : Decoder Comment
+nestedDecoder : Decoder Task
 nestedDecoder =
-    map2 Comment
-        (field "num" int)
-        (field "msg" string)
+    map7 Task
+        (field "id" int)
+        (field "priority" string)
+        (field "title" string)
+        (field "name" string)
+        (field "initiatedOn" string)
+        (field "dueAt" string)
+        (field "closed" bool)
 
-decoder : Decoder (List Comment)    
+decoder : Decoder (List Task)    
 decoder =
   at ["data"] (list nestedDecoder)
 
 
-x : Result String (List Comment)
-x = decodeString decoder xRaw
-
-comments : List Comment
-comments =
-    case x of
+tasks : List Task
+tasks =
+    case decodeString decoder testData of
         Err t -> []
         Ok t -> t
