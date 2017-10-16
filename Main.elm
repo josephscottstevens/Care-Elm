@@ -1,7 +1,9 @@
+port module Main exposing(..)
 import Hello exposing (tasks)
-import Html exposing (Html, text, div, input)
-import Html.Attributes exposing (style, class, placeholder)
+import Html exposing (Html, text, div, input, program)
+import Html.Attributes exposing (style, class, placeholder, id, type_)
 import Html.Events exposing (onInput)
+--import MainModel exposing (..)
 
 gridStyle : Html.Attribute msg
 gridStyle =
@@ -28,19 +30,35 @@ rowStyle =
 cellStyle : Html.Attribute msg
 cellStyle = style [("padding", "10px")]
 
-main = Html.beginnerProgram { model = model, view = view, update = update }
+main : Program Never Model Msg
+main =
+    program
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
 
-type alias Model = { content: String }
+init : ( Model, Cmd Msg )
+init = ( {content = ""}, Cmd.none )
+
+type Msg = 
+    Change String
+
+type alias Model =
+  { content : String
+  }
 model = { content = "" }
 
-type Msg 
-    = Change String
+subscriptions : Model -> Sub Msg
+subscriptions model = Sub.none
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Change newContent ->
-            { model | content = newContent }
+            ( { model | content = newContent }, Cmd.none)
+
 taskHeader : Html msg
 taskHeader = 
                     div [rowStyle] [
@@ -68,7 +86,8 @@ taskRow = tasks |> List.map (\t ->
 view : Model -> Html Msg
 view model =
     div [] [
-        input [ placeholder "Text to reverse", class "e-textbox", onInput Change] []
+        input [ type_ "text", onInput Change, class "e-textbox", id "testBob"] []
+        , div [] [ text (String.reverse model.content) ]
         ,div [gridStyle] (taskHeader :: taskRow)
     ]
     --<input type="text" id="DateOfDeath" data-bind="ejDatePicker: { value: DateOfDeath, enableStrictMode: true, width: '100%', htmlAttributes : { id: 'DateOfDeath', name: 'Date Of Death' } }" pattern="\d{1,2}/\d{1,2}/\d{4}" title="Please enter date in mm/dd/yyyy format" name="Date Of Death" />
