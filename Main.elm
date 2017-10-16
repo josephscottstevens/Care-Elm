@@ -1,6 +1,7 @@
 import Hello exposing (tasks)
-import Html exposing (Html, text, div)
-import Html.Attributes exposing (style)
+import Html exposing (Html, text, div, input)
+import Html.Attributes exposing (style, class, placeholder)
+import Html.Events exposing (onInput)
 
 gridStyle : Html.Attribute msg
 gridStyle =
@@ -27,6 +28,19 @@ rowStyle =
 cellStyle : Html.Attribute msg
 cellStyle = style [("padding", "10px")]
 
+main = Html.beginnerProgram { model = model, view = view, update = update }
+
+type alias Model = { content: String }
+model = { content = "" }
+
+type Msg 
+    = Change String
+
+update : Msg -> Model -> Model
+update msg model =
+    case msg of
+        Change newContent ->
+            { model | content = newContent }
 taskHeader : Html msg
 taskHeader = 
                     div [rowStyle] [
@@ -51,5 +65,10 @@ taskRow = tasks |> List.map (\t ->
                     ,   div [cellStyle] [text (toString t.closed)]
                     ])
 
-main : Html msg
-main = div [gridStyle] (taskHeader :: taskRow)
+view : Model -> Html Msg
+view model =
+    div [] [
+        input [ placeholder "Text to reverse", class "e-textbox", onInput Change] []
+        ,div [gridStyle] (taskHeader :: taskRow)
+    ]
+    --<input type="text" id="DateOfDeath" data-bind="ejDatePicker: { value: DateOfDeath, enableStrictMode: true, width: '100%', htmlAttributes : { id: 'DateOfDeath', name: 'Date Of Death' } }" pattern="\d{1,2}/\d{1,2}/\d{4}" title="Please enter date in mm/dd/yyyy format" name="Date Of Death" />
