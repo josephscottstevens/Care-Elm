@@ -1,15 +1,9 @@
 module Hello exposing (..)
 
+import Model exposing (..)
 import Json.Decode exposing (..)
 import Http
 
-type alias Employment =
-    {
-        patientId : Int
-    ,   employer : String
-    ,   occupation : String
-    ,   startDate : String
-    }
 nestedDecoder : Decoder Employment
 nestedDecoder =
     map4 Employment

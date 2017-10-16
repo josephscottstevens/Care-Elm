@@ -8918,13 +8918,14 @@ var _elm_lang$http$Http$StringPart = F2(
 	});
 var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 
-var _user$project$Hello$Employment = F4(
+var _user$project$Model$Employment = F4(
 	function (a, b, c, d) {
 		return {patientId: a, employer: b, occupation: c, startDate: d};
 	});
+
 var _user$project$Hello$nestedDecoder = A5(
 	_elm_lang$core$Json_Decode$map4,
-	_user$project$Hello$Employment,
+	_user$project$Model$Employment,
 	A2(_elm_lang$core$Json_Decode$field, 'PatientId', _elm_lang$core$Json_Decode$int),
 	A2(_elm_lang$core$Json_Decode$field, 'Employer', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'Occupation', _elm_lang$core$Json_Decode$string),
@@ -8960,20 +8961,28 @@ var _user$project$Main$view = function (model) {
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(
-							_elm_lang$core$String$reverse(model.content)),
+						_0: _elm_lang$html$Html$text(model.employ.startDate),
 						_1: {ctor: '[]'}
 					}),
-				_1: {ctor: '[]'}
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(model.status),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
 			}
 		});
 };
-var _user$project$Main$subscriptions = function (model) {
-	return _elm_lang$core$Platform_Sub$none;
-};
+var _user$project$Main$emptyEmploy = A4(_user$project$Model$Employment, 0, '', '', '');
 var _user$project$Main$Model = F2(
 	function (a, b) {
-		return {content: a, employer: b};
+		return {status: a, employ: b};
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
@@ -8981,14 +8990,15 @@ var _user$project$Main$update = F2(
 		if (_p0._0.ctor === 'Ok') {
 			return {
 				ctor: '_Tuple2',
-				_0: A2(
-					_user$project$Main$Model,
-					'',
-					_elm_lang$core$Maybe$Just(_p0._0._0)),
+				_0: A2(_user$project$Main$Model, 'Success', _p0._0._0),
 				_1: _elm_lang$core$Platform_Cmd$none
 			};
 		} else {
-			return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			return {
+				ctor: '_Tuple2',
+				_0: A2(_user$project$Main$Model, 'Fail', _user$project$Main$emptyEmploy),
+				_1: _elm_lang$core$Platform_Cmd$none
+			};
 		}
 	});
 var _user$project$Main$GetEmploy = function (a) {
@@ -8996,11 +9006,18 @@ var _user$project$Main$GetEmploy = function (a) {
 };
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
-	_0: A2(_user$project$Main$Model, '', _elm_lang$core$Maybe$Nothing),
+	_0: A2(_user$project$Main$Model, 'Loading', _user$project$Main$emptyEmploy),
 	_1: A2(_elm_lang$http$Http$send, _user$project$Main$GetEmploy, _user$project$Hello$getEmployment)
 };
 var _user$project$Main$main = _elm_lang$html$Html$program(
-	{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();
+	{
+		init: _user$project$Main$init,
+		view: _user$project$Main$view,
+		update: _user$project$Main$update,
+		subscriptions: function (_p1) {
+			return _elm_lang$core$Platform_Sub$none;
+		}
+	})();
 
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
