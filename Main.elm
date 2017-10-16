@@ -1,10 +1,13 @@
-module Main exposing(..)
+port module Main exposing(..)
 import Hello exposing (getEmployment)
 import Model exposing (..)
 import Html exposing (Html, text, div, input, program)
 import Http
-import Html.Attributes exposing (style, class, placeholder, id, type_)
+import Html.Attributes exposing (style, class, placeholder, id, type_, value)
 
+port check : String -> Cmd msg
+
+main : Program Never Model Msg
 main =
   Html.program
     { init = init
@@ -15,12 +18,14 @@ main =
 
 type Msg = 
     GetEmploy (Result Http.Error Employment)
+    | Change String
 
 type alias Model =
   { status : String
   , employ : Employment
   }
 
+emptyEmploy : Employment
 emptyEmploy = (Employment 0 "" "" "")
 
 init : (Model, Cmd Msg)
@@ -31,16 +36,15 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GetEmploy (Ok emp) ->
-            (Model "Success" emp , Cmd.none)
+            (Model "Success" emp, check emp.startDate)
         GetEmploy (Err _) ->
             (Model "Fail" emptyEmploy, Cmd.none)
+        Change str -> ({model | status = str}, Cmd.none)
 
 view : Model -> Html Msg
 view model =
     div [] [
-        input [ type_ "text", class "e-textbox", id "testBob"] []
+        input [ type_ "text", class "e-textbox", id "testBob" ] []
         , div [] [ text model.employ.startDate ]
         , div [] [ text model.status ]
-        --,div [gridStyle] (taskHeader :: taskRow)
     ]
-    --<input type="text" id="DateOfDeath" data-bind="ejDatePicker: { value: DateOfDeath, enableStrictMode: true, width: '100%', htmlAttributes : { id: 'DateOfDeath', name: 'Date Of Death' } }" pattern="\d{1,2}/\d{1,2}/\d{4}" title="Please enter date in mm/dd/yyyy format" name="Date Of Death" />
