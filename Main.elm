@@ -2,7 +2,7 @@ port module Main exposing(..)
 import Hello exposing (tasks)
 import Html exposing (Html, text, div, input, program)
 import Html.Attributes exposing (style, class, placeholder, id, type_)
-import Html.Events exposing (onInput)
+--import Html.Events exposing (onInput)
 --import MainModel exposing (..)
 
 gridStyle : Html.Attribute msg
@@ -48,10 +48,15 @@ type Msg =
 type alias Model =
   { content : String
   }
+
+model : { content : String }
 model = { content = "" }
 
+port setPizza : (String -> msg) -> Sub msg
+
 subscriptions : Model -> Sub Msg
-subscriptions model = Sub.none
+subscriptions model = Sub.batch ([ 
+    setPizza Change])
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -86,7 +91,7 @@ taskRow = tasks |> List.map (\t ->
 view : Model -> Html Msg
 view model =
     div [] [
-        input [ type_ "text", onInput Change, class "e-textbox", id "testBob"] []
+        input [ type_ "text", class "e-textbox", id "testBob"] []
         , div [] [ text (String.reverse model.content) ]
         ,div [gridStyle] (taskHeader :: taskRow)
     ]
