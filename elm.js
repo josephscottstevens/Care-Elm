@@ -9113,6 +9113,11 @@ var _elm_lang$http$Http$StringPart = F2(
 	});
 var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 
+var _user$project$Model$emptyEmployement = {
+	patientId: 0,
+	employers: {ctor: '[]'},
+	testDate: ''
+};
 var _user$project$Model$Employer = function (a) {
 	return function (b) {
 		return function (c) {
@@ -9148,31 +9153,23 @@ var _user$project$Model$Employment = F3(
 	function (a, b, c) {
 		return {patientId: a, employers: b, testDate: c};
 	});
-var _user$project$Model$Model = function (a) {
-	return {state: a};
-};
-var _user$project$Model$UpdateTestDate = F2(
+var _user$project$Model$Model = F2(
 	function (a, b) {
-		return {ctor: 'UpdateTestDate', _0: a, _1: b};
+		return {state: a, employment: b};
 	});
-var _user$project$Model$EditEnd = function (a) {
-	return {ctor: 'EditEnd', _0: a};
+var _user$project$Model$UpdateTestDate = function (a) {
+	return {ctor: 'UpdateTestDate', _0: a};
 };
-var _user$project$Model$EditStart = function (a) {
-	return {ctor: 'EditStart', _0: a};
-};
+var _user$project$Model$EditEnd = {ctor: 'EditEnd'};
+var _user$project$Model$EditStart = {ctor: 'EditStart'};
 var _user$project$Model$Load = function (a) {
 	return {ctor: 'Load', _0: a};
 };
 var _user$project$Model$Error = function (a) {
 	return {ctor: 'Error', _0: a};
 };
-var _user$project$Model$Edit = function (a) {
-	return {ctor: 'Edit', _0: a};
-};
-var _user$project$Model$Grid = function (a) {
-	return {ctor: 'Grid', _0: a};
-};
+var _user$project$Model$Edit = {ctor: 'Edit'};
+var _user$project$Model$Grid = {ctor: 'Grid'};
 var _user$project$Model$Initial = {ctor: 'Initial'};
 
 var _user$project$HtmlHelper$priorityList = A2(
@@ -9610,7 +9607,6 @@ var _user$project$Main$view = function (model) {
 					_1: {ctor: '[]'}
 				});
 		case 'Grid':
-			var _p1 = _p0._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -9620,8 +9616,7 @@ var _user$project$Main$view = function (model) {
 						_elm_lang$html$Html$button,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(
-								_user$project$Model$EditStart(_p1)),
+							_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditStart),
 							_1: {ctor: '[]'}
 						},
 						{
@@ -9654,7 +9649,7 @@ var _user$project$Main$view = function (model) {
 								{ctor: '[]'},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text(_p1.testDate),
+									_0: _elm_lang$html$Html$text(model.employment.testDate),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
@@ -9679,7 +9674,7 @@ var _user$project$Main$view = function (model) {
 										{
 											ctor: '::',
 											_0: _user$project$HtmlHelper$employmentHeaders,
-											_1: _user$project$HtmlHelper$employmentRows(_p1.employers)
+											_1: _user$project$HtmlHelper$employmentRows(model.employment.employers)
 										}),
 									_1: {
 										ctor: '::',
@@ -9701,8 +9696,7 @@ var _user$project$Main$view = function (model) {
 						_elm_lang$html$Html$button,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(
-								_user$project$Model$EditEnd(_p0._0)),
+							_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditEnd),
 							_1: {ctor: '[]'}
 						},
 						{
@@ -9735,73 +9729,66 @@ var _user$project$Main$view = function (model) {
 				});
 	}
 };
+var _user$project$Main$setTestDate = F2(
+	function (newTestDate, emp) {
+		return _elm_lang$core$Native_Utils.update(
+			emp,
+			{testDate: newTestDate});
+	});
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
-	_0: _user$project$Model$Model(_user$project$Model$Initial),
+	_0: A2(_user$project$Model$Model, _user$project$Model$Initial, _user$project$Model$emptyEmployement),
 	_1: _user$project$Load$getEmployment
 };
-var _user$project$Main$check = _elm_lang$core$Native_Platform.outgoingPort(
-	'check',
+var _user$project$Main$sendTestDate = _elm_lang$core$Native_Platform.outgoingPort(
+	'sendTestDate',
 	function (v) {
 		return v;
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p2 = msg;
-		switch (_p2.ctor) {
+		var _p1 = msg;
+		switch (_p1.ctor) {
 			case 'EditStart':
-				return {
-					ctor: '_Tuple2',
-					_0: _user$project$Model$Model(
-						_user$project$Model$Edit(_p2._0)),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'EditEnd':
-				return {
-					ctor: '_Tuple2',
-					_0: _user$project$Model$Model(
-						_user$project$Model$Grid(_p2._0)),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'Load':
-				if (_p2._0.ctor === 'Ok') {
-					var _p3 = _p2._0._0;
+				if (_p1._0.ctor === 'Ok') {
+					var _p2 = _p1._0._0;
 					return {
 						ctor: '_Tuple2',
-						_0: _user$project$Model$Model(
-							_user$project$Model$Grid(_p3)),
-						_1: _user$project$Main$check(_p3.testDate)
+						_0: {state: _user$project$Model$Grid, employment: _p2},
+						_1: _user$project$Main$sendTestDate(_p2.testDate)
 					};
 				} else {
 					return {
 						ctor: '_Tuple2',
-						_0: _user$project$Model$Model(
-							_user$project$Model$Error(_p2._0._0)),
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								state: _user$project$Model$Error(_p1._0._0)
+							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				}
 			default:
+				var newEmployment = A2(_user$project$Main$setTestDate, _p1._0, model.employment);
 				return {
 					ctor: '_Tuple2',
-					_0: _user$project$Model$Model(
-						_user$project$Model$Grid(
-							_elm_lang$core$Native_Utils.update(
-								_p2._0,
-								{testDate: _p2._1}))),
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{employment: newEmployment}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
 	});
+var _user$project$Main$getTestDate = _elm_lang$core$Native_Platform.incomingPort('getTestDate', _elm_lang$core$Json_Decode$string);
+var _user$project$Main$subscriptions = function (model) {
+	return _user$project$Main$getTestDate(_user$project$Model$UpdateTestDate);
+};
 var _user$project$Main$main = _elm_lang$html$Html$program(
-	{
-		init: _user$project$Main$init,
-		view: _user$project$Main$view,
-		update: _user$project$Main$update,
-		subscriptions: function (_p4) {
-			return _elm_lang$core$Platform_Sub$none;
-		}
-	})();
-var _user$project$Main$setPizza = _elm_lang$core$Native_Platform.incomingPort('setPizza', _elm_lang$core$Json_Decode$string);
+	{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();
 
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};

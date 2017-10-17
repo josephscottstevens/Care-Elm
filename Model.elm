@@ -31,17 +31,27 @@ type alias Employment =
 
 type Msg
     = Load (Result Http.Error Employment)
-    | EditStart Employment
-    | EditEnd Employment
-    | UpdateTestDate Employment String
+    | EditStart
+    | EditEnd
+    | UpdateTestDate String
 
 
 type ModelState
     = Initial
-    | Grid Employment
-    | Edit Employment
+    | Grid
+    | Edit
     | Error Http.Error
 
 
 type alias Model =
-    { state : ModelState }
+    { state : ModelState
+    , employment : Employment
+    }
+
+
+emptyEmployement : Employment
+emptyEmployement =
+    { patientId = 0
+    , employers = []
+    , testDate = ""
+    }

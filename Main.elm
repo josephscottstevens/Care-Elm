@@ -8,14 +8,15 @@ import Html.Attributes exposing (style, class, placeholder, id, type_, value)
 import Html.Events exposing (onClick)
 
 
-port check : String -> Cmd msg
+port sendTestDate : String -> Cmd msg
 
 
-port setPizza : (String -> msg) -> Sub msg
+port getTestDate : (String -> msg) -> Sub msg
 
 
-
---https://gist.github.com/evancz/e69723b23958e69b63d5b5502b0edf90
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    getTestDate UpdateTestDate
 
 
 main : Program Never Model Msg
@@ -24,34 +25,43 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = (\_ -> Sub.none)
+        , subscriptions = subscriptions
         }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model Initial
+    ( Model Initial emptyEmployement
     , getEmployment
     )
+
+
+setTestDate : String -> Employment -> Employment
+setTestDate newTestDate emp =
+    { emp | testDate = newTestDate }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        EditStart emp ->
-            ( Model (Edit emp), Cmd.none )
+        EditStart ->
+            ( model, Cmd.none )
 
-        EditEnd emp ->
-            ( Model (Grid emp), Cmd.none )
+        EditEnd ->
+            ( model, Cmd.none )
 
         Load (Ok emp) ->
-            ( Model (Grid emp), check emp.testDate )
+            ( { state = Grid, employment = emp }, sendTestDate emp.testDate )
 
         Load (Err t) ->
-            ( Model (Error t), Cmd.none )
+            ( { model | state = Error t }, Cmd.none )
 
-        UpdateTestDate emp t ->
-            ( Model (Grid { emp | testDate = t }), Cmd.none )
+        UpdateTestDate t ->
+            let
+                newEmployment =
+                    setTestDate t model.employment
+            in
+                ( { model | employment = newEmployment }, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -60,19 +70,19 @@ view model =
         Initial ->
             div [] [ text "loading" ]
 
-        Grid emp ->
+        Grid ->
             div []
-                [ button [ onClick (EditStart emp) ] [ text "edit" ]
+                [ button [ onClick EditStart ] [ text "edit" ]
                 , input [ type_ "text", class "e-textbox", id "testBob" ] []
-                , div [] [ text emp.testDate ]
+                , div [] [ text model.employment.testDate ]
                 , div [] [ text "b" ]
-                , div [ gridStyle ] (employmentHeaders :: (employmentRows emp.employers))
+                , div [ gridStyle ] (employmentHeaders :: (employmentRows model.employment.employers))
                 , priorityList
                 ]
 
-        Edit emp ->
+        Edit ->
             div []
-                [ button [ onClick (EditEnd emp) ] [ text "edit" ]
+                [ button [ onClick EditEnd ] [ text "edit" ]
                 , div [] [ text "edit mode" ]
                 ]
 
