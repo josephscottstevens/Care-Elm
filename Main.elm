@@ -1,6 +1,6 @@
 port module Main exposing (..)
 
-import Hello exposing (getEmployment)
+import Load exposing (getEmployment)
 import Model exposing (..)
 import Html exposing (Html, text, div, input, program)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value)

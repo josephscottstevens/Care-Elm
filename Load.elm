@@ -1,4 +1,4 @@
-module Hello exposing (..)
+module Load exposing (..)
 
 import Model exposing (..)
 import Json.Decode exposing (..)

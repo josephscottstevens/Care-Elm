@@ -8922,7 +8922,6 @@ var _user$project$Model$Employment = F4(
 	function (a, b, c, d) {
 		return {patientId: a, employer: b, occupation: c, startDate: d};
 	});
-var _user$project$Model$emptyEmploy = A4(_user$project$Model$Employment, 0, '', '', '');
 var _user$project$Model$Model = function (a) {
 	return {state: a};
 };
@@ -8935,15 +8934,15 @@ var _user$project$Model$Grid = function (a) {
 };
 var _user$project$Model$Initial = {ctor: 'Initial'};
 
-var _user$project$Hello$nestedDecoder = A5(
+var _user$project$Load$nestedDecoder = A5(
 	_elm_lang$core$Json_Decode$map4,
 	_user$project$Model$Employment,
 	A2(_elm_lang$core$Json_Decode$field, 'PatientId', _elm_lang$core$Json_Decode$int),
 	A2(_elm_lang$core$Json_Decode$field, 'Employer', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'Occupation', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'StartDate', _elm_lang$core$Json_Decode$string));
-var _user$project$Hello$request = A2(_elm_lang$http$Http$get, 'https://localhost:44336/People/GetEmploymentInfo?patientId=6676', _user$project$Hello$nestedDecoder);
-var _user$project$Hello$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Hello$request);
+var _user$project$Load$request = A2(_elm_lang$http$Http$get, 'https://localhost:44336/People/GetEmploymentInfo?patientId=6676', _user$project$Load$nestedDecoder);
+var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
 var _user$project$Main$view = function (model) {
 	var _p0 = model.state;
@@ -8988,7 +8987,7 @@ var _user$project$Main$view = function (model) {
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
 	_0: _user$project$Model$Model(_user$project$Model$Initial),
-	_1: _user$project$Hello$getEmployment
+	_1: _user$project$Load$getEmployment
 };
 var _user$project$Main$check = _elm_lang$core$Native_Platform.outgoingPort(
 	'check',

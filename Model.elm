@@ -23,8 +23,3 @@ type ModelState
 
 type alias Model =
     { state : ModelState }
-
-
-emptyEmploy : Employment
-emptyEmploy =
-    (Employment 0 "" "" "")
