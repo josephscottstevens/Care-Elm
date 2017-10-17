@@ -13,11 +13,14 @@ type alias Employment =
 
 type Msg
     = Load (Result Http.Error Employment)
+    | EditStart Employment
+    | EditEnd Employment
 
 
 type ModelState
     = Initial
     | Grid Employment
+    | Edit Employment
     | Error
 
 
