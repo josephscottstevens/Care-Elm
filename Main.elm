@@ -40,13 +40,13 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         EditStart ->
-            ( model, Cmd.none )
+            ( { model | state = Edit }, sendTestDate model.testDate )
 
         EditEnd ->
-            ( model, Cmd.none )
+            ( { model | state = Grid }, Cmd.none )
 
         Load (Ok newModel) ->
-            ( newModel, sendTestDate newModel.testDate )
+            ( { newModel | state = Grid }, Cmd.none )
 
         Load (Err t) ->
             ( { model | state = Error t }, Cmd.none )
@@ -64,16 +64,15 @@ view model =
         Grid ->
             div []
                 [ button [ onClick EditStart ] [ text "edit" ]
-                , input [ type_ "text", class "e-textbox", id "testDate" ] []
-                , div [] [ text model.testDate ]
                 , div [ gridStyle ] (employmentHeaders :: (employmentRows model.employers))
-                , priorityList
                 ]
 
         Edit ->
             div []
                 [ button [ onClick EditEnd ] [ text "edit" ]
                 , div [] [ text "edit mode" ]
+                , input [ type_ "text", class "e-textbox", id "testDate" ] []
+                , div [] [ text model.testDate ]
                 ]
 
         Error err ->

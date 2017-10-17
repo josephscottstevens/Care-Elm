@@ -9113,11 +9113,6 @@ var _elm_lang$http$Http$StringPart = F2(
 	});
 var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 
-var _user$project$Model$emptyEmployement = {
-	patientId: 0,
-	employers: {ctor: '[]'},
-	testDate: ''
-};
 var _user$project$Model$Employer = function (a) {
 	return function (b) {
 		return function (c) {
@@ -9149,13 +9144,9 @@ var _user$project$Model$Employer = function (a) {
 		};
 	};
 };
-var _user$project$Model$Employment = F3(
-	function (a, b, c) {
-		return {patientId: a, employers: b, testDate: c};
-	});
-var _user$project$Model$Model = F2(
-	function (a, b) {
-		return {state: a, employment: b};
+var _user$project$Model$Model = F4(
+	function (a, b, c, d) {
+		return {state: a, patientId: b, employers: c, testDate: d};
 	});
 var _user$project$Model$UpdateTestDate = function (a) {
 	return {ctor: 'UpdateTestDate', _0: a};
@@ -9171,60 +9162,13 @@ var _user$project$Model$Error = function (a) {
 var _user$project$Model$Edit = {ctor: 'Edit'};
 var _user$project$Model$Grid = {ctor: 'Grid'};
 var _user$project$Model$Initial = {ctor: 'Initial'};
+var _user$project$Model$emptyModel = {
+	state: _user$project$Model$Initial,
+	patientId: 0,
+	employers: {ctor: '[]'},
+	testDate: ''
+};
 
-var _user$project$HtmlHelper$priorityList = A2(
-	_elm_lang$html$Html$select,
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$id('testPriority'),
-		_1: {ctor: '[]'}
-	},
-	{
-		ctor: '::',
-		_0: A2(
-			_elm_lang$html$Html$option,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$value('High'),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html$text('High'),
-				_1: {ctor: '[]'}
-			}),
-		_1: {
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$option,
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$value('Medium'),
-					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text('Medium'),
-					_1: {ctor: '[]'}
-				}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$option,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$value('Low'),
-						_1: {ctor: '[]'}
-					},
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html$text('Low'),
-						_1: {ctor: '[]'}
-					}),
-				_1: {ctor: '[]'}
-			}
-		}
-	});
 var _user$project$HtmlHelper$cellStyle = _elm_lang$html$Html_Attributes$style(
 	{
 		ctor: '::',
@@ -9249,7 +9193,7 @@ var _user$project$HtmlHelper$rowStyle = _elm_lang$html$Html_Attributes$style(
 						_0: {ctor: '_Tuple2', _0: 'grid-column-start', _1: '1'},
 						_1: {
 							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'box-shadow', _1: '0 0 0 1px gray'},
+							_0: {ctor: '_Tuple2', _0: 'box-shadow', _1: '0 0 5px grey'},
 							_1: {ctor: '[]'}
 						}
 					}
@@ -9590,7 +9534,10 @@ var _user$project$Load$decodeEmployent = A3(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 			'PatientId',
 			_elm_lang$core$Json_Decode$int,
-			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Employment))));
+			A2(
+				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
+				_user$project$Model$Initial,
+				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Model)))));
 var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/People/GetEmploymentInfo?patientId=6676', _user$project$Load$decodeEmployent);
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
@@ -9627,52 +9574,18 @@ var _user$project$Main$view = function (model) {
 					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$input,
+							_elm_lang$html$Html$div,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$type_('text'),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
-									_1: {
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$id('testDate'),
-										_1: {ctor: '[]'}
-									}
-								}
+								_0: _user$project$HtmlHelper$gridStyle,
+								_1: {ctor: '[]'}
 							},
-							{ctor: '[]'}),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$div,
-								{ctor: '[]'},
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text(model.employment.testDate),
-									_1: {ctor: '[]'}
-								}),
-							_1: {
+							{
 								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$div,
-									{
-										ctor: '::',
-										_0: _user$project$HtmlHelper$gridStyle,
-										_1: {ctor: '[]'}
-									},
-									{
-										ctor: '::',
-										_0: _user$project$HtmlHelper$employmentHeaders,
-										_1: _user$project$HtmlHelper$employmentRows(model.employment.employers)
-									}),
-								_1: {
-									ctor: '::',
-									_0: _user$project$HtmlHelper$priorityList,
-									_1: {ctor: '[]'}
-								}
-							}
-						}
+								_0: _user$project$HtmlHelper$employmentHeaders,
+								_1: _user$project$HtmlHelper$employmentRows(model.employers)
+							}),
+						_1: {ctor: '[]'}
 					}
 				});
 		case 'Edit':
@@ -9703,7 +9616,37 @@ var _user$project$Main$view = function (model) {
 								_0: _elm_lang$html$Html$text('edit mode'),
 								_1: {ctor: '[]'}
 							}),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$input,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$type_('text'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$id('testDate'),
+											_1: {ctor: '[]'}
+										}
+									}
+								},
+								{ctor: '[]'}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text(model.testDate),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						}
 					}
 				});
 		default:
@@ -9718,17 +9661,7 @@ var _user$project$Main$view = function (model) {
 				});
 	}
 };
-var _user$project$Main$setTestDate = F2(
-	function (newTestDate, emp) {
-		return _elm_lang$core$Native_Utils.update(
-			emp,
-			{testDate: newTestDate});
-	});
-var _user$project$Main$init = {
-	ctor: '_Tuple2',
-	_0: A2(_user$project$Model$Model, _user$project$Model$Initial, _user$project$Model$emptyEmployement),
-	_1: _user$project$Load$getEmployment
-};
+var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
 var _user$project$Main$sendTestDate = _elm_lang$core$Native_Platform.outgoingPort(
 	'sendTestDate',
 	function (v) {
@@ -9739,16 +9672,29 @@ var _user$project$Main$update = F2(
 		var _p1 = msg;
 		switch (_p1.ctor) {
 			case 'EditStart':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{state: _user$project$Model$Edit}),
+					_1: _user$project$Main$sendTestDate(model.testDate)
+				};
 			case 'EditEnd':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{state: _user$project$Model$Grid}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			case 'Load':
 				if (_p1._0.ctor === 'Ok') {
-					var _p2 = _p1._0._0;
 					return {
 						ctor: '_Tuple2',
-						_0: {state: _user$project$Model$Grid, employment: _p2},
-						_1: _user$project$Main$sendTestDate(_p2.testDate)
+						_0: _elm_lang$core$Native_Utils.update(
+							_p1._0._0,
+							{state: _user$project$Model$Grid}),
+						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
 					return {
@@ -9762,12 +9708,11 @@ var _user$project$Main$update = F2(
 					};
 				}
 			default:
-				var newEmployment = A2(_user$project$Main$setTestDate, _p1._0, model.employment);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{employment: newEmployment}),
+						{testDate: _p1._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}

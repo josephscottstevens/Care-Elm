@@ -25,22 +25,13 @@ rowStyle =
         , ( "grid-template-rows", "auto auto" )
         , ( "grid-gap", "5px" )
         , ( "grid-column-start", "1" )
-        , ( "box-shadow", "0 0 0 1px gray" )
+        , ( "box-shadow", "0 0 5px grey" )
         ]
 
 
 cellStyle : Html.Attribute msg
 cellStyle =
     style [ ( "padding", "10px" ) ]
-
-
-priorityList : Html msg
-priorityList =
-    select [ id "testPriority" ]
-        [ option [ value "High" ] [ text "High" ]
-        , option [ value "Medium" ] [ text "Medium" ]
-        , option [ value "Low" ] [ text "Low" ]
-        ]
 
 
 employmentHeaders : Html msg
