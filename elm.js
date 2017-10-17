@@ -8557,121 +8557,6 @@ var _elm_lang$html$Html_Attributes$classList = function (list) {
 };
 var _elm_lang$html$Html_Attributes$style = _elm_lang$virtual_dom$VirtualDom$style;
 
-var _elm_lang$html$Html_Events$keyCode = A2(_elm_lang$core$Json_Decode$field, 'keyCode', _elm_lang$core$Json_Decode$int);
-var _elm_lang$html$Html_Events$targetChecked = A2(
-	_elm_lang$core$Json_Decode$at,
-	{
-		ctor: '::',
-		_0: 'target',
-		_1: {
-			ctor: '::',
-			_0: 'checked',
-			_1: {ctor: '[]'}
-		}
-	},
-	_elm_lang$core$Json_Decode$bool);
-var _elm_lang$html$Html_Events$targetValue = A2(
-	_elm_lang$core$Json_Decode$at,
-	{
-		ctor: '::',
-		_0: 'target',
-		_1: {
-			ctor: '::',
-			_0: 'value',
-			_1: {ctor: '[]'}
-		}
-	},
-	_elm_lang$core$Json_Decode$string);
-var _elm_lang$html$Html_Events$defaultOptions = _elm_lang$virtual_dom$VirtualDom$defaultOptions;
-var _elm_lang$html$Html_Events$onWithOptions = _elm_lang$virtual_dom$VirtualDom$onWithOptions;
-var _elm_lang$html$Html_Events$on = _elm_lang$virtual_dom$VirtualDom$on;
-var _elm_lang$html$Html_Events$onFocus = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'focus',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onBlur = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'blur',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onSubmitOptions = _elm_lang$core$Native_Utils.update(
-	_elm_lang$html$Html_Events$defaultOptions,
-	{preventDefault: true});
-var _elm_lang$html$Html_Events$onSubmit = function (msg) {
-	return A3(
-		_elm_lang$html$Html_Events$onWithOptions,
-		'submit',
-		_elm_lang$html$Html_Events$onSubmitOptions,
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onCheck = function (tagger) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'change',
-		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetChecked));
-};
-var _elm_lang$html$Html_Events$onInput = function (tagger) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'input',
-		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetValue));
-};
-var _elm_lang$html$Html_Events$onMouseOut = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseout',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseOver = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseover',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseLeave = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseleave',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseEnter = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseenter',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseUp = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseup',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseDown = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mousedown',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onDoubleClick = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'dblclick',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onClick = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'click',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$Options = F2(
-	function (a, b) {
-		return {stopPropagation: a, preventDefault: b};
-	});
-
 var _elm_lang$http$Native_Http = function() {
 
 
@@ -9037,6 +8922,18 @@ var _user$project$Model$Employment = F4(
 	function (a, b, c, d) {
 		return {patientId: a, employer: b, occupation: c, startDate: d};
 	});
+var _user$project$Model$emptyEmploy = A4(_user$project$Model$Employment, 0, '', '', '');
+var _user$project$Model$Model = function (a) {
+	return {status: a};
+};
+var _user$project$Model$Grid = function (a) {
+	return {ctor: 'Grid', _0: a};
+};
+var _user$project$Model$Failed = {ctor: 'Failed'};
+var _user$project$Model$Load = function (a) {
+	return {ctor: 'Load', _0: a};
+};
+var _user$project$Model$Initial = {ctor: 'Initial'};
 
 var _user$project$Hello$nestedDecoder = A5(
 	_elm_lang$core$Json_Decode$map4,
@@ -9047,54 +8944,38 @@ var _user$project$Hello$nestedDecoder = A5(
 	A2(_elm_lang$core$Json_Decode$field, 'StartDate', _elm_lang$core$Json_Decode$string));
 var _user$project$Hello$getEmployment = A2(_elm_lang$http$Http$get, '/People/GetEmploymentInfo?patientId=6676', _user$project$Hello$nestedDecoder);
 
-var _user$project$Main$emptyEmploy = A4(_user$project$Model$Employment, 0, '', '', '');
-var _user$project$Main$check = _elm_lang$core$Native_Platform.outgoingPort(
-	'check',
-	function (v) {
-		return v;
-	});
-var _user$project$Main$Model = F2(
-	function (a, b) {
-		return {status: a, employ: b};
-	});
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p0 = msg;
-		if (_p0.ctor === 'GetEmploy') {
-			if (_p0._0.ctor === 'Ok') {
-				var _p1 = _p0._0._0;
-				return {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$Main$Model, 'Success', _p1),
-					_1: _user$project$Main$check(_p1.startDate)
-				};
-			} else {
-				return {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$Main$Model, 'Fail', _user$project$Main$emptyEmploy),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			}
-		} else {
-			return {
-				ctor: '_Tuple2',
-				_0: _elm_lang$core$Native_Utils.update(
-					model,
-					{status: _p0._0}),
-				_1: _elm_lang$core$Platform_Cmd$none
-			};
-		}
-	});
-var _user$project$Main$Change = function (a) {
-	return {ctor: 'Change', _0: a};
-};
 var _user$project$Main$view = function (model) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: A2(
+	var _p0 = model.status;
+	switch (_p0.ctor) {
+		case 'Initial':
+			return A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('loading'),
+					_1: {ctor: '[]'}
+				});
+		case 'Load':
+			return A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('requesting data'),
+					_1: {ctor: '[]'}
+				});
+		case 'Failed':
+			return A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('error!'),
+					_1: {ctor: '[]'}
+				});
+		default:
+			return A2(
 				_elm_lang$html$Html$input,
 				{
 					ctor: '::',
@@ -9105,54 +8986,70 @@ var _user$project$Main$view = function (model) {
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$html$Html_Attributes$id('testBob'),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onInput(_user$project$Main$Change),
-								_1: {ctor: '[]'}
-							}
+							_1: {ctor: '[]'}
 						}
 					}
 				},
-				{ctor: '[]'}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$div,
-					{ctor: '[]'},
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html$text(model.employ.startDate),
-						_1: {ctor: '[]'}
-					}),
-				_1: {
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$div,
-						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text(model.status),
-							_1: {ctor: '[]'}
-						}),
-					_1: {ctor: '[]'}
-				}
-			}
-		});
-};
-var _user$project$Main$GetEmploy = function (a) {
-	return {ctor: 'GetEmploy', _0: a};
+				{ctor: '[]'});
+	}
 };
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
-	_0: A2(_user$project$Main$Model, 'Loading', _user$project$Main$emptyEmploy),
-	_1: A2(_elm_lang$http$Http$send, _user$project$Main$GetEmploy, _user$project$Hello$getEmployment)
+	_0: _user$project$Model$Model(_user$project$Model$Initial),
+	_1: A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Hello$getEmployment)
 };
+var _user$project$Main$check = _elm_lang$core$Native_Platform.outgoingPort(
+	'check',
+	function (v) {
+		return v;
+	});
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p1 = msg;
+		switch (_p1.ctor) {
+			case 'Initial':
+				return {
+					ctor: '_Tuple2',
+					_0: _user$project$Model$Model(_user$project$Model$Initial),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Failed':
+				return {
+					ctor: '_Tuple2',
+					_0: _user$project$Model$Model(_user$project$Model$Failed),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Grid':
+				return {
+					ctor: '_Tuple2',
+					_0: _user$project$Model$Model(
+						_user$project$Model$Grid(_p1._0)),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				if (_p1._0.ctor === 'Ok') {
+					var _p2 = _p1._0._0;
+					return {
+						ctor: '_Tuple2',
+						_0: _user$project$Model$Model(
+							_user$project$Model$Grid(_p2)),
+						_1: _user$project$Main$check(_p2.startDate)
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _user$project$Model$Model(_user$project$Model$Failed),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+		}
+	});
 var _user$project$Main$main = _elm_lang$html$Html$program(
 	{
 		init: _user$project$Main$init,
 		view: _user$project$Main$view,
 		update: _user$project$Main$update,
-		subscriptions: function (_p2) {
+		subscriptions: function (_p3) {
 			return _elm_lang$core$Platform_Sub$none;
 		}
 	})();

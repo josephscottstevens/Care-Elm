@@ -5,6 +5,10 @@ install elm runtime
     open powershell
     type "npm install -g elm"
 
+install Elm format
+    npm install -g elm-format
+    close powershell
+
 install vs code
     https://code.visualstudio.com/download
 
