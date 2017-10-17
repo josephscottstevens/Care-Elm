@@ -73,9 +73,8 @@ view model =
         Grid ->
             div []
                 [ button [ onClick EditStart ] [ text "edit" ]
-                , input [ type_ "text", class "e-textbox", id "testBob" ] []
+                , input [ type_ "text", class "e-textbox", id "testDate" ] []
                 , div [] [ text model.employment.testDate ]
-                , div [] [ text "b" ]
                 , div [ gridStyle ] (employmentHeaders :: (employmentRows model.employment.employers))
                 , priorityList
                 ]

@@ -9636,7 +9636,7 @@ var _user$project$Main$view = function (model) {
 									_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$id('testBob'),
+										_0: _elm_lang$html$Html_Attributes$id('testDate'),
 										_1: {ctor: '[]'}
 									}
 								}
@@ -9656,31 +9656,20 @@ var _user$project$Main$view = function (model) {
 								ctor: '::',
 								_0: A2(
 									_elm_lang$html$Html$div,
-									{ctor: '[]'},
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text('b'),
+										_0: _user$project$HtmlHelper$gridStyle,
 										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: _user$project$HtmlHelper$employmentHeaders,
+										_1: _user$project$HtmlHelper$employmentRows(model.employment.employers)
 									}),
 								_1: {
 									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$div,
-										{
-											ctor: '::',
-											_0: _user$project$HtmlHelper$gridStyle,
-											_1: {ctor: '[]'}
-										},
-										{
-											ctor: '::',
-											_0: _user$project$HtmlHelper$employmentHeaders,
-											_1: _user$project$HtmlHelper$employmentRows(model.employment.employers)
-										}),
-									_1: {
-										ctor: '::',
-										_0: _user$project$HtmlHelper$priorityList,
-										_1: {ctor: '[]'}
-									}
+									_0: _user$project$HtmlHelper$priorityList,
+									_1: {ctor: '[]'}
 								}
 							}
 						}
