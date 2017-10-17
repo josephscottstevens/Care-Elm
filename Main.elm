@@ -2,7 +2,8 @@ port module Main exposing (..)
 
 import Load exposing (getEmployment)
 import Model exposing (..)
-import Html exposing (Html, text, div, input, program, button)
+import HtmlHelper exposing (..)
+import Html exposing (Html, text, div, input, program, button, select, option)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value)
 import Html.Events exposing (onClick)
 
@@ -55,6 +56,7 @@ view model =
                 , input [ type_ "text", class "e-textbox", id "testBob" ] []
                 , div [] [ text "a" ]
                 , div [] [ text "b" ]
+                , priorityList
                 ]
 
         Edit emp ->
