@@ -36,7 +36,7 @@ cellStyle =
 
 priorityList : Html msg
 priorityList =
-    select []
+    select [ id "testPriority" ]
         [ option [ value "High" ] [ text "High" ]
         , option [ value "Medium" ] [ text "Medium" ]
         , option [ value "Low" ] [ text "Low" ]

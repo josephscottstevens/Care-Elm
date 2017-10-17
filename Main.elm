@@ -11,6 +11,13 @@ import Html.Events exposing (onClick)
 port check : String -> Cmd msg
 
 
+port setPizza : (String -> msg) -> Sub msg
+
+
+
+--https://gist.github.com/evancz/e69723b23958e69b63d5b5502b0edf90
+
+
 main : Program Never Model Msg
 main =
     Html.program
@@ -38,10 +45,13 @@ update msg model =
             ( Model (Grid emp), Cmd.none )
 
         Load (Ok emp) ->
-            ( Model (Grid emp), check "10/17/2017" )
+            ( Model (Grid emp), check emp.testDate )
 
         Load (Err t) ->
             ( Model (Error t), Cmd.none )
+
+        UpdateTestDate emp t ->
+            ( Model (Grid { emp | testDate = t }), Cmd.none )
 
 
 view : Model -> Html Msg
@@ -54,7 +64,7 @@ view model =
             div []
                 [ button [ onClick (EditStart emp) ] [ text "edit" ]
                 , input [ type_ "text", class "e-textbox", id "testBob" ] []
-                , div [] [ text "a" ]
+                , div [] [ text emp.testDate ]
                 , div [] [ text "b" ]
                 , div [ gridStyle ] (employmentHeaders :: (employmentRows emp.employers))
                 , priorityList

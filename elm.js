@@ -9144,13 +9144,17 @@ var _user$project$Model$Employer = function (a) {
 		};
 	};
 };
-var _user$project$Model$Employment = F2(
-	function (a, b) {
-		return {patientId: a, employers: b};
+var _user$project$Model$Employment = F3(
+	function (a, b, c) {
+		return {patientId: a, employers: b, testDate: c};
 	});
 var _user$project$Model$Model = function (a) {
 	return {state: a};
 };
+var _user$project$Model$UpdateTestDate = F2(
+	function (a, b) {
+		return {ctor: 'UpdateTestDate', _0: a, _1: b};
+	});
 var _user$project$Model$EditEnd = function (a) {
 	return {ctor: 'EditEnd', _0: a};
 };
@@ -9173,7 +9177,11 @@ var _user$project$Model$Initial = {ctor: 'Initial'};
 
 var _user$project$HtmlHelper$priorityList = A2(
 	_elm_lang$html$Html$select,
-	{ctor: '[]'},
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$id('testPriority'),
+		_1: {ctor: '[]'}
+	},
 	{
 		ctor: '::',
 		_0: A2(
@@ -9575,13 +9583,17 @@ var _user$project$Load$decodeEmployer = A3(
 															_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Employer))))))))))))))));
 var _user$project$Load$decodeEmployent = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-	'Employers',
-	_elm_lang$core$Json_Decode$list(_user$project$Load$decodeEmployer),
+	'TestDate',
+	_elm_lang$core$Json_Decode$string,
 	A3(
 		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-		'PatientId',
-		_elm_lang$core$Json_Decode$int,
-		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Employment)));
+		'Employers',
+		_elm_lang$core$Json_Decode$list(_user$project$Load$decodeEmployer),
+		A3(
+			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+			'PatientId',
+			_elm_lang$core$Json_Decode$int,
+			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Employment))));
 var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/People/GetEmploymentInfo?patientId=6676', _user$project$Load$decodeEmployent);
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
@@ -9642,7 +9654,7 @@ var _user$project$Main$view = function (model) {
 								{ctor: '[]'},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text('a'),
+									_0: _elm_lang$html$Html$text(_p1.testDate),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
@@ -9751,13 +9763,14 @@ var _user$project$Main$update = F2(
 						_user$project$Model$Grid(_p2._0)),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
+			case 'Load':
 				if (_p2._0.ctor === 'Ok') {
+					var _p3 = _p2._0._0;
 					return {
 						ctor: '_Tuple2',
 						_0: _user$project$Model$Model(
-							_user$project$Model$Grid(_p2._0._0)),
-						_1: _user$project$Main$check('10/17/2017')
+							_user$project$Model$Grid(_p3)),
+						_1: _user$project$Main$check(_p3.testDate)
 					};
 				} else {
 					return {
@@ -9767,6 +9780,16 @@ var _user$project$Main$update = F2(
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				}
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _user$project$Model$Model(
+						_user$project$Model$Grid(
+							_elm_lang$core$Native_Utils.update(
+								_p2._0,
+								{testDate: _p2._1}))),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 		}
 	});
 var _user$project$Main$main = _elm_lang$html$Html$program(
@@ -9774,10 +9797,11 @@ var _user$project$Main$main = _elm_lang$html$Html$program(
 		init: _user$project$Main$init,
 		view: _user$project$Main$view,
 		update: _user$project$Main$update,
-		subscriptions: function (_p3) {
+		subscriptions: function (_p4) {
 			return _elm_lang$core$Platform_Sub$none;
 		}
 	})();
+var _user$project$Main$setPizza = _elm_lang$core$Native_Platform.incomingPort('setPizza', _elm_lang$core$Json_Decode$string);
 
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};

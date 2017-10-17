@@ -25,6 +25,7 @@ type alias Employer =
 type alias Employment =
     { patientId : Int
     , employers : List Employer
+    , testDate : String
     }
 
 
@@ -32,6 +33,7 @@ type Msg
     = Load (Result Http.Error Employment)
     | EditStart Employment
     | EditEnd Employment
+    | UpdateTestDate Employment String
 
 
 type ModelState

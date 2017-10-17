@@ -31,6 +31,7 @@ decodeEmployent =
     decode Employment
         |> required "PatientId" int
         |> required "Employers" (list decodeEmployer)
+        |> required "TestDate" string
 
 
 request : Http.Request Employment
