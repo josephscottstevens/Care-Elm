@@ -2,28 +2,31 @@ module Model exposing (..)
 
 import Http
 
+
 type alias Employment =
-    {
-        patientId : Int
-    ,   employer : String
-    ,   occupation : String
-    ,   startDate : String
+    { patientId : Int
+    , employer : String
+    , occupation : String
+    , startDate : String
     }
 
-type Msg =
-    Initial
+
+type Msg
+    = Initial
     | Load (Result Http.Error Employment)
     | Failed
     | Grid Employment
-    -- | EditMode Employment
 
--- type Msg = 
---     GetEmploy (Result Http.Error Employment)
---     | Change String
+
+
+-- | EditMode Employment
+
 
 type alias Model =
-  { status : Msg
-  }
+    { status : Msg
+    }
+
 
 emptyEmploy : Employment
-emptyEmploy = (Employment 0 "" "" "")
+emptyEmploy =
+    (Employment 0 "" "" "")

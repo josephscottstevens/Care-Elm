@@ -60,11 +60,3 @@ view model =
 
         Grid t ->
             input [ type_ "text", class "e-textbox", id "testBob" ] []
-
-
-
--- div []
---     [
---     -- , div [] [ text model.employ.startDate ]
---     -- , div [] [ text model.status ]
---     ]
