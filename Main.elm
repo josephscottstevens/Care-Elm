@@ -38,10 +38,10 @@ update msg model =
             ( Model (Grid emp), Cmd.none )
 
         Load (Ok emp) ->
-            ( Model (Grid emp), check emp.startDate )
+            ( Model (Grid emp), check (toString emp.patientId) )
 
         Load (Err t) ->
-            ( Model Error, Cmd.none )
+            ( Model (Error t), Cmd.none )
 
 
 view : Model -> Html Msg
@@ -56,6 +56,7 @@ view model =
                 , input [ type_ "text", class "e-textbox", id "testBob" ] []
                 , div [] [ text "a" ]
                 , div [] [ text "b" ]
+                , div [ gridStyle ] (employmentHeaders :: (employmentRows emp.employers))
                 , priorityList
                 ]
 
@@ -65,5 +66,5 @@ view model =
                 , div [] [ text "edit mode" ]
                 ]
 
-        Error ->
-            div [] [ text "error!" ]
+        Error err ->
+            div [] [ text (toString err) ]

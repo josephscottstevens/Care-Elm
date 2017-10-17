@@ -3,11 +3,28 @@ module Model exposing (..)
 import Http
 
 
+type alias Employer =
+    { employmentStatus : String
+    , occupation : String
+    , employer : String
+    , startDate : String
+    , endDate : String
+    , contactPerson : String
+    , status : String
+    , addressLine1 : String
+    , addressLine2 : String
+    , city : String
+    , state : String
+    , zipCode : String
+    , phone : String
+    , email : String
+    , comment : String
+    }
+
+
 type alias Employment =
     { patientId : Int
-    , employer : String
-    , occupation : String
-    , startDate : String
+    , employers : List Employer
     }
 
 
@@ -21,7 +38,7 @@ type ModelState
     = Initial
     | Grid Employment
     | Edit Employment
-    | Error
+    | Error Http.Error
 
 
 type alias Model =
