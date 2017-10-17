@@ -22,15 +22,8 @@ type alias Employer =
     }
 
 
-type alias Employment =
-    { patientId : Int
-    , employers : List Employer
-    , testDate : String
-    }
-
-
 type Msg
-    = Load (Result Http.Error Employment)
+    = Load (Result Http.Error Model)
     | EditStart
     | EditEnd
     | UpdateTestDate String
@@ -45,13 +38,16 @@ type ModelState
 
 type alias Model =
     { state : ModelState
-    , employment : Employment
+    , patientId : Int
+    , employers : List Employer
+    , testDate : String
     }
 
 
-emptyEmployement : Employment
-emptyEmployement =
-    { patientId = 0
+emptyModel : Model
+emptyModel =
+    { state = Initial
+    , patientId = 0
     , employers = []
     , testDate = ""
     }

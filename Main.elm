@@ -31,14 +31,9 @@ main =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model Initial emptyEmployement
+    ( emptyModel
     , getEmployment
     )
-
-
-setTestDate : String -> Employment -> Employment
-setTestDate newTestDate emp =
-    { emp | testDate = newTestDate }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -50,18 +45,14 @@ update msg model =
         EditEnd ->
             ( model, Cmd.none )
 
-        Load (Ok emp) ->
-            ( { state = Grid, employment = emp }, sendTestDate emp.testDate )
+        Load (Ok newModel) ->
+            ( newModel, sendTestDate newModel.testDate )
 
         Load (Err t) ->
             ( { model | state = Error t }, Cmd.none )
 
         UpdateTestDate t ->
-            let
-                newEmployment =
-                    setTestDate t model.employment
-            in
-                ( { model | employment = newEmployment }, Cmd.none )
+            ( { model | testDate = t }, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -74,8 +65,8 @@ view model =
             div []
                 [ button [ onClick EditStart ] [ text "edit" ]
                 , input [ type_ "text", class "e-textbox", id "testDate" ] []
-                , div [] [ text model.employment.testDate ]
-                , div [ gridStyle ] (employmentHeaders :: (employmentRows model.employment.employers))
+                , div [] [ text model.testDate ]
+                , div [ gridStyle ] (employmentHeaders :: (employmentRows model.employers))
                 , priorityList
                 ]
 

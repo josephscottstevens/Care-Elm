@@ -26,15 +26,16 @@ decodeEmployer =
         |> required "Comment" string
 
 
-decodeEmployent : Decoder Employment
+decodeEmployent : Decoder Model
 decodeEmployent =
-    decode Employment
+    decode Model
+        |> hardcoded Initial
         |> required "PatientId" int
         |> required "Employers" (list decodeEmployer)
         |> required "TestDate" string
 
 
-request : Http.Request Employment
+request : Http.Request Model
 request =
     Http.get "/People/GetEmploymentInfo?patientId=6676" decodeEmployent
 
