@@ -8924,14 +8924,14 @@ var _user$project$Model$Employment = F4(
 	});
 var _user$project$Model$emptyEmploy = A4(_user$project$Model$Employment, 0, '', '', '');
 var _user$project$Model$Model = function (a) {
-	return {status: a};
+	return {state: a};
 };
-var _user$project$Model$Grid = function (a) {
-	return {ctor: 'Grid', _0: a};
-};
-var _user$project$Model$Failed = {ctor: 'Failed'};
 var _user$project$Model$Load = function (a) {
 	return {ctor: 'Load', _0: a};
+};
+var _user$project$Model$Error = {ctor: 'Error'};
+var _user$project$Model$Grid = function (a) {
+	return {ctor: 'Grid', _0: a};
 };
 var _user$project$Model$Initial = {ctor: 'Initial'};
 
@@ -8942,10 +8942,11 @@ var _user$project$Hello$nestedDecoder = A5(
 	A2(_elm_lang$core$Json_Decode$field, 'Employer', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'Occupation', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'StartDate', _elm_lang$core$Json_Decode$string));
-var _user$project$Hello$getEmployment = A2(_elm_lang$http$Http$get, '/People/GetEmploymentInfo?patientId=6676', _user$project$Hello$nestedDecoder);
+var _user$project$Hello$request = A2(_elm_lang$http$Http$get, 'https://localhost:44336/People/GetEmploymentInfo?patientId=6676', _user$project$Hello$nestedDecoder);
+var _user$project$Hello$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Hello$request);
 
 var _user$project$Main$view = function (model) {
-	var _p0 = model.status;
+	var _p0 = model.state;
 	switch (_p0.ctor) {
 		case 'Initial':
 			return A2(
@@ -8956,25 +8957,7 @@ var _user$project$Main$view = function (model) {
 					_0: _elm_lang$html$Html$text('loading'),
 					_1: {ctor: '[]'}
 				});
-		case 'Load':
-			return A2(
-				_elm_lang$html$Html$div,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text('requesting data'),
-					_1: {ctor: '[]'}
-				});
-		case 'Failed':
-			return A2(
-				_elm_lang$html$Html$div,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text('error!'),
-					_1: {ctor: '[]'}
-				});
-		default:
+		case 'Grid':
 			return A2(
 				_elm_lang$html$Html$input,
 				{
@@ -8991,12 +8974,21 @@ var _user$project$Main$view = function (model) {
 					}
 				},
 				{ctor: '[]'});
+		default:
+			return A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('error!'),
+					_1: {ctor: '[]'}
+				});
 	}
 };
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
 	_0: _user$project$Model$Model(_user$project$Model$Initial),
-	_1: A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Hello$getEmployment)
+	_1: _user$project$Hello$getEmployment
 };
 var _user$project$Main$check = _elm_lang$core$Native_Platform.outgoingPort(
 	'check',
@@ -9006,42 +8998,20 @@ var _user$project$Main$check = _elm_lang$core$Native_Platform.outgoingPort(
 var _user$project$Main$update = F2(
 	function (msg, model) {
 		var _p1 = msg;
-		switch (_p1.ctor) {
-			case 'Initial':
-				return {
-					ctor: '_Tuple2',
-					_0: _user$project$Model$Model(_user$project$Model$Initial),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'Failed':
-				return {
-					ctor: '_Tuple2',
-					_0: _user$project$Model$Model(_user$project$Model$Failed),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'Grid':
-				return {
-					ctor: '_Tuple2',
-					_0: _user$project$Model$Model(
-						_user$project$Model$Grid(_p1._0)),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			default:
-				if (_p1._0.ctor === 'Ok') {
-					var _p2 = _p1._0._0;
-					return {
-						ctor: '_Tuple2',
-						_0: _user$project$Model$Model(
-							_user$project$Model$Grid(_p2)),
-						_1: _user$project$Main$check(_p2.startDate)
-					};
-				} else {
-					return {
-						ctor: '_Tuple2',
-						_0: _user$project$Model$Model(_user$project$Model$Failed),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				}
+		if (_p1._0.ctor === 'Ok') {
+			var _p2 = _p1._0._0;
+			return {
+				ctor: '_Tuple2',
+				_0: _user$project$Model$Model(
+					_user$project$Model$Grid(_p2)),
+				_1: _user$project$Main$check(_p2.startDate)
+			};
+		} else {
+			return {
+				ctor: '_Tuple2',
+				_0: _user$project$Model$Model(_user$project$Model$Error),
+				_1: _elm_lang$core$Platform_Cmd$none
+			};
 		}
 	});
 var _user$project$Main$main = _elm_lang$html$Html$program(

@@ -20,9 +20,14 @@ nestedDecoder =
 --   at ["data"] (list nestedDecoder)
 
 
-getEmployment : Http.Request Employment
-getEmployment =
+request : Http.Request Employment
+request =
     Http.get "https://localhost:44336/People/GetEmploymentInfo?patientId=6676" nestedDecoder
+
+
+getEmployment : Cmd Msg
+getEmployment =
+    Http.send Load request
 
 
 

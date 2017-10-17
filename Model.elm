@@ -12,19 +12,17 @@ type alias Employment =
 
 
 type Msg
+    = Load (Result Http.Error Employment)
+
+
+type ModelState
     = Initial
-    | Load (Result Http.Error Employment)
-    | Failed
     | Grid Employment
-
-
-
--- | EditMode Employment
+    | Error
 
 
 type alias Model =
-    { status : Msg
-    }
+    { state : ModelState }
 
 
 emptyEmploy : Employment
