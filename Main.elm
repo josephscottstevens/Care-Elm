@@ -38,7 +38,7 @@ update msg model =
             ( Model (Grid emp), Cmd.none )
 
         Load (Ok emp) ->
-            ( Model (Grid emp), check (toString emp.patientId) )
+            ( Model (Grid emp), check "10/17/2017" )
 
         Load (Err t) ->
             ( Model (Error t), Cmd.none )

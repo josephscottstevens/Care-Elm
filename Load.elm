@@ -35,17 +35,9 @@ decodeEmployent =
 
 request : Http.Request Employment
 request =
-    Http.get "https://localhost:44336/People/GetEmploymentInfo?patientId=6676" decodeEmployent
+    Http.get "/People/GetEmploymentInfo?patientId=6676" decodeEmployent
 
 
 getEmployment : Cmd Msg
 getEmployment =
     Http.send Load request
-
-
-
--- tasks : List Task
--- tasks =
---     case decodeString decoder testData of
---         Err t -> []
---         Ok t -> t
