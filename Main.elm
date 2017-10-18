@@ -5,7 +5,7 @@ import Model exposing (..)
 import HtmlHelper exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput)
 
 
 port sendTestDate : String -> Cmd msg
@@ -31,9 +31,7 @@ main =
 
 init : ( Model, Cmd Msg )
 init =
-    ( emptyModel
-    , getEmployment
-    )
+    ( emptyModel, getEmployment )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -54,6 +52,12 @@ update msg model =
         UpdateTestDate t ->
             ( { model | testDate = t }, Cmd.none )
 
+        UpdateFirst t ->
+            ( { model | testFirst = t }, Cmd.none )
+
+        UpdateLast t ->
+            ( { model | testLast = t }, Cmd.none )
+
 
 view : Model -> Html Msg
 view model =
@@ -63,15 +67,18 @@ view model =
 
         Grid ->
             div []
-                [ button [ onClick EditStart ] [ text "edit" ]
+                [ div [] [ text "grid mode" ]
+                , button [ onClick EditStart ] [ text "edit" ]
                 , div [ gridStyle ] (employmentHeaders :: (employmentRows model.employers))
                 ]
 
         Edit ->
             div []
-                [ button [ onClick EditEnd ] [ text "edit" ]
-                , div [] [ text "edit mode" ]
-                , input [ type_ "text", class "e-textbox", id "testDate" ] []
+                [ div [] [ text "edit mode" ]
+                , button [ onClick EditEnd ] [ text "edit" ]
+                , input [ type_ "text", class "e-textbox", id "testDate", value model.testDate ] [ text model.testDate ]
+                , input [ placeholder "First", class "e-textbox", onInput UpdateFirst, value model.testFirst ] []
+                , input [ placeholder "Last", class "e-textbox", onInput UpdateLast, value model.testLast ] []
                 , div [] [ text model.testDate ]
                 ]
 

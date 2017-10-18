@@ -33,6 +33,8 @@ decodeEmployent =
         |> required "PatientId" int
         |> required "Employers" (list decodeEmployer)
         |> required "TestDate" string
+        |> hardcoded ""
+        |> hardcoded ""
 
 
 request : Http.Request Model

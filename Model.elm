@@ -27,6 +27,8 @@ type Msg
     | EditStart
     | EditEnd
     | UpdateTestDate String
+    | UpdateFirst String
+    | UpdateLast String
 
 
 type ModelState
@@ -41,6 +43,8 @@ type alias Model =
     , patientId : Int
     , employers : List Employer
     , testDate : String
+    , testFirst : String
+    , testLast : String
     }
 
 
@@ -48,6 +52,8 @@ emptyModel : Model
 emptyModel =
     { state = Initial
     , patientId = 0
+    , testFirst = ""
+    , testLast = ""
     , employers = []
     , testDate = ""
     }
