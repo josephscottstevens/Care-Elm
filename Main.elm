@@ -67,19 +67,16 @@ view model =
 
         Grid ->
             div []
-                [ div [] [ text "grid mode" ]
-                , button [ onClick EditStart ] [ text "edit" ]
+                [ button [ class "btn btn-default", controlStyle, onClick EditStart ] [ text "edit" ]
                 , div [ gridStyle ] (employmentHeaders :: (employmentRows model.employers))
                 ]
 
         Edit ->
             div []
-                [ div [] [ text "edit mode" ]
-                , button [ onClick EditEnd ] [ text "edit" ]
-                , input [ type_ "text", class "e-textbox", id "testDate", value model.testDate ] [ text model.testDate ]
-                , input [ placeholder "First", class "e-textbox", onInput UpdateFirst, value model.testFirst ] []
-                , input [ placeholder "Last", class "e-textbox", onInput UpdateLast, value model.testLast ] []
-                , div [] [ text model.testDate ]
+                [ button [ class "btn btn-default", controlStyle, onClick EditEnd ] [ text "edit" ]
+                , input [ type_ "text", class "e-textbox", controlStyle, id "testDate", value model.testDate ] [ text model.testDate ]
+                , input [ placeholder "First", class "e-textbox", controlStyle, onInput UpdateFirst, value model.testFirst ] []
+                , input [ placeholder "Last", class "e-textbox", controlStyle, onInput UpdateLast, value model.testLast ] []
                 ]
 
         Error err ->

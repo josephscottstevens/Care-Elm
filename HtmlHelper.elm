@@ -5,13 +5,17 @@ import Html.Attributes exposing (style, class, placeholder, id, type_, value)
 import Model exposing (..)
 
 
+controlStyle : Html.Attribute msg
+controlStyle =
+    style [ ( "margin", "5px" ) ]
+
+
 gridStyle : Html.Attribute msg
 gridStyle =
     style
         [ ( "display", "grid" )
         , ( "grid-template-columns", "1fr" )
         , ( "grid-template-rows", "repeat(-1, auto)" )
-        , ( "grid-gap", "1px" )
         , ( "padding", "40px" )
         , ( "text-align", "center" )
         ]
@@ -23,27 +27,41 @@ rowStyle =
         [ ( "display", "grid" )
         , ( "grid-template-columns", "80px 1fr 1fr 1fr 1fr 1fr 1fr" )
         , ( "grid-template-rows", "auto auto" )
-        , ( "grid-gap", "5px" )
-        , ( "grid-column-start", "1" )
-        , ( "box-shadow", "0 0 5px grey" )
+        , ( "grid-row-gap", "1px" )
+        , ( "box-sizing", "border-box" )
+        , ( "box-shadow", "0 0 1px grey" )
         ]
 
 
-cellStyle : Html.Attribute msg
+cellStyle : List (Html.Attribute msg)
 cellStyle =
-    style [ ( "padding", "10px" ) ]
+    [ style
+        [ ( "padding", "10px" )
+        ]
+    ]
+
+
+headerStyle : List (Html.Attribute msg)
+headerStyle =
+    List.append cellStyle
+        [ style
+            [ ( "font-weight", "600" )
+            , ( "background-color", "#f1f1f1" )
+            , ( "cursor", "pointer" )
+            ]
+        ]
 
 
 employmentHeaders : Html msg
 employmentHeaders =
     div [ rowStyle ]
-        [ div [ cellStyle ] [ text "Id" ]
-        , div [ cellStyle ] [ text "Priority" ]
-        , div [ cellStyle ] [ text "Title" ]
-        , div [ cellStyle ] [ text "Name" ]
-        , div [ cellStyle ] [ text "InitiatedOn" ]
-        , div [ cellStyle ] [ text "Due At" ]
-        , div [ cellStyle ] [ text "closed" ]
+        [ div headerStyle [ text "Id" ]
+        , div headerStyle [ text "Priority" ]
+        , div headerStyle [ text "Title" ]
+        , div headerStyle [ text "Name" ]
+        , div headerStyle [ text "InitiatedOn" ]
+        , div headerStyle [ text "Due At" ]
+        , div headerStyle [ text "Closed" ]
         ]
 
 
@@ -53,12 +71,12 @@ employmentRows emp =
         |> List.map
             (\t ->
                 div [ rowStyle ]
-                    [ div [ cellStyle ] [ text t.occupation ]
-                    , div [ cellStyle ] [ text t.employer ]
-                    , div [ cellStyle ] [ text t.startDate ]
-                    , div [ cellStyle ] [ text t.endDate ]
-                    , div [ cellStyle ] [ text t.contactPerson ]
-                    , div [ cellStyle ] [ text t.status ]
-                    , div [ cellStyle ] [ text t.state ]
+                    [ div cellStyle [ text t.occupation ]
+                    , div cellStyle [ text t.employer ]
+                    , div cellStyle [ text t.startDate ]
+                    , div cellStyle [ text t.endDate ]
+                    , div cellStyle [ text t.contactPerson ]
+                    , div cellStyle [ text t.status ]
+                    , div cellStyle [ text t.state ]
                     ]
             )

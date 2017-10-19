@@ -9144,10 +9144,16 @@ var _user$project$Model$Employer = function (a) {
 		};
 	};
 };
-var _user$project$Model$Model = F4(
-	function (a, b, c, d) {
-		return {state: a, patientId: b, employers: c, testDate: d};
+var _user$project$Model$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {state: a, patientId: b, employers: c, testDate: d, testFirst: e, testLast: f};
 	});
+var _user$project$Model$UpdateLast = function (a) {
+	return {ctor: 'UpdateLast', _0: a};
+};
+var _user$project$Model$UpdateFirst = function (a) {
+	return {ctor: 'UpdateFirst', _0: a};
+};
 var _user$project$Model$UpdateTestDate = function (a) {
 	return {ctor: 'UpdateTestDate', _0: a};
 };
@@ -9165,14 +9171,41 @@ var _user$project$Model$Initial = {ctor: 'Initial'};
 var _user$project$Model$emptyModel = {
 	state: _user$project$Model$Initial,
 	patientId: 0,
+	testFirst: '',
+	testLast: '',
 	employers: {ctor: '[]'},
 	testDate: ''
 };
 
-var _user$project$HtmlHelper$cellStyle = _elm_lang$html$Html_Attributes$style(
+var _user$project$HtmlHelper$cellStyle = {
+	ctor: '::',
+	_0: _elm_lang$html$Html_Attributes$style(
+		{
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: 'padding', _1: '10px'},
+			_1: {ctor: '[]'}
+		}),
+	_1: {ctor: '[]'}
+};
+var _user$project$HtmlHelper$headerStyle = A2(
+	_elm_lang$core$List$append,
+	_user$project$HtmlHelper$cellStyle,
 	{
 		ctor: '::',
-		_0: {ctor: '_Tuple2', _0: 'padding', _1: '10px'},
+		_0: _elm_lang$html$Html_Attributes$style(
+			{
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'font-weight', _1: '600'},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'background-color', _1: '#f1f1f1'},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'cursor', _1: 'pointer'},
+						_1: {ctor: '[]'}
+					}
+				}
+			}),
 		_1: {ctor: '[]'}
 	});
 var _user$project$HtmlHelper$rowStyle = _elm_lang$html$Html_Attributes$style(
@@ -9187,13 +9220,13 @@ var _user$project$HtmlHelper$rowStyle = _elm_lang$html$Html_Attributes$style(
 				_0: {ctor: '_Tuple2', _0: 'grid-template-rows', _1: 'auto auto'},
 				_1: {
 					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'grid-gap', _1: '5px'},
+					_0: {ctor: '_Tuple2', _0: 'grid-row-gap', _1: '1px'},
 					_1: {
 						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'grid-column-start', _1: '1'},
+						_0: {ctor: '_Tuple2', _0: 'box-sizing', _1: 'border-box'},
 						_1: {
 							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'box-shadow', _1: '0 0 5px grey'},
+							_0: {ctor: '_Tuple2', _0: 'box-shadow', _1: '0 0 1px grey'},
 							_1: {ctor: '[]'}
 						}
 					}
@@ -9212,11 +9245,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 		ctor: '::',
 		_0: A2(
 			_elm_lang$html$Html$div,
-			{
-				ctor: '::',
-				_0: _user$project$HtmlHelper$cellStyle,
-				_1: {ctor: '[]'}
-			},
+			_user$project$HtmlHelper$headerStyle,
 			{
 				ctor: '::',
 				_0: _elm_lang$html$Html$text('Id'),
@@ -9226,11 +9255,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 			ctor: '::',
 			_0: A2(
 				_elm_lang$html$Html$div,
-				{
-					ctor: '::',
-					_0: _user$project$HtmlHelper$cellStyle,
-					_1: {ctor: '[]'}
-				},
+				_user$project$HtmlHelper$headerStyle,
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html$text('Priority'),
@@ -9240,11 +9265,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 				ctor: '::',
 				_0: A2(
 					_elm_lang$html$Html$div,
-					{
-						ctor: '::',
-						_0: _user$project$HtmlHelper$cellStyle,
-						_1: {ctor: '[]'}
-					},
+					_user$project$HtmlHelper$headerStyle,
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html$text('Title'),
@@ -9254,11 +9275,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 					ctor: '::',
 					_0: A2(
 						_elm_lang$html$Html$div,
-						{
-							ctor: '::',
-							_0: _user$project$HtmlHelper$cellStyle,
-							_1: {ctor: '[]'}
-						},
+						_user$project$HtmlHelper$headerStyle,
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html$text('Name'),
@@ -9268,11 +9285,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 						ctor: '::',
 						_0: A2(
 							_elm_lang$html$Html$div,
-							{
-								ctor: '::',
-								_0: _user$project$HtmlHelper$cellStyle,
-								_1: {ctor: '[]'}
-							},
+							_user$project$HtmlHelper$headerStyle,
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html$text('InitiatedOn'),
@@ -9282,11 +9295,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 							ctor: '::',
 							_0: A2(
 								_elm_lang$html$Html$div,
-								{
-									ctor: '::',
-									_0: _user$project$HtmlHelper$cellStyle,
-									_1: {ctor: '[]'}
-								},
+								_user$project$HtmlHelper$headerStyle,
 								{
 									ctor: '::',
 									_0: _elm_lang$html$Html$text('Due At'),
@@ -9296,14 +9305,10 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 								ctor: '::',
 								_0: A2(
 									_elm_lang$html$Html$div,
+									_user$project$HtmlHelper$headerStyle,
 									{
 										ctor: '::',
-										_0: _user$project$HtmlHelper$cellStyle,
-										_1: {ctor: '[]'}
-									},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('closed'),
+										_0: _elm_lang$html$Html$text('Closed'),
 										_1: {ctor: '[]'}
 									}),
 								_1: {ctor: '[]'}
@@ -9329,11 +9334,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 					ctor: '::',
 					_0: A2(
 						_elm_lang$html$Html$div,
-						{
-							ctor: '::',
-							_0: _user$project$HtmlHelper$cellStyle,
-							_1: {ctor: '[]'}
-						},
+						_user$project$HtmlHelper$cellStyle,
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html$text(t.occupation),
@@ -9343,11 +9344,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 						ctor: '::',
 						_0: A2(
 							_elm_lang$html$Html$div,
-							{
-								ctor: '::',
-								_0: _user$project$HtmlHelper$cellStyle,
-								_1: {ctor: '[]'}
-							},
+							_user$project$HtmlHelper$cellStyle,
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html$text(t.employer),
@@ -9357,11 +9354,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 							ctor: '::',
 							_0: A2(
 								_elm_lang$html$Html$div,
-								{
-									ctor: '::',
-									_0: _user$project$HtmlHelper$cellStyle,
-									_1: {ctor: '[]'}
-								},
+								_user$project$HtmlHelper$cellStyle,
 								{
 									ctor: '::',
 									_0: _elm_lang$html$Html$text(t.startDate),
@@ -9371,11 +9364,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 								ctor: '::',
 								_0: A2(
 									_elm_lang$html$Html$div,
-									{
-										ctor: '::',
-										_0: _user$project$HtmlHelper$cellStyle,
-										_1: {ctor: '[]'}
-									},
+									_user$project$HtmlHelper$cellStyle,
 									{
 										ctor: '::',
 										_0: _elm_lang$html$Html$text(t.endDate),
@@ -9385,11 +9374,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 									ctor: '::',
 									_0: A2(
 										_elm_lang$html$Html$div,
-										{
-											ctor: '::',
-											_0: _user$project$HtmlHelper$cellStyle,
-											_1: {ctor: '[]'}
-										},
+										_user$project$HtmlHelper$cellStyle,
 										{
 											ctor: '::',
 											_0: _elm_lang$html$Html$text(t.contactPerson),
@@ -9399,11 +9384,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 										ctor: '::',
 										_0: A2(
 											_elm_lang$html$Html$div,
-											{
-												ctor: '::',
-												_0: _user$project$HtmlHelper$cellStyle,
-												_1: {ctor: '[]'}
-											},
+											_user$project$HtmlHelper$cellStyle,
 											{
 												ctor: '::',
 												_0: _elm_lang$html$Html$text(t.status),
@@ -9413,11 +9394,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 											ctor: '::',
 											_0: A2(
 												_elm_lang$html$Html$div,
-												{
-													ctor: '::',
-													_0: _user$project$HtmlHelper$cellStyle,
-													_1: {ctor: '[]'}
-												},
+												_user$project$HtmlHelper$cellStyle,
 												{
 													ctor: '::',
 													_0: _elm_lang$html$Html$text(t.state),
@@ -9446,19 +9423,21 @@ var _user$project$HtmlHelper$gridStyle = _elm_lang$html$Html_Attributes$style(
 				_0: {ctor: '_Tuple2', _0: 'grid-template-rows', _1: 'repeat(-1, auto)'},
 				_1: {
 					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'grid-gap', _1: '1px'},
+					_0: {ctor: '_Tuple2', _0: 'padding', _1: '40px'},
 					_1: {
 						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'padding', _1: '40px'},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'center'},
-							_1: {ctor: '[]'}
-						}
+						_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'center'},
+						_1: {ctor: '[]'}
 					}
 				}
 			}
 		}
+	});
+var _user$project$HtmlHelper$controlStyle = _elm_lang$html$Html_Attributes$style(
+	{
+		ctor: '::',
+		_0: {ctor: '_Tuple2', _0: 'margin', _1: '5px'},
+		_1: {ctor: '[]'}
 	});
 
 var _user$project$Load$decodeEmployer = A3(
@@ -9522,22 +9501,28 @@ var _user$project$Load$decodeEmployer = A3(
 															'EmploymentStatus',
 															_elm_lang$core$Json_Decode$string,
 															_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Employer))))))))))))))));
-var _user$project$Load$decodeEmployent = A3(
-	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-	'TestDate',
-	_elm_lang$core$Json_Decode$string,
-	A3(
-		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-		'Employers',
-		_elm_lang$core$Json_Decode$list(_user$project$Load$decodeEmployer),
+var _user$project$Load$decodeEmployent = A2(
+	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
+	'',
+	A2(
+		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
+		'',
 		A3(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-			'PatientId',
-			_elm_lang$core$Json_Decode$int,
-			A2(
-				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
-				_user$project$Model$Initial,
-				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Model)))));
+			'TestDate',
+			_elm_lang$core$Json_Decode$string,
+			A3(
+				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+				'Employers',
+				_elm_lang$core$Json_Decode$list(_user$project$Load$decodeEmployer),
+				A3(
+					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+					'PatientId',
+					_elm_lang$core$Json_Decode$int,
+					A2(
+						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
+						_user$project$Model$Initial,
+						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Model)))))));
 var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/People/GetEmploymentInfo?patientId=6676', _user$project$Load$decodeEmployent);
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
@@ -9563,8 +9548,16 @@ var _user$project$Main$view = function (model) {
 						_elm_lang$html$Html$button,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditStart),
-							_1: {ctor: '[]'}
+							_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+							_1: {
+								ctor: '::',
+								_0: _user$project$HtmlHelper$controlStyle,
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditStart),
+									_1: {ctor: '[]'}
+								}
+							}
 						},
 						{
 							ctor: '::',
@@ -9598,8 +9591,16 @@ var _user$project$Main$view = function (model) {
 						_elm_lang$html$Html$button,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditEnd),
-							_1: {ctor: '[]'}
+							_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+							_1: {
+								ctor: '::',
+								_0: _user$project$HtmlHelper$controlStyle,
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditEnd),
+									_1: {ctor: '[]'}
+								}
+							}
 						},
 						{
 							ctor: '::',
@@ -9609,11 +9610,31 @@ var _user$project$Main$view = function (model) {
 					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$div,
-							{ctor: '[]'},
+							_elm_lang$html$Html$input,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text('edit mode'),
+								_0: _elm_lang$html$Html_Attributes$type_('text'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
+									_1: {
+										ctor: '::',
+										_0: _user$project$HtmlHelper$controlStyle,
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$id('testDate'),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$value(model.testDate),
+												_1: {ctor: '[]'}
+											}
+										}
+									}
+								}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text(model.testDate),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -9622,14 +9643,22 @@ var _user$project$Main$view = function (model) {
 								_elm_lang$html$Html$input,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$type_('text'),
+									_0: _elm_lang$html$Html_Attributes$placeholder('First'),
 									_1: {
 										ctor: '::',
 										_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$id('testDate'),
-											_1: {ctor: '[]'}
+											_0: _user$project$HtmlHelper$controlStyle,
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html_Events$onInput(_user$project$Model$UpdateFirst),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$value(model.testFirst),
+													_1: {ctor: '[]'}
+												}
+											}
 										}
 									}
 								},
@@ -9637,13 +9666,29 @@ var _user$project$Main$view = function (model) {
 							_1: {
 								ctor: '::',
 								_0: A2(
-									_elm_lang$html$Html$div,
-									{ctor: '[]'},
+									_elm_lang$html$Html$input,
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text(model.testDate),
-										_1: {ctor: '[]'}
-									}),
+										_0: _elm_lang$html$Html_Attributes$placeholder('Last'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
+											_1: {
+												ctor: '::',
+												_0: _user$project$HtmlHelper$controlStyle,
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Events$onInput(_user$project$Model$UpdateLast),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$value(model.testLast),
+														_1: {ctor: '[]'}
+													}
+												}
+											}
+										}
+									},
+									{ctor: '[]'}),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -9707,12 +9752,28 @@ var _user$project$Main$update = F2(
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				}
-			default:
+			case 'UpdateTestDate':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{testDate: _p1._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'UpdateFirst':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{testFirst: _p1._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{testLast: _p1._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}

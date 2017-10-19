@@ -13063,7 +13063,6 @@ var _user$project$Model$Model = F6(
 	function (a, b, c, d, e, f) {
 		return {state: a, patientId: b, employers: c, testDate: d, testFirst: e, testLast: f};
 	});
-var _user$project$Model$Reset = {ctor: 'Reset'};
 var _user$project$Model$UpdateLast = function (a) {
 	return {ctor: 'UpdateLast', _0: a};
 };
@@ -13092,10 +13091,35 @@ var _user$project$Model$emptyModel = {
 	employers: {ctor: '[]'},
 	testDate: ''
 };
-var _user$project$HtmlHelper$cellStyle = _elm_lang$html$Html_Attributes$style(
+var _user$project$HtmlHelper$cellStyle = {
+	ctor: '::',
+	_0: _elm_lang$html$Html_Attributes$style(
+		{
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: 'padding', _1: '10px'},
+			_1: {ctor: '[]'}
+		}),
+	_1: {ctor: '[]'}
+};
+var _user$project$HtmlHelper$headerStyle = A2(
+	_elm_lang$core$List$append,
+	_user$project$HtmlHelper$cellStyle,
 	{
 		ctor: '::',
-		_0: {ctor: '_Tuple2', _0: 'padding', _1: '10px'},
+		_0: _elm_lang$html$Html_Attributes$style(
+			{
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'font-weight', _1: '600'},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'background-color', _1: '#f1f1f1'},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'cursor', _1: 'pointer'},
+						_1: {ctor: '[]'}
+					}
+				}
+			}),
 		_1: {ctor: '[]'}
 	});
 var _user$project$HtmlHelper$rowStyle = _elm_lang$html$Html_Attributes$style(
@@ -13110,13 +13134,13 @@ var _user$project$HtmlHelper$rowStyle = _elm_lang$html$Html_Attributes$style(
 				_0: {ctor: '_Tuple2', _0: 'grid-template-rows', _1: 'auto auto'},
 				_1: {
 					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'grid-gap', _1: '5px'},
+					_0: {ctor: '_Tuple2', _0: 'grid-row-gap', _1: '1px'},
 					_1: {
 						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'grid-column-start', _1: '1'},
+						_0: {ctor: '_Tuple2', _0: 'box-sizing', _1: 'border-box'},
 						_1: {
 							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'box-shadow', _1: '0 0 5px grey'},
+							_0: {ctor: '_Tuple2', _0: 'box-shadow', _1: '0 0 1px grey'},
 							_1: {ctor: '[]'}
 						}
 					}
@@ -13135,11 +13159,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 		ctor: '::',
 		_0: A2(
 			_elm_lang$html$Html$div,
-			{
-				ctor: '::',
-				_0: _user$project$HtmlHelper$cellStyle,
-				_1: {ctor: '[]'}
-			},
+			_user$project$HtmlHelper$headerStyle,
 			{
 				ctor: '::',
 				_0: _elm_lang$html$Html$text('Id'),
@@ -13149,11 +13169,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 			ctor: '::',
 			_0: A2(
 				_elm_lang$html$Html$div,
-				{
-					ctor: '::',
-					_0: _user$project$HtmlHelper$cellStyle,
-					_1: {ctor: '[]'}
-				},
+				_user$project$HtmlHelper$headerStyle,
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html$text('Priority'),
@@ -13163,11 +13179,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 				ctor: '::',
 				_0: A2(
 					_elm_lang$html$Html$div,
-					{
-						ctor: '::',
-						_0: _user$project$HtmlHelper$cellStyle,
-						_1: {ctor: '[]'}
-					},
+					_user$project$HtmlHelper$headerStyle,
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html$text('Title'),
@@ -13177,11 +13189,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 					ctor: '::',
 					_0: A2(
 						_elm_lang$html$Html$div,
-						{
-							ctor: '::',
-							_0: _user$project$HtmlHelper$cellStyle,
-							_1: {ctor: '[]'}
-						},
+						_user$project$HtmlHelper$headerStyle,
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html$text('Name'),
@@ -13191,11 +13199,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 						ctor: '::',
 						_0: A2(
 							_elm_lang$html$Html$div,
-							{
-								ctor: '::',
-								_0: _user$project$HtmlHelper$cellStyle,
-								_1: {ctor: '[]'}
-							},
+							_user$project$HtmlHelper$headerStyle,
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html$text('InitiatedOn'),
@@ -13205,11 +13209,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 							ctor: '::',
 							_0: A2(
 								_elm_lang$html$Html$div,
-								{
-									ctor: '::',
-									_0: _user$project$HtmlHelper$cellStyle,
-									_1: {ctor: '[]'}
-								},
+								_user$project$HtmlHelper$headerStyle,
 								{
 									ctor: '::',
 									_0: _elm_lang$html$Html$text('Due At'),
@@ -13219,14 +13219,10 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 								ctor: '::',
 								_0: A2(
 									_elm_lang$html$Html$div,
+									_user$project$HtmlHelper$headerStyle,
 									{
 										ctor: '::',
-										_0: _user$project$HtmlHelper$cellStyle,
-										_1: {ctor: '[]'}
-									},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('closed'),
+										_0: _elm_lang$html$Html$text('Closed'),
 										_1: {ctor: '[]'}
 									}),
 								_1: {ctor: '[]'}
@@ -13252,11 +13248,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 					ctor: '::',
 					_0: A2(
 						_elm_lang$html$Html$div,
-						{
-							ctor: '::',
-							_0: _user$project$HtmlHelper$cellStyle,
-							_1: {ctor: '[]'}
-						},
+						_user$project$HtmlHelper$cellStyle,
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html$text(t.occupation),
@@ -13266,11 +13258,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 						ctor: '::',
 						_0: A2(
 							_elm_lang$html$Html$div,
-							{
-								ctor: '::',
-								_0: _user$project$HtmlHelper$cellStyle,
-								_1: {ctor: '[]'}
-							},
+							_user$project$HtmlHelper$cellStyle,
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html$text(t.employer),
@@ -13280,11 +13268,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 							ctor: '::',
 							_0: A2(
 								_elm_lang$html$Html$div,
-								{
-									ctor: '::',
-									_0: _user$project$HtmlHelper$cellStyle,
-									_1: {ctor: '[]'}
-								},
+								_user$project$HtmlHelper$cellStyle,
 								{
 									ctor: '::',
 									_0: _elm_lang$html$Html$text(t.startDate),
@@ -13294,11 +13278,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 								ctor: '::',
 								_0: A2(
 									_elm_lang$html$Html$div,
-									{
-										ctor: '::',
-										_0: _user$project$HtmlHelper$cellStyle,
-										_1: {ctor: '[]'}
-									},
+									_user$project$HtmlHelper$cellStyle,
 									{
 										ctor: '::',
 										_0: _elm_lang$html$Html$text(t.endDate),
@@ -13308,11 +13288,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 									ctor: '::',
 									_0: A2(
 										_elm_lang$html$Html$div,
-										{
-											ctor: '::',
-											_0: _user$project$HtmlHelper$cellStyle,
-											_1: {ctor: '[]'}
-										},
+										_user$project$HtmlHelper$cellStyle,
 										{
 											ctor: '::',
 											_0: _elm_lang$html$Html$text(t.contactPerson),
@@ -13322,11 +13298,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 										ctor: '::',
 										_0: A2(
 											_elm_lang$html$Html$div,
-											{
-												ctor: '::',
-												_0: _user$project$HtmlHelper$cellStyle,
-												_1: {ctor: '[]'}
-											},
+											_user$project$HtmlHelper$cellStyle,
 											{
 												ctor: '::',
 												_0: _elm_lang$html$Html$text(t.status),
@@ -13336,11 +13308,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 											ctor: '::',
 											_0: A2(
 												_elm_lang$html$Html$div,
-												{
-													ctor: '::',
-													_0: _user$project$HtmlHelper$cellStyle,
-													_1: {ctor: '[]'}
-												},
+												_user$project$HtmlHelper$cellStyle,
 												{
 													ctor: '::',
 													_0: _elm_lang$html$Html$text(t.state),
@@ -13369,19 +13337,21 @@ var _user$project$HtmlHelper$gridStyle = _elm_lang$html$Html_Attributes$style(
 				_0: {ctor: '_Tuple2', _0: 'grid-template-rows', _1: 'repeat(-1, auto)'},
 				_1: {
 					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'grid-gap', _1: '1px'},
+					_0: {ctor: '_Tuple2', _0: 'padding', _1: '40px'},
 					_1: {
 						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'padding', _1: '40px'},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'center'},
-							_1: {ctor: '[]'}
-						}
+						_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'center'},
+						_1: {ctor: '[]'}
 					}
 				}
 			}
 		}
+	});
+var _user$project$HtmlHelper$controlStyle = _elm_lang$html$Html_Attributes$style(
+	{
+		ctor: '::',
+		_0: {ctor: '_Tuple2', _0: 'margin', _1: '5px'},
+		_1: {ctor: '[]'}
 	});
 var _user$project$Load$decodeEmployer = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
@@ -13490,8 +13460,16 @@ var _user$project$Main$view = function (model) {
 						_elm_lang$html$Html$button,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditStart),
-							_1: {ctor: '[]'}
+							_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+							_1: {
+								ctor: '::',
+								_0: _user$project$HtmlHelper$controlStyle,
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditStart),
+									_1: {ctor: '[]'}
+								}
+							}
 						},
 						{
 							ctor: '::',
@@ -13501,33 +13479,18 @@ var _user$project$Main$view = function (model) {
 					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$button,
+							_elm_lang$html$Html$div,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Reset),
+								_0: _user$project$HtmlHelper$gridStyle,
 								_1: {ctor: '[]'}
 							},
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text('reset'),
-								_1: {ctor: '[]'}
+								_0: _user$project$HtmlHelper$employmentHeaders,
+								_1: _user$project$HtmlHelper$employmentRows(model.employers)
 							}),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$div,
-								{
-									ctor: '::',
-									_0: _user$project$HtmlHelper$gridStyle,
-									_1: {ctor: '[]'}
-								},
-								{
-									ctor: '::',
-									_0: _user$project$HtmlHelper$employmentHeaders,
-									_1: _user$project$HtmlHelper$employmentRows(model.employers)
-								}),
-							_1: {ctor: '[]'}
-						}
+						_1: {ctor: '[]'}
 					}
 				});
 		case 'Edit':
@@ -13540,8 +13503,16 @@ var _user$project$Main$view = function (model) {
 						_elm_lang$html$Html$button,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditEnd),
-							_1: {ctor: '[]'}
+							_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+							_1: {
+								ctor: '::',
+								_0: _user$project$HtmlHelper$controlStyle,
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditEnd),
+									_1: {ctor: '[]'}
+								}
+							}
 						},
 						{
 							ctor: '::',
@@ -13551,23 +13522,16 @@ var _user$project$Main$view = function (model) {
 					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$div,
-							{ctor: '[]'},
+							_elm_lang$html$Html$input,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text('edit mode'),
-								_1: {ctor: '[]'}
-							}),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$input,
-								{
+								_0: _elm_lang$html$Html_Attributes$type_('text'),
+								_1: {
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$type_('text'),
+									_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
+										_0: _user$project$HtmlHelper$controlStyle,
 										_1: {
 											ctor: '::',
 											_0: _elm_lang$html$Html_Attributes$id('testDate'),
@@ -13578,22 +13542,26 @@ var _user$project$Main$view = function (model) {
 											}
 										}
 									}
-								},
+								}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text(model.testDate),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$input,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text(model.testDate),
-									_1: {ctor: '[]'}
-								}),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$input,
-									{
+									_0: _elm_lang$html$Html_Attributes$placeholder('First'),
+									_1: {
 										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$placeholder('First'),
+										_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
+											_0: _user$project$HtmlHelper$controlStyle,
 											_1: {
 												ctor: '::',
 												_0: _elm_lang$html$Html_Events$onInput(_user$project$Model$UpdateFirst),
@@ -13604,18 +13572,22 @@ var _user$project$Main$view = function (model) {
 												}
 											}
 										}
-									},
-									{ctor: '[]'}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$input,
-										{
+									}
+								},
+								{ctor: '[]'}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$input,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$placeholder('Last'),
+										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$placeholder('Last'),
+											_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
 											_1: {
 												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
+												_0: _user$project$HtmlHelper$controlStyle,
 												_1: {
 													ctor: '::',
 													_0: _elm_lang$html$Html_Events$onInput(_user$project$Model$UpdateLast),
@@ -13626,21 +13598,10 @@ var _user$project$Main$view = function (model) {
 													}
 												}
 											}
-										},
-										{ctor: '[]'}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$div,
-											{ctor: '[]'},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text(model.testDate),
-												_1: {ctor: '[]'}
-											}),
-										_1: {ctor: '[]'}
-									}
-								}
+										}
+									},
+									{ctor: '[]'}),
+								_1: {ctor: '[]'}
 							}
 						}
 					}
@@ -13719,7 +13680,7 @@ var _user$project$Main$update = F2(
 						{testFirst: _p1._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			case 'UpdateLast':
+			default:
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -13727,8 +13688,6 @@ var _user$project$Main$update = F2(
 						{testLast: _p1._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
-				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
 		}
 	});
 var _user$project$Main$getTestDate = _elm_lang$core$Native_Platform.incomingPort('getTestDate', _elm_lang$core$Json_Decode$string);
@@ -13740,7 +13699,7 @@ var _user$project$Main$main = _elm_lang$html$Html$program(
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.Employer":{"type":"{ employmentStatus : String , occupation : String , employer : String , startDate : String , endDate : String , contactPerson : String , status : String , addressLine1 : String , addressLine2 : String , city : String , state : String , zipCode : String , phone : String , email : String , comment : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , patientId : Int , employers : List Model.Employer , testDate : String , testFirst : String , testLast : String }","args":[]}},"unions":{"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":[],"Error":["Http.Error"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"Reset":[],"UpdateTestDate":["String"],"EditEnd":[],"EditStart":[],"UpdateLast":["String"],"UpdateFirst":["String"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.Employer":{"type":"{ employmentStatus : String , occupation : String , employer : String , startDate : String , endDate : String , contactPerson : String , status : String , addressLine1 : String , addressLine2 : String , city : String , state : String , zipCode : String , phone : String , email : String , comment : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , patientId : Int , employers : List Model.Employer , testDate : String , testFirst : String , testLast : String }","args":[]}},"unions":{"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":[],"Error":["Http.Error"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"UpdateTestDate":["String"],"EditEnd":[],"EditStart":[],"UpdateLast":["String"],"UpdateFirst":["String"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])
