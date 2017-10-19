@@ -1,6 +1,7 @@
 module Model exposing (..)
 
 import Http
+import Array
 
 
 type alias Employer =
@@ -24,27 +25,24 @@ type alias Employer =
 
 type Msg
     = Load (Result Http.Error Model)
-    | EditStart
+    | EditStart Int
     | EditEnd
-    | UpdateTestDate String
-    | UpdateFirst String
-    | UpdateLast String
+    | UpdateStartDate Int String
+    | UpdateCity Int String
+    | UpdateState Int String
 
 
 type ModelState
     = Initial
     | Grid
-    | Edit
+    | Edit Int
     | Error Http.Error
 
 
 type alias Model =
     { state : ModelState
     , patientId : Int
-    , employers : List Employer
-    , testDate : String
-    , testFirst : String
-    , testLast : String
+    , employers : Array.Array Employer
     }
 
 
@@ -52,8 +50,5 @@ emptyModel : Model
 emptyModel =
     { state = Initial
     , patientId = 0
-    , testFirst = ""
-    , testLast = ""
-    , employers = []
-    , testDate = ""
+    , employers = Array.empty
     }
