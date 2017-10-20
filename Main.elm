@@ -3,9 +3,11 @@ port module Main exposing (..)
 import Load exposing (getEmployment)
 import Model exposing (..)
 import HtmlHelper exposing (..)
+import UpdateHelper exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value)
 import Html.Events exposing (onClick, onInput)
+import Array
 
 
 -- Todo,
@@ -52,13 +54,13 @@ update msg model =
             ( { model | state = Error t }, Cmd.none )
 
         UpdateState i t ->
-            ( { model | employers = (updateEmployerState model.employers i t) }, Cmd.none )
+            ( { model | employers = (maybeUpdateState model i t newEmployerState) }, Cmd.none )
 
         UpdateCity i t ->
-            ( { model | employers = (updateEmployerCity model.employers i t) }, Cmd.none )
+            ( { model | employers = (maybeUpdateState model i t newEmployerState) }, Cmd.none )
 
         UpdateStartDate i t ->
-            ( { model | employers = (updateEmployerStartDate model.employers i t) }, Cmd.none )
+            ( { model | employers = (maybeUpdateState model i t newEmployerState) }, Cmd.none )
 
 
 view : Model -> Html Msg

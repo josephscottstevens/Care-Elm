@@ -13514,6 +13514,33 @@ var _user$project$Load$decodeEmployent = A3(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Model))));
 var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/People/GetEmploymentInfo?patientId=6676', _user$project$Load$decodeEmployent);
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
+var _user$project$UpdateHelper$setEmployer = F3(
+	function (employerArray, i, emp) {
+		return A3(_elm_lang$core$Array$set, i, emp, employerArray);
+	});
+var _user$project$UpdateHelper$maybeEmployee = F2(
+	function (employerArray, i) {
+		return A2(_elm_lang$core$Array$get, i, employerArray);
+	});
+var _user$project$UpdateHelper$maybeUpdateState = F4(
+	function (model, i, newState, func) {
+		var _p0 = A2(_user$project$UpdateHelper$maybeEmployee, model.employers, i);
+		if (_p0.ctor === 'Just') {
+			return A3(
+				_user$project$UpdateHelper$setEmployer,
+				model.employers,
+				i,
+				A2(func, _p0._0, newState));
+		} else {
+			return model.employers;
+		}
+	});
+var _user$project$UpdateHelper$newEmployerState = F2(
+	function (emp, newState) {
+		return _elm_lang$core$Native_Utils.update(
+			emp,
+			{state: newState});
+	});
 var _user$project$Main$view = function (model) {
 	var _p0 = model.state;
 	switch (_p0.ctor) {
@@ -13704,7 +13731,7 @@ var _user$project$Main$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							employers: A3(_user$project$HtmlHelper$updateEmployerState, model.employers, _p4._0, _p4._1)
+							employers: A4(_user$project$UpdateHelper$maybeUpdateState, model, _p4._0, _p4._1, _user$project$UpdateHelper$newEmployerState)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -13714,7 +13741,7 @@ var _user$project$Main$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							employers: A3(_user$project$HtmlHelper$updateEmployerCity, model.employers, _p4._0, _p4._1)
+							employers: A4(_user$project$UpdateHelper$maybeUpdateState, model, _p4._0, _p4._1, _user$project$UpdateHelper$newEmployerState)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -13724,7 +13751,7 @@ var _user$project$Main$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							employers: A3(_user$project$HtmlHelper$updateEmployerStartDate, model.employers, _p4._0, _p4._1)
+							employers: A4(_user$project$UpdateHelper$maybeUpdateState, model, _p4._0, _p4._1, _user$project$UpdateHelper$newEmployerState)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
