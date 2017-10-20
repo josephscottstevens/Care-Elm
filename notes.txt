@@ -19,3 +19,10 @@ install Elm extension for vscode
     press green install button
 
 perhaps... node_modules folder is needed... or the step to get that there?
+
+TODO:
+-- add the rest of the missing fields
+-- Re-add port \ subscription
+-- Super heavy right now on boilerplate to update row
+-- Test to see if I can update stuff
+-- Fix missing column header

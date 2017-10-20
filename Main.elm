@@ -10,14 +10,6 @@ import Html.Events exposing (onClick, onInput)
 import Array
 
 
--- Todo,
--- add the rest of the missing fields
--- Re-add port \ subscription
--- Super heavy right now on boilerplate to update row
--- Test to see if I can update stuff
--- Fix missing column header
-
-
 port sendTestDate : String -> Cmd msg
 
 
