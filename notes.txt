@@ -21,6 +21,9 @@ install Elm extension for vscode
 perhaps... node_modules folder is needed... or the step to get that there?
 
 TODO:
+-- Update below
+-- Date isn't updating on a per row basis (hardcoded row num to 0)
+
 -- add the rest of the missing fields
 -- Re-add port \ subscription
 -- Super heavy right now on boilerplate to update row
