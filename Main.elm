@@ -54,12 +54,15 @@ update msg model =
             ( { model | state = Error t }, Cmd.none )
 
         UpdateState i t ->
-            ( { model | employers = (maybeUpdateState model i t newEmployerState) }, Cmd.none )
+            -- which is better, this or
+            ( { model | employers = (maybeUpdateState model i t (\emp newState -> { emp | state = newState })) }, Cmd.none )
 
         UpdateCity i t ->
+            -- This and have a helper function outside
             ( { model | employers = (maybeUpdateState model i t newEmployerState) }, Cmd.none )
 
         UpdateStartDate i t ->
+            -- Can some of these parameters be applied ahead of time... or curried or whatever it is called?
             ( { model | employers = (maybeUpdateState model i t newEmployerState) }, Cmd.none )
 
 

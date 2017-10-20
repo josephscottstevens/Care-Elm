@@ -7,45 +7,6 @@ import Model exposing (..)
 import Array
 
 
-getEmployer : Array.Array Employer -> Int -> Maybe Employer
-getEmployer employers idx =
-    employers
-        |> Array.get idx
-
-
-updateEmployerState : Array.Array Employer -> Int -> String -> Array.Array Employer
-updateEmployerState employers idx newState =
-    case getEmployer employers idx of
-        Just emp ->
-            employers
-                |> Array.set idx { emp | state = newState }
-
-        Nothing ->
-            employers
-
-
-updateEmployerCity : Array.Array Employer -> Int -> String -> Array.Array Employer
-updateEmployerCity employers idx newCity =
-    case getEmployer employers idx of
-        Just emp ->
-            employers
-                |> Array.set idx { emp | city = newCity }
-
-        Nothing ->
-            employers
-
-
-updateEmployerStartDate : Array.Array Employer -> Int -> String -> Array.Array Employer
-updateEmployerStartDate employers idx newStartDate =
-    case getEmployer employers idx of
-        Just emp ->
-            employers
-                |> Array.set idx { emp | startDate = newStartDate }
-
-        Nothing ->
-            employers
-
-
 controlStyle : Html.Attribute msg
 controlStyle =
     style [ ( "margin", "5px" ) ]
