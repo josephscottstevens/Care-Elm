@@ -58,12 +58,12 @@ employmentHeaders : Html msg
 employmentHeaders =
     div [ rowStyle ]
         [ div headerStyle [ text " " ]
-        , div headerStyle [ text "Id" ]
-        , div headerStyle [ text "Priority" ]
-        , div headerStyle [ text "Title" ]
-        , div headerStyle [ text "Name" ]
-        , div headerStyle [ text "InitiatedOn" ]
-        , div headerStyle [ text "Due At" ]
+        , div headerStyle [ text "Occupation" ]
+        , div headerStyle [ text "Employer" ]
+        , div headerStyle [ text "Start Date" ]
+        , div headerStyle [ text "End Date" ]
+        , div headerStyle [ text "Contact Person" ]
+        , div headerStyle [ text "Status" ]
         , div headerStyle [ text "State" ]
         ]
 

@@ -4,6 +4,16 @@ import Model exposing (..)
 import Array
 
 
+testDt : Array.Array Employer -> Int -> String
+testDt employers idx =
+    case Array.get idx employers of
+        Just emp ->
+            emp.startDate
+
+        Nothing ->
+            ""
+
+
 newEmployerState : Employer -> String -> Employer
 newEmployerState emp newState =
     { emp | state = newState }
@@ -29,6 +39,6 @@ maybeUpdateState model i newState func =
             model.employers
 
 
-updateState : Model -> Int -> String -> (Employer -> String -> Employer) -> Model
-updateState model i newValue t =
+updateEmployeeList : Model -> Int -> String -> (Employer -> String -> Employer) -> Model
+updateEmployeeList model i newValue t =
     { model | employers = (maybeUpdateState model i newValue t) }

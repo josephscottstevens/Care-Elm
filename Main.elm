@@ -16,10 +16,17 @@ import Array
 -- Super heavy right now on boilerplate to update row
 -- Test to see if I can update stuff
 -- Fix missing column header
--- port sendTestDate : String -> Cmd msg
--- port getTestDate : (String -> msg) -> Sub msg
--- subscriptions model t i =
---     getTestDate (UpdateStartDate t i)
+
+
+port sendTestDate : String -> Cmd msg
+
+
+port getTestDate : (String -> msg) -> Sub msg
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    getTestDate (UpdateStartDate 0)
 
 
 main : Program Never Model Msg
@@ -28,7 +35,7 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = always Sub.none --subscriptions
+        , subscriptions = subscriptions
         }
 
 
@@ -41,9 +48,8 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         EditStart idx ->
-            ( { model | state = Edit idx }, Cmd.none )
+            ( { model | state = Edit idx }, sendTestDate (testDt model.employers idx) )
 
-        --sendTestDate "model.testDate"
         EditEnd ->
             ( { model | state = Grid }, Cmd.none )
 
@@ -54,17 +60,13 @@ update msg model =
             ( { model | state = Error t }, Cmd.none )
 
         UpdateState i t ->
-            -- which is better, this or
-            --( { model | employers = (maybeUpdateState model i t (\emp newState -> { emp | state = newState })) }, Cmd.none )
-            ( updateState model i t (\emp newState -> { emp | state = newState }), Cmd.none )
+            ( updateEmployeeList model i t (\emp newState -> { emp | state = newState }), Cmd.none )
 
         UpdateCity i t ->
-            -- This and have a helper function outside
-            ( { model | employers = (maybeUpdateState model i t newEmployerState) }, Cmd.none )
+            ( updateEmployeeList model i t (\emp newCity -> { emp | city = newCity }), Cmd.none )
 
         UpdateStartDate i t ->
-            -- Can some of these parameters be applied ahead of time... or curried or whatever it is called?
-            ( { model | employers = (maybeUpdateState model i t newEmployerState) }, Cmd.none )
+            ( updateEmployeeList model i t (\emp newStartDate -> { emp | startDate = newStartDate }), Cmd.none )
 
 
 view : Model -> Html Msg
@@ -84,8 +86,7 @@ view model =
                     div []
                         [ input [ placeholder "City", class "e-textbox", controlStyle, onInput (UpdateCity <| idx), value emp.city ] []
                         , input [ placeholder "State", class "e-textbox", controlStyle, onInput (UpdateState <| idx), value emp.state ] []
-
-                        --, input [ type_ "text", class "e-textbox", controlStyle, id "testDate", value emp.dueAt ] [ text emp.dueAt ]
+                        , input [ placeholder "Start Date", type_ "text", class "e-textbox", controlStyle, id "testDate", value emp.startDate ] []
                         , button [ class "btn btn-default", controlStyle, onClick EditEnd ] [ text "save" ]
                         ]
 

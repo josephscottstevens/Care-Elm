@@ -13172,7 +13172,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 				_user$project$HtmlHelper$headerStyle,
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('Id'),
+					_0: _elm_lang$html$Html$text('Occupation'),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
@@ -13182,7 +13182,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 					_user$project$HtmlHelper$headerStyle,
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text('Priority'),
+						_0: _elm_lang$html$Html$text('Employer'),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -13192,7 +13192,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 						_user$project$HtmlHelper$headerStyle,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text('Title'),
+							_0: _elm_lang$html$Html$text('Start Date'),
 							_1: {ctor: '[]'}
 						}),
 					_1: {
@@ -13202,7 +13202,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 							_user$project$HtmlHelper$headerStyle,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text('Name'),
+								_0: _elm_lang$html$Html$text('End Date'),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -13212,7 +13212,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 								_user$project$HtmlHelper$headerStyle,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text('InitiatedOn'),
+									_0: _elm_lang$html$Html$text('Contact Person'),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
@@ -13222,7 +13222,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 									_user$project$HtmlHelper$headerStyle,
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text('Due At'),
+										_0: _elm_lang$html$Html$text('Status'),
 										_1: {ctor: '[]'}
 									}),
 								_1: {
@@ -13390,55 +13390,6 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 				}),
 			emp));
 };
-var _user$project$HtmlHelper$getEmployer = F2(
-	function (employers, idx) {
-		return A2(_elm_lang$core$Array$get, idx, employers);
-	});
-var _user$project$HtmlHelper$updateEmployerState = F3(
-	function (employers, idx, newState) {
-		var _p0 = A2(_user$project$HtmlHelper$getEmployer, employers, idx);
-		if (_p0.ctor === 'Just') {
-			return A3(
-				_elm_lang$core$Array$set,
-				idx,
-				_elm_lang$core$Native_Utils.update(
-					_p0._0,
-					{state: newState}),
-				employers);
-		} else {
-			return employers;
-		}
-	});
-var _user$project$HtmlHelper$updateEmployerCity = F3(
-	function (employers, idx, newCity) {
-		var _p1 = A2(_user$project$HtmlHelper$getEmployer, employers, idx);
-		if (_p1.ctor === 'Just') {
-			return A3(
-				_elm_lang$core$Array$set,
-				idx,
-				_elm_lang$core$Native_Utils.update(
-					_p1._0,
-					{city: newCity}),
-				employers);
-		} else {
-			return employers;
-		}
-	});
-var _user$project$HtmlHelper$updateEmployerStartDate = F3(
-	function (employers, idx, newStartDate) {
-		var _p2 = A2(_user$project$HtmlHelper$getEmployer, employers, idx);
-		if (_p2.ctor === 'Just') {
-			return A3(
-				_elm_lang$core$Array$set,
-				idx,
-				_elm_lang$core$Native_Utils.update(
-					_p2._0,
-					{startDate: newStartDate}),
-				employers);
-		} else {
-			return employers;
-		}
-	});
 var _user$project$Load$decodeEmployer = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 	'Comment',
@@ -13535,11 +13486,28 @@ var _user$project$UpdateHelper$maybeUpdateState = F4(
 			return model.employers;
 		}
 	});
+var _user$project$UpdateHelper$updateEmployeeList = F4(
+	function (model, i, newValue, t) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				employers: A4(_user$project$UpdateHelper$maybeUpdateState, model, i, newValue, t)
+			});
+	});
 var _user$project$UpdateHelper$newEmployerState = F2(
 	function (emp, newState) {
 		return _elm_lang$core$Native_Utils.update(
 			emp,
 			{state: newState});
+	});
+var _user$project$UpdateHelper$testDt = F2(
+	function (employers, idx) {
+		var _p1 = A2(_elm_lang$core$Array$get, idx, employers);
+		if (_p1.ctor === 'Just') {
+			return _p1._0.startDate;
+		} else {
+			return '';
+		}
 	});
 var _user$project$Main$view = function (model) {
 	var _p0 = model.state;
@@ -13575,7 +13543,7 @@ var _user$project$Main$view = function (model) {
 				});
 		case 'Edit':
 			var _p3 = _p0._0;
-			var _p1 = A2(_user$project$HtmlHelper$getEmployer, model.employers, _p3);
+			var _p1 = A2(_elm_lang$core$Array$get, _p3, model.employers);
 			if (_p1.ctor === 'Just') {
 				var _p2 = _p1._0;
 				return A2(
@@ -13638,26 +13606,57 @@ var _user$project$Main$view = function (model) {
 							_1: {
 								ctor: '::',
 								_0: A2(
-									_elm_lang$html$Html$button,
+									_elm_lang$html$Html$input,
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+										_0: _elm_lang$html$Html_Attributes$placeholder('Start Date'),
 										_1: {
 											ctor: '::',
-											_0: _user$project$HtmlHelper$controlStyle,
+											_0: _elm_lang$html$Html_Attributes$type_('text'),
 											_1: {
 												ctor: '::',
-												_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditEnd),
-												_1: {ctor: '[]'}
+												_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
+												_1: {
+													ctor: '::',
+													_0: _user$project$HtmlHelper$controlStyle,
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$id('testDate'),
+														_1: {
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$value(_p2.startDate),
+															_1: {ctor: '[]'}
+														}
+													}
+												}
 											}
 										}
 									},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('save'),
-										_1: {ctor: '[]'}
-									}),
-								_1: {ctor: '[]'}
+									{ctor: '[]'}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$button,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+											_1: {
+												ctor: '::',
+												_0: _user$project$HtmlHelper$controlStyle,
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditEnd),
+													_1: {ctor: '[]'}
+												}
+											}
+										},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('save'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
 							}
 						}
 					});
@@ -13683,19 +13682,27 @@ var _user$project$Main$view = function (model) {
 				});
 	}
 };
+var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
+var _user$project$Main$sendTestDate = _elm_lang$core$Native_Platform.outgoingPort(
+	'sendTestDate',
+	function (v) {
+		return v;
+	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
 		var _p4 = msg;
 		switch (_p4.ctor) {
 			case 'EditStart':
+				var _p5 = _p4._0;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							state: _user$project$Model$Edit(_p4._0)
+							state: _user$project$Model$Edit(_p5)
 						}),
-					_1: _elm_lang$core$Platform_Cmd$none
+					_1: _user$project$Main$sendTestDate(
+						A2(_user$project$UpdateHelper$testDt, model.employers, _p5))
 				};
 			case 'EditEnd':
 				return {
@@ -13728,43 +13735,60 @@ var _user$project$Main$update = F2(
 			case 'UpdateState':
 				return {
 					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
+					_0: A4(
+						_user$project$UpdateHelper$updateEmployeeList,
 						model,
-						{
-							employers: A4(_user$project$UpdateHelper$maybeUpdateState, model, _p4._0, _p4._1, _user$project$UpdateHelper$newEmployerState)
-						}),
+						_p4._0,
+						_p4._1,
+						F2(
+							function (emp, newState) {
+								return _elm_lang$core$Native_Utils.update(
+									emp,
+									{state: newState});
+							})),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UpdateCity':
 				return {
 					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
+					_0: A4(
+						_user$project$UpdateHelper$updateEmployeeList,
 						model,
-						{
-							employers: A4(_user$project$UpdateHelper$maybeUpdateState, model, _p4._0, _p4._1, _user$project$UpdateHelper$newEmployerState)
-						}),
+						_p4._0,
+						_p4._1,
+						F2(
+							function (emp, newCity) {
+								return _elm_lang$core$Native_Utils.update(
+									emp,
+									{city: newCity});
+							})),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:
 				return {
 					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
+					_0: A4(
+						_user$project$UpdateHelper$updateEmployeeList,
 						model,
-						{
-							employers: A4(_user$project$UpdateHelper$maybeUpdateState, model, _p4._0, _p4._1, _user$project$UpdateHelper$newEmployerState)
-						}),
+						_p4._0,
+						_p4._1,
+						F2(
+							function (emp, newStartDate) {
+								return _elm_lang$core$Native_Utils.update(
+									emp,
+									{startDate: newStartDate});
+							})),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
 	});
-var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
+var _user$project$Main$getTestDate = _elm_lang$core$Native_Platform.incomingPort('getTestDate', _elm_lang$core$Json_Decode$string);
+var _user$project$Main$subscriptions = function (model) {
+	return _user$project$Main$getTestDate(
+		_user$project$Model$UpdateStartDate(0));
+};
 var _user$project$Main$main = _elm_lang$html$Html$program(
-	{
-		init: _user$project$Main$init,
-		view: _user$project$Main$view,
-		update: _user$project$Main$update,
-		subscriptions: _elm_lang$core$Basics$always(_elm_lang$core$Platform_Sub$none)
-	})();
+	{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
