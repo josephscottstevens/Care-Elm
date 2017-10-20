@@ -55,7 +55,8 @@ update msg model =
 
         UpdateState i t ->
             -- which is better, this or
-            ( { model | employers = (maybeUpdateState model i t (\emp newState -> { emp | state = newState })) }, Cmd.none )
+            --( { model | employers = (maybeUpdateState model i t (\emp newState -> { emp | state = newState })) }, Cmd.none )
+            ( updateState model i t (\emp newState -> { emp | state = newState }), Cmd.none )
 
         UpdateCity i t ->
             -- This and have a helper function outside
@@ -78,7 +79,7 @@ view model =
                 ]
 
         Edit idx ->
-            case getEmployer model.employers idx of
+            case Array.get idx model.employers of
                 Just emp ->
                     div []
                         [ input [ placeholder "City", class "e-textbox", controlStyle, onInput (UpdateCity <| idx), value emp.city ] []

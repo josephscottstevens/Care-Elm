@@ -27,3 +27,8 @@ maybeUpdateState model i newState func =
 
         Nothing ->
             model.employers
+
+
+updateState : Model -> Int -> String -> (Employer -> String -> Employer) -> Model
+updateState model i newValue t =
+    { model | employers = (maybeUpdateState model i newValue t) }
