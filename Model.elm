@@ -30,6 +30,7 @@ type Msg
     | UpdateStartDate Int String
     | UpdateCity Int String
     | UpdateState Int String
+    | Reset
 
 
 type ModelState

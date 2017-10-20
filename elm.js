@@ -9148,6 +9148,7 @@ var _user$project$Model$Model = F3(
 	function (a, b, c) {
 		return {state: a, patientId: b, employers: c};
 	});
+var _user$project$Model$Reset = {ctor: 'Reset'};
 var _user$project$Model$UpdateState = F2(
 	function (a, b) {
 		return {ctor: 'UpdateState', _0: a, _1: b};
@@ -9617,18 +9618,41 @@ var _user$project$Main$view = function (model) {
 				{
 					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$div,
+						_elm_lang$html$Html$button,
 						{
 							ctor: '::',
-							_0: _user$project$HtmlHelper$gridStyle,
-							_1: {ctor: '[]'}
+							_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+							_1: {
+								ctor: '::',
+								_0: _user$project$HtmlHelper$controlStyle,
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Reset),
+									_1: {ctor: '[]'}
+								}
+							}
 						},
 						{
 							ctor: '::',
-							_0: _user$project$HtmlHelper$employmentHeaders,
-							_1: _user$project$HtmlHelper$employmentRows(model.employers)
+							_0: _elm_lang$html$Html$text('reset'),
+							_1: {ctor: '[]'}
 						}),
-					_1: {ctor: '[]'}
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _user$project$HtmlHelper$gridStyle,
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: _user$project$HtmlHelper$employmentHeaders,
+								_1: _user$project$HtmlHelper$employmentRows(model.employers)
+							}),
+						_1: {ctor: '[]'}
+					}
 				});
 		case 'Edit':
 			var _p3 = _p0._0;
@@ -9853,7 +9877,7 @@ var _user$project$Main$update = F2(
 							})),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
+			case 'UpdateStartDate':
 				return {
 					ctor: '_Tuple2',
 					_0: A4(
@@ -9869,6 +9893,8 @@ var _user$project$Main$update = F2(
 							})),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
+			default:
+				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
 		}
 	});
 var _user$project$Main$getTestDate = _elm_lang$core$Native_Platform.incomingPort('getTestDate', _elm_lang$core$Json_Decode$string);

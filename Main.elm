@@ -60,6 +60,9 @@ update msg model =
         UpdateStartDate i t ->
             ( updateEmployeeList model i t (\emp newStartDate -> { emp | startDate = newStartDate }), Cmd.none )
 
+        Reset ->
+            ( emptyModel, getEmployment )
+
 
 view : Model -> Html Msg
 view model =
@@ -69,7 +72,8 @@ view model =
 
         Grid ->
             div []
-                [ div [ gridStyle ] (employmentHeaders :: (employmentRows model.employers))
+                [ button [ class "btn btn-default", controlStyle, onClick Reset ] [ text "reset" ]
+                , div [ gridStyle ] (employmentHeaders :: (employmentRows model.employers))
                 ]
 
         Edit idx ->
