@@ -56,17 +56,20 @@ update msg model =
         -- Very interesting... so I now have two employee records... and the UI keeps me in check... weird!
         UpdateState emp newState ->
             let
+                newEmp =
+                    { emp | state = newState }
+
                 newEmployers =
                     model.employers
                         |> List.map
                             (\t ->
                                 if t == emp then
-                                    { emp | state = newState }
+                                    newEmp
                                 else
                                     t
                             )
             in
-                ( { model | employers = newEmployers }, Cmd.none )
+                ( { model | employers = newEmployers, state = Edit newEmp }, Cmd.none )
 
         -- Re add me!
         -- UpdateCity i t ->

@@ -13678,19 +13678,23 @@ var _user$project$Main$update = F2(
 				}
 			case 'UpdateState':
 				var _p4 = _p2._0;
+				var newEmp = _elm_lang$core$Native_Utils.update(
+					_p4,
+					{state: _p2._1});
 				var newEmployers = A2(
 					_elm_lang$core$List$map,
 					function (t) {
-						return _elm_lang$core$Native_Utils.eq(t, _p4) ? _elm_lang$core$Native_Utils.update(
-							_p4,
-							{state: _p2._1}) : t;
+						return _elm_lang$core$Native_Utils.eq(t, _p4) ? newEmp : t;
 					},
 					model.employers);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{employers: newEmployers}),
+						{
+							employers: newEmployers,
+							state: _user$project$Model$Edit(newEmp)
+						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:
