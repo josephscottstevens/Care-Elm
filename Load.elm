@@ -31,7 +31,9 @@ decodeEmployent =
     decode Model
         |> hardcoded Initial
         |> required "PatientId" int
-        |> required "Employers" (array decodeEmployer)
+        |> required "Employers" (list decodeEmployer)
+        |> hardcoded Nothing
+        |> hardcoded SortNone
 
 
 request : Http.Request Model

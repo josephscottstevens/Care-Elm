@@ -4,7 +4,6 @@ import Html exposing (Html, text, div, input, program, button, select, option)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Model exposing (..)
-import Array
 
 
 controlStyle : Html.Attribute msg
@@ -68,13 +67,13 @@ employmentHeaders =
         ]
 
 
-employmentRows : Array.Array Employer -> List (Html Msg)
+employmentRows : List Employer -> List (Html Msg)
 employmentRows emp =
     emp
-        |> Array.indexedMap
-            (\idx t ->
+        |> List.map
+            (\t ->
                 div [ rowStyle ]
-                    [ button [ class "btn btn-default", controlStyle, onClick (EditStart idx) ] [ text "edit" ]
+                    [ button [ class "btn btn-default", controlStyle, onClick (EditStart t) ] [ text "edit" ]
                     , div cellStyle [ text t.occupation ]
                     , div cellStyle [ text t.employer ]
                     , div cellStyle [ text t.startDate ]
@@ -84,4 +83,3 @@ employmentRows emp =
                     , div cellStyle [ text t.state ]
                     ]
             )
-        |> Array.toList
