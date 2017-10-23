@@ -44,7 +44,22 @@ update msg model =
         EditStart employer ->
             ( { model | state = Edit employer }, sendTestDate employer.startDate )
 
-        EditEnd ->
+        EditSave employer ->
+            let
+                newEmployers =
+                    model.employers
+                        |> List.map
+                            (\t ->
+                                if t.email == employer.email then
+                                    -- Not good, email is the like.. row id here
+                                    employer
+                                else
+                                    t
+                            )
+            in
+                ( { model | state = Grid, employers = newEmployers }, Cmd.none )
+
+        EditCancel ->
             ( { model | state = Grid }, Cmd.none )
 
         Load (Ok newModel) ->
@@ -55,21 +70,7 @@ update msg model =
 
         -- Very interesting... so I now have two employee records... and the UI keeps me in check... weird!
         UpdateState emp newState ->
-            let
-                newEmp =
-                    { emp | state = newState }
-
-                newEmployers =
-                    model.employers
-                        |> List.map
-                            (\t ->
-                                if t == emp then
-                                    newEmp
-                                else
-                                    t
-                            )
-            in
-                ( { model | employers = newEmployers, state = Edit newEmp }, Cmd.none )
+            ( { model | state = Edit { emp | state = newState } }, Cmd.none )
 
         -- Re add me!
         -- UpdateCity i t ->
@@ -97,7 +98,8 @@ view model =
                 [ -- input [ placeholder "City", class "e-textbox", controlStyle, onInput (UpdateCity emp), value emp.city ] []
                   input [ placeholder "State", class "e-textbox", controlStyle, onInput (UpdateState emp), value emp.state ] []
                 , input [ placeholder "Start Date", type_ "text", class "e-textbox", controlStyle, id "testDate", value emp.startDate ] []
-                , button [ class "btn btn-default", controlStyle, onClick EditEnd ] [ text "save" ]
+                , button [ class "btn btn-default", controlStyle, onClick (EditSave emp) ] [ text "save" ]
+                , button [ class "btn btn-default", controlStyle, onClick EditCancel ] [ text "cancel" ]
                 ]
 
         Error err ->

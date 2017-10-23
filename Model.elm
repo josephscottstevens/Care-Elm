@@ -25,7 +25,8 @@ type alias Employer =
 type Msg
     = Load (Result Http.Error Model)
     | EditStart Employer
-    | EditEnd
+    | EditSave Employer
+    | EditCancel
       -- | UpdateStartDate String
       -- | UpdateCity Employer String
     | UpdateState Employer String
