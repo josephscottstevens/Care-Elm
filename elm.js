@@ -9163,27 +9163,16 @@ var _user$project$Model$emptyModel = {
 	sortMode: _user$project$Model$SortNone
 };
 
-var _user$project$HtmlHelper$sortFunc = F2(
-	function (sortMode, employers) {
+var _user$project$HtmlHelper$sortFunc = F3(
+	function (col, sortMode, employers) {
 		var _p0 = sortMode;
 		switch (_p0.ctor) {
 			case 'SortNone':
 				return employers;
 			case 'SortDesc':
-				return _elm_lang$core$List$reverse(
-					A2(
-						_elm_lang$core$List$sortBy,
-						function (t) {
-							return t.zipCode;
-						},
-						employers));
+				return A2(_elm_lang$core$List$sortBy, col, employers);
 			default:
-				return A2(
-					_elm_lang$core$List$sortBy,
-					function (t) {
-						return t.zipCode;
-					},
-					employers);
+				return A2(_elm_lang$core$List$sortBy, col, employers);
 		}
 	});
 var _user$project$HtmlHelper$cellStyle = {
@@ -9500,7 +9489,13 @@ var _user$project$HtmlHelper$employmentRows = F2(
 			A2(
 				_elm_lang$core$List$take,
 				20,
-				A2(_user$project$HtmlHelper$sortFunc, sortMode, employers)));
+				A3(
+					_user$project$HtmlHelper$sortFunc,
+					function (_) {
+						return _.zipCode;
+					},
+					sortMode,
+					employers)));
 	});
 
 var _user$project$Load$updateEmployers = F2(

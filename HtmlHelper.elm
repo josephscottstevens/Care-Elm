@@ -68,23 +68,23 @@ employmentHeaders =
         ]
 
 
-sortFunc : SortMode -> List Employer -> List Employer
-sortFunc sortMode employers =
+sortFunc : (Employer -> comparable) -> SortMode -> List Employer -> List Employer
+sortFunc col sortMode employers =
     case sortMode of
         SortNone ->
             employers
 
         SortDesc ->
-            employers |> List.sortBy (\t -> t.zipCode) |> List.reverse
+            employers |> List.sortBy col
 
         SortAsc ->
-            employers |> List.sortBy (\t -> t.zipCode)
+            employers |> List.sortBy col
 
 
 employmentRows : List Employer -> SortMode -> List (Html Msg)
 employmentRows employers sortMode =
     employers
-        |> sortFunc sortMode
+        |> sortFunc .zipCode sortMode
         |> List.take 20
         |> List.map
             (\t ->
