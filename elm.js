@@ -9113,39 +9113,10 @@ var _elm_lang$http$Http$StringPart = F2(
 	});
 var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 
-var _user$project$Model$Employer = function (a) {
-	return function (b) {
-		return function (c) {
-			return function (d) {
-				return function (e) {
-					return function (f) {
-						return function (g) {
-							return function (h) {
-								return function (i) {
-									return function (j) {
-										return function (k) {
-											return function (l) {
-												return function (m) {
-													return function (n) {
-														return function (o) {
-															return function (p) {
-																return {rowId: a, employmentStatus: b, occupation: c, employer: d, startDate: e, endDate: f, contactPerson: g, status: h, addressLine1: i, addressLine2: j, city: k, state: l, zipCode: m, phone: n, email: o, comment: p};
-															};
-														};
-													};
-												};
-											};
-										};
-									};
-								};
-							};
-						};
-					};
-				};
-			};
-		};
-	};
-};
+var _user$project$Model$Employer = F9(
+	function (a, b, c, d, e, f, g, h, i) {
+		return {rowId: a, dob: b, email: c, addressLine1: d, addressLine2: e, city: f, state: g, zipCode: h, phone: i};
+	});
 var _user$project$Model$Model = F5(
 	function (a, b, c, d, e) {
 		return {state: a, patientId: b, employers: c, sortCol: d, sortMode: e};
@@ -9272,7 +9243,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 				_user$project$HtmlHelper$headerStyle,
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('Occupation'),
+					_0: _elm_lang$html$Html$text('Address Line 1'),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
@@ -9282,7 +9253,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 					_user$project$HtmlHelper$headerStyle,
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text('Employer'),
+						_0: _elm_lang$html$Html$text('Address Line 2'),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -9292,7 +9263,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 						_user$project$HtmlHelper$headerStyle,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text('Start Date'),
+							_0: _elm_lang$html$Html$text('Phone'),
 							_1: {ctor: '[]'}
 						}),
 					_1: {
@@ -9302,7 +9273,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 							_user$project$HtmlHelper$headerStyle,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text('End Date'),
+								_0: _elm_lang$html$Html$text('Date of birth'),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -9312,7 +9283,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 								_user$project$HtmlHelper$headerStyle,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text('Contact Person'),
+									_0: _elm_lang$html$Html$text('City'),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
@@ -9322,7 +9293,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 									_user$project$HtmlHelper$headerStyle,
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text('City'),
+										_0: _elm_lang$html$Html$text('State'),
 										_1: {ctor: '[]'}
 									}),
 								_1: {
@@ -9332,7 +9303,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 										_user$project$HtmlHelper$headerStyle,
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text('State'),
+											_0: _elm_lang$html$Html$text('Zip'),
 											_1: {ctor: '[]'}
 										}),
 									_1: {ctor: '[]'}
@@ -9413,7 +9384,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 							_user$project$HtmlHelper$cellStyle,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text(t.occupation),
+								_0: _elm_lang$html$Html$text(t.addressLine1),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -9423,7 +9394,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 								_user$project$HtmlHelper$cellStyle,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text(t.employer),
+									_0: _elm_lang$html$Html$text(t.addressLine2),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
@@ -9433,7 +9404,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 									_user$project$HtmlHelper$cellStyle,
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text(t.startDate),
+										_0: _elm_lang$html$Html$text(t.phone),
 										_1: {ctor: '[]'}
 									}),
 								_1: {
@@ -9443,7 +9414,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 										_user$project$HtmlHelper$cellStyle,
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text(t.endDate),
+											_0: _elm_lang$html$Html$text(t.dob),
 											_1: {ctor: '[]'}
 										}),
 									_1: {
@@ -9453,7 +9424,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 											_user$project$HtmlHelper$cellStyle,
 											{
 												ctor: '::',
-												_0: _elm_lang$html$Html$text(t.contactPerson),
+												_0: _elm_lang$html$Html$text(t.city),
 												_1: {ctor: '[]'}
 											}),
 										_1: {
@@ -9463,7 +9434,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 												_user$project$HtmlHelper$cellStyle,
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html$text(t.city),
+													_0: _elm_lang$html$Html$text(t.state),
 													_1: {ctor: '[]'}
 												}),
 											_1: {
@@ -9473,7 +9444,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 													_user$project$HtmlHelper$cellStyle,
 													{
 														ctor: '::',
-														_0: _elm_lang$html$Html$text(t.state),
+														_0: _elm_lang$html$Html$text(t.zipCode),
 														_1: {ctor: '[]'}
 													}),
 												_1: {ctor: '[]'}
@@ -9486,7 +9457,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 					}
 				});
 		},
-		emp);
+		A2(_elm_lang$core$List$take, 20, emp));
 };
 
 var _user$project$Load$updateEmployers = F2(
@@ -9511,68 +9482,40 @@ var _user$project$Load$newEmployers = function (employers) {
 };
 var _user$project$Load$decodeEmployer = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-	'Comment',
+	'Phone',
 	_elm_lang$core$Json_Decode$string,
 	A3(
 		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-		'Email',
+		'ZipCode',
 		_elm_lang$core$Json_Decode$string,
 		A3(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-			'Phone',
+			'State',
 			_elm_lang$core$Json_Decode$string,
 			A3(
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-				'ZipCode',
+				'City',
 				_elm_lang$core$Json_Decode$string,
 				A3(
 					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-					'State',
+					'AddressLine2',
 					_elm_lang$core$Json_Decode$string,
 					A3(
 						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-						'City',
+						'AddressLine1',
 						_elm_lang$core$Json_Decode$string,
 						A3(
 							_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-							'AddressLine2',
+							'Email',
 							_elm_lang$core$Json_Decode$string,
 							A3(
 								_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-								'AddressLine1',
+								'Dob',
 								_elm_lang$core$Json_Decode$string,
-								A3(
-									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-									'Status',
-									_elm_lang$core$Json_Decode$string,
-									A3(
-										_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-										'ContactPerson',
-										_elm_lang$core$Json_Decode$string,
-										A3(
-											_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-											'EndDate',
-											_elm_lang$core$Json_Decode$string,
-											A3(
-												_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-												'StartDate',
-												_elm_lang$core$Json_Decode$string,
-												A3(
-													_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-													'Employer',
-													_elm_lang$core$Json_Decode$string,
-													A3(
-														_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-														'Occupation',
-														_elm_lang$core$Json_Decode$string,
-														A3(
-															_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-															'EmploymentStatus',
-															_elm_lang$core$Json_Decode$string,
-															A2(
-																_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
-																0,
-																_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Employer)))))))))))))))));
+								A2(
+									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
+									0,
+									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Employer))))))))));
 var _user$project$Load$decodeEmployent = A2(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
 	_user$project$Model$SortNone,
@@ -9660,21 +9603,24 @@ var _user$project$Main$view = function (model) {
 						_elm_lang$html$Html$input,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$placeholder('City'),
+							_0: _elm_lang$html$Html_Attributes$placeholder('Date of birth'),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
+								_0: _elm_lang$html$Html_Attributes$type_('text'),
 								_1: {
 									ctor: '::',
-									_0: _user$project$HtmlHelper$controlStyle,
+									_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$html$Html_Events$onInput(
-											_user$project$Model$UpdateCity(_p1)),
+										_0: _user$project$HtmlHelper$controlStyle,
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$value(_p1.city),
-											_1: {ctor: '[]'}
+											_0: _elm_lang$html$Html_Attributes$id('testDate'),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$value(_p1.dob),
+												_1: {ctor: '[]'}
+											}
 										}
 									}
 								}
@@ -9687,7 +9633,7 @@ var _user$project$Main$view = function (model) {
 							_elm_lang$html$Html$input,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$placeholder('State'),
+								_0: _elm_lang$html$Html_Attributes$placeholder('City'),
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
@@ -9697,10 +9643,10 @@ var _user$project$Main$view = function (model) {
 										_1: {
 											ctor: '::',
 											_0: _elm_lang$html$Html_Events$onInput(
-												_user$project$Model$UpdateState(_p1)),
+												_user$project$Model$UpdateCity(_p1)),
 											_1: {
 												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$value(_p1.state),
+												_0: _elm_lang$html$Html_Attributes$value(_p1.city),
 												_1: {ctor: '[]'}
 											}
 										}
@@ -9714,24 +9660,21 @@ var _user$project$Main$view = function (model) {
 								_elm_lang$html$Html$input,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$placeholder('Start Date'),
+									_0: _elm_lang$html$Html_Attributes$placeholder('State'),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$type_('text'),
+										_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
+											_0: _user$project$HtmlHelper$controlStyle,
 											_1: {
 												ctor: '::',
-												_0: _user$project$HtmlHelper$controlStyle,
+												_0: _elm_lang$html$Html_Events$onInput(
+													_user$project$Model$UpdateState(_p1)),
 												_1: {
 													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$id('testDate'),
-													_1: {
-														ctor: '::',
-														_0: _elm_lang$html$Html_Attributes$value(_p1.startDate),
-														_1: {ctor: '[]'}
-													}
+													_0: _elm_lang$html$Html_Attributes$value(_p1.state),
+													_1: {ctor: '[]'}
 												}
 											}
 										}
@@ -9820,7 +9763,7 @@ var _user$project$Main$update = F2(
 						{
 							state: _user$project$Model$Edit(_p3)
 						}),
-					_1: _user$project$Main$sendTestDate(_p3.startDate)
+					_1: _user$project$Main$sendTestDate(_p3.dob)
 				};
 			case 'EditSave':
 				return {
@@ -9902,7 +9845,7 @@ var _user$project$Main$update = F2(
 								state: _user$project$Model$Edit(
 									_elm_lang$core$Native_Utils.update(
 										_p5._0,
-										{startDate: _p2._0}))
+										{dob: _p2._0}))
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};

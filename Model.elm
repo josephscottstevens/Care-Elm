@@ -5,21 +5,14 @@ import Http
 
 type alias Employer =
     { rowId : Int
-    , employmentStatus : String
-    , occupation : String
-    , employer : String
-    , startDate : String
-    , endDate : String
-    , contactPerson : String
-    , status : String
+    , dob : String
+    , email : String
     , addressLine1 : String
     , addressLine2 : String
     , city : String
     , state : String
     , zipCode : String
     , phone : String
-    , email : String
-    , comment : String
     }
 
 

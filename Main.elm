@@ -38,7 +38,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         EditStart employer ->
-            ( { model | state = Edit employer }, sendTestDate employer.startDate )
+            ( { model | state = Edit employer }, sendTestDate employer.dob )
 
         EditSave employer ->
             ( { model | state = Grid, employers = (updateEmployers model.employers employer) }, Cmd.none )
@@ -58,10 +58,10 @@ update msg model =
         UpdateCity emp newCity ->
             ( { model | state = Edit { emp | city = newCity } }, Cmd.none )
 
-        UpdateStartDate newStartDate ->
+        UpdateStartDate newDob ->
             case model.state of
                 Edit emp ->
-                    ( { model | state = Edit { emp | startDate = newStartDate } }, Cmd.none )
+                    ( { model | state = Edit { emp | dob = newDob } }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -84,12 +84,25 @@ view model =
 
         Edit emp ->
             div []
-                [ input [ placeholder "City", class "e-textbox", controlStyle, onInput (UpdateCity emp), value emp.city ] []
+                [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", controlStyle, id "testDate", value emp.dob ] []
+                , input [ placeholder "City", class "e-textbox", controlStyle, onInput (UpdateCity emp), value emp.city ] []
                 , input [ placeholder "State", class "e-textbox", controlStyle, onInput (UpdateState emp), value emp.state ] []
-                , input [ placeholder "Start Date", type_ "text", class "e-textbox", controlStyle, id "testDate", value emp.startDate ] []
                 , button [ class "btn btn-default", controlStyle, onClick (EditSave emp) ] [ text "save" ]
                 , button [ class "btn btn-default", controlStyle, onClick EditCancel ] [ text "cancel" ]
                 ]
 
         Error err ->
             div [] [ text (toString err) ]
+
+
+
+-- { rowId : Int
+--     , dob : String
+--     , email : String
+--     , addressLine1 : String
+--     , addressLine2 : String
+--     , city : String
+--     , state : String
+--     , zipCode : String
+--     , phone : String
+--     }

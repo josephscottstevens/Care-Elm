@@ -57,29 +57,30 @@ employmentHeaders : Html msg
 employmentHeaders =
     div [ rowStyle ]
         [ div headerStyle [ text " " ]
-        , div headerStyle [ text "Occupation" ]
-        , div headerStyle [ text "Employer" ]
-        , div headerStyle [ text "Start Date" ]
-        , div headerStyle [ text "End Date" ]
-        , div headerStyle [ text "Contact Person" ]
+        , div headerStyle [ text "Address Line 1" ]
+        , div headerStyle [ text "Address Line 2" ]
+        , div headerStyle [ text "Phone" ]
+        , div headerStyle [ text "Date of birth" ]
         , div headerStyle [ text "City" ]
         , div headerStyle [ text "State" ]
+        , div headerStyle [ text "Zip" ]
         ]
 
 
 employmentRows : List Employer -> List (Html Msg)
 employmentRows emp =
     emp
+        |> List.take 20
         |> List.map
             (\t ->
                 div [ rowStyle ]
                     [ button [ class "btn btn-default", controlStyle, onClick (EditStart t) ] [ text "edit" ]
-                    , div cellStyle [ text t.occupation ]
-                    , div cellStyle [ text t.employer ]
-                    , div cellStyle [ text t.startDate ]
-                    , div cellStyle [ text t.endDate ]
-                    , div cellStyle [ text t.contactPerson ]
+                    , div cellStyle [ text t.addressLine1 ]
+                    , div cellStyle [ text t.addressLine2 ]
+                    , div cellStyle [ text t.phone ]
+                    , div cellStyle [ text t.dob ]
                     , div cellStyle [ text t.city ]
                     , div cellStyle [ text t.state ]
+                    , div cellStyle [ text t.zipCode ]
                     ]
             )
