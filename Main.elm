@@ -1,6 +1,6 @@
 port module Main exposing (..)
 
-import Load exposing (getEmployment)
+import Load exposing (getEmployment, newEmployers, updateEmployers)
 import Model exposing (..)
 import HtmlHelper exposing (..)
 import UpdateHelper exposing (..)
@@ -45,25 +45,13 @@ update msg model =
             ( { model | state = Edit employer }, sendTestDate employer.startDate )
 
         EditSave employer ->
-            let
-                newEmployers =
-                    model.employers
-                        |> List.map
-                            (\t ->
-                                if t.email == employer.email then
-                                    -- Not good, email is the like.. row id here
-                                    employer
-                                else
-                                    t
-                            )
-            in
-                ( { model | state = Grid, employers = newEmployers }, Cmd.none )
+            ( { model | state = Grid, employers = (updateEmployers model.employers employer) }, Cmd.none )
 
         EditCancel ->
             ( { model | state = Grid }, Cmd.none )
 
-        Load (Ok newModel) ->
-            ( { newModel | state = Grid }, Cmd.none )
+        Load (Ok model) ->
+            ( { model | state = Grid, employers = (newEmployers model.employers) }, Cmd.none )
 
         Load (Err t) ->
             ( { model | state = Error t }, Cmd.none )

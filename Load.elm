@@ -9,6 +9,7 @@ import Http
 decodeEmployer : Decoder Employer
 decodeEmployer =
     decode Employer
+        |> hardcoded 0
         |> required "EmploymentStatus" string
         |> required "Occupation" string
         |> required "Employer" string
@@ -44,3 +45,24 @@ request =
 getEmployment : Cmd Msg
 getEmployment =
     Http.send Load request
+
+
+
+-- Not good, rowId has to be patched on later, but I don't how to make it apart of the decoder
+
+
+newEmployers : List Employer -> List Employer
+newEmployers employers =
+    employers |> List.indexedMap (\idx t -> { t | rowId = idx })
+
+
+updateEmployers : List Employer -> Employer -> List Employer
+updateEmployers employers newEmployer =
+    employers
+        |> List.map
+            (\oldEmployer ->
+                if oldEmployer.rowId == newEmployer.rowId then
+                    newEmployer
+                else
+                    oldEmployer
+            )

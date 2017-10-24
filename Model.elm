@@ -4,7 +4,8 @@ import Http
 
 
 type alias Employer =
-    { employmentStatus : String
+    { rowId : Int
+    , employmentStatus : String
     , occupation : String
     , employer : String
     , startDate : String
