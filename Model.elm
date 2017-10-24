@@ -28,8 +28,8 @@ type Msg
     | EditStart Employer
     | EditSave Employer
     | EditCancel
-      -- | UpdateStartDate String
-      -- | UpdateCity Employer String
+    | UpdateStartDate String
+    | UpdateCity Employer String
     | UpdateState Employer String
     | Reset
 

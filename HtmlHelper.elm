@@ -62,7 +62,7 @@ employmentHeaders =
         , div headerStyle [ text "Start Date" ]
         , div headerStyle [ text "End Date" ]
         , div headerStyle [ text "Contact Person" ]
-        , div headerStyle [ text "Status" ]
+        , div headerStyle [ text "City" ]
         , div headerStyle [ text "State" ]
         ]
 
@@ -79,7 +79,7 @@ employmentRows emp =
                     , div cellStyle [ text t.startDate ]
                     , div cellStyle [ text t.endDate ]
                     , div cellStyle [ text t.contactPerson ]
-                    , div cellStyle [ text t.status ]
+                    , div cellStyle [ text t.city ]
                     , div cellStyle [ text t.state ]
                     ]
             )

@@ -8,18 +8,15 @@ import Html.Attributes exposing (style, class, placeholder, id, type_, value)
 import Html.Events exposing (onClick, onInput)
 
 
--- Fix me
-
-
 port sendTestDate : String -> Cmd msg
 
 
-port getTestDate : (Employer -> msg) -> Sub msg
+port getTestDate : (String -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    getTestDate EditStart
+    getTestDate UpdateStartDate
 
 
 main : Program Never Model Msg
@@ -55,15 +52,20 @@ update msg model =
         Load (Err t) ->
             ( { model | state = Error t }, Cmd.none )
 
-        -- Very interesting... so I now have two employee records... and the UI keeps me in check... weird!
         UpdateState emp newState ->
             ( { model | state = Edit { emp | state = newState } }, Cmd.none )
 
-        -- Re add me!
-        -- UpdateCity i t ->
-        --     ( updateEmployeeList model i t (\emp newCity -> { emp | city = newCity }), Cmd.none )
-        -- UpdateStartDate i t ->
-        --     ( updateEmployeeList model i t (\emp newStartDate -> { emp | startDate = newStartDate }), Cmd.none )
+        UpdateCity emp newCity ->
+            ( { model | state = Edit { emp | city = newCity } }, Cmd.none )
+
+        UpdateStartDate newStartDate ->
+            case model.state of
+                Edit emp ->
+                    ( { model | state = Edit { emp | startDate = newStartDate } }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
         Reset ->
             ( emptyModel, getEmployment )
 
@@ -82,8 +84,8 @@ view model =
 
         Edit emp ->
             div []
-                [ -- input [ placeholder "City", class "e-textbox", controlStyle, onInput (UpdateCity emp), value emp.city ] []
-                  input [ placeholder "State", class "e-textbox", controlStyle, onInput (UpdateState emp), value emp.state ] []
+                [ input [ placeholder "City", class "e-textbox", controlStyle, onInput (UpdateCity emp), value emp.city ] []
+                , input [ placeholder "State", class "e-textbox", controlStyle, onInput (UpdateState emp), value emp.state ] []
                 , input [ placeholder "Start Date", type_ "text", class "e-textbox", controlStyle, id "testDate", value emp.startDate ] []
                 , button [ class "btn btn-default", controlStyle, onClick (EditSave emp) ] [ text "save" ]
                 , button [ class "btn btn-default", controlStyle, onClick EditCancel ] [ text "cancel" ]
