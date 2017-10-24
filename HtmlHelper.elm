@@ -53,10 +53,11 @@ headerStyle =
         ]
 
 
-employmentHeaders : Html msg
+employmentHeaders : Html Msg
 employmentHeaders =
     div [ rowStyle ]
-        [ div headerStyle [ text " " ]
+        [ button [ onClick SortByZip ] [ text "sort" ]
+        , div headerStyle [ text " " ]
         , div headerStyle [ text "Address Line 1" ]
         , div headerStyle [ text "Address Line 2" ]
         , div headerStyle [ text "Phone" ]
@@ -67,9 +68,23 @@ employmentHeaders =
         ]
 
 
-employmentRows : List Employer -> List (Html Msg)
-employmentRows emp =
-    emp
+sortFunc : SortMode -> List Employer -> List Employer
+sortFunc sortMode employers =
+    case sortMode of
+        SortNone ->
+            employers
+
+        SortDesc ->
+            employers |> List.sortBy (\t -> t.zipCode) |> List.reverse
+
+        SortAsc ->
+            employers |> List.sortBy (\t -> t.zipCode)
+
+
+employmentRows : List Employer -> SortMode -> List (Html Msg)
+employmentRows employers sortMode =
+    employers
+        |> sortFunc sortMode
         |> List.take 20
         |> List.map
             (\t ->

@@ -24,6 +24,7 @@ type Msg
     | UpdateStartDate String
     | UpdateCity Employer String
     | UpdateState Employer String
+    | SortByZip
     | Reset
 
 

@@ -66,6 +66,17 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        SortByZip ->
+            case model.sortMode of
+                SortNone ->
+                    ( { model | sortMode = SortDesc }, Cmd.none )
+
+                SortDesc ->
+                    ( { model | sortMode = SortAsc }, Cmd.none )
+
+                SortAsc ->
+                    ( { model | sortMode = SortNone }, Cmd.none )
+
         Reset ->
             ( emptyModel, getEmployment )
 
@@ -79,7 +90,7 @@ view model =
         Grid ->
             div []
                 [ button [ class "btn btn-default", controlStyle, onClick Reset ] [ text "reset" ]
-                , div [ gridStyle ] (employmentHeaders :: (employmentRows model.employers))
+                , div [ gridStyle ] (employmentHeaders :: (employmentRows model.employers model.sortMode))
                 ]
 
         Edit emp ->

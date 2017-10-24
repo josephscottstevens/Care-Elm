@@ -9122,6 +9122,7 @@ var _user$project$Model$Model = F5(
 		return {state: a, patientId: b, employers: c, sortCol: d, sortMode: e};
 	});
 var _user$project$Model$Reset = {ctor: 'Reset'};
+var _user$project$Model$SortByZip = {ctor: 'SortByZip'};
 var _user$project$Model$UpdateState = F2(
 	function (a, b) {
 		return {ctor: 'UpdateState', _0: a, _1: b};
@@ -9162,6 +9163,29 @@ var _user$project$Model$emptyModel = {
 	sortMode: _user$project$Model$SortNone
 };
 
+var _user$project$HtmlHelper$sortFunc = F2(
+	function (sortMode, employers) {
+		var _p0 = sortMode;
+		switch (_p0.ctor) {
+			case 'SortNone':
+				return employers;
+			case 'SortDesc':
+				return _elm_lang$core$List$reverse(
+					A2(
+						_elm_lang$core$List$sortBy,
+						function (t) {
+							return t.zipCode;
+						},
+						employers));
+			default:
+				return A2(
+					_elm_lang$core$List$sortBy,
+					function (t) {
+						return t.zipCode;
+					},
+					employers);
+		}
+	});
 var _user$project$HtmlHelper$cellStyle = {
 	ctor: '::',
 	_0: _elm_lang$html$Html_Attributes$style(
@@ -9229,11 +9253,15 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 	{
 		ctor: '::',
 		_0: A2(
-			_elm_lang$html$Html$div,
-			_user$project$HtmlHelper$headerStyle,
+			_elm_lang$html$Html$button,
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html$text(' '),
+				_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$SortByZip),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text('sort'),
 				_1: {ctor: '[]'}
 			}),
 		_1: {
@@ -9243,7 +9271,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 				_user$project$HtmlHelper$headerStyle,
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('Address Line 1'),
+					_0: _elm_lang$html$Html$text(' '),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
@@ -9253,7 +9281,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 					_user$project$HtmlHelper$headerStyle,
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text('Address Line 2'),
+						_0: _elm_lang$html$Html$text('Address Line 1'),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -9263,7 +9291,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 						_user$project$HtmlHelper$headerStyle,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text('Phone'),
+							_0: _elm_lang$html$Html$text('Address Line 2'),
 							_1: {ctor: '[]'}
 						}),
 					_1: {
@@ -9273,7 +9301,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 							_user$project$HtmlHelper$headerStyle,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text('Date of birth'),
+								_0: _elm_lang$html$Html$text('Phone'),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -9283,7 +9311,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 								_user$project$HtmlHelper$headerStyle,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text('City'),
+									_0: _elm_lang$html$Html$text('Date of birth'),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
@@ -9293,7 +9321,7 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 									_user$project$HtmlHelper$headerStyle,
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text('State'),
+										_0: _elm_lang$html$Html$text('City'),
 										_1: {ctor: '[]'}
 									}),
 								_1: {
@@ -9303,10 +9331,21 @@ var _user$project$HtmlHelper$employmentHeaders = A2(
 										_user$project$HtmlHelper$headerStyle,
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text('Zip'),
+											_0: _elm_lang$html$Html$text('State'),
 											_1: {ctor: '[]'}
 										}),
-									_1: {ctor: '[]'}
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$div,
+											_user$project$HtmlHelper$headerStyle,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('Zip'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}
 								}
 							}
 						}
@@ -9343,48 +9382,39 @@ var _user$project$HtmlHelper$controlStyle = _elm_lang$html$Html_Attributes$style
 		_0: {ctor: '_Tuple2', _0: 'margin', _1: '5px'},
 		_1: {ctor: '[]'}
 	});
-var _user$project$HtmlHelper$employmentRows = function (emp) {
-	return A2(
-		_elm_lang$core$List$map,
-		function (t) {
-			return A2(
-				_elm_lang$html$Html$div,
-				{
-					ctor: '::',
-					_0: _user$project$HtmlHelper$rowStyle,
-					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$button,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
-							_1: {
-								ctor: '::',
-								_0: _user$project$HtmlHelper$controlStyle,
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Events$onClick(
-										_user$project$Model$EditStart(t)),
-									_1: {ctor: '[]'}
-								}
-							}
-						},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text('edit'),
-							_1: {ctor: '[]'}
-						}),
-					_1: {
+var _user$project$HtmlHelper$employmentRows = F2(
+	function (employers, sortMode) {
+		return A2(
+			_elm_lang$core$List$map,
+			function (t) {
+				return A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _user$project$HtmlHelper$rowStyle,
+						_1: {ctor: '[]'}
+					},
+					{
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$div,
-							_user$project$HtmlHelper$cellStyle,
+							_elm_lang$html$Html$button,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text(t.addressLine1),
+								_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+								_1: {
+									ctor: '::',
+									_0: _user$project$HtmlHelper$controlStyle,
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(
+											_user$project$Model$EditStart(t)),
+										_1: {ctor: '[]'}
+									}
+								}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('edit'),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -9394,7 +9424,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 								_user$project$HtmlHelper$cellStyle,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text(t.addressLine2),
+									_0: _elm_lang$html$Html$text(t.addressLine1),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
@@ -9404,7 +9434,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 									_user$project$HtmlHelper$cellStyle,
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text(t.phone),
+										_0: _elm_lang$html$Html$text(t.addressLine2),
 										_1: {ctor: '[]'}
 									}),
 								_1: {
@@ -9414,7 +9444,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 										_user$project$HtmlHelper$cellStyle,
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text(t.dob),
+											_0: _elm_lang$html$Html$text(t.phone),
 											_1: {ctor: '[]'}
 										}),
 									_1: {
@@ -9424,7 +9454,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 											_user$project$HtmlHelper$cellStyle,
 											{
 												ctor: '::',
-												_0: _elm_lang$html$Html$text(t.city),
+												_0: _elm_lang$html$Html$text(t.dob),
 												_1: {ctor: '[]'}
 											}),
 										_1: {
@@ -9434,7 +9464,7 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 												_user$project$HtmlHelper$cellStyle,
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html$text(t.state),
+													_0: _elm_lang$html$Html$text(t.city),
 													_1: {ctor: '[]'}
 												}),
 											_1: {
@@ -9444,21 +9474,34 @@ var _user$project$HtmlHelper$employmentRows = function (emp) {
 													_user$project$HtmlHelper$cellStyle,
 													{
 														ctor: '::',
-														_0: _elm_lang$html$Html$text(t.zipCode),
+														_0: _elm_lang$html$Html$text(t.state),
 														_1: {ctor: '[]'}
 													}),
-												_1: {ctor: '[]'}
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$div,
+														_user$project$HtmlHelper$cellStyle,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text(t.zipCode),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}
 											}
 										}
 									}
 								}
 							}
 						}
-					}
-				});
-		},
-		A2(_elm_lang$core$List$take, 20, emp));
-};
+					});
+			},
+			A2(
+				_elm_lang$core$List$take,
+				20,
+				A2(_user$project$HtmlHelper$sortFunc, sortMode, employers)));
+	});
 
 var _user$project$Load$updateEmployers = F2(
 	function (employers, newEmployer) {
@@ -9587,7 +9630,7 @@ var _user$project$Main$view = function (model) {
 							{
 								ctor: '::',
 								_0: _user$project$HtmlHelper$employmentHeaders,
-								_1: _user$project$HtmlHelper$employmentRows(model.employers)
+								_1: A2(_user$project$HtmlHelper$employmentRows, model.employers, model.sortMode)
 							}),
 						_1: {ctor: '[]'}
 					}
@@ -9851,6 +9894,34 @@ var _user$project$Main$update = F2(
 					};
 				} else {
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				}
+			case 'SortByZip':
+				var _p6 = model.sortMode;
+				switch (_p6.ctor) {
+					case 'SortNone':
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{sortMode: _user$project$Model$SortDesc}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					case 'SortDesc':
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{sortMode: _user$project$Model$SortAsc}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					default:
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{sortMode: _user$project$Model$SortNone}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
 				}
 			default:
 				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
