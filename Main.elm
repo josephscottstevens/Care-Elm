@@ -1,11 +1,12 @@
 port module Main exposing (..)
 
-import Load exposing (getEmployment, newEmployers, updateEmployers)
+import Load exposing (..)
 import Model exposing (..)
 import HtmlHelper exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value)
 import Html.Events exposing (onClick, onInput)
+import Table
 
 
 port sendTestDate : String -> Cmd msg
@@ -66,16 +67,11 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        SortByZip ->
-            case model.sortMode of
-                SortNone ->
-                    ( { model | sortMode = SortDesc }, Cmd.none )
+        SetQuery newQuery ->
+            ( { model | query = newQuery }, Cmd.none )
 
-                SortDesc ->
-                    ( { model | sortMode = SortAsc }, Cmd.none )
-
-                SortAsc ->
-                    ( { model | sortMode = SortNone }, Cmd.none )
+        SetTableState newState ->
+            ( { model | tableState = newState }, Cmd.none )
 
         Reset ->
             ( emptyModel, getEmployment )
@@ -90,7 +86,7 @@ view model =
         Grid ->
             div []
                 [ button [ class "btn btn-default", controlStyle, onClick Reset ] [ text "reset" ]
-                , div [ gridStyle ] (employmentHeaders :: (employmentRows model.employers model.sortMode))
+                , Table.view config model.tableState model.employers
                 ]
 
         Edit emp ->

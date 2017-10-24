@@ -1,6 +1,7 @@
 module Model exposing (..)
 
 import Http
+import Table
 
 
 type alias Employer =
@@ -24,7 +25,8 @@ type Msg
     | UpdateStartDate String
     | UpdateCity Employer String
     | UpdateState Employer String
-    | SortByZip
+    | SetQuery String
+    | SetTableState Table.State
     | Reset
 
 
@@ -45,8 +47,8 @@ type alias Model =
     { state : ModelState
     , patientId : Int
     , employers : List Employer
-    , sortCol : Maybe Employer
-    , sortMode : SortMode
+    , tableState : Table.State
+    , query : String
     }
 
 
@@ -55,6 +57,6 @@ emptyModel =
     { state = Initial
     , patientId = 0
     , employers = []
-    , sortCol = Nothing
-    , sortMode = SortNone
+    , tableState = Table.initialSort "dob"
+    , query = ""
     }
