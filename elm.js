@@ -9715,6 +9715,131 @@ var _user$project$HtmlHelper$controlStyle = _elm_lang$html$Html_Attributes$style
 		_1: {ctor: '[]'}
 	});
 
+var _user$project$Grid$editButton = function (emp) {
+	return A2(
+		_evancz$elm_sortable_table$Table$HtmlDetails,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$button,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+					_1: {
+						ctor: '::',
+						_0: _user$project$HtmlHelper$controlStyle,
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								_user$project$Model$EditStart(emp)),
+							_1: {ctor: '[]'}
+						}
+					}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('Edit'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Grid$editColumn = _evancz$elm_sortable_table$Table$veryCustomColumn(
+	{name: '', viewData: _user$project$Grid$editButton, sorter: _evancz$elm_sortable_table$Table$unsortable});
+var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
+	{
+		toId: function (_) {
+			return _.city;
+		},
+		toMsg: _user$project$Model$SetTableState,
+		columns: {
+			ctor: '::',
+			_0: _user$project$Grid$editColumn,
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_evancz$elm_sortable_table$Table$stringColumn,
+					'Date of birth',
+					function (_) {
+						return _.dob;
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_evancz$elm_sortable_table$Table$stringColumn,
+						'Email',
+						function (_) {
+							return _.email;
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_evancz$elm_sortable_table$Table$stringColumn,
+							'Address Line 1',
+							function (_) {
+								return _.addressLine1;
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_evancz$elm_sortable_table$Table$stringColumn,
+								'Address Line 2',
+								function (_) {
+									return _.addressLine2;
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_evancz$elm_sortable_table$Table$stringColumn,
+									'City',
+									function (_) {
+										return _.city;
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_evancz$elm_sortable_table$Table$stringColumn,
+										'State',
+										function (_) {
+											return _.state;
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_evancz$elm_sortable_table$Table$stringColumn,
+											'Zip Code',
+											function (_) {
+												return _.zipCode;
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_evancz$elm_sortable_table$Table$stringColumn,
+												'Phone',
+												function (_) {
+													return _.phone;
+												}),
+											_1: {ctor: '[]'}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		customizations: _evancz$elm_sortable_table$Table$defaultCustomizations
+	});
+var _user$project$Grid$customGrid = function (model) {
+	return A3(
+		_evancz$elm_sortable_table$Table$view,
+		_user$project$Grid$config,
+		model.tableState,
+		A2(_elm_lang$core$List$take, 20, model.employers));
+};
+
 var _user$project$Load$updateEmployers = F2(
 	function (employers, newEmployer) {
 		return A2(
@@ -9792,122 +9917,6 @@ var _user$project$Load$decodeEmployent = A2(
 var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/People/GetEmploymentInfo?patientId=6676', _user$project$Load$decodeEmployent);
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
-var _user$project$Main$editButton = function (emp) {
-	return A2(
-		_evancz$elm_sortable_table$Table$HtmlDetails,
-		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$button,
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
-					_1: {
-						ctor: '::',
-						_0: _user$project$HtmlHelper$controlStyle,
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(
-								_user$project$Model$EditStart(emp)),
-							_1: {ctor: '[]'}
-						}
-					}
-				},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text('Edit'),
-					_1: {ctor: '[]'}
-				}),
-			_1: {ctor: '[]'}
-		});
-};
-var _user$project$Main$editColumn = _evancz$elm_sortable_table$Table$veryCustomColumn(
-	{name: '', viewData: _user$project$Main$editButton, sorter: _evancz$elm_sortable_table$Table$unsortable});
-var _user$project$Main$config = _evancz$elm_sortable_table$Table$config(
-	{
-		toId: function (_) {
-			return _.city;
-		},
-		toMsg: _user$project$Model$SetTableState,
-		columns: {
-			ctor: '::',
-			_0: _user$project$Main$editColumn,
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_evancz$elm_sortable_table$Table$stringColumn,
-					'Date of birth',
-					function (_) {
-						return _.dob;
-					}),
-				_1: {
-					ctor: '::',
-					_0: A2(
-						_evancz$elm_sortable_table$Table$stringColumn,
-						'Email',
-						function (_) {
-							return _.email;
-						}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_evancz$elm_sortable_table$Table$stringColumn,
-							'Address Line 1',
-							function (_) {
-								return _.addressLine1;
-							}),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_evancz$elm_sortable_table$Table$stringColumn,
-								'Address Line 2',
-								function (_) {
-									return _.addressLine2;
-								}),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_evancz$elm_sortable_table$Table$stringColumn,
-									'City',
-									function (_) {
-										return _.city;
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_evancz$elm_sortable_table$Table$stringColumn,
-										'State',
-										function (_) {
-											return _.state;
-										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_evancz$elm_sortable_table$Table$stringColumn,
-											'Zip Code',
-											function (_) {
-												return _.zipCode;
-											}),
-										_1: {
-											ctor: '::',
-											_0: A2(
-												_evancz$elm_sortable_table$Table$stringColumn,
-												'Phone',
-												function (_) {
-													return _.phone;
-												}),
-											_1: {ctor: '[]'}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	});
 var _user$project$Main$view = function (model) {
 	var _p0 = model.state;
 	switch (_p0.ctor) {
@@ -9948,7 +9957,7 @@ var _user$project$Main$view = function (model) {
 						}),
 					_1: {
 						ctor: '::',
-						_0: A3(_evancz$elm_sortable_table$Table$view, _user$project$Main$config, model.tableState, model.employers),
+						_0: _user$project$Grid$customGrid(model),
 						_1: {ctor: '[]'}
 					}
 				});
@@ -10221,13 +10230,12 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'SetTableState':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
 						model,
 						{tableState: _p2._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
+					{ctor: '[]'});
 			default:
 				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
 		}
