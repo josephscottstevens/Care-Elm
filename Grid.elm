@@ -20,6 +20,7 @@ config =
         , toMsg = SetTableState
         , columns =
             [ editColumn
+            , editColumn2
             , Table.stringColumn "Date of birth" .dob
             , Table.stringColumn "Address Line 1" .addressLine1
             , Table.stringColumn "Address Line 2" .addressLine2
@@ -97,8 +98,24 @@ editColumn =
         }
 
 
+editColumn2 : Table.Column Employer Msg
+editColumn2 =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData = editButton2
+        , sorter = Table.unsortable
+        }
+
+
 editButton : Employer -> Table.HtmlDetails Msg
 editButton emp =
     Table.HtmlDetails []
         [ button [ class "btn btn-default", controlStyle, onClick (EditStart emp) ] [ text "Edit" ]
+        ]
+
+
+editButton2 : Employer -> Table.HtmlDetails Msg
+editButton2 emp =
+    Table.HtmlDetails []
+        [ button [ class "btn btn-default", controlStyle, onClick (EditStart emp) ] [ text emp.addressLine1 ]
         ]
