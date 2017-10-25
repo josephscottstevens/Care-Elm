@@ -9785,7 +9785,28 @@ var _user$project$HtmlHelper$controlStyle = _elm_lang$html$Html_Attributes$style
 		_1: {ctor: '[]'}
 	});
 
-var _user$project$Grid$editButton = function (emp) {
+var _user$project$Grid$checkColumnCell = function (emp) {
+	return A2(
+		_evancz$elm_sortable_table$Table$HtmlDetails,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$input,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$type_('checkbox'),
+					_1: {ctor: '[]'}
+				},
+				{ctor: '[]'}),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Grid$checkColumn = function (name) {
+	return _evancz$elm_sortable_table$Table$veryCustomColumn(
+		{name: name, viewData: _user$project$Grid$checkColumnCell, sorter: _evancz$elm_sortable_table$Table$unsortable});
+};
+var _user$project$Grid$editColumnCell = function (emp) {
 	return A2(
 		_evancz$elm_sortable_table$Table$HtmlDetails,
 		{ctor: '[]'},
@@ -9816,7 +9837,7 @@ var _user$project$Grid$editButton = function (emp) {
 		});
 };
 var _user$project$Grid$editColumn = _evancz$elm_sortable_table$Table$veryCustomColumn(
-	{name: '', viewData: _user$project$Grid$editButton, sorter: _evancz$elm_sortable_table$Table$unsortable});
+	{name: '', viewData: _user$project$Grid$editColumnCell, sorter: _evancz$elm_sortable_table$Table$unsortable});
 var _user$project$Grid$simpleRowAttrs = function (_p0) {
 	return {ctor: '[]'};
 };
@@ -9899,7 +9920,7 @@ var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 		toMsg: _user$project$Model$SetTableState,
 		columns: {
 			ctor: '::',
-			_0: _user$project$Grid$editColumn,
+			_0: _user$project$Grid$checkColumn('Reviewed'),
 			_1: {
 				ctor: '::',
 				_0: A2(
@@ -9956,7 +9977,11 @@ var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 											function (_) {
 												return _.phone;
 											}),
-										_1: {ctor: '[]'}
+										_1: {
+											ctor: '::',
+											_0: _user$project$Grid$editColumn,
+											_1: {ctor: '[]'}
+										}
 									}
 								}
 							}

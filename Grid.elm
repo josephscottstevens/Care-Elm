@@ -2,8 +2,8 @@ module Grid exposing (customGrid)
 
 import Model exposing (..)
 import HtmlHelper exposing (..)
-import Html exposing (Html, text, div, program, button)
-import Html.Attributes exposing (style, class)
+import Html exposing (Html, text, div, program, button, input)
+import Html.Attributes exposing (style, class, type_)
 import Html.Events exposing (onClick)
 import Table
 
@@ -19,7 +19,7 @@ config =
         { toId = .city
         , toMsg = SetTableState
         , columns =
-            [ editColumn
+            [ checkColumn "Reviewed"
             , Table.stringColumn "Date of birth" .dob
             , Table.stringColumn "Address Line 1" (\t -> t.addressLine1)
             , Table.stringColumn "Address Line 2" .addressLine2
@@ -27,6 +27,7 @@ config =
             , Table.stringColumn "State" .state
             , Table.stringColumn "Zip Code" .zipCode
             , Table.stringColumn "Phone" .phone
+            , editColumn
             ]
         , customizations = defaultCustomizations
         }
@@ -82,13 +83,29 @@ editColumn : Table.Column Employer Msg
 editColumn =
     Table.veryCustomColumn
         { name = ""
-        , viewData = editButton
+        , viewData = editColumnCell
         , sorter = Table.unsortable
         }
 
 
-editButton : Employer -> Table.HtmlDetails Msg
-editButton emp =
+editColumnCell : Employer -> Table.HtmlDetails Msg
+editColumnCell emp =
     Table.HtmlDetails []
         [ button [ class "btn btn-default", controlStyle, onClick (EditStart emp) ] [ text "Edit" ]
+        ]
+
+
+checkColumn : String -> Table.Column Employer Msg
+checkColumn name =
+    Table.veryCustomColumn
+        { name = name
+        , viewData = checkColumnCell
+        , sorter = Table.unsortable
+        }
+
+
+checkColumnCell : Employer -> Table.HtmlDetails Msg
+checkColumnCell emp =
+    Table.HtmlDetails []
+        [ input [ type_ "checkbox" ] []
         ]
