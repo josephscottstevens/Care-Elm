@@ -29,8 +29,73 @@ config =
             , Table.stringColumn "Zip Code" .zipCode
             , Table.stringColumn "Phone" .phone
             ]
-        , customizations = Table.defaultCustomizations
+        , customizations = defaultCustomizations
         }
+
+
+defaultCustomizations : Table.Customizations data msg
+defaultCustomizations =
+    { tableAttrs = []
+    , caption = Nothing
+    , thead = simpleThead
+    , tfoot = Nothing
+    , tbodyAttrs = []
+    , rowAttrs = simpleRowAttrs
+    }
+
+
+simpleTheadHelp : ( String, Table.Status, Html.Attribute msg ) -> Html msg
+simpleTheadHelp ( name, status, onClick ) =
+    let
+        content =
+            case status of
+                Table.Unsortable ->
+                    [ Html.text name ]
+
+                Table.Sortable selected ->
+                    [ Html.text name
+                    , if selected then
+                        darkGrey "↓"
+                      else
+                        lightGrey "↓"
+                    ]
+
+                Table.Reversible Nothing ->
+                    [ Html.text name
+                    , lightGrey "↕"
+                    ]
+
+                Table.Reversible (Just isReversed) ->
+                    [ Html.text name
+                    , darkGrey
+                        (if isReversed then
+                            "↑"
+                         else
+                            "↓"
+                        )
+                    ]
+    in
+        Html.th [ onClick ] content
+
+
+darkGrey : String -> Html msg
+darkGrey symbol =
+    Html.span [ style [ ( "color", "#555" ) ] ] [ Html.text (" " ++ symbol) ]
+
+
+lightGrey : String -> Html msg
+lightGrey symbol =
+    Html.span [ style [ ( "color", "#ccc" ) ] ] [ Html.text (" " ++ symbol) ]
+
+
+simpleThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
+simpleThead headers =
+    Table.HtmlDetails [] (List.map simpleTheadHelp headers)
+
+
+simpleRowAttrs : data -> List (Html.Attribute msg)
+simpleRowAttrs _ =
+    []
 
 
 editColumn : Table.Column Employer Msg
