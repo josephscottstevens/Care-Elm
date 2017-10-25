@@ -20,7 +20,7 @@ config =
         , toMsg = SetTableState
         , columns =
             [ editColumn
-            , editColumn2
+            , editColumn2 "test" .addressLine1
             , Table.stringColumn "Date of birth" .dob
             , Table.stringColumn "Address Line 1" .addressLine1
             , Table.stringColumn "Address Line 2" .addressLine2
@@ -98,11 +98,11 @@ editColumn =
         }
 
 
-editColumn2 : Table.Column Employer Msg
-editColumn2 =
+editColumn2 : String -> (Employer -> String) -> Table.Column Employer Msg
+editColumn2 name val =
     Table.veryCustomColumn
         { name = ""
-        , viewData = editButton2
+        , viewData = \t -> editButton2 (toString t)
         , sorter = Table.unsortable
         }
 
@@ -114,8 +114,8 @@ editButton emp =
         ]
 
 
-editButton2 : Employer -> Table.HtmlDetails Msg
-editButton2 emp =
+editButton2 : String -> Table.HtmlDetails Msg
+editButton2 str =
     Table.HtmlDetails []
-        [ button [ class "btn btn-default", controlStyle, onClick (EditStart emp) ] [ text emp.addressLine1 ]
+        [ button [ class "btn btn-default", controlStyle ] [ text str ]
         ]

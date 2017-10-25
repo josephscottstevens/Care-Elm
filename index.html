@@ -13691,7 +13691,7 @@ var _user$project$HtmlHelper$controlStyle = _elm_lang$html$Html_Attributes$style
 		_0: {ctor: '_Tuple2', _0: 'margin', _1: '5px'},
 		_1: {ctor: '[]'}
 	});
-var _user$project$Grid$editButton2 = function (emp) {
+var _user$project$Grid$editButton2 = function (str) {
 	return A2(
 		_evancz$elm_sortable_table$Table$HtmlDetails,
 		{ctor: '[]'},
@@ -13705,17 +13705,12 @@ var _user$project$Grid$editButton2 = function (emp) {
 					_1: {
 						ctor: '::',
 						_0: _user$project$HtmlHelper$controlStyle,
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(
-								_user$project$Model$EditStart(emp)),
-							_1: {ctor: '[]'}
-						}
+						_1: {ctor: '[]'}
 					}
 				},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(emp.addressLine1),
+					_0: _elm_lang$html$Html$text(str),
 					_1: {ctor: '[]'}
 				}),
 			_1: {ctor: '[]'}
@@ -13751,8 +13746,18 @@ var _user$project$Grid$editButton = function (emp) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$Grid$editColumn2 = _evancz$elm_sortable_table$Table$veryCustomColumn(
-	{name: '', viewData: _user$project$Grid$editButton2, sorter: _evancz$elm_sortable_table$Table$unsortable});
+var _user$project$Grid$editColumn2 = F2(
+	function (name, val) {
+		return _evancz$elm_sortable_table$Table$veryCustomColumn(
+			{
+				name: '',
+				viewData: function (t) {
+					return _user$project$Grid$editButton2(
+						_elm_lang$core$Basics$toString(t));
+				},
+				sorter: _evancz$elm_sortable_table$Table$unsortable
+			});
+	});
 var _user$project$Grid$editColumn = _evancz$elm_sortable_table$Table$veryCustomColumn(
 	{name: '', viewData: _user$project$Grid$editButton, sorter: _evancz$elm_sortable_table$Table$unsortable});
 var _user$project$Grid$simpleRowAttrs = function (_p0) {
@@ -13880,7 +13885,12 @@ var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 			_0: _user$project$Grid$editColumn,
 			_1: {
 				ctor: '::',
-				_0: _user$project$Grid$editColumn2,
+				_0: A2(
+					_user$project$Grid$editColumn2,
+					'test',
+					function (_) {
+						return _.addressLine1;
+					}),
 				_1: {
 					ctor: '::',
 					_0: A2(
