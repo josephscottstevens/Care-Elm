@@ -86,7 +86,7 @@ view model =
         Grid ->
             div []
                 [ button [ class "btn btn-default", controlStyle, onClick Reset ] [ text "reset" ]
-                , Table.view config model.tableState model.employers
+                , Table.view config model.tableState (List.take 20 model.employers)
                 ]
 
         Edit emp ->
