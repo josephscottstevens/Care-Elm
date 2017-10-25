@@ -22,7 +22,7 @@ config =
             [ editColumn
             , editColumn2 "test" .addressLine1
             , Table.stringColumn "Date of birth" .dob
-            , Table.stringColumn "Address Line 1" .addressLine1
+            , Table.stringColumn "Address Line 1" (\t -> t.addressLine1)
             , Table.stringColumn "Address Line 2" .addressLine2
             , Table.stringColumn "City" .city
             , Table.stringColumn "State" .state
@@ -98,15 +98,6 @@ editColumn =
         }
 
 
-editColumn2 : String -> (Employer -> String) -> Table.Column Employer Msg
-editColumn2 name val =
-    Table.veryCustomColumn
-        { name = ""
-        , viewData = \t -> editButton2 (toString t)
-        , sorter = Table.unsortable
-        }
-
-
 editButton : Employer -> Table.HtmlDetails Msg
 editButton emp =
     Table.HtmlDetails []
@@ -114,8 +105,17 @@ editButton emp =
         ]
 
 
-editButton2 : String -> Table.HtmlDetails Msg
-editButton2 str =
+editColumn2 : String -> (Employer -> String) -> Table.Column Employer msg
+editColumn2 name val =
+    Table.veryCustomColumn
+        { name = name
+        , viewData = viewDollars
+        , sorter = Table.unsortable
+        }
+
+
+viewDollars : Employer -> Table.HtmlDetails msg
+viewDollars str =
     Table.HtmlDetails []
-        [ button [ class "btn btn-default", controlStyle ] [ text str ]
+        [ button [ class "btn btn-warning", controlStyle ] [ text str.addressLine1 ]
         ]

@@ -13691,7 +13691,7 @@ var _user$project$HtmlHelper$controlStyle = _elm_lang$html$Html_Attributes$style
 		_0: {ctor: '_Tuple2', _0: 'margin', _1: '5px'},
 		_1: {ctor: '[]'}
 	});
-var _user$project$Grid$editButton2 = function (str) {
+var _user$project$Grid$viewDollars = function (str) {
 	return A2(
 		_evancz$elm_sortable_table$Table$HtmlDetails,
 		{ctor: '[]'},
@@ -13716,6 +13716,18 @@ var _user$project$Grid$editButton2 = function (str) {
 			_1: {ctor: '[]'}
 		});
 };
+var _user$project$Grid$editColumn2 = F2(
+	function (name, val) {
+		return _evancz$elm_sortable_table$Table$veryCustomColumn(
+			{
+				name: '',
+				viewData: function (_p0) {
+					return _user$project$Grid$viewDollars(
+						_elm_lang$core$Basics$toString(_p0));
+				},
+				sorter: _evancz$elm_sortable_table$Table$unsortable
+			});
+	});
 var _user$project$Grid$editButton = function (emp) {
 	return A2(
 		_evancz$elm_sortable_table$Table$HtmlDetails,
@@ -13746,21 +13758,9 @@ var _user$project$Grid$editButton = function (emp) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$Grid$editColumn2 = F2(
-	function (name, val) {
-		return _evancz$elm_sortable_table$Table$veryCustomColumn(
-			{
-				name: '',
-				viewData: function (t) {
-					return _user$project$Grid$editButton2(
-						_elm_lang$core$Basics$toString(t));
-				},
-				sorter: _evancz$elm_sortable_table$Table$unsortable
-			});
-	});
 var _user$project$Grid$editColumn = _evancz$elm_sortable_table$Table$veryCustomColumn(
 	{name: '', viewData: _user$project$Grid$editButton, sorter: _evancz$elm_sortable_table$Table$unsortable});
-var _user$project$Grid$simpleRowAttrs = function (_p0) {
+var _user$project$Grid$simpleRowAttrs = function (_p1) {
 	return {ctor: '[]'};
 };
 var _user$project$Grid$lightGrey = function (symbol) {
@@ -13803,38 +13803,38 @@ var _user$project$Grid$darkGrey = function (symbol) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$Grid$simpleTheadHelp = function (_p1) {
-	var _p2 = _p1;
-	var _p4 = _p2._0;
+var _user$project$Grid$simpleTheadHelp = function (_p2) {
+	var _p3 = _p2;
+	var _p5 = _p3._0;
 	var content = function () {
-		var _p3 = _p2._1;
-		switch (_p3.ctor) {
+		var _p4 = _p3._1;
+		switch (_p4.ctor) {
 			case 'Unsortable':
 				return {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p4),
+					_0: _elm_lang$html$Html$text(_p5),
 					_1: {ctor: '[]'}
 				};
 			case 'Sortable':
 				return {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p4),
+					_0: _elm_lang$html$Html$text(_p5),
 					_1: {ctor: '[]'}
 				};
 			default:
-				if (_p3._0.ctor === 'Nothing') {
+				if (_p4._0.ctor === 'Nothing') {
 					return {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p4),
+						_0: _elm_lang$html$Html$text(_p5),
 						_1: {ctor: '[]'}
 					};
 				} else {
 					return {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p4),
+						_0: _elm_lang$html$Html$text(_p5),
 						_1: {
 							ctor: '::',
-							_0: _p3._0._0 ? A2(
+							_0: _p4._0._0 ? A2(
 								_elm_lang$html$Html$div,
 								{
 									ctor: '::',
@@ -13857,7 +13857,7 @@ var _user$project$Grid$simpleTheadHelp = function (_p1) {
 	}();
 	return A2(
 		_elm_lang$html$Html$th,
-		{ctor: '::', _0: _p2._2, _1: _user$project$HtmlHelper$thStyle},
+		{ctor: '::', _0: _p3._2, _1: _user$project$HtmlHelper$thStyle},
 		content);
 };
 var _user$project$Grid$simpleThead = function (headers) {

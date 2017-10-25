@@ -9650,6 +9650,72 @@ var _user$project$Model$SortDesc = {ctor: 'SortDesc'};
 var _user$project$Model$SortAsc = {ctor: 'SortAsc'};
 var _user$project$Model$SortNone = {ctor: 'SortNone'};
 
+var _user$project$HtmlHelper$thStyle = {
+	ctor: '::',
+	_0: _elm_lang$html$Html_Attributes$style(
+		{
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: 'border', _1: '1px solid #CCC'},
+			_1: {
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'background', _1: '#F3F3F3'},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'center'},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'font-weight', _1: 'bold'},
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		}),
+	_1: {ctor: '[]'}
+};
+var _user$project$HtmlHelper$tdStyle = {
+	ctor: '::',
+	_0: _elm_lang$html$Html_Attributes$style(
+		{
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: 'border', _1: '1px solid #CCC'},
+			_1: {
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'background', _1: '#FAFAFA'},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'center'},
+					_1: {ctor: '[]'}
+				}
+			}
+		}),
+	_1: {ctor: '[]'}
+};
+var _user$project$HtmlHelper$tableStyle = {
+	ctor: '::',
+	_0: _elm_lang$html$Html_Attributes$style(
+		{
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: 'width', _1: '100%'},
+			_1: {
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'color', _1: '#333'},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'font-family', _1: 'Helvetica, Arial, sans-serif'},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'border-collapse', _1: 'collapse'},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'border-spacing', _1: '0'},
+							_1: {ctor: '[]'}
+						}
+					}
+				}
+			}
+		}),
+	_1: {ctor: '[]'}
+};
 var _user$project$HtmlHelper$cellStyle = {
 	ctor: '::',
 	_0: _elm_lang$html$Html_Attributes$style(
@@ -9715,6 +9781,53 @@ var _user$project$HtmlHelper$controlStyle = _elm_lang$html$Html_Attributes$style
 		_1: {ctor: '[]'}
 	});
 
+var _user$project$Grid$textDetails = function (str) {
+	return A2(
+		_evancz$elm_sortable_table$Table$HtmlDetails,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html$text(str),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Grid$viewDollars = function (str) {
+	return A2(
+		_evancz$elm_sortable_table$Table$HtmlDetails,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$button,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('btn btn-warning'),
+					_1: {
+						ctor: '::',
+						_0: _user$project$HtmlHelper$controlStyle,
+						_1: {ctor: '[]'}
+					}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(str),
+					_1: {ctor: '[]'}
+				}),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Grid$editColumn2 = F2(
+	function (name, val) {
+		return _evancz$elm_sortable_table$Table$veryCustomColumn(
+			{
+				name: name,
+				viewData: function (_p0) {
+					return _user$project$Grid$textDetails(
+						_elm_lang$core$Basics$toString(_p0));
+				},
+				sorter: _evancz$elm_sortable_table$Table$unsortable
+			});
+	});
 var _user$project$Grid$editButton = function (emp) {
 	return A2(
 		_evancz$elm_sortable_table$Table$HtmlDetails,
@@ -9747,7 +9860,7 @@ var _user$project$Grid$editButton = function (emp) {
 };
 var _user$project$Grid$editColumn = _evancz$elm_sortable_table$Table$veryCustomColumn(
 	{name: '', viewData: _user$project$Grid$editButton, sorter: _evancz$elm_sortable_table$Table$unsortable});
-var _user$project$Grid$simpleRowAttrs = function (_p0) {
+var _user$project$Grid$simpleRowAttrs = function (_p1) {
 	return {ctor: '[]'};
 };
 var _user$project$Grid$lightGrey = function (symbol) {
@@ -9790,38 +9903,38 @@ var _user$project$Grid$darkGrey = function (symbol) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$Grid$simpleTheadHelp = function (_p1) {
-	var _p2 = _p1;
-	var _p4 = _p2._0;
+var _user$project$Grid$simpleTheadHelp = function (_p2) {
+	var _p3 = _p2;
+	var _p5 = _p3._0;
 	var content = function () {
-		var _p3 = _p2._1;
-		switch (_p3.ctor) {
+		var _p4 = _p3._1;
+		switch (_p4.ctor) {
 			case 'Unsortable':
 				return {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p4),
+					_0: _elm_lang$html$Html$text(_p5),
 					_1: {ctor: '[]'}
 				};
 			case 'Sortable':
 				return {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p4),
+					_0: _elm_lang$html$Html$text(_p5),
 					_1: {ctor: '[]'}
 				};
 			default:
-				if (_p3._0.ctor === 'Nothing') {
+				if (_p4._0.ctor === 'Nothing') {
 					return {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p4),
+						_0: _elm_lang$html$Html$text(_p5),
 						_1: {ctor: '[]'}
 					};
 				} else {
 					return {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p4),
+						_0: _elm_lang$html$Html$text(_p5),
 						_1: {
 							ctor: '::',
-							_0: _p3._0._0 ? A2(
+							_0: _p4._0._0 ? A2(
 								_elm_lang$html$Html$div,
 								{
 									ctor: '::',
@@ -9844,11 +9957,7 @@ var _user$project$Grid$simpleTheadHelp = function (_p1) {
 	}();
 	return A2(
 		_elm_lang$html$Html$th,
-		{
-			ctor: '::',
-			_0: _p2._2,
-			_1: {ctor: '[]'}
-		},
+		{ctor: '::', _0: _p3._2, _1: _user$project$HtmlHelper$thStyle},
 		content);
 };
 var _user$project$Grid$simpleThead = function (headers) {
@@ -9858,16 +9967,7 @@ var _user$project$Grid$simpleThead = function (headers) {
 		A2(_elm_lang$core$List$map, _user$project$Grid$simpleTheadHelp, headers));
 };
 var _user$project$Grid$defaultCustomizations = {
-	tableAttrs: {
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$style(
-			{
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'width', _1: '100%'},
-				_1: {ctor: '[]'}
-			}),
-		_1: {ctor: '[]'}
-	},
+	tableAttrs: _user$project$HtmlHelper$tableStyle,
 	caption: _elm_lang$core$Maybe$Nothing,
 	thead: _user$project$Grid$simpleThead,
 	tfoot: _elm_lang$core$Maybe$Nothing,
@@ -9886,60 +9986,69 @@ var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 			_1: {
 				ctor: '::',
 				_0: A2(
-					_evancz$elm_sortable_table$Table$stringColumn,
-					'Date of birth',
+					_user$project$Grid$editColumn2,
+					'test',
 					function (_) {
-						return _.dob;
+						return _.addressLine1;
 					}),
 				_1: {
 					ctor: '::',
 					_0: A2(
 						_evancz$elm_sortable_table$Table$stringColumn,
-						'Address Line 1',
+						'Date of birth',
 						function (_) {
-							return _.addressLine1;
+							return _.dob;
 						}),
 					_1: {
 						ctor: '::',
 						_0: A2(
 							_evancz$elm_sortable_table$Table$stringColumn,
-							'Address Line 2',
+							'Address Line 1',
 							function (_) {
-								return _.addressLine2;
+								return _.addressLine1;
 							}),
 						_1: {
 							ctor: '::',
 							_0: A2(
 								_evancz$elm_sortable_table$Table$stringColumn,
-								'City',
+								'Address Line 2',
 								function (_) {
-									return _.city;
+									return _.addressLine2;
 								}),
 							_1: {
 								ctor: '::',
 								_0: A2(
 									_evancz$elm_sortable_table$Table$stringColumn,
-									'State',
+									'City',
 									function (_) {
-										return _.state;
+										return _.city;
 									}),
 								_1: {
 									ctor: '::',
 									_0: A2(
 										_evancz$elm_sortable_table$Table$stringColumn,
-										'Zip Code',
+										'State',
 										function (_) {
-											return _.zipCode;
+											return _.state;
 										}),
 									_1: {
 										ctor: '::',
 										_0: A2(
 											_evancz$elm_sortable_table$Table$stringColumn,
-											'Phone',
+											'Zip Code',
 											function (_) {
-												return _.phone;
+												return _.zipCode;
 											}),
-										_1: {ctor: '[]'}
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_evancz$elm_sortable_table$Table$stringColumn,
+												'Phone',
+												function (_) {
+													return _.phone;
+												}),
+											_1: {ctor: '[]'}
+										}
 									}
 								}
 							}
