@@ -102,6 +102,40 @@ view model =
             div [] [ text (toString err) ]
 
 
+config : Table.Config Employer Msg
+config =
+    Table.config
+        { toId = .city
+        , toMsg = SetTableState
+        , columns =
+            [ editColumn
+            , Table.stringColumn "Date of birth" .dob
+            , Table.stringColumn "Email" .email
+            , Table.stringColumn "Address Line 1" .addressLine1
+            , Table.stringColumn "Address Line 2" .addressLine2
+            , Table.stringColumn "City" .city
+            , Table.stringColumn "State" .state
+            , Table.stringColumn "Zip Code" .zipCode
+            , Table.stringColumn "Phone" .phone
+            ]
+        }
+
+
+editColumn : Table.Column Employer Msg
+editColumn =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData = editButton
+        , sorter = Table.unsortable
+        }
+
+
+editButton emp =
+    Table.HtmlDetails []
+        [ button [ class "btn btn-default", controlStyle, onClick (EditStart emp) ] [ text "Edit" ]
+        ]
+
+
 
 -- { rowId : Int
 --     , dob : String

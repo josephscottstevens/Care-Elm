@@ -7,25 +7,6 @@ import Http
 import Table
 
 
-config : Table.Config Employer Msg
-config =
-    Table.config
-        { toId = .city
-        , toMsg = SetTableState
-        , columns =
-            [ Table.intColumn "Id" .rowId
-            , Table.stringColumn "Dob" .dob
-            , Table.stringColumn "Email" .email
-            , Table.stringColumn "Address Line 1" .addressLine1
-            , Table.stringColumn "Address Line 2" .addressLine2
-            , Table.stringColumn "City" .city
-            , Table.stringColumn "State" .state
-            , Table.stringColumn "Zip Code" .zipCode
-            , Table.stringColumn "Phone" .phone
-            ]
-        }
-
-
 decodeEmployer : Decoder Employer
 decodeEmployer =
     decode Employer
