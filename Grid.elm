@@ -1,16 +1,16 @@
-module Grid exposing (..)
+module Grid exposing (customGrid)
 
 import Model exposing (..)
-import HtmlHelper exposing (..)
-import Html exposing (Html, text, div, input, program, button, select, option)
-import Html.Attributes exposing (style, class, placeholder, id, type_, value)
-import Html.Events exposing (onClick, onInput)
+import HtmlHelper exposing (controlStyle)
+import Html exposing (Html, text, div, program, button)
+import Html.Attributes exposing (style, class)
+import Html.Events exposing (onClick)
 import Table
 
 
 customGrid : { a | employers : List Employer, tableState : Table.State } -> Html Msg
 customGrid model =
-    Table.view config model.tableState (List.take 20 model.employers)
+    Table.view config model.tableState (List.take 15 model.employers)
 
 
 config : Table.Config Employer Msg
@@ -21,7 +21,6 @@ config =
         , columns =
             [ editColumn
             , Table.stringColumn "Date of birth" .dob
-            , Table.stringColumn "Email" .email
             , Table.stringColumn "Address Line 1" .addressLine1
             , Table.stringColumn "Address Line 2" .addressLine2
             , Table.stringColumn "City" .city
@@ -35,7 +34,7 @@ config =
 
 defaultCustomizations : Table.Customizations data msg
 defaultCustomizations =
-    { tableAttrs = []
+    { tableAttrs = [ style [ ( "width", "100%" ) ] ]
     , caption = Nothing
     , thead = simpleThead
     , tfoot = Nothing
@@ -53,26 +52,17 @@ simpleTheadHelp ( name, status, onClick ) =
                     [ Html.text name ]
 
                 Table.Sortable selected ->
-                    [ Html.text name
-                    , if selected then
-                        darkGrey "↓"
-                      else
-                        lightGrey "↓"
-                    ]
+                    [ Html.text name ]
 
                 Table.Reversible Nothing ->
-                    [ Html.text name
-                    , lightGrey "↕"
-                    ]
+                    [ Html.text name ]
 
                 Table.Reversible (Just isReversed) ->
                     [ Html.text name
-                    , darkGrey
-                        (if isReversed then
-                            "↑"
-                         else
-                            "↓"
-                        )
+                    , if isReversed then
+                        div [ class "glyphicon glyphicon-menu-up" ] []
+                      else
+                        div [ class "glyphicon glyphicon-menu-down" ] []
                     ]
     in
         Html.th [ onClick ] content

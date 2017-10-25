@@ -13716,22 +13716,14 @@ var _user$project$Grid$simpleTheadHelp = function (_p1) {
 				return {
 					ctor: '::',
 					_0: _elm_lang$html$Html$text(_p4),
-					_1: {
-						ctor: '::',
-						_0: _p3._0 ? _user$project$Grid$darkGrey('↓') : _user$project$Grid$lightGrey('↓'),
-						_1: {ctor: '[]'}
-					}
+					_1: {ctor: '[]'}
 				};
 			default:
 				if (_p3._0.ctor === 'Nothing') {
 					return {
 						ctor: '::',
 						_0: _elm_lang$html$Html$text(_p4),
-						_1: {
-							ctor: '::',
-							_0: _user$project$Grid$lightGrey('↕!!!'),
-							_1: {ctor: '[]'}
-						}
+						_1: {ctor: '[]'}
 					};
 				} else {
 					return {
@@ -13739,8 +13731,21 @@ var _user$project$Grid$simpleTheadHelp = function (_p1) {
 						_0: _elm_lang$html$Html$text(_p4),
 						_1: {
 							ctor: '::',
-							_0: _user$project$Grid$darkGrey(
-								_p3._0._0 ? '↑' : '↓'),
+							_0: _p3._0._0 ? A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('glyphicon glyphicon-menu-up'),
+									_1: {ctor: '[]'}
+								},
+								{ctor: '[]'}) : A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('glyphicon glyphicon-menu-down'),
+									_1: {ctor: '[]'}
+								},
+								{ctor: '[]'}),
 							_1: {ctor: '[]'}
 						}
 					};
@@ -13763,7 +13768,16 @@ var _user$project$Grid$simpleThead = function (headers) {
 		A2(_elm_lang$core$List$map, _user$project$Grid$simpleTheadHelp, headers));
 };
 var _user$project$Grid$defaultCustomizations = {
-	tableAttrs: {ctor: '[]'},
+	tableAttrs: {
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$style(
+			{
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'width', _1: '100%'},
+				_1: {ctor: '[]'}
+			}),
+		_1: {ctor: '[]'}
+	},
 	caption: _elm_lang$core$Maybe$Nothing,
 	thead: _user$project$Grid$simpleThead,
 	tfoot: _elm_lang$core$Maybe$Nothing,
@@ -13791,60 +13805,51 @@ var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 					ctor: '::',
 					_0: A2(
 						_evancz$elm_sortable_table$Table$stringColumn,
-						'Email',
+						'Address Line 1',
 						function (_) {
-							return _.email;
+							return _.addressLine1;
 						}),
 					_1: {
 						ctor: '::',
 						_0: A2(
 							_evancz$elm_sortable_table$Table$stringColumn,
-							'Address Line 1',
+							'Address Line 2',
 							function (_) {
-								return _.addressLine1;
+								return _.addressLine2;
 							}),
 						_1: {
 							ctor: '::',
 							_0: A2(
 								_evancz$elm_sortable_table$Table$stringColumn,
-								'Address Line 2',
+								'City',
 								function (_) {
-									return _.addressLine2;
+									return _.city;
 								}),
 							_1: {
 								ctor: '::',
 								_0: A2(
 									_evancz$elm_sortable_table$Table$stringColumn,
-									'City',
+									'State',
 									function (_) {
-										return _.city;
+										return _.state;
 									}),
 								_1: {
 									ctor: '::',
 									_0: A2(
 										_evancz$elm_sortable_table$Table$stringColumn,
-										'State',
+										'Zip Code',
 										function (_) {
-											return _.state;
+											return _.zipCode;
 										}),
 									_1: {
 										ctor: '::',
 										_0: A2(
 											_evancz$elm_sortable_table$Table$stringColumn,
-											'Zip Code',
+											'Phone',
 											function (_) {
-												return _.zipCode;
+												return _.phone;
 											}),
-										_1: {
-											ctor: '::',
-											_0: A2(
-												_evancz$elm_sortable_table$Table$stringColumn,
-												'Phone',
-												function (_) {
-													return _.phone;
-												}),
-											_1: {ctor: '[]'}
-										}
+										_1: {ctor: '[]'}
 									}
 								}
 							}
@@ -13860,7 +13865,7 @@ var _user$project$Grid$customGrid = function (model) {
 		_evancz$elm_sortable_table$Table$view,
 		_user$project$Grid$config,
 		model.tableState,
-		A2(_elm_lang$core$List$take, 20, model.employers));
+		A2(_elm_lang$core$List$take, 15, model.employers));
 };
 var _user$project$Load$updateEmployers = F2(
 	function (employers, newEmployer) {
