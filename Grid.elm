@@ -20,7 +20,6 @@ config =
         , toMsg = SetTableState
         , columns =
             [ editColumn
-            , editColumn2 "test" .addressLine1
             , Table.stringColumn "Date of birth" .dob
             , Table.stringColumn "Address Line 1" (\t -> t.addressLine1)
             , Table.stringColumn "Address Line 2" .addressLine2
@@ -69,16 +68,6 @@ simpleTheadHelp ( name, status, onClick ) =
         Html.th (onClick :: thStyle) content
 
 
-darkGrey : String -> Html msg
-darkGrey symbol =
-    Html.span [ style [ ( "color", "#555" ) ] ] [ Html.text (" " ++ symbol) ]
-
-
-lightGrey : String -> Html msg
-lightGrey symbol =
-    Html.span [ style [ ( "color", "#ccc" ) ] ] [ Html.text (" " ++ symbol) ]
-
-
 simpleThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
 simpleThead headers =
     Table.HtmlDetails [] (List.map simpleTheadHelp headers)
@@ -102,20 +91,4 @@ editButton : Employer -> Table.HtmlDetails Msg
 editButton emp =
     Table.HtmlDetails []
         [ button [ class "btn btn-default", controlStyle, onClick (EditStart emp) ] [ text "Edit" ]
-        ]
-
-
-editColumn2 : String -> (Employer -> String) -> Table.Column Employer msg
-editColumn2 name val =
-    Table.veryCustomColumn
-        { name = name
-        , viewData = viewDollars
-        , sorter = Table.unsortable
-        }
-
-
-viewDollars : Employer -> Table.HtmlDetails msg
-viewDollars str =
-    Table.HtmlDetails []
-        [ button [ class "btn btn-warning", controlStyle ] [ text str.addressLine1 ]
         ]

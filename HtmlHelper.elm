@@ -69,5 +69,6 @@ thStyle =
         , ( "background", "#F3F3F3" )
         , ( "text-align", "center" )
         , ( "font-weight", "bold" )
+        , ( "height", "50px" )
         ]
     ]
