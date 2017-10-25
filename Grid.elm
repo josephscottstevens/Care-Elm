@@ -1,7 +1,7 @@
 module Grid exposing (customGrid)
 
 import Model exposing (..)
-import HtmlHelper exposing (controlStyle)
+import HtmlHelper exposing (..)
 import Html exposing (Html, text, div, program, button)
 import Html.Attributes exposing (style, class)
 import Html.Events exposing (onClick)
@@ -34,7 +34,7 @@ config =
 
 defaultCustomizations : Table.Customizations data msg
 defaultCustomizations =
-    { tableAttrs = [ style [ ( "width", "100%" ) ] ]
+    { tableAttrs = tableStyle
     , caption = Nothing
     , thead = simpleThead
     , tfoot = Nothing
@@ -65,7 +65,7 @@ simpleTheadHelp ( name, status, onClick ) =
                         div [ class "glyphicon glyphicon-menu-down" ] []
                     ]
     in
-        Html.th [ onClick ] content
+        Html.th (onClick :: thStyle) content
 
 
 darkGrey : String -> Html msg

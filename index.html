@@ -13561,6 +13561,72 @@ var _user$project$Model$emptyModel = {
 var _user$project$Model$SortDesc = {ctor: 'SortDesc'};
 var _user$project$Model$SortAsc = {ctor: 'SortAsc'};
 var _user$project$Model$SortNone = {ctor: 'SortNone'};
+var _user$project$HtmlHelper$thStyle = {
+	ctor: '::',
+	_0: _elm_lang$html$Html_Attributes$style(
+		{
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: 'border', _1: '1px solid #CCC'},
+			_1: {
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'background', _1: '#F3F3F3'},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'center'},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'font-weight', _1: 'bold'},
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		}),
+	_1: {ctor: '[]'}
+};
+var _user$project$HtmlHelper$tdStyle = {
+	ctor: '::',
+	_0: _elm_lang$html$Html_Attributes$style(
+		{
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: 'border', _1: '1px solid #CCC'},
+			_1: {
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'background', _1: '#FAFAFA'},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'center'},
+					_1: {ctor: '[]'}
+				}
+			}
+		}),
+	_1: {ctor: '[]'}
+};
+var _user$project$HtmlHelper$tableStyle = {
+	ctor: '::',
+	_0: _elm_lang$html$Html_Attributes$style(
+		{
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: 'width', _1: '100%'},
+			_1: {
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'color', _1: '#333'},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'font-family', _1: 'Helvetica, Arial, sans-serif'},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'border-collapse', _1: 'collapse'},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'border-spacing', _1: '0'},
+							_1: {ctor: '[]'}
+						}
+					}
+				}
+			}
+		}),
+	_1: {ctor: '[]'}
+};
 var _user$project$HtmlHelper$cellStyle = {
 	ctor: '::',
 	_0: _elm_lang$html$Html_Attributes$style(
@@ -13754,11 +13820,7 @@ var _user$project$Grid$simpleTheadHelp = function (_p1) {
 	}();
 	return A2(
 		_elm_lang$html$Html$th,
-		{
-			ctor: '::',
-			_0: _p2._2,
-			_1: {ctor: '[]'}
-		},
+		{ctor: '::', _0: _p2._2, _1: _user$project$HtmlHelper$thStyle},
 		content);
 };
 var _user$project$Grid$simpleThead = function (headers) {
@@ -13767,23 +13829,7 @@ var _user$project$Grid$simpleThead = function (headers) {
 		{ctor: '[]'},
 		A2(_elm_lang$core$List$map, _user$project$Grid$simpleTheadHelp, headers));
 };
-var _user$project$Grid$defaultCustomizations = {
-	tableAttrs: {
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$style(
-			{
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'width', _1: '100%'},
-				_1: {ctor: '[]'}
-			}),
-		_1: {ctor: '[]'}
-	},
-	caption: _elm_lang$core$Maybe$Nothing,
-	thead: _user$project$Grid$simpleThead,
-	tfoot: _elm_lang$core$Maybe$Nothing,
-	tbodyAttrs: {ctor: '[]'},
-	rowAttrs: _user$project$Grid$simpleRowAttrs
-};
+var _user$project$Grid$defaultCustomizations = {tableAttrs: _user$project$HtmlHelper$tableStyle, caption: _elm_lang$core$Maybe$Nothing, thead: _user$project$Grid$simpleThead, tfoot: _elm_lang$core$Maybe$Nothing, tbodyAttrs: _user$project$HtmlHelper$tdStyle, rowAttrs: _user$project$Grid$simpleRowAttrs};
 var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 	{
 		toId: function (_) {
