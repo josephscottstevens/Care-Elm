@@ -29,6 +29,7 @@ decodeEmployent =
         |> required "Employers" (list decodeEmployer)
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
+        |> hardcoded 0
 
 
 request : Http.Request Model

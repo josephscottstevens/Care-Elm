@@ -1,4 +1,4 @@
-module HtmlHelper exposing (..)
+module Styles exposing (..)
 
 import Html exposing (Html, text, div, input, program, button, select, option)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value)

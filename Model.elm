@@ -49,6 +49,7 @@ type alias Model =
     , employers : List Employer
     , tableState : Table.State
     , query : String
+    , currentPage : Int
     }
 
 
@@ -59,4 +60,5 @@ emptyModel =
     , employers = []
     , tableState = Table.initialSort "dob"
     , query = ""
+    , currentPage = 0
     }

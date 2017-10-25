@@ -1,8 +1,8 @@
-module Grid exposing (customGrid)
+module Grid exposing (customGrid, pagingControl)
 
 import Model exposing (..)
-import HtmlHelper exposing (..)
-import Html exposing (Html, text, div, program, button, input)
+import Styles exposing (..)
+import Html exposing (Html, text, div, program, button, input, span)
 import Html.Attributes exposing (style, class, type_)
 import Html.Events exposing (onClick)
 import Table
@@ -10,7 +10,7 @@ import Table
 
 customGrid : { a | employers : List Employer, tableState : Table.State } -> Html Msg
 customGrid model =
-    Table.view config model.tableState (List.take 14 model.employers)
+    Table.view config model.tableState (List.take 12 model.employers)
 
 
 config : Table.Config Employer Msg
@@ -19,8 +19,8 @@ config =
         { toId = .city
         , toMsg = SetTableState
         , columns =
-            [ checkColumn "Reviewed"
-            , Table.stringColumn "Date of birth" .dob
+            [ -- checkColumn "Reviewed"
+              Table.stringColumn "Date of birth" .dob
             , Table.stringColumn "Address Line 1" (\t -> t.addressLine1)
             , Table.stringColumn "Address Line 2" .addressLine2
             , Table.stringColumn "City" .city
@@ -109,3 +109,16 @@ checkColumnCell emp =
     Table.HtmlDetails []
         [ input [ type_ "checkbox" ] []
         ]
+
+
+pagingControl : Model -> Html Msg
+pagingControl model =
+    let
+        len =
+            (List.length model.employers) // 12
+
+        rng =
+            List.range 1 (len + 1)
+                |> List.map (\t -> text (toString t ++ " "))
+    in
+        span [] rng

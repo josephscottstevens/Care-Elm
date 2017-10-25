@@ -9599,9 +9599,9 @@ var _user$project$Model$Employer = F9(
 	function (a, b, c, d, e, f, g, h, i) {
 		return {rowId: a, dob: b, email: c, addressLine1: d, addressLine2: e, city: f, state: g, zipCode: h, phone: i};
 	});
-var _user$project$Model$Model = F5(
-	function (a, b, c, d, e) {
-		return {state: a, patientId: b, employers: c, tableState: d, query: e};
+var _user$project$Model$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {state: a, patientId: b, employers: c, tableState: d, query: e, currentPage: f};
 	});
 var _user$project$Model$Reset = {ctor: 'Reset'};
 var _user$project$Model$SetTableState = function (a) {
@@ -9644,13 +9644,14 @@ var _user$project$Model$emptyModel = {
 	patientId: 0,
 	employers: {ctor: '[]'},
 	tableState: _evancz$elm_sortable_table$Table$initialSort('dob'),
-	query: ''
+	query: '',
+	currentPage: 0
 };
 var _user$project$Model$SortDesc = {ctor: 'SortDesc'};
 var _user$project$Model$SortAsc = {ctor: 'SortAsc'};
 var _user$project$Model$SortNone = {ctor: 'SortNone'};
 
-var _user$project$HtmlHelper$thStyle = {
+var _user$project$Styles$thStyle = {
 	ctor: '::',
 	_0: _elm_lang$html$Html_Attributes$style(
 		{
@@ -9676,7 +9677,7 @@ var _user$project$HtmlHelper$thStyle = {
 		}),
 	_1: {ctor: '[]'}
 };
-var _user$project$HtmlHelper$tdStyle = {
+var _user$project$Styles$tdStyle = {
 	ctor: '::',
 	_0: _elm_lang$html$Html_Attributes$style(
 		{
@@ -9694,7 +9695,7 @@ var _user$project$HtmlHelper$tdStyle = {
 		}),
 	_1: {ctor: '[]'}
 };
-var _user$project$HtmlHelper$tableStyle = {
+var _user$project$Styles$tableStyle = {
 	ctor: '::',
 	_0: _elm_lang$html$Html_Attributes$style(
 		{
@@ -9720,7 +9721,7 @@ var _user$project$HtmlHelper$tableStyle = {
 		}),
 	_1: {ctor: '[]'}
 };
-var _user$project$HtmlHelper$cellStyle = {
+var _user$project$Styles$cellStyle = {
 	ctor: '::',
 	_0: _elm_lang$html$Html_Attributes$style(
 		{
@@ -9730,7 +9731,7 @@ var _user$project$HtmlHelper$cellStyle = {
 		}),
 	_1: {ctor: '[]'}
 };
-var _user$project$HtmlHelper$rowStyle = _elm_lang$html$Html_Attributes$style(
+var _user$project$Styles$rowStyle = _elm_lang$html$Html_Attributes$style(
 	{
 		ctor: '::',
 		_0: {ctor: '_Tuple2', _0: 'display', _1: 'grid'},
@@ -9756,7 +9757,7 @@ var _user$project$HtmlHelper$rowStyle = _elm_lang$html$Html_Attributes$style(
 			}
 		}
 	});
-var _user$project$HtmlHelper$gridStyle = _elm_lang$html$Html_Attributes$style(
+var _user$project$Styles$gridStyle = _elm_lang$html$Html_Attributes$style(
 	{
 		ctor: '::',
 		_0: {ctor: '_Tuple2', _0: 'display', _1: 'grid'},
@@ -9778,13 +9779,30 @@ var _user$project$HtmlHelper$gridStyle = _elm_lang$html$Html_Attributes$style(
 			}
 		}
 	});
-var _user$project$HtmlHelper$controlStyle = _elm_lang$html$Html_Attributes$style(
+var _user$project$Styles$controlStyle = _elm_lang$html$Html_Attributes$style(
 	{
 		ctor: '::',
 		_0: {ctor: '_Tuple2', _0: 'margin', _1: '5px'},
 		_1: {ctor: '[]'}
 	});
 
+var _user$project$Grid$pagingControl = function (model) {
+	var len = (_elm_lang$core$List$length(model.employers) / 12) | 0;
+	var rng = A2(
+		_elm_lang$core$List$map,
+		function (t) {
+			return _elm_lang$html$Html$text(
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					_elm_lang$core$Basics$toString(t),
+					' '));
+		},
+		A2(_elm_lang$core$List$range, 1, len + 1));
+	return A2(
+		_elm_lang$html$Html$span,
+		{ctor: '[]'},
+		rng);
+};
 var _user$project$Grid$checkColumnCell = function (emp) {
 	return A2(
 		_evancz$elm_sortable_table$Table$HtmlDetails,
@@ -9819,7 +9837,7 @@ var _user$project$Grid$editColumnCell = function (emp) {
 					_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
 					_1: {
 						ctor: '::',
-						_0: _user$project$HtmlHelper$controlStyle,
+						_0: _user$project$Styles$controlStyle,
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$html$Html_Events$onClick(
@@ -9895,7 +9913,7 @@ var _user$project$Grid$simpleTheadHelp = function (_p1) {
 	}();
 	return A2(
 		_elm_lang$html$Html$th,
-		{ctor: '::', _0: _p2._2, _1: _user$project$HtmlHelper$thStyle},
+		{ctor: '::', _0: _p2._2, _1: _user$project$Styles$thStyle},
 		content);
 };
 var _user$project$Grid$simpleThead = function (headers) {
@@ -9905,7 +9923,7 @@ var _user$project$Grid$simpleThead = function (headers) {
 		A2(_elm_lang$core$List$map, _user$project$Grid$simpleTheadHelp, headers));
 };
 var _user$project$Grid$defaultCustomizations = {
-	tableAttrs: _user$project$HtmlHelper$tableStyle,
+	tableAttrs: _user$project$Styles$tableStyle,
 	caption: _elm_lang$core$Maybe$Nothing,
 	thead: _user$project$Grid$simpleThead,
 	tfoot: _elm_lang$core$Maybe$Nothing,
@@ -9920,68 +9938,64 @@ var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 		toMsg: _user$project$Model$SetTableState,
 		columns: {
 			ctor: '::',
-			_0: _user$project$Grid$checkColumn('Reviewed'),
+			_0: A2(
+				_evancz$elm_sortable_table$Table$stringColumn,
+				'Date of birth',
+				function (_) {
+					return _.dob;
+				}),
 			_1: {
 				ctor: '::',
 				_0: A2(
 					_evancz$elm_sortable_table$Table$stringColumn,
-					'Date of birth',
-					function (_) {
-						return _.dob;
+					'Address Line 1',
+					function (t) {
+						return t.addressLine1;
 					}),
 				_1: {
 					ctor: '::',
 					_0: A2(
 						_evancz$elm_sortable_table$Table$stringColumn,
-						'Address Line 1',
-						function (t) {
-							return t.addressLine1;
+						'Address Line 2',
+						function (_) {
+							return _.addressLine2;
 						}),
 					_1: {
 						ctor: '::',
 						_0: A2(
 							_evancz$elm_sortable_table$Table$stringColumn,
-							'Address Line 2',
+							'City',
 							function (_) {
-								return _.addressLine2;
+								return _.city;
 							}),
 						_1: {
 							ctor: '::',
 							_0: A2(
 								_evancz$elm_sortable_table$Table$stringColumn,
-								'City',
+								'State',
 								function (_) {
-									return _.city;
+									return _.state;
 								}),
 							_1: {
 								ctor: '::',
 								_0: A2(
 									_evancz$elm_sortable_table$Table$stringColumn,
-									'State',
+									'Zip Code',
 									function (_) {
-										return _.state;
+										return _.zipCode;
 									}),
 								_1: {
 									ctor: '::',
 									_0: A2(
 										_evancz$elm_sortable_table$Table$stringColumn,
-										'Zip Code',
+										'Phone',
 										function (_) {
-											return _.zipCode;
+											return _.phone;
 										}),
 									_1: {
 										ctor: '::',
-										_0: A2(
-											_evancz$elm_sortable_table$Table$stringColumn,
-											'Phone',
-											function (_) {
-												return _.phone;
-											}),
-										_1: {
-											ctor: '::',
-											_0: _user$project$Grid$editColumn,
-											_1: {ctor: '[]'}
-										}
+										_0: _user$project$Grid$editColumn,
+										_1: {ctor: '[]'}
 									}
 								}
 							}
@@ -9997,7 +10011,7 @@ var _user$project$Grid$customGrid = function (model) {
 		_evancz$elm_sortable_table$Table$view,
 		_user$project$Grid$config,
 		model.tableState,
-		A2(_elm_lang$core$List$take, 14, model.employers));
+		A2(_elm_lang$core$List$take, 12, model.employers));
 };
 
 var _user$project$Load$updateEmployers = F2(
@@ -10058,22 +10072,25 @@ var _user$project$Load$decodeEmployer = A3(
 									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Employer))))))))));
 var _user$project$Load$decodeEmployent = A2(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
-	'',
+	0,
 	A2(
 		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
-		_evancz$elm_sortable_table$Table$initialSort('dob'),
-		A3(
-			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-			'Employers',
-			_elm_lang$core$Json_Decode$list(_user$project$Load$decodeEmployer),
+		'',
+		A2(
+			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
+			_evancz$elm_sortable_table$Table$initialSort('dob'),
 			A3(
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-				'PatientId',
-				_elm_lang$core$Json_Decode$int,
-				A2(
-					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
-					_user$project$Model$Initial,
-					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Model))))));
+				'Employers',
+				_elm_lang$core$Json_Decode$list(_user$project$Load$decodeEmployer),
+				A3(
+					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+					'PatientId',
+					_elm_lang$core$Json_Decode$int,
+					A2(
+						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
+						_user$project$Model$Initial,
+						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Model)))))));
 var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/People/GetEmploymentInfo?patientId=6676', _user$project$Load$decodeEmployent);
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
@@ -10102,7 +10119,7 @@ var _user$project$Main$view = function (model) {
 							_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
 							_1: {
 								ctor: '::',
-								_0: _user$project$HtmlHelper$controlStyle,
+								_0: _user$project$Styles$controlStyle,
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Reset),
@@ -10118,7 +10135,34 @@ var _user$project$Main$view = function (model) {
 					_1: {
 						ctor: '::',
 						_0: _user$project$Grid$customGrid(model),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											'Total items: ',
+											_elm_lang$core$Basics$toString(
+												_elm_lang$core$List$length(model.employers)))),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _user$project$Grid$pagingControl(model),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						}
 					}
 				});
 		case 'Edit':
@@ -10141,7 +10185,7 @@ var _user$project$Main$view = function (model) {
 									_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
 									_1: {
 										ctor: '::',
-										_0: _user$project$HtmlHelper$controlStyle,
+										_0: _user$project$Styles$controlStyle,
 										_1: {
 											ctor: '::',
 											_0: _elm_lang$html$Html_Attributes$id('testDate'),
@@ -10168,7 +10212,7 @@ var _user$project$Main$view = function (model) {
 									_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
 									_1: {
 										ctor: '::',
-										_0: _user$project$HtmlHelper$controlStyle,
+										_0: _user$project$Styles$controlStyle,
 										_1: {
 											ctor: '::',
 											_0: _elm_lang$html$Html_Events$onInput(
@@ -10195,7 +10239,7 @@ var _user$project$Main$view = function (model) {
 										_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
 										_1: {
 											ctor: '::',
-											_0: _user$project$HtmlHelper$controlStyle,
+											_0: _user$project$Styles$controlStyle,
 											_1: {
 												ctor: '::',
 												_0: _elm_lang$html$Html_Events$onInput(
@@ -10219,7 +10263,7 @@ var _user$project$Main$view = function (model) {
 										_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
 										_1: {
 											ctor: '::',
-											_0: _user$project$HtmlHelper$controlStyle,
+											_0: _user$project$Styles$controlStyle,
 											_1: {
 												ctor: '::',
 												_0: _elm_lang$html$Html_Events$onClick(
@@ -10242,7 +10286,7 @@ var _user$project$Main$view = function (model) {
 											_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
 											_1: {
 												ctor: '::',
-												_0: _user$project$HtmlHelper$controlStyle,
+												_0: _user$project$Styles$controlStyle,
 												_1: {
 													ctor: '::',
 													_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditCancel),

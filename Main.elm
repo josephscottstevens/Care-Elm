@@ -2,8 +2,8 @@ port module Main exposing (..)
 
 import Load exposing (..)
 import Model exposing (..)
-import HtmlHelper exposing (..)
-import Html exposing (Html, text, div, input, program, button, select, option)
+import Styles exposing (..)
+import Html exposing (Html, text, div, input, program, button, select, option, span)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Grid exposing (..)
@@ -88,6 +88,8 @@ view model =
             div []
                 [ button [ class "btn btn-default", controlStyle, onClick Reset ] [ text "reset" ]
                 , customGrid model
+                , div [] [ text ("Total items: " ++ toString (List.length model.employers)) ]
+                , div [] [ pagingControl model ]
                 ]
 
         Edit emp ->
