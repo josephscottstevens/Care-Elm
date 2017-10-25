@@ -4,7 +4,6 @@ import Model exposing (..)
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
-import Table
 
 
 decodeEmployer : Decoder Employer

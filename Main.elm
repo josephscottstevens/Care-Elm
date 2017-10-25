@@ -130,20 +130,8 @@ editColumn =
         }
 
 
+editButton : Employer -> Table.HtmlDetails Msg
 editButton emp =
     Table.HtmlDetails []
         [ button [ class "btn btn-default", controlStyle, onClick (EditStart emp) ] [ text "Edit" ]
         ]
-
-
-
--- { rowId : Int
---     , dob : String
---     , email : String
---     , addressLine1 : String
---     , addressLine2 : String
---     , city : String
---     , state : String
---     , zipCode : String
---     , phone : String
---     }
