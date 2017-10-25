@@ -10,7 +10,7 @@ import Table
 
 customGrid : { a | employers : List Employer, tableState : Table.State } -> Html Msg
 customGrid model =
-    Table.view config model.tableState (List.take 15 model.employers)
+    Table.view config model.tableState (List.take 14 model.employers)
 
 
 config : Table.Config Employer Msg
