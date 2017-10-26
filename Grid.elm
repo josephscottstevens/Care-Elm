@@ -1,4 +1,4 @@
-module Grid exposing (customGrid, pagingControl)
+module Grid exposing (customGrid, config)
 
 import Model exposing (..)
 import Styles exposing (..)
@@ -21,7 +21,7 @@ config =
         , columns =
             [ -- checkColumn "Reviewed"
               Table.stringColumn "Date of birth" .dob
-            , Table.stringColumn "Address Line 1" (\t -> t.addressLine1)
+            , Table.stringColumn "Address Line 1" .addressLine1
             , Table.stringColumn "Address Line 2" .addressLine2
             , Table.stringColumn "City" .city
             , Table.stringColumn "State" .state
@@ -109,16 +109,3 @@ checkColumnCell emp =
     Table.HtmlDetails []
         [ input [ type_ "checkbox" ] []
         ]
-
-
-pagingControl : Model -> Html Msg
-pagingControl model =
-    let
-        len =
-            (List.length model.employers) // 12
-
-        rng =
-            List.range 1 (len + 1)
-                |> List.map (\t -> text (toString t ++ " "))
-    in
-        span [] rng
