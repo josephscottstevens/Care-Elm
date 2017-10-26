@@ -106,7 +106,7 @@ view model =
             Grid ->
                 div []
                     [ button [ class "btn btn-default", controlStyle, onClick Reset ] [ text "reset" ]
-                    , input [ placeholder "Search by Address", onInput SetQuery ] []
+                    , input [ placeholder "Search by Address", onInput SetQuery, value model.query ] []
                     , Table.view config model.tableState (filteredEmployers |> List.take 12)
                     , div [] [ text ("Total items: " ++ employersCount) ]
                     , span [] rng
