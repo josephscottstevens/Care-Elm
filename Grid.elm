@@ -1,9 +1,8 @@
 module Grid exposing (customGrid, config)
 
 import Model exposing (..)
-import Styles exposing (..)
 import Html exposing (Html, text, div, program, button, input, span)
-import Html.Attributes exposing (style, class, type_)
+import Html.Attributes exposing (style, class, type_, id)
 import Html.Events exposing (onClick)
 import Table
 
@@ -35,7 +34,7 @@ config =
 
 defaultCustomizations : Table.Customizations data msg
 defaultCustomizations =
-    { tableAttrs = tableStyle
+    { tableAttrs = [ id "employersTable" ]
     , caption = Nothing
     , thead = simpleThead
     , tfoot = Nothing
@@ -66,7 +65,7 @@ simpleTheadHelp ( name, status, onClick ) =
                         div [ class "glyphicon glyphicon-menu-down" ] []
                     ]
     in
-        Html.th (onClick :: thStyle) content
+        Html.th [ onClick ] content
 
 
 simpleThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
@@ -91,7 +90,7 @@ editColumn =
 editColumnCell : Employer -> Table.HtmlDetails Msg
 editColumnCell emp =
     Table.HtmlDetails []
-        [ button [ class "btn btn-default", controlStyle, onClick (EditStart emp) ] [ text "Edit" ]
+        [ button [ class "btn btn-default", onClick (EditStart emp) ] [ text "Edit" ]
         ]
 
 

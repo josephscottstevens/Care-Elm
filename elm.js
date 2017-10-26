@@ -9651,86 +9651,6 @@ var _user$project$Model$SortDesc = {ctor: 'SortDesc'};
 var _user$project$Model$SortAsc = {ctor: 'SortAsc'};
 var _user$project$Model$SortNone = {ctor: 'SortNone'};
 
-var _user$project$Styles$thStyle = {
-	ctor: '::',
-	_0: _elm_lang$html$Html_Attributes$style(
-		{
-			ctor: '::',
-			_0: {ctor: '_Tuple2', _0: 'border', _1: '1px solid #CCC'},
-			_1: {
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'background', _1: '#F3F3F3'},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'center'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'font-weight', _1: 'bold'},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'height', _1: '50px'},
-							_1: {ctor: '[]'}
-						}
-					}
-				}
-			}
-		}),
-	_1: {ctor: '[]'}
-};
-var _user$project$Styles$tdStyle = {
-	ctor: '::',
-	_0: _elm_lang$html$Html_Attributes$style(
-		{
-			ctor: '::',
-			_0: {ctor: '_Tuple2', _0: 'border', _1: '1px solid #CCC'},
-			_1: {
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'background', _1: '#FAFAFA'},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'center'},
-					_1: {ctor: '[]'}
-				}
-			}
-		}),
-	_1: {ctor: '[]'}
-};
-var _user$project$Styles$tableStyle = {
-	ctor: '::',
-	_0: _elm_lang$html$Html_Attributes$style(
-		{
-			ctor: '::',
-			_0: {ctor: '_Tuple2', _0: 'width', _1: '100%'},
-			_1: {
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'color', _1: '#333'},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'font-family', _1: 'Helvetica, Arial, sans-serif'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'border-collapse', _1: 'collapse'},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'border-spacing', _1: '0'},
-							_1: {ctor: '[]'}
-						}
-					}
-				}
-			}
-		}),
-	_1: {ctor: '[]'}
-};
-var _user$project$Styles$cellStyle = {
-	ctor: '::',
-	_0: _elm_lang$html$Html_Attributes$style(
-		{
-			ctor: '::',
-			_0: {ctor: '_Tuple2', _0: 'padding', _1: '10px'},
-			_1: {ctor: '[]'}
-		}),
-	_1: {ctor: '[]'}
-};
 var _user$project$Styles$rowStyle = _elm_lang$html$Html_Attributes$style(
 	{
 		ctor: '::',
@@ -9744,15 +9664,7 @@ var _user$project$Styles$rowStyle = _elm_lang$html$Html_Attributes$style(
 				_1: {
 					ctor: '::',
 					_0: {ctor: '_Tuple2', _0: 'grid-row-gap', _1: '1px'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'box-sizing', _1: 'border-box'},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'box-shadow', _1: '0 0 1px grey'},
-							_1: {ctor: '[]'}
-						}
-					}
+					_1: {ctor: '[]'}
 				}
 			}
 		}
@@ -9767,15 +9679,7 @@ var _user$project$Styles$gridStyle = _elm_lang$html$Html_Attributes$style(
 			_1: {
 				ctor: '::',
 				_0: {ctor: '_Tuple2', _0: 'grid-template-rows', _1: 'repeat(-1, auto)'},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'padding', _1: '40px'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'center'},
-						_1: {ctor: '[]'}
-					}
-				}
+				_1: {ctor: '[]'}
 			}
 		}
 	});
@@ -9786,23 +9690,6 @@ var _user$project$Styles$controlStyle = _elm_lang$html$Html_Attributes$style(
 		_1: {ctor: '[]'}
 	});
 
-var _user$project$Grid$pagingControl = function (model) {
-	var len = (_elm_lang$core$List$length(model.employers) / 12) | 0;
-	var rng = A2(
-		_elm_lang$core$List$map,
-		function (t) {
-			return _elm_lang$html$Html$text(
-				A2(
-					_elm_lang$core$Basics_ops['++'],
-					_elm_lang$core$Basics$toString(t),
-					' '));
-		},
-		A2(_elm_lang$core$List$range, 1, len + 1));
-	return A2(
-		_elm_lang$html$Html$span,
-		{ctor: '[]'},
-		rng);
-};
 var _user$project$Grid$checkColumnCell = function (emp) {
 	return A2(
 		_evancz$elm_sortable_table$Table$HtmlDetails,
@@ -9913,7 +9800,11 @@ var _user$project$Grid$simpleTheadHelp = function (_p1) {
 	}();
 	return A2(
 		_elm_lang$html$Html$th,
-		{ctor: '::', _0: _p2._2, _1: _user$project$Styles$thStyle},
+		{
+			ctor: '::',
+			_0: _p2._2,
+			_1: {ctor: '[]'}
+		},
 		content);
 };
 var _user$project$Grid$simpleThead = function (headers) {
@@ -9923,7 +9814,11 @@ var _user$project$Grid$simpleThead = function (headers) {
 		A2(_elm_lang$core$List$map, _user$project$Grid$simpleTheadHelp, headers));
 };
 var _user$project$Grid$defaultCustomizations = {
-	tableAttrs: _user$project$Styles$tableStyle,
+	tableAttrs: {
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$id('employersTable'),
+		_1: {ctor: '[]'}
+	},
 	caption: _elm_lang$core$Maybe$Nothing,
 	thead: _user$project$Grid$simpleThead,
 	tfoot: _elm_lang$core$Maybe$Nothing,
@@ -9949,8 +9844,8 @@ var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 				_0: A2(
 					_evancz$elm_sortable_table$Table$stringColumn,
 					'Address Line 1',
-					function (t) {
-						return t.addressLine1;
+					function (_) {
+						return _.addressLine1;
 					}),
 				_1: {
 					ctor: '::',
@@ -10095,8 +9990,34 @@ var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/People/GetEmploym
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
 var _user$project$Main$view = function (model) {
-	var _p0 = model.state;
-	switch (_p0.ctor) {
+	var lowerQuery = _elm_lang$core$String$toLower(model.query);
+	var filteredEmployers = A2(
+		_elm_lang$core$List$filter,
+		function (_p0) {
+			return A2(
+				_elm_lang$core$String$contains,
+				lowerQuery,
+				_elm_lang$core$String$toLower(
+					function (_) {
+						return _.addressLine1;
+					}(_p0)));
+		},
+		model.employers);
+	var len = (_elm_lang$core$List$length(filteredEmployers) / 12) | 0;
+	var rng = A2(
+		_elm_lang$core$List$map,
+		function (t) {
+			return _elm_lang$html$Html$text(
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					_elm_lang$core$Basics$toString(t),
+					' '));
+		},
+		A2(_elm_lang$core$List$range, 1, len + 1));
+	var employersCount = _elm_lang$core$Basics$toString(
+		_elm_lang$core$List$length(filteredEmployers));
+	var _p1 = model.state;
+	switch (_p1.ctor) {
 		case 'Initial':
 			return A2(
 				_elm_lang$html$Html$div,
@@ -10134,22 +10055,29 @@ var _user$project$Main$view = function (model) {
 						}),
 					_1: {
 						ctor: '::',
-						_0: _user$project$Grid$customGrid(model),
+						_0: A2(
+							_elm_lang$html$Html$input,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$placeholder('Search by Address'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onInput(_user$project$Model$SetQuery),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$value(model.query),
+										_1: {ctor: '[]'}
+									}
+								}
+							},
+							{ctor: '[]'}),
 						_1: {
 							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$div,
-								{ctor: '[]'},
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text(
-										A2(
-											_elm_lang$core$Basics_ops['++'],
-											'Total items: ',
-											_elm_lang$core$Basics$toString(
-												_elm_lang$core$List$length(model.employers)))),
-									_1: {ctor: '[]'}
-								}),
+							_0: A3(
+								_evancz$elm_sortable_table$Table$view,
+								_user$project$Grid$config,
+								model.tableState,
+								A2(_elm_lang$core$List$take, 12, filteredEmployers)),
 							_1: {
 								ctor: '::',
 								_0: A2(
@@ -10157,16 +10085,24 @@ var _user$project$Main$view = function (model) {
 									{ctor: '[]'},
 									{
 										ctor: '::',
-										_0: _user$project$Grid$pagingControl(model),
+										_0: _elm_lang$html$Html$text(
+											A2(_elm_lang$core$Basics_ops['++'], 'Total items: ', employersCount)),
 										_1: {ctor: '[]'}
 									}),
-								_1: {ctor: '[]'}
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$span,
+										{ctor: '[]'},
+										rng),
+									_1: {ctor: '[]'}
+								}
 							}
 						}
 					}
 				});
 		case 'Edit':
-			var _p1 = _p0._0;
+			var _p2 = _p1._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -10191,7 +10127,7 @@ var _user$project$Main$view = function (model) {
 											_0: _elm_lang$html$Html_Attributes$id('testDate'),
 											_1: {
 												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$value(_p1.dob),
+												_0: _elm_lang$html$Html_Attributes$value(_p2.dob),
 												_1: {ctor: '[]'}
 											}
 										}
@@ -10216,10 +10152,10 @@ var _user$project$Main$view = function (model) {
 										_1: {
 											ctor: '::',
 											_0: _elm_lang$html$Html_Events$onInput(
-												_user$project$Model$UpdateCity(_p1)),
+												_user$project$Model$UpdateCity(_p2)),
 											_1: {
 												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$value(_p1.city),
+												_0: _elm_lang$html$Html_Attributes$value(_p2.city),
 												_1: {ctor: '[]'}
 											}
 										}
@@ -10243,10 +10179,10 @@ var _user$project$Main$view = function (model) {
 											_1: {
 												ctor: '::',
 												_0: _elm_lang$html$Html_Events$onInput(
-													_user$project$Model$UpdateState(_p1)),
+													_user$project$Model$UpdateState(_p2)),
 												_1: {
 													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$value(_p1.state),
+													_0: _elm_lang$html$Html_Attributes$value(_p2.state),
 													_1: {ctor: '[]'}
 												}
 											}
@@ -10267,7 +10203,7 @@ var _user$project$Main$view = function (model) {
 											_1: {
 												ctor: '::',
 												_0: _elm_lang$html$Html_Events$onClick(
-													_user$project$Model$EditSave(_p1)),
+													_user$project$Model$EditSave(_p2)),
 												_1: {ctor: '[]'}
 											}
 										}
@@ -10312,7 +10248,7 @@ var _user$project$Main$view = function (model) {
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(_p0._0)),
+						_elm_lang$core$Basics$toString(_p1._0)),
 					_1: {ctor: '[]'}
 				});
 	}
@@ -10325,18 +10261,18 @@ var _user$project$Main$sendTestDate = _elm_lang$core$Native_Platform.outgoingPor
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p2 = msg;
-		switch (_p2.ctor) {
+		var _p3 = msg;
+		switch (_p3.ctor) {
 			case 'EditStart':
-				var _p3 = _p2._0;
+				var _p4 = _p3._0;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							state: _user$project$Model$Edit(_p3)
+							state: _user$project$Model$Edit(_p4)
 						}),
-					_1: _user$project$Main$sendTestDate(_p3.dob)
+					_1: _user$project$Main$sendTestDate(_p4.dob)
 				};
 			case 'EditSave':
 				return {
@@ -10345,7 +10281,7 @@ var _user$project$Main$update = F2(
 						model,
 						{
 							state: _user$project$Model$Grid,
-							employers: A2(_user$project$Load$updateEmployers, model.employers, _p2._0)
+							employers: A2(_user$project$Load$updateEmployers, model.employers, _p3._0)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -10358,15 +10294,15 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Load':
-				if (_p2._0.ctor === 'Ok') {
-					var _p4 = _p2._0._0;
+				if (_p3._0.ctor === 'Ok') {
+					var _p5 = _p3._0._0;
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
-							_p4,
+							_p5,
 							{
 								state: _user$project$Model$Grid,
-								employers: _user$project$Load$newEmployers(_p4.employers)
+								employers: _user$project$Load$newEmployers(_p5.employers)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
@@ -10376,7 +10312,7 @@ var _user$project$Main$update = F2(
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								state: _user$project$Model$Error(_p2._0._0)
+								state: _user$project$Model$Error(_p3._0._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
@@ -10389,8 +10325,8 @@ var _user$project$Main$update = F2(
 						{
 							state: _user$project$Model$Edit(
 								_elm_lang$core$Native_Utils.update(
-									_p2._0,
-									{state: _p2._1}))
+									_p3._0,
+									{state: _p3._1}))
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -10402,14 +10338,14 @@ var _user$project$Main$update = F2(
 						{
 							state: _user$project$Model$Edit(
 								_elm_lang$core$Native_Utils.update(
-									_p2._0,
-									{city: _p2._1}))
+									_p3._0,
+									{city: _p3._1}))
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UpdateStartDate':
-				var _p5 = model.state;
-				if (_p5.ctor === 'Edit') {
+				var _p6 = model.state;
+				if (_p6.ctor === 'Edit') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -10417,8 +10353,8 @@ var _user$project$Main$update = F2(
 							{
 								state: _user$project$Model$Edit(
 									_elm_lang$core$Native_Utils.update(
-										_p5._0,
-										{dob: _p2._0}))
+										_p6._0,
+										{dob: _p3._0}))
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
@@ -10430,7 +10366,7 @@ var _user$project$Main$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{query: _p2._0}),
+						{query: _p3._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'SetTableState':
@@ -10438,7 +10374,7 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{tableState: _p2._0}),
+						{tableState: _p3._0}),
 					{ctor: '[]'});
 			default:
 				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};

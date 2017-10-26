@@ -2,7 +2,6 @@ port module Main exposing (..)
 
 import Load exposing (..)
 import Model exposing (..)
-import Styles exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option, span)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -105,8 +104,8 @@ view model =
 
             Grid ->
                 div []
-                    [ button [ class "btn btn-default", controlStyle, onClick Reset ] [ text "reset" ]
-                    , input [ placeholder "Search by Address", onInput SetQuery, value model.query ] []
+                    [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
+                    , input [ class "form-control", placeholder "Search by Address", onInput SetQuery, value model.query ] []
                     , Table.view config model.tableState (filteredEmployers |> List.take 12)
                     , div [] [ text ("Total items: " ++ employersCount) ]
                     , span [] rng
@@ -114,11 +113,11 @@ view model =
 
             Edit emp ->
                 div []
-                    [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", controlStyle, id "testDate", value emp.dob ] []
-                    , input [ placeholder "City", class "e-textbox", controlStyle, onInput (UpdateCity emp), value emp.city ] []
-                    , input [ placeholder "State", class "e-textbox", controlStyle, onInput (UpdateState emp), value emp.state ] []
-                    , button [ class "btn btn-default", controlStyle, onClick (EditSave emp) ] [ text "save" ]
-                    , button [ class "btn btn-default", controlStyle, onClick EditCancel ] [ text "cancel" ]
+                    [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", id "testDate", value emp.dob ] []
+                    , input [ placeholder "City", class "e-textbox", onInput (UpdateCity emp), value emp.city ] []
+                    , input [ placeholder "State", class "e-textbox", onInput (UpdateState emp), value emp.state ] []
+                    , button [ class "btn btn-default", onClick (EditSave emp) ] [ text "save" ]
+                    , button [ class "btn btn-default", onClick EditCancel ] [ text "cancel" ]
                     ]
 
             Error err ->
