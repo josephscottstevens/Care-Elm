@@ -4,27 +4,14 @@ import Http
 import Table
 
 
-type alias Employer =
-    { rowId : Int
-    , dob : String
-    , email : String
-    , addressLine1 : String
-    , addressLine2 : String
-    , city : String
-    , state : String
-    , zipCode : String
-    , phone : String
-    }
-
-
 type Msg
     = Load (Result Http.Error Model)
-    | EditStart Employer
-    | EditSave Employer
+    | EditStart Enrollment
+      -- | EditSave Enrollment
     | EditCancel
-    | UpdateStartDate String
-    | UpdateCity Employer String
-    | UpdateState Employer String
+      -- | UpdateStartDate String
+      -- | UpdateCity Enrollment String
+      -- | UpdateState Enrollment String
     | SetQuery String
     | SetTableState Table.State
     | Reset
@@ -33,7 +20,7 @@ type Msg
 type ModelState
     = Initial
     | Grid
-    | Edit Employer
+    | Edit Enrollment
     | Error Http.Error
 
 
@@ -43,10 +30,60 @@ type SortMode
     | SortDesc
 
 
+type alias Enrollment =
+    { iD : Int
+    , facilityId : Int
+    , providerId : Maybe Int
+    , firstName : Maybe String
+    , middleName : Maybe String
+    , lastName : Maybe String
+    , sexTypeId : Maybe Int
+    , dob : String
+    , sSN : Maybe String
+    , mRN : Maybe String
+    , pAN : Maybe String
+    , email : Maybe String
+    , primaryPhone : String
+    , primaryPhoneNumberTypeId : Maybe Int
+    , secondaryPhone : Maybe String
+    , secondaryPhoneNumberTypeId : Maybe Int
+    , address : Maybe String
+    , address2 : Maybe String
+    , address3 : Maybe String
+    , city : Maybe String
+    , stateId : Maybe String
+    , zip : Maybe String
+    , proxyFirstName : Maybe String
+    , proxyMiddleName : Maybe String
+    , proxyLastName : Maybe String
+    , proxyRelationshipTypeId : Maybe Int
+    , proxyPhone : Maybe String
+    , proxyPhoneNumberTypeId : Maybe Int
+    , facility : String
+    , provider : String
+    , name : String
+    , primaryInsurance : Maybe String
+    , secondaryInsurance : Maybe String
+    , status : String
+    , assignedTo : String
+    , proxyName : String
+    , lastContactAttempt : Maybe String
+    , contactAttempts : Maybe String
+    , comments : Maybe String
+    , existingComments : Maybe String
+    , importDate : String
+    , consentObtained : Maybe String
+    , elligibleICD10 : Int
+    , elligibleICD9 : Int
+    , disableCall : Bool
+    , batchId : Int
+    , canRegister : Bool
+    }
+
+
 type alias Model =
     { state : ModelState
-    , patientId : Int
-    , employers : List Employer
+    , enrollment : List Enrollment
     , tableState : Table.State
     , query : String
     , currentPage : Int
@@ -56,8 +93,7 @@ type alias Model =
 emptyModel : Model
 emptyModel =
     { state = Initial
-    , patientId = 0
-    , employers = []
+    , enrollment = []
     , tableState = Table.initialSort "dob"
     , query = ""
     , currentPage = 0

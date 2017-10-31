@@ -9595,13 +9595,118 @@ var _evancz$elm_sortable_table$Table$increasingBy = function (toComparable) {
 var _evancz$elm_sortable_table$Table$None = {ctor: 'None'};
 var _evancz$elm_sortable_table$Table$unsortable = _evancz$elm_sortable_table$Table$None;
 
-var _user$project$Model$Employer = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {rowId: a, dob: b, email: c, addressLine1: d, addressLine2: e, city: f, state: g, zipCode: h, phone: i};
-	});
-var _user$project$Model$Model = F6(
-	function (a, b, c, d, e, f) {
-		return {state: a, patientId: b, employers: c, tableState: d, query: e, currentPage: f};
+var _user$project$Model$Enrollment = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return function (k) {
+											return function (l) {
+												return function (m) {
+													return function (n) {
+														return function (o) {
+															return function (p) {
+																return function (q) {
+																	return function (r) {
+																		return function (s) {
+																			return function (t) {
+																				return function (u) {
+																					return function (v) {
+																						return function (w) {
+																							return function (x) {
+																								return function (y) {
+																									return function (z) {
+																										return function (_1) {
+																											return function (_2) {
+																												return function (_3) {
+																													return function (_4) {
+																														return function (_5) {
+																															return function (_6) {
+																																return function (_7) {
+																																	return function (_8) {
+																																		return function (_9) {
+																																			return function (_10) {
+																																				return function (_11) {
+																																					return function (_12) {
+																																						return function (_13) {
+																																							return function (_14) {
+																																								return function (_15) {
+																																									return function (_16) {
+																																										return function (_17) {
+																																											return function (_18) {
+																																												return function (_19) {
+																																													return function (_20) {
+																																														return function (_21) {
+																																															return function (_22) {
+																																																return function (_23) {
+																																																	return function (_24) {
+																																																		return function (_25) {
+																																																			return function (_26) {
+																																																				return function (_27) {
+																																																					return function (_28) {
+																																																						return {iD: a, facilityId: b, providerId: c, firstName: d, middleName: e, lastName: f, sexTypeId: g, dob: h, sSN: i, mRN: j, pAN: k, email: l, primaryPhone: m, primaryPhoneNumberTypeId: n, secondaryPhone: o, secondaryPhoneNumberTypeId: p, address: q, address2: r, address3: s, city: t, stateId: u, zip: v, proxyFirstName: w, proxyMiddleName: x, proxyLastName: y, proxyRelationshipTypeId: z, proxyPhone: _1, proxyPhoneNumberTypeId: _2, facility: _3, provider: _4, name: _5, primaryInsurance: _6, secondaryInsurance: _7, status: _8, assignedTo: _9, proxyName: _10, lastContactAttempt: _11, contactAttempts: _12, comments: _13, existingComments: _14, importDate: _15, consentObtained: _16, elligibleICD10: _17, elligibleICD9: _18, disableCall: _19, batchId: _20, canRegister: _21, facilities: _22, providers: _23, sexTypes: _24, relationshipTypes: _25, states: _26, phoneNumberTypes: _27, selectedICDCodes: _28};
+																																																					};
+																																																				};
+																																																			};
+																																																		};
+																																																	};
+																																																};
+																																															};
+																																														};
+																																													};
+																																												};
+																																											};
+																																										};
+																																									};
+																																								};
+																																							};
+																																						};
+																																					};
+																																				};
+																																			};
+																																		};
+																																	};
+																																};
+																															};
+																														};
+																													};
+																												};
+																											};
+																										};
+																									};
+																								};
+																							};
+																						};
+																					};
+																				};
+																			};
+																		};
+																	};
+																};
+															};
+														};
+													};
+												};
+											};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var _user$project$Model$Model = F5(
+	function (a, b, c, d, e) {
+		return {state: a, enrollment: b, tableState: c, query: d, currentPage: e};
 	});
 var _user$project$Model$Reset = {ctor: 'Reset'};
 var _user$project$Model$SetTableState = function (a) {
@@ -9610,21 +9715,7 @@ var _user$project$Model$SetTableState = function (a) {
 var _user$project$Model$SetQuery = function (a) {
 	return {ctor: 'SetQuery', _0: a};
 };
-var _user$project$Model$UpdateState = F2(
-	function (a, b) {
-		return {ctor: 'UpdateState', _0: a, _1: b};
-	});
-var _user$project$Model$UpdateCity = F2(
-	function (a, b) {
-		return {ctor: 'UpdateCity', _0: a, _1: b};
-	});
-var _user$project$Model$UpdateStartDate = function (a) {
-	return {ctor: 'UpdateStartDate', _0: a};
-};
 var _user$project$Model$EditCancel = {ctor: 'EditCancel'};
-var _user$project$Model$EditSave = function (a) {
-	return {ctor: 'EditSave', _0: a};
-};
 var _user$project$Model$EditStart = function (a) {
 	return {ctor: 'EditStart', _0: a};
 };
@@ -9641,8 +9732,7 @@ var _user$project$Model$Grid = {ctor: 'Grid'};
 var _user$project$Model$Initial = {ctor: 'Initial'};
 var _user$project$Model$emptyModel = {
 	state: _user$project$Model$Initial,
-	patientId: 0,
-	employers: {ctor: '[]'},
+	enrollment: {ctor: '[]'},
 	tableState: _evancz$elm_sortable_table$Table$initialSort('dob'),
 	query: '',
 	currentPage: 0
@@ -9650,45 +9740,6 @@ var _user$project$Model$emptyModel = {
 var _user$project$Model$SortDesc = {ctor: 'SortDesc'};
 var _user$project$Model$SortAsc = {ctor: 'SortAsc'};
 var _user$project$Model$SortNone = {ctor: 'SortNone'};
-
-var _user$project$Styles$rowStyle = _elm_lang$html$Html_Attributes$style(
-	{
-		ctor: '::',
-		_0: {ctor: '_Tuple2', _0: 'display', _1: 'grid'},
-		_1: {
-			ctor: '::',
-			_0: {ctor: '_Tuple2', _0: 'grid-template-columns', _1: '80px 1fr 1fr 1fr 1fr 1fr 1fr 1fr'},
-			_1: {
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'grid-template-rows', _1: 'auto auto'},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'grid-row-gap', _1: '1px'},
-					_1: {ctor: '[]'}
-				}
-			}
-		}
-	});
-var _user$project$Styles$gridStyle = _elm_lang$html$Html_Attributes$style(
-	{
-		ctor: '::',
-		_0: {ctor: '_Tuple2', _0: 'display', _1: 'grid'},
-		_1: {
-			ctor: '::',
-			_0: {ctor: '_Tuple2', _0: 'grid-template-columns', _1: '1fr'},
-			_1: {
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'grid-template-rows', _1: 'repeat(-1, auto)'},
-				_1: {ctor: '[]'}
-			}
-		}
-	});
-var _user$project$Styles$controlStyle = _elm_lang$html$Html_Attributes$style(
-	{
-		ctor: '::',
-		_0: {ctor: '_Tuple2', _0: 'margin', _1: '5px'},
-		_1: {ctor: '[]'}
-	});
 
 var _user$project$Grid$checkColumnCell = function (emp) {
 	return A2(
@@ -9724,13 +9775,9 @@ var _user$project$Grid$editColumnCell = function (emp) {
 					_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
 					_1: {
 						ctor: '::',
-						_0: _user$project$Styles$controlStyle,
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(
-								_user$project$Model$EditStart(emp)),
-							_1: {ctor: '[]'}
-						}
+						_0: _elm_lang$html$Html_Events$onClick(
+							_user$project$Model$EditStart(emp)),
+						_1: {ctor: '[]'}
 					}
 				},
 				{
@@ -9828,75 +9875,21 @@ var _user$project$Grid$defaultCustomizations = {
 var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 	{
 		toId: function (_) {
-			return _.city;
+			return _.name;
 		},
 		toMsg: _user$project$Model$SetTableState,
 		columns: {
 			ctor: '::',
 			_0: A2(
 				_evancz$elm_sortable_table$Table$stringColumn,
-				'Date of birth',
+				'Facility',
 				function (_) {
-					return _.dob;
+					return _.facility;
 				}),
 			_1: {
 				ctor: '::',
-				_0: A2(
-					_evancz$elm_sortable_table$Table$stringColumn,
-					'Address Line 1',
-					function (_) {
-						return _.addressLine1;
-					}),
-				_1: {
-					ctor: '::',
-					_0: A2(
-						_evancz$elm_sortable_table$Table$stringColumn,
-						'Address Line 2',
-						function (_) {
-							return _.addressLine2;
-						}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_evancz$elm_sortable_table$Table$stringColumn,
-							'City',
-							function (_) {
-								return _.city;
-							}),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_evancz$elm_sortable_table$Table$stringColumn,
-								'State',
-								function (_) {
-									return _.state;
-								}),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_evancz$elm_sortable_table$Table$stringColumn,
-									'Zip Code',
-									function (_) {
-										return _.zipCode;
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_evancz$elm_sortable_table$Table$stringColumn,
-										'Phone',
-										function (_) {
-											return _.phone;
-										}),
-									_1: {
-										ctor: '::',
-										_0: _user$project$Grid$editColumn,
-										_1: {ctor: '[]'}
-									}
-								}
-							}
-						}
-					}
-				}
+				_0: _user$project$Grid$editColumn,
+				_1: {ctor: '[]'}
 			}
 		},
 		customizations: _user$project$Grid$defaultCustomizations
@@ -9910,62 +9903,243 @@ var _user$project$Grid$customGrid = function (model) {
 };
 
 var _user$project$Load$updateEmployers = F2(
-	function (employers, newEmployer) {
+	function (enrollment, newEnrollment) {
 		return A2(
 			_elm_lang$core$List$map,
-			function (oldEmployer) {
-				return _elm_lang$core$Native_Utils.eq(oldEmployer.rowId, newEmployer.rowId) ? newEmployer : oldEmployer;
+			function (t) {
+				return _elm_lang$core$Native_Utils.eq(t.iD, newEnrollment.iD) ? newEnrollment : t;
 			},
-			employers);
+			enrollment);
 	});
-var _user$project$Load$newEmployers = function (employers) {
+var _user$project$Load$newEmployers = function (enrollment) {
 	return A2(
 		_elm_lang$core$List$indexedMap,
 		F2(
 			function (idx, t) {
 				return _elm_lang$core$Native_Utils.update(
 					t,
-					{rowId: idx});
+					{iD: idx});
 			}),
-		employers);
+		enrollment);
 };
-var _user$project$Load$decodeEmployer = A3(
+var _user$project$Load$decodeEnrollment = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-	'Phone',
-	_elm_lang$core$Json_Decode$string,
+	'selectedICDCodes',
+	_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
 	A3(
 		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-		'ZipCode',
-		_elm_lang$core$Json_Decode$string,
+		'phoneNumberTypes',
+		_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
 		A3(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-			'State',
-			_elm_lang$core$Json_Decode$string,
+			'states',
+			_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
 			A3(
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-				'City',
-				_elm_lang$core$Json_Decode$string,
+				'relationshipTypes',
+				_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
 				A3(
 					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-					'AddressLine2',
-					_elm_lang$core$Json_Decode$string,
+					'sexTypes',
+					_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
 					A3(
 						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-						'AddressLine1',
-						_elm_lang$core$Json_Decode$string,
+						'providers',
+						_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
 						A3(
 							_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-							'Email',
-							_elm_lang$core$Json_Decode$string,
+							'facilities',
+							_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
 							A3(
 								_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-								'Dob',
-								_elm_lang$core$Json_Decode$string,
-								A2(
-									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
-									0,
-									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Employer))))))))));
-var _user$project$Load$decodeEmployent = A2(
+								'canRegister',
+								_elm_lang$core$Json_Decode$bool,
+								A3(
+									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+									'batchId',
+									_elm_lang$core$Json_Decode$int,
+									A3(
+										_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+										'disableCall',
+										_elm_lang$core$Json_Decode$bool,
+										A3(
+											_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+											'elligibleICD9',
+											_elm_lang$core$Json_Decode$int,
+											A3(
+												_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+												'elligibleICD10',
+												_elm_lang$core$Json_Decode$int,
+												A3(
+													_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+													'consentObtained',
+													_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+													A3(
+														_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+														'importDate',
+														_elm_lang$core$Json_Decode$string,
+														A3(
+															_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+															'existingComments',
+															_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+															A3(
+																_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																'comments',
+																_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																A3(
+																	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																	'contactAttempts',
+																	_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																	A3(
+																		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																		'lastContactAttempt',
+																		_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																		A3(
+																			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																			'proxyName',
+																			_elm_lang$core$Json_Decode$string,
+																			A3(
+																				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																				'assignedTo',
+																				_elm_lang$core$Json_Decode$string,
+																				A3(
+																					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																					'status',
+																					_elm_lang$core$Json_Decode$string,
+																					A3(
+																						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																						'secondaryInsurance',
+																						_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																						A3(
+																							_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																							'primaryInsurance',
+																							_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																							A3(
+																								_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																								'name',
+																								_elm_lang$core$Json_Decode$string,
+																								A3(
+																									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																									'provider',
+																									_elm_lang$core$Json_Decode$string,
+																									A3(
+																										_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																										'facility',
+																										_elm_lang$core$Json_Decode$string,
+																										A3(
+																											_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																											'proxyPhoneNumberTypeId',
+																											_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																											A3(
+																												_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																												'proxyPhone',
+																												_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																												A3(
+																													_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																													'proxyRelationshipTypeId',
+																													_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																													A3(
+																														_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																														'proxyLastName',
+																														_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																														A3(
+																															_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																															'proxyMiddleName',
+																															_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																															A3(
+																																_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																'proxyFirstName',
+																																_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																A3(
+																																	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																	'zip',
+																																	_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																	A3(
+																																		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																		'stateId',
+																																		_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																		A3(
+																																			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																			'city',
+																																			_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																			A3(
+																																				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																				'address3',
+																																				_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																				A3(
+																																					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																					'address2',
+																																					_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																					A3(
+																																						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																						'address',
+																																						_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																						A3(
+																																							_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																							'secondaryPhoneNumberTypeId',
+																																							_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																							A3(
+																																								_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																								'secondaryPhone',
+																																								_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																								A3(
+																																									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																									'primaryPhoneNumberTypeId',
+																																									_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																									A3(
+																																										_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																										'primaryPhone',
+																																										_elm_lang$core$Json_Decode$string,
+																																										A3(
+																																											_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																											'email',
+																																											_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																											A3(
+																																												_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																												'pAN',
+																																												_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																												A3(
+																																													_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																													'mRN',
+																																													_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																													A3(
+																																														_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																														'sSN',
+																																														_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																														A3(
+																																															_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																															'doB',
+																																															_elm_lang$core$Json_Decode$string,
+																																															A3(
+																																																_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																																'sexTypeId',
+																																																_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																																A3(
+																																																	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																																	'lastName',
+																																																	_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																																	A3(
+																																																		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																																		'middleName',
+																																																		_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																																		A3(
+																																																			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																																			'firstName',
+																																																			_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																																			A3(
+																																																				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																																				'providerId',
+																																																				_elm_lang$core$Json_Decode$int,
+																																																				A3(
+																																																					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																																					'facilityId',
+																																																					_elm_lang$core$Json_Decode$int,
+																																																					A3(
+																																																						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+																																																						'iD',
+																																																						_elm_lang$core$Json_Decode$int,
+																																																						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Enrollment)))))))))))))))))))))))))))))))))))))))))))))))))))))));
+var _user$project$Load$decodeModel = A2(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
 	0,
 	A2(
@@ -9976,17 +10150,13 @@ var _user$project$Load$decodeEmployent = A2(
 			_evancz$elm_sortable_table$Table$initialSort('dob'),
 			A3(
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-				'Employers',
-				_elm_lang$core$Json_Decode$list(_user$project$Load$decodeEmployer),
-				A3(
-					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-					'PatientId',
-					_elm_lang$core$Json_Decode$int,
-					A2(
-						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
-						_user$project$Model$Initial,
-						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Model)))))));
-var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/People/GetEmploymentInfo?patientId=6676', _user$project$Load$decodeEmployent);
+				'result',
+				_elm_lang$core$Json_Decode$list(_user$project$Load$decodeEnrollment),
+				A2(
+					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
+					_user$project$Model$Initial,
+					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Model))))));
+var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/People/GetCCMEnrollmentData2?showPending=true', _user$project$Load$decodeModel);
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
 var _user$project$Main$view = function (model) {
@@ -9999,10 +10169,10 @@ var _user$project$Main$view = function (model) {
 				lowerQuery,
 				_elm_lang$core$String$toLower(
 					function (_) {
-						return _.addressLine1;
+						return _.dob;
 					}(_p0)));
 		},
-		model.employers);
+		model.enrollment);
 	var len = (_elm_lang$core$List$length(filteredEmployers) / 12) | 0;
 	var rng = A2(
 		_elm_lang$core$List$map,
@@ -10040,12 +10210,8 @@ var _user$project$Main$view = function (model) {
 							_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
 							_1: {
 								ctor: '::',
-								_0: _user$project$Styles$controlStyle,
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Reset),
-									_1: {ctor: '[]'}
-								}
+								_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Reset),
+								_1: {ctor: '[]'}
 							}
 						},
 						{
@@ -10059,14 +10225,18 @@ var _user$project$Main$view = function (model) {
 							_elm_lang$html$Html$input,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$placeholder('Search by Address'),
+								_0: _elm_lang$html$Html_Attributes$class('form-control'),
 								_1: {
 									ctor: '::',
-									_0: _elm_lang$html$Html_Events$onInput(_user$project$Model$SetQuery),
+									_0: _elm_lang$html$Html_Attributes$placeholder('Search by Address'),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$value(model.query),
-										_1: {ctor: '[]'}
+										_0: _elm_lang$html$Html_Events$onInput(_user$project$Model$SetQuery),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$value(model.query),
+											_1: {ctor: '[]'}
+										}
 									}
 								}
 							},
@@ -10102,7 +10272,6 @@ var _user$project$Main$view = function (model) {
 					}
 				});
 		case 'Edit':
-			var _p2 = _p1._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -10121,15 +10290,11 @@ var _user$project$Main$view = function (model) {
 									_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
 									_1: {
 										ctor: '::',
-										_0: _user$project$Styles$controlStyle,
+										_0: _elm_lang$html$Html_Attributes$id('testDate'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$id('testDate'),
-											_1: {
-												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$value(_p2.dob),
-												_1: {ctor: '[]'}
-											}
+											_0: _elm_lang$html$Html_Attributes$value(_p1._0.dob),
+											_1: {ctor: '[]'}
 										}
 									}
 								}
@@ -10139,106 +10304,22 @@ var _user$project$Main$view = function (model) {
 					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$input,
+							_elm_lang$html$Html$button,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$placeholder('City'),
+								_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
 								_1: {
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
-									_1: {
-										ctor: '::',
-										_0: _user$project$Styles$controlStyle,
-										_1: {
-											ctor: '::',
-											_0: _elm_lang$html$Html_Events$onInput(
-												_user$project$Model$UpdateCity(_p2)),
-											_1: {
-												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$value(_p2.city),
-												_1: {ctor: '[]'}
-											}
-										}
-									}
-								}
-							},
-							{ctor: '[]'}),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$input,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$placeholder('State'),
-									_1: {
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('e-textbox'),
-										_1: {
-											ctor: '::',
-											_0: _user$project$Styles$controlStyle,
-											_1: {
-												ctor: '::',
-												_0: _elm_lang$html$Html_Events$onInput(
-													_user$project$Model$UpdateState(_p2)),
-												_1: {
-													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$value(_p2.state),
-													_1: {ctor: '[]'}
-												}
-											}
-										}
-									}
-								},
-								{ctor: '[]'}),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$button,
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
-										_1: {
-											ctor: '::',
-											_0: _user$project$Styles$controlStyle,
-											_1: {
-												ctor: '::',
-												_0: _elm_lang$html$Html_Events$onClick(
-													_user$project$Model$EditSave(_p2)),
-												_1: {ctor: '[]'}
-											}
-										}
-									},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('save'),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$button,
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
-											_1: {
-												ctor: '::',
-												_0: _user$project$Styles$controlStyle,
-												_1: {
-													ctor: '::',
-													_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditCancel),
-													_1: {ctor: '[]'}
-												}
-											}
-										},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text('cancel'),
-											_1: {ctor: '[]'}
-										}),
+									_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$EditCancel),
 									_1: {ctor: '[]'}
 								}
-							}
-						}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('cancel'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
 					}
 				});
 		default:
@@ -10253,35 +10334,17 @@ var _user$project$Main$view = function (model) {
 				});
 	}
 };
-var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
-var _user$project$Main$sendTestDate = _elm_lang$core$Native_Platform.outgoingPort(
-	'sendTestDate',
-	function (v) {
-		return v;
-	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p3 = msg;
-		switch (_p3.ctor) {
+		var _p2 = msg;
+		switch (_p2.ctor) {
 			case 'EditStart':
-				var _p4 = _p3._0;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							state: _user$project$Model$Edit(_p4)
-						}),
-					_1: _user$project$Main$sendTestDate(_p4.dob)
-				};
-			case 'EditSave':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							state: _user$project$Model$Grid,
-							employers: A2(_user$project$Load$updateEmployers, model.employers, _p3._0)
+							state: _user$project$Model$Edit(_p2._0)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -10294,15 +10357,15 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Load':
-				if (_p3._0.ctor === 'Ok') {
-					var _p5 = _p3._0._0;
+				if (_p2._0.ctor === 'Ok') {
+					var _p3 = _p2._0._0;
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
-							_p5,
+							_p3,
 							{
 								state: _user$project$Model$Grid,
-								employers: _user$project$Load$newEmployers(_p5.employers)
+								enrollment: _user$project$Load$newEmployers(_p3.enrollment)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
@@ -10312,80 +10375,43 @@ var _user$project$Main$update = F2(
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								state: _user$project$Model$Error(_p3._0._0)
+								state: _user$project$Model$Error(_p2._0._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
-				}
-			case 'UpdateState':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							state: _user$project$Model$Edit(
-								_elm_lang$core$Native_Utils.update(
-									_p3._0,
-									{state: _p3._1}))
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'UpdateCity':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							state: _user$project$Model$Edit(
-								_elm_lang$core$Native_Utils.update(
-									_p3._0,
-									{city: _p3._1}))
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'UpdateStartDate':
-				var _p6 = model.state;
-				if (_p6.ctor === 'Edit') {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								state: _user$project$Model$Edit(
-									_elm_lang$core$Native_Utils.update(
-										_p6._0,
-										{dob: _p3._0}))
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				}
 			case 'SetQuery':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{query: _p3._0}),
+						{query: _p2._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'SetTableState':
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{tableState: _p3._0}),
-					{ctor: '[]'});
+						{tableState: _p2._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			default:
 				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
 		}
 	});
-var _user$project$Main$getTestDate = _elm_lang$core$Native_Platform.incomingPort('getTestDate', _elm_lang$core$Json_Decode$string);
+var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
 var _user$project$Main$subscriptions = function (model) {
-	return _user$project$Main$getTestDate(_user$project$Model$UpdateStartDate);
+	return _elm_lang$core$Platform_Sub$none;
 };
 var _user$project$Main$main = _elm_lang$html$Html$program(
 	{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();
+var _user$project$Main$sendTestDate = _elm_lang$core$Native_Platform.outgoingPort(
+	'sendTestDate',
+	function (v) {
+		return v;
+	});
+var _user$project$Main$getTestDate = _elm_lang$core$Native_Platform.incomingPort('getTestDate', _elm_lang$core$Json_Decode$string);
 
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
