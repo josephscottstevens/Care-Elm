@@ -12,14 +12,29 @@ customGrid model =
     Table.view config model.tableState (List.take 12 model.employers)
 
 
+df : Maybe String -> String
+df str =
+    case str of
+        Just t ->
+            t
+
+        Nothing ->
+            ""
+
+
 config : Table.Config Enrollment Msg
 config =
     Table.customConfig
         { toId = .name
         , toMsg = SetTableState
         , columns =
-            [ -- checkColumn "Reviewed"
-              Table.stringColumn "Facility" .facility
+            [ checkColumn ""
+            , Table.stringColumn "Facility" .facility
+            , Table.stringColumn "Name" .name
+            , Table.stringColumn "DoB" .dob
+            , Table.stringColumn "Provider" .provider
+
+            -- , Table.stringColumn "Prim. Ins." .primaryInsurance
             , editColumn
             ]
         , customizations = defaultCustomizations
