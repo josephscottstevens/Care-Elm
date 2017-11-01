@@ -14165,7 +14165,7 @@ var _user$project$Main$pagerDiv = F2(
 				pagesPerBlock,
 				A2(
 					_elm_lang$core$List$drop,
-					currentPage,
+					(currentPage / pagesPerBlock) | 0,
 					A2(_elm_lang$core$List$range, 0, totalPages))));
 		var rightPageBlockClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - pagesPerBlock) < 0) ? 'e-link e-NP e-spacing e-numericitem e-default' : 'e-link e-NP e-spacing e-nextprevitemdisabled e-disable';
 		var rightPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - 1) < 0) ? 'e-nextpage e-icon e-arrowheadright-2x e-default' : 'e-icon e-arrowheadright-2x e-nextpagedisabled e-disable';

@@ -81,10 +81,6 @@ update msg model =
             ( emptyModel, getEmployment )
 
 
-
---pagerDiv : List BillingCcm -> Int -> Html Msg
-
-
 pagerDiv : List a -> Int -> Html Msg
 pagerDiv filteredEmployers currentPage =
     let
@@ -109,7 +105,7 @@ pagerDiv filteredEmployers currentPage =
 
         rng =
             List.range 0 totalPages
-                |> List.drop currentPage
+                |> List.drop (currentPage // pagesPerBlock)
                 |> List.take pagesPerBlock
                 |> List.map activeOrNot
 
