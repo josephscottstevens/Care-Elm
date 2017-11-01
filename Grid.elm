@@ -12,8 +12,8 @@ customGrid model =
     Table.view config model.tableState (List.take 12 model.employers)
 
 
-df : Maybe String -> String
-df str =
+defaultString : Maybe String -> String
+defaultString str =
     case str of
         Just t ->
             t
@@ -34,7 +34,7 @@ config =
             , Table.stringColumn "Main Provider" .mainProvider
             , Table.stringColumn "Patient Name" .patientName
             , Table.stringColumn "DOB" .dob
-            , maybeStringColumn "Patient's Facility Id No" .patientName -- .patientFacilityIdNo
+            , maybeStringColumn "Patient's Facility Id No" .patientFacilityIdNo
             , editColumn
             ]
         , customizations = defaultCustomizations
@@ -119,7 +119,7 @@ checkColumnCell emp =
         ]
 
 
-maybeStringColumn : String -> (BillingCcm -> String) -> Table.Column BillingCcm Msg
+maybeStringColumn : String -> (BillingCcm -> Maybe String) -> Table.Column BillingCcm Msg
 maybeStringColumn name field =
     Table.veryCustomColumn
         { name = name
@@ -128,8 +128,8 @@ maybeStringColumn name field =
         }
 
 
-maybeStringColumnCell : String -> Table.HtmlDetails Msg
+maybeStringColumnCell : Maybe String -> Table.HtmlDetails Msg
 maybeStringColumnCell str =
     Table.HtmlDetails []
-        [ div [] [ text str ]
+        [ div [] [ text (defaultString str) ]
         ]
