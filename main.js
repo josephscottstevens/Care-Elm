@@ -14288,6 +14288,24 @@ var _user$project$Main$pagerDiv = F2(
 		var rightPageBlockClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - _user$project$Main$pagesPerBlock) < 0) ? 'e-link e-NP e-spacing e-numericitem e-default' : 'e-link e-NP e-spacing e-nextprevitemdisabled e-disable';
 		var rightPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages) < 0) ? 'e-nextpage e-icon e-arrowheadright-2x e-default' : 'e-icon e-arrowheadright-2x e-nextpagedisabled e-disable';
 		var lastPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - _user$project$Main$pagesPerBlock) < 0) ? 'e-lastpage e-icon e-mediaforward e-default' : 'e-icon e-mediaforward e-animate e-lastpagedisabled e-disable';
+		var pagerText = function () {
+			var totalItemsText = _elm_lang$core$Basics$toString(totalRows);
+			var totalPagesText = _elm_lang$core$Basics$toString(totalPages + 1);
+			var currentPageText = _elm_lang$core$Basics$toString(currentPage + 1);
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				currentPageText,
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					' of ',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						totalPagesText,
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							' pages (',
+							A2(_elm_lang$core$Basics_ops['++'], totalItemsText, ' items)')))));
+		}();
 		return A2(
 			_elm_lang$html$Html$div,
 			{
@@ -14449,20 +14467,7 @@ var _user$project$Main$pagerDiv = F2(
 								},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text(
-										A2(
-											_elm_lang$core$Basics_ops['++'],
-											'1 of ',
-											A2(
-												_elm_lang$core$Basics_ops['++'],
-												_elm_lang$core$Basics$toString(totalPages),
-												A2(
-													_elm_lang$core$Basics_ops['++'],
-													' pages (',
-													A2(
-														_elm_lang$core$Basics_ops['++'],
-														_elm_lang$core$Basics$toString(totalRows),
-														' items)'))))),
+									_0: _elm_lang$html$Html$text(pagerText),
 									_1: {ctor: '[]'}
 								}),
 							_1: {ctor: '[]'}
@@ -14543,22 +14548,7 @@ var _user$project$Main$view = function (model) {
 									_user$project$Main$pagerDiv,
 									_user$project$Main$filteredCcm(model),
 									model.currentPage),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$div,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text(
-												A2(
-													_elm_lang$core$Basics_ops['++'],
-													'current Page: ',
-													_elm_lang$core$Basics$toString(model.currentPage))),
-											_1: {ctor: '[]'}
-										}),
-									_1: {ctor: '[]'}
-								}
+								_1: {ctor: '[]'}
 							}
 						}
 					}

@@ -195,6 +195,19 @@ pagerDiv filteredEmployers currentPage =
 
         employersCount =
             toString (List.length filteredEmployers)
+
+        pagerText =
+            let
+                currentPageText =
+                    toString (currentPage + 1)
+
+                totalPagesText =
+                    toString (totalPages + 1)
+
+                totalItemsText =
+                    toString totalRows
+            in
+                currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
     in
         div [ class "e-pager e-js e-pager" ]
             [ div [ class "e-pagercontainer" ]
@@ -207,7 +220,7 @@ pagerDiv filteredEmployers currentPage =
                 , div [ class lastPageClass, onClick (UpdatePage Last) ] []
                 ]
             , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
-                [ span [ class "e-pagermsg" ] [ text ("1 of " ++ (toString totalPages) ++ " pages (" ++ (toString totalRows) ++ " items)") ]
+                [ span [ class "e-pagermsg" ] [ text pagerText ]
                 ]
             ]
 
@@ -224,7 +237,6 @@ view model =
                 , input [ class "form-control", placeholder "Search by Address", onInput SetQuery, value model.query ] []
                 , Table.view config model.tableState ((filteredCcm model) |> List.take 12)
                 , pagerDiv (filteredCcm model) model.currentPage
-                , div [] [ text ("current Page: " ++ (toString model.currentPage)) ]
                 ]
 
         Edit emp ->
