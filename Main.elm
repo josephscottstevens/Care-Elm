@@ -7,12 +7,6 @@ import Html.Attributes exposing (style, class, placeholder, id, type_, value, ta
 import Html.Events exposing (onClick, onInput)
 import Grid exposing (..)
 import Table
-import Json.Encode as Encode
-
-
-role : String -> Html.Attribute msg
-role value =
-    Html.Attributes.property "role" (Encode.string value)
 
 
 port sendTestDate : String -> Cmd msg
@@ -90,6 +84,9 @@ pagerDiv filteredEmployers currentPage =
         itemsPerPage =
             10
 
+        pagesPerBlock =
+            8
+
         totalPages =
             (List.length filteredEmployers) // itemsPerPage
 
@@ -101,12 +98,12 @@ pagerDiv filteredEmployers currentPage =
                     else
                         "e-default"
             in
-                div [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), role "link" ] [ text (toString (pageIndex + 1)) ]
+                div [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText) ] [ text (toString (pageIndex + 1)) ]
 
         rng =
             List.range 0 totalPages
                 |> List.drop currentPage
-                |> List.take 8
+                |> List.take pagesPerBlock
                 |> List.map activeOrNot
 
         employersCount =

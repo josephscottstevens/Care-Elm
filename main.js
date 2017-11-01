@@ -14118,82 +14118,6 @@ var _user$project$Load$decodeModel = A2(
 var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/people/CcmGridDataSource?showOpenCcmBills=true', _user$project$Load$decodeModel);
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p0 = msg;
-		switch (_p0.ctor) {
-			case 'EditStart':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							state: _user$project$Model$Edit(_p0._0)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'EditCancel':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{state: _user$project$Model$Grid}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'Load':
-				if (_p0._0.ctor === 'Ok') {
-					var _p1 = _p0._0._0;
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							_p1,
-							{
-								state: _user$project$Model$Grid,
-								billingCcm: _user$project$Load$newEmployers(_p1.billingCcm)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								state: _user$project$Model$Error(_p0._0._0)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				}
-			case 'SetQuery':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{query: _p0._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'SetTableState':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{tableState: _p0._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			default:
-				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
-		}
-	});
-var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
-var _user$project$Main$subscriptions = function (model) {
-	return _elm_lang$core$Platform_Sub$none;
-};
-var _user$project$Main$role = function (value) {
-	return A2(
-		_elm_lang$html$Html_Attributes$property,
-		'role',
-		_elm_lang$core$Json_Encode$string(value));
-};
 var _user$project$Main$pagerDiv = F2(
 	function (filteredEmployers, currentPage) {
 		var employersCount = _elm_lang$core$Basics$toString(
@@ -14206,11 +14130,7 @@ var _user$project$Main$pagerDiv = F2(
 					ctor: '::',
 					_0: _elm_lang$html$Html_Attributes$class(
 						A2(_elm_lang$core$Basics_ops['++'], 'e-link e-numericitem e-spacing ', activeOrNotText)),
-					_1: {
-						ctor: '::',
-						_0: _user$project$Main$role('link'),
-						_1: {ctor: '[]'}
-					}
+					_1: {ctor: '[]'}
 				},
 				{
 					ctor: '::',
@@ -14219,6 +14139,7 @@ var _user$project$Main$pagerDiv = F2(
 					_1: {ctor: '[]'}
 				});
 		};
+		var pagesPerBlock = 8;
 		var itemsPerPage = 10;
 		var totalPages = (_elm_lang$core$List$length(filteredEmployers) / itemsPerPage) | 0;
 		var rng = A2(
@@ -14226,7 +14147,7 @@ var _user$project$Main$pagerDiv = F2(
 			activeOrNot,
 			A2(
 				_elm_lang$core$List$take,
-				8,
+				pagesPerBlock,
 				A2(
 					_elm_lang$core$List$drop,
 					currentPage,
@@ -14375,18 +14296,18 @@ var _user$project$Main$view = function (model) {
 	var lowerQuery = _elm_lang$core$String$toLower(model.query);
 	var filteredEmployers = A2(
 		_elm_lang$core$List$filter,
-		function (_p2) {
+		function (_p0) {
 			return A2(
 				_elm_lang$core$String$contains,
 				lowerQuery,
 				_elm_lang$core$String$toLower(
 					function (_) {
 						return _.patientName;
-					}(_p2)));
+					}(_p0)));
 		},
 		model.billingCcm);
-	var _p3 = model.state;
-	switch (_p3.ctor) {
+	var _p1 = model.state;
+	switch (_p1.ctor) {
 		case 'Initial':
 			return A2(
 				_elm_lang$html$Html$div,
@@ -14477,7 +14398,7 @@ var _user$project$Main$view = function (model) {
 										_0: _elm_lang$html$Html_Attributes$id('testDate'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$value(_p3._0.dob),
+											_0: _elm_lang$html$Html_Attributes$value(_p1._0.dob),
 											_1: {ctor: '[]'}
 										}
 									}
@@ -14513,10 +14434,80 @@ var _user$project$Main$view = function (model) {
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(_p3._0)),
+						_elm_lang$core$Basics$toString(_p1._0)),
 					_1: {ctor: '[]'}
 				});
 	}
+};
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p2 = msg;
+		switch (_p2.ctor) {
+			case 'EditStart':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							state: _user$project$Model$Edit(_p2._0)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'EditCancel':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{state: _user$project$Model$Grid}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Load':
+				if (_p2._0.ctor === 'Ok') {
+					var _p3 = _p2._0._0;
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							_p3,
+							{
+								state: _user$project$Model$Grid,
+								billingCcm: _user$project$Load$newEmployers(_p3.billingCcm)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								state: _user$project$Model$Error(_p2._0._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			case 'SetQuery':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{query: _p2._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SetTableState':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{tableState: _p2._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
+		}
+	});
+var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
+var _user$project$Main$subscriptions = function (model) {
+	return _elm_lang$core$Platform_Sub$none;
 };
 var _user$project$Main$main = _elm_lang$html$Html$program(
 	{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();
