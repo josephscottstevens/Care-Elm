@@ -84,12 +84,9 @@ update msg model =
             ( emptyModel, getEmployment )
 
 
-pagerDiv : List BillingCcm -> Html msg
-pagerDiv filteredEmployers =
+pagerDiv : List BillingCcm -> Int -> Html msg
+pagerDiv filteredEmployers currentPage =
     let
-        currentPage =
-            0
-
         itemsPerPage =
             10
 
@@ -150,7 +147,7 @@ view model =
                     [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
                     , input [ class "form-control", placeholder "Search by Address", onInput SetQuery, value model.query ] []
                     , Table.view config model.tableState (filteredEmployers |> List.take 12)
-                    , pagerDiv filteredEmployers
+                    , pagerDiv filteredEmployers model.currentPage
                     ]
 
             Edit emp ->

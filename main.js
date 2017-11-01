@@ -14194,183 +14194,183 @@ var _user$project$Main$role = function (value) {
 		'role',
 		_elm_lang$core$Json_Encode$string(value));
 };
-var _user$project$Main$pagerDiv = function (filteredEmployers) {
-	var employersCount = _elm_lang$core$Basics$toString(
-		_elm_lang$core$List$length(filteredEmployers));
-	var itemsPerPage = 10;
-	var totalPages = (_elm_lang$core$List$length(filteredEmployers) / itemsPerPage) | 0;
-	var currentPage = 0;
-	var activeOrNot = function (pageIndex) {
-		var activeOrNotText = _elm_lang$core$Native_Utils.eq(pageIndex, currentPage) ? 'e-currentitem e-active' : 'e-default';
+var _user$project$Main$pagerDiv = F2(
+	function (filteredEmployers, currentPage) {
+		var employersCount = _elm_lang$core$Basics$toString(
+			_elm_lang$core$List$length(filteredEmployers));
+		var activeOrNot = function (pageIndex) {
+			var activeOrNotText = _elm_lang$core$Native_Utils.eq(pageIndex, currentPage) ? 'e-currentitem e-active' : 'e-default';
+			return A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class(
+						A2(_elm_lang$core$Basics_ops['++'], 'e-link e-numericitem e-spacing ', activeOrNotText)),
+					_1: {
+						ctor: '::',
+						_0: _user$project$Main$role('link'),
+						_1: {ctor: '[]'}
+					}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(
+						_elm_lang$core$Basics$toString(pageIndex + 1)),
+					_1: {ctor: '[]'}
+				});
+		};
+		var itemsPerPage = 10;
+		var totalPages = (_elm_lang$core$List$length(filteredEmployers) / itemsPerPage) | 0;
+		var rng = A2(
+			_elm_lang$core$List$map,
+			activeOrNot,
+			A2(
+				_elm_lang$core$List$take,
+				8,
+				A2(
+					_elm_lang$core$List$drop,
+					currentPage,
+					A2(_elm_lang$core$List$range, 0, totalPages))));
 		return A2(
 			_elm_lang$html$Html$div,
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class(
-					A2(_elm_lang$core$Basics_ops['++'], 'e-link e-numericitem e-spacing ', activeOrNotText)),
-				_1: {
-					ctor: '::',
-					_0: _user$project$Main$role('link'),
-					_1: {ctor: '[]'}
-				}
+				_0: _elm_lang$html$Html_Attributes$class('e-pager e-js e-pager'),
+				_1: {ctor: '[]'}
 			},
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html$text(
-					_elm_lang$core$Basics$toString(pageIndex + 1)),
-				_1: {ctor: '[]'}
-			});
-	};
-	var rng = A2(
-		_elm_lang$core$List$map,
-		activeOrNot,
-		A2(
-			_elm_lang$core$List$take,
-			8,
-			A2(
-				_elm_lang$core$List$drop,
-				currentPage,
-				A2(_elm_lang$core$List$range, 0, totalPages))));
-	return A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('e-pager e-js e-pager'),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$div,
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('e-pagercontainer'),
-					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$div,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('e-icon e-mediaback e-firstpagedisabled e-disable'),
-							_1: {ctor: '[]'}
-						},
-						{ctor: '[]'}),
-					_1: {
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('e-pagercontainer'),
+						_1: {ctor: '[]'}
+					},
+					{
 						ctor: '::',
 						_0: A2(
 							_elm_lang$html$Html$div,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable'),
+								_0: _elm_lang$html$Html_Attributes$class('e-icon e-mediaback e-firstpagedisabled e-disable'),
 								_1: {ctor: '[]'}
 							},
 							{ctor: '[]'}),
 						_1: {
 							ctor: '::',
 							_0: A2(
-								_elm_lang$html$Html$a,
+								_elm_lang$html$Html$div,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('e-link e-nextprevitemdisabled e-disable e-spacing e-PP'),
+									_0: _elm_lang$html$Html_Attributes$class('e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable'),
 									_1: {ctor: '[]'}
 								},
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text('...'),
-									_1: {ctor: '[]'}
-								}),
+								{ctor: '[]'}),
 							_1: {
 								ctor: '::',
 								_0: A2(
-									_elm_lang$html$Html$div,
+									_elm_lang$html$Html$a,
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('e-numericcontainer e-default'),
+										_0: _elm_lang$html$Html_Attributes$class('e-link e-nextprevitemdisabled e-disable e-spacing e-PP'),
 										_1: {ctor: '[]'}
 									},
-									rng),
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('...'),
+										_1: {ctor: '[]'}
+									}),
 								_1: {
 									ctor: '::',
 									_0: A2(
-										_elm_lang$html$Html$a,
+										_elm_lang$html$Html$div,
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('e-link e-NP e-spacing e-numericitem e-default'),
+											_0: _elm_lang$html$Html_Attributes$class('e-numericcontainer e-default'),
 											_1: {ctor: '[]'}
 										},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text('...'),
-											_1: {ctor: '[]'}
-										}),
+										rng),
 									_1: {
 										ctor: '::',
 										_0: A2(
-											_elm_lang$html$Html$div,
+											_elm_lang$html$Html$a,
 											{
 												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$class('e-nextpage e-icon e-arrowheadright-2x e-default'),
+												_0: _elm_lang$html$Html_Attributes$class('e-link e-NP e-spacing e-numericitem e-default'),
 												_1: {ctor: '[]'}
 											},
-											{ctor: '[]'}),
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('...'),
+												_1: {ctor: '[]'}
+											}),
 										_1: {
 											ctor: '::',
 											_0: A2(
 												_elm_lang$html$Html$div,
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$class('e-lastpage e-icon e-mediaforward e-default'),
+													_0: _elm_lang$html$Html_Attributes$class('e-nextpage e-icon e-arrowheadright-2x e-default'),
 													_1: {ctor: '[]'}
 												},
 												{ctor: '[]'}),
-											_1: {ctor: '[]'}
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$div,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class('e-lastpage e-icon e-mediaforward e-default'),
+														_1: {ctor: '[]'}
+													},
+													{ctor: '[]'}),
+												_1: {ctor: '[]'}
+											}
 										}
 									}
 								}
 							}
 						}
-					}
-				}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$div,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('e-parentmsgbar'),
-						_1: {
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$style(
+							_0: _elm_lang$html$Html_Attributes$class('e-parentmsgbar'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$style(
+									{
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'right'},
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$span,
 								{
 									ctor: '::',
-									_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'right'},
+									_0: _elm_lang$html$Html_Attributes$class('e-pagermsg'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('1 of 808 pages (16153 items)'),
 									_1: {ctor: '[]'}
 								}),
 							_1: {ctor: '[]'}
-						}
-					},
-					{
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$span,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('e-pagermsg'),
-								_1: {ctor: '[]'}
-							},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text('1 of 808 pages (16153 items)'),
-								_1: {ctor: '[]'}
-							}),
-						_1: {ctor: '[]'}
-					}),
-				_1: {ctor: '[]'}
-			}
-		});
-};
+						}),
+					_1: {ctor: '[]'}
+				}
+			});
+	});
 var _user$project$Main$view = function (model) {
 	var lowerQuery = _elm_lang$core$String$toLower(model.query);
 	var filteredEmployers = A2(
@@ -14449,7 +14449,7 @@ var _user$project$Main$view = function (model) {
 								A2(_elm_lang$core$List$take, 12, filteredEmployers)),
 							_1: {
 								ctor: '::',
-								_0: _user$project$Main$pagerDiv(filteredEmployers),
+								_0: A2(_user$project$Main$pagerDiv, filteredEmployers, model.currentPage),
 								_1: {ctor: '[]'}
 							}
 						}
