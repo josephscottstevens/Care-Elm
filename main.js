@@ -13711,19 +13711,24 @@ var _user$project$Grid$editColumnCell = function (emp) {
 				_elm_lang$html$Html$button,
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+					_0: _elm_lang$html$Html_Attributes$class('btn btn-sm btn-default fa fa-angle-down btn-context-menu'),
 					_1: {
 						ctor: '::',
 						_0: _elm_lang$html$Html_Events$onClick(
 							_user$project$Model$EditStart(emp)),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$style(
+								{
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'right'},
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
 					}
 				},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text('Edit'),
-					_1: {ctor: '[]'}
-				}),
+				{ctor: '[]'}),
 			_1: {ctor: '[]'}
 		});
 };
