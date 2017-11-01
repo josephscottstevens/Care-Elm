@@ -52,7 +52,7 @@ update msg model =
             ( { model | state = Grid }, Cmd.none )
 
         Load (Ok model) ->
-            ( { model | state = Grid, enrollment = (newEmployers model.enrollment) }, Cmd.none )
+            ( { model | state = Grid, billingCcm = (newEmployers model.billingCcm) }, Cmd.none )
 
         Load (Err t) ->
             ( { model | state = Error t }, Cmd.none )
@@ -85,8 +85,8 @@ view model =
             String.toLower model.query
 
         filteredEmployers =
-            model.enrollment
-                |> List.filter (String.contains lowerQuery << String.toLower << .dob)
+            model.billingCcm
+                |> List.filter (String.contains lowerQuery << String.toLower << .patientName)
 
         len =
             (List.length filteredEmployers) // 12
@@ -113,7 +113,7 @@ view model =
 
             Edit emp ->
                 div []
-                    [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", id "testDate", value emp.dob ] []
+                    [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", id "testDate", value emp.doB ] []
 
                     -- , input [ placeholder "City", class "e-textbox", onInput (UpdateCity emp), value emp.city ] []
                     -- , input [ placeholder "State", class "e-textbox", onInput (UpdateState emp), value emp.state ] []

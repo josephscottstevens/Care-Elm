@@ -6,7 +6,7 @@ import Table
 
 type Msg
     = Load (Result Http.Error Model)
-    | EditStart Enrollment
+    | EditStart BillingCcm
       -- | EditSave Enrollment
     | EditCancel
       -- | UpdateStartDate String
@@ -20,7 +20,7 @@ type Msg
 type ModelState
     = Initial
     | Grid
-    | Edit Enrollment
+    | Edit BillingCcm
     | Error Http.Error
 
 
@@ -30,60 +30,9 @@ type SortMode
     | SortDesc
 
 
-type alias Enrollment =
-    { iD : Int
-    , facilityId : Int
-    , providerId : Maybe Int
-    , firstName : Maybe String
-    , middleName : Maybe String
-    , lastName : Maybe String
-    , sexTypeId : Maybe Int
-    , dob : String
-    , sSN : Maybe String
-    , mRN : Maybe String
-    , pAN : Maybe String
-    , email : Maybe String
-    , primaryPhone : String
-    , primaryPhoneNumberTypeId : Maybe Int
-    , secondaryPhone : Maybe String
-    , secondaryPhoneNumberTypeId : Maybe Int
-    , address : Maybe String
-    , address2 : Maybe String
-    , address3 : Maybe String
-    , city : Maybe String
-    , stateId : Maybe String
-    , zip : Maybe String
-    , proxyFirstName : Maybe String
-    , proxyMiddleName : Maybe String
-    , proxyLastName : Maybe String
-    , proxyRelationshipTypeId : Maybe Int
-    , proxyPhone : Maybe String
-    , proxyPhoneNumberTypeId : Maybe Int
-    , facility : String
-    , provider : String
-    , name : String
-    , primaryInsurance : Maybe String
-    , secondaryInsurance : Maybe String
-    , status : String
-    , assignedTo : String
-    , proxyName : String
-    , lastContactAttempt : Maybe String
-    , contactAttempts : Maybe String
-    , comments : Maybe String
-    , existingComments : Maybe String
-    , importDate : String
-    , consentObtained : Maybe String
-    , elligibleICD10 : Int
-    , elligibleICD9 : Int
-    , disableCall : Bool
-    , batchId : Int
-    , canRegister : Bool
-    }
-
-
 type alias Model =
     { state : ModelState
-    , enrollment : List Enrollment
+    , billingCcm : List BillingCcm
     , tableState : Table.State
     , query : String
     , currentPage : Int
@@ -93,8 +42,50 @@ type alias Model =
 emptyModel : Model
 emptyModel =
     { state = Initial
-    , enrollment = []
+    , billingCcm = []
     , tableState = Table.initialSort "dob"
     , query = ""
     , currentPage = 0
+    }
+
+
+type alias BillingCcm =
+    { iD : Int
+    , facility : String
+    , facilityId : Int
+    , practiceLocation : Maybe String
+    , mainProvider : String
+    , providerId : Int
+    , patientName : String
+    , patientId : Int
+    , doB : String
+    , patientFacilityIdNo : Maybe String
+    , phone : String
+    , assignedTo : Maybe String
+    , staffId : Maybe Int
+    , openTasks : Int
+    , totalTimeSpent : Maybe Int
+    , ccmRegistrationDate : String
+    , dateOfService : String
+    , billingDate : String
+    , billingMonth : Int
+    , billingYear : Int
+    , isClosed : Bool
+    , tocId : Maybe Int
+    , readmission : Bool
+    , isComplexCCM : Bool
+    , batchCloseOnInvoiceCompletion : Bool
+    , reviewedByStaffName : Maybe String
+    , canModifyReviewedStatus : Bool
+    , cPT : String
+    , isReviewed : Bool
+    , dxPresent : Bool
+    , carePlanPresent : Bool
+    , medsPresent : Bool
+    , allergiesPresent : Bool
+    , vitalsPresent : Bool
+    , recordingPresent : Bool
+    , chartComplete : Bool
+    , status : String
+    , is24HoursSinceBilledString : String
     }

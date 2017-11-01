@@ -13554,7 +13554,11 @@ var _evancz$elm_sortable_table$Table$increasingBy = function (toComparable) {
 var _evancz$elm_sortable_table$Table$None = {ctor: 'None'};
 var _evancz$elm_sortable_table$Table$unsortable = _evancz$elm_sortable_table$Table$None;
 
-var _user$project$Model$Enrollment = function (a) {
+var _user$project$Model$Model = F5(
+	function (a, b, c, d, e) {
+		return {state: a, billingCcm: b, tableState: c, query: d, currentPage: e};
+	});
+var _user$project$Model$BillingCcm = function (a) {
 	return function (b) {
 		return function (c) {
 			return function (d) {
@@ -13592,25 +13596,7 @@ var _user$project$Model$Enrollment = function (a) {
 																																			return function (_10) {
 																																				return function (_11) {
 																																					return function (_12) {
-																																						return function (_13) {
-																																							return function (_14) {
-																																								return function (_15) {
-																																									return function (_16) {
-																																										return function (_17) {
-																																											return function (_18) {
-																																												return function (_19) {
-																																													return function (_20) {
-																																														return function (_21) {
-																																															return {iD: a, facilityId: b, providerId: c, firstName: d, middleName: e, lastName: f, sexTypeId: g, dob: h, sSN: i, mRN: j, pAN: k, email: l, primaryPhone: m, primaryPhoneNumberTypeId: n, secondaryPhone: o, secondaryPhoneNumberTypeId: p, address: q, address2: r, address3: s, city: t, stateId: u, zip: v, proxyFirstName: w, proxyMiddleName: x, proxyLastName: y, proxyRelationshipTypeId: z, proxyPhone: _1, proxyPhoneNumberTypeId: _2, facility: _3, provider: _4, name: _5, primaryInsurance: _6, secondaryInsurance: _7, status: _8, assignedTo: _9, proxyName: _10, lastContactAttempt: _11, contactAttempts: _12, comments: _13, existingComments: _14, importDate: _15, consentObtained: _16, elligibleICD10: _17, elligibleICD9: _18, disableCall: _19, batchId: _20, canRegister: _21};
-																																														};
-																																													};
-																																												};
-																																											};
-																																										};
-																																									};
-																																								};
-																																							};
-																																						};
+																																						return {iD: a, facility: b, facilityId: c, practiceLocation: d, mainProvider: e, providerId: f, patientName: g, patientId: h, doB: i, patientFacilityIdNo: j, phone: k, assignedTo: l, staffId: m, openTasks: n, totalTimeSpent: o, ccmRegistrationDate: p, dateOfService: q, billingDate: r, billingMonth: s, billingYear: t, isClosed: u, tocId: v, readmission: w, isComplexCCM: x, batchCloseOnInvoiceCompletion: y, reviewedByStaffName: z, canModifyReviewedStatus: _1, cPT: _2, isReviewed: _3, dxPresent: _4, carePlanPresent: _5, medsPresent: _6, allergiesPresent: _7, vitalsPresent: _8, recordingPresent: _9, chartComplete: _10, status: _11, is24HoursSinceBilledString: _12};
 																																					};
 																																				};
 																																			};
@@ -13649,10 +13635,6 @@ var _user$project$Model$Enrollment = function (a) {
 		};
 	};
 };
-var _user$project$Model$Model = F5(
-	function (a, b, c, d, e) {
-		return {state: a, enrollment: b, tableState: c, query: d, currentPage: e};
-	});
 var _user$project$Model$Reset = {ctor: 'Reset'};
 var _user$project$Model$SetTableState = function (a) {
 	return {ctor: 'SetTableState', _0: a};
@@ -13677,7 +13659,7 @@ var _user$project$Model$Grid = {ctor: 'Grid'};
 var _user$project$Model$Initial = {ctor: 'Initial'};
 var _user$project$Model$emptyModel = {
 	state: _user$project$Model$Initial,
-	enrollment: {ctor: '[]'},
+	billingCcm: {ctor: '[]'},
 	tableState: _evancz$elm_sortable_table$Table$initialSort('dob'),
 	query: '',
 	currentPage: 0
@@ -13820,25 +13802,37 @@ var _user$project$Grid$defaultCustomizations = {
 var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 	{
 		toId: function (_) {
-			return _.name;
+			return _.patientName;
 		},
 		toMsg: _user$project$Model$SetTableState,
 		columns: {
 			ctor: '::',
-			_0: A2(
-				_evancz$elm_sortable_table$Table$stringColumn,
-				'Facility',
-				function (_) {
-					return _.facility;
-				}),
+			_0: _user$project$Grid$checkColumn(''),
 			_1: {
 				ctor: '::',
-				_0: _user$project$Grid$editColumn,
-				_1: {ctor: '[]'}
+				_0: A2(
+					_evancz$elm_sortable_table$Table$stringColumn,
+					'Facility',
+					function (_) {
+						return _.facility;
+					}),
+				_1: {
+					ctor: '::',
+					_0: _user$project$Grid$editColumn,
+					_1: {ctor: '[]'}
+				}
 			}
 		},
 		customizations: _user$project$Grid$defaultCustomizations
 	});
+var _user$project$Grid$df = function (str) {
+	var _p5 = str;
+	if (_p5.ctor === 'Just') {
+		return _p5._0;
+	} else {
+		return '';
+	}
+};
 var _user$project$Grid$customGrid = function (model) {
 	return A3(
 		_evancz$elm_sortable_table$Table$view,
@@ -13867,195 +13861,159 @@ var _user$project$Load$newEmployers = function (enrollment) {
 			}),
 		enrollment);
 };
-var _user$project$Load$decodeEnrollment = A3(
+var _user$project$Load$decodeBillingCcm = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-	'CanRegister',
-	_elm_lang$core$Json_Decode$bool,
+	'Is24HoursSinceBilledString',
+	_elm_lang$core$Json_Decode$string,
 	A3(
 		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-		'BatchId',
-		_elm_lang$core$Json_Decode$int,
+		'Status',
+		_elm_lang$core$Json_Decode$string,
 		A3(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-			'DisableCall',
+			'ChartComplete',
 			_elm_lang$core$Json_Decode$bool,
 			A3(
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-				'ElligibleICD9',
-				_elm_lang$core$Json_Decode$int,
+				'RecordingPresent',
+				_elm_lang$core$Json_Decode$bool,
 				A3(
 					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-					'ElligibleICD10',
-					_elm_lang$core$Json_Decode$int,
+					'VitalsPresent',
+					_elm_lang$core$Json_Decode$bool,
 					A3(
 						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-						'ConsentObtained',
-						_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+						'AllergiesPresent',
+						_elm_lang$core$Json_Decode$bool,
 						A3(
 							_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-							'ImportDate',
-							_elm_lang$core$Json_Decode$string,
+							'MedsPresent',
+							_elm_lang$core$Json_Decode$bool,
 							A3(
 								_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-								'ExistingComments',
-								_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+								'CarePlanPresent',
+								_elm_lang$core$Json_Decode$bool,
 								A3(
 									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-									'Comments',
-									_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+									'DxPresent',
+									_elm_lang$core$Json_Decode$bool,
 									A3(
 										_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-										'ContactAttempts',
-										_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+										'IsReviewed',
+										_elm_lang$core$Json_Decode$bool,
 										A3(
 											_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-											'LastContactAttempt',
-											_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+											'CPT',
+											_elm_lang$core$Json_Decode$string,
 											A3(
 												_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-												'ProxyName',
-												_elm_lang$core$Json_Decode$string,
+												'CanModifyReviewedStatus',
+												_elm_lang$core$Json_Decode$bool,
 												A3(
 													_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-													'AssignedTo',
-													_elm_lang$core$Json_Decode$string,
+													'ReviewedByStaffName',
+													_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
 													A3(
 														_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-														'Status',
-														_elm_lang$core$Json_Decode$string,
+														'BatchCloseOnInvoiceCompletion',
+														_elm_lang$core$Json_Decode$bool,
 														A3(
 															_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-															'SecondaryInsurance',
-															_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+															'IsComplexCCM',
+															_elm_lang$core$Json_Decode$bool,
 															A3(
 																_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																'PrimaryInsurance',
-																_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																'Readmission',
+																_elm_lang$core$Json_Decode$bool,
 																A3(
 																	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																	'Name',
-																	_elm_lang$core$Json_Decode$string,
+																	'TocId',
+																	_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$int),
 																	A3(
 																		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																		'Provider',
-																		_elm_lang$core$Json_Decode$string,
+																		'IsClosed',
+																		_elm_lang$core$Json_Decode$bool,
 																		A3(
 																			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																			'Facility',
-																			_elm_lang$core$Json_Decode$string,
+																			'BillingYear',
+																			_elm_lang$core$Json_Decode$int,
 																			A3(
 																				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																				'ProxyPhoneNumberTypeId',
-																				_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$int),
+																				'BillingMonth',
+																				_elm_lang$core$Json_Decode$int,
 																				A3(
 																					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																					'ProxyPhone',
-																					_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																					'BillingDate',
+																					_elm_lang$core$Json_Decode$string,
 																					A3(
 																						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																						'ProxyRelationshipTypeId',
-																						_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$int),
+																						'DateOfService',
+																						_elm_lang$core$Json_Decode$string,
 																						A3(
 																							_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																							'ProxyLastName',
-																							_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																							'CcmRegistrationDate',
+																							_elm_lang$core$Json_Decode$string,
 																							A3(
 																								_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																								'ProxyMiddleName',
-																								_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																								'TotalTimeSpent',
+																								_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$int),
 																								A3(
 																									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																									'ProxyFirstName',
-																									_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																									'OpenTasks',
+																									_elm_lang$core$Json_Decode$int,
 																									A3(
 																										_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																										'Zip',
-																										_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																										'StaffId',
+																										_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$int),
 																										A3(
 																											_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																											'StateId',
+																											'AssignedTo',
 																											_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
 																											A3(
 																												_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																												'City',
-																												_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																												'Phone',
+																												_elm_lang$core$Json_Decode$string,
 																												A3(
 																													_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																													'Address3',
+																													'PatientFacilityIdNo',
 																													_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
 																													A3(
 																														_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																														'Address2',
-																														_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																														'DoB',
+																														_elm_lang$core$Json_Decode$string,
 																														A3(
 																															_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																															'Address',
-																															_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																															'PatientId',
+																															_elm_lang$core$Json_Decode$int,
 																															A3(
 																																_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																'SecondaryPhoneNumberTypeId',
-																																_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$int),
+																																'PatientName',
+																																_elm_lang$core$Json_Decode$string,
 																																A3(
 																																	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																	'SecondaryPhone',
-																																	_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																	'ProviderId',
+																																	_elm_lang$core$Json_Decode$int,
 																																	A3(
 																																		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																		'PrimaryPhoneNumberTypeId',
-																																		_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$int),
+																																		'MainProvider',
+																																		_elm_lang$core$Json_Decode$string,
 																																		A3(
 																																			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																			'PrimaryPhone',
-																																			_elm_lang$core$Json_Decode$string,
+																																			'PracticeLocation',
+																																			_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
 																																			A3(
 																																				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																				'Email',
-																																				_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																				'FacilityId',
+																																				_elm_lang$core$Json_Decode$int,
 																																				A3(
 																																					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																					'PAN',
-																																					_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
+																																					'Facility',
+																																					_elm_lang$core$Json_Decode$string,
 																																					A3(
 																																						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																						'MRN',
-																																						_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
-																																						A3(
-																																							_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																							'SSN',
-																																							_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
-																																							A3(
-																																								_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																								'DoB',
-																																								_elm_lang$core$Json_Decode$string,
-																																								A3(
-																																									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																									'SexTypeId',
-																																									_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$int),
-																																									A3(
-																																										_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																										'LastName',
-																																										_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
-																																										A3(
-																																											_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																											'MiddleName',
-																																											_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
-																																											A3(
-																																												_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																												'FirstName',
-																																												_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string),
-																																												A3(
-																																													_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																													'ProviderId',
-																																													_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$int),
-																																													A3(
-																																														_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																														'FacilityId',
-																																														_elm_lang$core$Json_Decode$int,
-																																														A3(
-																																															_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-																																															'ID',
-																																															_elm_lang$core$Json_Decode$int,
-																																															_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Enrollment))))))))))))))))))))))))))))))))))))))))))))))));
+																																						'ID',
+																																						_elm_lang$core$Json_Decode$int,
+																																						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$BillingCcm)))))))))))))))))))))))))))))))))))))));
 var _user$project$Load$decodeModel = A2(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
 	0,
@@ -14068,12 +14026,12 @@ var _user$project$Load$decodeModel = A2(
 			A3(
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 				'list',
-				_elm_lang$core$Json_Decode$list(_user$project$Load$decodeEnrollment),
+				_elm_lang$core$Json_Decode$list(_user$project$Load$decodeBillingCcm),
 				A2(
 					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
 					_user$project$Model$Initial,
 					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Model))))));
-var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/people/GetEmploymentInfo?showPending=true', _user$project$Load$decodeModel);
+var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/people/CcmGridDataSource?showOpenCcmBills=true', _user$project$Load$decodeModel);
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
 var _user$project$Main$view = function (model) {
@@ -14086,10 +14044,10 @@ var _user$project$Main$view = function (model) {
 				lowerQuery,
 				_elm_lang$core$String$toLower(
 					function (_) {
-						return _.dob;
+						return _.patientName;
 					}(_p0)));
 		},
-		model.enrollment);
+		model.billingCcm);
 	var len = (_elm_lang$core$List$length(filteredEmployers) / 12) | 0;
 	var rng = A2(
 		_elm_lang$core$List$map,
@@ -14210,7 +14168,7 @@ var _user$project$Main$view = function (model) {
 										_0: _elm_lang$html$Html_Attributes$id('testDate'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$value(_p1._0.dob),
+											_0: _elm_lang$html$Html_Attributes$value(_p1._0.doB),
 											_1: {ctor: '[]'}
 										}
 									}
@@ -14282,7 +14240,7 @@ var _user$project$Main$update = F2(
 							_p3,
 							{
 								state: _user$project$Model$Grid,
-								enrollment: _user$project$Load$newEmployers(_p3.enrollment)
+								billingCcm: _user$project$Load$newEmployers(_p3.billingCcm)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
@@ -14333,7 +14291,7 @@ var _user$project$Main$getTestDate = _elm_lang$core$Native_Platform.incomingPort
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.Enrollment":{"type":"{ iD : Int , facilityId : Int , providerId : Maybe.Maybe Int , firstName : Maybe.Maybe String , middleName : Maybe.Maybe String , lastName : Maybe.Maybe String , sexTypeId : Maybe.Maybe Int , dob : String , sSN : Maybe.Maybe String , mRN : Maybe.Maybe String , pAN : Maybe.Maybe String , email : Maybe.Maybe String , primaryPhone : String , primaryPhoneNumberTypeId : Maybe.Maybe Int , secondaryPhone : Maybe.Maybe String , secondaryPhoneNumberTypeId : Maybe.Maybe Int , address : Maybe.Maybe String , address2 : Maybe.Maybe String , address3 : Maybe.Maybe String , city : Maybe.Maybe String , stateId : Maybe.Maybe String , zip : Maybe.Maybe String , proxyFirstName : Maybe.Maybe String , proxyMiddleName : Maybe.Maybe String , proxyLastName : Maybe.Maybe String , proxyRelationshipTypeId : Maybe.Maybe Int , proxyPhone : Maybe.Maybe String , proxyPhoneNumberTypeId : Maybe.Maybe Int , facility : String , provider : String , name : String , primaryInsurance : Maybe.Maybe String , secondaryInsurance : Maybe.Maybe String , status : String , assignedTo : String , proxyName : String , lastContactAttempt : Maybe.Maybe String , contactAttempts : Maybe.Maybe String , comments : Maybe.Maybe String , existingComments : Maybe.Maybe String , importDate : String , consentObtained : Maybe.Maybe String , elligibleICD10 : Int , elligibleICD9 : Int , disableCall : Bool , batchId : Int , canRegister : Bool }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , enrollment : List Model.Enrollment , tableState : Table.State , query : String , currentPage : Int }","args":[]}},"unions":{"Table.State":{"tags":{"State":["String","Bool"]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":["Model.Enrollment"],"Error":["Http.Error"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"Reset":[],"SetQuery":["String"],"EditStart":["Model.Enrollment"],"EditCancel":[],"SetTableState":["Table.State"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.BillingCcm":{"type":"{ iD : Int , facility : String , facilityId : Int , practiceLocation : Maybe.Maybe String , mainProvider : String , providerId : Int , patientName : String , patientId : Int , doB : String , patientFacilityIdNo : Maybe.Maybe String , phone : String , assignedTo : Maybe.Maybe String , staffId : Maybe.Maybe Int , openTasks : Int , totalTimeSpent : Maybe.Maybe Int , ccmRegistrationDate : String , dateOfService : String , billingDate : String , billingMonth : Int , billingYear : Int , isClosed : Bool , tocId : Maybe.Maybe Int , readmission : Bool , isComplexCCM : Bool , batchCloseOnInvoiceCompletion : Bool , reviewedByStaffName : Maybe.Maybe String , canModifyReviewedStatus : Bool , cPT : String , isReviewed : Bool , dxPresent : Bool , carePlanPresent : Bool , medsPresent : Bool , allergiesPresent : Bool , vitalsPresent : Bool , recordingPresent : Bool , chartComplete : Bool , status : String , is24HoursSinceBilledString : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , billingCcm : List Model.BillingCcm , tableState : Table.State , query : String , currentPage : Int }","args":[]}},"unions":{"Table.State":{"tags":{"State":["String","Bool"]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":["Model.BillingCcm"],"Error":["Http.Error"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"Reset":[],"SetQuery":["String"],"EditStart":["Model.BillingCcm"],"EditCancel":[],"SetTableState":["Table.State"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])

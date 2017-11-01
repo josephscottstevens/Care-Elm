@@ -7,7 +7,7 @@ import Html.Events exposing (onClick)
 import Table
 
 
-customGrid : { a | employers : List Enrollment, tableState : Table.State } -> Html Msg
+customGrid : { a | employers : List BillingCcm, tableState : Table.State } -> Html Msg
 customGrid model =
     Table.view config model.tableState (List.take 12 model.employers)
 
@@ -22,18 +22,18 @@ df str =
             ""
 
 
-config : Table.Config Enrollment Msg
+config : Table.Config BillingCcm Msg
 config =
     Table.customConfig
-        { toId = .name
+        { toId = .patientName
         , toMsg = SetTableState
         , columns =
             [ checkColumn ""
             , Table.stringColumn "Facility" .facility
-            , Table.stringColumn "Name" .name
-            , Table.stringColumn "DoB" .dob
-            , Table.stringColumn "Provider" .provider
 
+            -- , Table.stringColumn "Name" .name
+            -- , Table.stringColumn "DoB" .dob
+            -- , Table.stringColumn "Provider" .provider
             -- , Table.stringColumn "Prim. Ins." .primaryInsurance
             , editColumn
             ]
@@ -87,7 +87,7 @@ simpleRowAttrs _ =
     []
 
 
-editColumn : Table.Column Enrollment Msg
+editColumn : Table.Column BillingCcm Msg
 editColumn =
     Table.veryCustomColumn
         { name = ""
@@ -96,14 +96,14 @@ editColumn =
         }
 
 
-editColumnCell : Enrollment -> Table.HtmlDetails Msg
+editColumnCell : BillingCcm -> Table.HtmlDetails Msg
 editColumnCell emp =
     Table.HtmlDetails []
         [ button [ class "btn btn-default", onClick (EditStart emp) ] [ text "Edit" ]
         ]
 
 
-checkColumn : String -> Table.Column Enrollment Msg
+checkColumn : String -> Table.Column BillingCcm Msg
 checkColumn name =
     Table.veryCustomColumn
         { name = name
@@ -112,7 +112,7 @@ checkColumn name =
         }
 
 
-checkColumnCell : Enrollment -> Table.HtmlDetails Msg
+checkColumnCell : BillingCcm -> Table.HtmlDetails Msg
 checkColumnCell emp =
     Table.HtmlDetails []
         [ input [ type_ "checkbox" ] []

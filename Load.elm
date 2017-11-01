@@ -1,123 +1,98 @@
 module Load exposing (..)
 
-import Model exposing (..)
+import Json.Encode
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
+import Model exposing (..)
 import Table
 
 
-decodeEnrollment : Json.Decode.Decoder Enrollment
-decodeEnrollment =
-    Json.Decode.Pipeline.decode Enrollment
+decodeBillingCcm : Json.Decode.Decoder BillingCcm
+decodeBillingCcm =
+    Json.Decode.Pipeline.decode BillingCcm
         |> Json.Decode.Pipeline.required "ID" (Json.Decode.int)
-        |> Json.Decode.Pipeline.required "FacilityId" (Json.Decode.int)
-        |> Json.Decode.Pipeline.required "ProviderId" (Json.Decode.maybe int)
-        |> Json.Decode.Pipeline.required "FirstName" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "MiddleName" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "LastName" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "SexTypeId" (Json.Decode.maybe int)
-        |> Json.Decode.Pipeline.required "DoB" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "SSN" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "MRN" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "PAN" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "Email" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "PrimaryPhone" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "PrimaryPhoneNumberTypeId" (Json.Decode.maybe int)
-        |> Json.Decode.Pipeline.required "SecondaryPhone" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "SecondaryPhoneNumberTypeId" (Json.Decode.maybe int)
-        |> Json.Decode.Pipeline.required "Address" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "Address2" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "Address3" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "City" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "StateId" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "Zip" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "ProxyFirstName" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "ProxyMiddleName" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "ProxyLastName" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "ProxyRelationshipTypeId" (Json.Decode.maybe int)
-        |> Json.Decode.Pipeline.required "ProxyPhone" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "ProxyPhoneNumberTypeId" (Json.Decode.maybe int)
         |> Json.Decode.Pipeline.required "Facility" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "Provider" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "Name" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "PrimaryInsurance" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "SecondaryInsurance" (Json.Decode.maybe string)
+        |> Json.Decode.Pipeline.required "FacilityId" (Json.Decode.int)
+        |> Json.Decode.Pipeline.required "PracticeLocation" (Json.Decode.maybe Json.Decode.string)
+        |> Json.Decode.Pipeline.required "MainProvider" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "ProviderId" (Json.Decode.int)
+        |> Json.Decode.Pipeline.required "PatientName" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "PatientId" (Json.Decode.int)
+        |> Json.Decode.Pipeline.required "DoB" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "PatientFacilityIdNo" (Json.Decode.maybe Json.Decode.string)
+        |> Json.Decode.Pipeline.required "Phone" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "AssignedTo" (Json.Decode.maybe Json.Decode.string)
+        |> Json.Decode.Pipeline.required "StaffId" (Json.Decode.maybe Json.Decode.int)
+        |> Json.Decode.Pipeline.required "OpenTasks" (Json.Decode.int)
+        |> Json.Decode.Pipeline.required "TotalTimeSpent" (Json.Decode.maybe Json.Decode.int)
+        |> Json.Decode.Pipeline.required "CcmRegistrationDate" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "DateOfService" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "BillingDate" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "BillingMonth" (Json.Decode.int)
+        |> Json.Decode.Pipeline.required "BillingYear" (Json.Decode.int)
+        |> Json.Decode.Pipeline.required "IsClosed" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "TocId" (Json.Decode.maybe Json.Decode.int)
+        |> Json.Decode.Pipeline.required "Readmission" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "IsComplexCCM" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "BatchCloseOnInvoiceCompletion" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "ReviewedByStaffName" (Json.Decode.maybe Json.Decode.string)
+        |> Json.Decode.Pipeline.required "CanModifyReviewedStatus" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "CPT" (Json.Decode.string)
+        |> Json.Decode.Pipeline.required "IsReviewed" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "DxPresent" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "CarePlanPresent" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "MedsPresent" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "AllergiesPresent" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "VitalsPresent" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "RecordingPresent" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "ChartComplete" (Json.Decode.bool)
         |> Json.Decode.Pipeline.required "Status" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "AssignedTo" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "ProxyName" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "LastContactAttempt" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "ContactAttempts" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "Comments" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "ExistingComments" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "ImportDate" (Json.Decode.string)
-        |> Json.Decode.Pipeline.required "ConsentObtained" (Json.Decode.maybe string)
-        |> Json.Decode.Pipeline.required "ElligibleICD10" (Json.Decode.int)
-        |> Json.Decode.Pipeline.required "ElligibleICD9" (Json.Decode.int)
-        |> Json.Decode.Pipeline.required "DisableCall" (Json.Decode.bool)
-        |> Json.Decode.Pipeline.required "BatchId" (Json.Decode.int)
-        |> Json.Decode.Pipeline.required "CanRegister" (Json.Decode.bool)
+        |> Json.Decode.Pipeline.required "Is24HoursSinceBilledString" (Json.Decode.string)
 
 
 
--- |> Json.Decode.Pipeline.required "selectedICDCodes" (Json.Decode.maybe string)
--- encodeEnrollment : Enrollment -> Json.Encode.Value
--- encodeEnrollment record =
+-- encodeBillingCcm : BillingCcm -> Json.Encode.Value
+-- encodeBillingCcm record =
 --     Json.Encode.object
 --         [ ( "iD", Json.Encode.int <| record.iD )
---         , ( "facilityId", Json.Encode.int <| record.facilityId )
---         , ( "providerId", Json.Encode.int <| record.providerId )
---         , ( "firstName", Json.Encode.maybe <| encodeString <| record.firstName )
---         , ( "middleName", Json.Encode.maybe <| encodeString <| record.middleName )
---         , ( "lastName", Json.Encode.maybe <| encodeString <| record.lastName )
---         , ( "sexTypeId", Json.Encode.maybe <| encodeString <| record.sexTypeId )
---         , ( "doB", Json.Encode.string <| record.doB )
---         , ( "sSN", Json.Encode.maybe <| encodeString <| record.sSN )
---         , ( "mRN", Json.Encode.maybe <| encodeString <| record.mRN )
---         , ( "pAN", Json.Encode.maybe <| encodeString <| record.pAN )
---         , ( "email", Json.Encode.maybe <| encodeString <| record.email )
---         , ( "primaryPhone", Json.Encode.string <| record.primaryPhone )
---         , ( "primaryPhoneNumberTypeId", Json.Encode.maybe <| encodeString <| record.primaryPhoneNumberTypeId )
---         , ( "secondaryPhone", Json.Encode.maybe <| encodeString <| record.secondaryPhone )
---         , ( "secondaryPhoneNumberTypeId", Json.Encode.maybe <| encodeString <| record.secondaryPhoneNumberTypeId )
---         , ( "address", Json.Encode.maybe <| encodeString <| record.address )
---         , ( "address2", Json.Encode.maybe <| encodeString <| record.address2 )
---         , ( "address3", Json.Encode.maybe <| encodeString <| record.address3 )
---         , ( "city", Json.Encode.maybe <| encodeString <| record.city )
---         , ( "stateId", Json.Encode.maybe <| encodeString <| record.stateId )
---         , ( "zip", Json.Encode.maybe <| encodeString <| record.zip )
---         , ( "proxyFirstName", Json.Encode.maybe <| encodeString <| record.proxyFirstName )
---         , ( "proxyMiddleName", Json.Encode.maybe <| encodeString <| record.proxyMiddleName )
---         , ( "proxyLastName", Json.Encode.maybe <| encodeString <| record.proxyLastName )
---         , ( "proxyRelationshipTypeId", Json.Encode.maybe <| encodeString <| record.proxyRelationshipTypeId )
---         , ( "proxyPhone", Json.Encode.maybe <| encodeString <| record.proxyPhone )
---         , ( "proxyPhoneNumberTypeId", Json.Encode.maybe <| encodeString <| record.proxyPhoneNumberTypeId )
 --         , ( "facility", Json.Encode.string <| record.facility )
---         , ( "provider", Json.Encode.string <| record.provider )
---         , ( "name", Json.Encode.string <| record.name )
---         , ( "primaryInsurance", Json.Encode.maybe <| encodeString <| record.primaryInsurance )
---         , ( "secondaryInsurance", Json.Encode.maybe <| encodeString <| record.secondaryInsurance )
---         , ( "status", Json.Encode.string <| record.status )
+--         , ( "facilityId", Json.Encode.int <| record.facilityId )
+--         , ( "practiceLocation", Json.Encode.string <| record.practiceLocation )
+--         , ( "mainProvider", Json.Encode.string <| record.mainProvider )
+--         , ( "providerId", Json.Encode.int <| record.providerId )
+--         , ( "patientName", Json.Encode.string <| record.patientName )
+--         , ( "patientId", Json.Encode.int <| record.patientId )
+--         , ( "doB", Json.Encode.string <| record.doB )
+--         , ( "patientFacilityIdNo", Json.Encode.string <| record.patientFacilityIdNo )
+--         , ( "phone", Json.Encode.string <| record.phone )
 --         , ( "assignedTo", Json.Encode.string <| record.assignedTo )
---         , ( "proxyName", Json.Encode.string <| record.proxyName )
---         , ( "lastContactAttempt", Json.Encode.maybe <| encodeString <| record.lastContactAttempt )
---         , ( "contactAttempts", Json.Encode.maybe <| encodeString <| record.contactAttempts )
---         , ( "comments", Json.Encode.maybe <| encodeString <| record.comments )
---         , ( "existingComments", Json.Encode.maybe <| encodeString <| record.existingComments )
---         , ( "importDate", Json.Encode.string <| record.importDate )
---         , ( "consentObtained", Json.Encode.maybe <| encodeString <| record.consentObtained )
---         , ( "elligibleICD10", Json.Encode.int <| record.elligibleICD10 )
---         , ( "elligibleICD9", Json.Encode.int <| record.elligibleICD9 )
---         , ( "disableCall", Json.Encode.bool <| record.disableCall )
---         , ( "batchId", Json.Encode.int <| record.batchId )
---         , ( "canRegister", Json.Encode.bool <| record.canRegister )
---         , ( "facilities", Json.Encode.maybe <| encodeString <| record.facilities )
---         , ( "providers", Json.Encode.maybe <| encodeString <| record.providers )
---         , ( "sexTypes", Json.Encode.maybe <| encodeString <| record.sexTypes )
---         , ( "relationshipTypes", Json.Encode.maybe <| encodeString <| record.relationshipTypes )
---         , ( "states", Json.Encode.maybe <| encodeString <| record.states )
---         , ( "phoneNumberTypes", Json.Encode.maybe <| encodeString <| record.phoneNumberTypes )
---         , ( "selectedICDCodes", Json.Encode.maybe <| encodeString <| record.selectedICDCodes )
+--         , ( "staffId", Json.Encode.int <| record.staffId )
+--         , ( "openTasks", Json.Encode.int <| record.openTasks )
+--         , ( "totalTimeSpent", Json.Encode.int <| record.totalTimeSpent )
+--         , ( "ccmRegistrationDate", Json.Encode.string <| record.ccmRegistrationDate )
+--         , ( "dateOfService", Json.Encode.string <| record.dateOfService )
+--         , ( "billingDate", Json.Encode.string <| record.billingDate )
+--         , ( "billingMonth", Json.Encode.int <| record.billingMonth )
+--         , ( "billingYear", Json.Encode.int <| record.billingYear )
+--         , ( "isClosed", Json.Encode.bool <| record.isClosed )
+--         , ( "tocId", Json.Encode.int <| record.tocId )
+--         , ( "readmission", Json.Encode.bool <| record.readmission )
+--         , ( "isComplexCCM", Json.Encode.bool <| record.isComplexCCM )
+--         , ( "batchCloseOnInvoiceCompletion", Json.Encode.bool <| record.batchCloseOnInvoiceCompletion )
+--         , ( "reviewedByStaffName", Json.Encode.string <| record.reviewedByStaffName )
+--         , ( "canModifyReviewedStatus", Json.Encode.bool <| record.canModifyReviewedStatus )
+--         , ( "cPT", Json.Encode.string <| record.cPT )
+--         , ( "isReviewed", Json.Encode.bool <| record.isReviewed )
+--         , ( "dxPresent", Json.Encode.bool <| record.dxPresent )
+--         , ( "carePlanPresent", Json.Encode.bool <| record.carePlanPresent )
+--         , ( "medsPresent", Json.Encode.bool <| record.medsPresent )
+--         , ( "allergiesPresent", Json.Encode.bool <| record.allergiesPresent )
+--         , ( "vitalsPresent", Json.Encode.bool <| record.vitalsPresent )
+--         , ( "recordingPresent", Json.Encode.bool <| record.recordingPresent )
+--         , ( "chartComplete", Json.Encode.bool <| record.chartComplete )
+--         , ( "status", Json.Encode.string <| record.status )
+--         , ( "is24HoursSinceBilledString", Json.Encode.string <| record.is24HoursSinceBilledString )
 --         ]
 
 
@@ -125,7 +100,7 @@ decodeModel : Decoder Model
 decodeModel =
     decode Model
         |> hardcoded Initial
-        |> required "list" (list decodeEnrollment)
+        |> required "list" (list decodeBillingCcm)
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
         |> hardcoded 0
@@ -133,7 +108,7 @@ decodeModel =
 
 request : Http.Request Model
 request =
-    Http.get "/people/GetEmploymentInfo?showPending=true" decodeModel
+    Http.get "/people/CcmGridDataSource?showOpenCcmBills=true" decodeModel
 
 
 getEmployment : Cmd Msg
@@ -145,12 +120,12 @@ getEmployment =
 -- Not good, rowId has to be patched on later, but I don't how to make it apart of the decoder
 
 
-newEmployers : List Enrollment -> List Enrollment
+newEmployers : List BillingCcm -> List BillingCcm
 newEmployers enrollment =
     enrollment |> List.indexedMap (\idx t -> { t | iD = idx })
 
 
-updateEmployers : List Enrollment -> Enrollment -> List Enrollment
+updateEmployers : List BillingCcm -> BillingCcm -> List BillingCcm
 updateEmployers enrollment newEnrollment =
     enrollment
         |> List.map
