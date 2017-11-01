@@ -39,14 +39,6 @@ init =
     ( emptyModel, getEmployment )
 
 
-itemsPerPage =
-    10
-
-
-pagesPerBlock =
-    8
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -129,99 +121,6 @@ filteredCcm model =
     in
         model.billingCcm
             |> List.filter (String.contains lowerQuery << String.toLower << .facility)
-
-
-pagerDiv : List a -> Int -> Html Msg
-pagerDiv filteredEmployers currentPage =
-    let
-        totalRows =
-            List.length filteredEmployers
-
-        totalPages =
-            (totalRows // itemsPerPage) - 1
-
-        activeOrNot pageIndex =
-            let
-                activeOrNotText =
-                    if pageIndex == currentPage then
-                        "e-currentitem e-active"
-                    else
-                        "e-default"
-            in
-                div [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), onClick (UpdatePage (Index pageIndex)) ] [ text (toString (pageIndex + 1)) ]
-
-        rng =
-            List.range 0 totalPages
-                |> List.drop ((currentPage // pagesPerBlock) * pagesPerBlock)
-                |> List.take pagesPerBlock
-                |> List.map activeOrNot
-
-        firstPageClass =
-            if currentPage >= pagesPerBlock then
-                "e-icon e-mediaback e-firstpage e-default"
-            else
-                "e-icon e-mediaback e-firstpagedisabled e-disable"
-
-        leftPageClass =
-            if currentPage > 0 then
-                "e-icon e-arrowheadleft-2x e-prevpage e-default"
-            else
-                "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
-
-        leftPageBlockClass =
-            if currentPage >= pagesPerBlock then
-                "e-link e-spacing e-PP e-numericitem e-default"
-            else
-                "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
-
-        rightPageBlockClass =
-            if currentPage < totalPages - pagesPerBlock then
-                "e-link e-NP e-spacing e-numericitem e-default"
-            else
-                "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
-
-        rightPageClass =
-            if currentPage < totalPages then
-                "e-nextpage e-icon e-arrowheadright-2x e-default"
-            else
-                "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
-
-        lastPageClass =
-            if currentPage < totalPages - pagesPerBlock then
-                "e-lastpage e-icon e-mediaforward e-default"
-            else
-                "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
-
-        employersCount =
-            toString (List.length filteredEmployers)
-
-        pagerText =
-            let
-                currentPageText =
-                    toString (currentPage + 1)
-
-                totalPagesText =
-                    toString (totalPages + 1)
-
-                totalItemsText =
-                    toString totalRows
-            in
-                currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
-    in
-        div [ class "e-pager e-js e-pager" ]
-            [ div [ class "e-pagercontainer" ]
-                [ div [ class firstPageClass, onClick (UpdatePage First) ] []
-                , div [ class leftPageClass, onClick (UpdatePage Previous) ] []
-                , a [ class leftPageBlockClass, onClick (UpdatePage PreviousBlock) ] [ text "..." ]
-                , div [ class "e-numericcontainer e-default" ] rng
-                , a [ class rightPageBlockClass, onClick (UpdatePage NextBlock) ] [ text "..." ]
-                , div [ class rightPageClass, onClick (UpdatePage Next) ] []
-                , div [ class lastPageClass, onClick (UpdatePage Last) ] []
-                ]
-            , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
-                [ span [ class "e-pagermsg" ] [ text pagerText ]
-                ]
-            ]
 
 
 view : Model -> Html Msg

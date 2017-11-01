@@ -2,16 +2,7 @@ module Model exposing (..)
 
 import Http
 import Table
-
-
-type Page
-    = First
-    | Previous
-    | PreviousBlock
-    | Index Int
-    | NextBlock
-    | Next
-    | Last
+import GridPaging
 
 
 type Msg
@@ -22,7 +13,7 @@ type Msg
       -- | UpdateStartDate String
       -- | UpdateCity Enrollment String
       -- | UpdateState Enrollment String
-    | UpdatePage Page
+    | UpdatePage GridPaging.Page
     | SetQuery String
     | SetTableState Table.State
     | Reset
