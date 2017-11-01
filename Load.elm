@@ -6,6 +6,7 @@ import Json.Decode.Pipeline exposing (..)
 import Http
 import Model exposing (..)
 import Table
+import GridPaging
 
 
 decodeBillingCcm : Json.Decode.Decoder BillingCcm
@@ -103,7 +104,7 @@ decodeModel =
         |> required "list" (list decodeBillingCcm)
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
-        |> hardcoded 0
+        |> hardcoded GridPaging.initialPageState
 
 
 request : Http.Request Model

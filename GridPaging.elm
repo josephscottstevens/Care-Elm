@@ -6,15 +6,21 @@ import Json.Decode as Json
 import Html.Events as E
 
 
-type SortState
-    = SortState Int
+type PageState
+    = PageState Int
 
 
-type alias GridPagingConfig =
-    { itemsPerPage : Int
-    , pagesPerBlock : Int
-    , currentPage : Int
-    }
+type GridPagingConfig msg
+    = GridPagingConfig
+        { itemsPerPage : Int
+        , pagesPerBlock : Int
+        , toMsg : PageState -> msg
+        }
+
+
+initialPageState : PageState
+initialPageState =
+    PageState 0
 
 
 type Page
@@ -27,26 +33,66 @@ type Page
     | Last
 
 
-onClick : Page -> Int -> (SortState -> msg) -> Attribute msg
-onClick page currentPage toMsg =
+onClick : Int -> (PageState -> msg) -> Attribute msg
+onClick currentPage toMsg =
     E.on "click" <|
         Json.map toMsg <|
-            Json.map SortState (Json.succeed currentPage)
+            Json.map PageState (Json.succeed currentPage)
 
 
-
--- onClick name isReversed toMsg =
---     E.on "click" <|
---         Json.map toMsg <|
---             Json.map SortState (Json.succeed 0)
--- toSortSetPage : Page -> SortState -> msg
--- toSortSetPage page sortState =
---     onClick
-
-
-pagerDiv : GridPagingConfig -> SortState -> List data -> Html msg
-pagerDiv { itemsPerPage, pagesPerBlock, currentPage } state filteredList =
+getNewState : Page -> Int -> List -> Int
+getNewState page currentPage lst =
     let
+        totalRows =
+            10
+
+        --List.length (filteredCcm model)
+        totalPages =
+            5
+
+        --totalRows // itemsPerPage
+    in
+        case page of
+            First ->
+                0
+
+            Previous ->
+                if currentPage > 0 then
+                    currentPage - 1
+                else
+                    0
+
+            PreviousBlock ->
+                0
+
+            Index t ->
+                t
+
+            NextBlock ->
+                0
+
+            Next ->
+                currentPage + 1
+
+            Last ->
+                totalPages - 1
+
+
+view : GridPagingConfig msg -> PageState -> List data -> Html msg
+view t state data =
+    let
+        currentPage =
+            0
+
+        filteredList =
+            []
+
+        itemsPerPage =
+            0
+
+        pagesPerBlock =
+            0
+
         totalRows =
             List.length filteredList
 

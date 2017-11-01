@@ -13,7 +13,7 @@ type Msg
       -- | UpdateStartDate String
       -- | UpdateCity Enrollment String
       -- | UpdateState Enrollment String
-    | UpdatePage GridPaging.Page
+    | SetPagingState GridPaging.PageState
     | SetQuery String
     | SetTableState Table.State
     | Reset
@@ -37,7 +37,7 @@ type alias Model =
     , billingCcm : List BillingCcm
     , tableState : Table.State
     , query : String
-    , currentPage : Int
+    , pageState : GridPaging.PageState
     }
 
 
@@ -47,7 +47,7 @@ emptyModel =
     , billingCcm = []
     , tableState = Table.initialSort "dob"
     , query = ""
-    , currentPage = 0
+    , pageState = GridPaging.initialPageState
     }
 
 
