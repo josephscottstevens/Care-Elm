@@ -5,13 +5,13 @@ import Table
 
 
 type Page
-    = FirstPage
-    | PreviousPage
-    | PreviousPageBlock
-    | PageIndex Int
-    | NextPageBlock
-    | NextPage
-    | LastPage
+    = First
+    | Previous
+    | Previouslock
+    | Index Int
+    | NextBlock
+    | Next
+    | Last
 
 
 type Msg

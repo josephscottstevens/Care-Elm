@@ -81,7 +81,11 @@ update msg model =
             ( emptyModel, getEmployment )
 
 
-pagerDiv : List BillingCcm -> Int -> Html Msg
+
+--pagerDiv : List BillingCcm -> Int -> Html Msg
+
+
+pagerDiv : List a -> Int -> Html Msg
 pagerDiv filteredEmployers currentPage =
     let
         itemsPerPage =
@@ -155,7 +159,7 @@ pagerDiv filteredEmployers currentPage =
                 , a [ class leftPageBlockClass ] [ text "..." ]
                 , div [ class "e-numericcontainer e-default" ] rng
                 , a [ class rightPageBlockClass ] [ text "..." ]
-                , div [ class rightPageClass, onClick NextPage ] []
+                , div [ class rightPageClass, onClick (UpdatePage Next) ] []
                 , div [ class lastPageClass ] []
                 ]
             , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]

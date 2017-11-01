@@ -13635,12 +13635,24 @@ var _user$project$Model$BillingCcm = function (a) {
 		};
 	};
 };
+var _user$project$Model$Last = {ctor: 'Last'};
+var _user$project$Model$Next = {ctor: 'Next'};
+var _user$project$Model$NextBlock = {ctor: 'NextBlock'};
+var _user$project$Model$Index = function (a) {
+	return {ctor: 'Index', _0: a};
+};
+var _user$project$Model$Previouslock = {ctor: 'Previouslock'};
+var _user$project$Model$Previous = {ctor: 'Previous'};
+var _user$project$Model$First = {ctor: 'First'};
 var _user$project$Model$Reset = {ctor: 'Reset'};
 var _user$project$Model$SetTableState = function (a) {
 	return {ctor: 'SetTableState', _0: a};
 };
 var _user$project$Model$SetQuery = function (a) {
 	return {ctor: 'SetQuery', _0: a};
+};
+var _user$project$Model$UpdatePage = function (a) {
+	return {ctor: 'UpdatePage', _0: a};
 };
 var _user$project$Model$EditCancel = {ctor: 'EditCancel'};
 var _user$project$Model$EditStart = function (a) {
@@ -14122,6 +14134,7 @@ var _user$project$Main$pagerDiv = F2(
 	function (filteredEmployers, currentPage) {
 		var employersCount = _elm_lang$core$Basics$toString(
 			_elm_lang$core$List$length(filteredEmployers));
+		var firstPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, 0) > 0) ? 'e-icon e-mediaback e-firstpage e-default' : 'e-icon e-mediaback e-firstpagedisabled e-disable';
 		var activeOrNot = function (pageIndex) {
 			var activeOrNotText = _elm_lang$core$Native_Utils.eq(pageIndex, currentPage) ? 'e-currentitem e-active' : 'e-default';
 			return A2(
@@ -14140,6 +14153,8 @@ var _user$project$Main$pagerDiv = F2(
 				});
 		};
 		var pagesPerBlock = 8;
+		var leftPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, pagesPerBlock) > 0) ? 'e-icon e-arrowheadleft-2x e-prevpage e-default' : 'e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable';
+		var leftPageBlockClass = (_elm_lang$core$Native_Utils.cmp(currentPage, pagesPerBlock) > 0) ? 'e-link e-spacing e-PP e-numericitem e-default' : 'e-link e-nextprevitemdisabled e-disable e-spacing e-PP';
 		var itemsPerPage = 10;
 		var totalPages = (_elm_lang$core$List$length(filteredEmployers) / itemsPerPage) | 0;
 		var rng = A2(
@@ -14152,6 +14167,9 @@ var _user$project$Main$pagerDiv = F2(
 					_elm_lang$core$List$drop,
 					currentPage,
 					A2(_elm_lang$core$List$range, 0, totalPages))));
+		var rightPageBlockClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - pagesPerBlock) < 0) ? 'e-link e-NP e-spacing e-numericitem e-default' : 'e-link e-NP e-spacing e-nextprevitemdisabled e-disable';
+		var rightPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - 1) < 0) ? 'e-nextpage e-icon e-arrowheadright-2x e-default' : 'e-icon e-arrowheadright-2x e-nextpagedisabled e-disable';
+		var lastPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - pagesPerBlock) < 0) ? 'e-lastpage e-icon e-mediaforward e-default' : 'e-icon e-mediaforward e-animate e-lastpagedisabled e-disable';
 		return A2(
 			_elm_lang$html$Html$div,
 			{
@@ -14174,7 +14192,7 @@ var _user$project$Main$pagerDiv = F2(
 							_elm_lang$html$Html$div,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('e-icon e-mediaback e-firstpagedisabled e-disable'),
+								_0: _elm_lang$html$Html_Attributes$class(firstPageClass),
 								_1: {ctor: '[]'}
 							},
 							{ctor: '[]'}),
@@ -14184,7 +14202,7 @@ var _user$project$Main$pagerDiv = F2(
 								_elm_lang$html$Html$div,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable'),
+									_0: _elm_lang$html$Html_Attributes$class(leftPageClass),
 									_1: {ctor: '[]'}
 								},
 								{ctor: '[]'}),
@@ -14194,7 +14212,7 @@ var _user$project$Main$pagerDiv = F2(
 									_elm_lang$html$Html$a,
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('e-link e-nextprevitemdisabled e-disable e-spacing e-PP'),
+										_0: _elm_lang$html$Html_Attributes$class(leftPageBlockClass),
 										_1: {ctor: '[]'}
 									},
 									{
@@ -14218,7 +14236,7 @@ var _user$project$Main$pagerDiv = F2(
 											_elm_lang$html$Html$a,
 											{
 												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$class('e-link e-NP e-spacing e-numericitem e-default'),
+												_0: _elm_lang$html$Html_Attributes$class(rightPageBlockClass),
 												_1: {ctor: '[]'}
 											},
 											{
@@ -14232,8 +14250,13 @@ var _user$project$Main$pagerDiv = F2(
 												_elm_lang$html$Html$div,
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$class('e-nextpage e-icon e-arrowheadright-2x e-default'),
-													_1: {ctor: '[]'}
+													_0: _elm_lang$html$Html_Attributes$class(rightPageClass),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Events$onClick(
+															_user$project$Model$UpdatePage(_user$project$Model$Next)),
+														_1: {ctor: '[]'}
+													}
 												},
 												{ctor: '[]'}),
 											_1: {
@@ -14242,7 +14265,7 @@ var _user$project$Main$pagerDiv = F2(
 													_elm_lang$html$Html$div,
 													{
 														ctor: '::',
-														_0: _elm_lang$html$Html_Attributes$class('e-lastpage e-icon e-mediaforward e-default'),
+														_0: _elm_lang$html$Html_Attributes$class(lastPageClass),
 														_1: {ctor: '[]'}
 													},
 													{ctor: '[]'}),
@@ -14485,6 +14508,14 @@ var _user$project$Main$update = F2(
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				}
+			case 'UpdatePage':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{currentPage: 1}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			case 'SetQuery':
 				return {
 					ctor: '_Tuple2',
@@ -14521,7 +14552,7 @@ var _user$project$Main$getTestDate = _elm_lang$core$Native_Platform.incomingPort
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.BillingCcm":{"type":"{ iD : Int , facility : String , facilityId : Int , practiceLocation : Maybe.Maybe String , mainProvider : String , providerId : Int , patientName : String , patientId : Int , dob : String , patientFacilityIdNo : Maybe.Maybe String , phone : String , assignedTo : Maybe.Maybe String , staffId : Maybe.Maybe Int , openTasks : Int , totalTimeSpent : Maybe.Maybe Int , ccmRegistrationDate : String , dateOfService : String , billingDate : String , billingMonth : Int , billingYear : Int , isClosed : Bool , tocId : Maybe.Maybe Int , readmission : Bool , isComplexCCM : Bool , batchCloseOnInvoiceCompletion : Bool , reviewedByStaffName : Maybe.Maybe String , canModifyReviewedStatus : Bool , cPT : String , isReviewed : Bool , dxPresent : Bool , carePlanPresent : Bool , medsPresent : Bool , allergiesPresent : Bool , vitalsPresent : Bool , recordingPresent : Bool , chartComplete : Bool , status : String , is24HoursSinceBilledString : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , billingCcm : List Model.BillingCcm , tableState : Table.State , query : String , currentPage : Int }","args":[]}},"unions":{"Table.State":{"tags":{"State":["String","Bool"]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":["Model.BillingCcm"],"Error":["Http.Error"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"Reset":[],"SetQuery":["String"],"EditStart":["Model.BillingCcm"],"EditCancel":[],"SetTableState":["Table.State"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.BillingCcm":{"type":"{ iD : Int , facility : String , facilityId : Int , practiceLocation : Maybe.Maybe String , mainProvider : String , providerId : Int , patientName : String , patientId : Int , dob : String , patientFacilityIdNo : Maybe.Maybe String , phone : String , assignedTo : Maybe.Maybe String , staffId : Maybe.Maybe Int , openTasks : Int , totalTimeSpent : Maybe.Maybe Int , ccmRegistrationDate : String , dateOfService : String , billingDate : String , billingMonth : Int , billingYear : Int , isClosed : Bool , tocId : Maybe.Maybe Int , readmission : Bool , isComplexCCM : Bool , batchCloseOnInvoiceCompletion : Bool , reviewedByStaffName : Maybe.Maybe String , canModifyReviewedStatus : Bool , cPT : String , isReviewed : Bool , dxPresent : Bool , carePlanPresent : Bool , medsPresent : Bool , allergiesPresent : Bool , vitalsPresent : Bool , recordingPresent : Bool , chartComplete : Bool , status : String , is24HoursSinceBilledString : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , billingCcm : List Model.BillingCcm , tableState : Table.State , query : String , currentPage : Int }","args":[]}},"unions":{"Table.State":{"tags":{"State":["String","Bool"]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Model.Page":{"tags":{"Last":[],"Index":["Int"],"Previous":[],"Next":[],"Previouslock":[],"First":[],"NextBlock":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":["Model.BillingCcm"],"Error":["Http.Error"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"UpdatePage":["Model.Page"],"Reset":[],"SetQuery":["String"],"EditStart":["Model.BillingCcm"],"EditCancel":[],"SetTableState":["Table.State"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])
