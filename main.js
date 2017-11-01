@@ -13596,7 +13596,7 @@ var _user$project$Model$BillingCcm = function (a) {
 																																			return function (_10) {
 																																				return function (_11) {
 																																					return function (_12) {
-																																						return {iD: a, facility: b, facilityId: c, practiceLocation: d, mainProvider: e, providerId: f, patientName: g, patientId: h, doB: i, patientFacilityIdNo: j, phone: k, assignedTo: l, staffId: m, openTasks: n, totalTimeSpent: o, ccmRegistrationDate: p, dateOfService: q, billingDate: r, billingMonth: s, billingYear: t, isClosed: u, tocId: v, readmission: w, isComplexCCM: x, batchCloseOnInvoiceCompletion: y, reviewedByStaffName: z, canModifyReviewedStatus: _1, cPT: _2, isReviewed: _3, dxPresent: _4, carePlanPresent: _5, medsPresent: _6, allergiesPresent: _7, vitalsPresent: _8, recordingPresent: _9, chartComplete: _10, status: _11, is24HoursSinceBilledString: _12};
+																																						return {iD: a, facility: b, facilityId: c, practiceLocation: d, mainProvider: e, providerId: f, patientName: g, patientId: h, dob: i, patientFacilityIdNo: j, phone: k, assignedTo: l, staffId: m, openTasks: n, totalTimeSpent: o, ccmRegistrationDate: p, dateOfService: q, billingDate: r, billingMonth: s, billingYear: t, isClosed: u, tocId: v, readmission: w, isComplexCCM: x, batchCloseOnInvoiceCompletion: y, reviewedByStaffName: z, canModifyReviewedStatus: _1, cPT: _2, isReviewed: _3, dxPresent: _4, carePlanPresent: _5, medsPresent: _6, allergiesPresent: _7, vitalsPresent: _8, recordingPresent: _9, chartComplete: _10, status: _11, is24HoursSinceBilledString: _12};
 																																					};
 																																				};
 																																			};
@@ -13668,6 +13668,35 @@ var _user$project$Model$SortDesc = {ctor: 'SortDesc'};
 var _user$project$Model$SortAsc = {ctor: 'SortAsc'};
 var _user$project$Model$SortNone = {ctor: 'SortNone'};
 
+var _user$project$Grid$maybeStringColumnCell = function (str) {
+	return A2(
+		_evancz$elm_sortable_table$Table$HtmlDetails,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(str),
+					_1: {ctor: '[]'}
+				}),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Grid$maybeStringColumn = F2(
+	function (name, field) {
+		return _evancz$elm_sortable_table$Table$veryCustomColumn(
+			{
+				name: name,
+				viewData: function (_p0) {
+					return _user$project$Grid$maybeStringColumnCell(
+						field(_p0));
+				},
+				sorter: _evancz$elm_sortable_table$Table$unsortable
+			});
+	});
 var _user$project$Grid$checkColumnCell = function (emp) {
 	return A2(
 		_evancz$elm_sortable_table$Table$HtmlDetails,
@@ -13717,41 +13746,41 @@ var _user$project$Grid$editColumnCell = function (emp) {
 };
 var _user$project$Grid$editColumn = _evancz$elm_sortable_table$Table$veryCustomColumn(
 	{name: '', viewData: _user$project$Grid$editColumnCell, sorter: _evancz$elm_sortable_table$Table$unsortable});
-var _user$project$Grid$simpleRowAttrs = function (_p0) {
+var _user$project$Grid$simpleRowAttrs = function (_p1) {
 	return {ctor: '[]'};
 };
-var _user$project$Grid$simpleTheadHelp = function (_p1) {
-	var _p2 = _p1;
-	var _p4 = _p2._0;
+var _user$project$Grid$simpleTheadHelp = function (_p2) {
+	var _p3 = _p2;
+	var _p5 = _p3._0;
 	var content = function () {
-		var _p3 = _p2._1;
-		switch (_p3.ctor) {
+		var _p4 = _p3._1;
+		switch (_p4.ctor) {
 			case 'Unsortable':
 				return {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p4),
+					_0: _elm_lang$html$Html$text(_p5),
 					_1: {ctor: '[]'}
 				};
 			case 'Sortable':
 				return {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p4),
+					_0: _elm_lang$html$Html$text(_p5),
 					_1: {ctor: '[]'}
 				};
 			default:
-				if (_p3._0.ctor === 'Nothing') {
+				if (_p4._0.ctor === 'Nothing') {
 					return {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p4),
+						_0: _elm_lang$html$Html$text(_p5),
 						_1: {ctor: '[]'}
 					};
 				} else {
 					return {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p4),
+						_0: _elm_lang$html$Html$text(_p5),
 						_1: {
 							ctor: '::',
-							_0: _p3._0._0 ? A2(
+							_0: _p4._0._0 ? A2(
 								_elm_lang$html$Html$div,
 								{
 									ctor: '::',
@@ -13776,7 +13805,7 @@ var _user$project$Grid$simpleTheadHelp = function (_p1) {
 		_elm_lang$html$Html$th,
 		{
 			ctor: '::',
-			_0: _p2._2,
+			_0: _p3._2,
 			_1: {ctor: '[]'}
 		},
 		content);
@@ -13818,17 +13847,62 @@ var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 					}),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Grid$editColumn,
-					_1: {ctor: '[]'}
+					_0: A2(
+						_evancz$elm_sortable_table$Table$stringColumn,
+						'Billing Date',
+						function (_) {
+							return _.billingDate;
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_evancz$elm_sortable_table$Table$stringColumn,
+							'Main Provider',
+							function (_) {
+								return _.mainProvider;
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_evancz$elm_sortable_table$Table$stringColumn,
+								'Patient Name',
+								function (_) {
+									return _.patientName;
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_evancz$elm_sortable_table$Table$stringColumn,
+									'DOB',
+									function (_) {
+										return _.dob;
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_user$project$Grid$maybeStringColumn,
+										'Patient\'s Facility Id No',
+										function (_) {
+											return _.patientName;
+										}),
+									_1: {
+										ctor: '::',
+										_0: _user$project$Grid$editColumn,
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		},
 		customizations: _user$project$Grid$defaultCustomizations
 	});
 var _user$project$Grid$df = function (str) {
-	var _p5 = str;
-	if (_p5.ctor === 'Just') {
-		return _p5._0;
+	var _p6 = str;
+	if (_p6.ctor === 'Just') {
+		return _p6._0;
 	} else {
 		return '';
 	}
@@ -14168,7 +14242,7 @@ var _user$project$Main$view = function (model) {
 										_0: _elm_lang$html$Html_Attributes$id('testDate'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$value(_p1._0.doB),
+											_0: _elm_lang$html$Html_Attributes$value(_p1._0.dob),
 											_1: {ctor: '[]'}
 										}
 									}
@@ -14291,7 +14365,7 @@ var _user$project$Main$getTestDate = _elm_lang$core$Native_Platform.incomingPort
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.BillingCcm":{"type":"{ iD : Int , facility : String , facilityId : Int , practiceLocation : Maybe.Maybe String , mainProvider : String , providerId : Int , patientName : String , patientId : Int , doB : String , patientFacilityIdNo : Maybe.Maybe String , phone : String , assignedTo : Maybe.Maybe String , staffId : Maybe.Maybe Int , openTasks : Int , totalTimeSpent : Maybe.Maybe Int , ccmRegistrationDate : String , dateOfService : String , billingDate : String , billingMonth : Int , billingYear : Int , isClosed : Bool , tocId : Maybe.Maybe Int , readmission : Bool , isComplexCCM : Bool , batchCloseOnInvoiceCompletion : Bool , reviewedByStaffName : Maybe.Maybe String , canModifyReviewedStatus : Bool , cPT : String , isReviewed : Bool , dxPresent : Bool , carePlanPresent : Bool , medsPresent : Bool , allergiesPresent : Bool , vitalsPresent : Bool , recordingPresent : Bool , chartComplete : Bool , status : String , is24HoursSinceBilledString : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , billingCcm : List Model.BillingCcm , tableState : Table.State , query : String , currentPage : Int }","args":[]}},"unions":{"Table.State":{"tags":{"State":["String","Bool"]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":["Model.BillingCcm"],"Error":["Http.Error"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"Reset":[],"SetQuery":["String"],"EditStart":["Model.BillingCcm"],"EditCancel":[],"SetTableState":["Table.State"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.BillingCcm":{"type":"{ iD : Int , facility : String , facilityId : Int , practiceLocation : Maybe.Maybe String , mainProvider : String , providerId : Int , patientName : String , patientId : Int , dob : String , patientFacilityIdNo : Maybe.Maybe String , phone : String , assignedTo : Maybe.Maybe String , staffId : Maybe.Maybe Int , openTasks : Int , totalTimeSpent : Maybe.Maybe Int , ccmRegistrationDate : String , dateOfService : String , billingDate : String , billingMonth : Int , billingYear : Int , isClosed : Bool , tocId : Maybe.Maybe Int , readmission : Bool , isComplexCCM : Bool , batchCloseOnInvoiceCompletion : Bool , reviewedByStaffName : Maybe.Maybe String , canModifyReviewedStatus : Bool , cPT : String , isReviewed : Bool , dxPresent : Bool , carePlanPresent : Bool , medsPresent : Bool , allergiesPresent : Bool , vitalsPresent : Bool , recordingPresent : Bool , chartComplete : Bool , status : String , is24HoursSinceBilledString : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , billingCcm : List Model.BillingCcm , tableState : Table.State , query : String , currentPage : Int }","args":[]}},"unions":{"Table.State":{"tags":{"State":["String","Bool"]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":["Model.BillingCcm"],"Error":["Http.Error"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"Reset":[],"SetQuery":["String"],"EditStart":["Model.BillingCcm"],"EditCancel":[],"SetTableState":["Table.State"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])

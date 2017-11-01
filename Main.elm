@@ -113,7 +113,7 @@ view model =
 
             Edit emp ->
                 div []
-                    [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", id "testDate", value emp.doB ] []
+                    [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", id "testDate", value emp.dob ] []
 
                     -- , input [ placeholder "City", class "e-textbox", onInput (UpdateCity emp), value emp.city ] []
                     -- , input [ placeholder "State", class "e-textbox", onInput (UpdateState emp), value emp.state ] []

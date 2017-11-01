@@ -58,7 +58,7 @@ type alias BillingCcm =
     , providerId : Int
     , patientName : String
     , patientId : Int
-    , doB : String
+    , dob : String
     , patientFacilityIdNo : Maybe String
     , phone : String
     , assignedTo : Maybe String
