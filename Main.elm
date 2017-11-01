@@ -129,7 +129,7 @@ filteredCcm model =
             String.toLower model.query
     in
         model.billingCcm
-            |> List.filter (String.contains lowerQuery << String.toLower << .patientName)
+            |> List.filter (String.contains lowerQuery << String.toLower << .facility)
 
 
 pagerDiv : List a -> Int -> Html Msg
@@ -234,7 +234,7 @@ view model =
         Grid ->
             div []
                 [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
-                , input [ class "form-control", placeholder "Search by Address", onInput SetQuery, value model.query ] []
+                , input [ class "form-control", placeholder "Search by Facility", onInput SetQuery, value model.query ] []
                 , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view config model.tableState ((filteredCcm model) |> List.take 12)
                     ]

@@ -13554,6 +13554,86 @@ var _evancz$elm_sortable_table$Table$increasingBy = function (toComparable) {
 var _evancz$elm_sortable_table$Table$None = {ctor: 'None'};
 var _evancz$elm_sortable_table$Table$unsortable = _evancz$elm_sortable_table$Table$None;
 
+var _user$project$CommonGrid$simpleTheadHelp = function (_p0) {
+	var _p1 = _p0;
+	var _p3 = _p1._0;
+	var content = function () {
+		var _p2 = _p1._1;
+		switch (_p2.ctor) {
+			case 'Unsortable':
+				return {
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(_p3),
+					_1: {ctor: '[]'}
+				};
+			case 'Sortable':
+				return {
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(_p3),
+					_1: {ctor: '[]'}
+				};
+			default:
+				if (_p2._0.ctor === 'Nothing') {
+					return {
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(_p3),
+						_1: {ctor: '[]'}
+					};
+				} else {
+					return {
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(_p3),
+						_1: {
+							ctor: '::',
+							_0: _p2._0._0 ? A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('glyphicon glyphicon-menu-up'),
+									_1: {ctor: '[]'}
+								},
+								{ctor: '[]'}) : A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('glyphicon glyphicon-menu-down'),
+									_1: {ctor: '[]'}
+								},
+								{ctor: '[]'}),
+							_1: {ctor: '[]'}
+						}
+					};
+				}
+		}
+	}();
+	return A2(
+		_elm_lang$html$Html$th,
+		{
+			ctor: '::',
+			_0: _p1._2,
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('e-columnheader'),
+				_1: {ctor: '[]'}
+			}
+		},
+		content);
+};
+var _user$project$CommonGrid$simpleThead = function (headers) {
+	return A2(
+		_evancz$elm_sortable_table$Table$HtmlDetails,
+		{ctor: '[]'},
+		A2(_elm_lang$core$List$map, _user$project$CommonGrid$simpleTheadHelp, headers));
+};
+var _user$project$CommonGrid$defaultString = function (str) {
+	var _p4 = str;
+	if (_p4.ctor === 'Just') {
+		return _p4._0;
+	} else {
+		return '';
+	}
+};
+
 var _user$project$Model$Model = F5(
 	function (a, b, c, d, e) {
 		return {state: a, billingCcm: b, tableState: c, query: d, currentPage: e};
@@ -13747,77 +13827,6 @@ var _user$project$Grid$simpleRowAttrs = function (billingCcm) {
 		_1: {ctor: '[]'}
 	};
 };
-var _user$project$Grid$simpleTheadHelp = function (_p0) {
-	var _p1 = _p0;
-	var _p3 = _p1._0;
-	var content = function () {
-		var _p2 = _p1._1;
-		switch (_p2.ctor) {
-			case 'Unsortable':
-				return {
-					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p3),
-					_1: {ctor: '[]'}
-				};
-			case 'Sortable':
-				return {
-					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p3),
-					_1: {ctor: '[]'}
-				};
-			default:
-				if (_p2._0.ctor === 'Nothing') {
-					return {
-						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p3),
-						_1: {ctor: '[]'}
-					};
-				} else {
-					return {
-						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p3),
-						_1: {
-							ctor: '::',
-							_0: _p2._0._0 ? A2(
-								_elm_lang$html$Html$div,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('glyphicon glyphicon-menu-up'),
-									_1: {ctor: '[]'}
-								},
-								{ctor: '[]'}) : A2(
-								_elm_lang$html$Html$div,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('glyphicon glyphicon-menu-down'),
-									_1: {ctor: '[]'}
-								},
-								{ctor: '[]'}),
-							_1: {ctor: '[]'}
-						}
-					};
-				}
-		}
-	}();
-	return A2(
-		_elm_lang$html$Html$th,
-		{
-			ctor: '::',
-			_0: _p1._2,
-			_1: {
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('e-columnheader'),
-				_1: {ctor: '[]'}
-			}
-		},
-		content);
-};
-var _user$project$Grid$simpleThead = function (headers) {
-	return A2(
-		_evancz$elm_sortable_table$Table$HtmlDetails,
-		{ctor: '[]'},
-		A2(_elm_lang$core$List$map, _user$project$Grid$simpleTheadHelp, headers));
-};
 var _user$project$Grid$defaultCustomizations = {
 	tableAttrs: {
 		ctor: '::',
@@ -13829,49 +13838,11 @@ var _user$project$Grid$defaultCustomizations = {
 		}
 	},
 	caption: _elm_lang$core$Maybe$Nothing,
-	thead: _user$project$Grid$simpleThead,
+	thead: _user$project$CommonGrid$simpleThead,
 	tfoot: _elm_lang$core$Maybe$Nothing,
 	tbodyAttrs: {ctor: '[]'},
 	rowAttrs: _user$project$Grid$simpleRowAttrs
 };
-var _user$project$Grid$defaultString = function (str) {
-	var _p4 = str;
-	if (_p4.ctor === 'Just') {
-		return _p4._0;
-	} else {
-		return '';
-	}
-};
-var _user$project$Grid$maybeStringColumnCell = function (str) {
-	return A2(
-		_evancz$elm_sortable_table$Table$HtmlDetails,
-		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$div,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text(
-						_user$project$Grid$defaultString(str)),
-					_1: {ctor: '[]'}
-				}),
-			_1: {ctor: '[]'}
-		});
-};
-var _user$project$Grid$maybeStringColumn = F2(
-	function (name, field) {
-		return _evancz$elm_sortable_table$Table$veryCustomColumn(
-			{
-				name: name,
-				viewData: function (_p5) {
-					return _user$project$Grid$maybeStringColumnCell(
-						field(_p5));
-				},
-				sorter: _evancz$elm_sortable_table$Table$unsortable
-			});
-	});
 var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 	{
 		toId: function (_) {
@@ -13924,18 +13895,18 @@ var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 								_1: {
 									ctor: '::',
 									_0: A2(
-										_user$project$Grid$maybeStringColumn,
+										_evancz$elm_sortable_table$Table$stringColumn,
 										'Patient\'s Facility Id No',
-										function (_) {
-											return _.patientFacilityIdNo;
+										function (t) {
+											return _user$project$CommonGrid$defaultString(t.patientFacilityIdNo);
 										}),
 									_1: {
 										ctor: '::',
 										_0: A2(
-											_user$project$Grid$maybeStringColumn,
+											_evancz$elm_sortable_table$Table$stringColumn,
 											'AssignedTo',
-											function (_) {
-												return _.assignedTo;
+											function (t) {
+												return _user$project$CommonGrid$defaultString(t.assignedTo);
 											}),
 										_1: {
 											ctor: '::',
@@ -14163,7 +14134,7 @@ var _user$project$Main$filteredCcm = function (model) {
 				lowerQuery,
 				_elm_lang$core$String$toLower(
 					function (_) {
-						return _.patientName;
+						return _.facility;
 					}(_p0)));
 		},
 		model.billingCcm);
@@ -14542,7 +14513,7 @@ var _user$project$Main$view = function (model) {
 								_0: _elm_lang$html$Html_Attributes$class('form-control'),
 								_1: {
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$placeholder('Search by Address'),
+									_0: _elm_lang$html$Html_Attributes$placeholder('Search by Facility'),
 									_1: {
 										ctor: '::',
 										_0: _elm_lang$html$Html_Events$onInput(_user$project$Model$SetQuery),
