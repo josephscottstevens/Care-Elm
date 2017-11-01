@@ -2,8 +2,8 @@ port module Main exposing (..)
 
 import Load exposing (..)
 import Model exposing (..)
-import Html exposing (Html, text, div, input, program, button, select, option, span)
-import Html.Attributes exposing (style, class, placeholder, id, type_, value)
+import Html exposing (Html, text, div, input, program, button, select, option, span, a)
+import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)
 import Grid exposing (..)
 import Table
@@ -78,6 +78,45 @@ update msg model =
             ( emptyModel, getEmployment )
 
 
+pagerDiv : List BillingCcm -> Html msg
+pagerDiv filteredEmployers =
+    let
+        currentPage =
+            0
+
+        itemsPerPage =
+            10
+
+        totalPages =
+            (List.length filteredEmployers) // itemsPerPage
+
+        rng =
+            List.range 0 totalPages
+                |> List.drop currentPage
+                |> List.take 8
+                |> List.map (\t -> toString (t + 1))
+                |> List.map (\t -> text (t ++ " "))
+
+        employersCount =
+            toString (List.length filteredEmployers)
+    in
+        div [ class "e-pager e-js e-pager" ]
+            [ div [ class "e-pagercontainer" ]
+                [ div [ class "e-icon e-mediaback e-firstpagedisabled e-disable" ] []
+                , div [ class "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable" ] []
+                , a [ class "e-link e-nextprevitemdisabled e-disable e-spacing e-PP" ] []
+                , div [ class "e-numericcontainer e-default" ]
+                    []
+                , div [ class "" ] []
+                , div [ class "e-nextpage e-icon e-arrowheadright-2x e-default" ] []
+                , div [ class "e-lastpage e-icon e-mediaforward e-default" ] []
+                ]
+            , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
+                [ span [ class "e-pagermsg" ] [ text "1 of 808 pages (16153 items)" ]
+                ]
+            ]
+
+
 view : Model -> Html Msg
 view model =
     let
@@ -87,16 +126,6 @@ view model =
         filteredEmployers =
             model.billingCcm
                 |> List.filter (String.contains lowerQuery << String.toLower << .patientName)
-
-        len =
-            (List.length filteredEmployers) // 12
-
-        rng =
-            List.range 1 (len + 1)
-                |> List.map (\t -> text (toString t ++ " "))
-
-        employersCount =
-            toString (List.length filteredEmployers)
     in
         case model.state of
             Initial ->
@@ -107,8 +136,7 @@ view model =
                     [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
                     , input [ class "form-control", placeholder "Search by Address", onInput SetQuery, value model.query ] []
                     , Table.view config model.tableState (filteredEmployers |> List.take 12)
-                    , div [] [ text ("Total items: " ++ employersCount) ]
-                    , span [] rng
+                    , pagerDiv filteredEmployers
                     ]
 
             Edit emp ->

@@ -14118,6 +14118,162 @@ var _user$project$Load$decodeModel = A2(
 var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/people/CcmGridDataSource?showOpenCcmBills=true', _user$project$Load$decodeModel);
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
+var _user$project$Main$pagerDiv = function (filteredEmployers) {
+	var employersCount = _elm_lang$core$Basics$toString(
+		_elm_lang$core$List$length(filteredEmployers));
+	var itemsPerPage = 10;
+	var totalPages = (_elm_lang$core$List$length(filteredEmployers) / itemsPerPage) | 0;
+	var currentPage = 0;
+	var rng = A2(
+		_elm_lang$core$List$map,
+		function (t) {
+			return _elm_lang$html$Html$text(
+				A2(_elm_lang$core$Basics_ops['++'], t, ' '));
+		},
+		A2(
+			_elm_lang$core$List$map,
+			function (t) {
+				return _elm_lang$core$Basics$toString(t + 1);
+			},
+			A2(
+				_elm_lang$core$List$take,
+				8,
+				A2(
+					_elm_lang$core$List$drop,
+					currentPage,
+					A2(_elm_lang$core$List$range, 0, totalPages)))));
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('e-pager e-js e-pager'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('e-pagercontainer'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('e-icon e-mediaback e-firstpagedisabled e-disable'),
+							_1: {ctor: '[]'}
+						},
+						{ctor: '[]'}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable'),
+								_1: {ctor: '[]'}
+							},
+							{ctor: '[]'}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$a,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('e-link e-nextprevitemdisabled e-disable e-spacing e-PP'),
+									_1: {ctor: '[]'}
+								},
+								{ctor: '[]'}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('e-numericcontainer e-default'),
+										_1: {ctor: '[]'}
+									},
+									{ctor: '[]'}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class(''),
+											_1: {ctor: '[]'}
+										},
+										{ctor: '[]'}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$div,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('e-nextpage e-icon e-arrowheadright-2x e-default'),
+												_1: {ctor: '[]'}
+											},
+											{ctor: '[]'}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$div,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('e-lastpage e-icon e-mediaforward e-default'),
+													_1: {ctor: '[]'}
+												},
+												{ctor: '[]'}),
+											_1: {ctor: '[]'}
+										}
+									}
+								}
+							}
+						}
+					}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('e-parentmsgbar'),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$style(
+								{
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'right'},
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$span,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('e-pagermsg'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('1 of 808 pages (16153 items)'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			}
+		});
+};
 var _user$project$Main$view = function (model) {
 	var lowerQuery = _elm_lang$core$String$toLower(model.query);
 	var filteredEmployers = A2(
@@ -14132,19 +14288,6 @@ var _user$project$Main$view = function (model) {
 					}(_p0)));
 		},
 		model.billingCcm);
-	var len = (_elm_lang$core$List$length(filteredEmployers) / 12) | 0;
-	var rng = A2(
-		_elm_lang$core$List$map,
-		function (t) {
-			return _elm_lang$html$Html$text(
-				A2(
-					_elm_lang$core$Basics_ops['++'],
-					_elm_lang$core$Basics$toString(t),
-					' '));
-		},
-		A2(_elm_lang$core$List$range, 1, len + 1));
-	var employersCount = _elm_lang$core$Basics$toString(
-		_elm_lang$core$List$length(filteredEmployers));
 	var _p1 = model.state;
 	switch (_p1.ctor) {
 		case 'Initial':
@@ -14209,23 +14352,8 @@ var _user$project$Main$view = function (model) {
 								A2(_elm_lang$core$List$take, 12, filteredEmployers)),
 							_1: {
 								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$div,
-									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text(
-											A2(_elm_lang$core$Basics_ops['++'], 'Total items: ', employersCount)),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$span,
-										{ctor: '[]'},
-										rng),
-									_1: {ctor: '[]'}
-								}
+								_0: _user$project$Main$pagerDiv(filteredEmployers),
+								_1: {ctor: '[]'}
 							}
 						}
 					}
