@@ -43,3 +43,24 @@ simpleTheadHelp ( name, status, onClick ) =
 simpleThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
 simpleThead headers =
     Table.HtmlDetails [] (List.map simpleTheadHelp headers)
+
+
+
+-- maybeStringColumn : String -> (data -> Maybe String) -> Table.Column data msg
+-- maybeStringColumn name toStr =
+--     let
+--         str =
+--             case toStr of
+--                 Just a t ->
+--                     ""
+--                 Nothing ->
+--                     ""
+--     in
+--         Table.customColumn
+--             { name = name
+--             , viewData = str
+--             , sorter = Table.increasingOrDecreasingBy str
+--             }
+-- viewDefaultString : Maybe String -> String
+-- viewDefaultString dollars =
+--     defaultString dollars

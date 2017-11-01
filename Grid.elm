@@ -25,8 +25,8 @@ config =
             , Table.stringColumn "Main Provider" .mainProvider
             , Table.stringColumn "Patient Name" .patientName
             , Table.stringColumn "DOB" .dob
-            , maybeStringColumn "Patient's Facility Id No" .patientFacilityIdNo
-            , maybeStringColumn "AssignedTo" .assignedTo
+            , Table.stringColumn "Patient's Facility Id No" (\t -> defaultString t.patientFacilityIdNo)
+            , Table.stringColumn "AssignedTo" (\t -> defaultString t.assignedTo)
             , editColumn
             ]
         , customizations = defaultCustomizations
@@ -81,20 +81,4 @@ checkColumnCell : BillingCcm -> Table.HtmlDetails Msg
 checkColumnCell emp =
     Table.HtmlDetails []
         [ input [ type_ "checkbox" ] []
-        ]
-
-
-maybeStringColumn : String -> (BillingCcm -> Maybe String) -> Table.Column BillingCcm Msg
-maybeStringColumn name field =
-    Table.veryCustomColumn
-        { name = name
-        , viewData = maybeStringColumnCell << field
-        , sorter = Table.unsortable
-        }
-
-
-maybeStringColumnCell : Maybe String -> Table.HtmlDetails Msg
-maybeStringColumnCell str =
-    Table.HtmlDetails []
-        [ div [] [ text (defaultString str) ]
         ]
