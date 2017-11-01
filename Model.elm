@@ -4,6 +4,16 @@ import Http
 import Table
 
 
+type Page
+    = FirstPage
+    | PreviousPage
+    | PreviousPageBlock
+    | PageIndex Int
+    | NextPageBlock
+    | NextPage
+    | LastPage
+
+
 type Msg
     = Load (Result Http.Error Model)
     | EditStart BillingCcm
@@ -12,6 +22,7 @@ type Msg
       -- | UpdateStartDate String
       -- | UpdateCity Enrollment String
       -- | UpdateState Enrollment String
+    | UpdatePage Page
     | SetQuery String
     | SetTableState Table.State
     | Reset

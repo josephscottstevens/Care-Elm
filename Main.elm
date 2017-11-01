@@ -57,6 +57,9 @@ update msg model =
         Load (Err t) ->
             ( { model | state = Error t }, Cmd.none )
 
+        UpdatePage page ->
+            ( { model | currentPage = 1 }, Cmd.none )
+
         -- UpdateState emp newState ->
         --     ( { model | state = Edit { emp | state = newState } }, Cmd.none )
         -- UpdateCity emp newCity ->
@@ -78,7 +81,7 @@ update msg model =
             ( emptyModel, getEmployment )
 
 
-pagerDiv : List BillingCcm -> Int -> Html msg
+pagerDiv : List BillingCcm -> Int -> Html Msg
 pagerDiv filteredEmployers currentPage =
     let
         itemsPerPage =
@@ -106,18 +109,54 @@ pagerDiv filteredEmployers currentPage =
                 |> List.take pagesPerBlock
                 |> List.map activeOrNot
 
+        firstPageClass =
+            if currentPage > 0 then
+                "e-icon e-mediaback e-firstpage e-default"
+            else
+                "e-icon e-mediaback e-firstpagedisabled e-disable"
+
+        leftPageClass =
+            if currentPage > pagesPerBlock then
+                "e-icon e-arrowheadleft-2x e-prevpage e-default"
+            else
+                "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
+
+        leftPageBlockClass =
+            if currentPage > pagesPerBlock then
+                "e-link e-spacing e-PP e-numericitem e-default"
+            else
+                "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
+
+        rightPageBlockClass =
+            if currentPage < totalPages - pagesPerBlock then
+                "e-link e-NP e-spacing e-numericitem e-default"
+            else
+                "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
+
+        rightPageClass =
+            if currentPage < totalPages - 1 then
+                "e-nextpage e-icon e-arrowheadright-2x e-default"
+            else
+                "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
+
+        lastPageClass =
+            if currentPage < totalPages - pagesPerBlock then
+                "e-lastpage e-icon e-mediaforward e-default"
+            else
+                "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
+
         employersCount =
             toString (List.length filteredEmployers)
     in
         div [ class "e-pager e-js e-pager" ]
             [ div [ class "e-pagercontainer" ]
-                [ div [ class "e-icon e-mediaback e-firstpagedisabled e-disable" ] []
-                , div [ class "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable" ] []
-                , a [ class "e-link e-nextprevitemdisabled e-disable e-spacing e-PP" ] [ text "..." ]
+                [ div [ class firstPageClass ] []
+                , div [ class leftPageClass ] []
+                , a [ class leftPageBlockClass ] [ text "..." ]
                 , div [ class "e-numericcontainer e-default" ] rng
-                , a [ class "e-link e-NP e-spacing e-numericitem e-default" ] [ text "..." ]
-                , div [ class "e-nextpage e-icon e-arrowheadright-2x e-default" ] []
-                , div [ class "e-lastpage e-icon e-mediaforward e-default" ] []
+                , a [ class rightPageBlockClass ] [ text "..." ]
+                , div [ class rightPageClass, onClick NextPage ] []
+                , div [ class lastPageClass ] []
                 ]
             , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
                 [ span [ class "e-pagermsg" ] [ text "1 of 808 pages (16153 items)" ]
