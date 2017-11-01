@@ -7,7 +7,7 @@ import Table
 type Page
     = First
     | Previous
-    | Previouslock
+    | PreviousBlock
     | Index Int
     | NextBlock
     | Next

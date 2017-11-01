@@ -58,7 +58,34 @@ update msg model =
             ( { model | state = Error t }, Cmd.none )
 
         UpdatePage page ->
-            ( { model | currentPage = 1 }, Cmd.none )
+            let
+                newPageIndex =
+                    case page of
+                        First ->
+                            0
+
+                        Previous ->
+                            if model.currentPage > 0 then
+                                model.currentPage - 1
+                            else
+                                0
+
+                        PreviousBlock ->
+                            0
+
+                        Index t ->
+                            t
+
+                        NextBlock ->
+                            0
+
+                        Next ->
+                            model.currentPage + 1
+
+                        Last ->
+                            0
+            in
+                ( { model | currentPage = newPageIndex }, Cmd.none )
 
         -- UpdateState emp newState ->
         --     ( { model | state = Edit { emp | state = newState } }, Cmd.none )
@@ -101,28 +128,28 @@ pagerDiv filteredEmployers currentPage =
                     else
                         "e-default"
             in
-                div [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText) ] [ text (toString (pageIndex + 1)) ]
+                div [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), onClick (UpdatePage (Index pageIndex)) ] [ text (toString (pageIndex + 1)) ]
 
         rng =
             List.range 0 totalPages
-                |> List.drop (currentPage // pagesPerBlock)
+                |> List.drop ((currentPage // pagesPerBlock) * pagesPerBlock)
                 |> List.take pagesPerBlock
                 |> List.map activeOrNot
 
         firstPageClass =
-            if currentPage > 0 then
+            if currentPage >= pagesPerBlock then
                 "e-icon e-mediaback e-firstpage e-default"
             else
                 "e-icon e-mediaback e-firstpagedisabled e-disable"
 
         leftPageClass =
-            if currentPage > pagesPerBlock then
+            if currentPage > 0 then
                 "e-icon e-arrowheadleft-2x e-prevpage e-default"
             else
                 "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
 
         leftPageBlockClass =
-            if currentPage > pagesPerBlock then
+            if currentPage >= pagesPerBlock then
                 "e-link e-spacing e-PP e-numericitem e-default"
             else
                 "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
@@ -150,13 +177,13 @@ pagerDiv filteredEmployers currentPage =
     in
         div [ class "e-pager e-js e-pager" ]
             [ div [ class "e-pagercontainer" ]
-                [ div [ class firstPageClass ] []
-                , div [ class leftPageClass ] []
-                , a [ class leftPageBlockClass ] [ text "..." ]
+                [ div [ class firstPageClass, onClick (UpdatePage First) ] []
+                , div [ class leftPageClass, onClick (UpdatePage Previous) ] []
+                , a [ class leftPageBlockClass, onClick (UpdatePage PreviousBlock) ] [ text "..." ]
                 , div [ class "e-numericcontainer e-default" ] rng
-                , a [ class rightPageBlockClass ] [ text "..." ]
+                , a [ class rightPageBlockClass, onClick (UpdatePage NextBlock) ] [ text "..." ]
                 , div [ class rightPageClass, onClick (UpdatePage Next) ] []
-                , div [ class lastPageClass ] []
+                , div [ class lastPageClass, onClick (UpdatePage Last) ] []
                 ]
             , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
                 [ span [ class "e-pagermsg" ] [ text "1 of 808 pages (16153 items)" ]
@@ -184,6 +211,7 @@ view model =
                     , input [ class "form-control", placeholder "Search by Address", onInput SetQuery, value model.query ] []
                     , Table.view config model.tableState (filteredEmployers |> List.take 12)
                     , pagerDiv filteredEmployers model.currentPage
+                    , div [] [ text ("current Page: " ++ (toString model.currentPage)) ]
                     ]
 
             Edit emp ->
