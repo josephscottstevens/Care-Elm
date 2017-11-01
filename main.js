@@ -13729,41 +13729,51 @@ var _user$project$Grid$editColumnCell = function (emp) {
 };
 var _user$project$Grid$editColumn = _evancz$elm_sortable_table$Table$veryCustomColumn(
 	{name: '', viewData: _user$project$Grid$editColumnCell, sorter: _evancz$elm_sortable_table$Table$unsortable});
-var _user$project$Grid$simpleRowAttrs = function (_p0) {
-	return {ctor: '[]'};
+var _user$project$Grid$simpleRowAttrs = function (billingCcm) {
+	return _elm_lang$core$Native_Utils.eq(
+		A2(_elm_lang$core$Basics_ops['%'], billingCcm.iD, 2),
+		0) ? {
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$class('e-row'),
+		_1: {ctor: '[]'}
+	} : {
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$class('e-alt_row'),
+		_1: {ctor: '[]'}
+	};
 };
-var _user$project$Grid$simpleTheadHelp = function (_p1) {
-	var _p2 = _p1;
-	var _p4 = _p2._0;
+var _user$project$Grid$simpleTheadHelp = function (_p0) {
+	var _p1 = _p0;
+	var _p3 = _p1._0;
 	var content = function () {
-		var _p3 = _p2._1;
-		switch (_p3.ctor) {
+		var _p2 = _p1._1;
+		switch (_p2.ctor) {
 			case 'Unsortable':
 				return {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p4),
+					_0: _elm_lang$html$Html$text(_p3),
 					_1: {ctor: '[]'}
 				};
 			case 'Sortable':
 				return {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p4),
+					_0: _elm_lang$html$Html$text(_p3),
 					_1: {ctor: '[]'}
 				};
 			default:
-				if (_p3._0.ctor === 'Nothing') {
+				if (_p2._0.ctor === 'Nothing') {
 					return {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p4),
+						_0: _elm_lang$html$Html$text(_p3),
 						_1: {ctor: '[]'}
 					};
 				} else {
 					return {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p4),
+						_0: _elm_lang$html$Html$text(_p3),
 						_1: {
 							ctor: '::',
-							_0: _p3._0._0 ? A2(
+							_0: _p2._0._0 ? A2(
 								_elm_lang$html$Html$div,
 								{
 									ctor: '::',
@@ -13788,8 +13798,12 @@ var _user$project$Grid$simpleTheadHelp = function (_p1) {
 		_elm_lang$html$Html$th,
 		{
 			ctor: '::',
-			_0: _p2._2,
-			_1: {ctor: '[]'}
+			_0: _p1._2,
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('e-columnheader'),
+				_1: {ctor: '[]'}
+			}
 		},
 		content);
 };
@@ -13803,7 +13817,11 @@ var _user$project$Grid$defaultCustomizations = {
 	tableAttrs: {
 		ctor: '::',
 		_0: _elm_lang$html$Html_Attributes$id('employersTable'),
-		_1: {ctor: '[]'}
+		_1: {
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('e-table'),
+			_1: {ctor: '[]'}
+		}
 	},
 	caption: _elm_lang$core$Maybe$Nothing,
 	thead: _user$project$Grid$simpleThead,
@@ -13812,9 +13830,9 @@ var _user$project$Grid$defaultCustomizations = {
 	rowAttrs: _user$project$Grid$simpleRowAttrs
 };
 var _user$project$Grid$defaultString = function (str) {
-	var _p5 = str;
-	if (_p5.ctor === 'Just') {
-		return _p5._0;
+	var _p4 = str;
+	if (_p4.ctor === 'Just') {
+		return _p4._0;
 	} else {
 		return '';
 	}
@@ -13842,9 +13860,9 @@ var _user$project$Grid$maybeStringColumn = F2(
 		return _evancz$elm_sortable_table$Table$veryCustomColumn(
 			{
 				name: name,
-				viewData: function (_p6) {
+				viewData: function (_p5) {
 					return _user$project$Grid$maybeStringColumnCell(
-						field(_p6));
+						field(_p5));
 				},
 				sorter: _evancz$elm_sortable_table$Table$unsortable
 			});
@@ -14534,14 +14552,25 @@ var _user$project$Main$view = function (model) {
 							{ctor: '[]'}),
 						_1: {
 							ctor: '::',
-							_0: A3(
-								_evancz$elm_sortable_table$Table$view,
-								_user$project$Grid$config,
-								model.tableState,
-								A2(
-									_elm_lang$core$List$take,
-									12,
-									_user$project$Main$filteredCcm(model))),
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('e-grid e-js e-waitingpopup'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A3(
+										_evancz$elm_sortable_table$Table$view,
+										_user$project$Grid$config,
+										model.tableState,
+										A2(
+											_elm_lang$core$List$take,
+											12,
+											_user$project$Main$filteredCcm(model))),
+									_1: {ctor: '[]'}
+								}),
 							_1: {
 								ctor: '::',
 								_0: A2(

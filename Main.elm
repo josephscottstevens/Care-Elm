@@ -235,7 +235,9 @@ view model =
             div []
                 [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
                 , input [ class "form-control", placeholder "Search by Address", onInput SetQuery, value model.query ] []
-                , Table.view config model.tableState ((filteredCcm model) |> List.take 12)
+                , div [ class "e-grid e-js e-waitingpopup" ]
+                    [ Table.view config model.tableState ((filteredCcm model) |> List.take 12)
+                    ]
                 , pagerDiv (filteredCcm model) model.currentPage
                 ]
 

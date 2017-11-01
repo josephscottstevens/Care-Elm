@@ -42,9 +42,9 @@ config =
         }
 
 
-defaultCustomizations : Table.Customizations data msg
+defaultCustomizations : Table.Customizations BillingCcm msg
 defaultCustomizations =
-    { tableAttrs = [ id "employersTable" ]
+    { tableAttrs = [ id "employersTable", class "e-table" ]
     , caption = Nothing
     , thead = simpleThead
     , tfoot = Nothing
@@ -75,7 +75,7 @@ simpleTheadHelp ( name, status, onClick ) =
                         div [ class "glyphicon glyphicon-menu-down" ] []
                     ]
     in
-        Html.th [ onClick ] content
+        Html.th [ onClick, class "e-columnheader" ] content
 
 
 simpleThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
@@ -83,9 +83,12 @@ simpleThead headers =
     Table.HtmlDetails [] (List.map simpleTheadHelp headers)
 
 
-simpleRowAttrs : data -> List (Html.Attribute msg)
-simpleRowAttrs _ =
-    []
+simpleRowAttrs : BillingCcm -> List (Html.Attribute msg)
+simpleRowAttrs billingCcm =
+    if billingCcm.iD % 2 == 0 then
+        [ class "e-row" ]
+    else
+        [ class "e-alt_row" ]
 
 
 editColumn : Table.Column BillingCcm Msg
