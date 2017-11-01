@@ -35,6 +35,7 @@ config =
             , Table.stringColumn "Patient Name" .patientName
             , Table.stringColumn "DOB" .dob
             , maybeStringColumn "Patient's Facility Id No" .patientFacilityIdNo
+            , maybeStringColumn "AssignedTo" .assignedTo
             , editColumn
             ]
         , customizations = defaultCustomizations

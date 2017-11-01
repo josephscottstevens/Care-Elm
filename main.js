@@ -13668,35 +13668,6 @@ var _user$project$Model$SortDesc = {ctor: 'SortDesc'};
 var _user$project$Model$SortAsc = {ctor: 'SortAsc'};
 var _user$project$Model$SortNone = {ctor: 'SortNone'};
 
-var _user$project$Grid$maybeStringColumnCell = function (str) {
-	return A2(
-		_evancz$elm_sortable_table$Table$HtmlDetails,
-		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$div,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text(str),
-					_1: {ctor: '[]'}
-				}),
-			_1: {ctor: '[]'}
-		});
-};
-var _user$project$Grid$maybeStringColumn = F2(
-	function (name, field) {
-		return _evancz$elm_sortable_table$Table$veryCustomColumn(
-			{
-				name: name,
-				viewData: function (_p0) {
-					return _user$project$Grid$maybeStringColumnCell(
-						field(_p0));
-				},
-				sorter: _evancz$elm_sortable_table$Table$unsortable
-			});
-	});
 var _user$project$Grid$checkColumnCell = function (emp) {
 	return A2(
 		_evancz$elm_sortable_table$Table$HtmlDetails,
@@ -13746,41 +13717,41 @@ var _user$project$Grid$editColumnCell = function (emp) {
 };
 var _user$project$Grid$editColumn = _evancz$elm_sortable_table$Table$veryCustomColumn(
 	{name: '', viewData: _user$project$Grid$editColumnCell, sorter: _evancz$elm_sortable_table$Table$unsortable});
-var _user$project$Grid$simpleRowAttrs = function (_p1) {
+var _user$project$Grid$simpleRowAttrs = function (_p0) {
 	return {ctor: '[]'};
 };
-var _user$project$Grid$simpleTheadHelp = function (_p2) {
-	var _p3 = _p2;
-	var _p5 = _p3._0;
+var _user$project$Grid$simpleTheadHelp = function (_p1) {
+	var _p2 = _p1;
+	var _p4 = _p2._0;
 	var content = function () {
-		var _p4 = _p3._1;
-		switch (_p4.ctor) {
+		var _p3 = _p2._1;
+		switch (_p3.ctor) {
 			case 'Unsortable':
 				return {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p5),
+					_0: _elm_lang$html$Html$text(_p4),
 					_1: {ctor: '[]'}
 				};
 			case 'Sortable':
 				return {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p5),
+					_0: _elm_lang$html$Html$text(_p4),
 					_1: {ctor: '[]'}
 				};
 			default:
-				if (_p4._0.ctor === 'Nothing') {
+				if (_p3._0.ctor === 'Nothing') {
 					return {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p5),
+						_0: _elm_lang$html$Html$text(_p4),
 						_1: {ctor: '[]'}
 					};
 				} else {
 					return {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p5),
+						_0: _elm_lang$html$Html$text(_p4),
 						_1: {
 							ctor: '::',
-							_0: _p4._0._0 ? A2(
+							_0: _p3._0._0 ? A2(
 								_elm_lang$html$Html$div,
 								{
 									ctor: '::',
@@ -13805,7 +13776,7 @@ var _user$project$Grid$simpleTheadHelp = function (_p2) {
 		_elm_lang$html$Html$th,
 		{
 			ctor: '::',
-			_0: _p3._2,
+			_0: _p2._2,
 			_1: {ctor: '[]'}
 		},
 		content);
@@ -13828,6 +13799,44 @@ var _user$project$Grid$defaultCustomizations = {
 	tbodyAttrs: {ctor: '[]'},
 	rowAttrs: _user$project$Grid$simpleRowAttrs
 };
+var _user$project$Grid$defaultString = function (str) {
+	var _p5 = str;
+	if (_p5.ctor === 'Just') {
+		return _p5._0;
+	} else {
+		return '';
+	}
+};
+var _user$project$Grid$maybeStringColumnCell = function (str) {
+	return A2(
+		_evancz$elm_sortable_table$Table$HtmlDetails,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(
+						_user$project$Grid$defaultString(str)),
+					_1: {ctor: '[]'}
+				}),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Grid$maybeStringColumn = F2(
+	function (name, field) {
+		return _evancz$elm_sortable_table$Table$veryCustomColumn(
+			{
+				name: name,
+				viewData: function (_p6) {
+					return _user$project$Grid$maybeStringColumnCell(
+						field(_p6));
+				},
+				sorter: _evancz$elm_sortable_table$Table$unsortable
+			});
+	});
 var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 	{
 		toId: function (_) {
@@ -13883,12 +13892,21 @@ var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 										_user$project$Grid$maybeStringColumn,
 										'Patient\'s Facility Id No',
 										function (_) {
-											return _.patientName;
+											return _.patientFacilityIdNo;
 										}),
 									_1: {
 										ctor: '::',
-										_0: _user$project$Grid$editColumn,
-										_1: {ctor: '[]'}
+										_0: A2(
+											_user$project$Grid$maybeStringColumn,
+											'AssignedTo',
+											function (_) {
+												return _.assignedTo;
+											}),
+										_1: {
+											ctor: '::',
+											_0: _user$project$Grid$editColumn,
+											_1: {ctor: '[]'}
+										}
 									}
 								}
 							}
@@ -13899,14 +13917,6 @@ var _user$project$Grid$config = _evancz$elm_sortable_table$Table$customConfig(
 		},
 		customizations: _user$project$Grid$defaultCustomizations
 	});
-var _user$project$Grid$df = function (str) {
-	var _p6 = str;
-	if (_p6.ctor === 'Just') {
-		return _p6._0;
-	} else {
-		return '';
-	}
-};
 var _user$project$Grid$customGrid = function (model) {
 	return A3(
 		_evancz$elm_sortable_table$Table$view,
