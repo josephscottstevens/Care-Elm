@@ -115,7 +115,6 @@ update msg model =
             ( { model | query = newQuery }, Cmd.none )
 
         SetTableState newState ->
-            -- interesting, so ! [] is shorthand for ,( ... Cmd.none )
             ( { model | tableState = newState }, Cmd.none )
 
         Reset ->
@@ -236,7 +235,7 @@ view model =
                 [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
                 , input [ class "form-control", placeholder "Search by Facility", onInput SetQuery, value model.query ] []
                 , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view config model.tableState ((filteredCcm model) |> List.take 12)
+                    [ Table.view config model.tableState ((filteredCcm model) |> List.drop (model.currentPage * pagesPerBlock) |> List.take pagesPerBlock)
                     ]
                 , pagerDiv (filteredCcm model) model.currentPage
                 ]

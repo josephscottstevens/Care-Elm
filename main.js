@@ -14543,8 +14543,11 @@ var _user$project$Main$view = function (model) {
 										model.tableState,
 										A2(
 											_elm_lang$core$List$take,
-											12,
-											_user$project$Main$filteredCcm(model))),
+											_user$project$Main$pagesPerBlock,
+											A2(
+												_elm_lang$core$List$drop,
+												model.currentPage * _user$project$Main$pagesPerBlock,
+												_user$project$Main$filteredCcm(model)))),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
