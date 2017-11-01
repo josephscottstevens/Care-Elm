@@ -7,6 +7,12 @@ import Html.Attributes exposing (style, class, placeholder, id, type_, value, ta
 import Html.Events exposing (onClick, onInput)
 import Grid exposing (..)
 import Table
+import Json.Encode as Encode
+
+
+role : String -> Html.Attribute msg
+role value =
+    Html.Attributes.property "role" (Encode.string value)
 
 
 port sendTestDate : String -> Cmd msg
@@ -90,12 +96,21 @@ pagerDiv filteredEmployers =
         totalPages =
             (List.length filteredEmployers) // itemsPerPage
 
+        activeOrNot pageIndex =
+            let
+                activeOrNotText =
+                    if pageIndex == currentPage then
+                        "e-currentitem e-active"
+                    else
+                        "e-default"
+            in
+                div [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), role "link" ] [ text (toString (pageIndex + 1)) ]
+
         rng =
             List.range 0 totalPages
                 |> List.drop currentPage
                 |> List.take 8
-                |> List.map (\t -> toString (t + 1))
-                |> List.map (\t -> text (t ++ " "))
+                |> List.map activeOrNot
 
         employersCount =
             toString (List.length filteredEmployers)
@@ -104,10 +119,9 @@ pagerDiv filteredEmployers =
             [ div [ class "e-pagercontainer" ]
                 [ div [ class "e-icon e-mediaback e-firstpagedisabled e-disable" ] []
                 , div [ class "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable" ] []
-                , a [ class "e-link e-nextprevitemdisabled e-disable e-spacing e-PP" ] []
-                , div [ class "e-numericcontainer e-default" ]
-                    []
-                , div [ class "" ] []
+                , a [ class "e-link e-nextprevitemdisabled e-disable e-spacing e-PP" ] [ text "..." ]
+                , div [ class "e-numericcontainer e-default" ] rng
+                , a [ class "e-link e-NP e-spacing e-numericitem e-default" ] [ text "..." ]
                 , div [ class "e-nextpage e-icon e-arrowheadright-2x e-default" ] []
                 , div [ class "e-lastpage e-icon e-mediaforward e-default" ] []
                 ]
