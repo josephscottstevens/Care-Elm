@@ -29,3 +29,9 @@ TODO:
 -- Super heavy right now on boilerplate to update row
 -- Test to see if I can update stuff
 -- Fix missing column header
+
+November
+Seperate Paging out into it's own module, make the main only track currentPage, paging is dependant on the filter
+finish the ... left right
+add a config for paging
+it'd be slick if the thing could connect to the grid, but meh if it doesn't 
