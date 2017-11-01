@@ -39,6 +39,14 @@ init =
     ( emptyModel, getEmployment )
 
 
+itemsPerPage =
+    10
+
+
+pagesPerBlock =
+    8
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -59,6 +67,12 @@ update msg model =
 
         UpdatePage page ->
             let
+                totalRows =
+                    List.length (filteredCcm model)
+
+                totalPages =
+                    totalRows // itemsPerPage
+
                 newPageIndex =
                     case page of
                         First ->
@@ -83,7 +97,7 @@ update msg model =
                             model.currentPage + 1
 
                         Last ->
-                            0
+                            totalPages - 1
             in
                 ( { model | currentPage = newPageIndex }, Cmd.none )
 
@@ -108,17 +122,24 @@ update msg model =
             ( emptyModel, getEmployment )
 
 
+filteredCcm : Model -> List BillingCcm
+filteredCcm model =
+    let
+        lowerQuery =
+            String.toLower model.query
+    in
+        model.billingCcm
+            |> List.filter (String.contains lowerQuery << String.toLower << .patientName)
+
+
 pagerDiv : List a -> Int -> Html Msg
 pagerDiv filteredEmployers currentPage =
     let
-        itemsPerPage =
-            10
-
-        pagesPerBlock =
-            8
+        totalRows =
+            List.length filteredEmployers
 
         totalPages =
-            (List.length filteredEmployers) // itemsPerPage
+            (totalRows // itemsPerPage) - 1
 
         activeOrNot pageIndex =
             let
@@ -161,7 +182,7 @@ pagerDiv filteredEmployers currentPage =
                 "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
 
         rightPageClass =
-            if currentPage < totalPages - 1 then
+            if currentPage < totalPages then
                 "e-nextpage e-icon e-arrowheadright-2x e-default"
             else
                 "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
@@ -186,43 +207,35 @@ pagerDiv filteredEmployers currentPage =
                 , div [ class lastPageClass, onClick (UpdatePage Last) ] []
                 ]
             , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
-                [ span [ class "e-pagermsg" ] [ text "1 of 808 pages (16153 items)" ]
+                [ span [ class "e-pagermsg" ] [ text ("1 of " ++ (toString totalPages) ++ " pages (" ++ (toString totalRows) ++ " items)") ]
                 ]
             ]
 
 
 view : Model -> Html Msg
 view model =
-    let
-        lowerQuery =
-            String.toLower model.query
+    case model.state of
+        Initial ->
+            div [] [ text "loading" ]
 
-        filteredEmployers =
-            model.billingCcm
-                |> List.filter (String.contains lowerQuery << String.toLower << .patientName)
-    in
-        case model.state of
-            Initial ->
-                div [] [ text "loading" ]
+        Grid ->
+            div []
+                [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
+                , input [ class "form-control", placeholder "Search by Address", onInput SetQuery, value model.query ] []
+                , Table.view config model.tableState ((filteredCcm model) |> List.take 12)
+                , pagerDiv (filteredCcm model) model.currentPage
+                , div [] [ text ("current Page: " ++ (toString model.currentPage)) ]
+                ]
 
-            Grid ->
-                div []
-                    [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
-                    , input [ class "form-control", placeholder "Search by Address", onInput SetQuery, value model.query ] []
-                    , Table.view config model.tableState (filteredEmployers |> List.take 12)
-                    , pagerDiv filteredEmployers model.currentPage
-                    , div [] [ text ("current Page: " ++ (toString model.currentPage)) ]
-                    ]
+        Edit emp ->
+            div []
+                [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", id "testDate", value emp.dob ] []
 
-            Edit emp ->
-                div []
-                    [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", id "testDate", value emp.dob ] []
+                -- , input [ placeholder "City", class "e-textbox", onInput (UpdateCity emp), value emp.city ] []
+                -- , input [ placeholder "State", class "e-textbox", onInput (UpdateState emp), value emp.state ] []
+                -- , button [ class "btn btn-default", onClick (EditSave emp) ] [ text "save" ]
+                , button [ class "btn btn-default", onClick EditCancel ] [ text "cancel" ]
+                ]
 
-                    -- , input [ placeholder "City", class "e-textbox", onInput (UpdateCity emp), value emp.city ] []
-                    -- , input [ placeholder "State", class "e-textbox", onInput (UpdateState emp), value emp.state ] []
-                    -- , button [ class "btn btn-default", onClick (EditSave emp) ] [ text "save" ]
-                    , button [ class "btn btn-default", onClick EditCancel ] [ text "cancel" ]
-                    ]
-
-            Error err ->
-                div [] [ text (toString err) ]
+        Error err ->
+            div [] [ text (toString err) ]

@@ -14130,11 +14130,126 @@ var _user$project$Load$decodeModel = A2(
 var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/people/CcmGridDataSource?showOpenCcmBills=true', _user$project$Load$decodeModel);
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
+var _user$project$Main$filteredCcm = function (model) {
+	var lowerQuery = _elm_lang$core$String$toLower(model.query);
+	return A2(
+		_elm_lang$core$List$filter,
+		function (_p0) {
+			return A2(
+				_elm_lang$core$String$contains,
+				lowerQuery,
+				_elm_lang$core$String$toLower(
+					function (_) {
+						return _.patientName;
+					}(_p0)));
+		},
+		model.billingCcm);
+};
+var _user$project$Main$pagesPerBlock = 8;
+var _user$project$Main$itemsPerPage = 10;
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p1 = msg;
+		switch (_p1.ctor) {
+			case 'EditStart':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							state: _user$project$Model$Edit(_p1._0)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'EditCancel':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{state: _user$project$Model$Grid}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Load':
+				if (_p1._0.ctor === 'Ok') {
+					var _p2 = _p1._0._0;
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							_p2,
+							{
+								state: _user$project$Model$Grid,
+								billingCcm: _user$project$Load$newEmployers(_p2.billingCcm)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								state: _user$project$Model$Error(_p1._0._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			case 'UpdatePage':
+				var totalRows = _elm_lang$core$List$length(
+					_user$project$Main$filteredCcm(model));
+				var totalPages = (totalRows / _user$project$Main$itemsPerPage) | 0;
+				var newPageIndex = function () {
+					var _p3 = _p1._0;
+					switch (_p3.ctor) {
+						case 'First':
+							return 0;
+						case 'Previous':
+							return (_elm_lang$core$Native_Utils.cmp(model.currentPage, 0) > 0) ? (model.currentPage - 1) : 0;
+						case 'PreviousBlock':
+							return 0;
+						case 'Index':
+							return _p3._0;
+						case 'NextBlock':
+							return 0;
+						case 'Next':
+							return model.currentPage + 1;
+						default:
+							return totalPages - 1;
+					}
+				}();
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{currentPage: newPageIndex}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SetQuery':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{query: _p1._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SetTableState':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{tableState: _p1._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
+		}
+	});
 var _user$project$Main$pagerDiv = F2(
 	function (filteredEmployers, currentPage) {
 		var employersCount = _elm_lang$core$Basics$toString(
 			_elm_lang$core$List$length(filteredEmployers));
+		var leftPageBlockClass = (_elm_lang$core$Native_Utils.cmp(currentPage, _user$project$Main$pagesPerBlock) > -1) ? 'e-link e-spacing e-PP e-numericitem e-default' : 'e-link e-nextprevitemdisabled e-disable e-spacing e-PP';
 		var leftPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, 0) > 0) ? 'e-icon e-arrowheadleft-2x e-prevpage e-default' : 'e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable';
+		var firstPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, _user$project$Main$pagesPerBlock) > -1) ? 'e-icon e-mediaback e-firstpage e-default' : 'e-icon e-mediaback e-firstpagedisabled e-disable';
 		var activeOrNot = function (pageIndex) {
 			var activeOrNotText = _elm_lang$core$Native_Utils.eq(pageIndex, currentPage) ? 'e-currentitem e-active' : 'e-default';
 			return A2(
@@ -14158,24 +14273,21 @@ var _user$project$Main$pagerDiv = F2(
 					_1: {ctor: '[]'}
 				});
 		};
-		var pagesPerBlock = 8;
-		var firstPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, pagesPerBlock) > -1) ? 'e-icon e-mediaback e-firstpage e-default' : 'e-icon e-mediaback e-firstpagedisabled e-disable';
-		var leftPageBlockClass = (_elm_lang$core$Native_Utils.cmp(currentPage, pagesPerBlock) > -1) ? 'e-link e-spacing e-PP e-numericitem e-default' : 'e-link e-nextprevitemdisabled e-disable e-spacing e-PP';
-		var itemsPerPage = 10;
-		var totalPages = (_elm_lang$core$List$length(filteredEmployers) / itemsPerPage) | 0;
+		var totalRows = _elm_lang$core$List$length(filteredEmployers);
+		var totalPages = ((totalRows / _user$project$Main$itemsPerPage) | 0) - 1;
 		var rng = A2(
 			_elm_lang$core$List$map,
 			activeOrNot,
 			A2(
 				_elm_lang$core$List$take,
-				pagesPerBlock,
+				_user$project$Main$pagesPerBlock,
 				A2(
 					_elm_lang$core$List$drop,
-					((currentPage / pagesPerBlock) | 0) * pagesPerBlock,
+					((currentPage / _user$project$Main$pagesPerBlock) | 0) * _user$project$Main$pagesPerBlock,
 					A2(_elm_lang$core$List$range, 0, totalPages))));
-		var rightPageBlockClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - pagesPerBlock) < 0) ? 'e-link e-NP e-spacing e-numericitem e-default' : 'e-link e-NP e-spacing e-nextprevitemdisabled e-disable';
-		var rightPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - 1) < 0) ? 'e-nextpage e-icon e-arrowheadright-2x e-default' : 'e-icon e-arrowheadright-2x e-nextpagedisabled e-disable';
-		var lastPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - pagesPerBlock) < 0) ? 'e-lastpage e-icon e-mediaforward e-default' : 'e-icon e-mediaforward e-animate e-lastpagedisabled e-disable';
+		var rightPageBlockClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - _user$project$Main$pagesPerBlock) < 0) ? 'e-link e-NP e-spacing e-numericitem e-default' : 'e-link e-NP e-spacing e-nextprevitemdisabled e-disable';
+		var rightPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages) < 0) ? 'e-nextpage e-icon e-arrowheadright-2x e-default' : 'e-icon e-arrowheadright-2x e-nextpagedisabled e-disable';
+		var lastPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - _user$project$Main$pagesPerBlock) < 0) ? 'e-lastpage e-icon e-mediaforward e-default' : 'e-icon e-mediaforward e-animate e-lastpagedisabled e-disable';
 		return A2(
 			_elm_lang$html$Html$div,
 			{
@@ -14337,7 +14449,20 @@ var _user$project$Main$pagerDiv = F2(
 								},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text('1 of 808 pages (16153 items)'),
+									_0: _elm_lang$html$Html$text(
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											'1 of ',
+											A2(
+												_elm_lang$core$Basics_ops['++'],
+												_elm_lang$core$Basics$toString(totalPages),
+												A2(
+													_elm_lang$core$Basics_ops['++'],
+													' pages (',
+													A2(
+														_elm_lang$core$Basics_ops['++'],
+														_elm_lang$core$Basics$toString(totalRows),
+														' items)'))))),
 									_1: {ctor: '[]'}
 								}),
 							_1: {ctor: '[]'}
@@ -14347,21 +14472,8 @@ var _user$project$Main$pagerDiv = F2(
 			});
 	});
 var _user$project$Main$view = function (model) {
-	var lowerQuery = _elm_lang$core$String$toLower(model.query);
-	var filteredEmployers = A2(
-		_elm_lang$core$List$filter,
-		function (_p0) {
-			return A2(
-				_elm_lang$core$String$contains,
-				lowerQuery,
-				_elm_lang$core$String$toLower(
-					function (_) {
-						return _.patientName;
-					}(_p0)));
-		},
-		model.billingCcm);
-	var _p1 = model.state;
-	switch (_p1.ctor) {
+	var _p4 = model.state;
+	switch (_p4.ctor) {
 		case 'Initial':
 			return A2(
 				_elm_lang$html$Html$div,
@@ -14421,10 +14533,16 @@ var _user$project$Main$view = function (model) {
 								_evancz$elm_sortable_table$Table$view,
 								_user$project$Grid$config,
 								model.tableState,
-								A2(_elm_lang$core$List$take, 12, filteredEmployers)),
+								A2(
+									_elm_lang$core$List$take,
+									12,
+									_user$project$Main$filteredCcm(model))),
 							_1: {
 								ctor: '::',
-								_0: A2(_user$project$Main$pagerDiv, filteredEmployers, model.currentPage),
+								_0: A2(
+									_user$project$Main$pagerDiv,
+									_user$project$Main$filteredCcm(model),
+									model.currentPage),
 								_1: {
 									ctor: '::',
 									_0: A2(
@@ -14467,7 +14585,7 @@ var _user$project$Main$view = function (model) {
 										_0: _elm_lang$html$Html_Attributes$id('testDate'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$value(_p1._0.dob),
+											_0: _elm_lang$html$Html_Attributes$value(_p4._0.dob),
 											_1: {ctor: '[]'}
 										}
 									}
@@ -14503,104 +14621,11 @@ var _user$project$Main$view = function (model) {
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(_p1._0)),
+						_elm_lang$core$Basics$toString(_p4._0)),
 					_1: {ctor: '[]'}
 				});
 	}
 };
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p2 = msg;
-		switch (_p2.ctor) {
-			case 'EditStart':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							state: _user$project$Model$Edit(_p2._0)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'EditCancel':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{state: _user$project$Model$Grid}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'Load':
-				if (_p2._0.ctor === 'Ok') {
-					var _p3 = _p2._0._0;
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							_p3,
-							{
-								state: _user$project$Model$Grid,
-								billingCcm: _user$project$Load$newEmployers(_p3.billingCcm)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								state: _user$project$Model$Error(_p2._0._0)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				}
-			case 'UpdatePage':
-				var newPageIndex = function () {
-					var _p4 = _p2._0;
-					switch (_p4.ctor) {
-						case 'First':
-							return 0;
-						case 'Previous':
-							return (_elm_lang$core$Native_Utils.cmp(model.currentPage, 0) > 0) ? (model.currentPage - 1) : 0;
-						case 'PreviousBlock':
-							return 0;
-						case 'Index':
-							return _p4._0;
-						case 'NextBlock':
-							return 0;
-						case 'Next':
-							return model.currentPage + 1;
-						default:
-							return 0;
-					}
-				}();
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{currentPage: newPageIndex}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'SetQuery':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{query: _p2._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'SetTableState':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{tableState: _p2._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			default:
-				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
-		}
-	});
 var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
