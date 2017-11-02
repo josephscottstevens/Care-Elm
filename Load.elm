@@ -105,7 +105,6 @@ decodeModel =
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
         |> hardcoded 0
-        |> hardcoded 0
 
 
 request : Http.Request Model

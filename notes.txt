@@ -18,7 +18,11 @@ install Elm extension for vscode
     select elm Language support for visual studio code
     press green install button
 
+run 
+elm-make Main.elm --debug --output=C:\Projects\NavCare\HC360-Integration-UserInterfaceEnhancements-Joe\trunk\Care-24-7\Care-24-7-MVC\Scripts\elmmain.js
+
 perhaps... node_modules folder is needed... or the step to get that there?
+
 
 TODO:
 Filter above each header

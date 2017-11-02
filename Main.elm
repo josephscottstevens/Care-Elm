@@ -59,7 +59,14 @@ update msg model =
             ( { model | state = Error t }, Cmd.none )
 
         SetPagingState page ->
-            ( { model | currentPage = (GridPaging.getNewState page model.currentPage model.visibleRowCount) }, Cmd.none )
+            let
+                filteredRowCount =
+                    List.length (filteredCcm model)
+
+                newPageIndex =
+                    GridPaging.getNewState page model.currentPage filteredRowCount
+            in
+                ( { model | currentPage = newPageIndex }, Cmd.none )
 
         -- UpdateState emp newState ->
         --     ( { model | state = Edit { emp | state = newState } }, Cmd.none )
@@ -72,11 +79,7 @@ update msg model =
         --         _ ->
         --             ( model, Cmd.none )
         SetQuery newQuery ->
-            let
-                filteredRowCount =
-                    List.length (filteredCcm model)
-            in
-                ( { model | query = newQuery, visibleRowCount = filteredRowCount }, Cmd.none )
+            ( { model | query = newQuery }, Cmd.none )
 
         SetTableState newState ->
             ( { model | tableState = newState }, Cmd.none )
@@ -98,7 +101,7 @@ view model =
                 , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view config model.tableState ((filteredCcm model) |> List.drop (model.currentPage * 8) |> List.take 10)
                     ]
-                , GridPaging.view model.currentPage model.visibleRowCount
+                , GridPaging.view model.currentPage (List.length (filteredCcm model))
                 ]
 
         Edit emp ->
