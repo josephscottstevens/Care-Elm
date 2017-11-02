@@ -21,17 +21,12 @@ install Elm extension for vscode
 perhaps... node_modules folder is needed... or the step to get that there?
 
 TODO:
--- Update below
--- Date isn't updating on a per row basis (hardcoded row num to 0)
+Filter above each header
+Get dates displaying correctly
+    Perhaps server side as string, meh, or better DateLibrary (if that's hard, scratch that)
 
--- add the rest of the missing fields
--- Re-add port \ subscription
--- Super heavy right now on boilerplate to update row
--- Test to see if I can update stuff
--- Fix missing column header
-
-November
-Seperate Paging out into it's own module, make the main only track currentPage, paging is dependant on the filter
-finish the ... left right
-add a config for paging
-it'd be slick if the thing could connect to the grid, but meh if it doesn't 
+LOW TODO:
+Re-add port \ subscription
+Dropdown menu on right
+Style checkboxs
+Remove main.js from git
