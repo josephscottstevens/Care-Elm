@@ -72,3 +72,21 @@ checkColumnCell emp =
                 ]
             ]
         ]
+
+
+editColumn : (data -> Html.Attribute msg) -> Table.Column data msg
+editColumn toMsg =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData = editColumnCell << toMsg
+        , sorter = Table.unsortable
+        }
+
+
+editColumnCell : Html.Attribute msg -> Table.HtmlDetails msg
+editColumnCell t =
+    Table.HtmlDetails []
+        [ div [ style [ ( "text-align", "right" ) ] ]
+            [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", t ] []
+            ]
+        ]

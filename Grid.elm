@@ -37,7 +37,7 @@ config =
             , Table.stringColumn "DOB" .dob
             , Table.stringColumn "Id No" (\t -> defaultString t.patientFacilityIdNo)
             , Table.stringColumn "AssignedTo" (\t -> defaultString t.assignedTo)
-            , editColumn
+            , editColumn (\t -> onClick (EditStart t))
             ]
         , customizations = defaultCustomizations
         }
@@ -60,21 +60,3 @@ simpleRowAttrs billingCcm =
         [ class "e-row" ]
     else
         [ class "e-alt_row" ]
-
-
-editColumn : Table.Column BillingCcm Msg
-editColumn =
-    Table.veryCustomColumn
-        { name = ""
-        , viewData = editColumnCell
-        , sorter = Table.unsortable
-        }
-
-
-editColumnCell : BillingCcm -> Table.HtmlDetails Msg
-editColumnCell emp =
-    Table.HtmlDetails []
-        [ div [ style [ ( "text-align", "right" ) ] ]
-            [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", onClick (EditStart emp) ] []
-            ]
-        ]
