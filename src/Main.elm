@@ -50,12 +50,9 @@ view model =
             Html.button [ onClick OpenBilling ] [ text "Billing" ]
 
         BillingPage ->
-            div [] []
-
-
-updateBilling : Billing.Types.Model -> Billing.Types.Model
-updateBilling billingModel =
-    { billingModel | state = Billing.Types.Grid, billingCcm = (Billing.Load.newEmployers billingModel.billingCcm) }
+            div []
+                [ Html.map BillingMsgTag (Billing.Main.view model.billingState)
+                ]
 
 
 update : Msg -> Model -> ( Model.Model, Cmd Model.Msg )
@@ -65,7 +62,7 @@ update msg model =
             ( model, Cmd.none )
 
         OpenBilling ->
-            ( { model | page = BillingPage }, Billing.Main.getEmployment BillingLoad )
+            ( model, Billing.Main.getEmployment BillingLoad )
 
         BillingMsg billingModel billingMsg ->
             let
@@ -74,8 +71,19 @@ update msg model =
             in
                 ( { model | billingState = newBillingModel }, Cmd.none )
 
+        BillingMsgTag billingMsg ->
+            let
+                newBillingModel =
+                    Billing.Main.update (billingMsg) model.billingState
+            in
+                ( { model | billingState = newBillingModel }, Cmd.none )
+
         BillingLoad (Ok loadedModel) ->
-            ( { model | billingState = updateBilling loadedModel }, Cmd.none )
+            let
+                updateBilling =
+                    { loadedModel | state = Billing.Types.Grid, billingCcm = (Billing.Load.newEmployers loadedModel.billingCcm) }
+            in
+                ( { model | page = BillingPage, billingState = updateBilling }, Cmd.none )
 
         BillingLoad (Err t) ->
             ( model, Cmd.none )

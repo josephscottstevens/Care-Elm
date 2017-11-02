@@ -59,7 +59,7 @@ update msg model =
 --getEmployment
 
 
-view : Model -> Html Msg
+view : Billing.Types.Model -> Html Msg
 view model =
     case model.state of
         Initial ->
