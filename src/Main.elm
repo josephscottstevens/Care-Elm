@@ -46,7 +46,7 @@ view model =
 
         BillingPage ->
             Html.div []
-                [ Html.map BillingMsgTag (Billing.Main.view model.billingState)
+                [ Html.map BillingMsg (Billing.Main.view model.billingState)
                 ]
 
 
@@ -59,14 +59,7 @@ update msg model =
         OpenBilling ->
             ( model, Billing.Main.getEmployment BillingLoad )
 
-        BillingMsg billingModel billingMsg ->
-            let
-                newBillingModel =
-                    Billing.Main.update (billingMsg) billingModel
-            in
-                ( { model | billingState = newBillingModel }, Cmd.none )
-
-        BillingMsgTag billingMsg ->
+        BillingMsg billingMsg ->
             let
                 newBillingModel =
                     Billing.Main.update (billingMsg) model.billingState
