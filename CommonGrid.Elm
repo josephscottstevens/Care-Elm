@@ -66,5 +66,9 @@ checkColumn name =
 checkColumnCell : data -> Table.HtmlDetails msg
 checkColumnCell emp =
     Table.HtmlDetails []
-        [ input [ type_ "checkbox" ] []
+        [ div [ class "e-checkcell" ]
+            [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
+                [ input [ type_ "checkbox" ] []
+                ]
+            ]
         ]
