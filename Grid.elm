@@ -1,4 +1,4 @@
-module Grid exposing (customGrid, config, filteredCcm)
+module Grid exposing (config, filteredCcm)
 
 import Model exposing (..)
 import Html exposing (Html, text, div, program, button, input, span)
@@ -16,11 +16,6 @@ filteredCcm model =
     in
         model.billingCcm
             |> List.filter (String.contains lowerQuery << String.toLower << .facility)
-
-
-customGrid : { a | employers : List BillingCcm, tableState : Table.State } -> Html Msg
-customGrid model =
-    Table.view config model.tableState (List.take 12 model.employers)
 
 
 config : Table.Config BillingCcm Msg
