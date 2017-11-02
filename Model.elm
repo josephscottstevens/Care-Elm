@@ -2,7 +2,16 @@ module Model exposing (..)
 
 import Http
 import Table
-import GridPaging
+
+
+type Page
+    = First
+    | Previous
+    | PreviousBlock
+    | Index Int
+    | NextBlock
+    | Next
+    | Last
 
 
 type Msg
@@ -13,7 +22,7 @@ type Msg
       -- | UpdateStartDate String
       -- | UpdateCity Enrollment String
       -- | UpdateState Enrollment String
-    | SetPagingState GridPaging.PageState
+    | SetPagingState Page
     | SetQuery String
     | SetTableState Table.State
     | Reset
@@ -37,7 +46,7 @@ type alias Model =
     , billingCcm : List BillingCcm
     , tableState : Table.State
     , query : String
-    , pageState : GridPaging.PageState
+    , currentPage : Int
     }
 
 
@@ -47,7 +56,7 @@ emptyModel =
     , billingCcm = []
     , tableState = Table.initialSort "dob"
     , query = ""
-    , pageState = GridPaging.initialPageState
+    , currentPage = 0
     }
 
 

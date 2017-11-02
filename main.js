@@ -13634,170 +13634,9 @@ var _user$project$CommonGrid$defaultString = function (str) {
 	}
 };
 
-var _user$project$GridPaging$view = F2(
-	function (_p0, state) {
-		var _p1 = _p0;
-		var filteredList = {ctor: '[]'};
-		var totalRows = _elm_lang$core$List$length(filteredList);
-		var employersCount = _elm_lang$core$Basics$toString(
-			_elm_lang$core$List$length(filteredList));
-		var pagesPerBlock = 0;
-		var itemsPerPage = 0;
-		var totalPages = ((totalRows / itemsPerPage) | 0) - 1;
-		var currentPage = 0;
-		var activeOrNot = function (pageIndex) {
-			var activeOrNotText = _elm_lang$core$Native_Utils.eq(pageIndex, currentPage) ? 'e-currentitem e-active' : 'e-default';
-			return A2(
-				_elm_lang$html$Html$div,
-				{ctor: '[]'},
-				{ctor: '[]'});
-		};
-		var rng = A2(
-			_elm_lang$core$List$map,
-			activeOrNot,
-			A2(
-				_elm_lang$core$List$take,
-				pagesPerBlock,
-				A2(
-					_elm_lang$core$List$drop,
-					((currentPage / pagesPerBlock) | 0) * pagesPerBlock,
-					A2(_elm_lang$core$List$range, 0, totalPages))));
-		var firstPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, pagesPerBlock) > -1) ? 'e-icon e-mediaback e-firstpage e-default' : 'e-icon e-mediaback e-firstpagedisabled e-disable';
-		var leftPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, 0) > 0) ? 'e-icon e-arrowheadleft-2x e-prevpage e-default' : 'e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable';
-		var leftPageBlockClass = (_elm_lang$core$Native_Utils.cmp(currentPage, pagesPerBlock) > -1) ? 'e-link e-spacing e-PP e-numericitem e-default' : 'e-link e-nextprevitemdisabled e-disable e-spacing e-PP';
-		var rightPageBlockClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - pagesPerBlock) < 0) ? 'e-link e-NP e-spacing e-numericitem e-default' : 'e-link e-NP e-spacing e-nextprevitemdisabled e-disable';
-		var rightPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages) < 0) ? 'e-nextpage e-icon e-arrowheadright-2x e-default' : 'e-icon e-arrowheadright-2x e-nextpagedisabled e-disable';
-		var lastPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - pagesPerBlock) < 0) ? 'e-lastpage e-icon e-mediaforward e-default' : 'e-icon e-mediaforward e-animate e-lastpagedisabled e-disable';
-		var pagerText = function () {
-			var totalItemsText = _elm_lang$core$Basics$toString(totalRows);
-			var totalPagesText = _elm_lang$core$Basics$toString(totalPages + 1);
-			var currentPageText = _elm_lang$core$Basics$toString(currentPage + 1);
-			return A2(
-				_elm_lang$core$Basics_ops['++'],
-				currentPageText,
-				A2(
-					_elm_lang$core$Basics_ops['++'],
-					' of ',
-					A2(
-						_elm_lang$core$Basics_ops['++'],
-						totalPagesText,
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							' pages (',
-							A2(_elm_lang$core$Basics_ops['++'], totalItemsText, ' items)')))));
-		}();
-		return A2(
-			_elm_lang$html$Html$div,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('e-pager e-js e-pager'),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$div,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('e-pagercontainer'),
-						_1: {ctor: '[]'}
-					},
-					{ctor: '[]'}),
-				_1: {
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$div,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('e-parentmsgbar'),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$style(
-									{
-										ctor: '::',
-										_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'right'},
-										_1: {ctor: '[]'}
-									}),
-								_1: {ctor: '[]'}
-							}
-						},
-						{
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$span,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('e-pagermsg'),
-									_1: {ctor: '[]'}
-								},
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text(pagerText),
-									_1: {ctor: '[]'}
-								}),
-							_1: {ctor: '[]'}
-						}),
-					_1: {ctor: '[]'}
-				}
-			});
-	});
-var _user$project$GridPaging$getNewState = F3(
-	function (page, currentPage, lst) {
-		var totalPages = 5;
-		var totalRows = 10;
-		var _p2 = page;
-		switch (_p2.ctor) {
-			case 'First':
-				return 0;
-			case 'Previous':
-				return (_elm_lang$core$Native_Utils.cmp(currentPage, 0) > 0) ? (currentPage - 1) : 0;
-			case 'PreviousBlock':
-				return 0;
-			case 'Index':
-				return _p2._0;
-			case 'NextBlock':
-				return 0;
-			case 'Next':
-				return currentPage + 1;
-			default:
-				return totalPages - 1;
-		}
-	});
-var _user$project$GridPaging$PageState = F2(
-	function (a, b) {
-		return {ctor: 'PageState', _0: a, _1: b};
-	});
-var _user$project$GridPaging$initialPageState = A2(_user$project$GridPaging$PageState, 0, 0);
-var _user$project$GridPaging$onClick = F2(
-	function (page, toMsg) {
-		return A2(
-			_elm_lang$html$Html_Events$on,
-			'click',
-			A2(
-				_elm_lang$core$Json_Decode$map,
-				toMsg,
-				A3(
-					_elm_lang$core$Json_Decode$map2,
-					_user$project$GridPaging$PageState,
-					_elm_lang$core$Json_Decode$succeed(0),
-					_elm_lang$core$Json_Decode$succeed(0))));
-	});
-var _user$project$GridPaging$GridPagingConfig = function (a) {
-	return {ctor: 'GridPagingConfig', _0: a};
-};
-var _user$project$GridPaging$Last = {ctor: 'Last'};
-var _user$project$GridPaging$Next = {ctor: 'Next'};
-var _user$project$GridPaging$NextBlock = {ctor: 'NextBlock'};
-var _user$project$GridPaging$Index = function (a) {
-	return {ctor: 'Index', _0: a};
-};
-var _user$project$GridPaging$PreviousBlock = {ctor: 'PreviousBlock'};
-var _user$project$GridPaging$Previous = {ctor: 'Previous'};
-var _user$project$GridPaging$First = {ctor: 'First'};
-
 var _user$project$Model$Model = F5(
 	function (a, b, c, d, e) {
-		return {state: a, billingCcm: b, tableState: c, query: d, pageState: e};
+		return {state: a, billingCcm: b, tableState: c, query: d, currentPage: e};
 	});
 var _user$project$Model$BillingCcm = function (a) {
 	return function (b) {
@@ -13876,6 +13715,15 @@ var _user$project$Model$BillingCcm = function (a) {
 		};
 	};
 };
+var _user$project$Model$Last = {ctor: 'Last'};
+var _user$project$Model$Next = {ctor: 'Next'};
+var _user$project$Model$NextBlock = {ctor: 'NextBlock'};
+var _user$project$Model$Index = function (a) {
+	return {ctor: 'Index', _0: a};
+};
+var _user$project$Model$PreviousBlock = {ctor: 'PreviousBlock'};
+var _user$project$Model$Previous = {ctor: 'Previous'};
+var _user$project$Model$First = {ctor: 'First'};
 var _user$project$Model$Reset = {ctor: 'Reset'};
 var _user$project$Model$SetTableState = function (a) {
 	return {ctor: 'SetTableState', _0: a};
@@ -13906,7 +13754,7 @@ var _user$project$Model$emptyModel = {
 	billingCcm: {ctor: '[]'},
 	tableState: _evancz$elm_sortable_table$Table$initialSort('dob'),
 	query: '',
-	pageState: _user$project$GridPaging$initialPageState
+	currentPage: 0
 };
 var _user$project$Model$SortDesc = {ctor: 'SortDesc'};
 var _user$project$Model$SortAsc = {ctor: 'SortAsc'};
@@ -14083,6 +13931,261 @@ var _user$project$Grid$customGrid = function (model) {
 		A2(_elm_lang$core$List$take, 12, model.employers));
 };
 
+var _user$project$GridPaging$pagesPerBlock = 8;
+var _user$project$GridPaging$itemsPerPage = 10;
+var _user$project$GridPaging$getNewState = F3(
+	function (page, currentPage, totalVisiblePages) {
+		var totalPages = (totalVisiblePages / _user$project$GridPaging$itemsPerPage) | 0;
+		var _p0 = page;
+		switch (_p0.ctor) {
+			case 'First':
+				return 0;
+			case 'Previous':
+				return (_elm_lang$core$Native_Utils.cmp(currentPage, 0) > 0) ? (currentPage - 1) : 0;
+			case 'PreviousBlock':
+				return 0;
+			case 'Index':
+				return _p0._0;
+			case 'NextBlock':
+				return 0;
+			case 'Next':
+				return currentPage + 1;
+			default:
+				return totalPages - 1;
+		}
+	});
+var _user$project$GridPaging$view = F2(
+	function (currentPage, totalVisiblePages) {
+		var employersCount = _elm_lang$core$Basics$toString(totalVisiblePages);
+		var leftPageBlockClass = (_elm_lang$core$Native_Utils.cmp(currentPage, _user$project$GridPaging$pagesPerBlock) > -1) ? 'e-link e-spacing e-PP e-numericitem e-default' : 'e-link e-nextprevitemdisabled e-disable e-spacing e-PP';
+		var leftPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, 0) > 0) ? 'e-icon e-arrowheadleft-2x e-prevpage e-default' : 'e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable';
+		var firstPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, _user$project$GridPaging$pagesPerBlock) > -1) ? 'e-icon e-mediaback e-firstpage e-default' : 'e-icon e-mediaback e-firstpagedisabled e-disable';
+		var activeOrNot = function (pageIndex) {
+			var activeOrNotText = _elm_lang$core$Native_Utils.eq(pageIndex, currentPage) ? 'e-currentitem e-active' : 'e-default';
+			return A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class(
+						A2(_elm_lang$core$Basics_ops['++'], 'e-link e-numericitem e-spacing ', activeOrNotText)),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Events$onClick(
+							_user$project$Model$SetPagingState(
+								_user$project$Model$Index(pageIndex))),
+						_1: {ctor: '[]'}
+					}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(
+						_elm_lang$core$Basics$toString(pageIndex + 1)),
+					_1: {ctor: '[]'}
+				});
+		};
+		var totalPages = ((totalVisiblePages / _user$project$GridPaging$itemsPerPage) | 0) - 1;
+		var rng = A2(
+			_elm_lang$core$List$map,
+			activeOrNot,
+			A2(
+				_elm_lang$core$List$take,
+				_user$project$GridPaging$pagesPerBlock,
+				A2(
+					_elm_lang$core$List$drop,
+					((currentPage / _user$project$GridPaging$pagesPerBlock) | 0) * _user$project$GridPaging$pagesPerBlock,
+					A2(_elm_lang$core$List$range, 0, totalPages))));
+		var rightPageBlockClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - _user$project$GridPaging$pagesPerBlock) < 0) ? 'e-link e-NP e-spacing e-numericitem e-default' : 'e-link e-NP e-spacing e-nextprevitemdisabled e-disable';
+		var rightPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages) < 0) ? 'e-nextpage e-icon e-arrowheadright-2x e-default' : 'e-icon e-arrowheadright-2x e-nextpagedisabled e-disable';
+		var lastPageClass = (_elm_lang$core$Native_Utils.cmp(currentPage, totalPages - _user$project$GridPaging$pagesPerBlock) < 0) ? 'e-lastpage e-icon e-mediaforward e-default' : 'e-icon e-mediaforward e-animate e-lastpagedisabled e-disable';
+		var pagerText = function () {
+			var totalItemsText = _elm_lang$core$Basics$toString(totalVisiblePages);
+			var totalPagesText = _elm_lang$core$Basics$toString(totalPages + 1);
+			var currentPageText = _elm_lang$core$Basics$toString(currentPage + 1);
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				currentPageText,
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					' of ',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						totalPagesText,
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							' pages (',
+							A2(_elm_lang$core$Basics_ops['++'], totalItemsText, ' items)')))));
+		}();
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('e-pager e-js e-pager'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('e-pagercontainer'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class(firstPageClass),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(
+										_user$project$Model$SetPagingState(_user$project$Model$First)),
+									_1: {ctor: '[]'}
+								}
+							},
+							{ctor: '[]'}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class(leftPageClass),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(
+											_user$project$Model$SetPagingState(_user$project$Model$Previous)),
+										_1: {ctor: '[]'}
+									}
+								},
+								{ctor: '[]'}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$a,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class(leftPageBlockClass),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Events$onClick(
+												_user$project$Model$SetPagingState(_user$project$Model$PreviousBlock)),
+											_1: {ctor: '[]'}
+										}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('...'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('e-numericcontainer e-default'),
+											_1: {ctor: '[]'}
+										},
+										rng),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$a,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class(rightPageBlockClass),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Events$onClick(
+														_user$project$Model$SetPagingState(_user$project$Model$NextBlock)),
+													_1: {ctor: '[]'}
+												}
+											},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('...'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$div,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class(rightPageClass),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Events$onClick(
+															_user$project$Model$SetPagingState(_user$project$Model$Next)),
+														_1: {ctor: '[]'}
+													}
+												},
+												{ctor: '[]'}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$div,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class(lastPageClass),
+														_1: {
+															ctor: '::',
+															_0: _elm_lang$html$Html_Events$onClick(
+																_user$project$Model$SetPagingState(_user$project$Model$Last)),
+															_1: {ctor: '[]'}
+														}
+													},
+													{ctor: '[]'}),
+												_1: {ctor: '[]'}
+											}
+										}
+									}
+								}
+							}
+						}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('e-parentmsgbar'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$style(
+									{
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'right'},
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$span,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('e-pagermsg'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(pagerText),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			});
+	});
+
 var _user$project$Load$updateEmployers = F2(
 	function (enrollment, newEnrollment) {
 		return A2(
@@ -14258,7 +14361,7 @@ var _user$project$Load$decodeBillingCcm = A3(
 																																						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$BillingCcm)))))))))))))))))))))))))))))))))))))));
 var _user$project$Load$decodeModel = A2(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
-	_user$project$GridPaging$initialPageState,
+	0,
 	A2(
 		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
 		'',
@@ -14291,87 +14394,9 @@ var _user$project$Main$filteredCcm = function (model) {
 		},
 		model.billingCcm);
 };
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p1 = msg;
-		switch (_p1.ctor) {
-			case 'EditStart':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							state: _user$project$Model$Edit(_p1._0)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'EditCancel':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{state: _user$project$Model$Grid}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'Load':
-				if (_p1._0.ctor === 'Ok') {
-					var _p2 = _p1._0._0;
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							_p2,
-							{
-								state: _user$project$Model$Grid,
-								billingCcm: _user$project$Load$newEmployers(_p2.billingCcm)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								state: _user$project$Model$Error(_p1._0._0)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				}
-			case 'SetPagingState':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{pageState: _p1._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'SetQuery':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{query: _p1._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'SetTableState':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{tableState: _p1._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			default:
-				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
-		}
-	});
-var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
-var _user$project$Main$pagingConfig = _user$project$GridPaging$GridPagingConfig(
-	{itemsPerPage: 10, pagesPerBlock: 8, toMsg: _user$project$Model$SetPagingState});
 var _user$project$Main$view = function (model) {
-	var currentPage = 0;
-	var _p3 = model.state;
-	switch (_p3.ctor) {
+	var _p1 = model.state;
+	switch (_p1.ctor) {
 		case 'Initial':
 			return A2(
 				_elm_lang$html$Html$div,
@@ -14445,13 +14470,17 @@ var _user$project$Main$view = function (model) {
 											10,
 											A2(
 												_elm_lang$core$List$drop,
-												currentPage * 8,
+												model.currentPage * 8,
 												_user$project$Main$filteredCcm(model)))),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
 								ctor: '::',
-								_0: A2(_user$project$GridPaging$view, _user$project$Main$pagingConfig, model.pageState),
+								_0: A2(
+									_user$project$GridPaging$view,
+									model.currentPage,
+									_elm_lang$core$List$length(
+										_user$project$Main$filteredCcm(model))),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -14479,7 +14508,7 @@ var _user$project$Main$view = function (model) {
 										_0: _elm_lang$html$Html_Attributes$id('testDate'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$value(_p3._0.dob),
+											_0: _elm_lang$html$Html_Attributes$value(_p1._0.dob),
 											_1: {ctor: '[]'}
 										}
 									}
@@ -14515,11 +14544,90 @@ var _user$project$Main$view = function (model) {
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(_p3._0)),
+						_elm_lang$core$Basics$toString(_p1._0)),
 					_1: {ctor: '[]'}
 				});
 	}
 };
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p2 = msg;
+		switch (_p2.ctor) {
+			case 'EditStart':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							state: _user$project$Model$Edit(_p2._0)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'EditCancel':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{state: _user$project$Model$Grid}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Load':
+				if (_p2._0.ctor === 'Ok') {
+					var _p3 = _p2._0._0;
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							_p3,
+							{
+								state: _user$project$Model$Grid,
+								billingCcm: _user$project$Load$newEmployers(_p3.billingCcm)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								state: _user$project$Model$Error(_p2._0._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			case 'SetPagingState':
+				var filteredRowCount = _elm_lang$core$List$length(
+					_user$project$Main$filteredCcm(model));
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							currentPage: A3(_user$project$GridPaging$getNewState, _p2._0, model.currentPage, filteredRowCount)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SetQuery':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{query: _p2._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SetTableState':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{tableState: _p2._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
+		}
+	});
+var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
 };
@@ -14535,7 +14643,7 @@ var _user$project$Main$getTestDate = _elm_lang$core$Native_Platform.incomingPort
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.BillingCcm":{"type":"{ iD : Int , facility : String , facilityId : Int , practiceLocation : Maybe.Maybe String , mainProvider : String , providerId : Int , patientName : String , patientId : Int , dob : String , patientFacilityIdNo : Maybe.Maybe String , phone : String , assignedTo : Maybe.Maybe String , staffId : Maybe.Maybe Int , openTasks : Int , totalTimeSpent : Maybe.Maybe Int , ccmRegistrationDate : String , dateOfService : String , billingDate : String , billingMonth : Int , billingYear : Int , isClosed : Bool , tocId : Maybe.Maybe Int , readmission : Bool , isComplexCCM : Bool , batchCloseOnInvoiceCompletion : Bool , reviewedByStaffName : Maybe.Maybe String , canModifyReviewedStatus : Bool , cPT : String , isReviewed : Bool , dxPresent : Bool , carePlanPresent : Bool , medsPresent : Bool , allergiesPresent : Bool , vitalsPresent : Bool , recordingPresent : Bool , chartComplete : Bool , status : String , is24HoursSinceBilledString : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , billingCcm : List Model.BillingCcm , tableState : Table.State , query : String , pageState : GridPaging.PageState }","args":[]}},"unions":{"Table.State":{"tags":{"State":["String","Bool"]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":["Model.BillingCcm"],"Error":["Http.Error"]},"args":[]},"GridPaging.PageState":{"tags":{"PageState":["Int","Int"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"Reset":[],"SetQuery":["String"],"SetPagingState":["GridPaging.PageState"],"EditStart":["Model.BillingCcm"],"EditCancel":[],"SetTableState":["Table.State"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.BillingCcm":{"type":"{ iD : Int , facility : String , facilityId : Int , practiceLocation : Maybe.Maybe String , mainProvider : String , providerId : Int , patientName : String , patientId : Int , dob : String , patientFacilityIdNo : Maybe.Maybe String , phone : String , assignedTo : Maybe.Maybe String , staffId : Maybe.Maybe Int , openTasks : Int , totalTimeSpent : Maybe.Maybe Int , ccmRegistrationDate : String , dateOfService : String , billingDate : String , billingMonth : Int , billingYear : Int , isClosed : Bool , tocId : Maybe.Maybe Int , readmission : Bool , isComplexCCM : Bool , batchCloseOnInvoiceCompletion : Bool , reviewedByStaffName : Maybe.Maybe String , canModifyReviewedStatus : Bool , cPT : String , isReviewed : Bool , dxPresent : Bool , carePlanPresent : Bool , medsPresent : Bool , allergiesPresent : Bool , vitalsPresent : Bool , recordingPresent : Bool , chartComplete : Bool , status : String , is24HoursSinceBilledString : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , billingCcm : List Model.BillingCcm , tableState : Table.State , query : String , currentPage : Int }","args":[]}},"unions":{"Table.State":{"tags":{"State":["String","Bool"]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Model.Page":{"tags":{"Last":[],"Index":["Int"],"Previous":[],"Next":[],"First":[],"PreviousBlock":[],"NextBlock":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":["Model.BillingCcm"],"Error":["Http.Error"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"Reset":[],"SetQuery":["String"],"SetPagingState":["Model.Page"],"EditStart":["Model.BillingCcm"],"EditCancel":[],"SetTableState":["Table.State"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])

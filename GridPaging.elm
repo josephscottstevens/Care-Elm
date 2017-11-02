@@ -1,56 +1,26 @@
 module GridPaging exposing (..)
 
-import Html exposing (Html, Attribute, div, text, span)
-import Html.Attributes as Attr
-import Json.Decode as Json
-import Html.Events as E
+import Html exposing (Html, Attribute, div, text, span, a)
+import Html.Attributes exposing (class, style)
+import Html.Events exposing (onClick)
+import Model exposing (..)
 
 
-type PageState
-    = PageState Int Int
+itemsPerPage : Int
+itemsPerPage =
+    10
 
 
-type GridPagingConfig msg
-    = GridPagingConfig
-        { itemsPerPage : Int
-        , pagesPerBlock : Int
-        , toMsg : PageState -> msg
-        }
+pagesPerBlock : Int
+pagesPerBlock =
+    8
 
 
-initialPageState : PageState
-initialPageState =
-    PageState 0 0
-
-
-type Page
-    = First
-    | Previous
-    | PreviousBlock
-    | Index Int
-    | NextBlock
-    | Next
-    | Last
-
-
-onClick : Page -> (PageState -> msg) -> Attribute msg
-onClick page toMsg =
-    E.on "click" <|
-        Json.map toMsg <|
-            Json.map2 PageState (Json.succeed 0) (Json.succeed 0)
-
-
-getNewState : Page -> Int -> List -> Int
-getNewState page currentPage lst =
+getNewState : Page -> Int -> Int -> Int
+getNewState page currentPage totalVisiblePages =
     let
-        totalRows =
-            10
-
-        --List.length (filteredCcm model)
         totalPages =
-            5
-
-        --totalRows // itemsPerPage
+            totalVisiblePages // itemsPerPage
     in
         case page of
             First ->
@@ -78,26 +48,11 @@ getNewState page currentPage lst =
                 totalPages - 1
 
 
-view : GridPagingConfig msg -> PageState -> Html msg
-view (GridPagingConfig { itemsPerPage, pagesPerBlock, toMsg }) state =
+view : Int -> Int -> Html Msg
+view currentPage totalVisiblePages =
     let
-        currentPage =
-            0
-
-        itemsPerPage =
-            0
-
-        pagesPerBlock =
-            0
-
-        filteredList =
-            []
-
-        totalRows =
-            List.length filteredList
-
         totalPages =
-            (totalRows // itemsPerPage) - 1
+            (totalVisiblePages // itemsPerPage) - 1
 
         activeOrNot pageIndex =
             let
@@ -107,11 +62,10 @@ view (GridPagingConfig { itemsPerPage, pagesPerBlock, toMsg }) state =
                     else
                         "e-default"
             in
-                div [] []
+                div
+                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), onClick (SetPagingState (Index pageIndex)) ]
+                    [ text (toString (pageIndex + 1)) ]
 
-        -- div
-        --     [ Attr.class ("e-link e-numericitem e-spacing " ++ activeOrNotText), onClick (Index pageIndex) ]
-        --     [ text (toString (pageIndex + 1)) ]
         rng =
             List.range 0 totalPages
                 |> List.drop ((currentPage // pagesPerBlock) * pagesPerBlock)
@@ -155,7 +109,7 @@ view (GridPagingConfig { itemsPerPage, pagesPerBlock, toMsg }) state =
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
 
         employersCount =
-            toString (List.length filteredList)
+            toString totalVisiblePages
 
         pagerText =
             let
@@ -166,21 +120,21 @@ view (GridPagingConfig { itemsPerPage, pagesPerBlock, toMsg }) state =
                     toString (totalPages + 1)
 
                 totalItemsText =
-                    toString totalRows
+                    toString totalVisiblePages
             in
                 currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
     in
-        div [ Attr.class "e-pager e-js e-pager" ]
-            [ div [ Attr.class "e-pagercontainer" ]
-                [--div [ Attr.class firstPageClass, onClick First 0 toMsg ] []
-                 -- , div [ class leftPageClass, onClick Previous ] []
-                 -- , a [ class leftPageBlockClass, onClick PreviousBlock ] [ text "..." ]
-                 -- , div [ class "e-numericcontainer e-default" ] rng
-                 -- , a [ class rightPageBlockClass, onClick NextBlock ] [ text "..." ]
-                 -- , div [ class rightPageClass, onClick Next ] []
-                 -- , div [ class lastPageClass, onClick Last ] []
+        div [ class "e-pager e-js e-pager" ]
+            [ div [ class "e-pagercontainer" ]
+                [ div [ class firstPageClass, onClick (SetPagingState First) ] []
+                , div [ class leftPageClass, onClick (SetPagingState Previous) ] []
+                , a [ class leftPageBlockClass, onClick (SetPagingState PreviousBlock) ] [ text "..." ]
+                , div [ class "e-numericcontainer e-default" ] rng
+                , a [ class rightPageBlockClass, onClick (SetPagingState NextBlock) ] [ text "..." ]
+                , div [ class rightPageClass, onClick (SetPagingState Next) ] []
+                , div [ class lastPageClass, onClick (SetPagingState Last) ] []
                 ]
-            , div [ Attr.class "e-parentmsgbar", Attr.style [ ( "text-align", "right" ) ] ]
-                [ span [ Attr.class "e-pagermsg" ] [ text pagerText ]
+            , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
+                [ span [ class "e-pagermsg" ] [ text pagerText ]
                 ]
             ]

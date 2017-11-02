@@ -104,7 +104,7 @@ decodeModel =
         |> required "list" (list decodeBillingCcm)
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
-        |> hardcoded GridPaging.initialPageState
+        |> hardcoded 0
 
 
 request : Http.Request Model

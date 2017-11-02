@@ -25,15 +25,6 @@ subscriptions model =
 -- getTestDate UpdateStartDate
 
 
-pagingConfig : GridPaging.GridPagingConfig Msg
-pagingConfig =
-    GridPaging.GridPagingConfig
-        { itemsPerPage = 10
-        , pagesPerBlock = 8
-        , toMsg = SetPagingState
-        }
-
-
 main : Program Never Model Msg
 main =
     Html.program
@@ -67,8 +58,12 @@ update msg model =
         Load (Err t) ->
             ( { model | state = Error t }, Cmd.none )
 
-        SetPagingState state ->
-            ( { model | pageState = state }, Cmd.none )
+        SetPagingState page ->
+            let
+                filteredRowCount =
+                    List.length (filteredCcm model)
+            in
+                ( { model | currentPage = (GridPaging.getNewState page model.currentPage filteredRowCount) }, Cmd.none )
 
         -- UpdateState emp newState ->
         --     ( { model | state = Edit { emp | state = newState } }, Cmd.none )
@@ -102,33 +97,29 @@ filteredCcm model =
 
 view : Model -> Html Msg
 view model =
-    let
-        currentPage =
-            0
-    in
-        case model.state of
-            Initial ->
-                div [] [ text "loading" ]
+    case model.state of
+        Initial ->
+            div [] [ text "loading" ]
 
-            Grid ->
-                div []
-                    [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
-                    , input [ class "form-control", placeholder "Search by Facility", onInput SetQuery, value model.query ] []
-                    , div [ class "e-grid e-js e-waitingpopup" ]
-                        [ Table.view config model.tableState ((filteredCcm model) |> List.drop (currentPage * 8) |> List.take 10)
-                        ]
-                    , GridPaging.view pagingConfig model.pageState --(List.length filteredCcm model)
+        Grid ->
+            div []
+                [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
+                , input [ class "form-control", placeholder "Search by Facility", onInput SetQuery, value model.query ] []
+                , div [ class "e-grid e-js e-waitingpopup" ]
+                    [ Table.view config model.tableState ((filteredCcm model) |> List.drop (model.currentPage * 8) |> List.take 10)
                     ]
+                , GridPaging.view model.currentPage (List.length (filteredCcm model))
+                ]
 
-            Edit emp ->
-                div []
-                    [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", id "testDate", value emp.dob ] []
+        Edit emp ->
+            div []
+                [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", id "testDate", value emp.dob ] []
 
-                    -- , input [ placeholder "City", class "e-textbox", onInput (UpdateCity emp), value emp.city ] []
-                    -- , input [ placeholder "State", class "e-textbox", onInput (UpdateState emp), value emp.state ] []
-                    -- , button [ class "btn btn-default", onClick (EditSave emp) ] [ text "save" ]
-                    , button [ class "btn btn-default", onClick EditCancel ] [ text "cancel" ]
-                    ]
+                -- , input [ placeholder "City", class "e-textbox", onInput (UpdateCity emp), value emp.city ] []
+                -- , input [ placeholder "State", class "e-textbox", onInput (UpdateState emp), value emp.state ] []
+                -- , button [ class "btn btn-default", onClick (EditSave emp) ] [ text "save" ]
+                , button [ class "btn btn-default", onClick EditCancel ] [ text "cancel" ]
+                ]
 
-            Error err ->
-                div [] [ text (toString err) ]
+        Error err ->
+            div [] [ text (toString err) ]
