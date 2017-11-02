@@ -1,4 +1,4 @@
-module CommonGrid exposing (..)
+module Utils.CommonGrid exposing (..)
 
 import Html exposing (Html, text, div, program, button, input, span)
 import Html.Attributes exposing (style, class, type_, id, value)

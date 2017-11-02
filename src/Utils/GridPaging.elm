@@ -1,4 +1,4 @@
-module GridPaging exposing (itemsPerPage, pagesPerBlock, getNewState, pagingView)
+module Utils.GridPaging exposing (itemsPerPage, pagesPerBlock, getNewState, pagingView)
 
 import Html exposing (Html, Attribute, div, text, span, a)
 import Html.Attributes exposing (class, style)

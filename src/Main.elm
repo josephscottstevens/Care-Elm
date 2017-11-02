@@ -6,8 +6,8 @@ import Html exposing (Html, text, div, input, program, button, select, option, s
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)
 import Table
-import GridPaging exposing (..)
-import CommonGrid exposing (..)
+import Utils.GridPaging exposing (..)
+import Utils.CommonGrid exposing (..)
 
 
 port sendTestDate : String -> Cmd msg

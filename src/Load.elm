@@ -6,7 +6,6 @@ import Json.Decode.Pipeline exposing (..)
 import Http
 import Model exposing (..)
 import Table
-import GridPaging
 
 
 decodeBillingCcm : Json.Decode.Decoder BillingCcm
