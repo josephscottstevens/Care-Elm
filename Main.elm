@@ -40,16 +40,6 @@ init =
     ( emptyModel, getEmployment )
 
 
-filteredCcm : Model -> List BillingCcm
-filteredCcm model =
-    let
-        lowerQuery =
-            String.toLower model.query
-    in
-        model.billingCcm
-            |> List.filter (String.contains lowerQuery << String.toLower << .facility)
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
