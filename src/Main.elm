@@ -53,9 +53,6 @@ view model =
 update : Msg -> Model -> ( Model.Model, Cmd Model.Msg )
 update msg model =
     case msg of
-        NoMessage ->
-            ( model, Cmd.none )
-
         OpenBilling ->
             ( model, Billing.Main.getEmployment BillingLoad )
 
