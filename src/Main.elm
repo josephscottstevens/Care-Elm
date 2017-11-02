@@ -46,7 +46,7 @@ view model =
         NoPage ->
             div [] []
 
-        BillingPage billingModel ->
+        BillingPage ->
             div [] []
 
 
@@ -55,14 +55,14 @@ view model =
 --     Billing.Main.view billingModel
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> ( Model.Model, Cmd Model.Msg )
 update msg model =
     case msg of
         NoMessage ->
             ( model, Cmd.none )
 
-        BillingMsg billingMsg ->
-            ( model, Cmd.none )
+        BillingMsg billingModel billingMsg ->
+            ( { model | page = BillingPage }, Cmd.none )
 
 
 

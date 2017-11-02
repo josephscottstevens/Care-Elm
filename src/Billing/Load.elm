@@ -6,6 +6,7 @@ import Json.Decode.Pipeline exposing (..)
 import Http
 import Billing.Types exposing (..)
 import Table
+import Model
 
 
 decodeBillingCcm : Json.Decode.Decoder BillingCcm

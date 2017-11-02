@@ -8,6 +8,7 @@ import Html.Events exposing (onClick, onInput)
 import Table
 import Utils.GridPaging exposing (..)
 import Utils.CommonGrid exposing (..)
+import Model
 
 
 init : ( Model, Cmd Msg )
@@ -15,49 +16,62 @@ init =
     ( emptyModel, getEmployment )
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> ( Model.Model, Cmd Model.Msg )
 update msg model =
-    case msg of
-        EditStart employer ->
-            ( { model | state = Edit employer }, Cmd.none )
+    let
+        newPage t =
+            { page = Model.BillingPage
+            }
 
-        -- , sendTestDate employer.dOB
-        -- EditSave employer ->
-        --     ( { model | state = Grid, employment = (updateEmployers model.enrollment employer) }, Cmd.none )
-        EditCancel ->
-            ( { model | state = Grid }, Cmd.none )
+        -- newCmd t =
+        --     {
+        --     }
+    in
+        case msg of
+            EditStart employer ->
+                ( newPage { model | state = Edit employer }, Cmd.none )
 
-        Load (Ok model) ->
-            ( { model | state = Grid, billingCcm = (newEmployers model.billingCcm) }, Cmd.none )
+            -- , sendTestDate employer.dOB
+            -- EditSave employer ->
+            --     ( newPage { model | state = Grid, employment = (updateEmployers model.enrollment employer) }, Cmd.none )
+            EditCancel ->
+                ( newPage { model | state = Grid }, Cmd.none )
 
-        Load (Err t) ->
-            ( { model | state = Error t }, Cmd.none )
+            Load (Ok model) ->
+                ( newPage { model | state = Grid, billingCcm = (newEmployers model.billingCcm) }, Cmd.none )
 
-        SetPagingState page ->
-            let
-                newPageIndex =
-                    getNewState page model.currentPage (filteredCcmLength model)
-            in
-                ( { model | currentPage = newPageIndex }, Cmd.none )
+            Load (Err t) ->
+                ( newPage { model | state = Error t }, Cmd.none )
 
-        -- UpdateState emp newState ->
-        --     ( { model | state = Edit { emp | state = newState } }, Cmd.none )
-        -- UpdateCity emp newCity ->
-        --     ( { model | state = Edit { emp | city = newCity } }, Cmd.none )
-        -- UpdateStartDate newDob ->
-        --     case model.state of
-        --         Edit emp ->
-        --             ( { model | state = Edit { emp | dob = newDob } }, Cmd.none )
-        --         _ ->
-        --             ( model, Cmd.none )
-        SetQuery newQuery ->
-            ( { model | query = newQuery }, Cmd.none )
+            SetPagingState page ->
+                let
+                    newPageIndex =
+                        getNewState page model.currentPage (filteredCcmLength model)
+                in
+                    ( newPage { model | currentPage = newPageIndex }, Cmd.none )
 
-        SetTableState newState ->
-            ( { model | tableState = newState }, Cmd.none )
+            -- UpdateState emp newState ->
+            --     ( { model | state = Edit { emp | state = newState } }, Cmd.none )
+            -- UpdateCity emp newCity ->
+            --     ( { model | state = Edit { emp | city = newCity } }, Cmd.none )
+            -- UpdateStartDate newDob ->
+            --     case model.state of
+            --         Edit emp ->
+            --             ( { model | state = Edit { emp | dob = newDob } }, Cmd.none )
+            --         _ ->
+            --             ( model, Cmd.none )
+            SetQuery newQuery ->
+                ( newPage { model | query = newQuery }, Cmd.none )
 
-        Reset ->
-            ( emptyModel, getEmployment )
+            SetTableState newState ->
+                ( newPage { model | tableState = newState }, Cmd.none )
+
+            Reset ->
+                ( newPage emptyModel, Cmd.none )
+
+
+
+--getEmployment
 
 
 view : Model -> Html Msg
