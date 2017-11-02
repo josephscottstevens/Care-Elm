@@ -76,19 +76,3 @@ editColumnCell emp =
     Table.HtmlDetails []
         [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", onClick (EditStart emp), style [ ( "text-align", "right" ) ] ] []
         ]
-
-
-checkColumn : String -> Table.Column BillingCcm Msg
-checkColumn name =
-    Table.veryCustomColumn
-        { name = name
-        , viewData = checkColumnCell
-        , sorter = Table.unsortable
-        }
-
-
-checkColumnCell : BillingCcm -> Table.HtmlDetails Msg
-checkColumnCell emp =
-    Table.HtmlDetails []
-        [ input [ type_ "checkbox" ] []
-        ]

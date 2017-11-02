@@ -45,22 +45,17 @@ simpleThead headers =
     Table.HtmlDetails [] (List.map simpleTheadHelp headers)
 
 
+checkColumn : String -> Table.Column data msg
+checkColumn name =
+    Table.veryCustomColumn
+        { name = name
+        , viewData = checkColumnCell
+        , sorter = Table.unsortable
+        }
 
--- maybeStringColumn : String -> (data -> Maybe String) -> Table.Column data msg
--- maybeStringColumn name toStr =
---     let
---         str =
---             case toStr of
---                 Just a t ->
---                     ""
---                 Nothing ->
---                     ""
---     in
---         Table.customColumn
---             { name = name
---             , viewData = str
---             , sorter = Table.increasingOrDecreasingBy str
---             }
--- viewDefaultString : Maybe String -> String
--- viewDefaultString dollars =
---     defaultString dollars
+
+checkColumnCell : data -> Table.HtmlDetails msg
+checkColumnCell emp =
+    Table.HtmlDetails []
+        [ input [ type_ "checkbox" ] []
+        ]
