@@ -1,16 +1,11 @@
 port module Main exposing (..)
 
 import Model exposing (..)
-import Html exposing (Html, text, div, input, program, button, select, option, span, a)
-import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
-import Html.Events exposing (onClick, onInput)
-import Table
-import Utils.GridPaging exposing (..)
-import Utils.CommonGrid exposing (..)
+import Html
+import Html.Events
 import Billing.Main
 import Billing.Types
 import Billing.Load
-import Http
 
 
 port sendTestDate : String -> Cmd msg
@@ -43,14 +38,14 @@ main =
         }
 
 
-view : Model -> Html Msg
+view : Model -> Html.Html Msg
 view model =
     case model.page of
         NoPage ->
-            Html.button [ onClick OpenBilling ] [ text "Billing" ]
+            Html.button [ Html.Events.onClick OpenBilling ] [ Html.text "Billing" ]
 
         BillingPage ->
-            div []
+            Html.div []
                 [ Html.map BillingMsgTag (Billing.Main.view model.billingState)
                 ]
 
