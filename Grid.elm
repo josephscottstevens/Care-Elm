@@ -50,13 +50,5 @@ defaultCustomizations =
     , thead = simpleThead
     , tfoot = Nothing
     , tbodyAttrs = []
-    , rowAttrs = simpleRowAttrs
+    , rowAttrs = simpleRowAttrs .iD
     }
-
-
-simpleRowAttrs : BillingCcm -> List (Html.Attribute msg)
-simpleRowAttrs billingCcm =
-    if billingCcm.iD % 2 == 0 then
-        [ class "e-row" ]
-    else
-        [ class "e-alt_row" ]

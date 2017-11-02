@@ -84,9 +84,26 @@ editColumn toMsg =
 
 
 editColumnCell : Html.Attribute msg -> Table.HtmlDetails msg
-editColumnCell t =
+editColumnCell clickEvent =
     Table.HtmlDetails []
         [ div [ style [ ( "text-align", "right" ) ] ]
-            [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", t ] []
+            [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", clickEvent ] []
             ]
         ]
+
+
+
+--No lie, really... really don't understand how\why this works
+
+
+simpleRowAttrs : (a -> Int) -> a -> List (Html.Attribute msg)
+simpleRowAttrs toInt =
+    \data -> viewData (toInt data)
+
+
+viewData : Int -> List (Html.Attribute msg)
+viewData int =
+    if int % 2 == 0 then
+        [ class "e-row" ]
+    else
+        [ class "e-alt_row" ]
