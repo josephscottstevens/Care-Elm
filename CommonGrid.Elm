@@ -1,7 +1,7 @@
 module CommonGrid exposing (..)
 
 import Html exposing (Html, text, div, program, button, input, span)
-import Html.Attributes exposing (style, class, type_, id)
+import Html.Attributes exposing (style, class, type_, id, value)
 import Table
 
 
@@ -18,26 +18,32 @@ defaultString str =
 simpleTheadHelp : ( String, Table.Status, Html.Attribute msg ) -> Html msg
 simpleTheadHelp ( name, status, onClick ) =
     let
-        content =
+        headerContent =
             case status of
                 Table.Unsortable ->
-                    [ Html.text name ]
+                    Html.text name
 
                 Table.Sortable selected ->
-                    [ Html.text name ]
+                    Html.text name
 
                 Table.Reversible Nothing ->
-                    [ Html.text name ]
+                    Html.text name
 
                 Table.Reversible (Just isReversed) ->
-                    [ Html.text name
-                    , if isReversed then
-                        div [ class "glyphicon glyphicon-menu-up" ] []
-                      else
-                        div [ class "glyphicon glyphicon-menu-down" ] []
-                    ]
+                    if isReversed then
+                        div [ class "glyphicon glyphicon-menu-up" ] [ Html.text name ]
+                    else
+                        div [ class "glyphicon glyphicon-menu-down" ] [ Html.text name ]
+
+        filterContent =
+            div [ class "e-filterdiv e-fltrinputdiv" ]
+                [ Html.input [ class "e-ejinputtext e-filtertext", style [ ( "margin-bottom", "5px" ) ] ] []
+                ]
+
+        content =
+            [ headerContent, filterContent ]
     in
-        Html.th [ onClick, class "e-columnheader" ] content
+        Html.th [ onClick, class "e-filterbarcell", style [ ( "vertical-align", "bottom" ) ] ] content
 
 
 simpleThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg

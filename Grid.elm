@@ -35,7 +35,7 @@ config =
             , Table.stringColumn "Main Provider" .mainProvider
             , Table.stringColumn "Patient Name" .patientName
             , Table.stringColumn "DOB" .dob
-            , Table.stringColumn "Patient's Facility Id No" (\t -> defaultString t.patientFacilityIdNo)
+            , Table.stringColumn "Id No" (\t -> defaultString t.patientFacilityIdNo)
             , Table.stringColumn "AssignedTo" (\t -> defaultString t.assignedTo)
             , editColumn
             ]
