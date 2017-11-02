@@ -74,5 +74,7 @@ editColumn =
 editColumnCell : BillingCcm -> Table.HtmlDetails Msg
 editColumnCell emp =
     Table.HtmlDetails []
-        [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", onClick (EditStart emp), style [ ( "text-align", "right" ) ] ] []
+        [ div [ style [ ( "text-align", "right" ) ] ]
+            [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", onClick (EditStart emp) ] []
+            ]
         ]
