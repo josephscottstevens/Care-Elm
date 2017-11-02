@@ -50,7 +50,7 @@ view model =
                 ]
 
 
-update : Msg -> Model -> ( Model.Model, Cmd Model.Msg )
+update : Msg -> Model -> ( Model, Cmd Model.Msg )
 update msg model =
     case msg of
         OpenBilling ->
@@ -59,7 +59,7 @@ update msg model =
         BillingMsg billingMsg ->
             let
                 newBillingModel =
-                    Billing.Main.update (billingMsg) model.billingState
+                    Billing.Main.update billingMsg model.billingState
             in
                 ( { model | billingState = newBillingModel }, Cmd.none )
 
