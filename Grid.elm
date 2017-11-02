@@ -1,4 +1,4 @@
-module Grid exposing (config, filteredCcm)
+module Grid exposing (config, filteredCcm, filteredCcmLength)
 
 import Model exposing (..)
 import Html exposing (Html, text, div, program, button, input, span)
@@ -16,6 +16,11 @@ filteredCcm model =
     in
         model.billingCcm
             |> List.filter (String.contains lowerQuery << String.toLower << .facility)
+
+
+filteredCcmLength : Model -> Int
+filteredCcmLength model =
+    List.length (filteredCcm model)
 
 
 config : Table.Config BillingCcm Msg

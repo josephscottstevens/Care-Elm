@@ -60,11 +60,8 @@ update msg model =
 
         SetPagingState page ->
             let
-                filteredRowCount =
-                    List.length (filteredCcm model)
-
                 newPageIndex =
-                    GridPaging.getNewState page model.currentPage filteredRowCount
+                    GridPaging.getNewState page model.currentPage (filteredCcmLength model)
             in
                 ( { model | currentPage = newPageIndex }, Cmd.none )
 
@@ -99,9 +96,9 @@ view model =
                 [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
                 , input [ class "form-control", placeholder "Search by Facility", onInput SetQuery, value model.query ] []
                 , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view config model.tableState ((filteredCcm model) |> List.drop (model.currentPage * 8) |> List.take 10)
+                    [ Table.view config model.tableState ((filteredCcm model) |> List.drop (model.currentPage * GridPaging.pagesPerBlock) |> List.take GridPaging.itemsPerPage)
                     ]
-                , GridPaging.view model.currentPage (List.length (filteredCcm model))
+                , GridPaging.view model.currentPage (filteredCcmLength model)
                 ]
 
         Edit emp ->
