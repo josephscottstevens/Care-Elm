@@ -13634,15 +13634,16 @@ var _user$project$CommonGrid$defaultString = function (str) {
 	}
 };
 
-var _user$project$GridPaging$view = F3(
-	function (t, state, data) {
-		var pagesPerBlock = 0;
-		var itemsPerPage = 0;
+var _user$project$GridPaging$view = F2(
+	function (_p0, state) {
+		var _p1 = _p0;
 		var filteredList = {ctor: '[]'};
 		var totalRows = _elm_lang$core$List$length(filteredList);
-		var totalPages = ((totalRows / itemsPerPage) | 0) - 1;
 		var employersCount = _elm_lang$core$Basics$toString(
 			_elm_lang$core$List$length(filteredList));
+		var pagesPerBlock = 0;
+		var itemsPerPage = 0;
+		var totalPages = ((totalRows / itemsPerPage) | 0) - 1;
 		var currentPage = 0;
 		var activeOrNot = function (pageIndex) {
 			var activeOrNotText = _elm_lang$core$Native_Utils.eq(pageIndex, currentPage) ? 'e-currentitem e-active' : 'e-default';
@@ -13744,8 +13745,8 @@ var _user$project$GridPaging$getNewState = F3(
 	function (page, currentPage, lst) {
 		var totalPages = 5;
 		var totalRows = 10;
-		var _p0 = page;
-		switch (_p0.ctor) {
+		var _p2 = page;
+		switch (_p2.ctor) {
 			case 'First':
 				return 0;
 			case 'Previous':
@@ -13753,7 +13754,7 @@ var _user$project$GridPaging$getNewState = F3(
 			case 'PreviousBlock':
 				return 0;
 			case 'Index':
-				return _p0._0;
+				return _p2._0;
 			case 'NextBlock':
 				return 0;
 			case 'Next':
@@ -13762,22 +13763,24 @@ var _user$project$GridPaging$getNewState = F3(
 				return totalPages - 1;
 		}
 	});
-var _user$project$GridPaging$PageState = function (a) {
-	return {ctor: 'PageState', _0: a};
-};
-var _user$project$GridPaging$initialPageState = _user$project$GridPaging$PageState(0);
+var _user$project$GridPaging$PageState = F2(
+	function (a, b) {
+		return {ctor: 'PageState', _0: a, _1: b};
+	});
+var _user$project$GridPaging$initialPageState = A2(_user$project$GridPaging$PageState, 0, 0);
 var _user$project$GridPaging$onClick = F2(
-	function (currentPage, toMsg) {
+	function (page, toMsg) {
 		return A2(
 			_elm_lang$html$Html_Events$on,
 			'click',
 			A2(
 				_elm_lang$core$Json_Decode$map,
 				toMsg,
-				A2(
-					_elm_lang$core$Json_Decode$map,
+				A3(
+					_elm_lang$core$Json_Decode$map2,
 					_user$project$GridPaging$PageState,
-					_elm_lang$core$Json_Decode$succeed(currentPage))));
+					_elm_lang$core$Json_Decode$succeed(0),
+					_elm_lang$core$Json_Decode$succeed(0))));
 	});
 var _user$project$GridPaging$GridPagingConfig = function (a) {
 	return {ctor: 'GridPagingConfig', _0: a};
@@ -14448,11 +14451,7 @@ var _user$project$Main$view = function (model) {
 								}),
 							_1: {
 								ctor: '::',
-								_0: A3(
-									_user$project$GridPaging$view,
-									_user$project$Main$pagingConfig,
-									model.pageState,
-									_user$project$Main$filteredCcm(model)),
+								_0: A2(_user$project$GridPaging$view, _user$project$Main$pagingConfig, model.pageState),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -14536,7 +14535,7 @@ var _user$project$Main$getTestDate = _elm_lang$core$Native_Platform.incomingPort
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.BillingCcm":{"type":"{ iD : Int , facility : String , facilityId : Int , practiceLocation : Maybe.Maybe String , mainProvider : String , providerId : Int , patientName : String , patientId : Int , dob : String , patientFacilityIdNo : Maybe.Maybe String , phone : String , assignedTo : Maybe.Maybe String , staffId : Maybe.Maybe Int , openTasks : Int , totalTimeSpent : Maybe.Maybe Int , ccmRegistrationDate : String , dateOfService : String , billingDate : String , billingMonth : Int , billingYear : Int , isClosed : Bool , tocId : Maybe.Maybe Int , readmission : Bool , isComplexCCM : Bool , batchCloseOnInvoiceCompletion : Bool , reviewedByStaffName : Maybe.Maybe String , canModifyReviewedStatus : Bool , cPT : String , isReviewed : Bool , dxPresent : Bool , carePlanPresent : Bool , medsPresent : Bool , allergiesPresent : Bool , vitalsPresent : Bool , recordingPresent : Bool , chartComplete : Bool , status : String , is24HoursSinceBilledString : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , billingCcm : List Model.BillingCcm , tableState : Table.State , query : String , pageState : GridPaging.PageState }","args":[]}},"unions":{"Table.State":{"tags":{"State":["String","Bool"]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":["Model.BillingCcm"],"Error":["Http.Error"]},"args":[]},"GridPaging.PageState":{"tags":{"PageState":["Int"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"Reset":[],"SetQuery":["String"],"SetPagingState":["GridPaging.PageState"],"EditStart":["Model.BillingCcm"],"EditCancel":[],"SetTableState":["Table.State"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.BillingCcm":{"type":"{ iD : Int , facility : String , facilityId : Int , practiceLocation : Maybe.Maybe String , mainProvider : String , providerId : Int , patientName : String , patientId : Int , dob : String , patientFacilityIdNo : Maybe.Maybe String , phone : String , assignedTo : Maybe.Maybe String , staffId : Maybe.Maybe Int , openTasks : Int , totalTimeSpent : Maybe.Maybe Int , ccmRegistrationDate : String , dateOfService : String , billingDate : String , billingMonth : Int , billingYear : Int , isClosed : Bool , tocId : Maybe.Maybe Int , readmission : Bool , isComplexCCM : Bool , batchCloseOnInvoiceCompletion : Bool , reviewedByStaffName : Maybe.Maybe String , canModifyReviewedStatus : Bool , cPT : String , isReviewed : Bool , dxPresent : Bool , carePlanPresent : Bool , medsPresent : Bool , allergiesPresent : Bool , vitalsPresent : Bool , recordingPresent : Bool , chartComplete : Bool , status : String , is24HoursSinceBilledString : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , billingCcm : List Model.BillingCcm , tableState : Table.State , query : String , pageState : GridPaging.PageState }","args":[]}},"unions":{"Table.State":{"tags":{"State":["String","Bool"]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":["Model.BillingCcm"],"Error":["Http.Error"]},"args":[]},"GridPaging.PageState":{"tags":{"PageState":["Int","Int"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"Reset":[],"SetQuery":["String"],"SetPagingState":["GridPaging.PageState"],"EditStart":["Model.BillingCcm"],"EditCancel":[],"SetTableState":["Table.State"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])

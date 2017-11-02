@@ -117,7 +117,7 @@ view model =
                     , div [ class "e-grid e-js e-waitingpopup" ]
                         [ Table.view config model.tableState ((filteredCcm model) |> List.drop (currentPage * 8) |> List.take 10)
                         ]
-                    , GridPaging.view pagingConfig model.pageState (filteredCcm model)
+                    , GridPaging.view pagingConfig model.pageState --(List.length filteredCcm model)
                     ]
 
             Edit emp ->

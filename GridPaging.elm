@@ -7,7 +7,7 @@ import Html.Events as E
 
 
 type PageState
-    = PageState Int
+    = PageState Int Int
 
 
 type GridPagingConfig msg
@@ -20,7 +20,7 @@ type GridPagingConfig msg
 
 initialPageState : PageState
 initialPageState =
-    PageState 0
+    PageState 0 0
 
 
 type Page
@@ -33,11 +33,11 @@ type Page
     | Last
 
 
-onClick : Int -> (PageState -> msg) -> Attribute msg
-onClick currentPage toMsg =
+onClick : Page -> (PageState -> msg) -> Attribute msg
+onClick page toMsg =
     E.on "click" <|
         Json.map toMsg <|
-            Json.map PageState (Json.succeed currentPage)
+            Json.map2 PageState (Json.succeed 0) (Json.succeed 0)
 
 
 getNewState : Page -> Int -> List -> Int
@@ -78,20 +78,20 @@ getNewState page currentPage lst =
                 totalPages - 1
 
 
-view : GridPagingConfig msg -> PageState -> List data -> Html msg
-view t state data =
+view : GridPagingConfig msg -> PageState -> Html msg
+view (GridPagingConfig { itemsPerPage, pagesPerBlock, toMsg }) state =
     let
         currentPage =
             0
-
-        filteredList =
-            []
 
         itemsPerPage =
             0
 
         pagesPerBlock =
             0
+
+        filteredList =
+            []
 
         totalRows =
             List.length filteredList
@@ -109,7 +109,9 @@ view t state data =
             in
                 div [] []
 
-        -- div [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), onClick (Index pageIndex) ] [ text (toString (pageIndex + 1)) ]
+        -- div
+        --     [ Attr.class ("e-link e-numericitem e-spacing " ++ activeOrNotText), onClick (Index pageIndex) ]
+        --     [ text (toString (pageIndex + 1)) ]
         rng =
             List.range 0 totalPages
                 |> List.drop ((currentPage // pagesPerBlock) * pagesPerBlock)
@@ -170,7 +172,7 @@ view t state data =
     in
         div [ Attr.class "e-pager e-js e-pager" ]
             [ div [ Attr.class "e-pagercontainer" ]
-                [--     div [ class firstPageClass, onClick First ] []
+                [--div [ Attr.class firstPageClass, onClick First 0 toMsg ] []
                  -- , div [ class leftPageClass, onClick Previous ] []
                  -- , a [ class leftPageBlockClass, onClick PreviousBlock ] [ text "..." ]
                  -- , div [ class "e-numericcontainer e-default" ] rng
