@@ -1,10 +1,10 @@
-module Load exposing (..)
+module Billing.Load exposing (..)
 
 import Json.Encode
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
-import Model exposing (..)
+import Billing.Types exposing (..)
 import Table
 
 
