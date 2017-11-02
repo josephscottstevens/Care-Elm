@@ -8,7 +8,11 @@ import Html.Events exposing (onClick, onInput)
 import Table
 import Utils.GridPaging exposing (..)
 import Utils.CommonGrid exposing (..)
-import Http
+
+
+updateBilling : Billing.Types.Model -> Billing.Types.Model
+updateBilling loadedModel =
+    { loadedModel | state = Billing.Types.Grid, billingCcm = (Billing.Load.newEmployers loadedModel.billingCcm) }
 
 
 update : Billing.Types.Msg -> Billing.Types.Model -> Billing.Types.Model

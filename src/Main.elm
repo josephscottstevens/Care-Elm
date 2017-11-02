@@ -57,18 +57,10 @@ update msg model =
             ( model, Billing.Load.getEmployment BillingLoad )
 
         BillingMsg billingMsg ->
-            let
-                newBillingModel =
-                    Billing.Main.update billingMsg model.billingState
-            in
-                ( { model | billingState = newBillingModel }, Cmd.none )
+            ( { model | billingState = Billing.Main.update billingMsg model.billingState }, Cmd.none )
 
         BillingLoad (Ok loadedModel) ->
-            let
-                updateBilling =
-                    { loadedModel | state = Billing.Types.Grid, billingCcm = (Billing.Load.newEmployers loadedModel.billingCcm) }
-            in
-                ( { model | page = BillingPage, billingState = updateBilling }, Cmd.none )
+            ( { model | page = BillingPage, billingState = Billing.Main.updateBilling loadedModel }, Cmd.none )
 
         BillingLoad (Err t) ->
             ( model, Cmd.none )
