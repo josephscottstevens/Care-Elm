@@ -45,7 +45,7 @@ config =
 
 defaultCustomizations : Table.Customizations BillingCcm msg
 defaultCustomizations =
-    { tableAttrs = [ id "employersTable", class "e-table" ]
+    { tableAttrs = [ id "employersTable", class "e-table e-hidelines" ]
     , caption = Nothing
     , thead = simpleThead
     , tfoot = Nothing

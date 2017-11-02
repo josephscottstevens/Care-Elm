@@ -36,9 +36,12 @@ simpleTheadHelp ( name, status, onClick ) =
                         div [ class "glyphicon glyphicon-menu-down" ] [ Html.text name ]
 
         filterContent =
-            div [ class "e-filterdiv e-fltrinputdiv" ]
-                [ Html.input [ class "e-ejinputtext e-filtertext", style [ ( "margin-bottom", "5px" ) ] ] []
-                ]
+            if name == "" then
+                div [] []
+            else
+                div [ class "e-filterdiv e-fltrinputdiv" ]
+                    [ Html.input [ class "e-ejinputtext e-filtertext", style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ) ] ] []
+                    ]
 
         content =
             [ headerContent, filterContent ]
