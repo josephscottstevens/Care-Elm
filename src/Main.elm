@@ -8,6 +8,9 @@ import Table
 import Utils.GridPaging exposing (..)
 import Utils.CommonGrid exposing (..)
 import Billing.Main
+import Billing.Types
+import Billing.Load
+import Http
 
 
 port sendTestDate : String -> Cmd msg
@@ -44,15 +47,15 @@ view : Model -> Html Msg
 view model =
     case model.page of
         NoPage ->
-            div [] []
+            Html.button [ onClick OpenBilling ] [ text "Billing" ]
 
         BillingPage ->
             div [] []
 
 
-
--- BillingPage billingModel ->
---     Billing.Main.view billingModel
+updateBilling : Billing.Types.Model -> Billing.Types.Model
+updateBilling billingModel =
+    { billingModel | state = Billing.Types.Grid, billingCcm = (Billing.Load.newEmployers billingModel.billingCcm) }
 
 
 update : Msg -> Model -> ( Model.Model, Cmd Model.Msg )
@@ -61,10 +64,18 @@ update msg model =
         NoMessage ->
             ( model, Cmd.none )
 
+        OpenBilling ->
+            ( { model | page = BillingPage }, Billing.Main.getEmployment BillingLoad )
+
         BillingMsg billingModel billingMsg ->
-            ( { model | page = BillingPage }, Cmd.none )
+            let
+                newBillingModel =
+                    Billing.Main.update (billingMsg) billingModel
+            in
+                ( { model | billingState = newBillingModel }, Cmd.none )
 
+        BillingLoad (Ok loadedModel) ->
+            ( { model | billingState = updateBilling loadedModel }, Cmd.none )
 
-
--- BillingMsg t ->
---     ( { model = Billing.Main.update t }, Cmd.none )
+        BillingLoad (Err t) ->
+            ( model, Cmd.none )

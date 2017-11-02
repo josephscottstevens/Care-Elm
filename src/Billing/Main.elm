@@ -8,66 +8,51 @@ import Html.Events exposing (onClick, onInput)
 import Table
 import Utils.GridPaging exposing (..)
 import Utils.CommonGrid exposing (..)
-import Model
+import Http
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( emptyModel, getEmployment )
+getEmployment : (Result Http.Error Model -> msg) -> Cmd msg
+getEmployment t =
+    Http.send t Billing.Load.request
 
 
-update : Msg -> Model -> ( Model.Model, Cmd Model.Msg )
+update : Billing.Types.Msg -> Billing.Types.Model -> Billing.Types.Model
 update msg model =
-    let
-        newPage t =
-            { page = Model.BillingPage
-            }
+    case msg of
+        EditStart employer ->
+            { model | state = Edit employer }
 
-        -- newCmd t =
-        --     {
-        --     }
-    in
-        case msg of
-            EditStart employer ->
-                ( newPage { model | state = Edit employer }, Cmd.none )
+        -- , sendTestDate employer.dOB
+        -- EditSave employer ->
+        --     ( newPage { model | state = Grid, employment = (updateEmployers model.enrollment employer) }, Cmd.none )
+        EditCancel ->
+            { model | state = Grid }
 
-            -- , sendTestDate employer.dOB
-            -- EditSave employer ->
-            --     ( newPage { model | state = Grid, employment = (updateEmployers model.enrollment employer) }, Cmd.none )
-            EditCancel ->
-                ( newPage { model | state = Grid }, Cmd.none )
+        SetPagingState page ->
+            let
+                newPageIndex =
+                    getNewState page model.currentPage (filteredCcmLength model)
+            in
+                { model | currentPage = newPageIndex }
 
-            Load (Ok model) ->
-                ( newPage { model | state = Grid, billingCcm = (newEmployers model.billingCcm) }, Cmd.none )
+        -- UpdateState emp newState ->
+        --     ( { model | state = Edit { emp | state = newState } }, Cmd.none )
+        -- UpdateCity emp newCity ->
+        --     ( { model | state = Edit { emp | city = newCity } }, Cmd.none )
+        -- UpdateStartDate newDob ->
+        --     case model.state of
+        --         Edit emp ->
+        --             ( { model | state = Edit { emp | dob = newDob } }, Cmd.none )
+        --         _ ->
+        --             ( model, Cmd.none )
+        SetQuery newQuery ->
+            { model | query = newQuery }
 
-            Load (Err t) ->
-                ( newPage { model | state = Error t }, Cmd.none )
+        SetTableState newState ->
+            { model | tableState = newState }
 
-            SetPagingState page ->
-                let
-                    newPageIndex =
-                        getNewState page model.currentPage (filteredCcmLength model)
-                in
-                    ( newPage { model | currentPage = newPageIndex }, Cmd.none )
-
-            -- UpdateState emp newState ->
-            --     ( { model | state = Edit { emp | state = newState } }, Cmd.none )
-            -- UpdateCity emp newCity ->
-            --     ( { model | state = Edit { emp | city = newCity } }, Cmd.none )
-            -- UpdateStartDate newDob ->
-            --     case model.state of
-            --         Edit emp ->
-            --             ( { model | state = Edit { emp | dob = newDob } }, Cmd.none )
-            --         _ ->
-            --             ( model, Cmd.none )
-            SetQuery newQuery ->
-                ( newPage { model | query = newQuery }, Cmd.none )
-
-            SetTableState newState ->
-                ( newPage { model | tableState = newState }, Cmd.none )
-
-            Reset ->
-                ( newPage emptyModel, Cmd.none )
+        Reset ->
+            emptyModel
 
 
 
@@ -99,9 +84,6 @@ view model =
                 -- , button [ class "btn btn-default", onClick (EditSave emp) ] [ text "save" ]
                 , button [ class "btn btn-default", onClick EditCancel ] [ text "cancel" ]
                 ]
-
-        Error err ->
-            div [] [ text (toString err) ]
 
 
 filteredCcm : Model -> List BillingCcm

@@ -1,6 +1,5 @@
 module Billing.Types exposing (..)
 
-import Http
 import Table
 
 
@@ -15,8 +14,7 @@ type Page
 
 
 type Msg
-    = Load (Result Http.Error Model)
-    | EditStart BillingCcm
+    = EditStart BillingCcm
       -- | EditSave Enrollment
     | EditCancel
       -- | UpdateStartDate String
@@ -32,7 +30,6 @@ type ModelState
     = Initial
     | Grid
     | Edit BillingCcm
-    | Error Http.Error
 
 
 type SortMode

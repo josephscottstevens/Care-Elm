@@ -1,6 +1,7 @@
 module Model exposing (..)
 
 import Billing.Types
+import Http
 
 
 type Page
@@ -16,7 +17,9 @@ type alias Model =
 
 type Msg
     = NoMessage
+    | OpenBilling
     | BillingMsg Billing.Types.Model Billing.Types.Msg
+    | BillingLoad (Result Http.Error Billing.Types.Model)
 
 
 emptyModel : Model

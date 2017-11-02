@@ -6,7 +6,7 @@ import Json.Decode.Pipeline exposing (..)
 import Http
 import Billing.Types exposing (..)
 import Table
-import Model
+import Billing.Types
 
 
 decodeBillingCcm : Json.Decode.Decoder BillingCcm
@@ -97,7 +97,7 @@ decodeBillingCcm =
 --         ]
 
 
-decodeModel : Decoder Model
+decodeModel : Decoder Billing.Types.Model
 decodeModel =
     decode Model
         |> hardcoded Initial
@@ -107,14 +107,9 @@ decodeModel =
         |> hardcoded 0
 
 
-request : Http.Request Model
+request : Http.Request Billing.Types.Model
 request =
     Http.get "/people/CcmGridDataSource?showOpenCcmBills=true" decodeModel
-
-
-getEmployment : Cmd Msg
-getEmployment =
-    Http.send Load request
 
 
 
