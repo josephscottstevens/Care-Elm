@@ -54,7 +54,7 @@ update : Msg -> Model -> ( Model.Model, Cmd Model.Msg )
 update msg model =
     case msg of
         OpenBilling ->
-            ( model, Billing.Main.getEmployment BillingLoad )
+            ( model, Billing.Load.getEmployment BillingLoad )
 
         BillingMsg billingMsg ->
             let

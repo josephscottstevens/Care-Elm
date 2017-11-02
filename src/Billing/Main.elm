@@ -11,11 +11,6 @@ import Utils.CommonGrid exposing (..)
 import Http
 
 
-getEmployment : (Result Http.Error Model -> msg) -> Cmd msg
-getEmployment t =
-    Http.send t Billing.Load.request
-
-
 update : Billing.Types.Msg -> Billing.Types.Model -> Billing.Types.Model
 update msg model =
     case msg of

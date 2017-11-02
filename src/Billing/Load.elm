@@ -112,6 +112,11 @@ request =
     Http.get "/people/CcmGridDataSource?showOpenCcmBills=true" decodeModel
 
 
+getEmployment : (Result Http.Error Model -> msg) -> Cmd msg
+getEmployment t =
+    Http.send t request
+
+
 
 -- Not good, rowId has to be patched on later, but I don't how to make it apart of the decoder
 
