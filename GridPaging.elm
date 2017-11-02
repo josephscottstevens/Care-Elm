@@ -1,4 +1,4 @@
-module GridPaging exposing (..)
+module GridPaging exposing (itemsPerPage, pagesPerBlock, getNewState, pagingView)
 
 import Html exposing (Html, Attribute, div, text, span, a)
 import Html.Attributes exposing (class, style)
@@ -48,8 +48,8 @@ getNewState page currentPage totalVisiblePages =
                 totalPages - 1
 
 
-view : Int -> Int -> Html Msg
-view currentPage totalVisiblePages =
+pagingView : Int -> Int -> Html Msg
+pagingView currentPage totalVisiblePages =
     let
         totalPages =
             (totalVisiblePages // itemsPerPage) - 1

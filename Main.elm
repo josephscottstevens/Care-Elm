@@ -6,7 +6,7 @@ import Html exposing (Html, text, div, input, program, button, select, option, s
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)
 import Table
-import GridPaging
+import GridPaging exposing (..)
 import CommonGrid exposing (..)
 
 
@@ -61,7 +61,7 @@ update msg model =
         SetPagingState page ->
             let
                 newPageIndex =
-                    GridPaging.getNewState page model.currentPage (filteredCcmLength model)
+                    getNewState page model.currentPage (filteredCcmLength model)
             in
                 ( { model | currentPage = newPageIndex }, Cmd.none )
 
@@ -96,9 +96,9 @@ view model =
                 [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
                 , input [ class "form-control", placeholder "Search by Facility", onInput SetQuery, value model.query ] []
                 , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view config model.tableState ((filteredCcm model) |> List.drop (model.currentPage * GridPaging.pagesPerBlock) |> List.take GridPaging.itemsPerPage)
+                    [ Table.view config model.tableState ((filteredCcm model) |> List.drop (model.currentPage * pagesPerBlock) |> List.take itemsPerPage)
                     ]
-                , GridPaging.view model.currentPage (filteredCcmLength model)
+                , pagingView model.currentPage (filteredCcmLength model)
                 ]
 
         Edit emp ->
