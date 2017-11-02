@@ -5,9 +5,9 @@ import Model exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option, span, a)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)
-import Grid exposing (..)
 import Table
 import GridPaging
+import CommonGrid exposing (..)
 
 
 port sendTestDate : String -> Cmd msg
@@ -113,3 +113,49 @@ view model =
 
         Error err ->
             div [] [ text (toString err) ]
+
+
+filteredCcm : Model -> List BillingCcm
+filteredCcm model =
+    let
+        lowerQuery =
+            String.toLower model.query
+    in
+        model.billingCcm
+            |> List.filter (String.contains lowerQuery << String.toLower << .facility)
+
+
+filteredCcmLength : Model -> Int
+filteredCcmLength model =
+    List.length (filteredCcm model)
+
+
+config : Table.Config BillingCcm Msg
+config =
+    Table.customConfig
+        { toId = .patientName
+        , toMsg = SetTableState
+        , columns =
+            [ checkColumn ""
+            , Table.stringColumn "Facility" .facility
+            , Table.stringColumn "Billing Date" .billingDate
+            , Table.stringColumn "Main Provider" .mainProvider
+            , Table.stringColumn "Patient Name" .patientName
+            , Table.stringColumn "DOB" .dob
+            , Table.stringColumn "Id No" (\t -> defaultString t.patientFacilityIdNo)
+            , Table.stringColumn "AssignedTo" (\t -> defaultString t.assignedTo)
+            , editColumn (\t -> onClick (EditStart t))
+            ]
+        , customizations = defaultCustomizations
+        }
+
+
+defaultCustomizations : Table.Customizations BillingCcm msg
+defaultCustomizations =
+    { tableAttrs = [ id "employersTable", class "e-table e-hidelines" ]
+    , caption = Nothing
+    , thead = simpleThead
+    , tfoot = Nothing
+    , tbodyAttrs = []
+    , rowAttrs = simpleRowAttrs .iD
+    }
