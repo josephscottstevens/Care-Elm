@@ -4,7 +4,6 @@ import Model exposing (..)
 import Html
 import Html.Events
 import Billing.Main
-import Billing.Types
 import Billing.Load
 
 
@@ -14,13 +13,13 @@ port sendTestDate : String -> Cmd msg
 port getTestDate : (String -> msg) -> Sub msg
 
 
+
+-- getTestDate UpdateStartDate
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
-
-
-
--- getTestDate UpdateStartDate
 
 
 init : ( Model, Cmd Msg )
