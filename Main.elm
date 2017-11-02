@@ -40,6 +40,16 @@ init =
     ( emptyModel, getEmployment )
 
 
+filteredCcm : Model -> List BillingCcm
+filteredCcm model =
+    let
+        lowerQuery =
+            String.toLower model.query
+    in
+        model.billingCcm
+            |> List.filter (String.contains lowerQuery << String.toLower << .facility)
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -59,11 +69,7 @@ update msg model =
             ( { model | state = Error t }, Cmd.none )
 
         SetPagingState page ->
-            let
-                filteredRowCount =
-                    List.length (filteredCcm model)
-            in
-                ( { model | currentPage = (GridPaging.getNewState page model.currentPage filteredRowCount) }, Cmd.none )
+            ( { model | currentPage = (GridPaging.getNewState page model.currentPage model.visibleRowCount) }, Cmd.none )
 
         -- UpdateState emp newState ->
         --     ( { model | state = Edit { emp | state = newState } }, Cmd.none )
@@ -76,23 +82,17 @@ update msg model =
         --         _ ->
         --             ( model, Cmd.none )
         SetQuery newQuery ->
-            ( { model | query = newQuery }, Cmd.none )
+            let
+                filteredRowCount =
+                    List.length (filteredCcm model)
+            in
+                ( { model | query = newQuery, visibleRowCount = filteredRowCount }, Cmd.none )
 
         SetTableState newState ->
             ( { model | tableState = newState }, Cmd.none )
 
         Reset ->
             ( emptyModel, getEmployment )
-
-
-filteredCcm : Model -> List BillingCcm
-filteredCcm model =
-    let
-        lowerQuery =
-            String.toLower model.query
-    in
-        model.billingCcm
-            |> List.filter (String.contains lowerQuery << String.toLower << .facility)
 
 
 view : Model -> Html Msg
@@ -108,7 +108,7 @@ view model =
                 , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view config model.tableState ((filteredCcm model) |> List.drop (model.currentPage * 8) |> List.take 10)
                     ]
-                , GridPaging.view model.currentPage (List.length (filteredCcm model))
+                , GridPaging.view model.currentPage model.visibleRowCount
                 ]
 
         Edit emp ->

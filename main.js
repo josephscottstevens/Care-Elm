@@ -13634,9 +13634,9 @@ var _user$project$CommonGrid$defaultString = function (str) {
 	}
 };
 
-var _user$project$Model$Model = F5(
-	function (a, b, c, d, e) {
-		return {state: a, billingCcm: b, tableState: c, query: d, currentPage: e};
+var _user$project$Model$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {state: a, billingCcm: b, tableState: c, query: d, currentPage: e, visibleRowCount: f};
 	});
 var _user$project$Model$BillingCcm = function (a) {
 	return function (b) {
@@ -13754,7 +13754,8 @@ var _user$project$Model$emptyModel = {
 	billingCcm: {ctor: '[]'},
 	tableState: _evancz$elm_sortable_table$Table$initialSort('dob'),
 	query: '',
-	currentPage: 0
+	currentPage: 0,
+	visibleRowCount: 0
 };
 var _user$project$Model$SortDesc = {ctor: 'SortDesc'};
 var _user$project$Model$SortAsc = {ctor: 'SortAsc'};
@@ -14364,18 +14365,21 @@ var _user$project$Load$decodeModel = A2(
 	0,
 	A2(
 		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
-		'',
+		0,
 		A2(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
-			_evancz$elm_sortable_table$Table$initialSort('dob'),
-			A3(
-				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-				'list',
-				_elm_lang$core$Json_Decode$list(_user$project$Load$decodeBillingCcm),
-				A2(
-					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
-					_user$project$Model$Initial,
-					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Model))))));
+			'',
+			A2(
+				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
+				_evancz$elm_sortable_table$Table$initialSort('dob'),
+				A3(
+					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+					'list',
+					_elm_lang$core$Json_Decode$list(_user$project$Load$decodeBillingCcm),
+					A2(
+						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$hardcoded,
+						_user$project$Model$Initial,
+						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Model$Model)))))));
 var _user$project$Load$request = A2(_elm_lang$http$Http$get, '/people/CcmGridDataSource?showOpenCcmBills=true', _user$project$Load$decodeModel);
 var _user$project$Load$getEmployment = A2(_elm_lang$http$Http$send, _user$project$Model$Load, _user$project$Load$request);
 
@@ -14394,9 +14398,87 @@ var _user$project$Main$filteredCcm = function (model) {
 		},
 		model.billingCcm);
 };
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p1 = msg;
+		switch (_p1.ctor) {
+			case 'EditStart':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							state: _user$project$Model$Edit(_p1._0)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'EditCancel':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{state: _user$project$Model$Grid}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Load':
+				if (_p1._0.ctor === 'Ok') {
+					var _p2 = _p1._0._0;
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							_p2,
+							{
+								state: _user$project$Model$Grid,
+								billingCcm: _user$project$Load$newEmployers(_p2.billingCcm)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								state: _user$project$Model$Error(_p1._0._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			case 'SetPagingState':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							currentPage: A3(_user$project$GridPaging$getNewState, _p1._0, model.currentPage, model.visibleRowCount)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SetQuery':
+				var filteredRowCount = _elm_lang$core$List$length(
+					_user$project$Main$filteredCcm(model));
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{query: _p1._0, visibleRowCount: filteredRowCount}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SetTableState':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{tableState: _p1._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
+		}
+	});
 var _user$project$Main$view = function (model) {
-	var _p1 = model.state;
-	switch (_p1.ctor) {
+	var _p3 = model.state;
+	switch (_p3.ctor) {
 		case 'Initial':
 			return A2(
 				_elm_lang$html$Html$div,
@@ -14476,11 +14558,7 @@ var _user$project$Main$view = function (model) {
 								}),
 							_1: {
 								ctor: '::',
-								_0: A2(
-									_user$project$GridPaging$view,
-									model.currentPage,
-									_elm_lang$core$List$length(
-										_user$project$Main$filteredCcm(model))),
+								_0: A2(_user$project$GridPaging$view, model.currentPage, model.visibleRowCount),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -14508,7 +14586,7 @@ var _user$project$Main$view = function (model) {
 										_0: _elm_lang$html$Html_Attributes$id('testDate'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$value(_p1._0.dob),
+											_0: _elm_lang$html$Html_Attributes$value(_p3._0.dob),
 											_1: {ctor: '[]'}
 										}
 									}
@@ -14544,89 +14622,11 @@ var _user$project$Main$view = function (model) {
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(_p1._0)),
+						_elm_lang$core$Basics$toString(_p3._0)),
 					_1: {ctor: '[]'}
 				});
 	}
 };
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p2 = msg;
-		switch (_p2.ctor) {
-			case 'EditStart':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							state: _user$project$Model$Edit(_p2._0)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'EditCancel':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{state: _user$project$Model$Grid}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'Load':
-				if (_p2._0.ctor === 'Ok') {
-					var _p3 = _p2._0._0;
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							_p3,
-							{
-								state: _user$project$Model$Grid,
-								billingCcm: _user$project$Load$newEmployers(_p3.billingCcm)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								state: _user$project$Model$Error(_p2._0._0)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				}
-			case 'SetPagingState':
-				var filteredRowCount = _elm_lang$core$List$length(
-					_user$project$Main$filteredCcm(model));
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							currentPage: A3(_user$project$GridPaging$getNewState, _p2._0, model.currentPage, filteredRowCount)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'SetQuery':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{query: _p2._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'SetTableState':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{tableState: _p2._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			default:
-				return {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
-		}
-	});
 var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Model$emptyModel, _1: _user$project$Load$getEmployment};
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
@@ -14643,7 +14643,7 @@ var _user$project$Main$getTestDate = _elm_lang$core$Native_Platform.incomingPort
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.BillingCcm":{"type":"{ iD : Int , facility : String , facilityId : Int , practiceLocation : Maybe.Maybe String , mainProvider : String , providerId : Int , patientName : String , patientId : Int , dob : String , patientFacilityIdNo : Maybe.Maybe String , phone : String , assignedTo : Maybe.Maybe String , staffId : Maybe.Maybe Int , openTasks : Int , totalTimeSpent : Maybe.Maybe Int , ccmRegistrationDate : String , dateOfService : String , billingDate : String , billingMonth : Int , billingYear : Int , isClosed : Bool , tocId : Maybe.Maybe Int , readmission : Bool , isComplexCCM : Bool , batchCloseOnInvoiceCompletion : Bool , reviewedByStaffName : Maybe.Maybe String , canModifyReviewedStatus : Bool , cPT : String , isReviewed : Bool , dxPresent : Bool , carePlanPresent : Bool , medsPresent : Bool , allergiesPresent : Bool , vitalsPresent : Bool , recordingPresent : Bool , chartComplete : Bool , status : String , is24HoursSinceBilledString : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , billingCcm : List Model.BillingCcm , tableState : Table.State , query : String , currentPage : Int }","args":[]}},"unions":{"Table.State":{"tags":{"State":["String","Bool"]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Model.Page":{"tags":{"Last":[],"Index":["Int"],"Previous":[],"Next":[],"First":[],"PreviousBlock":[],"NextBlock":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":["Model.BillingCcm"],"Error":["Http.Error"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"Reset":[],"SetQuery":["String"],"SetPagingState":["Model.Page"],"EditStart":["Model.BillingCcm"],"EditCancel":[],"SetTableState":["Table.State"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Model.Msg","aliases":{"Model.BillingCcm":{"type":"{ iD : Int , facility : String , facilityId : Int , practiceLocation : Maybe.Maybe String , mainProvider : String , providerId : Int , patientName : String , patientId : Int , dob : String , patientFacilityIdNo : Maybe.Maybe String , phone : String , assignedTo : Maybe.Maybe String , staffId : Maybe.Maybe Int , openTasks : Int , totalTimeSpent : Maybe.Maybe Int , ccmRegistrationDate : String , dateOfService : String , billingDate : String , billingMonth : Int , billingYear : Int , isClosed : Bool , tocId : Maybe.Maybe Int , readmission : Bool , isComplexCCM : Bool , batchCloseOnInvoiceCompletion : Bool , reviewedByStaffName : Maybe.Maybe String , canModifyReviewedStatus : Bool , cPT : String , isReviewed : Bool , dxPresent : Bool , carePlanPresent : Bool , medsPresent : Bool , allergiesPresent : Bool , vitalsPresent : Bool , recordingPresent : Bool , chartComplete : Bool , status : String , is24HoursSinceBilledString : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Model.Model":{"type":"{ state : Model.ModelState , billingCcm : List Model.BillingCcm , tableState : Table.State , query : String , currentPage : Int , visibleRowCount : Int }","args":[]}},"unions":{"Table.State":{"tags":{"State":["String","Bool"]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Model.Page":{"tags":{"Last":[],"Index":["Int"],"Previous":[],"Next":[],"First":[],"PreviousBlock":[],"NextBlock":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Model.ModelState":{"tags":{"Grid":[],"Initial":[],"Edit":["Model.BillingCcm"],"Error":["Http.Error"]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Model.Msg":{"tags":{"Reset":[],"SetQuery":["String"],"SetPagingState":["Model.Page"],"EditStart":["Model.BillingCcm"],"EditCancel":[],"SetTableState":["Table.State"],"Load":["Result.Result Http.Error Model.Model"]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])

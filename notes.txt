@@ -13,7 +13,7 @@ install vs code
     https://code.visualstudio.com/download
 
 install Elm extension for vscode
-    Pres Control + Shift + X
+    Press Control + Shift + X
     search for "elm"
     select elm Language support for visual studio code
     press green install button
@@ -26,6 +26,8 @@ Get dates displaying correctly
     Perhaps server side as string, meh, or better DateLibrary (if that's hard, scratch that)
 
 LOW TODO:
+For example, when you are on page 12, and you filter down to like 20 rows, the highlighted row is gone
+When page left is disabled, you can still click it.
 Re-add port \ subscription
 Dropdown menu on right
 Style checkboxs

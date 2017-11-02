@@ -47,6 +47,7 @@ type alias Model =
     , tableState : Table.State
     , query : String
     , currentPage : Int
+    , visibleRowCount : Int
     }
 
 
@@ -57,6 +58,7 @@ emptyModel =
     , tableState = Table.initialSort "dob"
     , query = ""
     , currentPage = 0
+    , visibleRowCount = 0
     }
 
 
