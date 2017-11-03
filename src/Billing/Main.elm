@@ -1,7 +1,7 @@
 module Billing.Main exposing (..)
 
 import Billing.Load exposing (..)
-import Billing.Types exposing (..)
+import Billing.Model exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option, span, a)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)
@@ -15,12 +15,12 @@ init =
     Billing.Load.getEmployment Load
 
 
-updateBilling : Billing.Types.Model -> Billing.Types.Model
+updateBilling : Model -> Model
 updateBilling loadedModel =
-    { loadedModel | state = Billing.Types.Grid, billingCcm = (Billing.Load.newEmployers loadedModel.billingCcm) }
+    { loadedModel | state = Grid, billingCcm = (Billing.Load.newEmployers loadedModel.billingCcm) }
 
 
-update : Billing.Types.Msg -> Billing.Types.Model -> Billing.Types.Model
+update : Msg -> Model -> Model
 update msg model =
     case msg of
         EditStart employer ->
@@ -69,7 +69,7 @@ update msg model =
 --getEmployment
 
 
-view : Billing.Types.Model -> Html Msg
+view : Model -> Html Msg
 view model =
     case model.state of
         Initial ->

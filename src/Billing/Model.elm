@@ -1,4 +1,4 @@
-module Billing.Types exposing (..)
+module Billing.Model exposing (..)
 
 import Table
 import Http

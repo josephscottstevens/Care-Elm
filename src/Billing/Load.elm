@@ -4,9 +4,8 @@ import Json.Encode
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
-import Billing.Types exposing (..)
+import Billing.Model exposing (BillingCcm, Model)
 import Table
-import Billing.Types
 
 
 decodeBillingCcm : Json.Decode.Decoder BillingCcm
@@ -97,17 +96,17 @@ decodeBillingCcm =
 --         ]
 
 
-decodeModel : Decoder Billing.Types.Model
+decodeModel : Decoder Model
 decodeModel =
     decode Model
-        |> hardcoded Initial
+        |> hardcoded Billing.Model.Initial
         |> required "list" (list decodeBillingCcm)
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
         |> hardcoded 0
 
 
-request : Http.Request Billing.Types.Model
+request : Http.Request Model
 request =
     Http.get "/people/CcmGridDataSource?showOpenCcmBills=true" decodeModel
 

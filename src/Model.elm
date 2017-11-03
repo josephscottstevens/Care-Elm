@@ -1,6 +1,6 @@
 module Model exposing (..)
 
-import Billing.Types
+import Billing.Model as Billing
 
 
 type Page
@@ -10,16 +10,16 @@ type Page
 
 type alias Model =
     { page : Page
-    , billingState : Billing.Types.Model
+    , billingState : Billing.Model
     }
 
 
 type Msg
-    = BillingMsg Billing.Types.Msg
+    = BillingMsg Billing.Msg
 
 
 emptyModel : Model
 emptyModel =
     { page = NoPage
-    , billingState = Billing.Types.emptyModel
+    , billingState = Billing.emptyModel
     }
