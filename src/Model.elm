@@ -1,7 +1,6 @@
 module Model exposing (..)
 
 import Billing.Types
-import Http
 
 
 type Page
@@ -16,8 +15,7 @@ type alias Model =
 
 
 type Msg
-    = OpenPage String
-    | BillingMsg Billing.Types.Msg
+    = BillingMsg Billing.Types.Msg
 
 
 emptyModel : Model
