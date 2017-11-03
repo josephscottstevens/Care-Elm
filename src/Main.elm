@@ -1,35 +1,42 @@
 port module Main exposing (..)
 
 import Model exposing (..)
-import Html
-import Html.Events
+import Html exposing (div, text)
+import Html.Events exposing (onClick)
 import Billing.Main
 import Billing.Load
+import Billing.Types
 
 
 port sendTestDate : String -> Cmd msg
 
 
-port getTestDate : (String -> msg) -> Sub msg
+port openPage : (String -> msg) -> Sub msg
 
 
 
+-- port getTestDate : (String -> msg) -> Sub msg
 -- getTestDate UpdateStartDate
+
+
+type alias Flags =
+    { page : String
+    }
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    openPage OpenPage
 
 
-init : ( Model, Cmd Msg )
-init =
+init : Flags -> ( Model, Cmd Msg )
+init flags =
     ( emptyModel, Cmd.none )
 
 
-main : Program Never Model Msg
+main : Program Flags Model Msg
 main =
-    Html.program
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update
@@ -41,25 +48,21 @@ view : Model -> Html.Html Msg
 view model =
     case model.page of
         NoPage ->
-            Html.button [ Html.Events.onClick OpenBilling ] [ Html.text "Billing" ]
+            Html.button [ Html.Events.onClick (OpenPage "billing") ] [ Html.text "Billing" ]
 
         BillingPage ->
-            Html.div []
-                [ Html.map BillingMsg (Billing.Main.view model.billingState)
-                ]
+            Html.map BillingMsg (Billing.Main.view model.billingState)
+
+
+
+--Html.map BillingMsg (Billing.Main.view model.billingState)
 
 
 update : Msg -> Model -> ( Model, Cmd Model.Msg )
 update msg model =
     case msg of
-        OpenBilling ->
-            ( model, Billing.Load.getEmployment BillingLoad )
+        OpenPage t ->
+            ( { model | page = BillingPage }, Cmd.map BillingMsg Billing.Main.init )
 
         BillingMsg billingMsg ->
             ( { model | billingState = Billing.Main.update billingMsg model.billingState }, Cmd.none )
-
-        BillingLoad (Ok loadedModel) ->
-            ( { model | page = BillingPage, billingState = Billing.Main.updateBilling loadedModel }, Cmd.none )
-
-        BillingLoad (Err t) ->
-            ( model, Cmd.none )

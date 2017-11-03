@@ -10,6 +10,11 @@ import Utils.GridPaging exposing (..)
 import Utils.CommonGrid exposing (..)
 
 
+init : Cmd Msg
+init =
+    Billing.Load.getEmployment Load
+
+
 updateBilling : Billing.Types.Model -> Billing.Types.Model
 updateBilling loadedModel =
     { loadedModel | state = Billing.Types.Grid, billingCcm = (Billing.Load.newEmployers loadedModel.billingCcm) }
@@ -20,6 +25,12 @@ update msg model =
     case msg of
         EditStart employer ->
             { model | state = Edit employer }
+
+        Load (Ok model) ->
+            { model | state = Grid, billingCcm = (newEmployers model.billingCcm) }
+
+        Load (Err t) ->
+            { model | state = Error t }
 
         -- , sendTestDate employer.dOB
         -- EditSave employer ->
@@ -83,6 +94,9 @@ view model =
                 -- , button [ class "btn btn-default", onClick (EditSave emp) ] [ text "save" ]
                 , button [ class "btn btn-default", onClick EditCancel ] [ text "cancel" ]
                 ]
+
+        Error err ->
+            div [] [ text (toString err) ]
 
 
 filteredCcm : Model -> List BillingCcm

@@ -16,9 +16,8 @@ type alias Model =
 
 
 type Msg
-    = OpenBilling
+    = OpenPage String
     | BillingMsg Billing.Types.Msg
-    | BillingLoad (Result Http.Error Billing.Types.Model)
 
 
 emptyModel : Model
