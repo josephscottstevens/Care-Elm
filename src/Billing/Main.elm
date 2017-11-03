@@ -12,12 +12,12 @@ import Utils.CommonGrid exposing (..)
 
 init : Cmd Msg
 init =
-    Billing.Load.getEmployment Load
+    getEmployment Load
 
 
 updateBilling : Model -> Model
 updateBilling loadedModel =
-    { loadedModel | state = Grid, billingCcm = (Billing.Load.newEmployers loadedModel.billingCcm) }
+    { loadedModel | state = Grid, billingCcm = (newEmployers loadedModel.billingCcm) }
 
 
 update : Msg -> Model -> Model
