@@ -2,7 +2,8 @@ port module Main exposing (..)
 
 import Model exposing (..)
 import Html exposing (div, text)
-import Billing.Main
+import Billing.Main as Billing
+import Records.Main as Records
 
 
 port sendTestDate : String -> Cmd msg
@@ -29,7 +30,9 @@ subscriptions model =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     if flags.pageFlag == "billing" then
-        ( { emptyModel | page = BillingPage }, Cmd.map BillingMsg Billing.Main.init )
+        ( { emptyModel | page = BillingPage }, Cmd.map BillingMsg Billing.init )
+    else if flags.pageFlag == "records" then
+        ( { emptyModel | page = RecordsPage }, Cmd.map RecordsMsg Records.init )
     else
         ( emptyModel, Cmd.none )
 
@@ -51,11 +54,17 @@ view model =
             div [] []
 
         BillingPage ->
-            Html.map BillingMsg (Billing.Main.view model.billingState)
+            Html.map BillingMsg (Billing.view model.billingState)
+
+        RecordsPage ->
+            Html.map RecordsMsg (Records.view model.recordsState)
 
 
 update : Msg -> Model -> ( Model, Cmd Model.Msg )
 update msg model =
     case msg of
         BillingMsg billingMsg ->
-            ( { model | billingState = Billing.Main.update billingMsg model.billingState }, Cmd.none )
+            ( { model | billingState = Billing.update billingMsg model.billingState }, Cmd.none )
+
+        RecordsMsg recordsMsg ->
+            ( { model | recordsState = Records.update recordsMsg model.recordsState }, Cmd.none )

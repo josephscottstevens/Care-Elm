@@ -1,40 +1,11 @@
-module Billing.Load exposing (..)
+module Records.Load exposing (..)
 
 import Json.Encode
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
-import Billing.Model exposing (..)
+import Records.Model exposing (..)
 import Table
-
-
-type alias Record =
-    { iD : Int
-    , date : String
-    , speciality : Maybe String
-    , comments : String
-    , transferedTo : String
-    , transferedOn : Maybe String
-    , patientID : Int
-    , title : Maybe String
-    , dateAccessioned : Maybe String
-    , provider : Maybe String
-    , patientName : Maybe String
-    , recordType : String
-    , dateOfAdmission : Maybe String
-    , dateOfDischarge : Maybe String
-    , dischargePhysician : String
-    , dischargeDiagnosis : String
-    , hospitalizationServiceType : String
-    , hospitalizationModel : Maybe String
-    , hospitalizationID : Maybe Int
-    , reportDate : Maybe String
-    , fileName : String
-    , canTransfer : Bool
-    , facility : Maybe String
-    , facilityFax : Maybe String
-    , recommendations : Maybe String
-    }
 
 
 decodeRecord : Json.Decode.Decoder Record
@@ -96,31 +67,22 @@ decodeRecord =
 --         , ( "facilityFax", Json.Encode.maybe <| encodeComplexType <| record.facilityFax )
 --         , ( "recommendations", Json.Encode.maybe <| encodeComplexType <| record.recommendations )
 --         ]
--- decodeModel : Decoder Model
--- decodeModel =
---     decode Model
---         |> hardcoded Initial
---         |> required "list" (list decodeBillingCcm)
---         |> hardcoded (Table.initialSort "dob")
---         |> hardcoded ""
---         |> hardcoded 0
--- request : Http.Request Model
--- request =
---     Http.get "/people/CcmGridDataSource?showOpenCcmBills=true" decodeModel
--- getEmployment : (Result Http.Error Model -> msg) -> Cmd msg
--- getEmployment t =
---     Http.send t request
--- -- Not good, rowId has to be patched on later, but I don't how to make it apart of the decoder
--- newEmployers : List BillingCcm -> List BillingCcm
--- newEmployers enrollment =
---     enrollment |> List.indexedMap (\idx t -> { t | iD = idx })
--- updateEmployers : List BillingCcm -> BillingCcm -> List BillingCcm
--- updateEmployers enrollment newEnrollment =
---     enrollment
---         |> List.map
---             (\t ->
---                 if t.iD == newEnrollment.iD then
---                     newEnrollment
---                 else
---                     t
---             )
+
+
+decodeModel : Decoder Model
+decodeModel =
+    decode Model
+        |> hardcoded Initial
+        |> required "list" (list decodeRecord)
+        |> hardcoded (Table.initialSort "dob")
+        |> hardcoded ""
+
+
+request : Http.Request Model
+request =
+    Http.get "/people/PatientRecordsGrid?patientId=6676" decodeModel
+
+
+getRecords : (Result Http.Error Model -> msg) -> Cmd msg
+getRecords t =
+    Http.send t request

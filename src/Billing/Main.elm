@@ -15,11 +15,6 @@ init =
     getEmployment Load
 
 
-updateBilling : Model -> Model
-updateBilling loadedModel =
-    { loadedModel | state = Grid, billingCcm = (newEmployers loadedModel.billingCcm) }
-
-
 update : Msg -> Model -> Model
 update msg model =
     case msg of
