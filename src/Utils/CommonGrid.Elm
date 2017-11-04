@@ -18,22 +18,34 @@ defaultString str =
 simpleTheadHelp : ( String, Table.Status, Html.Attribute msg ) -> Html msg
 simpleTheadHelp ( name, status, onClick ) =
     let
+        headerDivClass =
+            class "e-headercelldiv e-gridtooltip headerColumn"
+
+        headerDivStyle =
+            style [ ( "margin-top", "5px" ) ]
+
+        headerDiv =
+            div [ headerDivClass, headerDivStyle ] [ Html.text name ]
+
+        headerColumnClass =
+            class ("e-columnheader e-default e-filterbarcell " ++ name ++ "-Column")
+
         headerContent =
             case status of
                 Table.Unsortable ->
-                    Html.text name
+                    headerDiv
 
                 Table.Sortable selected ->
-                    Html.text name
+                    headerDiv
 
                 Table.Reversible Nothing ->
-                    div [ class "e-headercelldiv e-gridtooltip", style [ ( "margin-top", "5px" ) ] ] [ Html.text name ]
+                    headerDiv
 
                 Table.Reversible (Just isReversed) ->
                     if isReversed then
-                        div [ class "glyphicon glyphicon-menu-up" ] [ Html.text name ]
+                        div [ class "glyphicon glyphicon-menu-up" ] [ headerDiv ]
                     else
-                        div [ class "glyphicon glyphicon-menu-down" ] [ Html.text name ]
+                        div [ class "glyphicon glyphicon-menu-down" ] [ headerDiv ]
 
         filterContent =
             if name == "" then
@@ -46,7 +58,7 @@ simpleTheadHelp ( name, status, onClick ) =
         content =
             [ headerContent, filterContent ]
     in
-        Html.th [ onClick, class "e-columnheader e-default e-filterbarcell" ] content
+        Html.th [ onClick, headerColumnClass ] content
 
 
 simpleThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
