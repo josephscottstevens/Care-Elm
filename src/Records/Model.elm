@@ -42,15 +42,15 @@ emptyModel =
 
 
 type alias Record =
-    { iD : Int
+    { id : Int
     , date : Maybe String
     , speciality : Maybe String
     , comments : Maybe String
     , transferedTo : Maybe String
     , transferedOn : Maybe String
-    , patientID : Int
+    , patientId : Int
     , title : Maybe String
-    , dateAccessioned : Maybe String
+    , dateAccessed : Maybe String
     , provider : Maybe String
     , patientName : Maybe String
     , recordType : Maybe String
@@ -59,7 +59,7 @@ type alias Record =
     , dischargePhysician : Maybe String
     , dischargeDiagnosis : Maybe String
     , hospitalizationServiceType : Maybe String
-    , hospitalizationID : Maybe Int
+    , hospitalizationId : Maybe Int
     , reportDate : Maybe String
     , fileName : Maybe String
     , canTransfer : Bool

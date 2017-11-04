@@ -48,7 +48,7 @@ view model =
 
         Edit rec ->
             div []
-                [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", id "testDate", value (defaultString rec.dateAccessioned) ] []
+                [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", id "testDate", value (defaultString rec.dateAccessed) ] []
                 ]
 
         Error err ->
@@ -58,11 +58,13 @@ view model =
 config : Table.Config Record Msg
 config =
     Table.customConfig
-        { toId = (\t -> toString .iD)
+        { toId = (\t -> toString .id)
         , toMsg = SetTableState
         , columns =
-            [ Table.stringColumn "Id No" (\t -> defaultString t.dateAccessioned)
-            , Table.stringColumn "AssignedTo" (\t -> defaultString t.dischargePhysician)
+            [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
+            , Table.stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
+            , Table.stringColumn "Speciality" (\t -> defaultString t.speciality)
+            , Table.stringColumn "Comments" (\t -> defaultString t.comments)
             , editColumn (\t -> onClick (EditStart t))
             ]
         , customizations = defaultCustomizations
@@ -76,5 +78,5 @@ defaultCustomizations =
     , thead = simpleThead
     , tfoot = Nothing
     , tbodyAttrs = []
-    , rowAttrs = simpleRowAttrs .iD
+    , rowAttrs = simpleRowAttrs .id
     }
