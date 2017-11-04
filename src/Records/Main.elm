@@ -73,7 +73,7 @@ config =
 
 defaultCustomizations : Table.Customizations Record msg
 defaultCustomizations =
-    { tableAttrs = [ id "employersTable", class "e-table e-hidelines" ]
+    { tableAttrs = [ id "employersTable", class "e-grid e-js e-waitingpopup" ]
     , caption = Nothing
     , thead = simpleThead
     , tfoot = Nothing

@@ -27,7 +27,7 @@ simpleTheadHelp ( name, status, onClick ) =
                     Html.text name
 
                 Table.Reversible Nothing ->
-                    Html.text name
+                    div [ class "e-headercelldiv e-gridtooltip", style [ ( "margin-top", "5px" ) ] ] [ Html.text name ]
 
                 Table.Reversible (Just isReversed) ->
                     if isReversed then
@@ -46,12 +46,12 @@ simpleTheadHelp ( name, status, onClick ) =
         content =
             [ headerContent, filterContent ]
     in
-        Html.th [ onClick, class "e-filterbarcell", style [ ( "vertical-align", "bottom" ) ] ] content
+        Html.th [ onClick, class "e-columnheader e-default e-filterbarcell" ] content
 
 
 simpleThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
 simpleThead headers =
-    Table.HtmlDetails [] (List.map simpleTheadHelp headers)
+    Table.HtmlDetails [ class "e-gridheader e-textover e-hidelines" ] (List.map simpleTheadHelp headers)
 
 
 checkColumn : String -> Table.Column data msg
