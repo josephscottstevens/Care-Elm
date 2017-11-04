@@ -1,6 +1,6 @@
 module Utils.CommonGrid exposing (..)
 
-import Html exposing (Html, text, div, program, button, input, span)
+import Html exposing (Html, text, div, program, button, input, span, th)
 import Html.Attributes exposing (style, class, type_, id, value)
 import Table
 
@@ -25,7 +25,7 @@ simpleTheadHelp ( name, status, onClick ) =
             style [ ( "margin-top", "5px" ) ]
 
         headerDiv =
-            div [ headerDivClass, headerDivStyle ] [ Html.text name ]
+            div [ headerDivClass, headerDivStyle ] [ text name ]
 
         headerColumnClass =
             class ("e-columnheader e-default e-filterbarcell " ++ name ++ "-Column")
@@ -52,13 +52,13 @@ simpleTheadHelp ( name, status, onClick ) =
                 div [] []
             else
                 div [ class "e-filterdiv e-fltrinputdiv" ]
-                    [ Html.input [ class "e-ejinputtext e-filtertext", style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ) ] ] []
+                    [ input [ class "e-ejinputtext e-filtertext", style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ) ] ] []
                     ]
 
         content =
             [ headerContent, filterContent ]
     in
-        Html.th [ onClick, headerColumnClass ] content
+        th [ onClick, headerColumnClass ] content
 
 
 simpleThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
