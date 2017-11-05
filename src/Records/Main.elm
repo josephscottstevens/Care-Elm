@@ -112,11 +112,18 @@ editDropdown : Table.Column Record Msg
 editDropdown =
     Table.veryCustomColumn
         { name = ""
-        , viewData = editDropdownList [ ( "e-contextedit", "View File", onClick (Reset) ) ]
+        , viewData = editDropdownList
         , sorter = Table.unsortable
         }
 
 
-editDropdownList : List ( String, String, Html.Attribute Msg ) -> Record -> Table.HtmlDetails Msg
-editDropdownList dropDownItems record =
-    buildDropDown dropDownItems record.dropDownState (onClick (DropdownToggle record))
+dropDownItems : Record -> List ( String, String, Html.Attribute Msg )
+dropDownItems record =
+    [ ( "e-contextedit", "View File", onClick (ViewFile record.id) )
+    , ( "e-contextdelete", "Delete", onClick (Delete record) )
+    ]
+
+
+editDropdownList : Record -> Table.HtmlDetails Msg
+editDropdownList record =
+    buildDropDown (dropDownItems record) record.dropDownState (onClick (DropdownToggle record))
