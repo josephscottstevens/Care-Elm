@@ -25,6 +25,8 @@ perhaps... node_modules folder is needed... or the step to get that there?
 
 
 TODO:
+When clicking delete, confirmation message should appear first
+After successful delete, confirmation message that was successfully delete should occur
 When you click away from dropdown menu, it doesn't close, you have to click the button again
 
 LOW TODO:
@@ -40,3 +42,5 @@ Remove main.js from git
 REALLY LOW TODO:
 Get dates displaying correctly
     Perhaps server side as string, meh, or better DateLibrary (if that's hard, scratch that)
+
+Don't really need to have two init functions, right there is the init, and the json.load init, seems silly

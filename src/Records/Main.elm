@@ -1,4 +1,4 @@
-module Records.Main exposing (..)
+port module Records.Main exposing (..)
 
 import Records.Load exposing (..)
 import Records.Model exposing (..)
@@ -7,6 +7,9 @@ import Html.Attributes exposing (style, class, placeholder, id, type_, value, ta
 import Html.Events exposing (onClick, onInput, on)
 import Table
 import Utils.CommonGrid exposing (..)
+
+
+port viewFile : Int -> Cmd msg
 
 
 init : Cmd Msg
@@ -31,6 +34,9 @@ update msg model =
 
         Reset ->
             emptyModel ! []
+
+        ViewFile recordId ->
+            ( model, viewFile recordId )
 
         Delete record ->
             ( model, deleteRequest record )
@@ -125,15 +131,15 @@ editDropdownList record =
             div [ class "e-menu-wrap", style dropDownMenuStyle ]
                 [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
                     [ li [ class "e-content e-list" ]
-                        [ a [ class "e-menulink" ]
-                            [ text "Edit Record"
+                        [ a [ class "e-menulink", onClick (ViewFile record.id) ]
+                            [ text "View File"
                             , span [ class "e-gridcontext e-icon e-contextedit" ] []
                             ]
                         ]
                     , li
                         [ class "e-content e-list" ]
                         [ a [ class "e-menulink", onClick (Delete record) ]
-                            [ text "Delete Record"
+                            [ text "Delete"
                             , span [ class "e-gridcontext e-icon e-contextdelete" ] []
                             ]
                         ]

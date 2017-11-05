@@ -12,6 +12,7 @@ type Msg
     | Reset
     | Delete Record
     | DeleteCompleted (Result Http.Error String)
+    | ViewFile Int
 
 
 
@@ -24,8 +25,7 @@ type DropDownState
 
 
 type DropDownButtonEvent
-    = ViewFile
-    | SendByEmail
+    = SendByEmail
     | SendByFax
     | SaveToClientPortal
     | Transfer
