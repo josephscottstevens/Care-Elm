@@ -89,21 +89,9 @@ getRecords t =
     Http.send t request
 
 
-
--- getDeleteRequest : Decoder a -> Http.Request a
--- getDeleteRequest =
---     Http.send Http.get "/records/DeleteRecord?recordId=8"
-
-
-decodeDeleteResponse : String -> Result String String
-decodeDeleteResponse =
-    decodeString (field "Message" string)
-
-
-
--- deleteRequest : (Http.Response String -> msg) -> Cmd msg
--- deleteRequest t =
---     Http.send t (Http.get "/records/DeleteRecord?recordId=8") decodeDeleteResponse
+deleteRequest : Record -> Cmd Msg
+deleteRequest record =
+    Http.send DeleteCompleted <| Http.getString ("/records/DeleteRecord?recordId=" ++ (toString record.id))
 
 
 updateRecords : List Record -> Record -> List Record

@@ -7,7 +7,6 @@ import Html.Attributes exposing (style, class, placeholder, id, type_, value, ta
 import Html.Events exposing (onClick, onInput, on)
 import Table
 import Utils.CommonGrid exposing (..)
-import Http
 
 
 init : Cmd Msg
@@ -155,8 +154,3 @@ editDropdownList record =
                 , dropDownList
                 ]
             ]
-
-
-deleteRequest : Record -> Cmd Msg
-deleteRequest record =
-    Http.send DeleteCompleted <| Http.getString ("/records/DeleteRecord?recordId=" ++ (toString record.id))
