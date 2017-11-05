@@ -33,15 +33,15 @@ update msg model =
         Reset ->
             emptyModel
 
-        DropdownToggle record ( x, y ) ->
+        DropdownToggle record pt ->
             let
                 newRecord =
                     case record.dropDownState of
                         DropdownOpen ->
-                            { record | dropDownState = DropdownClosed }
+                            { record | dropDownState = DropdownClosed, popupPos = pt }
 
                         DropdownClosed ->
-                            { record | dropDownState = DropdownOpen }
+                            { record | dropDownState = DropdownOpen, popupPos = pt }
             in
                 { model | records = updateRecords model.records newRecord }
 
@@ -106,11 +106,15 @@ editDropdown =
 editDropdownList : Record -> Table.HtmlDetails Msg
 editDropdownList record =
     let
+        ( x, y ) =
+            record.popupPos
+
         dropDownMenuStyle =
-            [ ( "margin-top", "-12px" )
-            , ( "margin-right", "21px" )
+            [ ( "left", (toString x) ++ "px" )
+            , ( "top", (toString y) ++ "px" )
             , ( "z-index", "5000" )
-            , ( "position", "relative" )
+            , ( "position", "absolute" )
+            , ( "visibility", "visible" )
             ]
 
         dropDownMenu =
@@ -142,7 +146,7 @@ editDropdownList record =
     in
         Table.HtmlDetails []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu" ] []
+                [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", on "click" (Decode.map (DropdownToggle record) decodeClickLocation) ] []
                 , dropDownList
                 ]
             ]
