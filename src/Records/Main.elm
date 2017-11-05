@@ -112,13 +112,35 @@ editDropdown : Table.Column Record Msg
 editDropdown =
     Table.veryCustomColumn
         { name = ""
-        , viewData = editDropdownList
+        , viewData = editDropdownList x
         , sorter = Table.unsortable
         }
 
 
-editDropdownList : Record -> Table.HtmlDetails Msg
-editDropdownList record =
+type alias DropDownMenuItem =
+    { iconClass : String
+    , displayText : String
+    , event : Html.Attribute Msg
+    }
+
+
+x : List DropDownMenuItem
+x =
+    [ { iconClass = "", displayText = "", event = onClick Reset } ]
+
+
+dropDownMenuItem : DropDownMenuItem -> Html Msg
+dropDownMenuItem { iconClass, displayText, event } =
+    li [ class "e-content e-list" ]
+        [ a [ class "e-menulink", event ]
+            [ text displayText
+            , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
+            ]
+        ]
+
+
+dropDownMenu : List DropDownMenuItem -> Record -> Html Msg
+dropDownMenu dropDownMenuItems record =
     let
         dropDownMenuStyle =
             [ ( "margin-top", "-12px" )
@@ -126,33 +148,23 @@ editDropdownList record =
             , ( "z-index", "5000" )
             , ( "position", "relative" )
             ]
+    in
+        div [ class "e-menu-wrap", style dropDownMenuStyle ]
+            [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
+                (List.map dropDownMenuItem dropDownMenuItems)
+            ]
 
-        dropDownMenu =
-            div [ class "e-menu-wrap", style dropDownMenuStyle ]
-                [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
-                    [ li [ class "e-content e-list" ]
-                        [ a [ class "e-menulink", onClick (ViewFile record.id) ]
-                            [ text "View File"
-                            , span [ class "e-gridcontext e-icon e-contextedit" ] []
-                            ]
-                        ]
-                    , li
-                        [ class "e-content e-list" ]
-                        [ a [ class "e-menulink", onClick (Delete record) ]
-                            [ text "Delete"
-                            , span [ class "e-gridcontext e-icon e-contextdelete" ] []
-                            ]
-                        ]
-                    ]
-                ]
 
+editDropdownList : List DropDownMenuItem -> Record -> Table.HtmlDetails Msg
+editDropdownList dropDownItems record =
+    let
         dropDownList =
             case record.dropDownState of
                 DropdownClosed ->
                     div [] []
 
                 DropdownOpen ->
-                    dropDownMenu
+                    (dropDownMenu dropDownItems record)
     in
         Table.HtmlDetails []
             [ div [ style [ ( "text-align", "right" ) ] ]
