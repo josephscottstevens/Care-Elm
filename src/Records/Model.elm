@@ -8,7 +8,7 @@ type Msg
     = Load (Result Http.Error Model)
     | EditStart Record
     | SetTableState Table.State
-    | DropdownToggle Record
+    | DropdownToggle ( Int, Int ) --Record
     | Reset
 
 
