@@ -33,15 +33,15 @@ update msg model =
         Reset ->
             emptyModel
 
-        DropdownToggle record pt ->
+        DropdownToggle record ->
             let
                 newRecord =
                     case record.dropDownState of
                         DropdownOpen ->
-                            { record | dropDownState = DropdownClosed, popupPos = pt }
+                            { record | dropDownState = DropdownClosed }
 
                         DropdownClosed ->
-                            { record | dropDownState = DropdownOpen, popupPos = pt }
+                            { record | dropDownState = DropdownOpen }
             in
                 { model | records = updateRecords model.records newRecord }
 
@@ -106,15 +106,11 @@ editDropdown =
 editDropdownList : Record -> Table.HtmlDetails Msg
 editDropdownList record =
     let
-        ( x, y ) =
-            record.popupPos
-
         dropDownMenuStyle =
-            [ ( "left", (toString x) ++ "px" )
-            , ( "top", (toString y) ++ "px" )
+            [ ( "margin-top", "-12px" )
+            , ( "margin-right", "21px" )
             , ( "z-index", "5000" )
-            , ( "position", "absolute" )
-            , ( "visibility", "visible" )
+            , ( "position", "relative" )
             ]
 
         dropDownMenu =
@@ -128,7 +124,7 @@ editDropdownList record =
                         ]
                     , li
                         [ class "e-content e-list" ]
-                        [ a [ class "e-menulink", on "click" (Decode.map (DropdownToggle record) decodeClickLocation) ]
+                        [ a [ class "e-menulink" ]
                             [ text "Delete Record"
                             , span [ class "e-gridcontext e-icon e-contextdelete" ] []
                             ]
@@ -146,20 +142,7 @@ editDropdownList record =
     in
         Table.HtmlDetails []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", on "click" (Decode.map (DropdownToggle record) decodeClickLocation) ] []
+                [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", onClick (DropdownToggle record) ] []
                 , dropDownList
                 ]
             ]
-
-
-decodeClickLocation : Decode.Decoder ( Int, Int )
-decodeClickLocation =
-    Decode.map2 (,)
-        (Decode.map2 (-)
-            (Decode.at [ "pageX" ] Decode.int)
-            (Decode.at [ "target", "offsetLeft" ] Decode.int)
-        )
-        (Decode.map2 (-)
-            (Decode.at [ "pageY" ] Decode.int)
-            (Decode.at [ "target", "offsetTop" ] Decode.int)
-        )

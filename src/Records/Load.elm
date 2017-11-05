@@ -36,8 +36,6 @@ decodeRecord =
         |> Json.Decode.Pipeline.required "FacilityFax" (Json.Decode.maybe Json.Decode.string)
         |> Json.Decode.Pipeline.required "Recommendations" (Json.Decode.maybe Json.Decode.string)
         |> Json.Decode.Pipeline.hardcoded DropdownClosed
-        |> hardcoded ( 0, 0 )
-        |> hardcoded True
 
 
 
