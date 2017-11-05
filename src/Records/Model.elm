@@ -8,7 +8,13 @@ type Msg
     = Load (Result Http.Error Model)
     | EditStart Record
     | SetTableState Table.State
+    | DropdownToggle Record
     | Reset
+
+
+type DropDownState
+    = DropdownOpen
+    | DropdownClosed
 
 
 type ModelState
@@ -66,4 +72,5 @@ type alias Record =
     , facility : Maybe String
     , facilityFax : Maybe String
     , recommendations : Maybe String
+    , dropDownState : DropDownState
     }

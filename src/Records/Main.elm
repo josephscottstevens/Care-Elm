@@ -32,6 +32,18 @@ update msg model =
         Reset ->
             emptyModel
 
+        DropdownToggle record ->
+            let
+                newRecord =
+                    case record.dropDownState of
+                        DropdownOpen ->
+                            { record | dropDownState = DropdownClosed }
+
+                        DropdownClosed ->
+                            { record | dropDownState = DropdownOpen }
+            in
+                { model | records = updateRecords model.records newRecord }
+
 
 view : Model -> Html Msg
 view model =
@@ -41,8 +53,7 @@ view model =
 
         Grid ->
             div []
-                [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
-                , div [ class "e-grid e-js e-waitingpopup" ]
+                [ div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view config model.tableState model.records ]
                 ]
 
@@ -65,7 +76,7 @@ config =
             , Table.stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
             , Table.stringColumn "Speciality" (\t -> defaultString t.speciality)
             , Table.stringColumn "Comments" (\t -> defaultString t.comments)
-            , editColumn (\t -> onClick (EditStart t))
+            , editDropdown
             ]
         , customizations = defaultCustomizations
         }
@@ -73,10 +84,38 @@ config =
 
 defaultCustomizations : Table.Customizations Record msg
 defaultCustomizations =
-    { tableAttrs = [ id "employersTable", class "e-grid e-js e-waitingpopup" ]
+    { tableAttrs = [ class "e-grid e-js e-waitingpopup" ]
     , caption = Nothing
     , thead = simpleThead
     , tfoot = Nothing
     , tbodyAttrs = []
     , rowAttrs = simpleRowAttrs .id
     }
+
+
+editDropdown : Table.Column Record Msg
+editDropdown =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData = editDropdownList
+        , sorter = Table.unsortable
+        }
+
+
+editDropdownList : Record -> Table.HtmlDetails Msg
+editDropdownList record =
+    let
+        dropDownList =
+            case record.dropDownState of
+                DropdownClosed ->
+                    div [] [ text "boo" ]
+
+                DropdownOpen ->
+                    div [] [ text "hey" ]
+    in
+        Table.HtmlDetails []
+            [ div [ style [ ( "text-align", "right" ) ] ]
+                [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", onClick (DropdownToggle record) ] []
+                , dropDownList
+                ]
+            ]

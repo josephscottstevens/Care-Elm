@@ -35,6 +35,7 @@ decodeRecord =
         |> Json.Decode.Pipeline.required "Facility" (Json.Decode.maybe Json.Decode.string)
         |> Json.Decode.Pipeline.required "FacilityFax" (Json.Decode.maybe Json.Decode.string)
         |> Json.Decode.Pipeline.required "Recommendations" (Json.Decode.maybe Json.Decode.string)
+        |> Json.Decode.Pipeline.hardcoded DropdownClosed
 
 
 
@@ -86,3 +87,15 @@ request =
 getRecords : (Result Http.Error Model -> msg) -> Cmd msg
 getRecords t =
     Http.send t request
+
+
+updateRecords : List Record -> Record -> List Record
+updateRecords records newRecord =
+    records
+        |> List.map
+            (\t ->
+                if t.id == newRecord.id then
+                    newRecord
+                else
+                    t
+            )
