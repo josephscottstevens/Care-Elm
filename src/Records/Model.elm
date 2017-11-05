@@ -86,4 +86,6 @@ type alias Record =
     , facilityFax : Maybe String
     , recommendations : Maybe String
     , dropDownState : DropDownState
+    , popupPos : ( Int, Int )
+    , popupVisible : Bool
     }
