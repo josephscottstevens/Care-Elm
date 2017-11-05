@@ -33,20 +33,17 @@ update msg model =
         Reset ->
             emptyModel
 
-        DropdownToggle ( x, y ) ->
-            emptyModel
+        DropdownToggle record ( x, y ) ->
+            let
+                newRecord =
+                    case record.dropDownState of
+                        DropdownOpen ->
+                            { record | dropDownState = DropdownClosed }
 
-
-
--- let
---     newRecord =
---         case record.dropDownState of
---             DropdownOpen ->
---                 { record | dropDownState = DropdownClosed }
---             DropdownClosed ->
---                 { record | dropDownState = DropdownOpen }
--- in
---     { model | records = updateRecords model.records newRecord }
+                        DropdownClosed ->
+                            { record | dropDownState = DropdownOpen }
+            in
+                { model | records = updateRecords model.records newRecord }
 
 
 view : Model -> Html Msg
@@ -127,7 +124,7 @@ editDropdownList record =
                         ]
                     , li
                         [ class "e-content e-list" ]
-                        [ a [ class "e-menulink" ]
+                        [ a [ class "e-menulink", on "click" (Decode.map (DropdownToggle record) decodeClickLocation) ]
                             [ text "Delete Record"
                             , span [ class "e-gridcontext e-icon e-contextdelete" ] []
                             ]
@@ -145,7 +142,7 @@ editDropdownList record =
     in
         Table.HtmlDetails []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", on "click" (Decode.map DropdownToggle decodeClickLocation) ] []
+                [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu" ] []
                 , dropDownList
                 ]
             ]
