@@ -10,7 +10,7 @@ type Msg
     | SetTableState Table.State
     | DropdownToggle Record
     | Reset
-      --| Delete Record
+    | Delete Record
     | DeleteCompleted (Result Http.Error String)
 
 

@@ -7,6 +7,7 @@ import Html.Attributes exposing (style, class, placeholder, id, type_, value, ta
 import Html.Events exposing (onClick, onInput, on)
 import Table
 import Utils.CommonGrid exposing (..)
+import Http
 
 
 init : Cmd Msg
@@ -14,7 +15,7 @@ init =
     getRecords Load
 
 
-update : Msg -> Model -> ( Model, Cmd msg )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         EditStart t ->
@@ -32,6 +33,9 @@ update msg model =
         Reset ->
             emptyModel ! []
 
+        Delete record ->
+            ( model, deleteRequest record )
+
         DropdownToggle record ->
             let
                 newRecord =
@@ -45,7 +49,7 @@ update msg model =
                 { model | records = updateRecords model.records newRecord } ! []
 
         DeleteCompleted (Ok t) ->
-            model ! []
+            ( model, init )
 
         DeleteCompleted (Err t) ->
             { model | state = Error t } ! []
@@ -129,7 +133,7 @@ editDropdownList record =
                         ]
                     , li
                         [ class "e-content e-list" ]
-                        [ a [ class "e-menulink" ]
+                        [ a [ class "e-menulink", onClick (Delete record) ]
                             [ text "Delete Record"
                             , span [ class "e-gridcontext e-icon e-contextdelete" ] []
                             ]
@@ -151,3 +155,8 @@ editDropdownList record =
                 , dropDownList
                 ]
             ]
+
+
+deleteRequest : Record -> Cmd Msg
+deleteRequest record =
+    Http.send DeleteCompleted <| Http.getString ("/records/DeleteRecord?recordId=" ++ (toString record.id))

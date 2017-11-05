@@ -100,11 +100,6 @@ decodeDeleteResponse =
     decodeString (field "Message" string)
 
 
-deleteRequest : Cmd Msg
-deleteRequest =
-    Http.send DeleteCompleted <| Http.getString "/records/DeleteRecord?recordId=8"
-
-
 
 -- deleteRequest : (Http.Response String -> msg) -> Cmd msg
 -- deleteRequest t =
