@@ -10,6 +10,8 @@ type Msg
     | SetTableState Table.State
     | DropdownToggle Record
     | Reset
+      --| Delete Record
+    | DeleteCompleted (Result Http.Error String)
 
 
 
@@ -27,7 +29,6 @@ type DropDownButtonEvent
     | SendByFax
     | SaveToClientPortal
     | Transfer
-    | Delete
 
 
 type ModelState

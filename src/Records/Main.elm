@@ -7,7 +7,6 @@ import Html.Attributes exposing (style, class, placeholder, id, type_, value, ta
 import Html.Events exposing (onClick, onInput, on)
 import Table
 import Utils.CommonGrid exposing (..)
-import Json.Decode as Decode
 
 
 init : Cmd Msg
@@ -15,23 +14,23 @@ init =
     getRecords Load
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case msg of
         EditStart t ->
-            { model | state = Edit t }
+            { model | state = Edit t } ! []
 
         Load (Ok t) ->
-            { t | state = Grid }
+            { t | state = Grid } ! []
 
         Load (Err t) ->
-            { model | state = Error t }
+            { model | state = Error t } ! []
 
         SetTableState newState ->
-            { model | tableState = newState }
+            { model | tableState = newState } ! []
 
         Reset ->
-            emptyModel
+            emptyModel ! []
 
         DropdownToggle record ->
             let
@@ -43,7 +42,13 @@ update msg model =
                         DropdownClosed ->
                             { record | dropDownState = DropdownOpen }
             in
-                { model | records = updateRecords model.records newRecord }
+                { model | records = updateRecords model.records newRecord } ! []
+
+        DeleteCompleted (Ok t) ->
+            model ! []
+
+        DeleteCompleted (Err t) ->
+            { model | state = Error t } ! []
 
 
 view : Model -> Html Msg

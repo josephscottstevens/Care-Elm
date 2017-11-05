@@ -64,7 +64,15 @@ update : Msg -> Model -> ( Model, Cmd Model.Msg )
 update msg model =
     case msg of
         BillingMsg billingMsg ->
-            ( { model | billingState = Billing.update billingMsg model.billingState }, Cmd.none )
+            let
+                ( newBillingModel, widgetCmd ) =
+                    Billing.update billingMsg model.billingState
+            in
+                ( { model | billingState = newBillingModel }, Cmd.map BillingMsg widgetCmd )
 
         RecordsMsg recordsMsg ->
-            ( { model | recordsState = Records.update recordsMsg model.recordsState }, Cmd.none )
+            let
+                ( newRecordModel, widgetCmd ) =
+                    Records.update recordsMsg model.recordsState
+            in
+                ( { model | recordsState = newRecordModel }, Cmd.map RecordsMsg widgetCmd )

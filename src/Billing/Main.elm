@@ -15,30 +15,30 @@ init =
     getEmployment Load
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case msg of
         EditStart employer ->
-            { model | state = Edit employer }
+            { model | state = Edit employer } ! []
 
         Load (Ok model) ->
-            { model | state = Grid, billingCcm = (newEmployers model.billingCcm) }
+            { model | state = Grid, billingCcm = (newEmployers model.billingCcm) } ! []
 
         Load (Err t) ->
-            { model | state = Error t }
+            { model | state = Error t } ! []
 
         -- , sendTestDate employer.dOB
         -- EditSave employer ->
         --     ( newPage { model | state = Grid, employment = (updateEmployers model.enrollment employer) }, Cmd.none )
         EditCancel ->
-            { model | state = Grid }
+            { model | state = Grid } ! []
 
         SetPagingState page ->
             let
                 newPageIndex =
                     getNewState page model.currentPage (filteredCcmLength model)
             in
-                { model | currentPage = newPageIndex }
+                { model | currentPage = newPageIndex } ! []
 
         -- UpdateState emp newState ->
         --     ( { model | state = Edit { emp | state = newState } }, Cmd.none )
@@ -51,13 +51,13 @@ update msg model =
         --         _ ->
         --             ( model, Cmd.none )
         SetQuery newQuery ->
-            { model | query = newQuery }
+            { model | query = newQuery } ! []
 
         SetTableState newState ->
-            { model | tableState = newState }
+            { model | tableState = newState } ! []
 
         Reset ->
-            emptyModel
+            emptyModel ! []
 
 
 
