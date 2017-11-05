@@ -139,8 +139,8 @@ dropDownMenuItem { iconClass, displayText, event } =
         ]
 
 
-dropDownMenu : List DropDownMenuItem -> Record -> Html Msg
-dropDownMenu dropDownMenuItems record =
+dropDownMenu : List DropDownMenuItem -> Html Msg
+dropDownMenu dropDownMenuItems =
     let
         dropDownMenuStyle =
             [ ( "margin-top", "-12px" )
@@ -155,8 +155,8 @@ dropDownMenu dropDownMenuItems record =
             ]
 
 
-editDropdownList : List DropDownMenuItem -> Record -> Table.HtmlDetails Msg
-editDropdownList dropDownItems record =
+buildDropDown : List DropDownMenuItem -> Record -> Html.Attribute Msg -> Table.HtmlDetails Msg
+buildDropDown dropDownItems record toggleEvent =
     let
         dropDownList =
             case record.dropDownState of
@@ -164,11 +164,16 @@ editDropdownList dropDownItems record =
                     div [] []
 
                 DropdownOpen ->
-                    (dropDownMenu dropDownItems record)
+                    (dropDownMenu dropDownItems)
     in
         Table.HtmlDetails []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", onClick (DropdownToggle record) ] []
+                [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", toggleEvent ] []
                 , dropDownList
                 ]
             ]
+
+
+editDropdownList : List DropDownMenuItem -> Record -> Table.HtmlDetails Msg
+editDropdownList dropDownItems record =
+    buildDropDown dropDownItems record (onClick (DropdownToggle record))
