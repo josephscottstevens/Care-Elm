@@ -1,7 +1,7 @@
 module Utils.CommonGrid exposing (..)
 
-import Html exposing (Html, text, div, program, button, input, span, th)
-import Html.Attributes exposing (style, class, type_, id, value)
+import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a)
+import Html.Attributes exposing (style, class, type_, id, value, tabindex)
 import Table
 
 
@@ -119,3 +119,53 @@ viewData int =
         [ class "e-row" ]
     else
         [ class "e-alt_row" ]
+
+
+type DropDownState
+    = DropdownOpen
+    | DropdownClosed
+
+
+dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
+dropDownMenuItem ( iconClass, displayText, event ) =
+    li [ class "e-content e-list" ]
+        [ a [ class "e-menulink", event ]
+            [ text displayText
+            , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
+            ]
+        ]
+
+
+dropDownMenu : List ( String, String, Html.Attribute msg ) -> Html msg
+dropDownMenu dropDownMenuItems =
+    let
+        dropDownMenuStyle =
+            [ ( "margin-top", "-12px" )
+            , ( "margin-right", "21px" )
+            , ( "z-index", "5000" )
+            , ( "position", "relative" )
+            ]
+    in
+        div [ class "e-menu-wrap", style dropDownMenuStyle ]
+            [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
+                (List.map dropDownMenuItem dropDownMenuItems)
+            ]
+
+
+buildDropDown : List ( String, String, Html.Attribute msg ) -> DropDownState -> Html.Attribute msg -> Table.HtmlDetails msg
+buildDropDown dropDownItems dropDownState toggleEvent =
+    let
+        dropDownList =
+            case dropDownState of
+                DropdownClosed ->
+                    div [] []
+
+                DropdownOpen ->
+                    (dropDownMenu dropDownItems)
+    in
+        Table.HtmlDetails []
+            [ div [ style [ ( "text-align", "right" ) ] ]
+                [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", toggleEvent ] []
+                , dropDownList
+                ]
+            ]

@@ -112,68 +112,11 @@ editDropdown : Table.Column Record Msg
 editDropdown =
     Table.veryCustomColumn
         { name = ""
-        , viewData = editDropdownList x
+        , viewData = editDropdownList [ ( "e-contextedit", "View File", onClick (Reset) ) ]
         , sorter = Table.unsortable
         }
 
 
-type alias DropDownMenuItem =
-    { iconClass : String
-    , displayText : String
-    , event : Html.Attribute Msg
-    }
-
-
-x : List DropDownMenuItem
-x =
-    [ { iconClass = "", displayText = "", event = onClick Reset } ]
-
-
-dropDownMenuItem : DropDownMenuItem -> Html Msg
-dropDownMenuItem { iconClass, displayText, event } =
-    li [ class "e-content e-list" ]
-        [ a [ class "e-menulink", event ]
-            [ text displayText
-            , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
-            ]
-        ]
-
-
-dropDownMenu : List DropDownMenuItem -> Html Msg
-dropDownMenu dropDownMenuItems =
-    let
-        dropDownMenuStyle =
-            [ ( "margin-top", "-12px" )
-            , ( "margin-right", "21px" )
-            , ( "z-index", "5000" )
-            , ( "position", "relative" )
-            ]
-    in
-        div [ class "e-menu-wrap", style dropDownMenuStyle ]
-            [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
-                (List.map dropDownMenuItem dropDownMenuItems)
-            ]
-
-
-buildDropDown : List DropDownMenuItem -> Record -> Html.Attribute Msg -> Table.HtmlDetails Msg
-buildDropDown dropDownItems record toggleEvent =
-    let
-        dropDownList =
-            case record.dropDownState of
-                DropdownClosed ->
-                    div [] []
-
-                DropdownOpen ->
-                    (dropDownMenu dropDownItems)
-    in
-        Table.HtmlDetails []
-            [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", toggleEvent ] []
-                , dropDownList
-                ]
-            ]
-
-
-editDropdownList : List DropDownMenuItem -> Record -> Table.HtmlDetails Msg
+editDropdownList : List ( String, String, Html.Attribute Msg ) -> Record -> Table.HtmlDetails Msg
 editDropdownList dropDownItems record =
-    buildDropDown dropDownItems record (onClick (DropdownToggle record))
+    buildDropDown dropDownItems record.dropDownState (onClick (DropdownToggle record))

@@ -6,6 +6,7 @@ import Json.Decode.Pipeline exposing (..)
 import Http
 import Records.Model exposing (..)
 import Table
+import Utils.CommonGrid exposing (DropDownState)
 
 
 decodeRecord : Json.Decode.Decoder Record
@@ -35,7 +36,7 @@ decodeRecord =
         |> Json.Decode.Pipeline.required "Facility" (Json.Decode.maybe Json.Decode.string)
         |> Json.Decode.Pipeline.required "FacilityFax" (Json.Decode.maybe Json.Decode.string)
         |> Json.Decode.Pipeline.required "Recommendations" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.hardcoded DropdownClosed
+        |> Json.Decode.Pipeline.hardcoded Utils.CommonGrid.DropdownClosed
 
 
 

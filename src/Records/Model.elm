@@ -2,6 +2,7 @@ module Records.Model exposing (..)
 
 import Table
 import Http
+import Utils.CommonGrid exposing (DropDownState)
 
 
 type Msg
@@ -17,11 +18,6 @@ type Msg
 
 
 --| Dropdown DropDownButtonEvent
-
-
-type DropDownState
-    = DropdownOpen
-    | DropdownClosed
 
 
 type DropDownButtonEvent
