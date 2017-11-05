@@ -2,8 +2,8 @@ module Records.Main exposing (..)
 
 import Records.Load exposing (..)
 import Records.Model exposing (..)
-import Html exposing (Html, text, div, input, program, button, select, option, span, a)
-import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
+import Html exposing (Html, text, div, input, program, button, select, option, span, a, ul, li)
+import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex, tabindex)
 import Html.Events exposing (onClick, onInput)
 import Table
 import Utils.CommonGrid exposing (..)
@@ -105,13 +105,39 @@ editDropdown =
 editDropdownList : Record -> Table.HtmlDetails Msg
 editDropdownList record =
     let
+        dropDownMenuStyle =
+            [ ( "margin-top", "-12px" )
+            , ( "margin-right", "21px" )
+            , ( "z-index", "5000" )
+            , ( "position", "relative" )
+            ]
+
+        dropDownMenu =
+            div [ class "e-menu-wrap", style dropDownMenuStyle ]
+                [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
+                    [ li [ class "e-content e-list" ]
+                        [ a [ class "e-menulink" ]
+                            [ text "Edit Record"
+                            , span [ class "e-gridcontext e-icon e-contextedit" ] []
+                            ]
+                        ]
+                    , li
+                        [ class "e-content e-list" ]
+                        [ a [ class "e-menulink" ]
+                            [ text "Delete Record"
+                            , span [ class "e-gridcontext e-icon e-contextdelete" ] []
+                            ]
+                        ]
+                    ]
+                ]
+
         dropDownList =
             case record.dropDownState of
                 DropdownClosed ->
-                    div [] [ text "boo" ]
+                    div [] []
 
                 DropdownOpen ->
-                    div [] [ text "hey" ]
+                    dropDownMenu
     in
         Table.HtmlDetails []
             [ div [ style [ ( "text-align", "right" ) ] ]
