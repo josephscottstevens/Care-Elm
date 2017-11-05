@@ -12,9 +12,22 @@ type Msg
     | Reset
 
 
+
+--| Dropdown DropDownButtonEvent
+
+
 type DropDownState
     = DropdownOpen
     | DropdownClosed
+
+
+type DropDownButtonEvent
+    = ViewFile
+    | SendByEmail
+    | SendByFax
+    | SaveToClientPortal
+    | Transfer
+    | Delete
 
 
 type ModelState

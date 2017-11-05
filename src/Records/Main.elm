@@ -123,7 +123,7 @@ editDropdownList record =
                         ]
                     , li
                         [ class "e-content e-list" ]
-                        [ a [ class "e-menulink" ]
+                        [ a [ class "e-menulink", onClick (DropdownToggle record) ]
                             [ text "Delete Record"
                             , span [ class "e-gridcontext e-icon e-contextdelete" ] []
                             ]
