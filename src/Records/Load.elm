@@ -95,6 +95,11 @@ deleteRequest record =
     Http.send DeleteCompleted <| Http.getString ("/records/DeleteRecord?recordId=" ++ (toString record.id))
 
 
+saveRequest : NewRecord -> Cmd Msg
+saveRequest newRecord =
+    Http.send DeleteCompleted <| Http.getString ("/People/AddNewRecord?recordModelString=" ++ (toString newRecord))
+
+
 updateRecords : List Record -> Record -> List Record
 updateRecords records newRecord =
     records

@@ -10,6 +10,7 @@ type Msg
     | SetTableState Table.State
     | DropdownToggle Record
     | Reset
+    | Save NewRecord
     | Delete Record
     | DeleteCompleted (Result Http.Error String)
     | ViewFile Int
