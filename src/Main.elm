@@ -6,15 +6,7 @@ import Billing.Main as Billing
 import Records.Main as Records
 
 
-port sendTestDate : String -> Cmd msg
-
-
 port openPage : (String -> msg) -> Sub msg
-
-
-
--- port getTestDate : (String -> msg) -> Sub msg
--- getTestDate UpdateStartDate
 
 
 type alias Flags =
@@ -24,7 +16,7 @@ type alias Flags =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Sub.map RecordsMsg (Records.subscriptions model.recordsState)
 
 
 init : Flags -> ( Model, Cmd Msg )

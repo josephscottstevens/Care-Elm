@@ -7,13 +7,15 @@ import Utils.CommonGrid exposing (DropDownState)
 
 type Msg
     = Load (Result Http.Error Model)
-    | EditStart Record
+    | AddNewStart
     | SetTableState Table.State
     | DropdownToggle Record
     | Reset
     | Delete Record
     | DeleteCompleted (Result Http.Error String)
     | ViewFile Int
+    | UpdateStartDate String
+    | Cancel
 
 
 
@@ -30,7 +32,7 @@ type DropDownButtonEvent
 type ModelState
     = Initial
     | Grid
-    | Edit Record
+    | AddNew
     | Error Http.Error
 
 
@@ -45,6 +47,7 @@ type alias Model =
     , records : List Record
     , tableState : Table.State
     , query : String
+    , addNewRecord : NewRecord
     }
 
 
@@ -54,6 +57,26 @@ emptyModel =
     , records = []
     , tableState = Table.initialSort "dob"
     , query = ""
+    , addNewRecord = emptyNewRecord
+    }
+
+
+emptyNewRecord : NewRecord
+emptyNewRecord =
+    { facility = ""
+    , category = ""
+    , dateTimeOfVisit = ""
+    , comments = ""
+    , recordFile = ""
+    }
+
+
+type alias NewRecord =
+    { facility : String
+    , category : String
+    , dateTimeOfVisit : String
+    , comments : String
+    , recordFile : String
     }
 
 

@@ -3,13 +3,24 @@ port module Records.Main exposing (..)
 import Records.Load exposing (..)
 import Records.Model exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option, span, a, ul, li)
-import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex, tabindex)
+import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex)
 import Html.Events exposing (onClick, onInput, on)
 import Table
 import Utils.CommonGrid exposing (..)
 
 
 port viewFile : Int -> Cmd msg
+
+
+port sendTestDate : String -> Cmd msg
+
+
+port getTestDate : (String -> msg) -> Sub msg
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    getTestDate UpdateStartDate
 
 
 init : Cmd Msg
@@ -20,8 +31,8 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        EditStart t ->
-            { model | state = Edit t } ! []
+        AddNewStart ->
+            ( { model | state = AddNew }, sendTestDate "" )
 
         Load (Ok t) ->
             { t | state = Grid } ! []
@@ -59,6 +70,19 @@ update msg model =
         DeleteCompleted (Err t) ->
             { model | state = Error t } ! []
 
+        UpdateStartDate str ->
+            let
+                t =
+                    model.addNewRecord
+
+                x =
+                    { t | dateTimeOfVisit = str }
+            in
+                ( { model | addNewRecord = x }, Cmd.none )
+
+        Cancel ->
+            { model | state = Grid } ! []
+
 
 view : Model -> Html Msg
 view model =
@@ -68,13 +92,20 @@ view model =
 
         Grid ->
             div []
-                [ div [ class "e-grid e-js e-waitingpopup" ]
+                [ button [ class "btn btn-default", onClick AddNewStart ] [ text "New Record" ]
+                , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view config model.tableState model.records ]
                 ]
 
-        Edit rec ->
+        AddNew ->
             div []
-                [ input [ placeholder "Date of birth", type_ "text", class "e-textbox", id "testDate", value (defaultString rec.dateAccessed) ] []
+                [ input [ type_ "text", class "e-textbox", id "testDate3", value model.addNewRecord.facility ] []
+                , input [ type_ "text", class "e-textbox", id "testDate2", value model.addNewRecord.category ] []
+                , input [ type_ "text", class "e-textbox", id "testDate", value model.addNewRecord.dateTimeOfVisit ] []
+                , div []
+                    [ button [ onClick Cancel, class "btn btn-default" ] [ text "Save" ]
+                    , button [ onClick Cancel, class "btn btn-default" ] [ text "Cancel" ]
+                    ]
                 ]
 
         Error err ->
