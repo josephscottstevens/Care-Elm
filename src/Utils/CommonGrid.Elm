@@ -121,11 +121,6 @@ viewData int =
         [ class "e-alt_row" ]
 
 
-type DropDownState
-    = DropdownOpen
-    | DropdownClosed
-
-
 dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
 dropDownMenuItem ( iconClass, displayText, event ) =
     li [ class "e-content e-list" ]
@@ -152,15 +147,15 @@ dropDownMenu dropDownMenuItems =
             ]
 
 
-buildDropDown : List ( String, String, Html.Attribute msg ) -> DropDownState -> Html.Attribute msg -> Table.HtmlDetails msg
-buildDropDown dropDownItems dropDownState toggleEvent =
+buildDropDown : List ( String, String, Html.Attribute msg ) -> Bool -> Html.Attribute msg -> Table.HtmlDetails msg
+buildDropDown dropDownItems dropDownOpen toggleEvent =
     let
         dropDownList =
-            case dropDownState of
-                DropdownClosed ->
+            case dropDownOpen of
+                False ->
                     div [] []
 
-                DropdownOpen ->
+                True ->
                     (dropDownMenu dropDownItems)
     in
         Table.HtmlDetails []

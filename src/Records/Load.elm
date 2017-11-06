@@ -6,37 +6,36 @@ import Json.Decode.Pipeline exposing (..)
 import Http
 import Records.Model exposing (..)
 import Table
-import Utils.CommonGrid exposing (DropDownState)
 
 
-decodeRecord : Json.Decode.Decoder Record
+decodeRecord : Decoder Record
 decodeRecord =
-    Json.Decode.Pipeline.decode Record
-        |> Json.Decode.Pipeline.required "Id" (Json.Decode.int)
-        |> Json.Decode.Pipeline.required "Date" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "Speciality" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "Comments" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "TransferedTo" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "TransferedOn" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "PatientId" (Json.Decode.int)
-        |> Json.Decode.Pipeline.required "Title" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "DateAccessed" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "Provider" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "PatientName" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "RecordType" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "DateOfAdmission" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "DateOfDischarge" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "DischargePhysician" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "DischargeDiagnosis" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "HospitalizationServiceType" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "HospitalizationId" (Json.Decode.maybe Json.Decode.int)
-        |> Json.Decode.Pipeline.required "ReportDate" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "FileName" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "CanTransfer" (Json.Decode.bool)
-        |> Json.Decode.Pipeline.required "Facility" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "FacilityFax" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.required "Recommendations" (Json.Decode.maybe Json.Decode.string)
-        |> Json.Decode.Pipeline.hardcoded Utils.CommonGrid.DropdownClosed
+    decode Record
+        |> required "Id" (int)
+        |> required "Date" (maybe string)
+        |> required "Speciality" (maybe string)
+        |> required "Comments" (maybe string)
+        |> required "TransferedTo" (maybe string)
+        |> required "TransferedOn" (maybe string)
+        |> required "PatientId" (int)
+        |> required "Title" (maybe string)
+        |> required "DateAccessed" (maybe string)
+        |> required "Provider" (maybe string)
+        |> required "PatientName" (maybe string)
+        |> required "RecordType" (maybe string)
+        |> required "DateOfAdmission" (maybe string)
+        |> required "DateOfDischarge" (maybe string)
+        |> required "DischargePhysician" (maybe string)
+        |> required "DischargeDiagnosis" (maybe string)
+        |> required "HospitalizationServiceType" (maybe string)
+        |> required "HospitalizationId" (maybe int)
+        |> required "ReportDate" (maybe string)
+        |> required "FileName" (maybe string)
+        |> required "CanTransfer" (bool)
+        |> required "Facility" (maybe string)
+        |> required "FacilityFax" (maybe string)
+        |> required "Recommendations" (maybe string)
+        |> hardcoded False
 
 
 
@@ -106,3 +105,18 @@ updateRecords records newRecord =
                 else
                     t
             )
+
+
+setFacility : String -> NewRecord -> NewRecord
+setFacility newFacility newRecord =
+    { newRecord | facility = newFacility }
+
+
+setCategory : String -> NewRecord -> NewRecord
+setCategory newCategory newRecord =
+    { newRecord | category = newCategory }
+
+
+setDateTimeOfVisit : String -> NewRecord -> NewRecord
+setDateTimeOfVisit newDateTimeOfVisit newRecord =
+    { newRecord | dateTimeOfVisit = newDateTimeOfVisit }

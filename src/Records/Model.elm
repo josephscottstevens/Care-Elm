@@ -2,7 +2,6 @@ module Records.Model exposing (..)
 
 import Table
 import Http
-import Utils.CommonGrid exposing (DropDownState)
 
 
 type Msg
@@ -14,6 +13,8 @@ type Msg
     | Delete Record
     | DeleteCompleted (Result Http.Error String)
     | ViewFile Int
+    | UpdateFacility String
+    | UpdateCategory String
     | UpdateStartDate String
     | Cancel
 
@@ -105,5 +106,5 @@ type alias Record =
     , facility : Maybe String
     , facilityFax : Maybe String
     , recommendations : Maybe String
-    , dropDownState : DropDownState
+    , dropDownOpen : Bool
     }

@@ -4,7 +4,7 @@ import Records.Load exposing (..)
 import Records.Model exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option, span, a, ul, li, label, form)
 import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex, for)
-import Html.Events exposing (onClick, onInput, on)
+import Html.Events exposing (onClick, onInput)
 import Table
 import Utils.CommonGrid exposing (..)
 
@@ -12,15 +12,21 @@ import Utils.CommonGrid exposing (..)
 port viewFile : Int -> Cmd msg
 
 
-port sendDateTimeOfVisitId : String -> Cmd msg
+port initSyncfusionControls : String -> Cmd msg
 
 
-port getDateTimeOfVisitId : (String -> msg) -> Sub msg
+port updateFacility : (String -> msg) -> Sub msg
+
+
+port updateCategory : (String -> msg) -> Sub msg
+
+
+port updateDateTimeOfVisit : (String -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    getDateTimeOfVisitId UpdateStartDate
+    Sub.batch [ updateDateTimeOfVisit UpdateStartDate ]
 
 
 init : Cmd Msg
@@ -32,7 +38,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AddNewStart ->
-            ( { model | state = AddNew }, sendDateTimeOfVisitId "" )
+            ( { model | state = AddNew }, initSyncfusionControls "" )
 
         Load (Ok t) ->
             { t | state = Grid } ! []
@@ -55,12 +61,7 @@ update msg model =
         DropdownToggle record ->
             let
                 newRecord =
-                    case record.dropDownState of
-                        DropdownOpen ->
-                            { record | dropDownState = DropdownClosed }
-
-                        DropdownClosed ->
-                            { record | dropDownState = DropdownOpen }
+                    { record | dropDownOpen = not record.dropDownOpen }
             in
                 { model | records = updateRecords model.records newRecord } ! []
 
@@ -70,15 +71,14 @@ update msg model =
         DeleteCompleted (Err t) ->
             { model | state = Error t } ! []
 
-        UpdateStartDate str ->
-            let
-                t =
-                    model.addNewRecord
+        UpdateFacility str ->
+            { model | addNewRecord = (setFacility str model.addNewRecord) } ! []
 
-                x =
-                    { t | dateTimeOfVisit = str }
-            in
-                ( { model | addNewRecord = x }, Cmd.none )
+        UpdateCategory str ->
+            { model | addNewRecord = (setCategory str model.addNewRecord) } ! []
+
+        UpdateStartDate str ->
+            { model | addNewRecord = (setDateTimeOfVisit str model.addNewRecord) } ! []
 
         Cancel ->
             { model | state = Grid } ! []
@@ -104,8 +104,8 @@ view model =
                 , eInput "Date of Visit" "DateTimeOfVisitId" model.addNewRecord.dateTimeOfVisit
                 , div [ class "form-group" ]
                     [ div [ class "col-sm-offset-5 col-sm-4" ]
-                        [ button [ onClick Cancel, class "btn btn-primary" ] [ text "Save" ]
-                        , button [ onClick Cancel, class "btn btn-default margin-left-5" ] [ text "Cancel" ]
+                        [ button [ type_ "button", onClick Cancel, class "btn btn-primary" ] [ text "Save" ]
+                        , button [ type_ "button", onClick Cancel, class "btn btn-default margin-left-5" ] [ text "Cancel" ]
                         ]
                     ]
                 ]
@@ -168,4 +168,4 @@ dropDownItems record =
 
 editDropdownList : Record -> Table.HtmlDetails Msg
 editDropdownList record =
-    buildDropDown (dropDownItems record) record.dropDownState (onClick (DropdownToggle record))
+    buildDropDown (dropDownItems record) record.dropDownOpen (onClick (DropdownToggle record))
