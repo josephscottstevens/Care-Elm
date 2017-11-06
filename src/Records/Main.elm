@@ -121,13 +121,13 @@ view model =
 
         AddNew ->
             form [ class "form-horizontal" ]
-                [ eInput "Facility" "FacilityId" model.addNewRecord.facility
-                , eRequiredInput "Category" "CategoryId" model.addNewRecord.category
-                , eRequiredInput "Date of Visit" "DateTimeOfVisitId" model.addNewRecord.dateTimeOfVisit
-                , eTextBox "Doctor of Visit" "DoctorOfVisitId" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit
-                , eTextBox "Speciality of Visit" "SpecialityOfVisitId" model.addNewRecord.specialityOfVisit UpdateFacility
-                , eTextArea "Comments" "CommentsId" model.addNewRecord.comments UpdateFacility
-                , eFileUpload "Upload Record File" "RecordFileId" model.addNewRecord.recordFile
+                [ inputCommon input "Facility" model.addNewRecord.facility UpdateFacility False
+                , inputCommon input "Category" model.addNewRecord.category UpdateCategory True
+                , inputCommon input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
+                , inputCommon input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
+                , inputCommon input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateFacility False
+                , inputCommon textarea "Comments" model.addNewRecord.comments UpdateFacility True
+                , inputCommon div "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
                 , div [ class "form-group" ]
                     [ div [ class "col-sm-10 col-md-7 col-lg-6" ]
                         [ button [ type_ "button", onClick (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
@@ -138,51 +138,6 @@ view model =
 
         Error err ->
             div [] [ text (toString err) ]
-
-
-eInput : String -> String -> String -> Html msg
-eInput displayText idAttr inputValue =
-    div [ class "form-group" ]
-        [ label [ class "col-sm-2 col-md-2 col-lg-2 control-label", for idAttr ] [ text displayText ]
-        , div [ class "col-sm-8 col-md-5 col-lg-4" ]
-            [ input [ type_ "text", class "e-textbox", id idAttr, value inputValue ] [] ]
-        ]
-
-
-eRequiredInput : String -> String -> String -> Html msg
-eRequiredInput displayText idAttr inputValue =
-    div [ class "form-group" ]
-        [ label [ class "col-sm-2 col-md-2 col-lg-2 control-label required", for idAttr ] [ text displayText ]
-        , div [ class "col-sm-8 col-md-5 col-lg-4" ]
-            [ input [ type_ "text", class "e-textbox", id idAttr, value inputValue ] [] ]
-        ]
-
-
-eTextArea : String -> String -> String -> (String -> msg) -> Html msg
-eTextArea displayText idAttr inputValue event =
-    div [ class "form-group" ]
-        [ label [ class "col-sm-2 col-md-2 col-lg-2 control-label required", for idAttr ] [ text displayText ]
-        , div [ class "col-sm-8 col-md-5 col-lg-4" ]
-            [ textarea [ class "e-textbox", id idAttr, value inputValue, onInput event ] [] ]
-        ]
-
-
-eTextBox : String -> String -> String -> (String -> msg) -> Html msg
-eTextBox displayText idAttr inputValue event =
-    div [ class "form-group" ]
-        [ label [ class "col-sm-2 col-md-2 col-lg-2 control-label", for idAttr ] [ text displayText ]
-        , div [ class "col-sm-8 col-md-5 col-lg-4" ]
-            [ input [ type_ "text", class "e-textbox", id idAttr, value inputValue, onInput event ] [] ]
-        ]
-
-
-eFileUpload : String -> String -> String -> Html msg
-eFileUpload displayText idAttr inputValue =
-    div [ class "form-group" ]
-        [ label [ class "col-sm-2 col-md-2 col-lg-2 control-label required", for idAttr ] [ text displayText ]
-        , div [ class "col-sm-8 col-md-5 col-lg-4" ]
-            [ div [ id idAttr, value inputValue ] [] ]
-        ]
 
 
 config : Table.Config Record Msg

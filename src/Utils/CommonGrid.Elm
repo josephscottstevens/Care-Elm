@@ -1,8 +1,25 @@
 module Utils.CommonGrid exposing (..)
 
-import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a)
-import Html.Attributes exposing (style, class, type_, id, value, tabindex)
+import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
+import Html.Attributes exposing (style, class, type_, id, value, tabindex, for)
+import Html.Events exposing (onInput)
 import Table
+import Char exposing (isLower, isUpper)
+
+
+isAlpha : Char -> Bool
+isAlpha char =
+    isLower char || isUpper char
+
+
+forId : String -> Html.Attribute msg
+forId str =
+    for (String.filter isAlpha str)
+
+
+idAttr : String -> Html.Attribute msg
+idAttr str =
+    id (String.filter isAlpha str)
 
 
 defaultString : Maybe String -> String
@@ -163,4 +180,20 @@ buildDropDown dropDownItems dropDownOpen toggleEvent =
                 [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", toggleEvent ] []
                 , dropDownList
                 ]
+            ]
+
+
+inputCommon : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
+inputCommon control displayText inputValue event isRequired =
+    let
+        isRequiredStr =
+            if isRequired then
+                " required"
+            else
+                ""
+    in
+        div [ class "form-group" ]
+            [ label [ class ("col-sm-2 col-md-2 col-lg-2 control-label" ++ isRequiredStr), forId displayText ] [ text displayText ]
+            , div [ class "col-sm-8 col-md-5 col-lg-4" ]
+                [ control [ type_ "text", class "e-textbox", idAttr displayText, value inputValue, onInput event ] [] ]
             ]
