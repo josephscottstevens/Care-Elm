@@ -127,7 +127,7 @@ view model =
                 , inputCommon input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
                 , inputCommon input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateFacility False
                 , inputCommon textarea "Comments" model.addNewRecord.comments UpdateFacility True
-                , inputCommon div "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
+                , inputCommonWithType input "file" "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
                 , div [ class "form-group" ]
                     [ div [ class "col-sm-10 col-md-7 col-lg-6" ]
                         [ button [ type_ "button", onClick (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]

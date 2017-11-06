@@ -183,8 +183,8 @@ buildDropDown dropDownItems dropDownOpen toggleEvent =
             ]
 
 
-inputCommon : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
-inputCommon control displayText inputValue event isRequired =
+inputCommonWithType : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> String -> (String -> msg) -> Bool -> Html msg
+inputCommonWithType control controlType displayText inputValue event isRequired =
     let
         isRequiredStr =
             if isRequired then
@@ -195,5 +195,10 @@ inputCommon control displayText inputValue event isRequired =
         div [ class "form-group" ]
             [ label [ class ("col-sm-2 col-md-2 col-lg-2 control-label" ++ isRequiredStr), forId displayText ] [ text displayText ]
             , div [ class "col-sm-8 col-md-5 col-lg-4" ]
-                [ control [ type_ "text", class "e-textbox", idAttr displayText, value inputValue, onInput event ] [] ]
+                [ control [ type_ controlType, class "e-textbox", idAttr displayText, value inputValue, onInput event ] [] ]
             ]
+
+
+inputCommon : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
+inputCommon control displayText inputValue event isRequired =
+    inputCommonWithType control "text" displayText inputValue event isRequired
