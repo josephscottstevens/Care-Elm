@@ -2,8 +2,8 @@ port module Records.Main exposing (..)
 
 import Records.Load exposing (..)
 import Records.Model exposing (..)
-import Html exposing (Html, text, div, input, program, button, select, option, span, a, ul, li)
-import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex)
+import Html exposing (Html, text, div, input, program, button, select, option, span, a, ul, li, label, form)
+import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex, for)
 import Html.Events exposing (onClick, onInput, on)
 import Table
 import Utils.CommonGrid exposing (..)
@@ -12,15 +12,15 @@ import Utils.CommonGrid exposing (..)
 port viewFile : Int -> Cmd msg
 
 
-port sendTestDate : String -> Cmd msg
+port sendDateTimeOfVisitId : String -> Cmd msg
 
 
-port getTestDate : (String -> msg) -> Sub msg
+port getDateTimeOfVisitId : (String -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    getTestDate UpdateStartDate
+    getDateTimeOfVisitId UpdateStartDate
 
 
 init : Cmd Msg
@@ -32,7 +32,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AddNewStart ->
-            ( { model | state = AddNew }, sendTestDate "" )
+            ( { model | state = AddNew }, sendDateTimeOfVisitId "" )
 
         Load (Ok t) ->
             { t | state = Grid } ! []
@@ -98,18 +98,29 @@ view model =
                 ]
 
         AddNew ->
-            div []
-                [ input [ type_ "text", class "e-textbox", id "testDate3", value model.addNewRecord.facility ] []
-                , input [ type_ "text", class "e-textbox", id "testDate2", value model.addNewRecord.category ] []
-                , input [ type_ "text", class "e-textbox", id "testDate", value model.addNewRecord.dateTimeOfVisit ] []
-                , div []
-                    [ button [ onClick Cancel, class "btn btn-default" ] [ text "Save" ]
-                    , button [ onClick Cancel, class "btn btn-default" ] [ text "Cancel" ]
+            form [ class "form-horizontal" ]
+                [ eInput "Facility" "FacilityId" model.addNewRecord.facility
+                , eInput "Category" "CategoryId" model.addNewRecord.category
+                , eInput "Date of Visit" "DateTimeOfVisitId" model.addNewRecord.dateTimeOfVisit
+                , div [ class "form-group" ]
+                    [ div [ class "col-sm-offset-5 col-sm-4" ]
+                        [ button [ onClick Cancel, class "btn btn-primary" ] [ text "Save" ]
+                        , button [ onClick Cancel, class "btn btn-default margin-left-5" ] [ text "Cancel" ]
+                        ]
                     ]
                 ]
 
         Error err ->
             div [] [ text (toString err) ]
+
+
+eInput : String -> String -> String -> Html msg
+eInput displayText idAttr inputValue =
+    div [ class "form-group" ]
+        [ label [ class "col-sm-2 control-label required", for idAttr ] [ text displayText ]
+        , div [ class "col-xs-10 col-sm-10 col-md-5 col-lg-4" ]
+            [ input [ type_ "text", class "e-textbox", id idAttr, value inputValue ] [] ]
+        ]
 
 
 config : Table.Config Record Msg
