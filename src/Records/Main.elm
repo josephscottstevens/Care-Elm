@@ -7,6 +7,7 @@ import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabin
 import Html.Events exposing (onInput, onClick, onInput)
 import Table
 import Utils.CommonGrid exposing (..)
+import Utils.CommonHtml exposing (..)
 
 
 port viewFile : Int -> Cmd msg
@@ -22,9 +23,6 @@ port updateCategory : (String -> msg) -> Sub msg
 
 
 port updateDateTimeOfVisit : (String -> msg) -> Sub msg
-
-
-port updateRecordFile : (String -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
@@ -127,9 +125,9 @@ view model =
                 , inputCommon input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
                 , inputCommon input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateFacility False
                 , inputCommon textarea "Comments" model.addNewRecord.comments UpdateFacility True
-                , inputCommonWithType input "file" "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
+                , inputCommonWithType input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True <| "file"
                 , div [ class "form-group" ]
-                    [ div [ class "col-sm-10 col-md-7 col-lg-6" ]
+                    [ div [ class fullWidth ]
                         [ button [ type_ "button", onClick (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
                         , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
                         ]
