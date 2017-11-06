@@ -169,7 +169,7 @@ eFileUpload displayText idAttr inputValue =
     div [ class "form-group" ]
         [ label [ class "col-sm-2 col-md-2 col-lg-2 control-label required", for idAttr ] [ text displayText ]
         , div [ class "col-sm-8 col-md-5 col-lg-4" ]
-            [ div [ class "e-textbox", id idAttr, value inputValue ] [] ]
+            [ div [ id idAttr, value inputValue ] [] ]
         ]
 
 
