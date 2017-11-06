@@ -15,7 +15,11 @@ type Msg
     | ViewFile Int
     | UpdateFacility String
     | UpdateCategory String
-    | UpdateStartDate String
+    | UpdateDateTimeOfVisit String
+    | UpdateDoctorOfVisit String
+    | UpdateSpecialtyOfVisit String
+    | UpdateComments String
+    | UpdateRecordFile String
     | Cancel
 
 
@@ -67,6 +71,8 @@ emptyNewRecord =
     { facility = ""
     , category = ""
     , dateTimeOfVisit = ""
+    , doctorOfVisit = ""
+    , specialityOfVisit = ""
     , comments = ""
     , recordFile = ""
     }
@@ -76,6 +82,8 @@ type alias NewRecord =
     { facility : String
     , category : String
     , dateTimeOfVisit : String
+    , doctorOfVisit : String
+    , specialityOfVisit : String
     , comments : String
     , recordFile : String
     }

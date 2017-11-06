@@ -2,9 +2,9 @@ port module Records.Main exposing (..)
 
 import Records.Load exposing (..)
 import Records.Model exposing (..)
-import Html exposing (Html, text, div, input, program, button, select, option, span, a, ul, li, label, form)
+import Html exposing (Html, text, div, input, program, button, select, option, span, a, ul, li, label, form, textarea)
 import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex, for)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onInput, onClick, onInput)
 import Table
 import Utils.CommonGrid exposing (..)
 
@@ -24,9 +24,16 @@ port updateCategory : (String -> msg) -> Sub msg
 port updateDateTimeOfVisit : (String -> msg) -> Sub msg
 
 
+port updateRecordFile : (String -> msg) -> Sub msg
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch [ updateDateTimeOfVisit UpdateStartDate ]
+    Sub.batch
+        [ updateFacility UpdateFacility
+        , updateCategory UpdateCategory
+        , updateDateTimeOfVisit UpdateDateTimeOfVisit
+        ]
 
 
 init : Cmd Msg
@@ -77,8 +84,20 @@ update msg model =
         UpdateCategory str ->
             { model | addNewRecord = (setCategory str model.addNewRecord) } ! []
 
-        UpdateStartDate str ->
+        UpdateDateTimeOfVisit str ->
             { model | addNewRecord = (setDateTimeOfVisit str model.addNewRecord) } ! []
+
+        UpdateDoctorOfVisit str ->
+            { model | addNewRecord = (setDoctorOfVisit str model.addNewRecord) } ! []
+
+        UpdateSpecialtyOfVisit str ->
+            { model | addNewRecord = (setSpecialtyOfVisit str model.addNewRecord) } ! []
+
+        UpdateComments str ->
+            { model | addNewRecord = (setComments str model.addNewRecord) } ! []
+
+        UpdateRecordFile str ->
+            { model | addNewRecord = (setRecordFile str model.addNewRecord) } ! []
 
         Cancel ->
             { model | state = Grid } ! []
@@ -102,10 +121,14 @@ view model =
                 [ eInput "Facility" "FacilityId" model.addNewRecord.facility
                 , eInput "Category" "CategoryId" model.addNewRecord.category
                 , eInput "Date of Visit" "DateTimeOfVisitId" model.addNewRecord.dateTimeOfVisit
+                , eTextBox "Doctor of Visit" "DoctorOfVisitId" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit
+                , eTextBox "Speciality of Visit" "SpecialityOfVisitId" model.addNewRecord.specialityOfVisit UpdateFacility
+                , eTextArea "Comments" "CommentsId" model.addNewRecord.comments UpdateFacility
+                , eFileUpload "Upload Record File" "RecordFileId" model.addNewRecord.recordFile
                 , div [ class "form-group" ]
-                    [ div [ class "col-sm-offset-5 col-sm-4" ]
-                        [ button [ type_ "button", onClick Cancel, class "btn btn-primary" ] [ text "Save" ]
-                        , button [ type_ "button", onClick Cancel, class "btn btn-default margin-left-5" ] [ text "Cancel" ]
+                    [ div [ class "col-sm-10 col-md-7 col-lg-6" ]
+                        [ button [ type_ "button", onClick Cancel, class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
+                        , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
                         ]
                     ]
                 ]
@@ -117,9 +140,36 @@ view model =
 eInput : String -> String -> String -> Html msg
 eInput displayText idAttr inputValue =
     div [ class "form-group" ]
-        [ label [ class "col-sm-2 control-label required", for idAttr ] [ text displayText ]
-        , div [ class "col-xs-10 col-sm-10 col-md-5 col-lg-4" ]
+        [ label [ class "col-sm-2 col-md-2 col-lg-2 control-label required", for idAttr ] [ text displayText ]
+        , div [ class "col-sm-8 col-md-5 col-lg-4" ]
             [ input [ type_ "text", class "e-textbox", id idAttr, value inputValue ] [] ]
+        ]
+
+
+eTextArea : String -> String -> String -> (String -> msg) -> Html msg
+eTextArea displayText idAttr inputValue event =
+    div [ class "form-group" ]
+        [ label [ class "col-sm-2 col-md-2 col-lg-2 control-label required", for idAttr ] [ text displayText ]
+        , div [ class "col-sm-8 col-md-5 col-lg-4" ]
+            [ textarea [ class "e-textbox", id idAttr, value inputValue, onInput event ] [] ]
+        ]
+
+
+eTextBox : String -> String -> String -> (String -> msg) -> Html msg
+eTextBox displayText idAttr inputValue event =
+    div [ class "form-group" ]
+        [ label [ class "col-sm-2 col-md-2 col-lg-2 control-label required", for idAttr ] [ text displayText ]
+        , div [ class "col-sm-8 col-md-5 col-lg-4" ]
+            [ input [ type_ "text", class "e-textbox", id idAttr, value inputValue, onInput event ] [] ]
+        ]
+
+
+eFileUpload : String -> String -> String -> Html msg
+eFileUpload displayText idAttr inputValue =
+    div [ class "form-group" ]
+        [ label [ class "col-sm-2 col-md-2 col-lg-2 control-label required", for idAttr ] [ text displayText ]
+        , div [ class "col-sm-8 col-md-5 col-lg-4" ]
+            [ div [ class "e-textbox", id idAttr, value inputValue ] [] ]
         ]
 
 

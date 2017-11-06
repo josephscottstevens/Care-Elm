@@ -120,3 +120,23 @@ setCategory newCategory newRecord =
 setDateTimeOfVisit : String -> NewRecord -> NewRecord
 setDateTimeOfVisit newDateTimeOfVisit newRecord =
     { newRecord | dateTimeOfVisit = newDateTimeOfVisit }
+
+
+setDoctorOfVisit : String -> NewRecord -> NewRecord
+setDoctorOfVisit newDoctorOfVisit newRecord =
+    { newRecord | doctorOfVisit = newDoctorOfVisit }
+
+
+setSpecialtyOfVisit : String -> NewRecord -> NewRecord
+setSpecialtyOfVisit newSpecialityOfVisit newRecord =
+    { newRecord | specialityOfVisit = newSpecialityOfVisit }
+
+
+setComments : String -> NewRecord -> NewRecord
+setComments newComments newRecord =
+    { newRecord | comments = newComments }
+
+
+setRecordFile : String -> NewRecord -> NewRecord
+setRecordFile newRecordFile newRecord =
+    { newRecord | recordFile = newRecordFile }
