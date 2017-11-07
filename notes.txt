@@ -25,11 +25,14 @@ perhaps... node_modules folder is needed... or the step to get that there?
 
 
 TODO:
+
 When clicking delete, confirmation message should appear first
 After successful delete, confirmation message that was successfully delete should occur
 When you click away from dropdown menu, it doesn't close, you have to click the button again
 
 LOW TODO:
+The whole form post to javascript to ports thing is a mess, but meh.
+
 Filter above each header
 For example, when you are on page 12, and you filter down to like 20 rows, the highlighted row is gone
 When page left is disabled, you can still click it.

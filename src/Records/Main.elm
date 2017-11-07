@@ -16,7 +16,10 @@ port viewFile : Int -> Cmd msg
 port initSyncfusionControls : String -> Cmd msg
 
 
-port submitForm : String -> Cmd msg
+port submitForm : Records.Model.NewRecord -> Cmd msg
+
+
+port saveComplete : (String -> msg) -> Sub msg
 
 
 port updateFacility : (String -> msg) -> Sub msg
@@ -34,6 +37,7 @@ subscriptions model =
         [ updateFacility UpdateFacility
         , updateCategory UpdateCategory
         , updateDateTimeOfVisit UpdateDateTimeOfVisit
+        , saveComplete SaveCompleted
         ]
 
 
@@ -72,9 +76,12 @@ update msg model =
                     if List.length (formValidationErrors model.addNewRecord) > 0 then
                         Cmd.none
                     else
-                        submitForm ""
+                        submitForm newRecord
             in
                 ( { model | showValidationErrors = True }, action )
+
+        SaveCompleted str ->
+            ( emptyModel, getRecords Load )
 
         DropDownToggle record ->
             let
