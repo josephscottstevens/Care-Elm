@@ -65,7 +65,7 @@ update msg model =
             ( model, deleteRequest record )
 
         Save newRecord ->
-            ( model, Cmd.none )
+            ( { model | showValidationErrors = True }, Cmd.none )
 
         DropDownToggle record ->
             let
@@ -128,10 +128,22 @@ view model =
                         "button"
                     else
                         "submit"
+
+                submitBtnEvent =
+                    if List.length errors > 0 then
+                        onClick
+                    else
+                        onSubmit
+
+                validationErrorsDiv =
+                    if model.showValidationErrors == True then
+                        displayErrors errors
+                    else
+                        div [] []
             in
                 div
                     [ class "form-horizontal" ]
-                    [ displayErrors errors
+                    [ validationErrorsDiv
                     , textInput input "Facility" model.addNewRecord.facility UpdateFacility False
                     , textInput input "Category" model.addNewRecord.category UpdateCategory True
                     , textInput input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
@@ -141,7 +153,7 @@ view model =
                     , fileInput input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
-                            [ button [ type_ "button", value "AddNewRecord", onSubmit (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
+                            [ button [ type_ "button", value "AddNewRecord", submitBtnEvent (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
                             , button [ type_ submitBtnType, onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
                             ]
                         ]
@@ -155,7 +167,11 @@ formValidationErrors : Records.Model.NewRecord -> List String
 formValidationErrors newRecord =
     let
         errors =
-            [ required newRecord.category "Category" ]
+            [ required newRecord.category "Category"
+            , required newRecord.dateTimeOfVisit "Date of Visit"
+            , required newRecord.comments "Comments"
+            , required newRecord.recordFile "Record File"
+            ]
     in
         errors |> List.filterMap identity
 
@@ -170,7 +186,7 @@ required str propName =
 
 displayErrors : List String -> Html Msg
 displayErrors errors =
-    div [] (List.map (\t -> div [] [ text t ]) errors)
+    div [ class "error" ] (List.map (\t -> div [] [ text t ]) errors)
 
 
 config : Table.Config Record Msg

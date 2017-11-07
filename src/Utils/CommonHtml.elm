@@ -2,9 +2,10 @@ module Utils.CommonHtml exposing (dropInput, textInput, fileInput, fullWidth, la
 
 import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, on)
 import Char exposing (isLower, isUpper)
 import Utils.DropDowns exposing (..)
+import Json.Decode as Json
 
 
 isAlpha : Char -> Bool
@@ -61,7 +62,7 @@ inputCommonFormat isRequired displayText t =
 inputCommonWithType : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> String -> List ( String, String ) -> Html msg
 inputCommonWithType control displayText inputValue event isRequired controlType dataSource =
     if controlType == "file" then
-        inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", id "Files", name "Files" ] [] ]
+        inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", id "Files", name "Files", onChange event ] [] ]
     else if controlType == "textarea" then
         inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", id "Files", name "Files" ] [] ]
     else if controlType == "text" then
@@ -87,3 +88,8 @@ fileInput control displayText inputValue event isRequired =
 textInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
 textInput control displayText inputValue event isRequired =
     inputCommonWithType control displayText inputValue event isRequired "text" []
+
+
+onChange : (String -> msg) -> Html.Attribute msg
+onChange handler =
+    on "change" <| Json.map handler <| Json.at [ "target", "value" ] Json.string
