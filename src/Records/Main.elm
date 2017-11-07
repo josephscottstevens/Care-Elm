@@ -8,6 +8,7 @@ import Html.Events exposing (onInput, onClick, onInput, on)
 import Table
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
+import Utils.Dropdowns exposing (..)
 
 
 port viewFile : Int -> Cmd msg
@@ -120,13 +121,13 @@ view model =
         AddNew ->
             div
                 [ class "form-horizontal" ]
-                [ inputCommonAsDropDown input "Facility" model.addNewRecord.facility UpdateFacility False
+                [ inputCommonAsDropDown input "Facility" model.addNewRecord.facility UpdateFacility False facilityDropDownSource
                 , inputCommon input "Category" model.addNewRecord.category UpdateCategory True
                 , inputCommon input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
                 , inputCommon input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
                 , inputCommon input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateSpecialtyOfVisit False
                 , inputCommon input "Comments" model.addNewRecord.comments UpdateComments True
-                , inputCommonWithType input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True <| "file"
+                , inputCommonAsFile input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
                 , div [ class "form-group" ]
                     [ div [ class fullWidth ]
                         [ button [ type_ "submit", value "AddNewRecord", onClick (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]

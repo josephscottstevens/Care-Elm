@@ -1,4 +1,4 @@
-module Utils.CommonHtml exposing (..)
+module Utils.CommonHtml exposing (inputCommonAsDropDown, inputCommon, inputCommonAsFile, fullWidth, labelWidth, controlWidth)
 
 import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name)
@@ -58,8 +58,8 @@ inputCommonFormat isRequired displayText t =
             ]
 
 
-inputCommonWithType : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> String -> Html msg
-inputCommonWithType control displayText inputValue event isRequired controlType =
+inputCommonWithType : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> String -> List ( String, String ) -> Html msg
+inputCommonWithType control displayText inputValue event isRequired controlType dataSource =
     if controlType == "file" then
         inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", id "Files", name "Files" ] [] ]
     else if controlType == "textarea" then
@@ -67,14 +67,19 @@ inputCommonWithType control displayText inputValue event isRequired controlType 
     else if controlType == "text" then
         inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] [] ]
     else
-        inputCommonFormat isRequired displayText [ (ejDropDownListSource (String.filter isAlpha displayText) []) ]
+        inputCommonFormat isRequired displayText [ (ejDropDownListSource (String.filter isAlpha displayText) dataSource) ]
 
 
-inputCommonAsDropDown : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
-inputCommonAsDropDown control displayText inputValue event isRequired =
-    inputCommonWithType control displayText inputValue event isRequired <| "dropdown"
+inputCommonAsDropDown : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> List ( String, String ) -> Html msg
+inputCommonAsDropDown control displayText inputValue event isRequired dataSource =
+    inputCommonWithType control displayText inputValue event isRequired "dropdown" dataSource
+
+
+inputCommonAsFile : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
+inputCommonAsFile control displayText inputValue event isRequired =
+    inputCommonWithType control displayText inputValue event isRequired "file" []
 
 
 inputCommon : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
 inputCommon control displayText inputValue event isRequired =
-    inputCommonWithType control displayText inputValue event isRequired <| "text"
+    inputCommonWithType control displayText inputValue event isRequired "text" []
