@@ -25,10 +25,12 @@ perhaps... node_modules folder is needed... or the step to get that there?
 
 
 TODO:
-
+Template the other Record types
+Populate Facility dropdown with real data
+Populate Category data with js data
 When clicking delete, confirmation message should appear first
-After successful delete, confirmation message that was successfully delete should occur
 When you click away from dropdown menu, it doesn't close, you have to click the button again
+Add the other dropdown options
 
 LOW TODO:
 The whole form post to javascript to ports thing is a mess, but meh.
