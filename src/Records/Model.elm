@@ -13,6 +13,7 @@ type Msg
     | Save NewRecord
     | Delete Record
     | DeleteCompleted (Result Http.Error String)
+      -- | SaveCompleted (Result Http.Error String)
     | ViewFile Int
     | UpdateFacility String
     | UpdateCategory String

@@ -59,6 +59,8 @@ encodeRecord newRecord =
         , ( "SpecialityOfVisit", Json.Encode.string <| newRecord.specialityOfVisit )
         , ( "Comments", Json.Encode.string <| newRecord.comments )
         , ( "RecordFile", Json.Encode.string <| newRecord.recordFile )
+        , ( "FacilityID", Json.Encode.int 79 )
+        , ( "PatientID", Json.Encode.int 6676 )
         ]
 
 
@@ -87,9 +89,22 @@ deleteRequest record =
     Http.send DeleteCompleted <| Http.getString ("/records/DeleteRecord?recordId=" ++ (toString record.id))
 
 
+savePlayerRequest : NewRecord -> Http.Request String
+savePlayerRequest player =
+    Http.request
+        { body = encodeRecord player |> Http.jsonBody
+        , expect = Http.expectString
+        , headers = []
+        , method = "POST"
+        , timeout = Nothing
+        , url = "/People/AddNewRecord"
+        , withCredentials = False
+        }
+
+
 saveRequest : NewRecord -> Cmd Msg
 saveRequest newRecord =
-    Http.send DeleteCompleted <| Http.getString ("/People/AddNewRecord?recordModelString=" ++ (toString (encodeRecord newRecord)))
+    Http.send DeleteCompleted (savePlayerRequest newRecord)
 
 
 updateRecords : List Record -> Record -> List Record
