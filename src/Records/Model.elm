@@ -8,7 +8,7 @@ type Msg
     = Load (Result Http.Error Model)
     | AddNewStart
     | SetTableState Table.State
-    | DropdownToggle Record
+    | DropDownToggle Record
     | Reset
     | Save NewRecord
     | Delete Record
@@ -23,10 +23,6 @@ type Msg
     | UpdateComments String
     | UpdateRecordFile String
     | Cancel
-
-
-
---| Dropdown DropDownButtonEvent
 
 
 type DropDownButtonEvent

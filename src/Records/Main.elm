@@ -8,7 +8,7 @@ import Html.Events exposing (onInput, onClick, onInput, on)
 import Table
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
-import Utils.Dropdowns exposing (..)
+import Utils.DropDowns exposing (..)
 
 
 port viewFile : Int -> Cmd msg
@@ -67,7 +67,7 @@ update msg model =
         Save newRecord ->
             ( model, Cmd.none )
 
-        DropdownToggle record ->
+        DropDownToggle record ->
             let
                 newRecord =
                     { record | dropDownOpen = not record.dropDownOpen }
@@ -150,7 +150,7 @@ config =
             , Table.stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
             , Table.stringColumn "Speciality" (\t -> defaultString t.speciality)
             , Table.stringColumn "Comments" (\t -> defaultString t.comments)
-            , editDropdown
+            , editDropDown
             ]
         , customizations = defaultCustomizations
         }
@@ -167,11 +167,11 @@ defaultCustomizations =
     }
 
 
-editDropdown : Table.Column Record Msg
-editDropdown =
+editDropDown : Table.Column Record Msg
+editDropDown =
     Table.veryCustomColumn
         { name = ""
-        , viewData = editDropdownList
+        , viewData = editDropDownList
         , sorter = Table.unsortable
         }
 
@@ -183,6 +183,6 @@ dropDownItems record =
     ]
 
 
-editDropdownList : Record -> Table.HtmlDetails Msg
-editDropdownList record =
-    buildDropDown (dropDownItems record) record.dropDownOpen (onClick (DropdownToggle record))
+editDropDownList : Record -> Table.HtmlDetails Msg
+editDropDownList record =
+    buildDropDown (dropDownItems record) record.dropDownOpen (onClick (DropDownToggle record))

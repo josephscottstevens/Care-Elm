@@ -4,7 +4,7 @@ import Html exposing (Html, text, div, program, button, input, span, th, li, ul,
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name)
 import Html.Events exposing (onInput)
 import Char exposing (isLower, isUpper)
-import Utils.Dropdowns exposing (..)
+import Utils.DropDowns exposing (..)
 
 
 isAlpha : Char -> Bool

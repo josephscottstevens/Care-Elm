@@ -1,4 +1,4 @@
-module Utils.Dropdowns exposing (..)
+module Utils.DropDowns exposing (..)
 
 import Html exposing (Html, select, option, text)
 import Html.Attributes exposing (id, value)
