@@ -73,6 +73,7 @@ decodeModel =
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
         |> hardcoded emptyNewRecord
+        |> hardcoded False
 
 
 request : Http.Request Model

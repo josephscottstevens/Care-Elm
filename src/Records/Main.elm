@@ -4,7 +4,7 @@ import Records.Load exposing (..)
 import Records.Model exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option, span, a, ul, li, label, form, textarea, img)
 import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex, for, src, title)
-import Html.Events exposing (onInput, onClick, onInput, on)
+import Html.Events exposing (onInput, onClick, onInput, onSubmit)
 import Table
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
@@ -119,25 +119,50 @@ view model =
                 ]
 
         AddNew ->
-            div
-                [ class "form-horizontal" ]
-                [ dropInput input "Facility" model.addNewRecord.facility UpdateFacility False facilityDropDownSource
-                , dropInput input "Category" model.addNewRecord.category UpdateCategory True categoryDropDownSource
-                , textInput input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
-                , textInput input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
-                , textInput input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateSpecialtyOfVisit False
-                , textInput input "Comments" model.addNewRecord.comments UpdateComments True
-                , fileInput input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
-                , div [ class "form-group" ]
-                    [ div [ class fullWidth ]
-                        [ button [ type_ "submit", value "AddNewRecord", onClick (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
-                        , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
+            let
+                errors =
+                    formValidationErrors model
+
+                submitBtnType =
+                    if List.length errors > 0 then
+                        "button"
+                    else
+                        "submit"
+            in
+                div
+                    [ class "form-horizontal" ]
+                    [ displayErrors errors
+                    , dropInput input "Facility" model.addNewRecord.facility UpdateFacility False facilityDropDownSource
+                    , dropInput input "Category" model.addNewRecord.category UpdateCategory True categoryDropDownSource
+                    , textInput input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
+                    , textInput input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
+                    , textInput input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateSpecialtyOfVisit False
+                    , textInput input "Comments" model.addNewRecord.comments UpdateComments True
+                    , fileInput input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
+                    , div [ class "form-group" ]
+                        [ div [ class fullWidth ]
+                            [ button [ type_ "button", value "AddNewRecord", onSubmit (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
+                            , button [ type_ submitBtnType, onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
+                            ]
                         ]
                     ]
-                ]
 
         Error err ->
             div [] [ text (toString err) ]
+
+
+formValidationErrors : Model -> List String
+formValidationErrors record =
+    let
+        x =
+            0
+    in
+        [ "bob" ]
+
+
+displayErrors : List String -> Html Msg
+displayErrors errors =
+    div [] (List.map (\t -> div [] [ text t ]) errors)
 
 
 config : Table.Config Record Msg

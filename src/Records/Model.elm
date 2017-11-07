@@ -51,6 +51,7 @@ type alias Model =
     , tableState : Table.State
     , query : String
     , addNewRecord : NewRecord
+    , valid : Bool
     }
 
 
@@ -61,6 +62,7 @@ emptyModel =
     , tableState = Table.initialSort "dob"
     , query = ""
     , addNewRecord = emptyNewRecord
+    , valid = False
     }
 
 
