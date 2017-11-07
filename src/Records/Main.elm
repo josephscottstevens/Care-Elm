@@ -132,8 +132,10 @@ view model =
                 div
                     [ class "form-horizontal" ]
                     [ displayErrors errors
-                    , dropInput input "Facility" model.addNewRecord.facility UpdateFacility False facilityDropDownSource
-                    , dropInput input "Category" model.addNewRecord.category UpdateCategory True categoryDropDownSource
+                    , ejDropDownListSource "FacilityId" facilityDropDownSource
+                    , ejDropDownListSource "CategoryId" categoryDropDownSource
+                    , dropInput input "Facility" model.addNewRecord.facility UpdateFacility False
+                    , dropInput input "Category" model.addNewRecord.category UpdateCategory True
                     , textInput input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
                     , textInput input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
                     , textInput input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateSpecialtyOfVisit False
