@@ -8,7 +8,6 @@ import Html.Events exposing (onInput, onClick, onInput, onSubmit)
 import Table
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
-import Utils.DropDowns exposing (..)
 
 
 port viewFile : Int -> Cmd msg
