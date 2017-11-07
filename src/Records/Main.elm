@@ -121,7 +121,7 @@ view model =
         AddNew ->
             let
                 errors =
-                    formValidationErrors model
+                    formValidationErrors model.addNewRecord
 
                 submitBtnType =
                     if List.length errors > 0 then
@@ -151,19 +151,21 @@ view model =
             div [] [ text (toString err) ]
 
 
-formValidationErrors : Model -> List String
-formValidationErrors model =
+formValidationErrors : Records.Model.NewRecord -> List String
+formValidationErrors newRecord =
     let
-        categoryReq =
-            if model.addNewRecord.category == "" then
-                Just "Category is required"
-            else
-                Nothing
-
         errors =
-            [ categoryReq ]
+            [ required newRecord.category "Category" ]
     in
         errors |> List.filterMap identity
+
+
+required : String -> String -> Maybe String
+required str propName =
+    if str == "" then
+        Just (propName ++ " is required")
+    else
+        Nothing
 
 
 displayErrors : List String -> Html Msg
