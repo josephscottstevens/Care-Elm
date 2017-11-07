@@ -38,36 +38,28 @@ decodeRecord =
         |> hardcoded False
 
 
+type alias NewRecord =
+    { facility : String
+    , category : String
+    , dateTimeOfVisit : String
+    , doctorOfVisit : String
+    , specialityOfVisit : String
+    , comments : String
+    , recordFile : String
+    }
 
--- encodeRecord : Record -> Json.Encode.Value
--- encodeRecord record =
---     Json.Encode.object
---         [ ( "iD", Json.Encode.int <| record.iD )
---         , ( "date", Json.Encode.string <| record.date )
---         , ( "speciality", Json.Encode.maybe <| Json.Encode.string <| record.speciality )
---         , ( "comments", Json.Encode.string <| record.comments )
---         , ( "transferedTo", Json.Encode.string <| record.transferedTo )
---         , ( "transferedOn", Json.Encode.maybe <| encodeComplexType <| record.transferedOn )
---         , ( "patientID", Json.Encode.int <| record.patientID )
---         , ( "title", Json.Encode.maybe <| encodeComplexType <| record.title )
---         , ( "dateAccessioned", Json.Encode.maybe <| encodeComplexType <| record.dateAccessioned )
---         , ( "provider", Json.Encode.maybe <| encodeComplexType <| record.provider )
---         , ( "patientName", Json.Encode.maybe <| encodeComplexType <| record.patientName )
---         , ( "recordType", Json.Encode.string <| record.recordType )
---         , ( "dateOfAdmission", Json.Encode.maybe <| encodeComplexType <| record.dateOfAdmission )
---         , ( "dateOfDischarge", Json.Encode.maybe <| encodeComplexType <| record.dateOfDischarge )
---         , ( "dischargePhysician", Json.Encode.string <| record.dischargePhysician )
---         , ( "dischargeDiagnosis", Json.Encode.string <| record.dischargeDiagnosis )
---         , ( "hospitalizationServiceType", Json.Encode.string <| record.hospitalizationServiceType )
---         , ( "hospitalizationModel", Json.Encode.maybe <| encodeComplexType <| record.hospitalizationModel )
---         , ( "hospitalizationID", Json.Encode.maybe <| encodeComplexType <| record.hospitalizationID )
---         , ( "reportDate", Json.Encode.maybe <| encodeComplexType <| record.reportDate )
---         , ( "fileName", Json.Encode.string <| record.fileName )
---         , ( "canTransfer", Json.Encode.bool <| record.canTransfer )
---         , ( "facility", Json.Encode.maybe <| encodeComplexType <| record.facility )
---         , ( "facilityFax", Json.Encode.maybe <| encodeComplexType <| record.facilityFax )
---         , ( "recommendations", Json.Encode.maybe <| encodeComplexType <| record.recommendations )
---         ]
+
+encodeRecord : NewRecord -> Json.Encode.Value
+encodeRecord newRecord =
+    Json.Encode.object
+        [ ( "Facility", Json.Encode.string <| newRecord.facility )
+        , ( "Category", Json.Encode.string <| newRecord.category )
+        , ( "DateTimeOfVisit", Json.Encode.string <| newRecord.dateTimeOfVisit )
+        , ( "DoctorOfVisit", Json.Encode.string <| newRecord.doctorOfVisit )
+        , ( "SpecialityOfVisit", Json.Encode.string <| newRecord.specialityOfVisit )
+        , ( "Comments", Json.Encode.string <| newRecord.comments )
+        , ( "RecordFile", Json.Encode.string <| newRecord.recordFile )
+        ]
 
 
 decodeModel : Decoder Model
@@ -97,7 +89,7 @@ deleteRequest record =
 
 saveRequest : NewRecord -> Cmd Msg
 saveRequest newRecord =
-    Http.send DeleteCompleted <| Http.getString ("/People/AddNewRecord?recordModelString=" ++ (toString newRecord))
+    Http.send DeleteCompleted <| Http.getString ("/People/AddNewRecord?recordModelString=" ++ (toString (encodeRecord newRecord)))
 
 
 updateRecords : List Record -> Record -> List Record

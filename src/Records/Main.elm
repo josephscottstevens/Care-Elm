@@ -123,8 +123,8 @@ view model =
                 , inputCommon input "Category" model.addNewRecord.category UpdateCategory True
                 , inputCommon input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
                 , inputCommon input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
-                , inputCommon input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateFacility False
-                , inputCommon textarea "Comments" model.addNewRecord.comments UpdateFacility True
+                , inputCommon input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateSpecialtyOfVisit False
+                , inputCommon input "Comments" model.addNewRecord.comments UpdateComments True
                 , inputCommonWithType input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True <| "file"
                 , div [ class "form-group" ]
                     [ div [ class fullWidth ]
