@@ -1,4 +1,4 @@
-module Utils.CommonHtml exposing (dropInput, textInput, fileInput, fullWidth, labelWidth, controlWidth)
+module Utils.CommonHtml exposing (dropInput, textInput, fileInput, hideInput, fullWidth, labelWidth, controlWidth)
 
 import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name)
@@ -83,6 +83,11 @@ fileInput control displayText inputValue event isRequired =
 textInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
 textInput control displayText inputValue event isRequired =
     inputCommonWithType control displayText inputValue event isRequired "text" []
+
+
+hideInput : String -> String -> Html msg
+hideInput displayText inputValue =
+    input [ type_ "text", class "hide", idAttr displayText, nameAttr displayText, value inputValue ] [ text inputValue ]
 
 
 onChange : (String -> msg) -> Html.Attribute msg

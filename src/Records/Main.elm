@@ -150,6 +150,9 @@ view model =
                     , textInput input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateSpecialtyOfVisit False
                     , textInput input "Comments" model.addNewRecord.comments UpdateComments True
                     , fileInput input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
+                    , hideInput "FacilityID" "79"
+                    , hideInput "PatientID" "6676"
+                    , hideInput "Recordtype" "1"
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
                             [ button [ type_ submitBtnType, value "AddNewRecord", submitBtnEvent (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]

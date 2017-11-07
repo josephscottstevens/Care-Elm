@@ -49,22 +49,6 @@ type alias NewRecord =
     }
 
 
-encodeRecord : NewRecord -> Json.Encode.Value
-encodeRecord newRecord =
-    Json.Encode.object
-        [ ( "Facility", Json.Encode.string <| newRecord.facility )
-        , ( "Category", Json.Encode.string <| newRecord.category )
-        , ( "DateTimeOfVisit", Json.Encode.string <| newRecord.dateTimeOfVisit )
-        , ( "DoctorOfVisit", Json.Encode.string <| newRecord.doctorOfVisit )
-        , ( "SpecialityOfVisit", Json.Encode.string <| newRecord.specialityOfVisit )
-        , ( "Comments", Json.Encode.string <| newRecord.comments )
-        , ( "RecordFile", Json.Encode.string <| newRecord.recordFile )
-        , ( "FacilityID", Json.Encode.int 79 )
-        , ( "PatientID", Json.Encode.int 6676 )
-        , ( "FileName", Json.Encode.string "test.xlsx" )
-        ]
-
-
 decodeModel : Decoder Model
 decodeModel =
     decode Model
