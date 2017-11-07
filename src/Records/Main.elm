@@ -122,7 +122,7 @@ view model =
             div
                 [ class "form-horizontal" ]
                 [ inputCommonAsDropDown input "Facility" model.addNewRecord.facility UpdateFacility False facilityDropDownSource
-                , inputCommon input "Category" model.addNewRecord.category UpdateCategory True
+                , inputCommonAsDropDown input "Category" model.addNewRecord.category UpdateCategory True categoryDropDownSource
                 , inputCommon input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
                 , inputCommon input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
                 , inputCommon input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateSpecialtyOfVisit False

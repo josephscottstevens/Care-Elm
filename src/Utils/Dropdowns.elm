@@ -24,3 +24,10 @@ facilityDropDownSource =
     [ ( "1", "art" )
     , ( "2", "science" )
     ]
+
+
+categoryDropDownSource : List ( String, String )
+categoryDropDownSource =
+    [ ( "1", "art!" )
+    , ( "2", "science!" )
+    ]
