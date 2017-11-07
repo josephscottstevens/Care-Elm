@@ -135,7 +135,7 @@ view model =
                         onSubmit
 
                 validationErrorsDiv =
-                    if model.showValidationErrors == then
+                    if model.showValidationErrors == True then
                         displayErrors errors
                     else
                         div [] []
