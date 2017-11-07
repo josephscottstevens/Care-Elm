@@ -135,7 +135,7 @@ view model =
                         onSubmit
 
                 validationErrorsDiv =
-                    if model.showValidationErrors == True then
+                    if model.showValidationErrors == then
                         displayErrors errors
                     else
                         div [] []
@@ -152,8 +152,8 @@ view model =
                     , fileInput input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
-                            [ button [ type_ "button", value "AddNewRecord", submitBtnEvent (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
-                            , button [ type_ submitBtnType, onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
+                            [ button [ type_ submitBtnType, value "AddNewRecord", submitBtnEvent (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
+                            , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
                             ]
                         ]
                     ]

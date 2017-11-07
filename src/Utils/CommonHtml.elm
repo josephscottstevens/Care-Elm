@@ -70,10 +70,6 @@ inputCommonWithType control displayText inputValue event isRequired controlType 
         inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] [] ]
 
 
-
---inputCommonFormat isRequired displayText [ ejDropDownListSource (String.filter isAlpha displayText) dataSource ]
-
-
 dropInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> List ( String, String ) -> Html msg
 dropInput control displayText inputValue event isRequired dataSource =
     inputCommonWithType control displayText inputValue event isRequired "dropdown" dataSource
