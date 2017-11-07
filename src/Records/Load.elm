@@ -61,6 +61,7 @@ encodeRecord newRecord =
         , ( "RecordFile", Json.Encode.string <| newRecord.recordFile )
         , ( "FacilityID", Json.Encode.int 79 )
         , ( "PatientID", Json.Encode.int 6676 )
+        , ( "FileName", Json.Encode.string "test.xlsx" )
         ]
 
 
@@ -72,6 +73,8 @@ decodeModel =
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
         |> hardcoded emptyNewRecord
+        |> hardcoded "ImageInputId"
+        |> hardcoded Nothing
 
 
 request : Http.Request Model
