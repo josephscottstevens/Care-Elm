@@ -4,6 +4,7 @@ import Html exposing (Html, text, div, program, button, input, span, th, li, ul,
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name)
 import Html.Events exposing (onInput)
 import Char exposing (isLower, isUpper)
+import Utils.Dropdowns exposing (..)
 
 
 isAlpha : Char -> Bool
@@ -63,8 +64,15 @@ inputCommonWithType control displayText inputValue event isRequired controlType 
         inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", id "Files", name "Files" ] [] ]
     else if controlType == "textarea" then
         inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", id "Files", name "Files" ] [] ]
-    else
+    else if controlType == "text" then
         inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] [] ]
+    else
+        inputCommonFormat isRequired displayText [ (ejDropDownListSource (String.filter isAlpha displayText) []) ]
+
+
+inputCommonAsDropDown : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
+inputCommonAsDropDown control displayText inputValue event isRequired =
+    inputCommonWithType control displayText inputValue event isRequired <| "dropdown"
 
 
 inputCommon : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
