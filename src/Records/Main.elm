@@ -121,13 +121,13 @@ view model =
         AddNew ->
             div
                 [ class "form-horizontal" ]
-                [ inputCommonAsDropDown input "Facility" model.addNewRecord.facility UpdateFacility False facilityDropDownSource
-                , inputCommonAsDropDown input "Category" model.addNewRecord.category UpdateCategory True categoryDropDownSource
-                , inputCommon input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
-                , inputCommon input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
-                , inputCommon input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateSpecialtyOfVisit False
-                , inputCommon input "Comments" model.addNewRecord.comments UpdateComments True
-                , inputCommonAsFile input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
+                [ dropInput input "Facility" model.addNewRecord.facility UpdateFacility False facilityDropDownSource
+                , dropInput input "Category" model.addNewRecord.category UpdateCategory True categoryDropDownSource
+                , textInput input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
+                , textInput input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
+                , textInput input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateSpecialtyOfVisit False
+                , textInput input "Comments" model.addNewRecord.comments UpdateComments True
+                , fileInput input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
                 , div [ class "form-group" ]
                     [ div [ class fullWidth ]
                         [ button [ type_ "submit", value "AddNewRecord", onClick (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]

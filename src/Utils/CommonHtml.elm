@@ -1,4 +1,4 @@
-module Utils.CommonHtml exposing (inputCommonAsDropDown, inputCommon, inputCommonAsFile, fullWidth, labelWidth, controlWidth)
+module Utils.CommonHtml exposing (dropInput, textInput, fileInput, fullWidth, labelWidth, controlWidth)
 
 import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name)
@@ -70,16 +70,16 @@ inputCommonWithType control displayText inputValue event isRequired controlType 
         inputCommonFormat isRequired displayText [ (ejDropDownListSource (String.filter isAlpha displayText) dataSource) ]
 
 
-inputCommonAsDropDown : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> List ( String, String ) -> Html msg
-inputCommonAsDropDown control displayText inputValue event isRequired dataSource =
+dropInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> List ( String, String ) -> Html msg
+dropInput control displayText inputValue event isRequired dataSource =
     inputCommonWithType control displayText inputValue event isRequired "dropdown" dataSource
 
 
-inputCommonAsFile : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
-inputCommonAsFile control displayText inputValue event isRequired =
+fileInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
+fileInput control displayText inputValue event isRequired =
     inputCommonWithType control displayText inputValue event isRequired "file" []
 
 
-inputCommon : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
-inputCommon control displayText inputValue event isRequired =
+textInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
+textInput control displayText inputValue event isRequired =
     inputCommonWithType control displayText inputValue event isRequired "text" []
