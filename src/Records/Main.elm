@@ -152,12 +152,18 @@ view model =
 
 
 formValidationErrors : Model -> List String
-formValidationErrors record =
+formValidationErrors model =
     let
-        x =
-            0
+        categoryReq =
+            if model.addNewRecord.category == "" then
+                Just "Category is required"
+            else
+                Nothing
+
+        errors =
+            [ categoryReq ]
     in
-        [ "bob" ]
+        errors |> List.filterMap identity
 
 
 displayErrors : List String -> Html Msg
