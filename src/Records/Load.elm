@@ -73,8 +73,6 @@ decodeModel =
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
         |> hardcoded emptyNewRecord
-        |> hardcoded "ImageInputId"
-        |> hardcoded Nothing
 
 
 request : Http.Request Model
@@ -90,24 +88,6 @@ getRecords t =
 deleteRequest : Record -> Cmd Msg
 deleteRequest record =
     Http.send DeleteCompleted <| Http.getString ("/records/DeleteRecord?recordId=" ++ (toString record.id))
-
-
-savePlayerRequest : NewRecord -> Http.Request String
-savePlayerRequest player =
-    Http.request
-        { body = encodeRecord player |> Http.jsonBody
-        , expect = Http.expectString
-        , headers = []
-        , method = "POST"
-        , timeout = Nothing
-        , url = "/People/AddNewRecord"
-        , withCredentials = False
-        }
-
-
-saveRequest : NewRecord -> Cmd Msg
-saveRequest newRecord =
-    Http.send DeleteCompleted (savePlayerRequest newRecord)
 
 
 updateRecords : List Record -> Record -> List Record

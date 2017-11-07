@@ -1,7 +1,7 @@
 module Utils.CommonHtml exposing (..)
 
 import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
-import Html.Attributes exposing (style, class, type_, id, value, tabindex, for)
+import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name)
 import Html.Events exposing (onInput)
 import Char exposing (isLower, isUpper)
 
@@ -19,6 +19,11 @@ forId str =
 idAttr : String -> Html.Attribute msg
 idAttr str =
     id (String.filter isAlpha str)
+
+
+nameAttr : String -> Html.Attribute msg
+nameAttr str =
+    name (String.filter isAlpha str)
 
 
 fullWidth : String
@@ -44,11 +49,17 @@ inputCommonWithType control displayText inputValue event isRequired controlType 
                 " required"
             else
                 ""
+
+        t =
+            if controlType == "file" then
+                tabindex 0
+            else
+                value inputValue
     in
         div [ class "form-group" ]
             [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr), forId displayText ] [ text displayText ]
             , div [ class controlWidth ]
-                [ control [ type_ controlType, class "e-textbox", idAttr displayText, value inputValue, onInput event ] [] ]
+                [ control [ type_ controlType, class "e-textbox", idAttr displayText, nameAttr displayText, t, onInput event ] [] ]
             ]
 
 

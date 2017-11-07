@@ -4,18 +4,6 @@ import Table
 import Http
 
 
-type alias ImagePortData =
-    { contents : String
-    , filename : String
-    }
-
-
-type alias Image =
-    { contents : String
-    , filename : String
-    }
-
-
 type Msg
     = Load (Result Http.Error Model)
     | AddNewStart
@@ -34,8 +22,6 @@ type Msg
     | UpdateSpecialtyOfVisit String
     | UpdateComments String
     | UpdateRecordFile String
-    | ImageSelected
-    | ImageRead ImagePortData
     | Cancel
 
 
@@ -69,8 +55,6 @@ type alias Model =
     , tableState : Table.State
     , query : String
     , addNewRecord : NewRecord
-    , id : String
-    , mImage : Maybe Image
     }
 
 
@@ -81,8 +65,6 @@ emptyModel =
     , tableState = Table.initialSort "dob"
     , query = ""
     , addNewRecord = emptyNewRecord
-    , id = "ImageInputId"
-    , mImage = Nothing
     }
 
 

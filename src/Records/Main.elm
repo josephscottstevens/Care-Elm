@@ -29,16 +29,12 @@ port updateDateTimeOfVisit : (String -> msg) -> Sub msg
 port fileSelected : String -> Cmd msg
 
 
-port fileContentRead : (ImagePortData -> msg) -> Sub msg
-
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ updateFacility UpdateFacility
         , updateCategory UpdateCategory
         , updateDateTimeOfVisit UpdateDateTimeOfVisit
-        , fileContentRead ImageRead
         ]
 
 
@@ -72,7 +68,7 @@ update msg model =
             ( model, deleteRequest record )
 
         Save newRecord ->
-            ( model, saveRequest newRecord )
+            ( model, Cmd.none )
 
         DropdownToggle record ->
             let
@@ -82,7 +78,7 @@ update msg model =
                 { model | records = updateRecords model.records newRecord } ! []
 
         DeleteCompleted (Ok t) ->
-            ( model, init )
+            ( model, Cmd.none )
 
         DeleteCompleted (Err t) ->
             { model | state = Error t } ! []
@@ -111,26 +107,6 @@ update msg model =
         Cancel ->
             { model | state = Grid } ! []
 
-        ImageSelected ->
-            ( model, fileSelected model.id )
-
-        ImageRead data ->
-            let
-                newImage =
-                    { contents = data.contents
-                    , filename = data.filename
-                    }
-
-                t =
-                    model.addNewRecord
-
-                updatedNewRecord =
-                    { t | recordFile = data.contents }
-            in
-                ( { model | mImage = Just newImage, addNewRecord = updatedNewRecord }
-                , Cmd.none
-                )
-
 
 view : Model -> Html Msg
 view model =
@@ -140,59 +116,31 @@ view model =
 
         Grid ->
             div []
-                [ button [ class "btn btn-default", onClick AddNewStart ] [ text "New Record" ]
+                [ button [ type_ "button", class "btn btn-default", onClick AddNewStart ] [ text "New Record" ]
                 , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view config model.tableState model.records ]
                 ]
 
         AddNew ->
-            let
-                imagePreview =
-                    case model.mImage of
-                        Just i ->
-                            viewImagePreview i
-
-                        Nothing ->
-                            text "no image"
-            in
-                div [ class "imageWrapper" ]
-                    [ input
-                        [ type_ "file"
-                        , id model.id
-                        , on "change"
-                            (Json.Decode.succeed ImageSelected)
-                        ]
-                        []
-                    , imagePreview
-                    , form
-                        [ class "form-horizontal" ]
-                        [ inputCommon input "Facility" model.addNewRecord.facility UpdateFacility False
-                        , inputCommon input "Category" model.addNewRecord.category UpdateCategory True
-                        , inputCommon input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
-                        , inputCommon input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
-                        , inputCommon input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateSpecialtyOfVisit False
-                        , inputCommon input "Comments" model.addNewRecord.comments UpdateComments True
-                        , inputCommonWithType input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True <| "file"
-                        , div [ class "form-group" ]
-                            [ div [ class fullWidth ]
-                                [ button [ type_ "button", onClick (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
-                                , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
-                                ]
-                            ]
+            div
+                [ class "form-horizontal" ]
+                [ inputCommon input "Facility" model.addNewRecord.facility UpdateFacility False
+                , inputCommon input "Category" model.addNewRecord.category UpdateCategory True
+                , inputCommon input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
+                , inputCommon input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
+                , inputCommon input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateSpecialtyOfVisit False
+                , inputCommon input "Comments" model.addNewRecord.comments UpdateComments True
+                , inputCommonWithType input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True <| "file"
+                , div [ class "form-group" ]
+                    [ div [ class fullWidth ]
+                        [ button [ type_ "submit", value "AddNewRecord", onClick (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
+                        , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
                         ]
                     ]
+                ]
 
         Error err ->
             div [] [ text (toString err) ]
-
-
-viewImagePreview : Image -> Html Msg
-viewImagePreview image =
-    img
-        [ src image.contents
-        , title image.filename
-        ]
-        []
 
 
 config : Table.Config Record Msg
