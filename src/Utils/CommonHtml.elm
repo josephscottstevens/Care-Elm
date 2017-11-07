@@ -61,6 +61,8 @@ inputCommonWithType : (List (Html.Attribute msg) -> List a -> Html msg) -> Strin
 inputCommonWithType control displayText inputValue event isRequired controlType =
     if controlType == "file" then
         inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", id "Files", name "Files" ] [] ]
+    else if controlType == "textarea" then
+        inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", id "Files", name "Files" ] [] ]
     else
         inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] [] ]
 

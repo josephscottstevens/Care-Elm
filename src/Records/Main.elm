@@ -8,6 +8,7 @@ import Html.Events exposing (onInput, onClick, onInput, on)
 import Table
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
+import Utils.Dropdowns exposing (..)
 
 
 port viewFile : Int -> Cmd msg
@@ -120,7 +121,8 @@ view model =
         AddNew ->
             div
                 [ class "form-horizontal" ]
-                [ inputCommon input "Facility" model.addNewRecord.facility UpdateFacility False
+                [ ejDropDownListSource "FacilityDropDownId" []
+                , inputCommon input "Facility" model.addNewRecord.facility UpdateFacility False
                 , inputCommon input "Category" model.addNewRecord.category UpdateCategory True
                 , inputCommon input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
                 , inputCommon input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
