@@ -41,6 +41,22 @@ controlWidth =
     "col-sm-8 col-md-5 col-lg-4"
 
 
+inputCommonFormat : Bool -> String -> List (Html msg) -> Html msg
+inputCommonFormat isRequired displayText t =
+    let
+        isRequiredStr =
+            if isRequired then
+                " required"
+            else
+                ""
+    in
+        div [ class "form-group" ]
+            [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr), forId displayText ] [ text displayText ]
+            , div [ class controlWidth ]
+                t
+            ]
+
+
 inputCommonWithType : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> String -> Html msg
 inputCommonWithType control displayText inputValue event isRequired controlType =
     let

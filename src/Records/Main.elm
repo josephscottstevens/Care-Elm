@@ -8,7 +8,6 @@ import Html.Events exposing (onInput, onClick, onInput, on)
 import Table
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
-import Json.Decode
 
 
 port viewFile : Int -> Cmd msg
@@ -24,9 +23,6 @@ port updateCategory : (String -> msg) -> Sub msg
 
 
 port updateDateTimeOfVisit : (String -> msg) -> Sub msg
-
-
-port fileSelected : String -> Cmd msg
 
 
 subscriptions : Model -> Sub Msg
