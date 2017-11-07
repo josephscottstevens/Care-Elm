@@ -59,24 +59,10 @@ inputCommonFormat isRequired displayText t =
 
 inputCommonWithType : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> String -> Html msg
 inputCommonWithType control displayText inputValue event isRequired controlType =
-    let
-        isRequiredStr =
-            if isRequired then
-                " required"
-            else
-                ""
-
-        t =
-            if controlType == "file" then
-                tabindex 0
-            else
-                value inputValue
-    in
-        div [ class "form-group" ]
-            [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr), forId displayText ] [ text displayText ]
-            , div [ class controlWidth ]
-                [ control [ type_ controlType, class "e-textbox", idAttr displayText, nameAttr displayText, t, onInput event ] [] ]
-            ]
+    if controlType == "file" then
+        inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", id "Files", name "Files" ] [] ]
+    else
+        inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] [] ]
 
 
 inputCommon : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
