@@ -16,6 +16,9 @@ port viewFile : Int -> Cmd msg
 port initSyncfusionControls : String -> Cmd msg
 
 
+port submitForm : String -> Cmd msg
+
+
 port updateFacility : (String -> msg) -> Sub msg
 
 
@@ -64,7 +67,14 @@ update msg model =
             ( model, deleteRequest record )
 
         Save newRecord ->
-            ( { model | showValidationErrors = True }, Cmd.none )
+            let
+                action =
+                    if List.length (formValidationErrors model.addNewRecord) > 0 then
+                        Cmd.none
+                    else
+                        submitForm ""
+            in
+                ( { model | showValidationErrors = True }, action )
 
         DropDownToggle record ->
             let
@@ -128,12 +138,6 @@ view model =
                     else
                         "submit"
 
-                submitBtnEvent =
-                    if List.length errors > 0 then
-                        onClick
-                    else
-                        onSubmit
-
                 validationErrorsDiv =
                     if model.showValidationErrors == True then
                         displayErrors errors
@@ -155,7 +159,7 @@ view model =
                     , hideInput "Recordtype" "1"
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
-                            [ button [ type_ submitBtnType, value "AddNewRecord", submitBtnEvent (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
+                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
                             , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
                             ]
                         ]
