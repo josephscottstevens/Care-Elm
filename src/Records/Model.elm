@@ -8,7 +8,7 @@ type Msg
     = Load (Result Http.Error Model)
     | AddNewStart
     | SetTableState Table.State
-    | DropDownToggle Record
+    | DropDownToggle DropDownState
     | Reset
     | Save NewRecord
     | Delete Record
@@ -52,6 +52,7 @@ type alias Model =
     , query : String
     , addNewRecord : NewRecord
     , showValidationErrors : Bool
+    , dropDownState : DropDownState
     }
 
 
@@ -63,6 +64,7 @@ emptyModel =
     , query = ""
     , addNewRecord = emptyNewRecord
     , showValidationErrors = False
+    , dropDownState = emptyDropDownState
     }
 
 
@@ -114,5 +116,21 @@ type alias Record =
     , facility : Maybe String
     , facilityFax : Maybe String
     , recommendations : Maybe String
-    , dropDownOpen : Bool
+    }
+
+
+type alias DropDownState =
+    { x : Int
+    , y : Int
+    , rowId : String
+    , showEditMenu : Bool
+    }
+
+
+emptyDropDownState : DropDownState
+emptyDropDownState =
+    { x = -500
+    , y = -500
+    , rowId = ""
+    , showEditMenu = False
     }

@@ -1,6 +1,5 @@
 module Records.Load exposing (..)
 
-import Json.Encode
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
@@ -35,7 +34,6 @@ decodeRecord =
         |> required "Facility" (maybe string)
         |> required "FacilityFax" (maybe string)
         |> required "Recommendations" (maybe string)
-        |> hardcoded False
 
 
 type alias NewRecord =
@@ -58,6 +56,7 @@ decodeModel =
         |> hardcoded ""
         |> hardcoded emptyNewRecord
         |> hardcoded False
+        |> hardcoded emptyDropDownState
 
 
 request : Http.Request Model

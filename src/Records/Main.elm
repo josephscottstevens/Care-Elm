@@ -86,12 +86,8 @@ update msg model =
         SaveCompleted str ->
             ( emptyModel, getRecords Load )
 
-        DropDownToggle record ->
-            let
-                newRecord =
-                    { record | dropDownOpen = not record.dropDownOpen }
-            in
-                { model | records = updateRecords model.records newRecord } ! []
+        DropDownToggle dropState ->
+            { model | dropDownState = dropState } ! []
 
         DeleteCompleted (Ok t) ->
             ( emptyModel, Cmd.batch [ getRecords Load, deleteComplete "Record was deleted successfully" ] )
@@ -215,7 +211,6 @@ config =
             , Table.stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
             , Table.stringColumn "Speciality" (\t -> defaultString t.speciality)
             , Table.stringColumn "Comments" (\t -> defaultString t.comments)
-            , editDropDown
             ]
         , customizations = defaultCustomizations
         }
@@ -241,6 +236,10 @@ editDropDown =
         }
 
 
+
+--public
+
+
 dropDownItems : Record -> List ( String, String, Html.Attribute Msg )
 dropDownItems record =
     [ ( "e-contextedit", "View File", onClick (ViewFile record.id) )
@@ -250,4 +249,45 @@ dropDownItems record =
 
 editDropDownList : Record -> Table.HtmlDetails Msg
 editDropDownList record =
-    buildDropDown (dropDownItems record) record.dropDownOpen (onClick (DropDownToggle record))
+    buildDropDown (dropDownItems record) record.id
+
+
+
+-- private
+
+
+dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
+dropDownMenuItem ( iconClass, displayText, event ) =
+    li [ class "e-content e-list" ]
+        [ a [ class "e-menulink", event ]
+            [ text displayText
+            , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
+            ]
+        ]
+
+
+dropDownMenu : List ( String, String, Html.Attribute msg ) -> Html msg
+dropDownMenu dropDownMenuItems =
+    let
+        dropDownMenuStyle =
+            [ ( "margin-top", "-12px" )
+            , ( "margin-right", "21px" )
+            , ( "z-index", "5000" )
+            , ( "position", "relative" )
+            , ( "display", "none" )
+            ]
+    in
+        div [ class "e-menu-wrap", style dropDownMenuStyle ]
+            [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
+                (List.map dropDownMenuItem dropDownMenuItems)
+            ]
+
+
+buildDropDown : List ( String, String, Html.Attribute msg ) -> data -> Table.HtmlDetails msg
+buildDropDown dropDownItems rowId =
+    Table.HtmlDetails []
+        [ div [ style [ ( "text-align", "right" ) ] ]
+            [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown", dataTarget (toString rowId) ] []
+            , dropDownMenu dropDownItems
+            ]
+        ]
