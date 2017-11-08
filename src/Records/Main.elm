@@ -13,7 +13,7 @@ import Utils.CommonHtml exposing (..)
 port viewFile : Int -> Cmd msg
 
 
-port initSyncfusionControls : String -> Cmd msg
+port initSyncfusionControls : List DropDownItem -> Cmd msg
 
 
 port deleteComplete : String -> Cmd msg
@@ -57,7 +57,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AddNewStart ->
-            ( { model | state = AddNew }, initSyncfusionControls "" )
+            ( { model | state = AddNew }, initSyncfusionControls model.facilities )
 
         Load (Ok t) ->
             { t | state = Grid } ! []
@@ -74,8 +74,8 @@ update msg model =
         ViewFile recordId ->
             ( model, viewFile recordId )
 
-        Delete record ->
-            ( model, deleteRequest record )
+        Delete rowId ->
+            ( model, deleteRequest rowId )
 
         Save newRecord ->
             let

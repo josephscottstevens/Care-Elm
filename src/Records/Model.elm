@@ -45,9 +45,16 @@ type SortMode
     | SortDesc
 
 
+type alias DropDownItem =
+    { id : Maybe Int
+    , name : String
+    }
+
+
 type alias Model =
     { state : ModelState
     , records : List Record
+    , facilities : List DropDownItem
     , tableState : Table.State
     , query : String
     , addNewRecord : NewRecord
@@ -60,6 +67,7 @@ emptyModel : Model
 emptyModel =
     { state = Initial
     , records = []
+    , facilities = []
     , tableState = Table.initialSort "dob"
     , query = ""
     , addNewRecord = emptyNewRecord

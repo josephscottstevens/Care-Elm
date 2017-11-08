@@ -36,11 +36,19 @@ decodeRecord =
         |> required "Recommendations" (maybe string)
 
 
+decodeDropDownItem : Decoder DropDownItem
+decodeDropDownItem =
+    decode DropDownItem
+        |> required "Id" (maybe int)
+        |> required "Name" (string)
+
+
 decodeModel : Decoder Model
 decodeModel =
     decode Model
         |> hardcoded Initial
         |> required "list" (list decodeRecord)
+        |> required "facilityDropdown" (list decodeDropDownItem)
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
         |> hardcoded emptyNewRecord
@@ -50,7 +58,7 @@ decodeModel =
 
 request : Http.Request Model
 request =
-    Http.get "/people/PatientRecordsGrid?patientId=6676" decodeModel
+    Http.get "/People/PatientRecordsGrid?patientId=6676" decodeModel
 
 
 getRecords : (Result Http.Error Model -> msg) -> Cmd msg
@@ -60,7 +68,7 @@ getRecords t =
 
 deleteRequest : Int -> Cmd Msg
 deleteRequest rowId =
-    Http.send DeleteCompleted <| Http.getString ("/records/DeleteRecord?recordId=" ++ (toString rowId))
+    Http.send DeleteCompleted <| Http.getString ("/People/DeleteRecord?recordId=" ++ (toString rowId))
 
 
 updateRecords : List Record -> Record -> List Record
