@@ -16,6 +16,9 @@ port viewFile : Int -> Cmd msg
 port initSyncfusionControls : String -> Cmd msg
 
 
+port deleteComplete : String -> Cmd msg
+
+
 port submitForm : Records.Model.NewRecord -> Cmd msg
 
 
@@ -91,7 +94,7 @@ update msg model =
                 { model | records = updateRecords model.records newRecord } ! []
 
         DeleteCompleted (Ok t) ->
-            ( model, Cmd.none )
+            ( emptyModel, Cmd.batch [ getRecords Load, deleteComplete "Record was deleted successfully" ] )
 
         DeleteCompleted (Err t) ->
             { model | state = Error t } ! []

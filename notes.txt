@@ -25,6 +25,10 @@ perhaps... node_modules folder is needed... or the step to get that there?
 
 
 TODO:
+After viewing file, close dropdown
+Delete some of the bad data in the grid
+Make sure filename is getting saved
+View record is returning... ASH now? Frig, is it because of the darn Form post nonse, GRR!
 Template the other Record types
 Populate Facility dropdown with real data
 Populate Category data with js data
