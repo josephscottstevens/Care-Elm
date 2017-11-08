@@ -58,7 +58,7 @@ decodeModel =
 
 request : Http.Request Model
 request =
-    Http.get "/People/PatientRecordsGrid?patientId=6676" decodeModel
+    Http.get "/People/PatientRecordsGrid?patientId=6676&recordTypeId=1" decodeModel
 
 
 getRecords : (Result Http.Error Model -> msg) -> Cmd msg

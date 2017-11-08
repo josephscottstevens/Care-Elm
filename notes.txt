@@ -25,15 +25,15 @@ perhaps... node_modules folder is needed... or the step to get that there?
 
 
 TODO:
-Populate Category data with js data
-Populate Facility dropdown with real data
+Validate Add new record functionality
+	Make sure filename is getting saved
 Template the other Record types
-After viewing file, close dropdown
-Make sure filename is getting saved
+Facility... and another field should already be populated?
+Fix hard coded values (patient id, record type, facilityID)
+
 Display Date Collected with time
 Make sure to fix dates on save \ load
 When clicking delete, confirmation message should appear first
-When you click away from dropdown menu, it doesn't close, you have to click the button again
 Add the other dropdown options
 
 Filter above each header
@@ -41,7 +41,9 @@ Don't sort on header click :/ oh my
 Place sort icon next to header
 Perhaps show default sorted?
 
+
 LOW TODO:
+Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super duplicated stuff?)
 Have active row highlight?
 The whole form post to javascript to ports thing is a mess, but meh.
 See if I can set the rectangle to be more intelligently positioned (right now it has to do all the offsets for stuff)
