@@ -5,6 +5,7 @@ import Json.Decode.Pipeline exposing (..)
 import Http
 import Records.Model exposing (..)
 import Table
+import Utils.CommonTypes exposing (..)
 
 
 decodeRecord : Decoder Record
@@ -40,7 +41,7 @@ decodeDropDownItem : Decoder DropDownItem
 decodeDropDownItem =
     decode DropDownItem
         |> required "Id" (maybe int)
-        |> required "Name" (string)
+        |> required "Name" string
 
 
 decodeModel : Decoder Model
@@ -49,6 +50,8 @@ decodeModel =
         |> hardcoded Initial
         |> required "list" (list decodeRecord)
         |> required "facilityDropdown" (list decodeDropDownItem)
+        |> required "patientId" int
+        |> required "recordTypeId" int
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
         |> hardcoded emptyNewRecord
@@ -56,14 +59,14 @@ decodeModel =
         |> hardcoded emptyDropDownState
 
 
-request : Http.Request Model
-request =
-    Http.get "/People/PatientRecordsGrid?patientId=6676&recordTypeId=1" decodeModel
+request : Int -> Int -> Http.Request Model
+request patientId recordTypeId =
+    Http.get ("/People/PatientRecordsGrid?patientId=" ++ (toString patientId) ++ "&recordTypeId=" ++ (toString recordTypeId)) decodeModel
 
 
-getRecords : (Result Http.Error Model -> msg) -> Cmd msg
-getRecords t =
-    Http.send t request
+getRecords : Int -> Int -> (Result Http.Error Model -> msg) -> Cmd msg
+getRecords patientId recordTypeId t =
+    Http.send t (request patientId recordTypeId)
 
 
 deleteRequest : Int -> Cmd Msg

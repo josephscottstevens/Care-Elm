@@ -2,6 +2,7 @@ module Records.Model exposing (..)
 
 import Table
 import Http
+import Utils.CommonTypes exposing (..)
 
 
 type Msg
@@ -45,16 +46,12 @@ type SortMode
     | SortDesc
 
 
-type alias DropDownItem =
-    { id : Maybe Int
-    , name : String
-    }
-
-
 type alias Model =
     { state : ModelState
     , records : List Record
     , facilities : List DropDownItem
+    , patientId : Int
+    , recordTypeId : Int
     , tableState : Table.State
     , query : String
     , addNewRecord : NewRecord
@@ -68,6 +65,8 @@ emptyModel =
     { state = Initial
     , records = []
     , facilities = []
+    , patientId = 0
+    , recordTypeId = 0
     , tableState = Table.initialSort "dob"
     , query = ""
     , addNewRecord = emptyNewRecord
@@ -141,4 +140,10 @@ emptyDropDownState =
     , y = 500.0
     , rowId = 0
     , showEditMenu = False
+    }
+
+
+type alias SyncFusionMessage =
+    { facilities : List DropDownItem
+    , categoryId : Int
     }

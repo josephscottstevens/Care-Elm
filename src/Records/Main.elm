@@ -8,12 +8,13 @@ import Html.Events exposing (onInput, onClick, onInput, onSubmit)
 import Table
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
+import Utils.CommonTypes exposing (..)
 
 
 port viewFile : Int -> Cmd msg
 
 
-port initSyncfusionControls : List DropDownItem -> Cmd msg
+port initSyncfusionControls : SyncFusionMessage -> Cmd msg
 
 
 port deleteComplete : String -> Cmd msg
@@ -48,16 +49,21 @@ subscriptions model =
         ]
 
 
-init : Cmd Msg
-init =
-    getRecords Load
+init : Flags -> Cmd Msg
+init flag =
+    case flag.recordType of
+        Just recType ->
+            (getRecords flag.patientId recType) Load
+
+        Nothing ->
+            Cmd.none
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AddNewStart ->
-            ( { model | state = AddNew }, initSyncfusionControls model.facilities )
+            ( { model | state = AddNew }, initSyncfusionControls (SyncFusionMessage model.facilities model.recordTypeId) )
 
         Load (Ok t) ->
             { t | state = Grid } ! []
@@ -88,13 +94,13 @@ update msg model =
                 ( { model | showValidationErrors = True }, action )
 
         SaveCompleted str ->
-            ( emptyModel, getRecords Load )
+            ( emptyModel, (getRecords model.patientId model.recordTypeId) Load )
 
         DropDownToggle dropState ->
             { model | dropDownState = dropState } ! []
 
         DeleteCompleted (Ok t) ->
-            ( emptyModel, Cmd.batch [ getRecords Load, deleteComplete "Record was deleted successfully" ] )
+            ( emptyModel, Cmd.batch [ (getRecords model.patientId model.recordTypeId) Load, deleteComplete "Record was deleted successfully" ] )
 
         DeleteCompleted (Err t) ->
             { model | state = Error t } ! []

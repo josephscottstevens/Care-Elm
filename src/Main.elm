@@ -4,14 +4,10 @@ import Model exposing (..)
 import Html exposing (div, text)
 import Billing.Main as Billing
 import Records.Main as Records
+import Utils.CommonTypes exposing (..)
 
 
 port openPage : (String -> msg) -> Sub msg
-
-
-type alias Flags =
-    { pageFlag : String
-    }
 
 
 subscriptions : Model -> Sub Msg
@@ -24,7 +20,7 @@ init flags =
     if flags.pageFlag == "billing" then
         ( { emptyModel | page = BillingPage }, Cmd.map BillingMsg Billing.init )
     else if flags.pageFlag == "records" then
-        ( { emptyModel | page = RecordsPage }, Cmd.map RecordsMsg Records.init )
+        ( { emptyModel | page = RecordsPage }, Cmd.map RecordsMsg (Records.init flags) )
     else
         ( emptyModel, Cmd.none )
 
