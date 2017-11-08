@@ -11,10 +11,10 @@ type Msg
     | DropDownToggle DropDownState
     | Reset
     | Save NewRecord
-    | Delete Record
+    | ViewFile Int
+    | Delete Int
     | DeleteCompleted (Result Http.Error String)
     | SaveCompleted String
-    | ViewFile Int
     | UpdateFacility String
     | UpdateCategory String
     | UpdateDateTimeOfVisit String
@@ -122,7 +122,7 @@ type alias Record =
 type alias DropDownState =
     { x : Int
     , y : Int
-    , rowId : String
+    , rowId : Int
     , showEditMenu : Bool
     }
 
@@ -131,6 +131,6 @@ emptyDropDownState : DropDownState
 emptyDropDownState =
     { x = -500
     , y = -500
-    , rowId = ""
+    , rowId = 0
     , showEditMenu = False
     }

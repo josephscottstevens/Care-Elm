@@ -153,6 +153,7 @@ view model =
                 div
                     [ class "form-horizontal" ]
                     [ validationErrorsDiv
+                    , editDropDown (dropDownItems model.dropDownState.rowId) model.dropDownState
                     , textInput input "Facility" model.addNewRecord.facility UpdateFacility False
                     , textInput input "Category" model.addNewRecord.category UpdateCategory True
                     , textInput input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
@@ -227,33 +228,42 @@ defaultCustomizations =
     }
 
 
-editDropDown : Table.Column Record Msg
-editDropDown =
-    Table.veryCustomColumn
-        { name = ""
-        , viewData = editDropDownList
-        , sorter = Table.unsortable
-        }
-
-
 
 --public
 
 
-dropDownItems : Record -> List ( String, String, Html.Attribute Msg )
-dropDownItems record =
-    [ ( "e-contextedit", "View File", onClick (ViewFile record.id) )
-    , ( "e-contextdelete", "Delete", onClick (Delete record) )
+dropDownItems : Int -> List ( String, String, Html.Attribute Msg )
+dropDownItems rowId =
+    [ ( "e-contextedit", "View File", onClick (ViewFile rowId) )
+    , ( "e-contextdelete", "Delete", onClick (Delete rowId) )
     ]
-
-
-editDropDownList : Record -> Table.HtmlDetails Msg
-editDropDownList record =
-    buildDropDown (dropDownItems record) record.id
 
 
 
 -- private
+
+
+editDropDown : List ( String, String, Html.Attribute msg ) -> DropDownState -> Html msg
+editDropDown dropDownItems dropDownState =
+    div [ style [ ( "text-align", "right" ) ] ]
+        [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown", dataTarget (toString dropDownState.rowId) ] []
+        , div [ class "e-menu-wrap", dropDownMenuStyle dropDownState ]
+            [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
+                (List.map dropDownMenuItem dropDownItems)
+            ]
+        ]
+
+
+dropDownMenuStyle : DropDownState -> Html.Attribute msg
+dropDownMenuStyle dropDownState =
+    style
+        [ ( "top", toString dropDownState.x ++ "px" )
+        , ( "left", toString dropDownState.y ++ "px" )
+        , ( "z-index", "5000" )
+        , ( "position", "absolute" )
+
+        --, ( "display", "none" )
+        ]
 
 
 dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
@@ -262,32 +272,5 @@ dropDownMenuItem ( iconClass, displayText, event ) =
         [ a [ class "e-menulink", event ]
             [ text displayText
             , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
-            ]
-        ]
-
-
-dropDownMenu : List ( String, String, Html.Attribute msg ) -> Html msg
-dropDownMenu dropDownMenuItems =
-    let
-        dropDownMenuStyle =
-            [ ( "margin-top", "-12px" )
-            , ( "margin-right", "21px" )
-            , ( "z-index", "5000" )
-            , ( "position", "relative" )
-            , ( "display", "none" )
-            ]
-    in
-        div [ class "e-menu-wrap", style dropDownMenuStyle ]
-            [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
-                (List.map dropDownMenuItem dropDownMenuItems)
-            ]
-
-
-buildDropDown : List ( String, String, Html.Attribute msg ) -> data -> Table.HtmlDetails msg
-buildDropDown dropDownItems rowId =
-    Table.HtmlDetails []
-        [ div [ style [ ( "text-align", "right" ) ] ]
-            [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown", dataTarget (toString rowId) ] []
-            , dropDownMenu dropDownItems
             ]
         ]

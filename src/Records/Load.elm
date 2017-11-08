@@ -69,9 +69,9 @@ getRecords t =
     Http.send t request
 
 
-deleteRequest : Record -> Cmd Msg
-deleteRequest record =
-    Http.send DeleteCompleted <| Http.getString ("/records/DeleteRecord?recordId=" ++ (toString record.id))
+deleteRequest : Int -> Cmd Msg
+deleteRequest rowId =
+    Http.send DeleteCompleted <| Http.getString ("/records/DeleteRecord?recordId=" ++ (toString rowId))
 
 
 updateRecords : List Record -> Record -> List Record
