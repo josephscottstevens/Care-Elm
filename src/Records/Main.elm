@@ -19,7 +19,7 @@ port initSyncfusionControls : String -> Cmd msg
 port deleteComplete : String -> Cmd msg
 
 
-port submitForm : Records.Model.NewRecord -> Cmd msg
+port submitForm : NewRecord -> Cmd msg
 
 
 port saveComplete : (String -> msg) -> Sub msg
@@ -34,6 +34,9 @@ port updateCategory : (String -> msg) -> Sub msg
 port updateDateTimeOfVisit : (String -> msg) -> Sub msg
 
 
+port dropDownToggle : (DropDownState -> msg) -> Sub msg
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
@@ -41,6 +44,7 @@ subscriptions model =
         , updateCategory UpdateCategory
         , updateDateTimeOfVisit UpdateDateTimeOfVisit
         , saveComplete SaveCompleted
+        , dropDownToggle DropDownToggle
         ]
 
 
@@ -129,6 +133,7 @@ view model =
         Grid ->
             div []
                 [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
+                , editDropDownDiv (dropDownItems model.dropDownState.rowId) model.dropDownState
                 , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view config model.tableState model.records ]
                 ]
@@ -153,7 +158,6 @@ view model =
                 div
                     [ class "form-horizontal" ]
                     [ validationErrorsDiv
-                    , editDropDown (dropDownItems model.dropDownState.rowId) model.dropDownState
                     , textInput input "Facility" model.addNewRecord.facility UpdateFacility False
                     , textInput input "Category" model.addNewRecord.category UpdateCategory True
                     , textInput input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
@@ -176,7 +180,7 @@ view model =
             div [] [ text (toString err) ]
 
 
-formValidationErrors : Records.Model.NewRecord -> List String
+formValidationErrors : NewRecord -> List String
 formValidationErrors newRecord =
     let
         errors =
@@ -212,6 +216,7 @@ config =
             , Table.stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
             , Table.stringColumn "Speciality" (\t -> defaultString t.speciality)
             , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+            , editButton
             ]
         , customizations = defaultCustomizations
         }
@@ -243,27 +248,48 @@ dropDownItems rowId =
 -- private
 
 
-editDropDown : List ( String, String, Html.Attribute msg ) -> DropDownState -> Html msg
-editDropDown dropDownItems dropDownState =
-    div [ style [ ( "text-align", "right" ) ] ]
-        [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown", dataTarget (toString dropDownState.rowId) ] []
-        , div [ class "e-menu-wrap", dropDownMenuStyle dropDownState ]
-            [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
-                (List.map dropDownMenuItem dropDownItems)
+editButton : Table.Column Record Msg
+editButton =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData = editButtonDiv
+        , sorter = Table.unsortable
+        }
+
+
+editButtonDiv : Record -> Table.HtmlDetails Msg
+editButtonDiv record =
+    Table.HtmlDetails []
+        [ div [ style [ ( "text-align", "right" ) ] ]
+            [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown", dataTarget (toString record.id) ] []
             ]
+        ]
+
+
+editDropDownDiv : List ( String, String, Html.Attribute msg ) -> DropDownState -> Html msg
+editDropDownDiv dropDownItems dropDownState =
+    div [ id "editButtonMenu", dropDownMenuStyle dropDownState ]
+        [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
+            (List.map dropDownMenuItem dropDownItems)
         ]
 
 
 dropDownMenuStyle : DropDownState -> Html.Attribute msg
 dropDownMenuStyle dropDownState =
-    style
-        [ ( "top", toString dropDownState.x ++ "px" )
-        , ( "left", toString dropDownState.y ++ "px" )
-        , ( "z-index", "5000" )
-        , ( "position", "absolute" )
-
-        --, ( "display", "none" )
-        ]
+    let
+        show =
+            if dropDownState.showEditMenu == True then
+                ("")
+            else
+                ("none")
+    in
+        style
+            [ ( "left", toString dropDownState.x ++ "px" )
+            , ( "top", toString dropDownState.y ++ "px" )
+            , ( "z-index", "5000" )
+            , ( "position", "absolute" )
+            , ( "display", show )
+            ]
 
 
 dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg

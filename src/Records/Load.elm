@@ -36,17 +36,6 @@ decodeRecord =
         |> required "Recommendations" (maybe string)
 
 
-type alias NewRecord =
-    { facility : String
-    , category : String
-    , dateTimeOfVisit : String
-    , doctorOfVisit : String
-    , specialityOfVisit : String
-    , comments : String
-    , recordFile : String
-    }
-
-
 decodeModel : Decoder Model
 decodeModel =
     decode Model

@@ -120,8 +120,8 @@ type alias Record =
 
 
 type alias DropDownState =
-    { x : Int
-    , y : Int
+    { x : Float
+    , y : Float
     , rowId : Int
     , showEditMenu : Bool
     }
@@ -129,8 +129,8 @@ type alias DropDownState =
 
 emptyDropDownState : DropDownState
 emptyDropDownState =
-    { x = -500
-    , y = -500
+    { x = 500.0
+    , y = 500.0
     , rowId = 0
     , showEditMenu = False
     }
