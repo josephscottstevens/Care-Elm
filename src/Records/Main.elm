@@ -132,7 +132,7 @@ view model =
 
         Grid ->
             div []
-                [ button [ type_ "button", class "btn btn-default", onClick AddNewStart ] [ text "New Record" ]
+                [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
                 , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view config model.tableState model.records ]
                 ]
@@ -169,7 +169,7 @@ view model =
                     , hideInput "Recordtype" "1"
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
-                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save model.addNewRecord), class "btn btn-primary margin-left-5 pull-right" ] [ text "Save" ]
+                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save model.addNewRecord), class "btn btn-success margin-left-5 pull-right" ] [ text "Save" ]
                             , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
                             ]
                         ]

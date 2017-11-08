@@ -160,7 +160,7 @@ buildDropDown dropDownItems dropDownOpen toggleEvent =
     in
         Table.HtmlDetails []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", toggleEvent ] []
+                [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown", toggleEvent ] []
                 , dropDownList
                 ]
             ]

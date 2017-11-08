@@ -25,21 +25,26 @@ perhaps... node_modules folder is needed... or the step to get that there?
 
 
 TODO:
-After viewing file, close dropdown
-Delete some of the bad data in the grid
-Make sure filename is getting saved
-View record is returning... ASH now? Frig, is it because of the darn Form post nonse, GRR!
-Template the other Record types
-Populate Facility dropdown with real data
 Populate Category data with js data
+Populate Facility dropdown with real data
+Template the other Record types
+After viewing file, close dropdown
+Make sure filename is getting saved
+Display Date Collected with time
+Make sure to fix dates on save \ load
 When clicking delete, confirmation message should appear first
 When you click away from dropdown menu, it doesn't close, you have to click the button again
 Add the other dropdown options
 
+Filter above each header
+Don't sort on header click :/ oh my
+Place sort icon next to header
+Perhaps show default sorted?
+
 LOW TODO:
 The whole form post to javascript to ports thing is a mess, but meh.
 
-Filter above each header
+
 For example, when you are on page 12, and you filter down to like 20 rows, the highlighted row is gone
 When page left is disabled, you can still click it.
 Re-add port \ subscription
