@@ -86,36 +86,58 @@ updateRecords records newRecord =
             )
 
 
+setRecordId : Int -> Model -> Model
+setRecordId t model =
+    let
+        addNewRecord =
+            model.addNewRecord
+
+        newRecord =
+            { addNewRecord | recordId = t }
+    in
+        { model | addNewRecord = newRecord }
+
+
+setRecordType : String -> NewRecord -> NewRecord
+setRecordType t newRecord =
+    { newRecord | recordType = t }
+
+
+setPatientId : Int -> NewRecord -> NewRecord
+setPatientId t newRecord =
+    { newRecord | patientId = t }
+
+
+setFacilityId : Maybe Int -> NewRecord -> NewRecord
+setFacilityId t newRecord =
+    { newRecord | facilityId = t }
+
+
 setFacility : String -> NewRecord -> NewRecord
-setFacility newFacility newRecord =
-    { newRecord | facility = newFacility }
+setFacility t newRecord =
+    { newRecord | facility = t }
 
 
-setCategory : String -> NewRecord -> NewRecord
-setCategory newCategory newRecord =
-    { newRecord | category = newCategory }
+setRecordTypeId : Int -> NewRecord -> NewRecord
+setRecordTypeId t newRecord =
+    { newRecord | recordTypeId = t }
 
 
-setDateTimeOfVisit : String -> NewRecord -> NewRecord
-setDateTimeOfVisit newDateTimeOfVisit newRecord =
-    { newRecord | dateTimeOfVisit = newDateTimeOfVisit }
+setTimeVisit : String -> NewRecord -> NewRecord
+setTimeVisit t newRecord =
+    { newRecord | timeVisit = t }
 
 
-setDoctorOfVisit : String -> NewRecord -> NewRecord
-setDoctorOfVisit newDoctorOfVisit newRecord =
-    { newRecord | doctorOfVisit = newDoctorOfVisit }
+setProvider : String -> NewRecord -> NewRecord
+setProvider t newRecord =
+    { newRecord | provider = t }
 
 
-setSpecialtyOfVisit : String -> NewRecord -> NewRecord
-setSpecialtyOfVisit newSpecialityOfVisit newRecord =
-    { newRecord | specialityOfVisit = newSpecialityOfVisit }
+setSpeciality : String -> NewRecord -> NewRecord
+setSpeciality t newRecord =
+    { newRecord | speciality = t }
 
 
 setComments : String -> NewRecord -> NewRecord
-setComments newComments newRecord =
-    { newRecord | comments = newComments }
-
-
-setRecordFile : String -> NewRecord -> NewRecord
-setRecordFile newRecordFile newRecord =
-    { newRecord | recordFile = newRecordFile }
+setComments t newRecord =
+    { newRecord | comments = t }

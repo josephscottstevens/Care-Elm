@@ -16,13 +16,13 @@ type Msg
     | Delete Int
     | DeleteCompleted (Result Http.Error String)
     | SaveCompleted String
-    | UpdateFacility String
-    | UpdateCategory String
-    | UpdateDateTimeOfVisit String
-    | UpdateDoctorOfVisit String
-    | UpdateSpecialtyOfVisit String
-    | UpdateComments String
-    | UpdateRecordFile String
+    | UpdateFacility NewRecord String
+    | UpdateCategory NewRecord String
+    | UpdateDateTimeOfVisit NewRecord String
+    | UpdateDoctorOfVisit NewRecord String
+    | UpdateSpecialtyOfVisit NewRecord String
+    | UpdateComments NewRecord String
+    | UpdateRecordFile NewRecord String
     | Cancel
 
 
@@ -36,7 +36,7 @@ type DropDownButtonEvent
 type ModelState
     = Initial
     | Grid
-    | AddNew
+    | AddNew NewRecord
     | Error Http.Error
 
 
@@ -77,22 +77,30 @@ emptyModel =
 
 emptyNewRecord : NewRecord
 emptyNewRecord =
-    { facility = ""
-    , category = ""
-    , dateTimeOfVisit = ""
-    , doctorOfVisit = ""
-    , specialityOfVisit = ""
+    { recordId = 0
+    , patientId = 0
+    , facilityId = Nothing
+    , facility = ""
+    , recordType = ""
+    , recordTypeId = 0
+    , timeVisit = ""
+    , provider = ""
+    , speciality = ""
     , comments = ""
     , recordFile = ""
     }
 
 
 type alias NewRecord =
-    { facility : String
-    , category : String
-    , dateTimeOfVisit : String
-    , doctorOfVisit : String
-    , specialityOfVisit : String
+    { recordId : Int
+    , patientId : Int
+    , facilityId : Maybe Int
+    , facility : String
+    , recordType : String
+    , recordTypeId : Int
+    , timeVisit : String
+    , provider : String
+    , speciality : String
     , comments : String
     , recordFile : String
     }

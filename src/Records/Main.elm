@@ -39,11 +39,11 @@ port dropDownToggle : (DropDownState -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions { addNewRecord } =
     Sub.batch
-        [ updateFacility UpdateFacility
-        , updateCategory UpdateCategory
-        , updateDateTimeOfVisit UpdateDateTimeOfVisit
+        [ updateFacility (UpdateFacility addNewRecord)
+        , updateCategory (UpdateCategory addNewRecord)
+        , updateDateTimeOfVisit (UpdateDateTimeOfVisit addNewRecord)
         , saveComplete SaveCompleted
         , dropDownToggle DropDownToggle
         ]
@@ -63,7 +63,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AddNewStart ->
-            ( { model | state = AddNew }, initSyncfusionControls (SyncFusionMessage model.facilities model.recordTypeId) )
+            ( { model | state = AddNew model.addNewRecord }, initSyncfusionControls (SyncFusionMessage model.facilities model.recordTypeId) )
 
         Load (Ok t) ->
             { t | state = Grid } ! []
@@ -105,26 +105,26 @@ update msg model =
         DeleteCompleted (Err t) ->
             { model | state = Error t } ! []
 
-        UpdateFacility str ->
-            { model | addNewRecord = (setFacility str model.addNewRecord) } ! []
+        UpdateFacility newRecord str ->
+            { model | addNewRecord = { newRecord | facility = str } } ! []
 
-        UpdateCategory str ->
-            { model | addNewRecord = (setCategory str model.addNewRecord) } ! []
+        UpdateCategory newRecord str ->
+            { model | addNewRecord = { newRecord | recordType = str } } ! []
 
-        UpdateDateTimeOfVisit str ->
-            { model | addNewRecord = (setDateTimeOfVisit str model.addNewRecord) } ! []
+        UpdateDateTimeOfVisit newRecord str ->
+            { model | addNewRecord = { newRecord | timeVisit = str } } ! []
 
-        UpdateDoctorOfVisit str ->
-            { model | addNewRecord = (setDoctorOfVisit str model.addNewRecord) } ! []
+        UpdateDoctorOfVisit newRecord str ->
+            { model | addNewRecord = { newRecord | provider = str } } ! []
 
-        UpdateSpecialtyOfVisit str ->
-            { model | addNewRecord = (setSpecialtyOfVisit str model.addNewRecord) } ! []
+        UpdateSpecialtyOfVisit newRecord str ->
+            { model | addNewRecord = { newRecord | speciality = str } } ! []
 
-        UpdateComments str ->
-            { model | addNewRecord = (setComments str model.addNewRecord) } ! []
+        UpdateComments newRecord str ->
+            { model | addNewRecord = { newRecord | comments = str } } ! []
 
-        UpdateRecordFile str ->
-            { model | addNewRecord = (setRecordFile str model.addNewRecord) } ! []
+        UpdateRecordFile newRecord str ->
+            { model | addNewRecord = { newRecord | recordFile = str } } ! []
 
         Cancel ->
             { model | state = Grid } ! []
@@ -144,7 +144,7 @@ view model =
                     [ Table.view config model.tableState model.records ]
                 ]
 
-        AddNew ->
+        AddNew newRecord ->
             let
                 errors =
                     formValidationErrors model.addNewRecord
@@ -164,13 +164,13 @@ view model =
                 div
                     [ class "form-horizontal" ]
                     [ validationErrorsDiv
-                    , textInput input "Facility" model.addNewRecord.facility UpdateFacility False
-                    , textInput input "Category" model.addNewRecord.category UpdateCategory True
-                    , textInput input "Date of Visit" model.addNewRecord.dateTimeOfVisit UpdateDateTimeOfVisit True
-                    , textInput input "Doctor of Visit" model.addNewRecord.doctorOfVisit UpdateDoctorOfVisit False
-                    , textInput input "Speciality of Visit" model.addNewRecord.specialityOfVisit UpdateSpecialtyOfVisit False
-                    , textInput input "Comments" model.addNewRecord.comments UpdateComments True
-                    , fileInput input "Upload Record File" model.addNewRecord.recordFile UpdateRecordFile True
+                    , textInput input "Facility" model.addNewRecord.facility (UpdateFacility model.addNewRecord) False
+                    , textInput input "Category" model.addNewRecord.recordType (UpdateCategory model.addNewRecord) True
+                    , textInput input "Date of Visit" model.addNewRecord.timeVisit (UpdateDateTimeOfVisit model.addNewRecord) True
+                    , textInput input "Doctor of Visit" model.addNewRecord.provider (UpdateDoctorOfVisit model.addNewRecord) False
+                    , textInput input "Speciality of Visit" model.addNewRecord.speciality (UpdateSpecialtyOfVisit model.addNewRecord) False
+                    , textInput input "Comments" model.addNewRecord.comments (UpdateComments model.addNewRecord) True
+                    , fileInput input "Upload Record File" "" (UpdateRecordFile model.addNewRecord) True
                     , hideInput "FacilityID" "79"
                     , hideInput "PatientID" "6676"
                     , hideInput "Recordtype" "1"
@@ -190,8 +190,8 @@ formValidationErrors : NewRecord -> List String
 formValidationErrors newRecord =
     let
         errors =
-            [ required newRecord.category "Category"
-            , required newRecord.dateTimeOfVisit "Date of Visit"
+            [ required newRecord.recordType "Category"
+            , required newRecord.timeVisit "Date of Visit"
             , required newRecord.comments "Comments"
             , required newRecord.recordFile "Record File"
             ]
