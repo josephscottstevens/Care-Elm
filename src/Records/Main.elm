@@ -84,7 +84,11 @@ update msg model =
             ( model, viewFile recordId )
 
         Delete rowId ->
-            ( model, deleteRequest rowId )
+            let
+                updatedRecords =
+                    model.records |> List.filter (\t -> t.id == rowId)
+            in
+                ( { model | records = updatedRecords }, deleteRequest rowId )
 
         AddNewStart ->
             let
@@ -110,7 +114,7 @@ update msg model =
             { model | dropDownState = dropState } ! []
 
         DeleteCompleted (Ok t) ->
-            ( emptyModel, Cmd.batch [ (getRecords model.patientId model.recordTypeId) Load, deleteComplete "Record was deleted successfully" ] )
+            ( emptyModel, deleteComplete "Record was deleted successfully" )
 
         DeleteCompleted (Err t) ->
             { model | state = Error t } ! []
