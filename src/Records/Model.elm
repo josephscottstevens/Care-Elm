@@ -72,7 +72,7 @@ emptyNewRecord =
     , facilityId = Nothing
     , facility = ""
     , recordType = ""
-    , recordTypeId = 0
+    , recordTypeId = 1
     , timeVisit = ""
     , provider = ""
     , speciality = ""
@@ -128,16 +128,14 @@ type alias DropDownState =
     { x : Float
     , y : Float
     , rowId : Int
-    , showEditMenu : Bool
     }
 
 
 emptyDropDownState : DropDownState
 emptyDropDownState =
-    { x = 500.0
-    , y = 500.0
+    { x = -5000.0
+    , y = 0.0
     , rowId = 0
-    , showEditMenu = False
     }
 
 

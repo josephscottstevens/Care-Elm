@@ -323,20 +323,13 @@ editDropDownDiv dropDownItems dropDownState =
 
 dropDownMenuStyle : DropDownState -> Html.Attribute msg
 dropDownMenuStyle dropDownState =
-    let
-        show =
-            if dropDownState.showEditMenu == True then
-                ("")
-            else
-                ("none")
-    in
-        style
-            [ ( "left", toString dropDownState.x ++ "px" )
-            , ( "top", toString dropDownState.y ++ "px" )
-            , ( "z-index", "5000" )
-            , ( "position", "absolute" )
-            , ( "display", show )
-            ]
+    style
+        [ ( "left", toString dropDownState.x ++ "px" )
+        , ( "top", toString dropDownState.y ++ "px" )
+        , ( "z-index", "5000" )
+        , ( "position", "absolute" )
+        , ( "display", "block" )
+        ]
 
 
 dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
