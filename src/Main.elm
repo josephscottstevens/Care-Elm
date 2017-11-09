@@ -17,12 +17,16 @@ subscriptions model =
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    if flags.pageFlag == "billing" then
-        ( { emptyModel | page = BillingPage }, Cmd.map BillingMsg Billing.init )
-    else if flags.pageFlag == "records" then
-        ( { emptyModel | page = RecordsPage }, Cmd.map RecordsMsg (Records.init flags) )
-    else
-        ( emptyModel, Cmd.none )
+    let
+        model =
+            emptyModel flags
+    in
+        if flags.pageFlag == "billing" then
+            ( { model | page = BillingPage }, Cmd.map BillingMsg Billing.init )
+        else if flags.pageFlag == "records" then
+            ( { model | page = RecordsPage }, Cmd.map RecordsMsg (Records.init flags) )
+        else
+            ( model, Cmd.none )
 
 
 main : Program Flags Model Msg

@@ -6,11 +6,10 @@ import Utils.CommonTypes exposing (..)
 
 
 type Msg
-    = Load (Result Http.Error Model)
+    = Load (Result Http.Error WebResponse)
     | AddNewStart
     | SetTableState Table.State
     | DropDownToggle DropDownState
-    | Reset
     | Save NewRecord
     | SendMenuMessage Int String
     | Delete Int
@@ -38,11 +37,20 @@ type SortMode
     | SortDesc
 
 
+type alias WebResponse =
+    { records : List Record
+    , facilities : List DropDownItem
+    , patientId : Int
+    , recordTypeId : Int
+    }
+
+
 type alias Model =
     { state : ModelState
     , records : List Record
     , facilities : List DropDownItem
     , patientId : Int
+    , facilityId : Maybe Int
     , recordTypeId : Int
     , tableState : Table.State
     , query : String
@@ -51,18 +59,28 @@ type alias Model =
     }
 
 
-emptyModel : Model
-emptyModel =
-    { state = Grid
-    , records = []
-    , facilities = []
-    , patientId = 0
-    , recordTypeId = 1
-    , tableState = Table.initialSort "dob"
-    , query = ""
-    , showValidationErrors = False
-    , dropDownState = emptyDropDownState
-    }
+emptyModel : Flags -> Model
+emptyModel flags =
+    let
+        recordType =
+            case flags.recordType of
+                Just t ->
+                    t
+
+                Nothing ->
+                    0
+    in
+        { state = Grid
+        , records = []
+        , facilities = []
+        , patientId = flags.patientId
+        , facilityId = flags.facilityId
+        , recordTypeId = recordType
+        , tableState = Table.initialSort "dob"
+        , query = ""
+        , showValidationErrors = False
+        , dropDownState = emptyDropDownState
+        }
 
 
 emptyNewRecord : NewRecord

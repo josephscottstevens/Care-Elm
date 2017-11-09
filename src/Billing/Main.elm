@@ -57,7 +57,7 @@ update msg model =
             { model | tableState = newState } ! []
 
         Reset ->
-            emptyModel ! []
+            model ! []
 
 
 

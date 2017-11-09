@@ -44,26 +44,21 @@ decodeDropDownItem =
         |> required "Name" string
 
 
-decodeModel : Decoder Model
+decodeModel : Decoder WebResponse
 decodeModel =
-    decode Model
-        |> hardcoded Grid
+    decode WebResponse
         |> required "list" (list decodeRecord)
         |> required "facilityDropdown" (list decodeDropDownItem)
         |> required "patientId" int
         |> required "recordTypeId" int
-        |> hardcoded (Table.initialSort "dob")
-        |> hardcoded ""
-        |> hardcoded False
-        |> hardcoded emptyDropDownState
 
 
-request : Int -> Int -> Http.Request Model
+request : Int -> Int -> Http.Request WebResponse
 request patientId recordTypeId =
     Http.get ("/People/PatientRecordsGrid?patientId=" ++ (toString patientId) ++ "&recordTypeId=" ++ (toString recordTypeId)) decodeModel
 
 
-getRecords : Int -> Int -> (Result Http.Error Model -> msg) -> Cmd msg
+getRecords : Int -> Int -> (Result Http.Error WebResponse -> msg) -> Cmd msg
 getRecords patientId recordTypeId t =
     Http.send t (request patientId recordTypeId)
 

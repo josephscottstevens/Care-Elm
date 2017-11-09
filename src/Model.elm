@@ -2,6 +2,7 @@ module Model exposing (..)
 
 import Billing.Model as Billing
 import Records.Model as Records
+import Utils.CommonTypes exposing (Flags)
 
 
 type Page
@@ -22,9 +23,9 @@ type Msg
     | RecordsMsg Records.Msg
 
 
-emptyModel : Model
-emptyModel =
+emptyModel : Flags -> Model
+emptyModel flags =
     { page = NoPage
-    , billingState = Billing.emptyModel
-    , recordsState = Records.emptyModel
+    , billingState = Billing.emptyModel flags
+    , recordsState = Records.emptyModel flags
     }

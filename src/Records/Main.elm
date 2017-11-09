@@ -72,16 +72,18 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Load (Ok t) ->
-            { t | state = Grid } ! [ setLoadingStatus False ]
+            { model
+                | state = Grid
+                , records = t.records
+                , facilities = t.facilities
+            }
+                ! [ setLoadingStatus False ]
 
         Load (Err t) ->
             { model | state = Error t } ! [ setLoadingStatus False ]
 
         SetTableState newState ->
             { model | tableState = newState } ! []
-
-        Reset ->
-            emptyModel ! []
 
         SendMenuMessage recordId messageType ->
             model ! [ sendMenuMessage (MenuMessage messageType recordId model.recordTypeId) ]
@@ -111,7 +113,7 @@ update msg model =
                 ( { model | showValidationErrors = True }, action )
 
         SaveCompleted str ->
-            ( emptyModel, (getRecords model.patientId model.recordTypeId) Load )
+            ( model, (getRecords model.patientId model.recordTypeId) Load )
 
         DropDownToggle dropState ->
             { model | dropDownState = dropState } ! []

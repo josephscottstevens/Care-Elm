@@ -35,6 +35,7 @@ Don't sort on header click :/ oh my
 Place sort icon next to header
 Perhaps show default sorted?
 track down why files aren't being saved correctly
+don't need PatientId\recordTypeId from server anymore
 
 Populate the RecordTypeId from flags before loading.. somehow
 	Also, change the dropdown width to be concrete, right now, during load, there is a flicker awaiting stuff
