@@ -54,7 +54,6 @@ type alias Model =
     , recordTypeId : Int
     , tableState : Table.State
     , query : String
-    , showValidationErrors : Bool
     , dropDownState : DropDownState
     }
 
@@ -78,7 +77,6 @@ emptyModel flags =
         , recordTypeId = recordType
         , tableState = Table.initialSort "dob"
         , query = ""
-        , showValidationErrors = False
         , dropDownState = emptyDropDownState
         }
 
@@ -96,6 +94,7 @@ emptyNewRecord =
     , speciality = ""
     , comments = ""
     , recordFile = ""
+    , showValidationErrors = False
     }
 
 
@@ -111,6 +110,7 @@ type alias NewRecord =
     , speciality : String
     , comments : String
     , recordFile : String
+    , showValidationErrors : Bool
     }
 
 

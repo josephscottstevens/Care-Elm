@@ -113,7 +113,7 @@ update msg model =
                     else
                         submitForm newRecord
             in
-                { model | showValidationErrors = True } ! [ action, setUnsavedChanges False ]
+                { model | state = AddNew { newRecord | showValidationErrors = True } } ! [ action, setUnsavedChanges False ]
 
         SaveCompleted str ->
             ( model, (getRecords model.patientId model.recordTypeId) Load )
@@ -180,7 +180,7 @@ view model =
                         "submit"
 
                 validationErrorsDiv =
-                    if model.showValidationErrors == True then
+                    if newRecord.showValidationErrors == True then
                         displayErrors errors
                     else
                         div [] []
