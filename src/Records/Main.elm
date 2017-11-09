@@ -152,9 +152,6 @@ update msg model =
 view : Model -> Html Msg
 view model =
     case model.state of
-        Initial ->
-            div [] [ text "loading" ]
-
         Grid ->
             div []
                 [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]

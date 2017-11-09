@@ -1,8 +1,0 @@
-# node generated files
-node_modules
-# elm-package generated files
-elm-stuff
-# elm-repl generated files
-repl-temp-*
-index.html
-elm.js

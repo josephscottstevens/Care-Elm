@@ -34,8 +34,7 @@ type DropDownButtonEvent
 
 
 type ModelState
-    = Initial
-    | Grid
+    = Grid
     | AddNew NewRecord
     | Error Http.Error
 
@@ -61,7 +60,7 @@ type alias Model =
 
 emptyModel : Model
 emptyModel =
-    { state = Initial
+    { state = Grid
     , records = []
     , facilities = []
     , patientId = 0

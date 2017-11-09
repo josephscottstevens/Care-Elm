@@ -47,7 +47,7 @@ decodeDropDownItem =
 decodeModel : Decoder Model
 decodeModel =
     decode Model
-        |> hardcoded Initial
+        |> hardcoded Grid
         |> required "list" (list decodeRecord)
         |> required "facilityDropdown" (list decodeDropDownItem)
         |> required "patientId" int
