@@ -54,7 +54,6 @@ type alias Model =
     , recordTypeId : Int
     , tableState : Table.State
     , query : String
-    , addNewRecord : NewRecord
     , showValidationErrors : Bool
     , dropDownState : DropDownState
     }
@@ -69,7 +68,6 @@ emptyModel =
     , recordTypeId = 0
     , tableState = Table.initialSort "dob"
     , query = ""
-    , addNewRecord = emptyNewRecord
     , showValidationErrors = False
     , dropDownState = emptyDropDownState
     }

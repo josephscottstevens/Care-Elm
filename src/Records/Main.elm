@@ -39,14 +39,20 @@ port dropDownToggle : (DropDownState -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
-subscriptions { addNewRecord } =
-    Sub.batch
-        [ updateFacility (UpdateFacility addNewRecord)
-        , updateCategory (UpdateCategory addNewRecord)
-        , updateDateTimeOfVisit (UpdateDateTimeOfVisit addNewRecord)
-        , saveComplete SaveCompleted
-        , dropDownToggle DropDownToggle
-        ]
+subscriptions model =
+    case model.state of
+        AddNew t ->
+            Sub.batch
+                [ updateFacility (UpdateFacility t)
+                , updateCategory (UpdateCategory t)
+                , updateDateTimeOfVisit (UpdateDateTimeOfVisit t)
+                ]
+
+        _ ->
+            Sub.batch
+                [ saveComplete SaveCompleted
+                , dropDownToggle DropDownToggle
+                ]
 
 
 init : Flags -> Cmd Msg
@@ -62,9 +68,6 @@ init flag =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        AddNewStart ->
-            ( { model | state = AddNew model.addNewRecord }, initSyncfusionControls (SyncFusionMessage model.facilities model.recordTypeId) )
-
         Load (Ok t) ->
             { t | state = Grid } ! []
 
@@ -83,10 +86,17 @@ update msg model =
         Delete rowId ->
             ( model, deleteRequest rowId )
 
+        AddNewStart ->
+            let
+                newRecord =
+                    { emptyNewRecord | patientId = model.patientId, recordTypeId = model.recordTypeId }
+            in
+                ( { model | state = AddNew newRecord }, initSyncfusionControls (SyncFusionMessage model.facilities model.recordTypeId) )
+
         Save newRecord ->
             let
                 action =
-                    if List.length (formValidationErrors model.addNewRecord) > 0 then
+                    if List.length (formValidationErrors newRecord) > 0 then
                         Cmd.none
                     else
                         submitForm newRecord
@@ -106,25 +116,25 @@ update msg model =
             { model | state = Error t } ! []
 
         UpdateFacility newRecord str ->
-            { model | addNewRecord = { newRecord | facility = str } } ! []
+            { model | state = AddNew { newRecord | facility = str } } ! []
 
         UpdateCategory newRecord str ->
-            { model | addNewRecord = { newRecord | recordType = str } } ! []
+            { model | state = AddNew { newRecord | recordType = str } } ! []
 
         UpdateDateTimeOfVisit newRecord str ->
-            { model | addNewRecord = { newRecord | timeVisit = str } } ! []
+            { model | state = AddNew { newRecord | timeVisit = str } } ! []
 
         UpdateDoctorOfVisit newRecord str ->
-            { model | addNewRecord = { newRecord | provider = str } } ! []
+            { model | state = AddNew { newRecord | provider = str } } ! []
 
         UpdateSpecialtyOfVisit newRecord str ->
-            { model | addNewRecord = { newRecord | speciality = str } } ! []
+            { model | state = AddNew { newRecord | speciality = str } } ! []
 
         UpdateComments newRecord str ->
-            { model | addNewRecord = { newRecord | comments = str } } ! []
+            { model | state = AddNew { newRecord | comments = str } } ! []
 
         UpdateRecordFile newRecord str ->
-            { model | addNewRecord = { newRecord | recordFile = str } } ! []
+            { model | state = AddNew { newRecord | recordFile = str } } ! []
 
         Cancel ->
             { model | state = Grid } ! []
@@ -147,7 +157,7 @@ view model =
         AddNew newRecord ->
             let
                 errors =
-                    formValidationErrors model.addNewRecord
+                    formValidationErrors newRecord
 
                 submitBtnType =
                     if List.length errors > 0 then
@@ -164,19 +174,19 @@ view model =
                 div
                     [ class "form-horizontal" ]
                     [ validationErrorsDiv
-                    , textInput input "Facility" model.addNewRecord.facility (UpdateFacility model.addNewRecord) False
-                    , textInput input "Category" model.addNewRecord.recordType (UpdateCategory model.addNewRecord) True
-                    , textInput input "Date of Visit" model.addNewRecord.timeVisit (UpdateDateTimeOfVisit model.addNewRecord) True
-                    , textInput input "Doctor of Visit" model.addNewRecord.provider (UpdateDoctorOfVisit model.addNewRecord) False
-                    , textInput input "Speciality of Visit" model.addNewRecord.speciality (UpdateSpecialtyOfVisit model.addNewRecord) False
-                    , textInput input "Comments" model.addNewRecord.comments (UpdateComments model.addNewRecord) True
-                    , fileInput input "Upload Record File" "" (UpdateRecordFile model.addNewRecord) True
+                    , textInput input "Facility" newRecord.facility (UpdateFacility newRecord) False
+                    , textInput input "Category" newRecord.recordType (UpdateCategory newRecord) True
+                    , textInput input "Date of Visit" newRecord.timeVisit (UpdateDateTimeOfVisit newRecord) True
+                    , textInput input "Doctor of Visit" newRecord.provider (UpdateDoctorOfVisit newRecord) False
+                    , textInput input "Speciality of Visit" newRecord.speciality (UpdateSpecialtyOfVisit newRecord) False
+                    , textInput input "Comments" newRecord.comments (UpdateComments newRecord) True
+                    , fileInput input "Upload Record File" "" (UpdateRecordFile newRecord) True
                     , hideInput "FacilityID" "79"
                     , hideInput "PatientID" "6676"
                     , hideInput "Recordtype" "1"
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
-                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save model.addNewRecord), class "btn btn-success margin-left-5 pull-right" ] [ text "Save" ]
+                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), class "btn btn-success margin-left-5 pull-right" ] [ text "Save" ]
                             , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
                             ]
                         ]

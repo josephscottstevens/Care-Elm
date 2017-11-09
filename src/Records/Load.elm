@@ -54,7 +54,6 @@ decodeModel =
         |> required "recordTypeId" int
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
-        |> hardcoded emptyNewRecord
         |> hardcoded False
         |> hardcoded emptyDropDownState
 
@@ -84,60 +83,3 @@ updateRecords records newRecord =
                 else
                     t
             )
-
-
-setRecordId : Int -> Model -> Model
-setRecordId t model =
-    let
-        addNewRecord =
-            model.addNewRecord
-
-        newRecord =
-            { addNewRecord | recordId = t }
-    in
-        { model | addNewRecord = newRecord }
-
-
-setRecordType : String -> NewRecord -> NewRecord
-setRecordType t newRecord =
-    { newRecord | recordType = t }
-
-
-setPatientId : Int -> NewRecord -> NewRecord
-setPatientId t newRecord =
-    { newRecord | patientId = t }
-
-
-setFacilityId : Maybe Int -> NewRecord -> NewRecord
-setFacilityId t newRecord =
-    { newRecord | facilityId = t }
-
-
-setFacility : String -> NewRecord -> NewRecord
-setFacility t newRecord =
-    { newRecord | facility = t }
-
-
-setRecordTypeId : Int -> NewRecord -> NewRecord
-setRecordTypeId t newRecord =
-    { newRecord | recordTypeId = t }
-
-
-setTimeVisit : String -> NewRecord -> NewRecord
-setTimeVisit t newRecord =
-    { newRecord | timeVisit = t }
-
-
-setProvider : String -> NewRecord -> NewRecord
-setProvider t newRecord =
-    { newRecord | provider = t }
-
-
-setSpeciality : String -> NewRecord -> NewRecord
-setSpeciality t newRecord =
-    { newRecord | speciality = t }
-
-
-setComments : String -> NewRecord -> NewRecord
-setComments t newRecord =
-    { newRecord | comments = t }
