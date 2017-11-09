@@ -46,12 +46,12 @@ subscriptions model =
                 [ updateFacility (UpdateFacility t)
                 , updateCategory (UpdateCategory t)
                 , updateDateTimeOfVisit (UpdateDateTimeOfVisit t)
+                , saveComplete SaveCompleted
                 ]
 
         _ ->
             Sub.batch
-                [ saveComplete SaveCompleted
-                , dropDownToggle DropDownToggle
+                [ dropDownToggle DropDownToggle
                 ]
 
 
