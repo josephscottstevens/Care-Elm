@@ -114,7 +114,7 @@ update msg model =
             { model | dropDownState = dropState } ! []
 
         DeleteCompleted (Ok t) ->
-            ( emptyModel, deleteComplete "Record was deleted successfully" )
+            ( model, deleteComplete "Record was deleted successfully" )
 
         DeleteCompleted (Err t) ->
             { model | state = Error t } ! []
