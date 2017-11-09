@@ -4,7 +4,6 @@ import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
 import Records.Model exposing (..)
-import Table
 import Utils.CommonTypes exposing (..)
 
 
@@ -49,8 +48,7 @@ decodeModel =
     decode WebResponse
         |> required "list" (list decodeRecord)
         |> required "facilityDropdown" (list decodeDropDownItem)
-        |> required "patientId" int
-        |> required "recordTypeId" int
+        |> required "recordTypeDropdown" (list decodeDropDownItem)
 
 
 request : Int -> Int -> Http.Request WebResponse
@@ -66,15 +64,3 @@ getRecords patientId recordTypeId t =
 deleteRequest : Int -> Cmd Msg
 deleteRequest rowId =
     Http.send DeleteCompleted <| Http.getString ("/People/DeleteRecord?recordId=" ++ (toString rowId))
-
-
-updateRecords : List Record -> Record -> List Record
-updateRecords records newRecord =
-    records
-        |> List.map
-            (\t ->
-                if t.id == newRecord.id then
-                    newRecord
-                else
-                    t
-            )

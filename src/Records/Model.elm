@@ -40,8 +40,7 @@ type SortMode
 type alias WebResponse =
     { records : List Record
     , facilities : List DropDownItem
-    , patientId : Int
-    , recordTypeId : Int
+    , recordTypes : List DropDownItem
     }
 
 
@@ -49,6 +48,7 @@ type alias Model =
     { state : ModelState
     , records : List Record
     , facilities : List DropDownItem
+    , recordTypes : List DropDownItem
     , patientId : Int
     , facilityId : Maybe Int
     , recordTypeId : Int
@@ -72,6 +72,7 @@ emptyModel flags =
         { state = Grid
         , records = []
         , facilities = []
+        , recordTypes = []
         , patientId = flags.patientId
         , facilityId = flags.facilityId
         , recordTypeId = recordType
@@ -152,7 +153,9 @@ emptyDropDownState =
 
 type alias SyncFusionMessage =
     { facilities : List DropDownItem
-    , categoryId : Int
+    , recordTypes : List DropDownItem
+    , facilityId : Maybe Int
+    , recordTypeId : Int
     }
 
 

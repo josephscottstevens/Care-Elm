@@ -79,6 +79,7 @@ update msg model =
                 | state = Grid
                 , records = t.records
                 , facilities = t.facilities
+                , recordTypes = t.recordTypes
             }
                 ! [ setLoadingStatus False ]
 
@@ -101,9 +102,15 @@ update msg model =
         AddNewStart ->
             let
                 newRecord =
-                    { emptyNewRecord | patientId = model.patientId, recordTypeId = model.recordTypeId }
+                    { emptyNewRecord
+                        | patientId = model.patientId
+                        , recordTypeId = model.recordTypeId
+                        , facilityId = model.facilityId
+                        , facility = getDropDownItemById model.facilities model.facilityId
+                        , recordType = getDropDownItemById model.recordTypes (Just model.recordTypeId)
+                    }
             in
-                ( { model | state = AddNew newRecord }, initSyncfusionControls (SyncFusionMessage model.facilities model.recordTypeId) )
+                { model | state = AddNew newRecord } ! [ initSyncfusionControls (SyncFusionMessage model.facilities model.recordTypes model.facilityId model.recordTypeId) ]
 
         Save newRecord ->
             let
@@ -307,3 +314,17 @@ editButton =
         , viewData = editButtonDiv << .id
         , sorter = Table.unsortable
         }
+
+
+getDropDownItemById : List DropDownItem -> Maybe Int -> String
+getDropDownItemById facilities facilityId =
+    case
+        facilities
+            |> List.filter (\t -> t.id == facilityId)
+            |> List.head
+    of
+        Just { name, id } ->
+            name
+
+        Nothing ->
+            ""
