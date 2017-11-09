@@ -160,7 +160,7 @@ view model =
                 [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
                 , editDropDownDiv (dropDownItems model.dropDownState.rowId) model.dropDownState
                 , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view config model.tableState model.records ]
+                    [ Table.view (config model.recordTypeId) model.tableState model.records ]
                 ]
 
         AddNew newRecord ->
@@ -231,18 +231,36 @@ displayErrors errors =
     div [ class "error" ] (List.map (\t -> div [] [ text t ]) errors)
 
 
-config : Table.Config Record Msg
-config =
+getColumns : Int -> List (Table.Column Record Msg)
+getColumns recordTypeId =
+    let
+        firstColumn =
+            Table.stringColumn "Date Collected" (\t -> defaultString t.date)
+
+        middleColumns =
+            if recordTypeId == 1 || recordTypeId == 2 || recordTypeId == 5 then
+                [ Table.stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
+                , Table.stringColumn "Speciality" (\t -> defaultString t.speciality)
+                ]
+            else if recordTypeId == 6 then
+                []
+            else
+                []
+
+        lastColumns =
+            [ Table.stringColumn "Comments" (\t -> defaultString t.comments)
+            , editButton
+            ]
+    in
+        firstColumn :: (List.append middleColumns lastColumns)
+
+
+config : Int -> Table.Config Record Msg
+config recordTypeId =
     Table.customConfig
         { toId = (\t -> toString .id)
         , toMsg = SetTableState
-        , columns =
-            [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
-            , Table.stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
-            , Table.stringColumn "Speciality" (\t -> defaultString t.speciality)
-            , Table.stringColumn "Comments" (\t -> defaultString t.comments)
-            , editButton
-            ]
+        , columns = getColumns recordTypeId
         , customizations = defaultCustomizations
         }
 
