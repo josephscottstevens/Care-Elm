@@ -16,8 +16,8 @@ type Msg
     | Delete Int
     | DeleteCompleted (Result Http.Error String)
     | SaveCompleted String
-    | UpdateFacility NewRecord String
-    | UpdateCategory NewRecord String
+    | UpdateFacility NewRecord DropDownItem
+    | UpdateCategory NewRecord DropDownItem
     | UpdateDateTimeOfVisit NewRecord String
     | UpdateDoctorOfVisit NewRecord String
     | UpdateSpecialtyOfVisit NewRecord String

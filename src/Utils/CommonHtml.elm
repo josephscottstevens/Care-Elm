@@ -58,8 +58,8 @@ inputCommonFormat isRequired displayText t =
             ]
 
 
-inputCommonWithType : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> String -> List ( String, String ) -> Html msg
-inputCommonWithType control displayText inputValue event isRequired controlType dataSource =
+inputCommonWithType : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> String -> Html msg
+inputCommonWithType control displayText inputValue event isRequired controlType =
     if controlType == "file" then
         inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", id "Files", name "Files", onChange event ] [] ]
     else if controlType == "textarea" then
@@ -70,24 +70,24 @@ inputCommonWithType control displayText inputValue event isRequired controlType 
         inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] [] ]
 
 
-dropInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> List ( String, String ) -> Html msg
-dropInput control displayText inputValue event isRequired dataSource =
-    inputCommonWithType control displayText inputValue event isRequired "dropdown" dataSource
-
-
 fileInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
 fileInput control displayText inputValue event isRequired =
-    inputCommonWithType control displayText inputValue event isRequired "file" []
+    inputCommonWithType control displayText inputValue event isRequired "file"
 
 
 textInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
 textInput control displayText inputValue event isRequired =
-    inputCommonWithType control displayText inputValue event isRequired "text" []
+    inputCommonWithType control displayText inputValue event isRequired "text"
 
 
 hideInput : String -> String -> Html msg
 hideInput displayText inputValue =
     input [ type_ "text", class "hide", idAttr displayText, nameAttr displayText, value inputValue ] [ text inputValue ]
+
+
+dropInput : String -> Html msg
+dropInput displayText =
+    inputCommonFormat False displayText [ input [ type_ "text", idAttr displayText ] [] ]
 
 
 onChange : (String -> msg) -> Html.Attribute msg

@@ -26,10 +26,10 @@ port submitForm : NewRecord -> Cmd msg
 port saveComplete : (String -> msg) -> Sub msg
 
 
-port updateFacility : (String -> msg) -> Sub msg
+port updateFacility : (DropDownItem -> msg) -> Sub msg
 
 
-port updateCategory : (String -> msg) -> Sub msg
+port updateCategory : (DropDownItem -> msg) -> Sub msg
 
 
 port updateDateTimeOfVisit : (String -> msg) -> Sub msg
@@ -115,11 +115,16 @@ update msg model =
         DeleteCompleted (Err t) ->
             { model | state = Error t } ! []
 
-        UpdateFacility newRecord str ->
-            { model | state = AddNew { newRecord | facility = str } } ! []
+        UpdateFacility newRecord dropDownItem ->
+            { model | state = AddNew { newRecord | facility = dropDownItem.name, facilityId = dropDownItem.id } } ! []
 
-        UpdateCategory newRecord str ->
-            { model | state = AddNew { newRecord | recordType = str } } ! []
+        UpdateCategory newRecord dropDownItem ->
+            case dropDownItem.id of
+                Just t ->
+                    { model | state = AddNew { newRecord | recordType = dropDownItem.name, recordTypeId = t } } ! []
+
+                Nothing ->
+                    model ! []
 
         UpdateDateTimeOfVisit newRecord str ->
             { model | state = AddNew { newRecord | timeVisit = str } } ! []
@@ -174,8 +179,8 @@ view model =
                 div
                     [ class "form-horizontal" ]
                     [ validationErrorsDiv
-                    , textInput input "Facility" newRecord.facility (UpdateFacility newRecord) False
-                    , textInput input "Category" newRecord.recordType (UpdateCategory newRecord) True
+                    , dropInput "Facility"
+                    , dropInput "Category"
                     , textInput input "Date of Visit" newRecord.timeVisit (UpdateDateTimeOfVisit newRecord) True
                     , textInput input "Doctor of Visit" newRecord.provider (UpdateDoctorOfVisit newRecord) False
                     , textInput input "Speciality of Visit" newRecord.speciality (UpdateSpecialtyOfVisit newRecord) False
