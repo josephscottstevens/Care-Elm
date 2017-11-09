@@ -26,9 +26,9 @@ perhaps... node_modules folder is needed... or the step to get that there?
 
 TODO:
 
-Template the other Record types
-use loading spinner instead of text loading
-
+Get a different grid running, Labs.
+Dropdown item (2nd to last is busted)
+Fix dropdown menu location
 Display Date Collected with time
 Make sure to fix dates on save \ load
 When clicking delete, confirmation message should appear first
@@ -53,6 +53,8 @@ Re-add port \ subscription
 Dropdown menu on right
 Style checkboxs
 Remove main.js from git
+put private column stuff back in Common (see bottom of Records/Main.elm
+standardize ! [] vs Cmd.none (and when I do use cmd, do ! instead)
 How can I put Elm-Make command as apart of vscode instead of needing to up arrow use recent command
 	see: https://github.com/Krzysztof-Cieslak/vscode-elm/blob/master/package.json
 	

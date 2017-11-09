@@ -12,7 +12,7 @@ type Msg
     | DropDownToggle DropDownState
     | Reset
     | Save NewRecord
-    | ViewFile Int
+    | SendMenuMessage Int String
     | Delete Int
     | DeleteCompleted (Result Http.Error String)
     | SaveCompleted String
@@ -24,13 +24,6 @@ type Msg
     | UpdateComments NewRecord String
     | UpdateRecordFile NewRecord String
     | Cancel
-
-
-type DropDownButtonEvent
-    = SendByEmail
-    | SendByFax
-    | SaveToClientPortal
-    | Transfer
 
 
 type ModelState
@@ -151,4 +144,11 @@ emptyDropDownState =
 type alias SyncFusionMessage =
     { facilities : List DropDownItem
     , categoryId : Int
+    }
+
+
+type alias MenuMessage =
+    { name : String
+    , recordId : Int
+    , recordType : Int
     }

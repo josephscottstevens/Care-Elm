@@ -11,7 +11,7 @@ import Utils.CommonHtml exposing (..)
 import Utils.CommonTypes exposing (..)
 
 
-port viewFile : Int -> Cmd msg
+port sendMenuMessage : MenuMessage -> Cmd msg
 
 
 port initSyncfusionControls : SyncFusionMessage -> Cmd msg
@@ -21,6 +21,9 @@ port deleteComplete : String -> Cmd msg
 
 
 port submitForm : NewRecord -> Cmd msg
+
+
+port setLoadingStatus : Bool -> Cmd msg
 
 
 port saveComplete : (String -> msg) -> Sub msg
@@ -69,10 +72,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Load (Ok t) ->
-            { t | state = Grid } ! []
+            { t | state = Grid } ! [ setLoadingStatus False ]
 
         Load (Err t) ->
-            { model | state = Error t } ! []
+            { model | state = Error t } ! [ setLoadingStatus False ]
 
         SetTableState newState ->
             { model | tableState = newState } ! []
@@ -80,8 +83,8 @@ update msg model =
         Reset ->
             emptyModel ! []
 
-        ViewFile recordId ->
-            ( model, viewFile recordId )
+        SendMenuMessage recordId messageType ->
+            model ! [ sendMenuMessage (MenuMessage messageType recordId model.recordTypeId) ]
 
         Delete rowId ->
             let
@@ -261,7 +264,11 @@ defaultCustomizations =
 
 dropDownItems : Int -> List ( String, String, Html.Attribute Msg )
 dropDownItems rowId =
-    [ ( "e-contextedit", "View File", onClick (ViewFile rowId) )
+    [ ( "", "Transfer", onClick (SendMenuMessage rowId "Transfer") )
+    , ( "e-contextedit", "View File", onClick (SendMenuMessage rowId "ViewFile") )
+    , ( "", "Send By Email", onClick (SendMenuMessage rowId "SendByEmail") )
+    , ( "", "Send By Fax", onClick (SendMenuMessage rowId "SendByFax") )
+    , ( "", "Save To Client Portal", onClick (SendMenuMessage rowId "SaveToClientPortal") )
     , ( "e-contextdelete", "Delete", onClick (Delete rowId) )
     ]
 
