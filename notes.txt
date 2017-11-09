@@ -25,8 +25,7 @@ perhaps... node_modules folder is needed... or the step to get that there?
 
 
 TODO:
-Validate Add new record functionality
-	Make sure filename is getting saved
+
 Template the other Record types
 Facility... and another field should already be populated?
 Fix hard coded values (patient id, record type, facilityID)
@@ -43,6 +42,7 @@ Perhaps show default sorted?
 
 
 LOW TODO:
+Bahh, delete looks weird :'(
 Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super duplicated stuff?)
 Have active row highlight?
 The whole form post to javascript to ports thing is a mess, but meh.
