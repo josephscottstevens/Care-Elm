@@ -26,6 +26,9 @@ port submitForm : NewRecord -> Cmd msg
 port setLoadingStatus : Bool -> Cmd msg
 
 
+port setUnsavedChanges : Bool -> Cmd msg
+
+
 port saveComplete : (String -> msg) -> Sub msg
 
 
@@ -110,10 +113,13 @@ update msg model =
                     else
                         submitForm newRecord
             in
-                ( { model | showValidationErrors = True }, action )
+                { model | showValidationErrors = True } ! [ action, setUnsavedChanges False ]
 
         SaveCompleted str ->
             ( model, (getRecords model.patientId model.recordTypeId) Load )
+
+        Cancel ->
+            { model | state = Grid } ! [ setUnsavedChanges False ]
 
         DropDownToggle dropState ->
             { model | dropDownState = dropState } ! []
@@ -125,33 +131,30 @@ update msg model =
             { model | state = Error t } ! []
 
         UpdateFacility newRecord dropDownItem ->
-            { model | state = AddNew { newRecord | facility = dropDownItem.name, facilityId = dropDownItem.id } } ! []
+            { model | state = AddNew { newRecord | facility = dropDownItem.name, facilityId = dropDownItem.id } } ! [ setUnsavedChanges True ]
 
         UpdateCategory newRecord dropDownItem ->
             case dropDownItem.id of
                 Just t ->
-                    { model | state = AddNew { newRecord | recordType = dropDownItem.name, recordTypeId = t } } ! []
+                    { model | state = AddNew { newRecord | recordType = dropDownItem.name, recordTypeId = t } } ! [ setUnsavedChanges True ]
 
                 Nothing ->
                     model ! []
 
         UpdateDateTimeOfVisit newRecord str ->
-            { model | state = AddNew { newRecord | timeVisit = str } } ! []
+            { model | state = AddNew { newRecord | timeVisit = str } } ! [ setUnsavedChanges True ]
 
         UpdateDoctorOfVisit newRecord str ->
-            { model | state = AddNew { newRecord | provider = str } } ! []
+            { model | state = AddNew { newRecord | provider = str } } ! [ setUnsavedChanges True ]
 
         UpdateSpecialtyOfVisit newRecord str ->
-            { model | state = AddNew { newRecord | speciality = str } } ! []
+            { model | state = AddNew { newRecord | speciality = str } } ! [ setUnsavedChanges True ]
 
         UpdateComments newRecord str ->
-            { model | state = AddNew { newRecord | comments = str } } ! []
+            { model | state = AddNew { newRecord | comments = str } } ! [ setUnsavedChanges True ]
 
         UpdateRecordFile newRecord str ->
-            { model | state = AddNew { newRecord | recordFile = str } } ! []
-
-        Cancel ->
-            { model | state = Grid } ! []
+            { model | state = AddNew { newRecord | recordFile = str } } ! [ setUnsavedChanges True ]
 
 
 view : Model -> Html Msg
