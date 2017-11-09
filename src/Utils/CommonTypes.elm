@@ -13,3 +13,10 @@ type alias DropDownItem =
     { id : Maybe Int
     , name : String
     }
+
+
+type alias DropDownState =
+    { x : Float
+    , y : Float
+    , rowId : Int
+    }

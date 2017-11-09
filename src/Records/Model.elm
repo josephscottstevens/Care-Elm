@@ -142,13 +142,6 @@ type alias Record =
     }
 
 
-type alias DropDownState =
-    { x : Float
-    , y : Float
-    , rowId : Int
-    }
-
-
 emptyDropDownState : DropDownState
 emptyDropDownState =
     { x = -5000.0

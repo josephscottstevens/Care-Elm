@@ -3,6 +3,7 @@ module Utils.CommonGrid exposing (..)
 import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, attribute)
 import Table
+import Utils.CommonTypes exposing (DropDownState)
 
 
 dataTarget : String -> Html.Attribute msg
@@ -124,3 +125,41 @@ viewData int =
         [ class "e-row" ]
     else
         [ class "e-alt_row" ]
+
+
+editButtonDiv : data -> Table.HtmlDetails msg
+editButtonDiv data =
+    Table.HtmlDetails []
+        [ div [ style [ ( "text-align", "right" ) ] ]
+            [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown", dataTarget (toString data) ] []
+            ]
+        ]
+
+
+editDropDownDiv : List ( String, String, Html.Attribute msg ) -> DropDownState -> Html msg
+editDropDownDiv dropDownItems dropDownState =
+    div [ id "editButtonMenu", dropDownMenuStyle dropDownState ]
+        [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
+            (List.map dropDownMenuItem dropDownItems)
+        ]
+
+
+dropDownMenuStyle : DropDownState -> Html.Attribute msg
+dropDownMenuStyle dropDownState =
+    style
+        [ ( "left", toString dropDownState.x ++ "px" )
+        , ( "top", toString dropDownState.y ++ "px" )
+        , ( "z-index", "5000" )
+        , ( "position", "absolute" )
+        , ( "display", "block" )
+        ]
+
+
+dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
+dropDownMenuItem ( iconClass, displayText, event ) =
+    li [ class "e-content e-list" ]
+        [ a [ class "e-menulink", event ]
+            [ text displayText
+            , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
+            ]
+        ]

@@ -278,10 +278,6 @@ defaultCustomizations =
     }
 
 
-
---public
-
-
 dropDownItems : Int -> List ( String, String, Html.Attribute Msg )
 dropDownItems rowId =
     [ ( "", "Transfer", onClick (SendMenuMessage rowId "Transfer") )
@@ -293,52 +289,10 @@ dropDownItems rowId =
     ]
 
 
-
--- private
-
-
-editButton : Table.Column Record Msg
+editButton : Table.Column Record msg
 editButton =
     Table.veryCustomColumn
         { name = ""
-        , viewData = editButtonDiv
+        , viewData = editButtonDiv << .id
         , sorter = Table.unsortable
         }
-
-
-editButtonDiv : Record -> Table.HtmlDetails Msg
-editButtonDiv record =
-    Table.HtmlDetails []
-        [ div [ style [ ( "text-align", "right" ) ] ]
-            [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown", dataTarget (toString record.id) ] []
-            ]
-        ]
-
-
-editDropDownDiv : List ( String, String, Html.Attribute msg ) -> DropDownState -> Html msg
-editDropDownDiv dropDownItems dropDownState =
-    div [ id "editButtonMenu", dropDownMenuStyle dropDownState ]
-        [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
-            (List.map dropDownMenuItem dropDownItems)
-        ]
-
-
-dropDownMenuStyle : DropDownState -> Html.Attribute msg
-dropDownMenuStyle dropDownState =
-    style
-        [ ( "left", toString dropDownState.x ++ "px" )
-        , ( "top", toString dropDownState.y ++ "px" )
-        , ( "z-index", "5000" )
-        , ( "position", "absolute" )
-        , ( "display", "block" )
-        ]
-
-
-dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
-dropDownMenuItem ( iconClass, displayText, event ) =
-    li [ class "e-content e-list" ]
-        [ a [ class "e-menulink", event ]
-            [ text displayText
-            , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
-            ]
-        ]
