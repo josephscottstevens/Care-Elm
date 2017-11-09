@@ -86,7 +86,7 @@ update msg model =
         Delete rowId ->
             let
                 updatedRecords =
-                    model.records |> List.filter (\t -> t.id == rowId)
+                    model.records |> List.filter (\t -> t.id /= rowId)
             in
                 ( { model | records = updatedRecords }, deleteRequest rowId )
 
