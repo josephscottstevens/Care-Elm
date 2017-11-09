@@ -107,13 +107,13 @@ update msg model =
 
         Save newRecord ->
             let
-                action =
+                actions =
                     if List.length (formValidationErrors newRecord) > 0 then
-                        Cmd.none
+                        []
                     else
-                        submitForm newRecord
+                        [ submitForm newRecord, setUnsavedChanges False ]
             in
-                { model | state = AddNew { newRecord | showValidationErrors = True } } ! [ action, setUnsavedChanges False ]
+                { model | state = AddNew { newRecord | showValidationErrors = True } } ! actions
 
         SaveCompleted str ->
             ( model, (getRecords model.patientId model.recordTypeId) Load )
