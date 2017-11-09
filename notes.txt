@@ -25,9 +25,8 @@ perhaps... node_modules folder is needed... or the step to get that there?
 
 
 TODO:
-Implement the column chooser for Add new as well
-Display Date Collected with time
-Dropdown item (2nd to last is busted)
+implement setIsUnsavedChanges
+dropdown item "Save to Client Portal" is busted
 Make sure to fix dates on save \ load
 When clicking delete, confirmation message should appear first
 
@@ -35,8 +34,10 @@ Filter above each header
 Don't sort on header click :/ oh my
 Place sort icon next to header
 Perhaps show default sorted?
+track down why files aren't being saved correctly
 
 Populate the RecordTypeId from flags before loading.. somehow
+	Also, change the dropdown width to be concrete, right now, during load, there is a flicker awaiting stuff
 
 
 LOW TODO:
