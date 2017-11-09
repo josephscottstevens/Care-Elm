@@ -210,6 +210,10 @@ view model =
             div [] [ text (toString err) ]
 
 
+
+-- Validation Stuff
+
+
 formValidationErrors : NewRecord -> List String
 formValidationErrors newRecord =
     let
@@ -234,6 +238,10 @@ required str propName =
 displayErrors : List String -> Html Msg
 displayErrors errors =
     div [ class "error" ] (List.map (\t -> div [] [ text t ]) errors)
+
+
+
+-- Column Stuff
 
 
 getColumns : Int -> List (Table.Column Record Msg)
