@@ -19,27 +19,16 @@ install Elm extension for vscode
     press green install button
 
 run 
-elm-make Main.elm --debug --output=C:\Projects\NavCare\HC360-Integration-UserInterfaceEnhancements-Joe\trunk\Care-24-7\Care-24-7-MVC\Scripts\elmmain.js
+elm-make Src\Main.elm --output=C:\Projects\NavCare\HC360-Integration-UserInterfaceEnhancements-Phase2-Joe\trunk\Care-24-7\Care-24-7-MVC\Scripts\People\app.js --debug
 
-perhaps... node_modules folder is needed... or the step to get that there?
 
 
 TODO:
-use file uploader (and If I get that working, I can remove the giant hack that is form submission)
-why am I sending a null FacilityId to syncufsioninit?
-cleanup common controls, 
-	pass 
-		Optional
-		Required
-	instead of Bool
-	
-	don't auto make id in the bottom left common item, do it a level up
-	don't expose onSelect \ common control
-	have a withId to optionally pass id in
 dropdown item "Save to Client Portal" is busted
 Make sure to fix dates on save \ load
 When clicking delete, confirmation message should appear first
 when page first loads, make sure to fire the there are no unsaved changes, incase another form has screwed it lol
+
 
 Filter above each header
 Don't sort on header click :/ oh my
@@ -60,7 +49,7 @@ Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super d
 Have active row highlight?
 The whole form post to javascript to ports thing is a mess, but meh.
 See if I can set the rectangle to be more intelligently positioned (right now it has to do all the offsets for stuff)
-
+FacilityId is coming from window, and it seems to like... not be there 10% of the time, lets see if we can explicitly pass it
 For example, when you are on page 12, and you filter down to like 20 rows, the highlighted row is gone
 When page left is disabled, you can still click it.
 Re-add port \ subscription
