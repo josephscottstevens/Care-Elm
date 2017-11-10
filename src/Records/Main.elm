@@ -191,7 +191,7 @@ view model =
                         "submit"
 
                 validationErrorsDiv =
-                    if newRecord.showValidationErrors == True then
+                    if newRecord.showValidationErrors == True && List.length errors > 0 then
                         displayErrors errors
                     else
                         div [] []
