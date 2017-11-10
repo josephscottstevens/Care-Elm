@@ -201,12 +201,11 @@ view model =
                     [ validationErrorsDiv
                     , dropInput "Facility" Required
                     , dropInput "Category" Required
-                    , textInput "Date of Visit" newRecord.timeVisit (UpdateDateTimeOfVisit newRecord) Required
+                    , dropInput "Date of Visit" Required
                     , textInput "Doctor of Visit" newRecord.provider (UpdateDoctorOfVisit newRecord) Optional
                     , textInput "Speciality of Visit" newRecord.speciality (UpdateSpecialtyOfVisit newRecord) Optional
                     , textInput "Comments" newRecord.comments (UpdateComments newRecord) Required
-
-                    --, fileInput s
+                    , fileInput "Upload file ? " newRecord.recordFile (UpdateRecordFile newRecord) Required
                     , hideInput "FacilityID" (defaultInt newRecord.facilityId)
                     , hideInput "PatientID" (toString model.patientId)
                     , hideInput "Recordtype" (toString model.recordTypeId)
