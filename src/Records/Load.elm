@@ -1,6 +1,7 @@
 module Records.Load exposing (..)
 
-import Json.Decode exposing (..)
+import Json.Decode as Decode exposing (..)
+import Json.Encode as Encode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
 import Records.Model exposing (..)
@@ -10,45 +11,62 @@ import Utils.CommonTypes exposing (..)
 decodeRecord : Decoder Record
 decodeRecord =
     decode Record
-        |> required "Id" (int)
-        |> required "Date" (maybe string)
-        |> required "Speciality" (maybe string)
-        |> required "Comments" (maybe string)
-        |> required "TransferedTo" (maybe string)
-        |> required "TransferedOn" (maybe string)
-        |> required "PatientId" (int)
-        |> required "Title" (maybe string)
-        |> required "DateAccessed" (maybe string)
-        |> required "Provider" (maybe string)
-        |> required "PatientName" (maybe string)
-        |> required "RecordType" (maybe string)
-        |> required "DateOfAdmission" (maybe string)
-        |> required "DateOfDischarge" (maybe string)
-        |> required "DischargePhysician" (maybe string)
-        |> required "DischargeDiagnosis" (maybe string)
-        |> required "HospitalizationServiceType" (maybe string)
-        |> required "HospitalizationId" (maybe int)
-        |> required "ReportDate" (maybe string)
-        |> required "FileName" (maybe string)
-        |> required "CanTransfer" (bool)
-        |> required "Facility" (maybe string)
-        |> required "FacilityFax" (maybe string)
-        |> required "Recommendations" (maybe string)
+        |> required "Id" (Decode.int)
+        |> required "Date" (maybe Decode.string)
+        |> required "Speciality" (maybe Decode.string)
+        |> required "Comments" (maybe Decode.string)
+        |> required "TransferedTo" (maybe Decode.string)
+        |> required "TransferedOn" (maybe Decode.string)
+        |> required "PatientId" (Decode.int)
+        |> required "Title" (maybe Decode.string)
+        |> required "DateAccessed" (maybe Decode.string)
+        |> required "Provider" (maybe Decode.string)
+        |> required "PatientName" (maybe Decode.string)
+        |> required "RecordType" (maybe Decode.string)
+        |> required "DateOfAdmission" (maybe Decode.string)
+        |> required "DateOfDischarge" (maybe Decode.string)
+        |> required "DischargePhysician" (maybe Decode.string)
+        |> required "DischargeDiagnosis" (maybe Decode.string)
+        |> required "HospitalizationServiceType" (maybe Decode.string)
+        |> required "HospitalizationId" (maybe Decode.int)
+        |> required "ReportDate" (maybe Decode.string)
+        |> required "FileName" (maybe Decode.string)
+        |> required "CanTransfer" (Decode.bool)
+        |> required "Facility" (maybe Decode.string)
+        |> required "FacilityFax" (maybe Decode.string)
+        |> required "Recommendations" (maybe Decode.string)
+
+
+encodeRecord : NewRecord -> Encode.Value
+encodeRecord newRecord =
+    Encode.object
+        [ ( "RecordId", Encode.int <| newRecord.recordId )
+        , ( "PatientID", Encode.int <| newRecord.patientId )
+        , ( "FacilityID", maybeInt Encode.int <| newRecord.facilityId )
+        , ( "Facility", Encode.string <| newRecord.facility )
+        , ( "RecordType", Encode.string <| newRecord.recordType )
+        , ( "RecordTypeId", Encode.int <| newRecord.recordTypeId )
+        , ( "TimeVisit", Encode.string <| newRecord.timeVisit )
+        , ( "Provider", Encode.string <| newRecord.provider )
+        , ( "Speciality", Encode.string <| newRecord.speciality )
+        , ( "Comments", Encode.string <| newRecord.comments )
+        , ( "RecordFile", Encode.string <| newRecord.recordFile )
+        ]
 
 
 decodeDropDownItem : Decoder DropDownItem
 decodeDropDownItem =
     decode DropDownItem
-        |> required "Id" (maybe int)
-        |> required "Name" string
+        |> required "Id" (maybe Decode.int)
+        |> required "Name" Decode.string
 
 
 decodeModel : Decoder WebResponse
 decodeModel =
     decode WebResponse
-        |> required "list" (list decodeRecord)
-        |> required "facilityDropdown" (list decodeDropDownItem)
-        |> required "recordTypeDropdown" (list decodeDropDownItem)
+        |> required "list" (Decode.list decodeRecord)
+        |> required "facilityDropdown" (Decode.list decodeDropDownItem)
+        |> required "recordTypeDropdown" (Decode.list decodeDropDownItem)
 
 
 request : Int -> Int -> Http.Request WebResponse
@@ -64,3 +82,26 @@ getRecords patientId recordTypeId t =
 deleteRequest : Int -> Cmd Msg
 deleteRequest rowId =
     Http.send DeleteCompleted <| Http.getString ("/People/DeleteRecord?recordId=" ++ (toString rowId))
+
+
+saveFormRequest : NewRecord -> Http.Request String
+saveFormRequest record =
+    Http.request
+        { body = encodeRecord record |> Http.jsonBody
+        , expect = Http.expectString
+        , headers = []
+        , method = "POST"
+        , timeout = Nothing
+        , url = "/People/AddNewRecord"
+        , withCredentials = False
+        }
+
+
+saveForm : NewRecord -> Cmd Msg
+saveForm newRecord =
+    Http.send SaveCompleted (saveFormRequest newRecord)
+
+
+maybeInt : (a -> Encode.Value) -> Maybe a -> Encode.Value
+maybeInt encoder =
+    Maybe.map encoder >> Maybe.withDefault Encode.null

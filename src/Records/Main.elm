@@ -3,7 +3,7 @@ port module Records.Main exposing (..)
 import Records.Load exposing (..)
 import Records.Model exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option, span, a, ul, li, label, form, textarea, img)
-import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex, for, src, title)
+import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex, for, src, title, href)
 import Html.Events exposing (onInput, onClick)
 import Table
 import Utils.CommonGrid exposing (..)
@@ -20,16 +20,10 @@ port initSyncfusionControls : SyncFusionMessage -> Cmd msg
 port deleteComplete : String -> Cmd msg
 
 
-port submitForm : NewRecord -> Cmd msg
-
-
 port setLoadingStatus : Bool -> Cmd msg
 
 
 port setUnsavedChanges : Bool -> Cmd msg
-
-
-port saveComplete : (String -> msg) -> Sub msg
 
 
 port updateFacility : (DropDownItem -> msg) -> Sub msg
@@ -56,7 +50,6 @@ subscriptions model =
                 , updateCategory (UpdateCategory t)
                 , updateDateTimeOfVisit (UpdateDateTimeOfVisit t)
                 , updateFileName (UpdateRecordFile t)
-                , saveComplete SaveCompleted
                 ]
 
         _ ->
@@ -87,8 +80,8 @@ update msg model =
             }
                 ! [ setLoadingStatus False ]
 
-        Load (Err t) ->
-            { model | state = Error t } ! [ setLoadingStatus False ]
+        Load (Err httpError) ->
+            { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
 
         SetTableState newState ->
             { model | tableState = newState } ! []
@@ -122,11 +115,11 @@ update msg model =
                     if List.length (formValidationErrors newRecord) > 0 then
                         []
                     else
-                        [ submitForm newRecord, setUnsavedChanges False ]
+                        [ saveForm newRecord, setUnsavedChanges False ]
             in
                 { model | state = AddNew { newRecord | showValidationErrors = True } } ! actions
 
-        SaveCompleted str ->
+        SaveCompleted httpResult ->
             ( model, (getRecords model.patientId model.recordTypeId) Load )
 
         Cancel ->
@@ -138,8 +131,8 @@ update msg model =
         DeleteCompleted (Ok t) ->
             ( model, deleteComplete "Record was deleted successfully" )
 
-        DeleteCompleted (Err t) ->
-            { model | state = Error t } ! []
+        DeleteCompleted (Err httpError) ->
+            { model | state = Error (toString httpError) } ! []
 
         UpdateFacility newRecord dropDownItem ->
             { model | state = AddNew { newRecord | facility = dropDownItem.name, facilityId = dropDownItem.id } } ! [ setUnsavedChanges True ]
@@ -217,8 +210,8 @@ view model =
                         ]
                     ]
 
-        Error err ->
-            div [] [ text (toString err) ]
+        Error errMessage ->
+            div [] [ text errMessage ]
 
 
 

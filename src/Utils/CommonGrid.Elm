@@ -1,7 +1,7 @@
 module Utils.CommonGrid exposing (..)
 
 import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
-import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, attribute)
+import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, attribute, href, target)
 import Table
 import Utils.CommonTypes exposing (DropDownState)
 
@@ -163,7 +163,7 @@ dropDownMenuStyle dropDownState =
 dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
 dropDownMenuItem ( iconClass, displayText, event ) =
     li [ class "e-content e-list" ]
-        [ a [ class "e-menulink", event ]
+        [ a [ class "e-menulink", event, target "_blank" ]
             [ text displayText
             , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
             ]

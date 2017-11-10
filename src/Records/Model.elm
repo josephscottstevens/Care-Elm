@@ -14,7 +14,7 @@ type Msg
     | SendMenuMessage Int String
     | Delete Int
     | DeleteCompleted (Result Http.Error String)
-    | SaveCompleted String
+    | SaveCompleted (Result Http.Error String)
     | UpdateFacility NewRecord DropDownItem
     | UpdateCategory NewRecord DropDownItem
     | UpdateDateTimeOfVisit NewRecord String
@@ -28,7 +28,7 @@ type Msg
 type ModelState
     = Grid
     | AddNew NewRecord
-    | Error Http.Error
+    | Error String
 
 
 type SortMode
