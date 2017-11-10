@@ -3,7 +3,7 @@ port module Records.Main exposing (..)
 import Records.Load exposing (..)
 import Records.Model exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option, span, a, ul, li, label, form, textarea, img)
-import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex, for, src, title)
+import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex, for, src, title, readonly)
 import Html.Events exposing (onInput, onClick, onInput, onSubmit)
 import Table
 import Utils.CommonGrid exposing (..)
@@ -41,6 +41,9 @@ port updateCategory : (DropDownItem -> msg) -> Sub msg
 port updateDateTimeOfVisit : (String -> msg) -> Sub msg
 
 
+port updateFileName : (String -> msg) -> Sub msg
+
+
 port dropDownToggle : (DropDownState -> msg) -> Sub msg
 
 
@@ -52,6 +55,7 @@ subscriptions model =
                 [ updateFacility (UpdateFacility t)
                 , updateCategory (UpdateCategory t)
                 , updateDateTimeOfVisit (UpdateDateTimeOfVisit t)
+                , updateFileName (UpdateRecordFile t)
                 , saveComplete SaveCompleted
                 ]
 
@@ -201,10 +205,19 @@ view model =
                     , textInput input "Doctor of Visit" newRecord.provider (UpdateDoctorOfVisit newRecord) False
                     , textInput input "Speciality of Visit" newRecord.speciality (UpdateSpecialtyOfVisit newRecord) False
                     , textInput input "Comments" newRecord.comments (UpdateComments newRecord) True
-                    , fileInput input "Upload Record File" "" (UpdateRecordFile newRecord) True
-                    , hideInput "FacilityID" "79"
-                    , hideInput "PatientID" "6676"
-                    , hideInput "Recordtype" "1"
+                    , div [ class "form-group" ]
+                        [ label [ class (labelWidth ++ "control-label required"), for "fileName" ]
+                            [ text "Wanna file" ]
+                        , div [ class "col-sm-6 col-md-4 col-lg-3" ]
+                            [ input [ type_ "text", class "e-textbox", id "fileName", value newRecord.recordFile, onChange (UpdateRecordFile newRecord), readonly True ] []
+                            ]
+                        , div [ class "col-sm-2 col-md-1 col-lg-1" ]
+                            [ div [ id "fileBtn" ] []
+                            ]
+                        ]
+                    , hideInput "FacilityID" (defaultInt newRecord.facilityId)
+                    , hideInput "PatientID" (toString model.patientId)
+                    , hideInput "Recordtype" (toString model.recordTypeId)
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
                             [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), class "btn btn-success margin-left-5 pull-right" ] [ text "Save" ]

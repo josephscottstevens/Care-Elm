@@ -25,14 +25,21 @@ perhaps... node_modules folder is needed... or the step to get that there?
 
 
 TODO:
-put edit mode inside of grid 
-fix category required
-clean up hideInput
-test out file uploader from syncfusion
-implement setIsUnsavedChanges
+use file uploader (and If I get that working, I can remove the giant hack that is form submission)
+why am I sending a null FacilityId to syncufsioninit?
+cleanup common controls, 
+	pass 
+		Optional
+		Required
+	instead of Bool
+	
+	don't auto make id in the bottom left common item, do it a level up
+	don't expose onSelect \ common control
+	have a withId to optionally pass id in
 dropdown item "Save to Client Portal" is busted
 Make sure to fix dates on save \ load
 When clicking delete, confirmation message should appear first
+when page first loads, make sure to fire the there are no unsaved changes, incase another form has screwed it lol
 
 Filter above each header
 Don't sort on header click :/ oh my
@@ -40,6 +47,8 @@ Place sort icon next to header
 Perhaps show default sorted?
 track down why files aren't being saved correctly
 don't need PatientId\recordTypeId from server anymore
+
+for update facility\category, I am not sure if I am saving both parameters being passed
 
 Populate the RecordTypeId from flags before loading.. somehow
 	Also, change the dropdown width to be concrete, right now, during load, there is a flicker awaiting stuff
@@ -65,6 +74,9 @@ How can I put Elm-Make command as apart of vscode instead of needing to up arrow
 	
 Edit Button's class name is "-Column", and I am styling that class, but if we have any columns without a name... how to handle?
 	Maybe have a type, Column-With-ClassName function?
+
+REQUESTED TODO:
+put edit mode inside of grid  (but.. how?)
 	
 DELETE
 	C:\Projects\NavCare\HC360-Integration-UserInterfaceEnhancements-Phase2\trunk\Care-24-7\Care-24-7-MVC\Views\People\_Records.cshtml

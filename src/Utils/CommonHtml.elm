@@ -1,4 +1,4 @@
-module Utils.CommonHtml exposing (dropInput, textInput, fileInput, hideInput, fullWidth, labelWidth, controlWidth)
+module Utils.CommonHtml exposing (dropInput, textInput, fileInput, hideInput, fullWidth, labelWidth, controlWidth, inputCommonFormat, onChange)
 
 import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name)
@@ -72,7 +72,7 @@ inputCommonWithType control displayText inputValue event isRequired controlType 
 
 fileInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
 fileInput control displayText inputValue event isRequired =
-    inputCommonWithType control displayText inputValue event isRequired "file"
+    inputCommonWithType control displayText inputValue event isRequired "text"
 
 
 textInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg

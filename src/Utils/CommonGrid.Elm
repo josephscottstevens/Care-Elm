@@ -13,9 +13,14 @@ dataTarget val =
 
 defaultString : Maybe String -> String
 defaultString str =
-    case str of
+    Maybe.withDefault "" str
+
+
+defaultInt : Maybe Int -> String
+defaultInt int =
+    case int of
         Just t ->
-            t
+            toString t
 
         Nothing ->
             ""
