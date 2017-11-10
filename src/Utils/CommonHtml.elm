@@ -1,10 +1,11 @@
-module Utils.CommonHtml exposing (dropInput, textInput, fileInput, hideInput, fullWidth, labelWidth, controlWidth, inputCommonFormat, onChange)
+module Utils.CommonHtml exposing (dropInput, textInput, fileInput, hideInput, fullWidth, labelWidth, controlWidth)
 
 import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
-import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name)
+import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name, required)
 import Html.Events exposing (onInput, on)
 import Char exposing (isLower, isUpper)
 import Json.Decode as Json
+import Utils.CommonTypes as CT exposing (RequiredType)
 
 
 isAlpha : Char -> Bool
@@ -42,14 +43,16 @@ controlWidth =
     "col-sm-8 col-md-5 col-lg-4"
 
 
-inputCommonFormat : Bool -> String -> List (Html msg) -> Html msg
+inputCommonFormat : RequiredType -> String -> List (Html msg) -> Html msg
 inputCommonFormat isRequired displayText t =
     let
         isRequiredStr =
-            if isRequired then
-                " required"
-            else
-                ""
+            case isRequired of
+                CT.Required ->
+                    " required"
+
+                CT.Optional ->
+                    ""
     in
         div [ class "form-group" ]
             [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr), forId displayText ] [ text displayText ]
@@ -58,26 +61,37 @@ inputCommonFormat isRequired displayText t =
             ]
 
 
-inputCommonWithType : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> String -> Html msg
-inputCommonWithType control displayText inputValue event isRequired controlType =
-    if controlType == "file" then
-        inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", id "Files", name "Files", onChange event ] [] ]
-    else if controlType == "textarea" then
-        inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", id "Files", name "Files" ] [] ]
-    else if controlType == "text" then
-        inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] [] ]
-    else
-        inputCommonFormat isRequired displayText [ control [ type_ controlType, class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] [] ]
+type InputControlType
+    = File
+    | Textbox
+    | TextArea
+    | DropDown
 
 
-fileInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
-fileInput control displayText inputValue event isRequired =
-    inputCommonWithType control displayText inputValue event isRequired "text"
+inputCommonWithType : String -> String -> (String -> msg) -> RequiredType -> InputControlType -> Html msg
+inputCommonWithType displayText inputValue event isRequired controlType =
+    case controlType of
+        File ->
+            inputCommonFormat isRequired displayText [ input [ type_ "file", class "e-textbox", id "Files", name "Files", onChange event ] [] ]
+
+        TextArea ->
+            inputCommonFormat isRequired displayText [ input [ type_ "textarea", class "e-textbox", id "Files", name "Files" ] [] ]
+
+        Textbox ->
+            inputCommonFormat isRequired displayText [ input [ type_ "textbox", class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] [] ]
+
+        DropDown ->
+            inputCommonFormat isRequired displayText [ input [ type_ "?", class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] [] ]
 
 
-textInput : (List (Html.Attribute msg) -> List a -> Html msg) -> String -> String -> (String -> msg) -> Bool -> Html msg
-textInput control displayText inputValue event isRequired =
-    inputCommonWithType control displayText inputValue event isRequired "text"
+fileInput : String -> String -> (String -> msg) -> RequiredType -> Html msg
+fileInput displayText inputValue event isRequired =
+    inputCommonWithType displayText inputValue event isRequired Textbox
+
+
+textInput : String -> String -> (String -> msg) -> RequiredType -> Html msg
+textInput displayText inputValue event isRequired =
+    inputCommonWithType displayText inputValue event isRequired Textbox
 
 
 hideInput : String -> String -> Html msg
@@ -85,11 +99,25 @@ hideInput displayText inputValue =
     input [ type_ "text", class "hide", idAttr displayText, nameAttr displayText, value inputValue ] [ text inputValue ]
 
 
-dropInput : String -> Html msg
-dropInput displayText =
-    inputCommonFormat False displayText [ input [ type_ "text", idAttr displayText ] [] ]
+dropInput : String -> RequiredType -> Html msg
+dropInput displayText isRequired =
+    inputCommonFormat isRequired displayText [ input [ type_ "text", idAttr displayText ] [] ]
 
 
 onChange : (String -> msg) -> Html.Attribute msg
 onChange handler =
     on "change" <| Json.map handler <| Json.at [ "target", "value" ] Json.string
+
+
+
+-- x =
+--     div [ class "form-group" ]
+--         [ label [ class (labelWidth ++ "control-label required"), for "fileName" ]
+--             [ text "Wanna file" ]
+--         , div [ class "col-sm-6 col-md-4 col-lg-3" ]
+--             [ input [ type_ "text", class "e-textbox", id "fileName", value newRecord.recordFile, onChange (UpdateRecordFile newRecord), readonly True ] []
+--             ]
+--         , div [ class "col-sm-2 col-md-1 col-lg-1" ]
+--             [ div [ id "fileBtn" ] []
+--             ]
+--         ]

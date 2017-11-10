@@ -3,8 +3,8 @@ port module Records.Main exposing (..)
 import Records.Load exposing (..)
 import Records.Model exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option, span, a, ul, li, label, form, textarea, img)
-import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex, for, src, title, readonly)
-import Html.Events exposing (onInput, onClick, onInput, onSubmit)
+import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex, for, src, title)
+import Html.Events exposing (onInput, onClick)
 import Table
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
@@ -199,22 +199,14 @@ view model =
                 div
                     [ class "form-horizontal" ]
                     [ validationErrorsDiv
-                    , dropInput "Facility"
-                    , dropInput "Category"
-                    , textInput input "Date of Visit" newRecord.timeVisit (UpdateDateTimeOfVisit newRecord) True
-                    , textInput input "Doctor of Visit" newRecord.provider (UpdateDoctorOfVisit newRecord) False
-                    , textInput input "Speciality of Visit" newRecord.speciality (UpdateSpecialtyOfVisit newRecord) False
-                    , textInput input "Comments" newRecord.comments (UpdateComments newRecord) True
-                    , div [ class "form-group" ]
-                        [ label [ class (labelWidth ++ "control-label required"), for "fileName" ]
-                            [ text "Wanna file" ]
-                        , div [ class "col-sm-6 col-md-4 col-lg-3" ]
-                            [ input [ type_ "text", class "e-textbox", id "fileName", value newRecord.recordFile, onChange (UpdateRecordFile newRecord), readonly True ] []
-                            ]
-                        , div [ class "col-sm-2 col-md-1 col-lg-1" ]
-                            [ div [ id "fileBtn" ] []
-                            ]
-                        ]
+                    , dropInput "Facility" Required
+                    , dropInput "Category" Required
+                    , textInput "Date of Visit" newRecord.timeVisit (UpdateDateTimeOfVisit newRecord) Required
+                    , textInput "Doctor of Visit" newRecord.provider (UpdateDoctorOfVisit newRecord) Optional
+                    , textInput "Speciality of Visit" newRecord.speciality (UpdateSpecialtyOfVisit newRecord) Optional
+                    , textInput "Comments" newRecord.comments (UpdateComments newRecord) Required
+
+                    --, fileInput s
                     , hideInput "FacilityID" (defaultInt newRecord.facilityId)
                     , hideInput "PatientID" (toString model.patientId)
                     , hideInput "Recordtype" (toString model.recordTypeId)
