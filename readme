@@ -13,19 +13,10 @@ install vs code
     https://code.visualstudio.com/download
 
 install Elm extension for vscode
-    Pres Control + Shift + X
+    Press Control + Shift + X
     search for "elm"
     select elm Language support for visual studio code
     press green install button
 
-perhaps... node_modules folder is needed... or the step to get that there?
-
-TODO:
--- Update below
--- Date isn't updating on a per row basis (hardcoded row num to 0)
-
--- add the rest of the missing fields
--- Re-add port \ subscription
--- Super heavy right now on boilerplate to update row
--- Test to see if I can update stuff
--- Fix missing column header
+run 
+elm-make Src\Main.elm --output=C:\Projects\NavCare\HC360-Integration-UserInterfaceEnhancements-Phase2-Joe\trunk\Care-24-7\Care-24-7-MVC\Scripts\People\app.js --debug
