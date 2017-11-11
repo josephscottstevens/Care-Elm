@@ -1,6 +1,6 @@
 TODO:
-change comments to textarea
-remove c# beginform 
+comments onChange event isn't firing
+remove c# beginform from remaining views
 dropdown item "Save to Client Portal" is busted
 Make sure to fix dates on save \ load
 When clicking delete, confirmation message should appear first

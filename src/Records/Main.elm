@@ -215,21 +215,16 @@ view model =
 -- Validation Stuff
 
 
-formInputs : NewRecord -> List ( InputControlType, RequiredType, String, Maybe (String -> Msg) )
+formInputs : NewRecord -> List (InputControlType Msg)
 formInputs newRecord =
-    [ ( FileInput, Required, "Facility", Nothing )
-    , ( DropInput, Required, "Category", Nothing )
-    , ( DropInput, Required, "Date of Visit", Nothing )
-    , ( TextInput, Optional, "Doctor of Visit", Just (UpdateDoctorOfVisit newRecord) )
-    , ( TextInput, Optional, "Speciality of Visit", Just (UpdateSpecialtyOfVisit newRecord) )
-    , ( AreaInput, Required, "Comments", Just (UpdateComments newRecord) )
-    , ( FileInput, Required, "Upload Record File", Just (UpdateRecordFile newRecord) )
+    [ DropInput Required "Facility" "FacilityId"
+    , DropInput Required "Category" "CategoryId"
+    , DropInput Required "Date of Visit" "DateofVisitId"
+    , TextInput Optional "Doctor of Visit" (UpdateDoctorOfVisit newRecord)
+    , TextInput Optional "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord)
+    , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
+    , FileInput Required "Upload Record File" newRecord.recordFile
     ]
-
-
-x : NewRecord -> List (Html Msg)
-x t =
-    makeControls (formInputs t)
 
 
 formValidationErrors : NewRecord -> List String
