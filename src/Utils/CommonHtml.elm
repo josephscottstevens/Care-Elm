@@ -1,4 +1,4 @@
-module Utils.CommonHtml exposing (textInput, dropInput, areaInput, fileInput, fullWidth, labelWidth, controlWidth)
+module Utils.CommonHtml exposing (textInput, dropInput, areaInput, fileInput, fullWidth, labelWidth, controlWidth, CommonControl, commonInput, InputControlType(..), makeControls)
 
 import Html exposing (Html, text, div, button, input, span, th, li, ul, a, label)
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name, readonly)
@@ -75,57 +75,82 @@ type InputControlType
     | TextInput
 
 
-inputCommonWithType : InputControlType -> RequiredType -> String -> Html msg -> Html msg
-inputCommonWithType controlType requiredType displayText t =
-    let
-        commonInput t =
+type alias CommonControl =
+    { controlType : InputControlType
+    , requiredType : RequiredType
+    , displayText : String
+    }
+
+
+commonInput : InputControlType -> RequiredType -> String -> Html msg -> Html msg
+commonInput controlType requiredType displayText t =
+    case controlType of
+        AreaInput ->
             inputCommonFormat requiredType displayText (commonStructure t)
-    in
-        case controlType of
-            AreaInput ->
-                commonInput t
 
-            TextInput ->
-                commonInput t
+        TextInput ->
+            inputCommonFormat requiredType displayText (commonStructure t)
 
-            DropInput ->
-                commonInput t
+        DropInput ->
+            inputCommonFormat requiredType displayText (commonStructure t)
 
-            FileInput ->
-                t
+        FileInput ->
+            t
 
 
-fileInput : RequiredType -> String -> (String -> msg) -> Html msg
-fileInput requiredType displayText event =
-    inputCommonWithType FileInput requiredType displayText (input [ type_ "textarea", class "e-textbox", id "Files", name "Files" ] [])
+makeControls : List ( InputControlType, RequiredType, String, Maybe (String -> msg) ) -> List (Html msg)
+makeControls controls =
+    List.map common controls
 
 
-textInput : RequiredType -> String -> (String -> msg) -> Html msg
-textInput requiredType displayText event =
-    inputCommonWithType TextInput requiredType displayText (input [ type_ "textbox", class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] [])
+common : ( InputControlType, RequiredType, String, Maybe (String -> msg) ) -> Html msg
+common ( controlType, requiredType, displayText, t ) =
+    case t of
+        Just event ->
+            case controlType of
+                TextInput ->
+                    commonInput controlType requiredType displayText (textInput displayText event)
+
+                AreaInput ->
+                    commonInput controlType requiredType displayText (areaInput displayText event)
+
+                DropInput ->
+                    Debug.crash "Drop input's cannot have an input, because syncfusion will override"
+
+                FileInput ->
+                    commonInput controlType requiredType displayText (fileInput requiredType displayText)
+
+        Nothing ->
+            commonInput controlType requiredType displayText (dropInput displayText)
 
 
-areaInput : RequiredType -> String -> (String -> msg) -> Html msg
-areaInput requiredType displayText event =
-    inputCommonWithType AreaInput requiredType displayText (input [ type_ "text", idAttr displayText, onChange event ] [])
+textInput : String -> (String -> msg) -> Html msg
+textInput displayText event =
+    input [ type_ "textbox", class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] []
 
 
-dropInput : RequiredType -> String -> Html msg
-dropInput requiredType displayText =
-    inputCommonWithType DropInput
-        requiredType
-        displayText
-        (div [ class "form-group" ]
-            [ label [ class (labelWidth ++ "control-label " ++ isRequiredStr requiredType), for "fileName" ]
-                [ text displayText ]
-            , div [ class "col-sm-6 col-md-4 col-lg-3" ]
-                [ input [ type_ "text", class "e-textbox", id "fileName", readonly True ] []
-                ]
-            , div [ class "col-sm-2 col-md-1 col-lg-1" ]
-                [ div [ id "fileBtn" ] []
-                ]
+areaInput : String -> (String -> msg) -> Html msg
+areaInput displayText event =
+    input [ type_ "text", idAttr displayText, onChange event ] []
+
+
+dropInput : String -> Html msg
+dropInput displayText =
+    input [ type_ "textarea", class "e-textbox", id "Files", name "Files" ] []
+
+
+fileInput : RequiredType -> String -> Html msg
+fileInput requiredType displayText =
+    div [ class "form-group" ]
+        [ label [ class (labelWidth ++ "control-label " ++ isRequiredStr requiredType), for "fileName" ]
+            [ text displayText ]
+        , div [ class "col-sm-6 col-md-4 col-lg-3" ]
+            [ input [ type_ "text", class "e-textbox", id "fileName", readonly True ] []
             ]
-        )
+        , div [ class "col-sm-2 col-md-1 col-lg-1" ]
+            [ div [ id "fileBtn" ] []
+            ]
+        ]
 
 
 onChange : (String -> msg) -> Html.Attribute msg

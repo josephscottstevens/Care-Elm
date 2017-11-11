@@ -190,18 +190,9 @@ view model =
 
                 saveBtnClass =
                     class "btn btn-success margin-left-5 pull-right"
-            in
-                div
-                    [ class "form-horizontal" ]
-                    [ validationErrorsDiv
-                    , dropInput Required "Facility"
-                    , dropInput Required "Category"
-                    , dropInput Required "Date of Visit"
-                    , textInput Optional "Doctor of Visit" (UpdateDoctorOfVisit newRecord)
-                    , textInput Optional "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord)
-                    , areaInput Required "Comments" (UpdateComments newRecord)
-                    , fileInput Required "Upload Record File" (UpdateRecordFile newRecord)
-                    , div [ class "form-group" ]
+
+                footerControls =
+                    [ div [ class "form-group" ]
                         [ div [ class fullWidth ]
                             [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
                             , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
@@ -209,12 +200,36 @@ view model =
                         ]
                     ]
 
+                inputControls =
+                    makeControls (formInputs newRecord)
+            in
+                div
+                    [ class "form-horizontal" ]
+                    (validationErrorsDiv :: inputControls ++ footerControls)
+
         Error errMessage ->
             div [] [ text errMessage ]
 
 
 
 -- Validation Stuff
+
+
+formInputs : NewRecord -> List ( InputControlType, RequiredType, String, Maybe (String -> Msg) )
+formInputs newRecord =
+    [ ( FileInput, Required, "Facility", Nothing )
+    , ( DropInput, Required, "Category", Nothing )
+    , ( DropInput, Required, "Date of Visit", Nothing )
+    , ( TextInput, Optional, "Doctor of Visit", Just (UpdateDoctorOfVisit newRecord) )
+    , ( TextInput, Optional, "Speciality of Visit", Just (UpdateSpecialtyOfVisit newRecord) )
+    , ( AreaInput, Required, "Comments", Just (UpdateComments newRecord) )
+    , ( FileInput, Required, "Upload Record File", Just (UpdateRecordFile newRecord) )
+    ]
+
+
+x : NewRecord -> List (Html Msg)
+x t =
+    makeControls (formInputs t)
 
 
 formValidationErrors : NewRecord -> List String
