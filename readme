@@ -3,13 +3,13 @@ install NPM
 
 install elm runtime
     open powershell
-    type "npm install -g elm"
+    type: npm install -g elm
 
 install Elm format
-    npm install -g elm-format
+    type: npm install -g elm-format
     close powershell
 
-install vs code
+install Visual Studio Code
     https://code.visualstudio.com/download
 
 install Elm extension for vscode
@@ -18,5 +18,7 @@ install Elm extension for vscode
     select elm Language support for visual studio code
     press green install button
 
-run 
-elm-make Src\Main.elm --output=C:\Projects\NavCare\HC360-Integration-UserInterfaceEnhancements-Phase2-Joe\trunk\Care-24-7\Care-24-7-MVC\Scripts\People\app.js --debug
+install missing packages \ build project
+    open Integrated terminal (View -> Integrated Terminal)
+    type: elm-make
+    type: y
