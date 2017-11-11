@@ -17,7 +17,7 @@ type Msg
     | SaveCompleted (Result Http.Error String)
     | UpdateFacility NewRecord DropDownItem
     | UpdateCategory NewRecord DropDownItem
-    | UpdateDateTimeOfVisit NewRecord String
+    | UpdateDateOfVisit NewRecord String
     | UpdateDoctorOfVisit NewRecord String
     | UpdateSpecialtyOfVisit NewRecord String
     | UpdateComments NewRecord String

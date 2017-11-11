@@ -48,7 +48,7 @@ subscriptions model =
             Sub.batch
                 [ updateFacility (UpdateFacility t)
                 , updateCategory (UpdateCategory t)
-                , updateDateTimeOfVisit (UpdateDateTimeOfVisit t)
+                , updateDateTimeOfVisit (UpdateDateOfVisit t)
                 , updateFileName (UpdateRecordFile t)
                 ]
 
@@ -150,7 +150,7 @@ update msg model =
                 Nothing ->
                     model ! []
 
-        UpdateDateTimeOfVisit newRecord str ->
+        UpdateDateOfVisit newRecord str ->
             { model | state = AddNew { newRecord | timeVisit = str } } ! [ setUnsavedChanges True ]
 
         UpdateDoctorOfVisit newRecord str ->
@@ -194,13 +194,14 @@ view model =
                 div
                     [ class "form-horizontal" ]
                     [ validationErrorsDiv
-                    , dropInput "Facility" Required
-                    , dropInput "Category" Required
-                    , dropInput "Date of Visit" Required
-                    , textInput "Doctor of Visit" (UpdateDoctorOfVisit newRecord) Optional
-                    , textInput "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord) Optional
-                    , textInput "Comments" (UpdateComments newRecord) Required
-                    , fileInput "Upload Record File" (UpdateRecordFile newRecord) Required
+
+                    -- , dropInput Required "Facility"
+                    -- , dropInput Required "Category"
+                    -- , dropInput Required "Date of Visit"
+                    , textInput Optional "Doctor of Visit" (UpdateDoctorOfVisit newRecord)
+                    , textInput Optional "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord)
+                    , areaInput Required "Comments" (UpdateComments newRecord)
+                    , fileInput Required "Upload Record File" (UpdateRecordFile newRecord)
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
                             [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
@@ -319,8 +320,8 @@ getDropDownItemById facilities facilityId =
             |> List.filter (\t -> t.id == facilityId)
             |> List.head
     of
-        Just { name } ->
-            name
+        Just dropDownItem ->
+            dropDownItem.name
 
         Nothing ->
             ""
