@@ -64,6 +64,7 @@ decodeDropDownItem =
 decodeModel : Decoder WebResponse
 decodeModel =
     decode WebResponse
+        |> required "facilityId" (maybe Decode.int)
         |> required "list" (Decode.list decodeRecord)
         |> required "facilityDropdown" (Decode.list decodeDropDownItem)
         |> required "recordTypeDropdown" (Decode.list decodeDropDownItem)

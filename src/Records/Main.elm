@@ -74,14 +74,15 @@ update msg model =
         Load (Ok t) ->
             { model
                 | state = Grid
+                , facilityId = t.facilityId
                 , records = t.records
                 , facilities = t.facilities
                 , recordTypes = t.recordTypes
             }
-                ! [ setLoadingStatus False ]
+                ! [ setLoadingStatus False, setUnsavedChanges False ]
 
         Load (Err httpError) ->
-            { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
+            { model | state = Error (toString httpError) } ! [ setLoadingStatus False, setUnsavedChanges False ]
 
         SetTableState newState ->
             { model | tableState = newState } ! []
@@ -94,7 +95,7 @@ update msg model =
                 updatedRecords =
                     model.records |> List.filter (\t -> t.id /= rowId)
             in
-                ( { model | records = updatedRecords }, deleteRequest rowId )
+                { model | records = updatedRecords } ! [ deleteRequest rowId ]
 
         AddNewStart ->
             let
@@ -120,7 +121,7 @@ update msg model =
                 { model | state = AddNew { newRecord | showValidationErrors = True } } ! actions
 
         SaveCompleted httpResult ->
-            ( model, (getRecords model.patientId model.recordTypeId) Load )
+            model ! [ (getRecords model.patientId model.recordTypeId) Load ]
 
         Cancel ->
             { model | state = Grid } ! [ setUnsavedChanges False ]
@@ -129,7 +130,7 @@ update msg model =
             { model | dropDownState = dropState } ! []
 
         DeleteCompleted (Ok t) ->
-            ( model, deleteComplete "Record was deleted successfully" )
+            model ! [ deleteComplete "Record was deleted successfully" ]
 
         DeleteCompleted (Err httpError) ->
             { model | state = Error (toString httpError) } ! []

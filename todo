@@ -1,28 +1,3 @@
-install NPM
-    https://www.npmjs.com/get-npm
-
-install elm runtime
-    open powershell
-    type "npm install -g elm"
-
-install Elm format
-    npm install -g elm-format
-    close powershell
-
-install vs code
-    https://code.visualstudio.com/download
-
-install Elm extension for vscode
-    Press Control + Shift + X
-    search for "elm"
-    select elm Language support for visual studio code
-    press green install button
-
-run 
-elm-make Src\Main.elm --output=C:\Projects\NavCare\HC360-Integration-UserInterfaceEnhancements-Phase2-Joe\trunk\Care-24-7\Care-24-7-MVC\Scripts\People\app.js --debug
-
-
-
 TODO:
 dropdown item "Save to Client Portal" is busted
 Make sure to fix dates on save \ load
@@ -57,7 +32,6 @@ Dropdown menu on right
 Style checkboxs
 Remove main.js from git
 put private column stuff back in Common (see bottom of Records/Main.elm
-standardize ! [] vs Cmd.none (and when I do use cmd, do ! instead)
 Save request won't put form in error state if it fails
 I think most of the requests right now are ignoring messages
 Save request won't put form in error state if it fails

@@ -38,7 +38,8 @@ type SortMode
 
 
 type alias WebResponse =
-    { records : List Record
+    { facilityId : Maybe Int
+    , records : List Record
     , facilities : List DropDownItem
     , recordTypes : List DropDownItem
     }
@@ -74,7 +75,7 @@ emptyModel flags =
         , facilities = []
         , recordTypes = []
         , patientId = flags.patientId
-        , facilityId = flags.facilityId
+        , facilityId = Nothing
         , recordTypeId = recordType
         , tableState = Table.initialSort "dob"
         , query = ""

@@ -10,7 +10,6 @@ type alias Flags =
     { pageFlag : String
     , patientId : Int
     , recordType : Maybe Int
-    , facilityId : Maybe Int
     }
 
 
