@@ -1,4 +1,6 @@
 TODO:
+change comments to textarea
+remove c# beginform 
 dropdown item "Save to Client Portal" is busted
 Make sure to fix dates on save \ load
 When clicking delete, confirmation message should appear first
@@ -41,6 +43,7 @@ How can I put Elm-Make command as apart of vscode instead of needing to up arrow
 	
 Edit Button's class name is "-Column", and I am styling that class, but if we have any columns without a name... how to handle?
 	Maybe have a type, Column-With-ClassName function?
+put project on github
 
 REQUESTED TODO:
 put edit mode inside of grid  (but.. how?)
