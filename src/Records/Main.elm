@@ -197,13 +197,10 @@ view model =
                     , dropInput "Facility" Required
                     , dropInput "Category" Required
                     , dropInput "Date of Visit" Required
-                    , textInput "Doctor of Visit" newRecord.provider (UpdateDoctorOfVisit newRecord) Optional
-                    , textInput "Speciality of Visit" newRecord.speciality (UpdateSpecialtyOfVisit newRecord) Optional
-                    , textInput "Comments" newRecord.comments (UpdateComments newRecord) Required
-                    , fileInput "Upload file ? " newRecord.recordFile (UpdateRecordFile newRecord) Required
-                    , hideInput "FacilityID" (defaultInt newRecord.facilityId)
-                    , hideInput "PatientID" (toString model.patientId)
-                    , hideInput "Recordtype" (toString model.recordTypeId)
+                    , textInput "Doctor of Visit" (UpdateDoctorOfVisit newRecord) Optional
+                    , textInput "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord) Optional
+                    , textInput "Comments" (UpdateComments newRecord) Required
+                    , fileInput "Upload Record File" (UpdateRecordFile newRecord) Required
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
                             [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
