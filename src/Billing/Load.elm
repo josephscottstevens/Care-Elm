@@ -1,6 +1,5 @@
-module Billing.Load exposing (..)
+module Billing.Load exposing (getEmployment, newEmployers, updateEmployers)
 
-import Json.Encode
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http

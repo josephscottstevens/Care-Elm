@@ -11,13 +11,13 @@ import Utils.CommonTypes exposing (..)
 decodeRecord : Decoder Record
 decodeRecord =
     decode Record
-        |> required "Id" (Decode.int)
+        |> required "Id" Decode.int
         |> required "Date" (maybe Decode.string)
         |> required "Speciality" (maybe Decode.string)
         |> required "Comments" (maybe Decode.string)
         |> required "TransferedTo" (maybe Decode.string)
         |> required "TransferedOn" (maybe Decode.string)
-        |> required "PatientId" (Decode.int)
+        |> required "PatientId" Decode.int
         |> required "Title" (maybe Decode.string)
         |> required "DateAccessed" (maybe Decode.string)
         |> required "Provider" (maybe Decode.string)
@@ -31,7 +31,7 @@ decodeRecord =
         |> required "HospitalizationId" (maybe Decode.int)
         |> required "ReportDate" (maybe Decode.string)
         |> required "FileName" (maybe Decode.string)
-        |> required "CanTransfer" (Decode.bool)
+        |> required "CanTransfer" Decode.bool
         |> required "Facility" (maybe Decode.string)
         |> required "FacilityFax" (maybe Decode.string)
         |> required "Recommendations" (maybe Decode.string)
@@ -72,7 +72,7 @@ decodeModel =
 
 request : Int -> Int -> Http.Request WebResponse
 request patientId recordTypeId =
-    Http.get ("/People/PatientRecordsGrid?patientId=" ++ (toString patientId) ++ "&recordTypeId=" ++ (toString recordTypeId)) decodeModel
+    Http.get ("/People/PatientRecordsGrid?patientId=" ++ toString patientId ++ "&recordTypeId=" ++ toString recordTypeId) decodeModel
 
 
 getRecords : Int -> Int -> (Result Http.Error WebResponse -> msg) -> Cmd msg
@@ -82,7 +82,7 @@ getRecords patientId recordTypeId t =
 
 deleteRequest : Int -> Cmd Msg
 deleteRequest rowId =
-    Http.send DeleteCompleted <| Http.getString ("/People/DeleteRecord?recordId=" ++ (toString rowId))
+    Http.send DeleteCompleted <| Http.getString ("/People/DeleteRecord?recordId=" ++ toString rowId)
 
 
 saveFormRequest : NewRecord -> Http.Request String

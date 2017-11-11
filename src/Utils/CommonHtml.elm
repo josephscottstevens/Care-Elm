@@ -1,6 +1,6 @@
 module Utils.CommonHtml exposing (dropInput, textInput, fileInput, hideInput, fullWidth, labelWidth, controlWidth)
 
-import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
+import Html exposing (Html, text, div, button, input, span, th, li, ul, a, label)
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name, readonly)
 import Html.Events exposing (onInput, on)
 import Char exposing (isLower, isUpper)
@@ -50,21 +50,22 @@ commonStructure t =
         ]
 
 
+isRequiredStr : RequiredType -> String
+isRequiredStr requiredType =
+    case requiredType of
+        CT.Required ->
+            " required"
+
+        CT.Optional ->
+            ""
+
+
 inputCommonFormat : RequiredType -> String -> Html msg -> Html msg
 inputCommonFormat requiredType displayText t =
-    let
-        isRequiredStr =
-            case requiredType of
-                CT.Required ->
-                    " required"
-
-                CT.Optional ->
-                    ""
-    in
-        div [ class "form-group" ]
-            [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr), forId displayText ] [ text displayText ]
-            , t
-            ]
+    div [ class "form-group" ]
+        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId displayText ] [ text displayText ]
+        , t
+        ]
 
 
 type InputControlType
@@ -89,8 +90,8 @@ inputCommonWithType displayText inputValue event requiredType controlType =
 fileInput : String -> String -> (String -> msg) -> RequiredType -> Html msg
 fileInput displayText inputValue event requiredType =
     div [ class "form-group" ]
-        [ label [ class (labelWidth ++ "control-label required"), for "fileName" ]
-            [ text "Wanna file" ]
+        [ label [ class (labelWidth ++ "control-label " ++ isRequiredStr requiredType), for "fileName" ]
+            [ text displayText ]
         , div [ class "col-sm-6 col-md-4 col-lg-3" ]
             [ input [ type_ "text", class "e-textbox", id "fileName", value inputValue, onChange event, readonly True ] []
             ]

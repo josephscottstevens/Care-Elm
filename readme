@@ -1,12 +1,11 @@
 install NPM
     https://www.npmjs.com/get-npm
 
-install elm runtime
+install elm runtime, format and analyse
     open powershell
     type: npm install -g elm
-
-install Elm format
     type: npm install -g elm-format
+    type: npm install -g elm-install
     close powershell
 
 install Visual Studio Code

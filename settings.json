@@ -1,4 +1,6 @@
 {
-    "elm.makeCommand": "./node_modules/.bin/elm-make",
-    "elm.formatOnSave": true
+    "elm.makeCommand": ".\\node_modules\\.bin\\elm-make",
+    // "elm.analyseCommand": ".\\node_modules\\.bin/elm-analyse",
+    "elm.formatOnSave": true,
+    "elm.analyseEnabled": true
 }

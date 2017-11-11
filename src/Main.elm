@@ -1,7 +1,7 @@
 port module Main exposing (..)
 
 import Model exposing (..)
-import Html exposing (div, text)
+import Html exposing (div)
 import Billing.Main as Billing
 import Records.Main as Records
 import Utils.CommonTypes exposing (..)

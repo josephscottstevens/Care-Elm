@@ -2,9 +2,9 @@ port module Records.Main exposing (..)
 
 import Records.Load exposing (..)
 import Records.Model exposing (..)
-import Html exposing (Html, text, div, input, program, button, select, option, span, a, ul, li, label, form, textarea, img)
-import Html.Attributes exposing (style, class, id, type_, value, tabindex, tabindex, for, src, title, href)
-import Html.Events exposing (onInput, onClick)
+import Html exposing (Html, text, div, button)
+import Html.Attributes exposing (class, id, type_, value)
+import Html.Events exposing (onClick)
 import Table
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
@@ -62,7 +62,7 @@ init : Flags -> Cmd Msg
 init flag =
     case flag.recordType of
         Just recType ->
-            (getRecords flag.patientId recType) Load
+            getRecords flag.patientId recType Load
 
         Nothing ->
             Cmd.none
@@ -79,10 +79,10 @@ update msg model =
                 , facilities = t.facilities
                 , recordTypes = t.recordTypes
             }
-                ! [ setLoadingStatus False, setUnsavedChanges False ]
+                ! [ setLoadingStatus False ]
 
         Load (Err httpError) ->
-            { model | state = Error (toString httpError) } ! [ setLoadingStatus False, setUnsavedChanges False ]
+            { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
 
         SetTableState newState ->
             { model | tableState = newState } ! []
@@ -108,7 +108,8 @@ update msg model =
                         , recordType = getDropDownItemById model.recordTypes (Just model.recordTypeId)
                     }
             in
-                { model | state = AddNew newRecord } ! [ initSyncfusionControls (SyncFusionMessage model.facilities model.recordTypes model.facilityId model.recordTypeId) ]
+                { model | state = AddNew newRecord }
+                    ! [ initSyncfusionControls (SyncFusionMessage model.facilities model.recordTypes model.facilityId model.recordTypeId) ]
 
         Save newRecord ->
             let
@@ -120,8 +121,11 @@ update msg model =
             in
                 { model | state = AddNew { newRecord | showValidationErrors = True } } ! actions
 
-        SaveCompleted httpResult ->
-            model ! [ (getRecords model.patientId model.recordTypeId) Load ]
+        SaveCompleted (Ok _) ->
+            model ! [ getRecords model.patientId model.recordTypeId Load ]
+
+        SaveCompleted (Err httpError) ->
+            { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
 
         Cancel ->
             { model | state = Grid } ! [ setUnsavedChanges False ]
@@ -129,7 +133,7 @@ update msg model =
         DropDownToggle dropState ->
             { model | dropDownState = dropState } ! []
 
-        DeleteCompleted (Ok t) ->
+        DeleteCompleted (Ok _) ->
             model ! [ deleteComplete "Record was deleted successfully" ]
 
         DeleteCompleted (Err httpError) ->
@@ -178,17 +182,14 @@ view model =
                 errors =
                     formValidationErrors newRecord
 
-                submitBtnType =
-                    if List.length errors > 0 then
-                        "button"
-                    else
-                        "submit"
-
                 validationErrorsDiv =
                     if newRecord.showValidationErrors == True && List.length errors > 0 then
                         displayErrors errors
                     else
                         div [] []
+
+                saveBtnClass =
+                    class "btn btn-success margin-left-5 pull-right"
             in
                 div
                     [ class "form-horizontal" ]
@@ -205,7 +206,7 @@ view model =
                     , hideInput "Recordtype" (toString model.recordTypeId)
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
-                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), class "btn btn-success margin-left-5 pull-right" ] [ text "Save" ]
+                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
                             , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
                             ]
                         ]
@@ -270,13 +271,13 @@ getColumns recordTypeId =
             , editButton
             ]
     in
-        firstColumn :: (List.append middleColumns lastColumns)
+        firstColumn :: List.append middleColumns lastColumns
 
 
 config : Int -> Table.Config Record Msg
 config recordTypeId =
     Table.customConfig
-        { toId = (\t -> toString .id)
+        { toId = \t -> toString t.id
         , toMsg = SetTableState
         , columns = getColumns recordTypeId
         , customizations = defaultCustomizations
@@ -321,7 +322,7 @@ getDropDownItemById facilities facilityId =
             |> List.filter (\t -> t.id == facilityId)
             |> List.head
     of
-        Just { name, id } ->
+        Just { name } ->
             name
 
         Nothing ->
