@@ -194,10 +194,9 @@ view model =
                 div
                     [ class "form-horizontal" ]
                     [ validationErrorsDiv
-
-                    -- , dropInput Required "Facility"
-                    -- , dropInput Required "Category"
-                    -- , dropInput Required "Date of Visit"
+                    , dropInput Required "Facility"
+                    , dropInput Required "Category"
+                    , dropInput Required "Date of Visit"
                     , textInput Optional "Doctor of Visit" (UpdateDoctorOfVisit newRecord)
                     , textInput Optional "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord)
                     , areaInput Required "Comments" (UpdateComments newRecord)
