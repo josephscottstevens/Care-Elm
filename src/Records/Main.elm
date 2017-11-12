@@ -257,7 +257,7 @@ displayErrors errors =
 -- Column Stuff
 
 
-getColumns : Int -> List (Table.Column Record Msg)
+getColumns : Int -> List (Table.Column RecordRow Msg)
 getColumns recordTypeId =
     let
         firstColumn =
@@ -281,7 +281,7 @@ getColumns recordTypeId =
         firstColumn :: List.append middleColumns lastColumns
 
 
-config : Int -> Table.Config Record Msg
+config : Int -> Table.Config RecordRow Msg
 config recordTypeId =
     Table.customConfig
         { toId = \t -> toString t.id
@@ -291,7 +291,7 @@ config recordTypeId =
         }
 
 
-defaultCustomizations : Table.Customizations Record msg
+defaultCustomizations : Table.Customizations RecordRow msg
 defaultCustomizations =
     { tableAttrs = [ class "e-grid e-js e-waitingpopup" ]
     , caption = Nothing
@@ -313,7 +313,7 @@ dropDownItems rowId =
     ]
 
 
-editButton : Table.Column Record msg
+editButton : Table.Column RecordRow msg
 editButton =
     Table.veryCustomColumn
         { name = ""

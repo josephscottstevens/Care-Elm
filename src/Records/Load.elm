@@ -8,9 +8,9 @@ import Records.Model exposing (..)
 import Utils.CommonTypes exposing (..)
 
 
-decodeRecord : Decoder Record
+decodeRecord : Decoder RecordRow
 decodeRecord =
-    decode Record
+    decode RecordRow
         |> required "Id" Decode.int
         |> required "Date" (maybe Decode.string)
         |> required "Speciality" (maybe Decode.string)

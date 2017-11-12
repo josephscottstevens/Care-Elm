@@ -1,5 +1,6 @@
 TODO:
-comments onChange event isn't firing
+Ahha.. I understand :) I see now, Records actually has different edit forms for each, makes the sense :D
+	No need I think for duplicate columns, so, just need to find out and list all the columns for each
 remove c# beginform from remaining views
 dropdown item "Save to Client Portal" is busted
 Make sure to fix dates on save \ load
