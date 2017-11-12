@@ -70,7 +70,7 @@ inputCommonFormat requiredType displayText t =
 
 type InputControlType msg
     = TextInput RequiredType String (String -> msg)
-    | AreaInput RequiredType String String (String -> msg)
+    | AreaInput RequiredType String (String -> msg)
     | DropInput RequiredType String String
     | FileInput RequiredType String String
 
@@ -86,8 +86,8 @@ common controlType =
         TextInput requiredType displayText event ->
             inputCommonFormat requiredType displayText (commonStructure (textInput displayText event))
 
-        AreaInput requiredType displayText displayValue event ->
-            inputCommonFormat requiredType displayText (commonStructure (areaInput displayText displayValue event))
+        AreaInput requiredType displayText event ->
+            inputCommonFormat requiredType displayText (commonStructure (areaInput displayText event))
 
         DropInput requiredType displayText syncfusionId ->
             inputCommonFormat requiredType displayText (commonStructure (dropInput displayText syncfusionId))
@@ -101,9 +101,9 @@ textInput displayText event =
     input [ type_ "textbox", class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] []
 
 
-areaInput : String -> String -> (String -> msg) -> Html msg
-areaInput displayText displayValue event =
-    textarea [ idAttr displayText, class "e-textarea", onChange event ] [ text displayValue ]
+areaInput : String -> (String -> msg) -> Html msg
+areaInput displayText event =
+    textarea [ idAttr displayText, class "e-textarea", onInput event ] []
 
 
 dropInput : String -> String -> Html msg

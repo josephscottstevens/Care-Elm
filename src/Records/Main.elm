@@ -222,7 +222,7 @@ formInputs newRecord =
     , DropInput Required "Date of Visit" "DateofVisitId"
     , TextInput Optional "Doctor of Visit" (UpdateDoctorOfVisit newRecord)
     , TextInput Optional "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord)
-    , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
+    , AreaInput Required "Comments" (UpdateComments newRecord)
     , FileInput Required "Upload Record File" newRecord.recordFile
     ]
 
