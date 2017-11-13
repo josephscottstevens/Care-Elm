@@ -60,14 +60,11 @@ getRecordType id =
         4 ->
             Radiology
 
-        5 ->
-            Misc
+        9 ->
+            Hospitalizations
 
         6 ->
             Legal
-
-        9 ->
-            Hospitalizations
 
         8 ->
             CallRecordings
@@ -77,6 +74,9 @@ getRecordType id =
 
         12 ->
             Enrollment
+
+        5 ->
+            Misc
 
         _ ->
             Debug.crash "Invalid recordId, cannot load program"
