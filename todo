@@ -1,4 +1,7 @@
-Genericasize validation
+REQUESTED TODO:
+put edit mode inside of grid  (but.. how?)
+	
+	
 Add ReportDateId DateTime dropdown
 	and all the other places it is missing
 Get Messages from server and client to sync up
@@ -10,24 +13,18 @@ Resolve
 
 enrollment, and a coupler other pages aren't as wide as original
 dropdown item "Save to Client Portal" is busted
-Make sure to fix dates on save \ load
-When clicking delete, confirmation message should appear first
+When clicking delete, confirmation popup should appear first
 when page first loads, make sure to fire the there are no unsaved changes, incase another form has screwed it lol
 Re-add dropdown text, for time travelling debugger
 	But first, test to see how it looks without it
 
-
+Implement Hospitalizations
+Implement CallRecordings
 Filter above each header
 Don't sort on header click :/ oh my
 Place sort icon next to header
-Perhaps show default sorted?
-track down why files aren't being saved correctly
-don't need PatientId\recordTypeId from server anymore
-
-for update facility\category, I am not sure if I am saving both parameters being passed
-
-Populate the RecordTypeId from flags before loading.. somehow
-	Also, change the dropdown width to be concrete, right now, during load, there is a flicker awaiting stuff
+show default sorted column?
+oh my... haha... when they change recordTypeId from Category, need to change the edit view
 
 
 LOW TODO:
@@ -56,21 +53,9 @@ Edit Button's class name is "-Column", and I am styling that class, but if we ha
 	Maybe have a type, Column-With-ClassName function?
 put project on github
 
-REQUESTED TODO:
-put edit mode inside of grid  (but.. how?)
-	
-DELETE
-	C:\Projects\NavCare\HC360-Integration-UserInterfaceEnhancements-Phase2\trunk\Care-24-7\Care-24-7-MVC\Views\People\_Records.cshtml
-	
-
-merge up Enrollment branch into Main, close Enrollment branch
-
-REALLY LOW TODO:
-Get dates displaying correctly
-    Perhaps server side as string, meh, or better DateLibrary (if that's hard, scratch that)
-
-Don't really need to have two init functions, right there is the init, and the json.load init, seems silly
 
 
-NOTE:
-run elm-make Src\Main.elm --output=C:\Projects\NavCare\HC360-Integration-UserInterfaceEnhancements-Phase2-Joe\trunk\Care-24-7\Care-24-7-MVC\Scripts\People\app.js --debug
+On Deploy Todo:
+	Validate File stuff still works
+	DateTime is still correct
+	Ask why PreviousEnrollment has a comments column in the grid, but not on edit?
