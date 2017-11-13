@@ -87,16 +87,16 @@ emptyNewRecord : NewRecord
 emptyNewRecord =
     { recordId = 0
     , patientId = 0
-    , facilityId = Nothing
-    , facilityText = ""
-    , recordTypeText = ""
+    , title = ""
     , recordTypeId = 0
-    , timeVisit = ""
-    , provider = ""
     , speciality = ""
+    , provider = ""
+    , timeVisit = ""
+    , timeAcc = ""
+    , fileName = ""
     , comments = ""
-    , recordFile = ""
     , showValidationErrors = False
+    , facilityId = Nothing
     }
 
 
@@ -107,16 +107,16 @@ emptyNewRecord =
 type alias NewRecord =
     { recordId : Int
     , patientId : Int
-    , facilityId : Maybe Int
-    , facilityText : String
-    , recordTypeText : String
+    , title : String
     , recordTypeId : Int
-    , timeVisit : String
-    , provider : String
     , speciality : String
+    , provider : String
+    , timeVisit : String
+    , timeAcc : String
+    , fileName : String
     , comments : String
-    , recordFile : String
     , showValidationErrors : Bool
+    , facilityId : Maybe Int
     }
 
 

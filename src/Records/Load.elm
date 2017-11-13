@@ -42,15 +42,15 @@ encodeRecord newRecord =
     Encode.object
         [ ( "RecordId", Encode.int <| newRecord.recordId )
         , ( "PatientID", Encode.int <| newRecord.patientId )
-        , ( "FacilityID", maybeInt Encode.int <| newRecord.facilityId )
-        , ( "Facility", Encode.string <| newRecord.facilityText )
-        , ( "RecordType", Encode.string <| newRecord.recordTypeText )
+        , ( "Title", Encode.string <| newRecord.title )
         , ( "RecordTypeId", Encode.int <| newRecord.recordTypeId )
-        , ( "TimeVisit", Encode.string <| newRecord.timeVisit )
-        , ( "Provider", Encode.string <| newRecord.provider )
         , ( "Speciality", Encode.string <| newRecord.speciality )
+        , ( "Provider", Encode.string <| newRecord.provider )
+        , ( "TimeVisit", Encode.string <| newRecord.timeVisit )
+        , ( "TimeAcc", Encode.string <| newRecord.timeAcc )
+        , ( "FileName", Encode.string <| newRecord.fileName )
         , ( "Comments", Encode.string <| newRecord.comments )
-        , ( "RecordFile", Encode.string <| newRecord.recordFile )
+        , ( "FacilityID", maybeVal Encode.int <| newRecord.facilityId )
         ]
 
 
@@ -103,6 +103,6 @@ saveForm newRecord =
     Http.send SaveCompleted (saveFormRequest newRecord)
 
 
-maybeInt : (a -> Encode.Value) -> Maybe a -> Encode.Value
-maybeInt encoder =
+maybeVal : (a -> Encode.Value) -> Maybe a -> Encode.Value
+maybeVal encoder =
     Maybe.map encoder >> Maybe.withDefault Encode.null

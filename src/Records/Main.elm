@@ -104,8 +104,6 @@ update msg model =
                         | patientId = model.patientId
                         , recordTypeId = model.recordTypeId
                         , facilityId = model.facilityId
-                        , facilityText = getDropDownItemById model.facilities model.facilityId
-                        , recordTypeText = getDropDownItemById model.recordTypes (Just model.recordTypeId)
                     }
             in
                 { model | state = AddNew newRecord }
@@ -140,12 +138,12 @@ update msg model =
             { model | state = Error (toString httpError) } ! []
 
         UpdateFacility newRecord dropDownItem ->
-            { model | state = AddNew { newRecord | facilityText = dropDownItem.name, facilityId = dropDownItem.id } } ! [ setUnsavedChanges True ]
+            { model | state = AddNew { newRecord | facilityId = dropDownItem.id } } ! [ setUnsavedChanges True ]
 
         UpdateCategory newRecord dropDownItem ->
             case dropDownItem.id of
                 Just t ->
-                    { model | state = AddNew { newRecord | recordTypeText = dropDownItem.name, recordTypeId = t } } ! [ setUnsavedChanges True ]
+                    { model | state = AddNew { newRecord | recordTypeId = t } } ! [ setUnsavedChanges True ]
 
                 Nothing ->
                     model ! []
@@ -163,7 +161,7 @@ update msg model =
             { model | state = AddNew { newRecord | comments = str } } ! [ setUnsavedChanges True ]
 
         UpdateRecordFile newRecord str ->
-            { model | state = AddNew { newRecord | recordFile = str } } ! [ setUnsavedChanges True ]
+            { model | state = AddNew { newRecord | fileName = str } } ! [ setUnsavedChanges True ]
 
 
 view : Model -> Html Msg
@@ -226,7 +224,7 @@ formInputs newRecord =
             , TextInput Optional "Doctor of Visit" (UpdateDoctorOfVisit newRecord)
             , TextInput Optional "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord)
             , AreaInput Required "Comments" (UpdateComments newRecord)
-            , FileInput Required "Upload Record File" newRecord.recordFile
+            , FileInput Required "Upload Record File" newRecord.fileName
             ]
 
         firstColumns =
@@ -273,18 +271,26 @@ formValidationErrors : NewRecord -> List String
 formValidationErrors newRecord =
     let
         errors =
-            [ required newRecord.recordTypeText "Category"
-            , required newRecord.timeVisit "Date of Visit"
-            , required newRecord.comments "Comments"
-            , required newRecord.recordFile "Record File"
+            [ requiredInt newRecord.recordTypeId "Category"
+            , requiredStr newRecord.timeVisit "Date of Visit"
+            , requiredStr newRecord.comments "Comments"
+            , requiredStr newRecord.fileName "Record File"
             ]
     in
         errors |> List.filterMap identity
 
 
-required : String -> String -> Maybe String
-required str propName =
+requiredStr : String -> String -> Maybe String
+requiredStr str propName =
     if str == "" then
+        Just (propName ++ " is required")
+    else
+        Nothing
+
+
+requiredInt : Int -> String -> Maybe String
+requiredInt int propName =
+    if int <= 0 then
         Just (propName ++ " is required")
     else
         Nothing
