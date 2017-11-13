@@ -68,7 +68,7 @@ emptyModel flags =
                     t
 
                 Nothing ->
-                    0
+                    Debug.crash "Invalid recordTypeId, cannot start program"
     in
         { state = Grid
         , records = []
@@ -88,8 +88,8 @@ emptyNewRecord =
     { recordId = 0
     , patientId = 0
     , facilityId = Nothing
-    , facility = ""
-    , recordType = ""
+    , facilityText = ""
+    , recordTypeText = ""
     , recordTypeId = 0
     , timeVisit = ""
     , provider = ""
@@ -108,8 +108,8 @@ type alias NewRecord =
     { recordId : Int
     , patientId : Int
     , facilityId : Maybe Int
-    , facility : String
-    , recordType : String
+    , facilityText : String
+    , recordTypeText : String
     , recordTypeId : Int
     , timeVisit : String
     , provider : String
@@ -130,91 +130,6 @@ type Date
 
 type DropDown
     = Int
-
-
-
--- TODO: update below, anywhere text and it's dropdown, want int
--- TODO: remove Record from the below names (IE: StandardRecordFields, just be StandardFields)
--- TODO: instead of primitive types... maybe have
---       like, for example, instead of
---       Title : String
---       Title : TextBox Required "title"
---       and link it up with the control types in commonHtml
---       then in common html, also have a textWithButton one for the thing on Records
---       also, need numberBox for Call Recordings
-
-
-type RecordType
-    = PrimaryCare StandardRecordFields
-    | Speciality StandardRecordFields
-    | Labs LabRecordFields
-    | Radiology RadiliologyRecordFields
-    | Misc StandardRecordFields
-    | Legal LegalRecordFields
-    | Hospitalizations HospitilizationRecordFields
-    | CallRecordings CallRecordingFields
-    | PreviousHistories PreviousHistoriesRecordFields
-    | Enrollment EnrollmentRecord
-
-
-type alias RecordFields =
-    { facility : DropDown
-    , recordType : DropDown
-    , patientId : Int
-    , fields : Int
-    }
-
-
-type alias StandardRecordFields =
-    { dateTimeOfVisit : Date, doctorOfVisit : Maybe String, specialityOfVisit : Maybe String, comments : String, recordFile : String }
-
-
-type alias LabRecordFields =
-    { dateTimeOfLabsCollected : Date, dateTimeOfLabsAccessioned : Date, nameOfLab : Maybe String, providerOfLab : Maybe String, comments : String, recordFile : String }
-
-
-type alias RadiliologyRecordFields =
-    { dateTimeOfStudyCollected : Date, dateTimeOfStudyAccessioned : Date, nameOfLab : Maybe String, providerOfLab : Maybe String, comments : String, recordFile : String }
-
-
-type alias LegalRecordFields =
-    { title : Maybe String, comments : String, recordFile : String }
-
-
-type alias HospitilizationRecordFields =
-    { facility : Maybe DropDown
-    , dateOfAdmission : Date
-    , dateOfDiscsharge : Date
-    , hospitalServiceType : DropDown
-    , dischargeRecommendations : String
-    , dischargePhysician : Maybe DropDown
-    , comments : String
-    , recordFile : String
-    }
-
-
-type alias CallRecordingFields =
-    { callSid : Maybe String, recordingSid : Maybe String, durationSec : Int, recordingDate : Date, user : Maybe String, task : Maybe String }
-
-
-type alias PreviousHistoriesRecordFields =
-    { reportDate : Maybe Date, recordFile : String }
-
-
-type alias EnrollmentRecord =
-    { title : Maybe String, comments : String, recordFile : String }
-
-
-
--- includes two new add new buttons
---      which both of these are nested forms
--- Dropdowns
--- Facility -- All Forms
--- Category -- All Forms
--- User -- [Call Recordings]
--- Task -- [Task]
--- Hospitilization Service Type -- [Hospitilizations]
--- Discharge Physician -- [Hospitilizations]
 
 
 type alias RecordRow =

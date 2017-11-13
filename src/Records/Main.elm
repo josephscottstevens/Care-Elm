@@ -104,8 +104,8 @@ update msg model =
                         | patientId = model.patientId
                         , recordTypeId = model.recordTypeId
                         , facilityId = model.facilityId
-                        , facility = getDropDownItemById model.facilities model.facilityId
-                        , recordType = getDropDownItemById model.recordTypes (Just model.recordTypeId)
+                        , facilityText = getDropDownItemById model.facilities model.facilityId
+                        , recordTypeText = getDropDownItemById model.recordTypes (Just model.recordTypeId)
                     }
             in
                 { model | state = AddNew newRecord }
@@ -140,12 +140,12 @@ update msg model =
             { model | state = Error (toString httpError) } ! []
 
         UpdateFacility newRecord dropDownItem ->
-            { model | state = AddNew { newRecord | facility = dropDownItem.name, facilityId = dropDownItem.id } } ! [ setUnsavedChanges True ]
+            { model | state = AddNew { newRecord | facilityText = dropDownItem.name, facilityId = dropDownItem.id } } ! [ setUnsavedChanges True ]
 
         UpdateCategory newRecord dropDownItem ->
             case dropDownItem.id of
                 Just t ->
-                    { model | state = AddNew { newRecord | recordType = dropDownItem.name, recordTypeId = t } } ! [ setUnsavedChanges True ]
+                    { model | state = AddNew { newRecord | recordTypeText = dropDownItem.name, recordTypeId = t } } ! [ setUnsavedChanges True ]
 
                 Nothing ->
                     model ! []
@@ -217,21 +217,36 @@ view model =
 
 formInputs : NewRecord -> List (InputControlType Msg)
 formInputs newRecord =
-    [ DropInput Required "Facility" "FacilityId"
-    , DropInput Required "Category" "CategoryId"
-    , DropInput Required "Date of Visit" "DateofVisitId"
-    , TextInput Optional "Doctor of Visit" (UpdateDoctorOfVisit newRecord)
-    , TextInput Optional "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord)
-    , AreaInput Required "Comments" (UpdateComments newRecord)
-    , FileInput Required "Upload Record File" newRecord.recordFile
-    ]
+    let
+        recordType =
+            getRecordType newRecord.recordTypeId
+
+        firstColumns =
+            [ DropInput Required "Facility" "FacilityId"
+            , DropInput Required "Category" "CategoryId"
+            ]
+
+        lastColumns =
+            case recordType of
+                PrimaryCare ->
+                    [ DropInput Required "Date of Visit" "DateofVisitId"
+                    , TextInput Optional "Doctor of Visit" (UpdateDoctorOfVisit newRecord)
+                    , TextInput Optional "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord)
+                    , AreaInput Required "Comments" (UpdateComments newRecord)
+                    , FileInput Required "Upload Record File" newRecord.recordFile
+                    ]
+
+                _ ->
+                    []
+    in
+        List.append firstColumns lastColumns
 
 
 formValidationErrors : NewRecord -> List String
 formValidationErrors newRecord =
     let
         errors =
-            [ required newRecord.recordType "Category"
+            [ required newRecord.recordTypeText "Category"
             , required newRecord.timeVisit "Date of Visit"
             , required newRecord.comments "Comments"
             , required newRecord.recordFile "Record File"
