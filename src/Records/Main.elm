@@ -239,10 +239,6 @@ view model =
             div [] [ text errMessage ]
 
 
-
--- Validation Stuff
-
-
 displayErrors : List String -> Html Msg
 displayErrors errors =
     div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
@@ -320,10 +316,6 @@ formInputs newRecord =
                     ]
     in
         List.append firstColumns lastColumns
-
-
-
--- Column Stuff
 
 
 getColumns : Int -> List (Table.Column RecordRow Msg)
@@ -435,17 +427,3 @@ editButton =
         , viewData = editButtonDiv << .id
         , sorter = Table.unsortable
         }
-
-
-getDropDownItemById : List DropDownItem -> Maybe Int -> String
-getDropDownItemById facilities facilityId =
-    case
-        facilities
-            |> List.filter (\t -> t.id == facilityId)
-            |> List.head
-    of
-        Just dropDownItem ->
-            dropDownItem.name
-
-        Nothing ->
-            ""
