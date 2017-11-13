@@ -26,10 +26,6 @@ type alias DropDownState =
     }
 
 
-type alias HtmlId =
-    String
-
-
 type RecordType
     = PrimaryCare
     | Specialty

@@ -8,7 +8,7 @@ import Html.Events exposing (onClick)
 import Table
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
-import Utils.CommonTypes as CT exposing (..)
+import Utils.CommonTypes exposing (..)
 
 
 port sendMenuMessage : MenuMessage -> Cmd msg
@@ -116,7 +116,7 @@ update msg model =
         Save newRecord ->
             let
                 actions =
-                    if List.length (formValidationErrors newRecord) > 0 then
+                    if List.length (getValidationErrors (formInputs newRecord)) > 0 then
                         []
                     else
                         [ saveForm newRecord, setUnsavedChanges False ]
@@ -187,8 +187,11 @@ view model =
 
         AddNew newRecord ->
             let
+                inputControls =
+                    makeControls (formInputs newRecord)
+
                 errors =
-                    formValidationErrors newRecord
+                    getValidationErrors (formInputs newRecord)
 
                 validationErrorsDiv =
                     if newRecord.showValidationErrors == True && List.length errors > 0 then
@@ -207,9 +210,6 @@ view model =
                             ]
                         ]
                     ]
-
-                inputControls =
-                    makeControls (formInputs newRecord)
             in
                 div
                     [ class "form-horizontal" ]
@@ -221,35 +221,6 @@ view model =
 
 
 -- Validation Stuff
-
-
-formValidationErrors : NewRecord -> List String
-formValidationErrors newRecord =
-    let
-        errors =
-            [ requiredInt newRecord.recordTypeId "Category"
-            , requiredStr newRecord.timeVisit "Date of Visit"
-            , requiredStr newRecord.comments "Comments"
-            , requiredStr newRecord.fileName "Record File"
-            ]
-    in
-        errors |> List.filterMap identity
-
-
-requiredStr : String -> String -> Maybe String
-requiredStr str propName =
-    if str == "" then
-        Just (propName ++ " is required")
-    else
-        Nothing
-
-
-requiredInt : Int -> String -> Maybe String
-requiredInt int propName =
-    if int <= 0 then
-        Just (propName ++ " is required")
-    else
-        Nothing
 
 
 displayErrors : List String -> Html Msg
@@ -264,7 +235,7 @@ formInputs newRecord =
             getRecordType newRecord.recordTypeId
 
         defaultFields =
-            [ DropInput Required "Date of Visit" newRecord.timeVisit "DateofVisitId"
+            [ DropInput Required "Date of Visit" newRecord.timeVisit "TimeVisitId"
             , TextInput Optional "Doctor of Visit" newRecord.provider (UpdateProvider newRecord)
             , TextInput Optional "Specialty of Visit" newRecord.specialty (UpdateSpecialty newRecord)
             , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)

@@ -1,11 +1,11 @@
-module Utils.CommonHtml exposing (textInput, dropInput, areaInput, fileInput, fullWidth, labelWidth, controlWidth, InputControlType(..), makeControls)
+module Utils.CommonHtml exposing (textInput, dropInput, areaInput, fileInput, fullWidth, labelWidth, controlWidth, InputControlType(..), makeControls, getValidationErrors)
 
 import Html exposing (Html, text, div, button, input, span, th, li, ul, a, label, textarea)
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name, readonly)
 import Html.Events exposing (onInput, on)
 import Char exposing (isLower, isUpper)
 import Json.Decode as Json
-import Utils.CommonTypes as CT exposing (RequiredType, HtmlId)
+import Utils.CommonTypes as CommonTypes exposing (RequiredType)
 
 
 isAlpha : Char -> Bool
@@ -53,10 +53,10 @@ commonStructure t =
 isRequiredStr : RequiredType -> String
 isRequiredStr requiredType =
     case requiredType of
-        CT.Required ->
+        CommonTypes.Required ->
             " required"
 
-        CT.Optional ->
+        CommonTypes.Optional ->
             ""
 
 
@@ -71,7 +71,7 @@ inputCommonFormat requiredType displayText t =
 type InputControlType msg
     = TextInput RequiredType String String (String -> msg)
     | AreaInput RequiredType String String (String -> msg)
-    | DropInput RequiredType String String HtmlId
+    | DropInput RequiredType String String String
     | FileInput RequiredType String String
 
 
@@ -80,9 +80,35 @@ makeControls controls =
     List.map common controls
 
 
-getValidationErrors : List (InputControlType msg) -> List (Maybe String)
+getValidationErrors : List (InputControlType msg) -> List String
 getValidationErrors controls =
-    [ Nothing, Just "" ]
+    controls
+        |> List.map commonValidation
+        |> List.filterMap identity
+
+
+commonValidation : InputControlType msg -> Maybe String
+commonValidation controlType =
+    case controlType of
+        TextInput requiredType labelText displayValue event ->
+            requiredStr displayValue labelText
+
+        AreaInput requiredType labelText displayValue event ->
+            requiredStr displayValue labelText
+
+        DropInput requiredType labelText displayValue syncfusionId ->
+            requiredStr displayValue labelText
+
+        FileInput requiredType labelText displayValue ->
+            requiredStr displayValue labelText
+
+
+requiredStr : String -> String -> Maybe String
+requiredStr str propName =
+    if str == "" then
+        Just (propName ++ " is required")
+    else
+        Nothing
 
 
 common : InputControlType msg -> Html msg
@@ -111,9 +137,9 @@ areaInput displayText event =
     textarea [ idAttr displayText, class "e-textarea", onInput event ] []
 
 
-dropInput : String -> HtmlId -> Html msg
+dropInput : String -> String -> Html msg
 dropInput displayText syncfusionId =
-    input [ type_ "text", id (toString syncfusionId) ] []
+    input [ type_ "text", id syncfusionId ] []
 
 
 fileInput : RequiredType -> String -> String -> Html msg
