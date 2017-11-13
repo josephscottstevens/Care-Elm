@@ -28,13 +28,38 @@ defaultInt int =
             ""
 
 
+dateTimeToString : Date.Date -> String
+dateTimeToString date =
+    Date.Extra.toFormattedString "MM/dd/yyyy hh:mm:ss a" date
+
+
+dateToString : Date.Date -> String
+dateToString date =
+    Date.Extra.toFormattedString "MM/dd/yyyy" date
+
+
 defaultDateTime : Maybe String -> String
 defaultDateTime maybeStr =
     case maybeStr of
         Just str ->
             case Date.fromString (str) of
                 Ok date ->
-                    Date.Extra.toFormattedString "MM/dd/yyyy hh:mm:ss a" date
+                    dateTimeToString date
+
+                Err _ ->
+                    ""
+
+        Nothing ->
+            ""
+
+
+defaultDate : Maybe String -> String
+defaultDate maybeStr =
+    case maybeStr of
+        Just str ->
+            case Date.fromString (str) of
+                Ok date ->
+                    dateToString date
 
                 Err _ ->
                     ""

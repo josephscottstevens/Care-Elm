@@ -53,6 +53,7 @@ encodeRecord newRecord =
         , ( "RecordFile", Encode.string <| newRecord.fileName )
         , ( "Comments", Encode.string <| newRecord.comments )
         , ( "FacilityID", maybeVal Encode.int <| newRecord.facilityId )
+        , ( "ReportDate", maybeVal Encode.string <| maybeToDateString <| newRecord.reportDate )
         ]
 
 
@@ -98,6 +99,21 @@ saveFormRequest record =
         , url = "/People/AddNewRecord"
         , withCredentials = False
         }
+
+
+getResponseError : String -> Maybe String
+getResponseError str =
+    case decodeString (field "Error" Decode.int) str of
+        Ok _ ->
+            case decodeString (field "Message" Decode.string) str of
+                Ok t ->
+                    Just t
+
+                Err _ ->
+                    Just ""
+
+        Err _ ->
+            Nothing
 
 
 saveForm : NewRecord -> Cmd Msg

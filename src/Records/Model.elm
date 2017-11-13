@@ -24,6 +24,7 @@ type Msg
     | UpdateFileName NewRecord String
     | UpdateComments NewRecord String
     | UpdateFacility NewRecord DropDownItem
+    | UpdateReportDate NewRecord (Maybe String)
     | Cancel
 
 

@@ -17,7 +17,10 @@ port sendMenuMessage : MenuMessage -> Cmd msg
 port initSyncfusionControls : SyncFusionMessage -> Cmd msg
 
 
-port deleteComplete : String -> Cmd msg
+port displaySuccessMessage : String -> Cmd msg
+
+
+port displayErrorMessage : String -> Cmd msg
 
 
 port setLoadingStatus : Bool -> Cmd msg
@@ -41,6 +44,9 @@ port updateTimeAcc : (Maybe String -> msg) -> Sub msg
 port updateFileName : (String -> msg) -> Sub msg
 
 
+port updateReportDate : (Maybe String -> msg) -> Sub msg
+
+
 port dropDownToggle : (DropDownState -> msg) -> Sub msg
 
 
@@ -54,6 +60,7 @@ subscriptions model =
                 , updateTimeVisit (UpdateTimeVisit t)
                 , updateTimeAcc (UpdateTimeAcc t)
                 , updateFileName (UpdateFileName t)
+                , updateReportDate (UpdateReportDate t)
                 ]
 
         _ ->
@@ -123,8 +130,13 @@ update msg model =
             in
                 { model | state = AddNew { newRecord | showValidationErrors = True } } ! actions
 
-        SaveCompleted (Ok _) ->
-            model ! [ getRecords model.patientId model.recordTypeId Load ]
+        SaveCompleted (Ok responseMsg) ->
+            case getResponseError responseMsg of
+                Just t ->
+                    model ! [ getRecords model.patientId model.recordTypeId Load, displayErrorMessage t ]
+
+                Nothing ->
+                    model ! [ getRecords model.patientId model.recordTypeId Load, displaySuccessMessage "Save completed successfully!" ]
 
         SaveCompleted (Err httpError) ->
             { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
@@ -135,8 +147,13 @@ update msg model =
         DropDownToggle dropState ->
             { model | dropDownState = dropState } ! []
 
-        DeleteCompleted (Ok _) ->
-            model ! [ deleteComplete "Record was deleted successfully" ]
+        DeleteCompleted (Ok responseMsg) ->
+            case getResponseError responseMsg of
+                Just t ->
+                    model ! [ displayErrorMessage t ]
+
+                Nothing ->
+                    model ! [ displaySuccessMessage "Record deleted successfully!" ]
 
         DeleteCompleted (Err httpError) ->
             { model | state = Error (toString httpError) } ! []
@@ -172,6 +189,9 @@ update msg model =
 
         UpdateFacility newRecord dropDownItem ->
             { model | state = AddNew { newRecord | facilityId = dropDownItem.id } } ! [ setUnsavedChanges True ]
+
+        UpdateReportDate newRecord str ->
+            { model | state = AddNew { newRecord | reportDate = str } } ! [ setUnsavedChanges True ]
 
 
 view : Model -> Html Msg
@@ -289,7 +309,7 @@ formInputs newRecord =
                     []
 
                 PreviousHistories ->
-                    [ DropInput Required "ReportDate" (defaultString newRecord.reportDate) "ReportDateId"
+                    [ DropInput Required "Report Date" (defaultString newRecord.reportDate) "ReportDateId"
                     , FileInput Required "Upload Record File" newRecord.fileName
                     ]
 
@@ -357,7 +377,7 @@ getColumns recordTypeId =
                 PreviousHistories ->
                     [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
                     , Table.stringColumn "File Name" (\t -> defaultString t.fileName)
-                    , Table.stringColumn "Report Date" (\t -> defaultDateTime t.reportDate)
+                    , Table.stringColumn "Report Date" (\t -> defaultDate t.reportDate)
                     , Table.stringColumn "Comments" (\t -> defaultString t.comments)
                     ]
 
