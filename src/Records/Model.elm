@@ -19,8 +19,8 @@ type Msg
     | UpdateRecordType NewRecord DropDownItem
     | UpdateSpecialty NewRecord String
     | UpdateProvider NewRecord String
-    | UpdateTimeVisit NewRecord String
-    | UpdateTimeAcc NewRecord String
+    | UpdateTimeVisit NewRecord (Maybe String)
+    | UpdateTimeAcc NewRecord (Maybe String)
     | UpdateFileName NewRecord String
     | UpdateComments NewRecord String
     | UpdateFacility NewRecord DropDownItem
@@ -93,12 +93,12 @@ emptyNewRecord =
     , recordTypeId = 0
     , specialty = ""
     , provider = ""
-    , timeVisit = ""
-    , timeAcc = ""
+    , timeVisit = Nothing
+    , timeAcc = Nothing
     , fileName = ""
     , comments = ""
     , showValidationErrors = False
-    , reportDate = ""
+    , reportDate = Nothing
     , facilityId = Nothing
     }
 
@@ -114,12 +114,12 @@ type alias NewRecord =
     , recordTypeId : Int
     , specialty : String
     , provider : String
-    , timeVisit : String
-    , timeAcc : String
+    , timeVisit : Maybe String
+    , timeAcc : Maybe String
     , fileName : String
     , comments : String
     , showValidationErrors : Bool
-    , reportDate : String
+    , reportDate : Maybe String
     , facilityId : Maybe Int
     }
 

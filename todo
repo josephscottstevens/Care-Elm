@@ -1,5 +1,6 @@
 Genericasize validation
 Add ReportDateId DateTime dropdown
+	and all the other places it is missing
 Get Messages from server and client to sync up
 	Right now I am ignoring response from server when File Added successfully
 Skipped Hospitilizations, Call Recordings
@@ -30,6 +31,7 @@ Populate the RecordTypeId from flags before loading.. somehow
 
 
 LOW TODO:
+Validation is a bit meh, a bit of duplicated code, and had to convert everything to string to validate
 I have double border around the grids
 Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super duplicated stuff?) [no reason to be in same class right?]
 Have active row highlight?

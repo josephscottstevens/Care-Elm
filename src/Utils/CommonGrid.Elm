@@ -4,6 +4,8 @@ import Html exposing (Html, text, div, program, button, input, span, th, li, ul,
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, attribute, href, target)
 import Table
 import Utils.CommonTypes exposing (DropDownState)
+import Date
+import Date.Extra
 
 
 dataTarget : String -> Html.Attribute msg
@@ -21,6 +23,21 @@ defaultInt int =
     case int of
         Just t ->
             toString t
+
+        Nothing ->
+            ""
+
+
+defaultDateTime : Maybe String -> String
+defaultDateTime maybeStr =
+    case maybeStr of
+        Just str ->
+            case Date.fromString (str) of
+                Ok date ->
+                    Date.Extra.toFormattedString "MM/dd/yyyy hh:mm:ss a" date
+
+                Err _ ->
+                    ""
 
         Nothing ->
             ""

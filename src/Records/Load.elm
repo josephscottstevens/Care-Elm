@@ -6,6 +6,8 @@ import Json.Decode.Pipeline exposing (..)
 import Http
 import Records.Model exposing (..)
 import Utils.CommonTypes exposing (..)
+import Date
+import Date.Extra
 
 
 decodeRecord : Decoder RecordRow
@@ -46,8 +48,8 @@ encodeRecord newRecord =
         , ( "RecordTypeId", Encode.int <| newRecord.recordTypeId )
         , ( "Specialty", Encode.string <| newRecord.specialty )
         , ( "Provider", Encode.string <| newRecord.provider )
-        , ( "TimeVisit", Encode.string <| newRecord.timeVisit )
-        , ( "TimeAcc", Encode.string <| newRecord.timeAcc )
+        , ( "TimeVisit", maybeVal Encode.string <| maybeToDateString <| newRecord.timeVisit )
+        , ( "TimeAcc", maybeVal Encode.string <| maybeToDateString <| newRecord.timeAcc )
         , ( "RecordFile", Encode.string <| newRecord.fileName )
         , ( "Comments", Encode.string <| newRecord.comments )
         , ( "FacilityID", maybeVal Encode.int <| newRecord.facilityId )
@@ -106,3 +108,18 @@ saveForm newRecord =
 maybeVal : (a -> Encode.Value) -> Maybe a -> Encode.Value
 maybeVal encoder =
     Maybe.map encoder >> Maybe.withDefault Encode.null
+
+
+maybeToDateString : Maybe String -> Maybe String
+maybeToDateString maybeDateStr =
+    case maybeDateStr of
+        Just dateStr ->
+            case Date.fromString dateStr of
+                Ok date ->
+                    Just (Date.Extra.toUtcIsoString date)
+
+                Err _ ->
+                    Nothing
+
+        Nothing ->
+            Nothing

@@ -32,10 +32,10 @@ port updateFacility : (DropDownItem -> msg) -> Sub msg
 port updateCategory : (DropDownItem -> msg) -> Sub msg
 
 
-port updateTimeVisit : (String -> msg) -> Sub msg
+port updateTimeVisit : (Maybe String -> msg) -> Sub msg
 
 
-port updateTimeAcc : (String -> msg) -> Sub msg
+port updateTimeAcc : (Maybe String -> msg) -> Sub msg
 
 
 port updateFileName : (String -> msg) -> Sub msg
@@ -235,7 +235,7 @@ formInputs newRecord =
             getRecordType newRecord.recordTypeId
 
         defaultFields =
-            [ DropInput Required "Date of Visit" newRecord.timeVisit "TimeVisitId"
+            [ DropInput Required "Date of Visit" (defaultString newRecord.timeVisit) "TimeVisitId"
             , TextInput Optional "Doctor of Visit" newRecord.provider (UpdateProvider newRecord)
             , TextInput Optional "Specialty of Visit" newRecord.specialty (UpdateSpecialty newRecord)
             , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
@@ -256,8 +256,8 @@ formInputs newRecord =
                     defaultFields
 
                 Labs ->
-                    [ DropInput Required "Date/Time of Labs Collected" newRecord.timeVisit "TimeVisitId"
-                    , DropInput Required "Date/Time of Labs Accessioned" newRecord.timeAcc "TimeAccId"
+                    [ DropInput Required "Date/Time of Labs Collected" (defaultString newRecord.timeVisit) "TimeVisitId"
+                    , DropInput Required "Date/Time of Labs Accessioned" (defaultString newRecord.timeAcc) "TimeAccId"
                     , TextInput Optional "Name of Lab" newRecord.title (UpdateTitle newRecord)
                     , TextInput Optional "Provider of Lab" newRecord.provider (UpdateProvider newRecord)
                     , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
@@ -265,8 +265,8 @@ formInputs newRecord =
                     ]
 
                 Radiology ->
-                    [ DropInput Required "Date/Time of Study was done" newRecord.timeVisit "TimeVisitId"
-                    , DropInput Required "Date/Time of Study Accessioned" newRecord.timeAcc "TimeAccId"
+                    [ DropInput Required "Date/Time of Study was done" (defaultString newRecord.timeVisit) "TimeVisitId"
+                    , DropInput Required "Date/Time of Study Accessioned" (defaultString newRecord.timeAcc) "TimeAccId"
                     , TextInput Optional "Name of Study" newRecord.title (UpdateTitle newRecord)
                     , TextInput Optional "Provider of Study" newRecord.provider (UpdateProvider newRecord)
                     , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
@@ -289,7 +289,7 @@ formInputs newRecord =
                     []
 
                 PreviousHistories ->
-                    [ DropInput Required "ReportDate" newRecord.reportDate "ReportDateId"
+                    [ DropInput Required "ReportDate" (defaultString newRecord.reportDate) "ReportDateId"
                     , FileInput Required "Upload Record File" newRecord.fileName
                     ]
 
@@ -313,7 +313,7 @@ getColumns recordTypeId =
             getRecordType recordTypeId
 
         commonColumns =
-            [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
+            [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
             , Table.stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
             , Table.stringColumn "Specialty" (\t -> defaultString t.specialty)
             , Table.stringColumn "Comments" (\t -> defaultString t.comments)
@@ -328,16 +328,16 @@ getColumns recordTypeId =
                     commonColumns
 
                 Labs ->
-                    [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
-                    , Table.stringColumn "Date Accessioned" (\t -> defaultString t.dateAccessed)
+                    [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+                    , Table.stringColumn "Date Accessioned" (\t -> defaultDateTime t.dateAccessed)
                     , Table.stringColumn "Name of Lab" (\t -> defaultString t.title)
                     , Table.stringColumn "Provider" (\t -> defaultString t.provider)
                     , Table.stringColumn "Comments" (\t -> defaultString t.comments)
                     ]
 
                 Radiology ->
-                    [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
-                    , Table.stringColumn "Date Accessioned" (\t -> defaultString t.dateAccessed)
+                    [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+                    , Table.stringColumn "Date Accessioned" (\t -> defaultDateTime t.dateAccessed)
                     , Table.stringColumn "Name of Study" (\t -> defaultString t.title)
                     , Table.stringColumn "Provider" (\t -> defaultString t.provider)
                     , Table.stringColumn "Comments" (\t -> defaultString t.comments)
@@ -347,22 +347,22 @@ getColumns recordTypeId =
                     []
 
                 Legal ->
-                    [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
-                    , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+                    [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+                    , Table.stringColumn "Comments" (\t -> defaultDateTime t.comments)
                     ]
 
                 CallRecordings ->
                     []
 
                 PreviousHistories ->
-                    [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
+                    [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
                     , Table.stringColumn "File Name" (\t -> defaultString t.fileName)
-                    , Table.stringColumn "Report Date" (\t -> defaultString t.reportDate)
+                    , Table.stringColumn "Report Date" (\t -> defaultDateTime t.reportDate)
                     , Table.stringColumn "Comments" (\t -> defaultString t.comments)
                     ]
 
                 Enrollment ->
-                    [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
+                    [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
                     , Table.stringColumn "Comments" (\t -> defaultString t.comments)
                     ]
 
