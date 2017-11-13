@@ -225,7 +225,7 @@ view model =
 
 displayErrors : List String -> Html Msg
 displayErrors errors =
-    div [ class "error" ] (List.map (\t -> div [] [ text t ]) errors)
+    div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
 
 
 formInputs : NewRecord -> List (InputControlType Msg)

@@ -83,6 +83,7 @@ makeControls controls =
 getValidationErrors : List (InputControlType msg) -> List String
 getValidationErrors controls =
     controls
+        |> List.filter isRequired
         |> List.map commonValidation
         |> List.filterMap identity
 
@@ -101,6 +102,32 @@ commonValidation controlType =
 
         FileInput requiredType labelText displayValue ->
             requiredStr displayValue labelText
+
+
+isRequiredBool : RequiredType -> Bool
+isRequiredBool requiredType =
+    case requiredType of
+        CommonTypes.Required ->
+            True
+
+        CommonTypes.Optional ->
+            False
+
+
+isRequired : InputControlType msg -> Bool
+isRequired controlType =
+    case controlType of
+        TextInput requiredType labelText displayValue event ->
+            isRequiredBool requiredType
+
+        AreaInput requiredType labelText displayValue event ->
+            isRequiredBool requiredType
+
+        DropInput requiredType labelText displayValue syncfusionId ->
+            isRequiredBool requiredType
+
+        FileInput requiredType labelText displayValue ->
+            isRequiredBool requiredType
 
 
 requiredStr : String -> String -> Maybe String
