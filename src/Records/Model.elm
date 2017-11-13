@@ -15,13 +15,15 @@ type Msg
     | Delete Int
     | DeleteCompleted (Result Http.Error String)
     | SaveCompleted (Result Http.Error String)
-    | UpdateFacility NewRecord DropDownItem
-    | UpdateCategory NewRecord DropDownItem
-    | UpdateDateOfVisit NewRecord String
-    | UpdateDoctorOfVisit NewRecord String
-    | UpdateSpecialtyOfVisit NewRecord String
+    | UpdateTitle NewRecord String
+    | UpdateRecordType NewRecord DropDownItem
+    | UpdateSpecialty NewRecord String
+    | UpdateProvider NewRecord String
+    | UpdateTimeVisit NewRecord String
+    | UpdateTimeAcc NewRecord String
+    | UpdateFileName NewRecord String
     | UpdateComments NewRecord String
-    | UpdateRecordFile NewRecord String
+    | UpdateFacility NewRecord DropDownItem
     | Cancel
 
 

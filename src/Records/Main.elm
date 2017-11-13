@@ -47,9 +47,9 @@ subscriptions model =
         AddNew t ->
             Sub.batch
                 [ updateFacility (UpdateFacility t)
-                , updateCategory (UpdateCategory t)
-                , updateDateTimeOfVisit (UpdateDateOfVisit t)
-                , updateFileName (UpdateRecordFile t)
+                , updateCategory (UpdateRecordType t)
+                , updateDateTimeOfVisit (UpdateTimeVisit t)
+                , updateFileName (UpdateFileName t)
                 ]
 
         _ ->
@@ -137,10 +137,10 @@ update msg model =
         DeleteCompleted (Err httpError) ->
             { model | state = Error (toString httpError) } ! []
 
-        UpdateFacility newRecord dropDownItem ->
-            { model | state = AddNew { newRecord | facilityId = dropDownItem.id } } ! [ setUnsavedChanges True ]
+        UpdateTitle newRecord str ->
+            { model | state = AddNew { newRecord | title = str } } ! [ setUnsavedChanges True ]
 
-        UpdateCategory newRecord dropDownItem ->
+        UpdateRecordType newRecord dropDownItem ->
             case dropDownItem.id of
                 Just t ->
                     { model | state = AddNew { newRecord | recordTypeId = t } } ! [ setUnsavedChanges True ]
@@ -148,20 +148,26 @@ update msg model =
                 Nothing ->
                     model ! []
 
-        UpdateDateOfVisit newRecord str ->
-            { model | state = AddNew { newRecord | timeVisit = str } } ! [ setUnsavedChanges True ]
+        UpdateSpecialty newRecord str ->
+            { model | state = AddNew { newRecord | speciality = str } } ! [ setUnsavedChanges True ]
 
-        UpdateDoctorOfVisit newRecord str ->
+        UpdateProvider newRecord str ->
             { model | state = AddNew { newRecord | provider = str } } ! [ setUnsavedChanges True ]
 
-        UpdateSpecialtyOfVisit newRecord str ->
-            { model | state = AddNew { newRecord | speciality = str } } ! [ setUnsavedChanges True ]
+        UpdateTimeVisit newRecord str ->
+            { model | state = AddNew { newRecord | timeVisit = str } } ! [ setUnsavedChanges True ]
+
+        UpdateTimeAcc newRecord str ->
+            { model | state = AddNew { newRecord | timeAcc = str } } ! [ setUnsavedChanges True ]
+
+        UpdateFileName newRecord str ->
+            { model | state = AddNew { newRecord | fileName = str } } ! [ setUnsavedChanges True ]
 
         UpdateComments newRecord str ->
             { model | state = AddNew { newRecord | comments = str } } ! [ setUnsavedChanges True ]
 
-        UpdateRecordFile newRecord str ->
-            { model | state = AddNew { newRecord | fileName = str } } ! [ setUnsavedChanges True ]
+        UpdateFacility newRecord dropDownItem ->
+            { model | state = AddNew { newRecord | facilityId = dropDownItem.id } } ! [ setUnsavedChanges True ]
 
 
 view : Model -> Html Msg
@@ -221,8 +227,8 @@ formInputs newRecord =
 
         defaultFields =
             [ DropInput Required "Date of Visit" "DateofVisitId"
-            , TextInput Optional "Doctor of Visit" (UpdateDoctorOfVisit newRecord)
-            , TextInput Optional "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord)
+            , TextInput Optional "Doctor of Visit" (UpdateProvider newRecord)
+            , TextInput Optional "Speciality of Visit" (UpdateSpecialty newRecord)
             , AreaInput Required "Comments" (UpdateComments newRecord)
             , FileInput Required "Upload Record File" newRecord.fileName
             ]
