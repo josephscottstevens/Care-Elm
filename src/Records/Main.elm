@@ -8,7 +8,7 @@ import Html.Events exposing (onClick)
 import Table
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
-import Utils.CommonTypes exposing (..)
+import Utils.CommonTypes as CT exposing (..)
 
 
 port sendMenuMessage : MenuMessage -> Cmd msg
@@ -32,7 +32,10 @@ port updateFacility : (DropDownItem -> msg) -> Sub msg
 port updateCategory : (DropDownItem -> msg) -> Sub msg
 
 
-port updateDateTimeOfVisit : (String -> msg) -> Sub msg
+port updateTimeVisit : (String -> msg) -> Sub msg
+
+
+port updateTimeAcc : (String -> msg) -> Sub msg
 
 
 port updateFileName : (String -> msg) -> Sub msg
@@ -48,7 +51,8 @@ subscriptions model =
             Sub.batch
                 [ updateFacility (UpdateFacility t)
                 , updateCategory (UpdateRecordType t)
-                , updateDateTimeOfVisit (UpdateTimeVisit t)
+                , updateTimeVisit (UpdateTimeVisit t)
+                , updateTimeAcc (UpdateTimeAcc t)
                 , updateFileName (UpdateFileName t)
                 ]
 
@@ -149,7 +153,7 @@ update msg model =
                     model ! []
 
         UpdateSpecialty newRecord str ->
-            { model | state = AddNew { newRecord | speciality = str } } ! [ setUnsavedChanges True ]
+            { model | state = AddNew { newRecord | specialty = str } } ! [ setUnsavedChanges True ]
 
         UpdateProvider newRecord str ->
             { model | state = AddNew { newRecord | provider = str } } ! [ setUnsavedChanges True ]
@@ -219,60 +223,6 @@ view model =
 -- Validation Stuff
 
 
-formInputs : NewRecord -> List (InputControlType Msg)
-formInputs newRecord =
-    let
-        recordType =
-            getRecordType newRecord.recordTypeId
-
-        defaultFields =
-            [ DropInput Required "Date of Visit" "DateofVisitId"
-            , TextInput Optional "Doctor of Visit" (UpdateProvider newRecord)
-            , TextInput Optional "Speciality of Visit" (UpdateSpecialty newRecord)
-            , AreaInput Required "Comments" (UpdateComments newRecord)
-            , FileInput Required "Upload Record File" newRecord.fileName
-            ]
-
-        firstColumns =
-            [ DropInput Required "Facility" "FacilityId"
-            , DropInput Required "Category" "CategoryId"
-            ]
-
-        lastColumns =
-            case recordType of
-                PrimaryCare ->
-                    defaultFields
-
-                Speciality ->
-                    defaultFields
-
-                Labs ->
-                    []
-
-                Radiology ->
-                    []
-
-                Misc ->
-                    defaultFields
-
-                Legal ->
-                    []
-
-                Hospitalizations ->
-                    []
-
-                CallRecordings ->
-                    []
-
-                PreviousHistories ->
-                    []
-
-                Enrollment ->
-                    []
-    in
-        List.append firstColumns lastColumns
-
-
 formValidationErrors : NewRecord -> List String
 formValidationErrors newRecord =
     let
@@ -307,6 +257,80 @@ displayErrors errors =
     div [ class "error" ] (List.map (\t -> div [] [ text t ]) errors)
 
 
+formInputs : NewRecord -> List (InputControlType Msg)
+formInputs newRecord =
+    let
+        recordType =
+            getRecordType newRecord.recordTypeId
+
+        defaultFields =
+            [ DropInput Required "Date of Visit" newRecord.timeVisit "DateofVisitId"
+            , TextInput Optional "Doctor of Visit" newRecord.provider (UpdateProvider newRecord)
+            , TextInput Optional "Specialty of Visit" newRecord.specialty (UpdateSpecialty newRecord)
+            , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
+            , FileInput Required "Upload Record File" newRecord.fileName
+            ]
+
+        firstColumns =
+            [ DropInput Required "Facility" (defaultInt newRecord.facilityId) "FacilityId"
+            , DropInput Required "Category" (toString newRecord.recordTypeId) "CategoryId"
+            ]
+
+        lastColumns =
+            case recordType of
+                PrimaryCare ->
+                    defaultFields
+
+                Specialty ->
+                    defaultFields
+
+                Labs ->
+                    [ DropInput Required "Date/Time of Labs Collected" newRecord.timeVisit "TimeVisitId"
+                    , DropInput Required "Date/Time of Labs Accessioned" newRecord.timeAcc "TimeAccId"
+                    , TextInput Optional "Name of Lab" newRecord.title (UpdateTitle newRecord)
+                    , TextInput Optional "Provider of Lab" newRecord.provider (UpdateProvider newRecord)
+                    , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
+                    , FileInput Required "Upload Record File" newRecord.fileName
+                    ]
+
+                Radiology ->
+                    [ DropInput Required "Date/Time of Study was done" newRecord.timeVisit "TimeVisitId"
+                    , DropInput Required "Date/Time of Study Accessioned" newRecord.timeAcc "TimeAccId"
+                    , TextInput Optional "Name of Study" newRecord.title (UpdateTitle newRecord)
+                    , TextInput Optional "Provider of Study" newRecord.provider (UpdateProvider newRecord)
+                    , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
+                    , FileInput Required "Upload Record File" newRecord.fileName
+                    ]
+
+                Misc ->
+                    defaultFields
+
+                Legal ->
+                    [ TextInput Optional "Title" newRecord.title (UpdateTitle newRecord)
+                    , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
+                    , FileInput Required "Upload Record File" newRecord.fileName
+                    ]
+
+                Hospitalizations ->
+                    []
+
+                CallRecordings ->
+                    []
+
+                PreviousHistories ->
+                    [ DropInput Required "ReportDate" newRecord.reportDate "ReportDateId"
+                    , FileInput Required "Upload Record File" newRecord.fileName
+                    ]
+
+                Enrollment ->
+                    [ TextInput Optional "Title" newRecord.title (UpdateTitle newRecord)
+                    , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
+                    , FileInput Required "Upload Record File" newRecord.fileName
+                    ]
+    in
+        List.append firstColumns lastColumns
+
+
 
 -- Column Stuff
 
@@ -314,25 +338,71 @@ displayErrors errors =
 getColumns : Int -> List (Table.Column RecordRow Msg)
 getColumns recordTypeId =
     let
-        firstColumn =
-            Table.stringColumn "Date Collected" (\t -> defaultString t.date)
+        recordType =
+            getRecordType recordTypeId
 
-        middleColumns =
-            if recordTypeId == 1 || recordTypeId == 2 || recordTypeId == 5 then
-                [ Table.stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
-                , Table.stringColumn "Speciality" (\t -> defaultString t.speciality)
-                ]
-            else if recordTypeId == 6 then
-                []
-            else
-                []
+        commonColumns =
+            [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
+            , Table.stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
+            , Table.stringColumn "Specialty" (\t -> defaultString t.specialty)
+            , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+            ]
+
+        firstColumns =
+            case recordType of
+                PrimaryCare ->
+                    commonColumns
+
+                Specialty ->
+                    commonColumns
+
+                Labs ->
+                    [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
+                    , Table.stringColumn "Date Accessioned" (\t -> defaultString t.dateAccessed)
+                    , Table.stringColumn "Name of Lab" (\t -> defaultString t.title)
+                    , Table.stringColumn "Provider" (\t -> defaultString t.provider)
+                    , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+                    ]
+
+                Radiology ->
+                    [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
+                    , Table.stringColumn "Date Accessioned" (\t -> defaultString t.dateAccessed)
+                    , Table.stringColumn "Name of Study" (\t -> defaultString t.title)
+                    , Table.stringColumn "Provider" (\t -> defaultString t.provider)
+                    , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+                    ]
+
+                Hospitalizations ->
+                    []
+
+                Legal ->
+                    [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
+                    , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+                    ]
+
+                CallRecordings ->
+                    []
+
+                PreviousHistories ->
+                    [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
+                    , Table.stringColumn "File Name" (\t -> defaultString t.fileName)
+                    , Table.stringColumn "Report Date" (\t -> defaultString t.reportDate)
+                    , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+                    ]
+
+                Enrollment ->
+                    [ Table.stringColumn "Date Collected" (\t -> defaultString t.date)
+                    , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+                    ]
+
+                Misc ->
+                    commonColumns
 
         lastColumns =
-            [ Table.stringColumn "Comments" (\t -> defaultString t.comments)
-            , editButton
+            [ editButton
             ]
     in
-        firstColumn :: List.append middleColumns lastColumns
+        List.append firstColumns lastColumns
 
 
 config : Int -> Table.Config RecordRow Msg

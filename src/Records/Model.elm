@@ -91,13 +91,14 @@ emptyNewRecord =
     , patientId = 0
     , title = ""
     , recordTypeId = 0
-    , speciality = ""
+    , specialty = ""
     , provider = ""
     , timeVisit = ""
     , timeAcc = ""
     , fileName = ""
     , comments = ""
     , showValidationErrors = False
+    , reportDate = ""
     , facilityId = Nothing
     }
 
@@ -111,13 +112,14 @@ type alias NewRecord =
     , patientId : Int
     , title : String
     , recordTypeId : Int
-    , speciality : String
+    , specialty : String
     , provider : String
     , timeVisit : String
     , timeAcc : String
     , fileName : String
     , comments : String
     , showValidationErrors : Bool
+    , reportDate : String
     , facilityId : Maybe Int
     }
 
@@ -137,7 +139,7 @@ type DropDown
 type alias RecordRow =
     { id : Int
     , date : Maybe String
-    , speciality : Maybe String
+    , specialty : Maybe String
     , comments : Maybe String
     , transferedTo : Maybe String
     , transferedOn : Maybe String

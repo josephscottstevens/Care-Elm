@@ -1,9 +1,19 @@
-No save successful message? did it bomb?
-remove c# beginform from remaining views
+Genericasize validation
+Add ReportDateId DateTime dropdown
+Get Messages from server and client to sync up
+	Right now I am ignoring response from server when File Added successfully
+Skipped Hospitilizations, Call Recordings
+Resolve 
+	CCDs.... I think, is recordType Null?
+	
+
+enrollment, and a coupler other pages aren't as wide as original
 dropdown item "Save to Client Portal" is busted
 Make sure to fix dates on save \ load
 When clicking delete, confirmation message should appear first
 when page first loads, make sure to fire the there are no unsaved changes, incase another form has screwed it lol
+Re-add dropdown text, for time travelling debugger
+	But first, test to see how it looks without it
 
 
 Filter above each header

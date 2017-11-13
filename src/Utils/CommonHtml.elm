@@ -5,7 +5,7 @@ import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, 
 import Html.Events exposing (onInput, on)
 import Char exposing (isLower, isUpper)
 import Json.Decode as Json
-import Utils.CommonTypes as CT exposing (RequiredType)
+import Utils.CommonTypes as CT exposing (RequiredType, HtmlId)
 
 
 isAlpha : Char -> Bool
@@ -69,9 +69,9 @@ inputCommonFormat requiredType displayText t =
 
 
 type InputControlType msg
-    = TextInput RequiredType String (String -> msg)
-    | AreaInput RequiredType String (String -> msg)
-    | DropInput RequiredType String String
+    = TextInput RequiredType String String (String -> msg)
+    | AreaInput RequiredType String String (String -> msg)
+    | DropInput RequiredType String String HtmlId
     | FileInput RequiredType String String
 
 
@@ -80,20 +80,25 @@ makeControls controls =
     List.map common controls
 
 
+getValidationErrors : List (InputControlType msg) -> List (Maybe String)
+getValidationErrors controls =
+    [ Nothing, Just "" ]
+
+
 common : InputControlType msg -> Html msg
 common controlType =
     case controlType of
-        TextInput requiredType displayText event ->
-            inputCommonFormat requiredType displayText (commonStructure (textInput displayText event))
+        TextInput requiredType labelText displayValue event ->
+            inputCommonFormat requiredType labelText (commonStructure (textInput labelText event))
 
-        AreaInput requiredType displayText event ->
-            inputCommonFormat requiredType displayText (commonStructure (areaInput displayText event))
+        AreaInput requiredType labelText displayValue event ->
+            inputCommonFormat requiredType labelText (commonStructure (areaInput labelText event))
 
-        DropInput requiredType displayText syncfusionId ->
-            inputCommonFormat requiredType displayText (commonStructure (dropInput displayText syncfusionId))
+        DropInput requiredType labelText displayValue syncfusionId ->
+            inputCommonFormat requiredType labelText (commonStructure (dropInput labelText syncfusionId))
 
-        FileInput requiredType displayText displayValue ->
-            fileInput requiredType displayText displayValue
+        FileInput requiredType labelText displayValue ->
+            fileInput requiredType labelText displayValue
 
 
 textInput : String -> (String -> msg) -> Html msg
@@ -106,9 +111,9 @@ areaInput displayText event =
     textarea [ idAttr displayText, class "e-textarea", onInput event ] []
 
 
-dropInput : String -> String -> Html msg
+dropInput : String -> HtmlId -> Html msg
 dropInput displayText syncfusionId =
-    input [ type_ "text", id syncfusionId ] []
+    input [ type_ "text", id (toString syncfusionId) ] []
 
 
 fileInput : RequiredType -> String -> String -> Html msg

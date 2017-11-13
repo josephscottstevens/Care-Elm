@@ -26,21 +26,27 @@ type alias DropDownState =
     }
 
 
+type alias HtmlId =
+    String
+
+
 type RecordType
     = PrimaryCare
-    | Speciality
+    | Specialty
     | Labs
     | Radiology
-    | Misc
-    | Legal
     | Hospitalizations
+    | Legal
+      -- | CCDS
     | CallRecordings
     | PreviousHistories
     | Enrollment
+    | Misc
 
 
 
 -- Feel like this should get used to CommonFunctions, but... later
+-- Ccds -> ?
 
 
 getRecordType : Int -> RecordType
@@ -50,7 +56,7 @@ getRecordType id =
             PrimaryCare
 
         2 ->
-            Speciality
+            Specialty
 
         3 ->
             Labs
@@ -64,16 +70,16 @@ getRecordType id =
         6 ->
             Legal
 
-        7 ->
+        9 ->
             Hospitalizations
 
         8 ->
             CallRecordings
 
-        9 ->
+        11 ->
             PreviousHistories
 
-        10 ->
+        12 ->
             Enrollment
 
         _ ->
@@ -86,7 +92,7 @@ getId recordType =
         PrimaryCare ->
             1
 
-        Speciality ->
+        Specialty ->
             2
 
         Labs ->
@@ -95,20 +101,20 @@ getId recordType =
         Radiology ->
             4
 
-        Misc ->
-            5
+        Hospitalizations ->
+            9
 
         Legal ->
             6
-
-        Hospitalizations ->
-            7
 
         CallRecordings ->
             8
 
         PreviousHistories ->
-            9
+            11
 
         Enrollment ->
-            10
+            12
+
+        Misc ->
+            5

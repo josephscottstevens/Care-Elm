@@ -13,7 +13,7 @@ decodeRecord =
     decode RecordRow
         |> required "Id" Decode.int
         |> required "Date" (maybe Decode.string)
-        |> required "Speciality" (maybe Decode.string)
+        |> required "Specialty" (maybe Decode.string)
         |> required "Comments" (maybe Decode.string)
         |> required "TransferedTo" (maybe Decode.string)
         |> required "TransferedOn" (maybe Decode.string)
@@ -44,11 +44,11 @@ encodeRecord newRecord =
         , ( "PatientID", Encode.int <| newRecord.patientId )
         , ( "Title", Encode.string <| newRecord.title )
         , ( "RecordTypeId", Encode.int <| newRecord.recordTypeId )
-        , ( "Speciality", Encode.string <| newRecord.speciality )
+        , ( "Specialty", Encode.string <| newRecord.specialty )
         , ( "Provider", Encode.string <| newRecord.provider )
         , ( "TimeVisit", Encode.string <| newRecord.timeVisit )
         , ( "TimeAcc", Encode.string <| newRecord.timeAcc )
-        , ( "FileName", Encode.string <| newRecord.fileName )
+        , ( "RecordFile", Encode.string <| newRecord.fileName )
         , ( "Comments", Encode.string <| newRecord.comments )
         , ( "FacilityID", maybeVal Encode.int <| newRecord.facilityId )
         ]
