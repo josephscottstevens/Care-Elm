@@ -221,6 +221,14 @@ formInputs newRecord =
         recordType =
             getRecordType newRecord.recordTypeId
 
+        defaultFields =
+            [ DropInput Required "Date of Visit" "DateofVisitId"
+            , TextInput Optional "Doctor of Visit" (UpdateDoctorOfVisit newRecord)
+            , TextInput Optional "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord)
+            , AreaInput Required "Comments" (UpdateComments newRecord)
+            , FileInput Required "Upload Record File" newRecord.recordFile
+            ]
+
         firstColumns =
             [ DropInput Required "Facility" "FacilityId"
             , DropInput Required "Category" "CategoryId"
@@ -229,14 +237,33 @@ formInputs newRecord =
         lastColumns =
             case recordType of
                 PrimaryCare ->
-                    [ DropInput Required "Date of Visit" "DateofVisitId"
-                    , TextInput Optional "Doctor of Visit" (UpdateDoctorOfVisit newRecord)
-                    , TextInput Optional "Speciality of Visit" (UpdateSpecialtyOfVisit newRecord)
-                    , AreaInput Required "Comments" (UpdateComments newRecord)
-                    , FileInput Required "Upload Record File" newRecord.recordFile
-                    ]
+                    defaultFields
 
-                _ ->
+                Speciality ->
+                    defaultFields
+
+                Labs ->
+                    []
+
+                Radiology ->
+                    []
+
+                Misc ->
+                    defaultFields
+
+                Legal ->
+                    []
+
+                Hospitalizations ->
+                    []
+
+                CallRecordings ->
+                    []
+
+                PreviousHistories ->
+                    []
+
+                Enrollment ->
                     []
     in
         List.append firstColumns lastColumns
