@@ -10,11 +10,9 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
+Fix Mark As Consent height.. bah
+Implement MarkAsConsent menu message
 Fix Call Recording column widths
-Implement CallRecordings
-	Delte isn't gonna work
-	Add new
-	gah, dropdown menu changes on call recordings
 Create add new in edit
 Implement Hospitalizations
 

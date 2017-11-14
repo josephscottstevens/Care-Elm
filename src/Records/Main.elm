@@ -5,10 +5,11 @@ import Records.Model exposing (..)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, id, type_, value)
 import Html.Events exposing (onClick)
-import Table
+import Table exposing (..)
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
 import Utils.CommonTypes exposing (..)
+import Utils.CommonFunctions exposing (..)
 
 
 port sendMenuMessage : MenuMessage -> Cmd msg
@@ -236,7 +237,7 @@ view model =
         Grid ->
             div []
                 [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
-                , editDropDownDiv (dropDownItems model.dropDownState.rowId) model.dropDownState
+                , editDropDownDiv (dropDownItems model.recordTypeId model.dropDownState.rowId) model.dropDownState
                 , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view (config model.recordTypeId) model.tableState model.records ]
                 ]
@@ -360,17 +361,17 @@ formInputs newRecord =
         List.append firstColumns lastColumns
 
 
-getColumns : Int -> List (Table.Column RecordRow Msg)
+getColumns : Int -> List (Column RecordRow Msg)
 getColumns recordTypeId =
     let
         recordType =
             getRecordType recordTypeId
 
         commonColumns =
-            [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-            , Table.stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
-            , Table.stringColumn "Specialty" (\t -> defaultString t.specialty)
-            , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+            [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+            , stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
+            , stringColumn "Specialty" (\t -> defaultString t.specialty)
+            , stringColumn "Comments" (\t -> defaultString t.comments)
             ]
 
         firstColumns =
@@ -382,47 +383,47 @@ getColumns recordTypeId =
                     commonColumns
 
                 Labs ->
-                    [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , Table.stringColumn "Date Accessioned" (\t -> defaultDateTime t.dateAccessed)
-                    , Table.stringColumn "Name of Lab" (\t -> defaultString t.title)
-                    , Table.stringColumn "Provider" (\t -> defaultString t.provider)
-                    , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+                    , stringColumn "Date Accessioned" (\t -> defaultDateTime t.dateAccessed)
+                    , stringColumn "Name of Lab" (\t -> defaultString t.title)
+                    , stringColumn "Provider" (\t -> defaultString t.provider)
+                    , stringColumn "Comments" (\t -> defaultString t.comments)
                     ]
 
                 Radiology ->
-                    [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , Table.stringColumn "Date Accessioned" (\t -> defaultDateTime t.dateAccessed)
-                    , Table.stringColumn "Name of Study" (\t -> defaultString t.title)
-                    , Table.stringColumn "Provider" (\t -> defaultString t.provider)
-                    , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+                    , stringColumn "Date Accessioned" (\t -> defaultDateTime t.dateAccessed)
+                    , stringColumn "Name of Study" (\t -> defaultString t.title)
+                    , stringColumn "Provider" (\t -> defaultString t.provider)
+                    , stringColumn "Comments" (\t -> defaultString t.comments)
                     ]
 
                 Hospitalizations ->
                     []
 
                 Legal ->
-                    [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , Table.stringColumn "Comments" (\t -> defaultDateTime t.comments)
+                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+                    , stringColumn "Comments" (\t -> defaultDateTime t.comments)
                     ]
 
                 CallRecordings ->
-                    [ Table.stringColumn "Date" (\t -> dateTime t.recordingDate)
+                    [ stringColumn "Date" (\t -> dateTime t.recordingDate)
                     , hrefColumn "Recording" "Open" (\t -> defaultString t.recording)
                     , checkColumn "During Enrollment" (\t -> t.enrollment)
                     , checkColumn "Consent" (\t -> t.hasVerbalConsent)
-                    , Table.stringColumn "User" (\t -> defaultString t.staffName)
+                    , stringColumn "User" (\t -> defaultString t.staffName)
                     ]
 
                 PreviousHistories ->
-                    [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , Table.stringColumn "File Name" (\t -> defaultString t.fileName)
-                    , Table.stringColumn "Report Date" (\t -> defaultDate t.reportDate)
-                    , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+                    , stringColumn "File Name" (\t -> defaultString t.fileName)
+                    , stringColumn "Report Date" (\t -> defaultDate t.reportDate)
+                    , stringColumn "Comments" (\t -> defaultString t.comments)
                     ]
 
                 Enrollment ->
-                    [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , Table.stringColumn "Comments" (\t -> defaultString t.comments)
+                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+                    , stringColumn "Comments" (\t -> defaultString t.comments)
                     ]
 
                 Misc ->
@@ -435,9 +436,9 @@ getColumns recordTypeId =
         List.append firstColumns lastColumns
 
 
-config : Int -> Table.Config RecordRow Msg
+config : Int -> Config RecordRow Msg
 config recordTypeId =
-    Table.customConfig
+    customConfig
         { toId = \t -> toString t.id
         , toMsg = SetTableState
         , columns = getColumns recordTypeId
@@ -445,7 +446,7 @@ config recordTypeId =
         }
 
 
-defaultCustomizations : Table.Customizations RecordRow msg
+defaultCustomizations : Customizations RecordRow msg
 defaultCustomizations =
     { tableAttrs = defaultTableAttributes
     , caption = Nothing
@@ -456,21 +457,26 @@ defaultCustomizations =
     }
 
 
-dropDownItems : Int -> List ( String, String, Html.Attribute Msg )
-dropDownItems rowId =
-    [ ( "", "Transfer", onClick (SendMenuMessage rowId "Transfer") )
-    , ( "e-contextedit", "View File", onClick (SendMenuMessage rowId "ViewFile") )
-    , ( "", "Send By Email", onClick (SendMenuMessage rowId "SendByEmail") )
-    , ( "", "Send By Fax", onClick (SendMenuMessage rowId "SendByFax") )
-    , ( "", "Save To Client Portal", onClick (SendMenuMessage rowId "SaveToClientPortal") )
-    , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "Delete") )
-    ]
+dropDownItems : Int -> Int -> List ( String, String, Html.Attribute Msg )
+dropDownItems recordTypeId rowId =
+    case getRecordType recordTypeId of
+        CallRecordings ->
+            [ ( "", "Mark As Consent", onClick (SendMenuMessage rowId "MarkAsConsent") ) ]
+
+        _ ->
+            [ ( "", "Transfer", onClick (SendMenuMessage rowId "Transfer") )
+            , ( "e-contextedit", "View File", onClick (SendMenuMessage rowId "ViewFile") )
+            , ( "", "Send By Email", onClick (SendMenuMessage rowId "SendByEmail") )
+            , ( "", "Send By Fax", onClick (SendMenuMessage rowId "SendByFax") )
+            , ( "", "Save To Client Portal", onClick (SendMenuMessage rowId "SaveToClientPortal") )
+            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "Delete") )
+            ]
 
 
-editButton : Table.Column RecordRow msg
+editButton : Column RecordRow msg
 editButton =
-    Table.veryCustomColumn
+    veryCustomColumn
         { name = ""
         , viewData = editButtonDiv << .id
-        , sorter = Table.unsortable
+        , sorter = unsortable
         }

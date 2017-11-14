@@ -3,14 +3,9 @@ module Utils.CommonHtml exposing (textInput, dropInput, areaInput, fileInput, fu
 import Html exposing (Html, text, div, button, input, span, th, li, ul, a, label, textarea)
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name, readonly)
 import Html.Events exposing (onInput, on)
-import Char exposing (isLower, isUpper)
 import Json.Decode as Json
 import Utils.CommonTypes as CommonTypes exposing (RequiredType)
-
-
-isAlpha : Char -> Bool
-isAlpha char =
-    isLower char || isUpper char
+import Utils.CommonFunctions exposing (..)
 
 
 forId : String -> Html.Attribute msg
