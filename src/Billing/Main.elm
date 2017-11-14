@@ -115,8 +115,8 @@ config =
         { toId = .patientName
         , toMsg = SetTableState
         , columns =
-            [ checkColumn ""
-            , Table.stringColumn "Facility" .facility
+            [ --checkColumn "" ,
+              Table.stringColumn "Facility" .facility
             , Table.stringColumn "Billing Date" .billingDate
             , Table.stringColumn "Main Provider" .mainProvider
             , Table.stringColumn "Patient Name" .patientName

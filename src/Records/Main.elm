@@ -368,7 +368,12 @@ getColumns recordTypeId =
                     ]
 
                 CallRecordings ->
-                    []
+                    [ Table.stringColumn "Date" (\t -> dateTime t.recordingDate)
+                    , Table.stringColumn "Date" (\t -> defaultString t.recording)
+                    , checkColumn "During Enrollment" (\t -> t.enrollment)
+                    , checkColumn "Consent" (\t -> t.hasVerbalConsent)
+                    , Table.stringColumn "User" (\t -> defaultString t.recording)
+                    ]
 
                 PreviousHistories ->
                     [ Table.stringColumn "Date Collected" (\t -> defaultDateTime t.date)

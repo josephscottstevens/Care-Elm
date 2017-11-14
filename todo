@@ -8,9 +8,14 @@ QUESTIONS:
 REQUESTED TODO:
 put edit mode inside of grid  (but.. how?)
 	
+Create number input box
+Create hyperlink grid column
+Create checkbox column
+
 Implement CallRecordings
 	Delte isn't gonna work
 	Add new
+Create add new in edit
 Implement Hospitalizations
 
 Filter above each header

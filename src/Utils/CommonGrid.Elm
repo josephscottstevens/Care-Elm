@@ -1,7 +1,7 @@
 module Utils.CommonGrid exposing (..)
 
 import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
-import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, attribute, href, target)
+import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, attribute, href, target, checked)
 import Table
 import Utils.CommonTypes exposing (DropDownState)
 import Date
@@ -38,34 +38,34 @@ dateToString date =
     Date.Extra.toFormattedString "MM/dd/yyyy" date
 
 
-defaultDateTime : Maybe String -> String
-defaultDateTime maybeStr =
-    case maybeStr of
-        Just str ->
-            case Date.fromString (str) of
-                Ok date ->
-                    dateTimeToString date
+dateTime : String -> String
+dateTime str =
+    case Date.fromString str of
+        Ok date ->
+            dateTimeToString date
 
-                Err _ ->
-                    ""
-
-        Nothing ->
+        Err _ ->
             ""
+
+
+date : String -> String
+date str =
+    case Date.fromString str of
+        Ok date ->
+            dateToString date
+
+        Err _ ->
+            ""
+
+
+defaultDateTime : Maybe String -> String
+defaultDateTime str =
+    dateTime (defaultString str)
 
 
 defaultDate : Maybe String -> String
-defaultDate maybeStr =
-    case maybeStr of
-        Just str ->
-            case Date.fromString (str) of
-                Ok date ->
-                    dateToString date
-
-                Err _ ->
-                    ""
-
-        Nothing ->
-            ""
+defaultDate str =
+    date (defaultString str)
 
 
 defaultTheadHelp : ( String, Table.Status, Html.Attribute msg ) -> Html msg
@@ -119,21 +119,21 @@ defaultThead headers =
     Table.HtmlDetails [ class "e-gridheader e-textover e-hidelines" ] (List.map defaultTheadHelp headers)
 
 
-checkColumn : String -> Table.Column data msg
-checkColumn name =
+checkColumn : String -> (data -> Bool) -> Table.Column data msg
+checkColumn name toCheck =
     Table.veryCustomColumn
         { name = name
-        , viewData = checkColumnCell
+        , viewData = \data -> checkColumnCell (toCheck data)
         , sorter = Table.unsortable
         }
 
 
-checkColumnCell : data -> Table.HtmlDetails msg
-checkColumnCell emp =
+checkColumnCell : Bool -> Table.HtmlDetails msg
+checkColumnCell isChecked =
     Table.HtmlDetails []
         [ div [ class "e-checkcell" ]
             [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
-                [ input [ type_ "checkbox" ] []
+                [ input [ type_ "checkbox", checked isChecked ] []
                 ]
             ]
         ]
