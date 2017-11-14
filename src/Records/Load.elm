@@ -80,6 +80,8 @@ decodeModel =
         |> required "list" (Decode.list decodeRecordRow)
         |> required "facilityDropdown" (Decode.list decodeDropDownItem)
         |> required "recordTypeDropdown" (Decode.list decodeDropDownItem)
+        |> required "userDropDown" (Decode.list decodeDropDownItem)
+        |> required "taskDropDown" (Decode.list decodeDropDownItem)
 
 
 request : Int -> Int -> Http.Request WebResponse

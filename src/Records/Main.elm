@@ -93,6 +93,8 @@ update msg model =
                 , records = t.records
                 , facilities = t.facilities
                 , recordTypes = t.recordTypes
+                , tasks = t.tasks
+                , users = t.users
             }
                 ! [ setLoadingStatus False ]
 
@@ -115,7 +117,7 @@ update msg model =
                     }
             in
                 { model | state = AddNew newRecord }
-                    ! [ initSyncfusionControls (SyncFusionMessage model.facilities model.recordTypes model.facilityId model.recordTypeId) ]
+                    ! [ initSyncfusionControls (SyncFusionMessage model.facilities model.recordTypes model.users model.tasks model.facilityId model.recordTypeId) ]
 
         Save newRecord ->
             let
@@ -196,6 +198,24 @@ update msg model =
 
         UpdateReportDate newRecord str ->
             { model | state = AddNew { newRecord | reportDate = str } } ! [ setUnsavedChanges True ]
+
+        UpdateCallSid newRecord str ->
+            { model | state = AddNew { newRecord | callSid = str } } ! [ setUnsavedChanges True ]
+
+        UpdateRecordingSid newRecord str ->
+            { model | state = AddNew { newRecord | recording = str } } ! [ setUnsavedChanges True ]
+
+        Duration newRecord str ->
+            { model | state = AddNew { newRecord | duration = str } } ! [ setUnsavedChanges True ]
+
+        RecordingDate newRecord str ->
+            { model | state = AddNew { newRecord | recordingDate = str } } ! [ setUnsavedChanges True ]
+
+        UpdateUser newRecord dropDownItem ->
+            { model | state = AddNew { newRecord | userId = dropDownItem.id, userText = dropDownItem.name } } ! [ setUnsavedChanges True ]
+
+        UpdateTask newRecord dropDownItem ->
+            { model | state = AddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name } } ! [ setUnsavedChanges True ]
 
 
 view : Model -> Html Msg
@@ -306,7 +326,8 @@ formInputs newRecord =
                     []
 
                 CallRecordings ->
-                    []
+                    [ TextInput Optional "Call Sid" newRecord.callSid (UpdateCallSid newRecord)
+                    ]
 
                 PreviousHistories ->
                     [ DropInput Required "Report Date" (defaultString newRecord.reportDate) "ReportDateId"

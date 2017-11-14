@@ -25,6 +25,12 @@ type Msg
     | UpdateComments NewRecord String
     | UpdateFacility NewRecord DropDownItem
     | UpdateReportDate NewRecord (Maybe String)
+    | UpdateCallSid NewRecord String
+    | UpdateRecordingSid NewRecord String
+    | Duration NewRecord Int
+    | RecordingDate NewRecord String
+    | UpdateUser NewRecord DropDownItem
+    | UpdateTask NewRecord DropDownItem
     | Cancel
 
 
@@ -45,6 +51,8 @@ type alias WebResponse =
     , records : List RecordRow
     , facilities : List DropDownItem
     , recordTypes : List DropDownItem
+    , users : List DropDownItem
+    , tasks : List DropDownItem
     }
 
 
@@ -53,6 +61,8 @@ type alias Model =
     , records : List RecordRow
     , facilities : List DropDownItem
     , recordTypes : List DropDownItem
+    , users : List DropDownItem
+    , tasks : List DropDownItem
     , patientId : Int
     , facilityId : Maybe Int
     , recordTypeId : Int
@@ -77,6 +87,8 @@ emptyModel flags =
         , records = []
         , facilities = []
         , recordTypes = []
+        , users = []
+        , tasks = []
         , patientId = flags.patientId
         , facilityId = Nothing
         , recordTypeId = recordType
@@ -103,6 +115,14 @@ emptyNewRecord =
     , reportDate = Nothing
     , facilityId = Nothing
     , facilityText = ""
+    , recording = ""
+    , callSid = ""
+    , duration = 0
+    , recordingDate = ""
+    , userId = Nothing
+    , userText = ""
+    , taskId = Nothing
+    , taskText = ""
     }
 
 
@@ -122,6 +142,14 @@ type alias NewRecord =
     , reportDate : Maybe String
     , facilityId : Maybe Int
     , facilityText : String
+    , recording : String
+    , callSid : String
+    , duration : Int
+    , recordingDate : String
+    , userId : Maybe Int
+    , userText : String
+    , taskId : Maybe Int
+    , taskText : String
     }
 
 
@@ -173,6 +201,8 @@ emptyDropDownState =
 type alias SyncFusionMessage =
     { facilities : List DropDownItem
     , recordTypes : List DropDownItem
+    , users : List DropDownItem
+    , tasks : List DropDownItem
     , facilityId : Maybe Int
     , recordTypeId : Int
     }
