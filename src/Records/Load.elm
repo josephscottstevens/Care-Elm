@@ -10,8 +10,8 @@ import Date
 import Date.Extra
 
 
-decodeRecord : Decoder RecordRow
-decodeRecord =
+decodeRecordRow : Decoder RecordRow
+decodeRecordRow =
     decode RecordRow
         |> required "Id" Decode.int
         |> required "Date" (maybe Decode.string)
@@ -68,7 +68,7 @@ decodeModel : Decoder WebResponse
 decodeModel =
     decode WebResponse
         |> required "facilityId" (maybe Decode.int)
-        |> required "list" (Decode.list decodeRecord)
+        |> required "list" (Decode.list decodeRecordRow)
         |> required "facilityDropdown" (Decode.list decodeDropDownItem)
         |> required "recordTypeDropdown" (Decode.list decodeDropDownItem)
 
