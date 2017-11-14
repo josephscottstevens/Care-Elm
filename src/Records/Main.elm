@@ -50,6 +50,9 @@ port updateReportDate : (Maybe String -> msg) -> Sub msg
 port dropDownToggle : (DropDownState -> msg) -> Sub msg
 
 
+port deleteConfirmed : (Int -> msg) -> Sub msg
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     case model.state of
@@ -66,6 +69,7 @@ subscriptions model =
         _ ->
             Sub.batch
                 [ dropDownToggle DropDownToggle
+                , deleteConfirmed DeleteConfirmed
                 ]
 
 
@@ -100,13 +104,6 @@ update msg model =
 
         SendMenuMessage recordId messageType ->
             model ! [ sendMenuMessage (MenuMessage messageType recordId model.recordTypeId) ]
-
-        Delete rowId ->
-            let
-                updatedRecords =
-                    model.records |> List.filter (\t -> t.id /= rowId)
-            in
-                { model | records = updatedRecords } ! [ deleteRequest rowId ]
 
         AddNewStart ->
             let
@@ -146,6 +143,13 @@ update msg model =
 
         DropDownToggle dropState ->
             { model | dropDownState = dropState } ! []
+
+        DeleteConfirmed rowId ->
+            let
+                updatedRecords =
+                    model.records |> List.filter (\t -> t.id /= rowId)
+            in
+                { model | records = updatedRecords } ! [ deleteRequest rowId ]
 
         DeleteCompleted (Ok responseMsg) ->
             case getResponseError responseMsg of
@@ -416,7 +420,7 @@ dropDownItems rowId =
     , ( "", "Send By Email", onClick (SendMenuMessage rowId "SendByEmail") )
     , ( "", "Send By Fax", onClick (SendMenuMessage rowId "SendByFax") )
     , ( "", "Save To Client Portal", onClick (SendMenuMessage rowId "SaveToClientPortal") )
-    , ( "e-contextdelete", "Delete", onClick (Delete rowId) )
+    , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "Delete") )
     ]
 
 

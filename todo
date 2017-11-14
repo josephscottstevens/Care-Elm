@@ -1,9 +1,6 @@
 REQUESTED TODO:
 put edit mode inside of grid  (but.. how?)
 	
-
-enrollment, and a coupler other pages aren't as wide as original
-dropdown item "Save to Client Portal" is busted
 When clicking delete, confirmation popup should appear first
 when page first loads, make sure to fire the there are no unsaved changes, incase another form has screwed it lol
 Re-add dropdown text, for time travelling debugger
@@ -17,7 +14,7 @@ Don't sort on header click :/ oh my
 Place sort icon next to header
 show default sorted column?
 oh my... haha... when they change recordTypeId from Category, need to change the edit view
-
+Try and find some better icons for the dropdown menu
 
 LOW TODO:
 Validation is a bit meh, a bit of duplicated code, and had to convert everything to string to validate
@@ -51,3 +48,4 @@ On Deploy Todo:
 	Validate File stuff still works
 	DateTime is still correct
 	Ask why PreviousEnrollment has a comments column in the grid, but not on edit?
+	how does dropdown item "Save to Client Portal" work?
