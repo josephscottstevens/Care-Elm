@@ -63,6 +63,12 @@ encodeRecord newRecord =
         , ( "Comments", Encode.string <| newRecord.comments )
         , ( "FacilityID", maybeVal Encode.int <| newRecord.facilityId )
         , ( "ReportDate", maybeVal Encode.string <| maybeToDateString <| newRecord.reportDate )
+        , ( "CallSid", Encode.string <| newRecord.callSid )
+        , ( "RecordingSid", Encode.string <| newRecord.recording )
+        , ( "RecordingDuration", Encode.int <| newRecord.duration )
+        , ( "RecordingDate", maybeVal Encode.string <| maybeToDateString <| newRecord.recordingDate )
+        , ( "StaffId", maybeVal Encode.int <| newRecord.userId )
+        , ( "TaskId", maybeVal Encode.int <| newRecord.taskId )
         ]
 
 
