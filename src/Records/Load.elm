@@ -37,6 +37,15 @@ decodeRecordRow =
         |> required "Facility" (maybe Decode.string)
         |> required "FacilityFax" (maybe Decode.string)
         |> required "Recommendations" (maybe Decode.string)
+        |> required "TaskId" (maybe Decode.int)
+        |> required "TaskTitle" (maybe Decode.string)
+        |> required "Recording" (maybe Decode.string)
+        |> required "RecordingDate" Decode.string
+        |> required "RecordingDuration" Decode.int
+        |> required "Enrollment" Decode.bool
+        |> required "StaffId" Decode.int
+        |> required "StaffName" (maybe Decode.string)
+        |> required "HasVerbalConsent" Decode.bool
 
 
 encodeRecord : NewRecord -> Encode.Value

@@ -106,10 +106,6 @@ emptyNewRecord =
     }
 
 
-
---I don't need to track facility's text or recordType's text, just the ID, syncfusion manages the text's state anyway
-
-
 type alias NewRecord =
     { recordId : Int
     , patientId : Int
@@ -127,18 +123,6 @@ type alias NewRecord =
     , facilityId : Maybe Int
     , facilityText : String
     }
-
-
-
---all have facilityId (optional), recordTypeId(category), patientId
-
-
-type Date
-    = String
-
-
-type DropDown
-    = Int
 
 
 type alias RecordRow =
@@ -166,6 +150,15 @@ type alias RecordRow =
     , facility : Maybe String
     , facilityFax : Maybe String
     , recommendations : Maybe String
+    , taskId : Maybe Int
+    , taskTitle : Maybe String
+    , recording : Maybe String
+    , recordingDate : String
+    , recordingDuration : Int
+    , enrollment : Bool
+    , staffId : Int
+    , staffName : Maybe String
+    , hasVerbalConsent : Bool
     }
 
 

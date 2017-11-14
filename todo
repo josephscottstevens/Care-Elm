@@ -8,8 +8,11 @@ QUESTIONS:
 REQUESTED TODO:
 put edit mode inside of grid  (but.. how?)
 	
-Implement Hospitalizations
 Implement CallRecordings
+	Delte isn't gonna work
+	Add new
+Implement Hospitalizations
+
 Filter above each header
 Don't sort on header click :/ oh my
 Place sort icon next to header
@@ -19,6 +22,7 @@ there seems to be a bit of logic on transfer logic... not sure how to handle or 
 Try and find some better icons for the dropdown menu
 
 LOW TODO:
+remove un-used fields in MVC list type
 Validation is a bit meh, a bit of duplicated code, and had to convert everything to string to validate
 I have double border around the grids
 Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super duplicated stuff?) [no reason to be in same class right?]

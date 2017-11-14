@@ -162,6 +162,18 @@ defaultTableAttributes =
     [ class "e-grid e-js e-waitingpopup", style [ ( "width", "100%" ) ] ]
 
 
+standardCustomizations : Table.Customizations data msg
+standardCustomizations =
+    let
+        t =
+            Table.defaultCustomizations
+    in
+        { t
+            | tableAttrs = defaultTableAttributes
+            , thead = defaultThead
+        }
+
+
 defaultRowAttrs : (a -> Int) -> a -> List (Html.Attribute msg)
 defaultRowAttrs toInt =
     \data -> viewData (toInt data)
