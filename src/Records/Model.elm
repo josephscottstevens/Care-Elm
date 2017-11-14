@@ -92,6 +92,7 @@ emptyNewRecord =
     , patientId = 0
     , title = ""
     , recordTypeId = 0
+    , recordTypeText = ""
     , specialty = ""
     , provider = ""
     , timeVisit = Nothing
@@ -101,6 +102,7 @@ emptyNewRecord =
     , showValidationErrors = False
     , reportDate = Nothing
     , facilityId = Nothing
+    , facilityText = ""
     }
 
 
@@ -113,6 +115,7 @@ type alias NewRecord =
     , patientId : Int
     , title : String
     , recordTypeId : Int
+    , recordTypeText : String
     , specialty : String
     , provider : String
     , timeVisit : Maybe String
@@ -122,6 +125,7 @@ type alias NewRecord =
     , showValidationErrors : Bool
     , reportDate : Maybe String
     , facilityId : Maybe Int
+    , facilityText : String
     }
 
 

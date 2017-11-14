@@ -142,31 +142,31 @@ common : InputControlType msg -> Html msg
 common controlType =
     case controlType of
         TextInput requiredType labelText displayValue event ->
-            inputCommonFormat requiredType labelText (commonStructure (textInput labelText event))
+            inputCommonFormat requiredType labelText (commonStructure (textInput labelText displayValue event))
 
         AreaInput requiredType labelText displayValue event ->
-            inputCommonFormat requiredType labelText (commonStructure (areaInput labelText event))
+            inputCommonFormat requiredType labelText (commonStructure (areaInput labelText displayValue event))
 
         DropInput requiredType labelText displayValue syncfusionId ->
-            inputCommonFormat requiredType labelText (commonStructure (dropInput labelText syncfusionId))
+            inputCommonFormat requiredType labelText (commonStructure (dropInput labelText displayValue syncfusionId))
 
         FileInput requiredType labelText displayValue ->
             fileInput requiredType labelText displayValue
 
 
-textInput : String -> (String -> msg) -> Html msg
-textInput displayText event =
-    input [ type_ "textbox", class "e-textbox", idAttr displayText, nameAttr displayText, onInput event ] []
+textInput : String -> String -> (String -> msg) -> Html msg
+textInput displayText displayValue event =
+    input [ type_ "textbox", class "e-textbox", idAttr displayText, nameAttr displayText, onInput event, value displayValue ] []
 
 
-areaInput : String -> (String -> msg) -> Html msg
-areaInput displayText event =
-    textarea [ idAttr displayText, class "e-textarea", onInput event ] []
+areaInput : String -> String -> (String -> msg) -> Html msg
+areaInput displayText displayValue event =
+    textarea [ idAttr displayText, class "e-textarea", onInput event, value displayValue ] []
 
 
-dropInput : String -> String -> Html msg
-dropInput displayText syncfusionId =
-    input [ type_ "text", id syncfusionId ] []
+dropInput : String -> String -> String -> Html msg
+dropInput displayText displayValue syncfusionId =
+    input [ type_ "text", id syncfusionId, value displayValue ] []
 
 
 fileInput : RequiredType -> String -> String -> Html msg

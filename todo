@@ -1,8 +1,6 @@
 REQUESTED TODO:
 put edit mode inside of grid  (but.. how?)
 	
-When clicking delete, confirmation popup should appear first
-when page first loads, make sure to fire the there are no unsaved changes, incase another form has screwed it lol
 Re-add dropdown text, for time travelling debugger
 	But first, test to see how it looks without it
 

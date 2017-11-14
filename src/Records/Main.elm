@@ -168,7 +168,7 @@ update msg model =
         UpdateRecordType newRecord dropDownItem ->
             case dropDownItem.id of
                 Just t ->
-                    { model | state = AddNew { newRecord | recordTypeId = t } } ! [ setUnsavedChanges True ]
+                    { model | state = AddNew { newRecord | recordTypeId = t, recordTypeText = dropDownItem.name } } ! [ setUnsavedChanges True ]
 
                 Nothing ->
                     model ! []
@@ -192,7 +192,7 @@ update msg model =
             { model | state = AddNew { newRecord | comments = str } } ! [ setUnsavedChanges True ]
 
         UpdateFacility newRecord dropDownItem ->
-            { model | state = AddNew { newRecord | facilityId = dropDownItem.id } } ! [ setUnsavedChanges True ]
+            { model | state = AddNew { newRecord | facilityId = dropDownItem.id, facilityText = dropDownItem.name } } ! [ setUnsavedChanges True ]
 
         UpdateReportDate newRecord str ->
             { model | state = AddNew { newRecord | reportDate = str } } ! [ setUnsavedChanges True ]
