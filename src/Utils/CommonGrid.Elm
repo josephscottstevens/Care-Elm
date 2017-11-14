@@ -68,6 +68,16 @@ defaultDate str =
     date (defaultString str)
 
 
+defaultIntStr : String -> Int
+defaultIntStr str =
+    case String.toInt str of
+        Ok t ->
+            t
+
+        Err _ ->
+            0
+
+
 defaultTheadHelp : ( String, Table.Status, Html.Attribute msg ) -> Html msg
 defaultTheadHelp ( name, status, onClick ) =
     let

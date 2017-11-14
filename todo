@@ -31,6 +31,8 @@ there seems to be a bit of logic on transfer logic... not sure how to handle or 
 Try and find some better icons for the dropdown menu
 No way the alternating row color is working... right? I mean it's based on the id of the record, not a row number?
 
+all of the html controls need optional types, having to butcher all my model to satisfy is required bs
+
 LOW TODO:
 remove un-used fields in MVC list type
 Validation is a bit meh, a bit of duplicated code, and had to convert everything to string to validate

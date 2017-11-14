@@ -27,8 +27,8 @@ type Msg
     | UpdateReportDate NewRecord (Maybe String)
     | UpdateCallSid NewRecord String
     | UpdateRecordingSid NewRecord String
-    | Duration NewRecord Int
-    | RecordingDate NewRecord String
+    | UpdateDuration NewRecord String
+    | UpdateRecordingDate NewRecord (Maybe String)
     | UpdateUser NewRecord DropDownItem
     | UpdateTask NewRecord DropDownItem
     | Cancel
@@ -118,7 +118,7 @@ emptyNewRecord =
     , recording = ""
     , callSid = ""
     , duration = 0
-    , recordingDate = ""
+    , recordingDate = Nothing
     , userId = Nothing
     , userText = ""
     , taskId = Nothing
@@ -145,7 +145,7 @@ type alias NewRecord =
     , recording : String
     , callSid : String
     , duration : Int
-    , recordingDate : String
+    , recordingDate : Maybe String
     , userId : Maybe Int
     , userText : String
     , taskId : Maybe Int

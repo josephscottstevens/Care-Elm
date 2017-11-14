@@ -47,6 +47,15 @@ port updateFileName : (String -> msg) -> Sub msg
 port updateReportDate : (Maybe String -> msg) -> Sub msg
 
 
+port updateRecordingDate : (Maybe String -> msg) -> Sub msg
+
+
+port updateUser : (DropDownItem -> msg) -> Sub msg
+
+
+port updateTask : (DropDownItem -> msg) -> Sub msg
+
+
 port dropDownToggle : (DropDownState -> msg) -> Sub msg
 
 
@@ -64,6 +73,9 @@ subscriptions model =
                 , updateTimeAcc (UpdateTimeAcc t)
                 , updateFileName (UpdateFileName t)
                 , updateReportDate (UpdateReportDate t)
+                , updateRecordingDate (UpdateRecordingDate t)
+                , updateUser (UpdateUser t)
+                , updateTask (UpdateTask t)
                 ]
 
         _ ->
@@ -205,10 +217,10 @@ update msg model =
         UpdateRecordingSid newRecord str ->
             { model | state = AddNew { newRecord | recording = str } } ! [ setUnsavedChanges True ]
 
-        Duration newRecord str ->
-            { model | state = AddNew { newRecord | duration = str } } ! [ setUnsavedChanges True ]
+        UpdateDuration newRecord str ->
+            { model | state = AddNew { newRecord | duration = defaultIntStr str } } ! [ setUnsavedChanges True ]
 
-        RecordingDate newRecord str ->
+        UpdateRecordingDate newRecord str ->
             { model | state = AddNew { newRecord | recordingDate = str } } ! [ setUnsavedChanges True ]
 
         UpdateUser newRecord dropDownItem ->
@@ -327,6 +339,11 @@ formInputs newRecord =
 
                 CallRecordings ->
                     [ TextInput Optional "Call Sid" newRecord.callSid (UpdateCallSid newRecord)
+                    , TextInput Optional "Recording Sid" newRecord.recording (UpdateRecordingSid newRecord)
+                    , NumrInput Required "Duration" newRecord.duration (UpdateDuration newRecord)
+                    , DropInput Required "Recording Date" (defaultString newRecord.recordingDate) "RecordingDateId"
+                    , DropInput Optional "User" (defaultInt newRecord.userId) "UserId"
+                    , DropInput Optional "Task" (defaultInt newRecord.taskId) "TaskId"
                     ]
 
                 PreviousHistories ->

@@ -70,6 +70,7 @@ inputCommonFormat requiredType displayText t =
 
 type InputControlType msg
     = TextInput RequiredType String String (String -> msg)
+    | NumrInput RequiredType String Int (String -> msg)
     | AreaInput RequiredType String String (String -> msg)
     | DropInput RequiredType String String String
     | FileInput RequiredType String String
@@ -93,6 +94,9 @@ commonValidation controlType =
     case controlType of
         TextInput requiredType labelText displayValue event ->
             requiredStr displayValue labelText
+
+        NumrInput requiredType labelText displayValue event ->
+            requiredStr (toString displayValue) labelText
 
         AreaInput requiredType labelText displayValue event ->
             requiredStr displayValue labelText
@@ -120,6 +124,9 @@ isRequired controlType =
         TextInput requiredType labelText displayValue event ->
             isRequiredBool requiredType
 
+        NumrInput requiredType labelText displayValue event ->
+            isRequiredBool requiredType
+
         AreaInput requiredType labelText displayValue event ->
             isRequiredBool requiredType
 
@@ -144,6 +151,9 @@ common controlType =
         TextInput requiredType labelText displayValue event ->
             inputCommonFormat requiredType labelText (commonStructure (textInput labelText displayValue event))
 
+        NumrInput requiredType labelText displayValue event ->
+            inputCommonFormat requiredType labelText (commonStructure (numrInput labelText displayValue event))
+
         AreaInput requiredType labelText displayValue event ->
             inputCommonFormat requiredType labelText (commonStructure (areaInput labelText displayValue event))
 
@@ -157,6 +167,11 @@ common controlType =
 textInput : String -> String -> (String -> msg) -> Html msg
 textInput displayText displayValue event =
     input [ type_ "textbox", class "e-textbox", idAttr displayText, nameAttr displayText, onInput event, value displayValue ] []
+
+
+numrInput : String -> Int -> (String -> msg) -> Html msg
+numrInput displayText displayValue event =
+    input [ type_ "number", class "e-textbox", idAttr displayText, nameAttr displayText, onInput event, value (toString displayValue) ] []
 
 
 areaInput : String -> String -> (String -> msg) -> Html msg
