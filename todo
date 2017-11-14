@@ -9,9 +9,8 @@ REQUESTED TODO:
 put edit mode inside of grid  (but.. how?)
 	
 Create number input box
-Create hyperlink grid column
-Create checkbox column
 
+Fix Call Recording column widths
 Implement CallRecordings
 	Delte isn't gonna work
 	Add new

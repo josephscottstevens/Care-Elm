@@ -139,6 +139,22 @@ checkColumnCell isChecked =
         ]
 
 
+hrefColumn : String -> String -> (data -> String) -> Table.Column data msg
+hrefColumn name hrefText toHref =
+    Table.veryCustomColumn
+        { name = name
+        , viewData = \data -> hrefColumnCell hrefText (toHref data)
+        , sorter = Table.unsortable
+        }
+
+
+hrefColumnCell : String -> String -> Table.HtmlDetails msg
+hrefColumnCell displayText url =
+    Table.HtmlDetails []
+        [ a [ href url ] [ text displayText ]
+        ]
+
+
 editColumn : (data -> Html.Attribute msg) -> Table.Column data msg
 editColumn toMsg =
     Table.veryCustomColumn
