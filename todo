@@ -1,15 +1,6 @@
 REQUESTED TODO:
 put edit mode inside of grid  (but.. how?)
 	
-	
-Add ReportDateId DateTime dropdown
-	and all the other places it is missing
-Get Messages from server and client to sync up
-	Right now I am ignoring response from server when File Added successfully
-Skipped Hospitilizations, Call Recordings
-Resolve 
-	CCDs.... I think, is recordType Null?
-	
 
 enrollment, and a coupler other pages aren't as wide as original
 dropdown item "Save to Client Portal" is busted
@@ -20,6 +11,7 @@ Re-add dropdown text, for time travelling debugger
 
 Implement Hospitalizations
 Implement CallRecordings
+Implement CCDs (jebus, there is no edit, only read?) wait, that is easy lol
 Filter above each header
 Don't sort on header click :/ oh my
 Place sort icon next to header

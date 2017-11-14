@@ -157,10 +157,6 @@ editColumnCell clickEvent =
         ]
 
 
-
---No lie, really... really don't understand how\why this works
-
-
 simpleRowAttrs : (a -> Int) -> a -> List (Html.Attribute msg)
 simpleRowAttrs toInt =
     \data -> viewData (toInt data)
