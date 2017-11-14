@@ -66,7 +66,7 @@ getRecordType id =
         6 ->
             Legal
 
-        8 ->
+        10 ->
             CallRecordings
 
         11 ->
@@ -104,7 +104,7 @@ getId recordType =
             6
 
         CallRecordings ->
-            8
+            10
 
         PreviousHistories ->
             11
