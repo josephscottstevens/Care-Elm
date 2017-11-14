@@ -133,8 +133,8 @@ defaultCustomizations : Table.Customizations BillingCcm msg
 defaultCustomizations =
     { tableAttrs = [ id "employersTable", class "e-table e-hidelines" ]
     , caption = Nothing
-    , thead = simpleThead
+    , thead = defaultThead
     , tfoot = Nothing
     , tbodyAttrs = []
-    , rowAttrs = simpleRowAttrs .iD
+    , rowAttrs = defaultRowAttrs .iD
     }

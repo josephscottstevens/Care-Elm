@@ -68,8 +68,8 @@ defaultDate maybeStr =
             ""
 
 
-simpleTheadHelp : ( String, Table.Status, Html.Attribute msg ) -> Html msg
-simpleTheadHelp ( name, status, onClick ) =
+defaultTheadHelp : ( String, Table.Status, Html.Attribute msg ) -> Html msg
+defaultTheadHelp ( name, status, onClick ) =
     let
         headerDivClass =
             class "e-headercelldiv e-gridtooltip headerColumn"
@@ -114,9 +114,9 @@ simpleTheadHelp ( name, status, onClick ) =
         th [ onClick, headerColumnClass ] content
 
 
-simpleThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
-simpleThead headers =
-    Table.HtmlDetails [ class "e-gridheader e-textover e-hidelines" ] (List.map simpleTheadHelp headers)
+defaultThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
+defaultThead headers =
+    Table.HtmlDetails [ class "e-gridheader e-textover e-hidelines" ] (List.map defaultTheadHelp headers)
 
 
 checkColumn : String -> Table.Column data msg
@@ -157,8 +157,13 @@ editColumnCell clickEvent =
         ]
 
 
-simpleRowAttrs : (a -> Int) -> a -> List (Html.Attribute msg)
-simpleRowAttrs toInt =
+defaultTableAttributes : List (Html.Attribute msg)
+defaultTableAttributes =
+    [ class "e-grid e-js e-waitingpopup", style [ ( "width", "100%" ) ] ]
+
+
+defaultRowAttrs : (a -> Int) -> a -> List (Html.Attribute msg)
+defaultRowAttrs toInt =
     \data -> viewData (toInt data)
 
 

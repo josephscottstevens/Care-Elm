@@ -400,12 +400,12 @@ config recordTypeId =
 
 defaultCustomizations : Table.Customizations RecordRow msg
 defaultCustomizations =
-    { tableAttrs = [ class "e-grid e-js e-waitingpopup" ]
+    { tableAttrs = defaultTableAttributes
     , caption = Nothing
-    , thead = simpleThead
+    , thead = defaultThead
     , tfoot = Nothing
     , tbodyAttrs = []
-    , rowAttrs = simpleRowAttrs .id
+    , rowAttrs = defaultRowAttrs .id
     }
 
 
