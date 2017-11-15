@@ -116,22 +116,25 @@ inputCommonFormat displayText t =
 common : ( String, InputControlType msg ) -> Html msg
 common ( labelText, controlType ) =
     let
-        commonStructure =
-            div [ class controlWidth ]
+        commonStructure t =
+            commonFormat [ div [ class controlWidth ] t ]
 
         commonFormat =
             inputCommonFormat labelText
     in
         case controlType of
             RequiredTextInput displayValue event ->
-                commonFormat [ commonStructure [ textInput labelText displayValue event ] ]
+                commonStructure [ textInput labelText displayValue event ]
 
-            -- RequiredNumrInput displayValue event ->
-            --     commonFormat commonStructure [ numrInput labelText displayValue event ]
-            -- RequiredAreaInput displayValue event ->
-            --     commonFormat commonStructure [ areaInput labelText displayValue event ]
-            -- RequiredDropInput displayValue syncfusionId ->
-            --     commonFormat commonStructure [ dropInput labelText displayValue syncfusionId ]
+            RequiredNumrInput displayValue event ->
+                commonStructure [ numrInput labelText displayValue event ]
+
+            RequiredAreaInput displayValue event ->
+                commonStructure [ areaInput labelText displayValue event ]
+
+            RequiredDropInput displayValue syncfusionId ->
+                commonStructure [ dropInput labelText displayValue syncfusionId ]
+
             RequiredFileInput displayValue ->
                 commonFormat [ fileInput labelText displayValue ]
 
@@ -140,30 +143,30 @@ common ( labelText, controlType ) =
 
 
 textInput : String -> String -> (String -> msg) -> Html msg
-textInput displayText displayValue event =
-    input [ type_ "textbox", class "e-textbox", idAttr displayText, nameAttr displayText, onInput event, value displayValue ] []
+textInput labelText displayValue event =
+    input [ type_ "textbox", class "e-textbox", idAttr labelText, nameAttr labelText, onInput event, value displayValue ] []
 
 
 numrInput : String -> Int -> (String -> msg) -> Html msg
-numrInput displayText displayValue event =
-    input [ type_ "number", class "e-textbox", idAttr displayText, nameAttr displayText, onInput event, value (toString displayValue) ] []
+numrInput labelText displayValue event =
+    input [ type_ "number", class "e-textbox", idAttr labelText, nameAttr labelText, onInput event, value (toString displayValue) ] []
 
 
 areaInput : String -> String -> (String -> msg) -> Html msg
-areaInput displayText displayValue event =
-    textarea [ idAttr displayText, class "e-textarea", onInput event, value displayValue ] []
+areaInput labelText displayValue event =
+    textarea [ idAttr labelText, class "e-textarea", onInput event, value displayValue ] []
 
 
 dropInput : String -> String -> String -> Html msg
-dropInput displayText displayValue syncfusionId =
+dropInput labelText displayValue syncfusionId =
     input [ type_ "text", id syncfusionId, value displayValue ] []
 
 
 fileInput : String -> String -> Html msg
-fileInput displayText displayValue =
+fileInput labelText displayValue =
     div [ class "form-group" ]
         [ label [ class (labelWidth ++ "control-label "), for "fileName" ]
-            [ text displayText ]
+            [ text labelText ]
         , div [ class "col-sm-6 col-md-4 col-lg-3" ]
             [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] []
             ]
