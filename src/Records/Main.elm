@@ -417,7 +417,7 @@ getColumns recordTypeId taskId =
                     commonColumns
 
         lastColumns =
-            [ editButton
+            [ rowDropDown
             ]
     in
         List.append firstColumns lastColumns
@@ -430,7 +430,7 @@ config recordTypeId taskId =
         , toMsg = SetTableState
         , columns = getColumns recordTypeId taskId
         , customizations =
-            { defaultCustomizations | tableAttrs = standardTableAttrs, thead = standardThead }
+            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = standardThead }
         }
 
 
@@ -448,12 +448,3 @@ dropDownItems recordTypeId rowId =
             , ( "", "Save To Client Portal", onClick (SendMenuMessage rowId "SaveToClientPortal") )
             , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "Delete") )
             ]
-
-
-editButton : Column RecordRow msg
-editButton =
-    veryCustomColumn
-        { name = ""
-        , viewData = editButtonDiv << .id
-        , sorter = unsortable
-        }

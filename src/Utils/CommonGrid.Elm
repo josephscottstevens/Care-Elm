@@ -63,9 +63,9 @@ standardThead headers =
     Table.HtmlDetails [ class "e-gridheader e-textover e-hidelines" ] (List.map standardTheadHelp headers)
 
 
-standardTableAttrs : List (Html.Attribute msg)
-standardTableAttrs =
-    [ class "e-grid e-js e-waitingpopup", style [ ( "width", "100%" ) ] ]
+standardTableAttrs : String -> List (Html.Attribute msg)
+standardTableAttrs idValue =
+    [ id idValue, class "e-grid e-js e-waitingpopup", style [ ( "width", "100%" ) ] ]
 
 
 checkColumn : String -> (data -> Bool) -> Table.Column data msg
@@ -138,13 +138,22 @@ editColumnCell clickEvent =
         ]
 
 
-editButtonDiv : data -> Table.HtmlDetails msg
-editButtonDiv data =
+rowDropDownDiv : data -> Table.HtmlDetails msg
+rowDropDownDiv data =
     Table.HtmlDetails []
         [ div [ style [ ( "text-align", "right" ) ] ]
             [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown", dataTarget (toString data) ] []
             ]
         ]
+
+
+rowDropDown : Table.Column { b | id : a } msg
+rowDropDown =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData = rowDropDownDiv << .id
+        , sorter = Table.unsortable
+        }
 
 
 editDropDownDiv : List ( String, String, Html.Attribute msg ) -> DropDownState -> Html msg

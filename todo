@@ -10,11 +10,6 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-css
-	Fix Call Recording column widths
-	rowAttrs is a hack, need to change to css row alternating
-	change over all the record grid inline css to a stylesheet
-	
 Call recordings starts with date column sorted desc
 Call recorings loading isn't working? (the spinner stops early)
 Create add new in edit
@@ -34,6 +29,7 @@ all of the html controls need optional types, having to butcher all my model to 
 
 LOW TODO:
 remove un-used fields in MVC list type
+if I think it is worth any performance boost, I don't need to return userDropDown or taskDropdown unless I am on recorcTypeId of 10
 Validation is a bit meh, a bit of duplicated code, and had to convert everything to string to validate
 I have double border around the grids
 Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super duplicated stuff?) [no reason to be in same class right?]
@@ -53,6 +49,7 @@ Save request won't put form in error state if it fails
 I think most of the requests right now are ignoring messages
 Save request won't put form in error state if it fails
 I think most of the requests right now are ignoring messages
+editButton doesn't need to be in Main, it can go to CommonGrid (also, the name sucks, since it is a row dropdown menu)
 How can I put Elm-Make command as apart of vscode instead of needing to up arrow use recent command
 	see: https://github.com/Krzysztof-Cieslak/vscode-elm/blob/master/package.json
 	
