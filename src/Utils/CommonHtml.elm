@@ -103,11 +103,6 @@ requiredStr displayValue str =
 --             ""
 
 
-commonStructure : Html msg -> Html msg
-commonStructure t =
-    div [ class controlWidth ] [ t ]
-
-
 inputCommonFormat : String -> List (Html msg) -> Html msg
 inputCommonFormat displayText t =
     let
@@ -121,12 +116,15 @@ inputCommonFormat displayText t =
 common : ( String, InputControlType msg ) -> Html msg
 common ( labelText, controlType ) =
     let
+        commonStructure =
+            div [ class controlWidth ]
+
         commonFormat =
             inputCommonFormat labelText
     in
         case controlType of
             RequiredTextInput displayValue event ->
-                commonFormat [ commonStructure (textInput labelText displayValue event) ]
+                commonFormat [ commonStructure [ textInput labelText displayValue event ] ]
 
             -- RequiredNumrInput displayValue event ->
             --     commonFormat commonStructure [ numrInput labelText displayValue event ]
