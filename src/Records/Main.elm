@@ -282,8 +282,8 @@ formInputs newRecord =
             ]
 
         firstColumns =
-            [ ( "Facility", Required, DropInput (defaultInt newRecord.facilityId) "FacilityId" )
-            , ( "Category", Required, DropInput newRecord.recordTypeId "CategoryId" )
+            [ ( "Facility", Required, DropInput newRecord.facilityId "FacilityId" )
+            , ( "Category", Required, DropInput (Just newRecord.recordTypeId) "CategoryId" )
             ]
 
         lastColumns =
@@ -329,8 +329,8 @@ formInputs newRecord =
                     , ( "Recording Sid", Required, TextInput newRecord.recording (UpdateRecordingSid newRecord) )
                     , ( "Duration", Required, NumrInput newRecord.duration (UpdateDuration newRecord) )
                     , ( "Recording Date", Required, DateInput (defaultString newRecord.recordingDate) "RecordingDateId" )
-                    , ( "User", Required, DropInput (defaultInt newRecord.userId) "UserId" )
-                    , ( "Task", Optional, DropInput (defaultInt newRecord.taskId) "TaskId" )
+                    , ( "User", Required, DropInput newRecord.userId "UserId" )
+                    , ( "Task", Optional, DropInput newRecord.taskId "TaskId" )
                     ]
 
                 PreviousHistories ->

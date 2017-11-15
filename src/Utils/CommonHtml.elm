@@ -42,7 +42,7 @@ type InputControlType msg
     = TextInput String (String -> msg)
     | NumrInput Int (String -> msg)
     | AreaInput String (String -> msg)
-    | DropInput Int String
+    | DropInput (Maybe Int) String
     | DateInput String String
     | FileInput String
 
@@ -69,7 +69,12 @@ commonValidation ( labelText, requiredType, controlType ) =
             requiredStr labelText displayValue
 
         DropInput displayValue _ ->
-            requiredStr labelText (toString displayValue)
+            case displayValue of
+                Just t ->
+                    Nothing
+
+                Nothing ->
+                    Just (labelText ++ "is required")
 
         FileInput displayValue ->
             requiredStr labelText displayValue
@@ -79,9 +84,9 @@ commonValidation ( labelText, requiredType, controlType ) =
 
 
 requiredStr : String -> String -> Maybe String
-requiredStr displayValue str =
+requiredStr labelText str =
     if str == "" then
-        Just (displayValue ++ " is required")
+        Just (labelText ++ " is required")
     else
         Nothing
 

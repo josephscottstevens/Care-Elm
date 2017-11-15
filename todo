@@ -37,6 +37,7 @@ When page left is disabled, you can still click it. (for pagination Grid)
 For example, when you are on page 12, and you filter down to like 20 rows, the highlighted row is gone (for pagination Grid)
 How can I put Elm-Make command as apart of vscode instead of needing to up arrow use recent command
 	see: https://github.com/Krzysztof-Cieslak/vscode-elm/blob/master/package.json
+recordTypeId should be a maybe type, there are hacks all over keeping from that
 Edit Button's class name is "-Column", and I am styling that class, but if we have any columns without a name... how to handle?
 	Maybe have a type, Column-With-ClassName function?
 	
