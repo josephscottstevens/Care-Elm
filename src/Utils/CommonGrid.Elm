@@ -12,8 +12,8 @@ dataTarget val =
     attribute "data-target" val
 
 
-defaultTheadHelp : ( String, Table.Status, Html.Attribute msg ) -> Html msg
-defaultTheadHelp ( name, status, onClick ) =
+standardTheadHelp : ( String, Table.Status, Html.Attribute msg ) -> Html msg
+standardTheadHelp ( name, status, onClick ) =
     let
         headerDivClass =
             class "e-headercelldiv e-gridtooltip headerColumn"
@@ -58,9 +58,14 @@ defaultTheadHelp ( name, status, onClick ) =
         th [ onClick, headerColumnClass ] content
 
 
-defaultThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
-defaultThead headers =
-    Table.HtmlDetails [ class "e-gridheader e-textover e-hidelines" ] (List.map defaultTheadHelp headers)
+standardThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
+standardThead headers =
+    Table.HtmlDetails [ class "e-gridheader e-textover e-hidelines" ] (List.map standardTheadHelp headers)
+
+
+standardTableAttrs : List (Html.Attribute msg)
+standardTableAttrs =
+    [ class "e-grid e-js e-waitingpopup", style [ ( "width", "100%" ) ] ]
 
 
 checkColumn : String -> (data -> Bool) -> Table.Column data msg
@@ -131,36 +136,6 @@ editColumnCell clickEvent =
             [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", clickEvent ] []
             ]
         ]
-
-
-defaultTableAttributes : List (Html.Attribute msg)
-defaultTableAttributes =
-    [ class "e-grid e-js e-waitingpopup", style [ ( "width", "100%" ) ] ]
-
-
-standardCustomizations : Table.Customizations data msg
-standardCustomizations =
-    let
-        t =
-            Table.defaultCustomizations
-    in
-        { t
-            | tableAttrs = defaultTableAttributes
-            , thead = defaultThead
-        }
-
-
-defaultRowAttrs : (a -> Int) -> a -> List (Html.Attribute msg)
-defaultRowAttrs toInt =
-    \data -> viewData (toInt data)
-
-
-viewData : Int -> List (Html.Attribute msg)
-viewData int =
-    if int % 2 == 0 then
-        [ class "e-row" ]
-    else
-        [ class "e-alt_row" ]
 
 
 editButtonDiv : data -> Table.HtmlDetails msg

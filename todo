@@ -38,6 +38,7 @@ Validation is a bit meh, a bit of duplicated code, and had to convert everything
 I have double border around the grids
 Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super duplicated stuff?) [no reason to be in same class right?]
 Have active row highlight?
+It would be nice to have the Call recordings grid refresh after task edit popup closes.
 The whole form post to javascript to ports thing is a mess, but meh.
 See if I can set the rectangle to be more intelligently positioned (right now it has to do all the offsets for stuff)
 FacilityId is coming from window, and it seems to like... not be there 10% of the time, lets see if we can explicitly pass it

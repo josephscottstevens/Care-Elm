@@ -429,19 +429,9 @@ config recordTypeId taskId =
         { toId = \t -> toString t.id
         , toMsg = SetTableState
         , columns = getColumns recordTypeId taskId
-        , customizations = defaultCustomizations
+        , customizations =
+            { defaultCustomizations | tableAttrs = standardTableAttrs, thead = standardThead }
         }
-
-
-defaultCustomizations : Customizations RecordRow msg
-defaultCustomizations =
-    { tableAttrs = defaultTableAttributes
-    , caption = Nothing
-    , thead = defaultThead
-    , tfoot = Nothing
-    , tbodyAttrs = []
-    , rowAttrs = defaultRowAttrs .id
-    }
 
 
 dropDownItems : Int -> Int -> List ( String, String, Html.Attribute Msg )

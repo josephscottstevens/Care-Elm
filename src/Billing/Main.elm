@@ -5,7 +5,7 @@ import Billing.Model exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option, span, a)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)
-import Table
+import Table exposing (..)
 import Utils.GridPaging exposing (..)
 import Utils.CommonGrid exposing (..)
 import Utils.CommonFunctions exposing (..)
@@ -126,16 +126,6 @@ config =
             , Table.stringColumn "AssignedTo" (\t -> defaultString t.assignedTo)
             , editColumn (\t -> onClick (EditStart t))
             ]
-        , customizations = defaultCustomizations
+        , customizations =
+            { defaultCustomizations | tableAttrs = [ id "employersTable", class "e-table e-hidelines" ], thead = standardThead }
         }
-
-
-defaultCustomizations : Table.Customizations BillingCcm msg
-defaultCustomizations =
-    { tableAttrs = [ id "employersTable", class "e-table e-hidelines" ]
-    , caption = Nothing
-    , thead = defaultThead
-    , tfoot = Nothing
-    , tbodyAttrs = []
-    , rowAttrs = defaultRowAttrs .iD
-    }
