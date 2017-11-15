@@ -22,7 +22,7 @@ standardTheadHelp ( name, status, onClick ) =
             style [ ( "margin-top", "5px" ) ]
 
         headerDiv =
-            div [ headerDivClass, headerDivStyle ]
+            div [ headerDivClass, headerDivStyle, onClick ]
 
         headerColumnClass =
             class ("e-columnheader e-default e-filterbarcell " ++ name ++ "-Column")
@@ -51,11 +51,12 @@ standardTheadHelp ( name, status, onClick ) =
                 div [ class "e-filterdiv e-fltrinputdiv" ]
                     [ input [ class "e-ejinputtext e-filtertext", style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ) ] ] []
                     ]
-
-        content =
-            [ headerContent, filterContent ]
     in
-        th [ onClick, headerColumnClass ] content
+        th [ headerColumnClass ] [ headerContent, filterContent ]
+
+
+
+--onClick
 
 
 standardThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg

@@ -10,10 +10,7 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-Selecting Null in dropdown menu isn't updating validation
-
 Filter above each header
-Don't sort on header click :/ oh my
 I have double border around the grids
 
 Create add new in edit
@@ -24,9 +21,9 @@ there seems to be a bit of logic on transfer logic... not sure how to handle or 
 Try and find some better icons for the dropdown menu
 
 LOW TODO:
-
 Style checkboxs
-
+Perhaps css should go in main instead of index?
+should i set header to be unselectable?
 
 REALLY LOW TODO:
 if I think it is worth any performance boost, I don't need to return userDropDown or taskDropdown unless I am on recorcTypeId of 10
