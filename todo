@@ -10,56 +10,45 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-Call recordings starts with date column sorted desc
-Call recorings loading isn't working? (the spinner stops early)
+all of the html controls need optional types, having to butcher all my model to satisfy is required bs
+Validation is a bit meh, a bit of duplicated code, and had to convert everything to string to validate
+Edit Button's class name is "-Column", and I am styling that class, but if we have any columns without a name... how to handle?
+	Maybe have a type, Column-With-ClassName function?
+
+In Recording add new, user is actually required.
+As is CallSid, and Recording Sid
+	
 Create add new in edit
 Implement Hospitalizations
-Enrollment looks weird
 
 Filter above each header
 Don't sort on header click :/ oh my
-Place sort icon next to header
-show default sorted column?
+Sort, like sorts twice, because of initial sort on Call Recordings
 oh my... haha... when they change recordTypeId from Category, need to change the edit view
 there seems to be a bit of logic on transfer logic... not sure how to handle or if I am already
 Try and find some better icons for the dropdown menu
-No way the alternating row color is working... right? I mean it's based on the id of the record, not a row number?
-
-all of the html controls need optional types, having to butcher all my model to satisfy is required bs
 
 LOW TODO:
-remove un-used fields in MVC list type
-if I think it is worth any performance boost, I don't need to return userDropDown or taskDropdown unless I am on recorcTypeId of 10
-Validation is a bit meh, a bit of duplicated code, and had to convert everything to string to validate
-I have double border around the grids
-Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super duplicated stuff?) [no reason to be in same class right?]
 Have active row highlight?
-It would be nice to have the Call recordings grid refresh after task edit popup closes.
-The whole form post to javascript to ports thing is a mess, but meh.
-See if I can set the rectangle to be more intelligently positioned (right now it has to do all the offsets for stuff)
-FacilityId is coming from window, and it seems to like... not be there 10% of the time, lets see if we can explicitly pass it
-For example, when you are on page 12, and you filter down to like 20 rows, the highlighted row is gone
-When page left is disabled, you can still click it.
-Re-add port \ subscription
-Dropdown menu on right
+I have double border around the grids
 Style checkboxs
-Remove main.js from git
-put private column stuff back in Common (see bottom of Records/Main.elm
-Save request won't put form in error state if it fails
-I think most of the requests right now are ignoring messages
-Save request won't put form in error state if it fails
-I think most of the requests right now are ignoring messages
-editButton doesn't need to be in Main, it can go to CommonGrid (also, the name sucks, since it is a row dropdown menu)
+
+
+REALLY LOW TODO:
+if I think it is worth any performance boost, I don't need to return userDropDown or taskDropdown unless I am on recorcTypeId of 10
+remove un-used fields in MVC list type
+Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super duplicated stuff?) [no reason to be in same class right?]
+It would be nice to have the Call recordings grid refresh after task edit popup closes.
+When page left is disabled, you can still click it. (for pagination Grid)
+For example, when you are on page 12, and you filter down to like 20 rows, the highlighted row is gone (for pagination Grid)
 How can I put Elm-Make command as apart of vscode instead of needing to up arrow use recent command
 	see: https://github.com/Krzysztof-Cieslak/vscode-elm/blob/master/package.json
 	
-Edit Button's class name is "-Column", and I am styling that class, but if we have any columns without a name... how to handle?
-	Maybe have a type, Column-With-ClassName function?
-put project on github
-
-
-
 On Deploy Todo:
 	Validate File stuff still works
 	DateTime is still correct
+	Test DateTime conversions
+	Test Saving
+	Test Validation
+	Test Server errors
 	

@@ -1,11 +1,6 @@
 module Utils.CommonTypes exposing (..)
 
 
-type RequiredType
-    = Required
-    | Optional
-
-
 type alias Flags =
     { pageFlag : String
     , patientId : Int

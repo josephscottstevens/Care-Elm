@@ -4,7 +4,6 @@ import Html exposing (Html, text, div, button, input, span, th, li, ul, a, label
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name, readonly)
 import Html.Events exposing (onInput, on)
 import Json.Decode as Json
-import Utils.CommonTypes as CommonTypes exposing (RequiredType)
 import Utils.CommonFunctions exposing (..)
 
 
@@ -38,125 +37,108 @@ controlWidth =
     "col-sm-8 col-md-5 col-lg-4"
 
 
-commonStructure : Html msg -> Html msg
-commonStructure t =
-    div [ class controlWidth ]
-        [ t
-        ]
-
-
-isRequiredStr : RequiredType -> String
-isRequiredStr requiredType =
-    case requiredType of
-        CommonTypes.Required ->
-            " required"
-
-        CommonTypes.Optional ->
-            ""
-
-
-inputCommonFormat : RequiredType -> String -> Html msg -> Html msg
-inputCommonFormat requiredType displayText t =
-    div [ class "form-group" ]
-        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId displayText ] [ text displayText ]
-        , t
-        ]
-
-
 type InputControlType msg
-    = TextInput RequiredType String String (String -> msg)
-    | NumrInput RequiredType String Int (String -> msg)
-    | AreaInput RequiredType String String (String -> msg)
-    | DropInput RequiredType String String String
-    | FileInput RequiredType String String
+    = RequiredTextInput String (String -> msg)
+    | RequiredNumrInput Int (String -> msg)
+    | RequiredAreaInput String (String -> msg)
+    | RequiredDropInput String String
+    | RequiredFileInput String
+    | OptionalTextInput (Maybe String) (String -> msg)
+    | OptionalNumrInput (Maybe Int) (String -> msg)
+    | OptionalAreaInput (Maybe String) (String -> msg)
+    | OptionalDropInput (Maybe String) String
+    | OptionalFileInput String
 
 
-makeControls : List (InputControlType msg) -> List (Html msg)
+makeControls : List (String -> InputControlType msg) -> List (Html msg)
 makeControls controls =
-    List.map common controls
+    [ div [] [] ]
 
 
-getValidationErrors : List (InputControlType msg) -> List String
+
+-- List.map common controls
+
+
+getValidationErrors : List ( String, InputControlType msg ) -> List String
 getValidationErrors controls =
     controls
-        |> List.filter isRequired
         |> List.map commonValidation
         |> List.filterMap identity
 
 
-commonValidation : InputControlType msg -> Maybe String
-commonValidation controlType =
+commonValidation : ( String, InputControlType msg ) -> Maybe String
+commonValidation ( labelText, controlType ) =
     case controlType of
-        TextInput requiredType labelText displayValue event ->
-            requiredStr displayValue labelText
+        RequiredTextInput displayValue _ ->
+            requiredStr labelText displayValue
 
-        NumrInput requiredType labelText displayValue event ->
-            requiredStr (toString displayValue) labelText
+        RequiredAreaInput displayValue _ ->
+            requiredStr labelText displayValue
 
-        AreaInput requiredType labelText displayValue event ->
-            requiredStr displayValue labelText
+        RequiredDropInput displayValue _ ->
+            requiredStr labelText displayValue
 
-        DropInput requiredType labelText displayValue syncfusionId ->
-            requiredStr displayValue labelText
+        RequiredFileInput displayValue ->
+            requiredStr labelText displayValue
 
-        FileInput requiredType labelText displayValue ->
-            requiredStr displayValue labelText
-
-
-isRequiredBool : RequiredType -> Bool
-isRequiredBool requiredType =
-    case requiredType of
-        CommonTypes.Required ->
-            True
-
-        CommonTypes.Optional ->
-            False
-
-
-isRequired : InputControlType msg -> Bool
-isRequired controlType =
-    case controlType of
-        TextInput requiredType labelText displayValue event ->
-            isRequiredBool requiredType
-
-        NumrInput requiredType labelText displayValue event ->
-            isRequiredBool requiredType
-
-        AreaInput requiredType labelText displayValue event ->
-            isRequiredBool requiredType
-
-        DropInput requiredType labelText displayValue syncfusionId ->
-            isRequiredBool requiredType
-
-        FileInput requiredType labelText displayValue ->
-            isRequiredBool requiredType
+        _ ->
+            Nothing
 
 
 requiredStr : String -> String -> Maybe String
-requiredStr str propName =
+requiredStr displayValue str =
     if str == "" then
-        Just (propName ++ " is required")
+        Just (displayValue ++ " is required")
     else
         Nothing
 
 
-common : InputControlType msg -> Html msg
-common controlType =
-    case controlType of
-        TextInput requiredType labelText displayValue event ->
-            inputCommonFormat requiredType labelText (commonStructure (textInput labelText displayValue event))
 
-        NumrInput requiredType labelText displayValue event ->
-            inputCommonFormat requiredType labelText (commonStructure (numrInput labelText displayValue event))
+-- isRequiredStr : RequiredType -> String
+-- isRequiredStr requiredType =
+--     case requiredType of
+--         CommonTypes.Required ->
+--             " required"
+--         CommonTypes.Optional ->
+--             ""
 
-        AreaInput requiredType labelText displayValue event ->
-            inputCommonFormat requiredType labelText (commonStructure (areaInput labelText displayValue event))
 
-        DropInput requiredType labelText displayValue syncfusionId ->
-            inputCommonFormat requiredType labelText (commonStructure (dropInput labelText displayValue syncfusionId))
+commonStructure : Html msg -> Html msg
+commonStructure t =
+    div [ class controlWidth ] [ t ]
 
-        FileInput requiredType labelText displayValue ->
-            fileInput requiredType labelText displayValue
+
+inputCommonFormat : String -> List (Html msg) -> Html msg
+inputCommonFormat displayText t =
+    let
+        firstItem =
+            label [ class (labelWidth ++ "control-label"), forId displayText ] [ text displayText ]
+    in
+        div [ class "form-group" ]
+            (firstItem :: t)
+
+
+common : ( String, InputControlType msg ) -> Html msg
+common ( labelText, controlType ) =
+    let
+        commonFormat =
+            inputCommonFormat labelText
+    in
+        case controlType of
+            RequiredTextInput displayValue event ->
+                commonFormat [ commonStructure (textInput labelText displayValue event) ]
+
+            -- RequiredNumrInput displayValue event ->
+            --     commonFormat commonStructure [ numrInput labelText displayValue event ]
+            -- RequiredAreaInput displayValue event ->
+            --     commonFormat commonStructure [ areaInput labelText displayValue event ]
+            -- RequiredDropInput displayValue syncfusionId ->
+            --     commonFormat commonStructure [ dropInput labelText displayValue syncfusionId ]
+            RequiredFileInput displayValue ->
+                commonFormat [ fileInput labelText displayValue ]
+
+            _ ->
+                div [] []
 
 
 textInput : String -> String -> (String -> msg) -> Html msg
@@ -179,10 +161,10 @@ dropInput displayText displayValue syncfusionId =
     input [ type_ "text", id syncfusionId, value displayValue ] []
 
 
-fileInput : RequiredType -> String -> String -> Html msg
-fileInput requiredType displayText displayValue =
+fileInput : String -> String -> Html msg
+fileInput displayText displayValue =
     div [ class "form-group" ]
-        [ label [ class (labelWidth ++ "control-label " ++ isRequiredStr requiredType), for "fileName" ]
+        [ label [ class (labelWidth ++ "control-label "), for "fileName" ]
             [ text displayText ]
         , div [ class "col-sm-6 col-md-4 col-lg-3" ]
             [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] []
