@@ -15,6 +15,9 @@ import Utils.CommonFunctions exposing (..)
 port sendMenuMessage : MenuMessage -> Cmd msg
 
 
+port toggleConsent : Bool -> Cmd msg
+
+
 port initSyncfusionControls : SyncFusionMessage -> Cmd msg
 
 
@@ -118,7 +121,24 @@ update msg model =
             { model | tableState = newState } ! []
 
         SendMenuMessage recordId messageType ->
-            model ! [ sendMenuMessage (MenuMessage messageType recordId model.recordTypeId) ]
+            let
+                maybeVerbalConsent =
+                    model.records
+                        |> List.filter (\t -> t.id == recordId)
+                        |> List.head
+                        |> Maybe.map (\t -> t.hasVerbalConsent)
+
+                updatedRecords =
+                    model.records
+                        |> List.map
+                            (\t ->
+                                if t.id == recordId then
+                                    { t | hasVerbalConsent = not t.hasVerbalConsent }
+                                else
+                                    t
+                            )
+            in
+                { model | records = updatedRecords } ! [ sendMenuMessage (MenuMessage messageType recordId model.recordTypeId maybeVerbalConsent) ]
 
         AddNewStart ->
             let
@@ -233,47 +253,51 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    case model.state of
-        Grid ->
-            div []
-                [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
-                , editDropDownDiv (dropDownItems model.recordTypeId model.dropDownState.rowId) model.dropDownState
-                , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config model.recordTypeId) model.tableState model.records ]
-                ]
+    let
+        x =
+            1
+    in
+        case model.state of
+            Grid ->
+                div []
+                    [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
+                    , editDropDownDiv (dropDownItems model.recordTypeId model.dropDownState.rowId) model.dropDownState
+                    , div [ class "e-grid e-js e-waitingpopup" ]
+                        [ Table.view (config model.recordTypeId) model.tableState model.records ]
+                    ]
 
-        AddNew newRecord ->
-            let
-                inputControls =
-                    makeControls (formInputs newRecord)
+            AddNew newRecord ->
+                let
+                    inputControls =
+                        makeControls (formInputs newRecord)
 
-                errors =
-                    getValidationErrors (formInputs newRecord)
+                    errors =
+                        getValidationErrors (formInputs newRecord)
 
-                validationErrorsDiv =
-                    if newRecord.showValidationErrors == True && List.length errors > 0 then
-                        displayErrors errors
-                    else
-                        div [] []
+                    validationErrorsDiv =
+                        if newRecord.showValidationErrors == True && List.length errors > 0 then
+                            displayErrors errors
+                        else
+                            div [] []
 
-                saveBtnClass =
-                    class "btn btn-success margin-left-5 pull-right"
+                    saveBtnClass =
+                        class "btn btn-success margin-left-5 pull-right"
 
-                footerControls =
-                    [ div [ class "form-group" ]
-                        [ div [ class fullWidth ]
-                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
-                            , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
+                    footerControls =
+                        [ div [ class "form-group" ]
+                            [ div [ class fullWidth ]
+                                [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
+                                , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
+                                ]
                             ]
                         ]
-                    ]
-            in
-                div
-                    [ class "form-horizontal" ]
-                    (validationErrorsDiv :: inputControls ++ footerControls)
+                in
+                    div
+                        [ class "form-horizontal" ]
+                        (validationErrorsDiv :: inputControls ++ footerControls)
 
-        Error errMessage ->
-            div [] [ text errMessage ]
+            Error errMessage ->
+                div [] [ text errMessage ]
 
 
 displayErrors : List String -> Html Msg
@@ -406,6 +430,7 @@ getColumns recordTypeId =
                     , stringColumn "Comments" (\t -> defaultDateTime t.comments)
                     ]
 
+                --"<a onclick='(function(s,e){ window.taskId = " + taskId + "; EditTaskPopup.Show(); return false;})()' href='#'>" + taskTitle + "</a>");
                 CallRecordings ->
                     [ stringColumn "Date" (\t -> dateTime t.recordingDate)
                     , hrefColumn "Recording" "Open" (\t -> defaultString t.recording)

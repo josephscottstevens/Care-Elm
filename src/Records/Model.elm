@@ -212,4 +212,5 @@ type alias MenuMessage =
     { name : String
     , recordId : Int
     , recordType : Int
+    , hasConsent : Maybe Bool
     }

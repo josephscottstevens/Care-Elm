@@ -15,6 +15,11 @@ defaultString str =
     Maybe.withDefault "" str
 
 
+defaultBool : Maybe Bool -> Bool
+defaultBool bool =
+    Maybe.withDefault False bool
+
+
 defaultInt : Maybe Int -> String
 defaultInt int =
     case int of

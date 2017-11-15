@@ -10,11 +10,13 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-Fix Mark As Consent height.. bah
-Implement MarkAsConsent menu message
 Fix Call Recording column widths
+Call recordings starts with date column sorted desc
+Call recorings loading isn't working? (the spinner stops early)
 Create add new in edit
 Implement Hospitalizations
+Enrollment looks weird
+SendMenuMessage is really heavy for a model update function, see if I can split out somehow
 
 Filter above each header
 Don't sort on header click :/ oh my

@@ -163,11 +163,17 @@ editDropDownDiv dropDownItems dropDownState =
         ]
 
 
+
+-- (24 * maxnumber of elements) + 2
+-- currently 6 items, so , set max height to 146
+
+
 dropDownMenuStyle : DropDownState -> Html.Attribute msg
 dropDownMenuStyle dropDownState =
     style
         [ ( "left", toString dropDownState.x ++ "px" )
         , ( "top", toString dropDownState.y ++ "px" )
+        , ( "height", "146px" )
         , ( "z-index", "5000" )
         , ( "position", "absolute" )
         , ( "display", "block" )
