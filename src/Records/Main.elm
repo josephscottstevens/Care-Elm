@@ -18,6 +18,9 @@ port sendMenuMessage : MenuMessage -> Cmd msg
 port toggleConsent : Bool -> Cmd msg
 
 
+port editTask : Int -> Cmd msg
+
+
 port initSyncfusionControls : SyncFusionMessage -> Cmd msg
 
 
@@ -199,6 +202,9 @@ update msg model =
 
         UpdateTitle newRecord str ->
             { model | state = AddNew { newRecord | title = str } } ! [ setUnsavedChanges True ]
+
+        OpenTask taskId ->
+            model ! [ editTask taskId ]
 
         UpdateRecordType newRecord dropDownItem ->
             case dropDownItem.id of
@@ -430,10 +436,10 @@ getColumns recordTypeId =
                     , stringColumn "Comments" (\t -> defaultDateTime t.comments)
                     ]
 
-                --"<a onclick='(function(s,e){ window.taskId = " + taskId + "; EditTaskPopup.Show(); return false;})()' href='#'>" + taskTitle + "</a>");
                 CallRecordings ->
                     [ stringColumn "Date" (\t -> dateTime t.recordingDate)
                     , hrefColumn "Recording" "Open" (\t -> defaultString t.recording)
+                    , hrefColumnExtra "Task" (\t -> defaultString t.taskTitle) "#" (OpenTask 18)
                     , checkColumn "During Enrollment" (\t -> t.enrollment)
                     , checkColumn "Consent" (\t -> t.hasVerbalConsent)
                     , stringColumn "User" (\t -> defaultString t.staffName)

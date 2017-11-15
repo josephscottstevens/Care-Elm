@@ -12,6 +12,7 @@ type Msg
     | DropDownToggle DropDownState
     | Save NewRecord
     | SendMenuMessage Int String
+    | OpenTask Int
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | SaveCompleted (Result Http.Error String)

@@ -2,6 +2,7 @@ module Utils.CommonGrid exposing (..)
 
 import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, attribute, href, target, checked)
+import Html.Events exposing (onClick)
 import Table
 import Utils.CommonTypes exposing (DropDownState)
 
@@ -91,10 +92,26 @@ hrefColumn name hrefText toHref =
         }
 
 
+hrefColumnExtra : String -> (data -> String) -> String -> msg -> Table.Column data msg
+hrefColumnExtra name hrefText toHref event =
+    Table.veryCustomColumn
+        { name = name
+        , viewData = \data -> hrefColumnCellExtra (hrefText data) toHref event
+        , sorter = Table.unsortable
+        }
+
+
 hrefColumnCell : String -> String -> Table.HtmlDetails msg
 hrefColumnCell displayText url =
     Table.HtmlDetails []
         [ a [ href url ] [ text displayText ]
+        ]
+
+
+hrefColumnCellExtra : String -> String -> msg -> Table.HtmlDetails msg
+hrefColumnCellExtra displayText url event =
+    Table.HtmlDetails []
+        [ a [ href url, onClick event ] [ text displayText ]
         ]
 
 
