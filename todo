@@ -10,10 +10,11 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-User is required, but not enforced in call recordings.
+Selecting Null in dropdown menu isn't updating validation
 
 Filter above each header
 Don't sort on header click :/ oh my
+I have double border around the grids
 
 Create add new in edit
 Implement Hospitalizations
@@ -23,8 +24,7 @@ there seems to be a bit of logic on transfer logic... not sure how to handle or 
 Try and find some better icons for the dropdown menu
 
 LOW TODO:
-Have active row highlight?
-I have double border around the grids
+
 Style checkboxs
 
 

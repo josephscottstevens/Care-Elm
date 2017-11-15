@@ -52,9 +52,20 @@ makeControls controls =
     List.map common controls
 
 
+isRequired : ( String, RequiredType, InputControlType msg ) -> Bool
+isRequired ( _, requiredType, _ ) =
+    case requiredType of
+        Required ->
+            True
+
+        Optional ->
+            False
+
+
 getValidationErrors : List ( String, RequiredType, InputControlType msg ) -> List String
 getValidationErrors controls =
     controls
+        |> List.filter isRequired
         |> List.map commonValidation
         |> List.filterMap identity
 
@@ -74,7 +85,7 @@ commonValidation ( labelText, requiredType, controlType ) =
                     Nothing
 
                 Nothing ->
-                    Just (labelText ++ "is required")
+                    Just (labelText ++ " is required")
 
         FileInput displayValue ->
             requiredStr labelText displayValue
