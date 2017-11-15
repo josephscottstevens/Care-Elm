@@ -4,7 +4,13 @@ import Html exposing (Html, text, div, button, input, span, th, li, ul, a)
 import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked)
 import Html.Events
 import Table
-import Utils.CommonTypes exposing (DropDownState)
+import Utils.CommonTypes exposing (DropDownState, FilterState)
+import Json.Decode as Json
+
+
+onInput : String -> (FilterState -> msg) -> Html.Attribute msg
+onInput name handler =
+    Html.Events.on "input" <| Json.map handler <| Json.map2 Utils.CommonTypes.FilterState (Json.succeed name) (Json.at [ "target", "value" ] Json.string)
 
 
 dataTarget : String -> Html.Attribute msg
@@ -12,8 +18,8 @@ dataTarget val =
     attribute "data-target" val
 
 
-standardTheadHelp : ( String, Table.Status, Html.Attribute msg ) -> Html msg
-standardTheadHelp ( name, status, onClick ) =
+standardTheadHelp : (FilterState -> msg) -> ( String, Table.Status, Html.Attribute msg ) -> Html msg
+standardTheadHelp event ( name, status, onClick ) =
     let
         headerDivClass =
             class "e-headercelldiv e-gridtooltip headerColumn"
@@ -49,19 +55,15 @@ standardTheadHelp ( name, status, onClick ) =
                 div [] []
             else
                 div [ class "e-filterdiv e-fltrinputdiv" ]
-                    [ input [ class "e-ejinputtext e-filtertext", style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ) ] ] []
+                    [ input [ class "e-ejinputtext e-filtertext", style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ) ], onInput name event ] []
                     ]
     in
         th [ headerColumnClass ] [ headerContent, filterContent ]
 
 
-
---onClick
-
-
-standardThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
-standardThead headers =
-    Table.HtmlDetails [ class "e-gridheader e-textover e-hidelines" ] (List.map standardTheadHelp headers)
+standardThead : (FilterState -> msg) -> List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
+standardThead msg headers =
+    Table.HtmlDetails [ class "e-gridheader e-textover e-hidelines" ] (List.map (standardTheadHelp msg) headers)
 
 
 standardTableAttrs : String -> List (Html.Attribute msg)

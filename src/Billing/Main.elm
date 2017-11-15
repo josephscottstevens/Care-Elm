@@ -74,7 +74,7 @@ view model =
         Grid ->
             div []
                 [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
-                , input [ class "form-control", placeholder "Search by Facility", onInput SetQuery, value model.query ] []
+                , input [ class "form-control", placeholder "Search by Facility" ] [] --onInput SetQuery, value model.query
                 , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view config model.tableState ((filteredCcm model) |> List.drop (model.currentPage * pagesPerBlock) |> List.take itemsPerPage)
                     ]
@@ -126,6 +126,7 @@ config =
             , Table.stringColumn "AssignedTo" (\t -> defaultString t.assignedTo)
             , editColumn (\t -> onClick (EditStart t))
             ]
-        , customizations =
-            { defaultCustomizations | tableAttrs = [ id "employersTable", class "e-table e-hidelines" ], thead = standardThead }
+        , customizations = defaultCustomizations
+
+        -- { defaultCustomizations | tableAttrs = [ id "employersTable", class "e-table e-hidelines" ], thead = standardThead }
         }

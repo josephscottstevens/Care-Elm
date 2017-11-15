@@ -1,6 +1,10 @@
 module Utils.CommonTypes exposing (..)
 
 
+type FilterState
+    = FilterState String String
+
+
 type RequiredType
     = Required
     | Optional

@@ -3,6 +3,7 @@ module Records.Model exposing (..)
 import Table
 import Http
 import Utils.CommonTypes exposing (..)
+import Dict exposing (Dict, fromList)
 
 
 type Msg
@@ -12,6 +13,7 @@ type Msg
     | DropDownToggle DropDownState
     | Save NewRecord
     | SendMenuMessage Int String
+    | SetFilter FilterState
     | OpenTask Int
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
@@ -69,6 +71,7 @@ type alias Model =
     , recordTypeId : Int
     , tableState : Table.State
     , query : String
+    , filterFields : Dict String String
     , dropDownState : DropDownState
     }
 
@@ -95,6 +98,7 @@ emptyModel flags =
         , recordTypeId = recordType
         , tableState = Table.initialSort "Date"
         , query = ""
+        , filterFields = fromList [ ( "Date Collected", "" ) ]
         , dropDownState = emptyDropDownState
         }
 
@@ -151,6 +155,12 @@ type alias NewRecord =
     , userText : String
     , taskId : Maybe Int
     , taskText : String
+    }
+
+
+type alias FilterField =
+    { fieldName : String
+    , fieldText : String
     }
 
 

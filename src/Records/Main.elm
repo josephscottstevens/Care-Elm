@@ -4,12 +4,13 @@ import Records.Load exposing (..)
 import Records.Model exposing (..)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, id, type_, value)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onFocus)
 import Table exposing (..)
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
 import Utils.CommonTypes exposing (..)
 import Utils.CommonFunctions exposing (..)
+import Dict exposing (..)
 
 
 port sendMenuMessage : MenuMessage -> Cmd msg
@@ -179,6 +180,18 @@ update msg model =
                 Nothing ->
                     model ! []
 
+        SetFilter filterState ->
+            let
+                ( fieldName, fieldText ) =
+                    case filterState of
+                        FilterState a b ->
+                            ( a, b )
+
+                filterFields =
+                    model.filterFields |> Dict.update fieldName (\_ -> Just fieldText)
+            in
+                { model | filterFields = filterFields, query = fieldText } ! []
+
         UpdateSpecialty newRecord str ->
             { model | state = AddNew { newRecord | specialty = str } } ! [ setUnsavedChanges True ]
 
@@ -224,47 +237,52 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    case model.state of
-        Grid ->
-            div []
-                [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
-                , editDropDownDiv (dropDownItems model.recordTypeId model.dropDownState.rowId) model.dropDownState
-                , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config model.recordTypeId (getTaskId model)) model.tableState model.records ]
-                ]
+    let
+        filteredRecords =
+            model.records
+                |> List.filter (\t -> String.contains model.query (defaultDateTime t.date))
+    in
+        case model.state of
+            Grid ->
+                div []
+                    [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
+                    , editDropDownDiv (dropDownItems model.recordTypeId model.dropDownState.rowId) model.dropDownState
+                    , div [ class "e-grid e-js e-waitingpopup" ]
+                        [ Table.view (config SetFilter model.recordTypeId (getTaskId model)) model.tableState filteredRecords ]
+                    ]
 
-        AddNew newRecord ->
-            let
-                inputControls =
-                    makeControls (formInputs newRecord)
+            AddNew newRecord ->
+                let
+                    inputControls =
+                        makeControls (formInputs newRecord)
 
-                errors =
-                    getValidationErrors (formInputs newRecord)
+                    errors =
+                        getValidationErrors (formInputs newRecord)
 
-                validationErrorsDiv =
-                    if newRecord.showValidationErrors == True && List.length errors > 0 then
-                        div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
-                    else
-                        div [] []
+                    validationErrorsDiv =
+                        if newRecord.showValidationErrors == True && List.length errors > 0 then
+                            div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
+                        else
+                            div [] []
 
-                saveBtnClass =
-                    class "btn btn-success margin-left-5 pull-right"
+                    saveBtnClass =
+                        class "btn btn-success margin-left-5 pull-right"
 
-                footerControls =
-                    [ div [ class "form-group" ]
-                        [ div [ class fullWidth ]
-                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
-                            , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
+                    footerControls =
+                        [ div [ class "form-group" ]
+                            [ div [ class fullWidth ]
+                                [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
+                                , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
+                                ]
                             ]
                         ]
-                    ]
-            in
-                div
-                    [ class "form-horizontal" ]
-                    (validationErrorsDiv :: inputControls ++ footerControls)
+                in
+                    div
+                        [ class "form-horizontal" ]
+                        (validationErrorsDiv :: inputControls ++ footerControls)
 
-        Error errMessage ->
-            div [] [ text errMessage ]
+            Error errMessage ->
+                div [] [ text errMessage ]
 
 
 formInputs : NewRecord -> List ( String, RequiredType, InputControlType Msg )
@@ -420,14 +438,14 @@ getColumns recordTypeId taskId =
         List.append firstColumns lastColumns
 
 
-config : Int -> Maybe Int -> Config RecordRow Msg
-config recordTypeId taskId =
+config : (FilterState -> Msg) -> Int -> Maybe Int -> Config RecordRow Msg
+config msg recordTypeId taskId =
     customConfig
         { toId = \t -> toString t.id
         , toMsg = SetTableState
         , columns = getColumns recordTypeId taskId
         , customizations =
-            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = standardThead }
+            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = (standardThead msg) }
         }
 
 
