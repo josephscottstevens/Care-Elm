@@ -267,23 +267,23 @@ view model =
             div [] [ text errMessage ]
 
 
-formInputs : NewRecord -> List (InputControlType Msg)
+formInputs : NewRecord -> List ( String, RequiredType, InputControlType Msg )
 formInputs newRecord =
     let
         recordType =
             getRecordType newRecord.recordTypeId
 
         defaultFields =
-            [ DropInput Required "Date of Visit" (defaultString newRecord.timeVisit) "TimeVisitId"
-            , TextInput Optional "Doctor of Visit" newRecord.provider (UpdateProvider newRecord)
-            , TextInput Optional "Specialty of Visit" newRecord.specialty (UpdateSpecialty newRecord)
-            , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
-            , FileInput Required "Upload Record File" newRecord.fileName
+            [ ( "Date of Visit", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" )
+            , ( "Doctor of Visit", Optional, TextInput newRecord.provider (UpdateProvider newRecord) )
+            , ( "Specialty of Visit", Optional, TextInput newRecord.specialty (UpdateSpecialty newRecord) )
+            , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
+            , ( "Upload Record File", Required, FileInput newRecord.fileName )
             ]
 
         firstColumns =
-            [ DropInput Required "Facility" (defaultIntToString newRecord.facilityId) "FacilityId"
-            , DropInput Required "Category" (toString newRecord.recordTypeId) "CategoryId"
+            [ ( "Facility", Required, DropInput (defaultInt newRecord.facilityId) "FacilityId" )
+            , ( "Category", Required, DropInput newRecord.recordTypeId "CategoryId" )
             ]
 
         lastColumns =
@@ -295,53 +295,53 @@ formInputs newRecord =
                     defaultFields
 
                 Labs ->
-                    [ DropInput Required "Date/Time of Labs Collected" (defaultString newRecord.timeVisit) "TimeVisitId"
-                    , DropInput Required "Date/Time of Labs Accessioned" (defaultString newRecord.timeAcc) "TimeAccId"
-                    , TextInput Optional "Name of Lab" newRecord.title (UpdateTitle newRecord)
-                    , TextInput Optional "Provider of Lab" newRecord.provider (UpdateProvider newRecord)
-                    , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
-                    , FileInput Required "Upload Record File" newRecord.fileName
+                    [ ( "Date/Time of Labs Collected", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" )
+                    , ( "Date/Time of Labs Accessioned", Required, DateInput (defaultString newRecord.timeAcc) "TimeAccId" )
+                    , ( "Name of Lab", Optional, TextInput newRecord.title (UpdateTitle newRecord) )
+                    , ( "Provider of Lab", Optional, TextInput newRecord.provider (UpdateProvider newRecord) )
+                    , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
+                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
                     ]
 
                 Radiology ->
-                    [ DropInput Required "Date/Time of Study was done" (defaultString newRecord.timeVisit) "TimeVisitId"
-                    , DropInput Required "Date/Time of Study Accessioned" (defaultString newRecord.timeAcc) "TimeAccId"
-                    , TextInput Optional "Name of Study" newRecord.title (UpdateTitle newRecord)
-                    , TextInput Optional "Provider of Study" newRecord.provider (UpdateProvider newRecord)
-                    , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
-                    , FileInput Required "Upload Record File" newRecord.fileName
+                    [ ( "Date/Time of Study was done", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" )
+                    , ( "Date/Time of Study Accessioned", Required, DateInput (defaultString newRecord.timeAcc) "TimeAccId" )
+                    , ( "Name of Study", Optional, TextInput newRecord.title (UpdateTitle newRecord) )
+                    , ( "Provider of Study", Optional, TextInput newRecord.provider (UpdateProvider newRecord) )
+                    , ( "Comments", Required, TextInput newRecord.comments (UpdateComments newRecord) )
+                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
                     ]
 
                 Misc ->
                     defaultFields
 
                 Legal ->
-                    [ TextInput Optional "Title" newRecord.title (UpdateTitle newRecord)
-                    , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
-                    , FileInput Required "Upload Record File" newRecord.fileName
+                    [ ( "Title", Optional, TextInput newRecord.title (UpdateTitle newRecord) )
+                    , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
+                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
                     ]
 
                 Hospitalizations ->
                     []
 
                 CallRecordings ->
-                    [ TextInput Optional "Call Sid" newRecord.callSid (UpdateCallSid newRecord)
-                    , TextInput Optional "Recording Sid" newRecord.recording (UpdateRecordingSid newRecord)
-                    , NumrInput Required "Duration" newRecord.duration (UpdateDuration newRecord)
-                    , DropInput Required "Recording Date" (defaultString newRecord.recordingDate) "RecordingDateId"
-                    , DropInput Optional "User" (defaultIntToString newRecord.userId) "UserId"
-                    , DropInput Optional "Task" (defaultIntToString newRecord.taskId) "TaskId"
+                    [ ( "Call Sid", Optional, TextInput newRecord.callSid (UpdateCallSid newRecord) )
+                    , ( "Recording Sid", Optional, TextInput newRecord.recording (UpdateRecordingSid newRecord) )
+                    , ( "Duration", Required, NumrInput newRecord.duration (UpdateDuration newRecord) )
+                    , ( "Recording Date", Required, DateInput (defaultString newRecord.recordingDate) "RecordingDateId" )
+                    , ( "User", Optional, DropInput (defaultInt newRecord.userId) "UserId" )
+                    , ( "Task", Optional, DropInput (defaultInt newRecord.taskId) "TaskId" )
                     ]
 
                 PreviousHistories ->
-                    [ DropInput Required "Report Date" (defaultString newRecord.reportDate) "ReportDateId"
-                    , FileInput Required "Upload Record File" newRecord.fileName
+                    [ ( "Report Date", Required, DateInput (defaultString newRecord.reportDate) "ReportDateId" )
+                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
                     ]
 
                 Enrollment ->
-                    [ TextInput Optional "Title" newRecord.title (UpdateTitle newRecord)
-                    , AreaInput Required "Comments" newRecord.comments (UpdateComments newRecord)
-                    , FileInput Required "Upload Record File" newRecord.fileName
+                    [ ( "Title", Optional, TextInput newRecord.title (UpdateTitle newRecord) )
+                    , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
+                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
                     ]
     in
         List.append firstColumns lastColumns
