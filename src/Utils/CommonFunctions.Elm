@@ -20,8 +20,13 @@ defaultBool bool =
     Maybe.withDefault False bool
 
 
-defaultInt : Maybe Int -> String
+defaultInt : Maybe Int -> Int
 defaultInt int =
+    Maybe.withDefault -1 int
+
+
+defaultIntToString : Maybe Int -> String
+defaultIntToString int =
     case int of
         Just t ->
             toString t

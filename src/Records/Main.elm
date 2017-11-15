@@ -259,51 +259,47 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    let
-        x =
-            1
-    in
-        case model.state of
-            Grid ->
-                div []
-                    [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
-                    , editDropDownDiv (dropDownItems model.recordTypeId model.dropDownState.rowId) model.dropDownState
-                    , div [ class "e-grid e-js e-waitingpopup" ]
-                        [ Table.view (config model.recordTypeId) model.tableState model.records ]
-                    ]
+    case model.state of
+        Grid ->
+            div []
+                [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
+                , editDropDownDiv (dropDownItems model.recordTypeId model.dropDownState.rowId) model.dropDownState
+                , div [ class "e-grid e-js e-waitingpopup" ]
+                    [ Table.view (config model.recordTypeId (getTaskId model)) model.tableState model.records ]
+                ]
 
-            AddNew newRecord ->
-                let
-                    inputControls =
-                        makeControls (formInputs newRecord)
+        AddNew newRecord ->
+            let
+                inputControls =
+                    makeControls (formInputs newRecord)
 
-                    errors =
-                        getValidationErrors (formInputs newRecord)
+                errors =
+                    getValidationErrors (formInputs newRecord)
 
-                    validationErrorsDiv =
-                        if newRecord.showValidationErrors == True && List.length errors > 0 then
-                            displayErrors errors
-                        else
-                            div [] []
+                validationErrorsDiv =
+                    if newRecord.showValidationErrors == True && List.length errors > 0 then
+                        displayErrors errors
+                    else
+                        div [] []
 
-                    saveBtnClass =
-                        class "btn btn-success margin-left-5 pull-right"
+                saveBtnClass =
+                    class "btn btn-success margin-left-5 pull-right"
 
-                    footerControls =
-                        [ div [ class "form-group" ]
-                            [ div [ class fullWidth ]
-                                [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
-                                , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
-                                ]
+                footerControls =
+                    [ div [ class "form-group" ]
+                        [ div [ class fullWidth ]
+                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
+                            , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
                             ]
                         ]
-                in
-                    div
-                        [ class "form-horizontal" ]
-                        (validationErrorsDiv :: inputControls ++ footerControls)
+                    ]
+            in
+                div
+                    [ class "form-horizontal" ]
+                    (validationErrorsDiv :: inputControls ++ footerControls)
 
-            Error errMessage ->
-                div [] [ text errMessage ]
+        Error errMessage ->
+            div [] [ text errMessage ]
 
 
 displayErrors : List String -> Html Msg
@@ -326,7 +322,7 @@ formInputs newRecord =
             ]
 
         firstColumns =
-            [ DropInput Required "Facility" (defaultInt newRecord.facilityId) "FacilityId"
+            [ DropInput Required "Facility" (defaultIntToString newRecord.facilityId) "FacilityId"
             , DropInput Required "Category" (toString newRecord.recordTypeId) "CategoryId"
             ]
 
@@ -373,8 +369,8 @@ formInputs newRecord =
                     , TextInput Optional "Recording Sid" newRecord.recording (UpdateRecordingSid newRecord)
                     , NumrInput Required "Duration" newRecord.duration (UpdateDuration newRecord)
                     , DropInput Required "Recording Date" (defaultString newRecord.recordingDate) "RecordingDateId"
-                    , DropInput Optional "User" (defaultInt newRecord.userId) "UserId"
-                    , DropInput Optional "Task" (defaultInt newRecord.taskId) "TaskId"
+                    , DropInput Optional "User" (defaultIntToString newRecord.userId) "UserId"
+                    , DropInput Optional "Task" (defaultIntToString newRecord.taskId) "TaskId"
                     ]
 
                 PreviousHistories ->
@@ -391,8 +387,8 @@ formInputs newRecord =
         List.append firstColumns lastColumns
 
 
-getColumns : Int -> List (Column RecordRow Msg)
-getColumns recordTypeId =
+getColumns : Int -> Maybe Int -> List (Column RecordRow Msg)
+getColumns recordTypeId taskId =
     let
         recordType =
             getRecordType recordTypeId
@@ -439,7 +435,7 @@ getColumns recordTypeId =
                 CallRecordings ->
                     [ stringColumn "Date" (\t -> dateTime t.recordingDate)
                     , hrefColumn "Recording" "Open" (\t -> defaultString t.recording)
-                    , hrefColumnExtra "Task" (\t -> defaultString t.taskTitle) "#" (OpenTask 18)
+                    , hrefColumnExtra "Task" (\t -> defaultString t.taskTitle) "#" (OpenTask (defaultInt taskId))
                     , checkColumn "During Enrollment" (\t -> t.enrollment)
                     , checkColumn "Consent" (\t -> t.hasVerbalConsent)
                     , stringColumn "User" (\t -> defaultString t.staffName)
@@ -467,12 +463,12 @@ getColumns recordTypeId =
         List.append firstColumns lastColumns
 
 
-config : Int -> Config RecordRow Msg
-config recordTypeId =
+config : Int -> Maybe Int -> Config RecordRow Msg
+config recordTypeId taskId =
     customConfig
         { toId = \t -> toString t.id
         , toMsg = SetTableState
-        , columns = getColumns recordTypeId
+        , columns = getColumns recordTypeId taskId
         , customizations = defaultCustomizations
         }
 

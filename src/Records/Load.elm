@@ -156,3 +156,15 @@ maybeToDateString maybeDateStr =
 
         Nothing ->
             Nothing
+
+
+getTaskId : Model -> Maybe Int
+getTaskId model =
+    let
+        records =
+            model.records
+                |> List.filter (\t -> t.id == model.dropDownState.rowId)
+                |> List.head
+                |> Maybe.map (\t -> t.taskId)
+    in
+        Maybe.withDefault Nothing records
