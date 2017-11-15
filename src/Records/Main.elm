@@ -325,11 +325,11 @@ formInputs newRecord =
                     []
 
                 CallRecordings ->
-                    [ ( "Call Sid", Optional, TextInput newRecord.callSid (UpdateCallSid newRecord) )
-                    , ( "Recording Sid", Optional, TextInput newRecord.recording (UpdateRecordingSid newRecord) )
+                    [ ( "Call Sid", Required, TextInput newRecord.callSid (UpdateCallSid newRecord) )
+                    , ( "Recording Sid", Required, TextInput newRecord.recording (UpdateRecordingSid newRecord) )
                     , ( "Duration", Required, NumrInput newRecord.duration (UpdateDuration newRecord) )
                     , ( "Recording Date", Required, DateInput (defaultString newRecord.recordingDate) "RecordingDateId" )
-                    , ( "User", Optional, DropInput (defaultInt newRecord.userId) "UserId" )
+                    , ( "User", Required, DropInput (defaultInt newRecord.userId) "UserId" )
                     , ( "Task", Optional, DropInput (defaultInt newRecord.taskId) "TaskId" )
                     ]
 

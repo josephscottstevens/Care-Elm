@@ -49,11 +49,7 @@ type InputControlType msg
 
 makeControls : List ( String, RequiredType, InputControlType msg ) -> List (Html msg)
 makeControls controls =
-    [ div [] [] ]
-
-
-
--- List.map common controls
+    List.map common controls
 
 
 getValidationErrors : List ( String, RequiredType, InputControlType msg ) -> List String
@@ -90,21 +86,21 @@ requiredStr displayValue str =
         Nothing
 
 
+isRequiredStr : RequiredType -> String
+isRequiredStr requiredType =
+    case requiredType of
+        Required ->
+            " required"
 
--- isRequiredStr : RequiredType -> String
--- isRequiredStr requiredType =
---     case requiredType of
---         CommonTypes.Required ->
---             " required"
---         CommonTypes.Optional ->
---             ""
+        Optional ->
+            ""
 
 
-inputCommonFormat : String -> List (Html msg) -> Html msg
-inputCommonFormat displayText t =
+inputCommonFormat : String -> RequiredType -> List (Html msg) -> Html msg
+inputCommonFormat displayText requiredType t =
     let
         firstItem =
-            label [ class (labelWidth ++ "control-label"), forId displayText ] [ text displayText ]
+            label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId displayText ] [ text displayText ]
     in
         div [ class "form-group" ]
             (firstItem :: t)
@@ -114,10 +110,7 @@ common : ( String, RequiredType, InputControlType msg ) -> Html msg
 common ( labelText, requiredType, controlType ) =
     let
         commonStructure t =
-            commonFormat [ div [ class controlWidth ] t ]
-
-        commonFormat =
-            inputCommonFormat labelText
+            inputCommonFormat labelText requiredType [ div [ class controlWidth ] t ]
     in
         case controlType of
             TextInput displayValue event ->
@@ -146,16 +139,14 @@ common ( labelText, requiredType, controlType ) =
                     ]
 
             FileInput displayValue ->
-                commonFormat
-                    [ div [ class "form-group" ]
-                        [ label [ class (labelWidth ++ "control-label "), for "fileName" ]
-                            [ text labelText ]
-                        , div [ class "col-sm-6 col-md-4 col-lg-3" ]
-                            [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] []
-                            ]
-                        , div [ class "col-sm-2 col-md-1 col-lg-1" ]
-                            [ div [ id "fileBtn" ] []
-                            ]
+                div [ class "form-group" ]
+                    [ label [ class (labelWidth ++ "control-label " ++ isRequiredStr requiredType), for "fileName" ]
+                        [ text labelText ]
+                    , div [ class "col-sm-6 col-md-4 col-lg-3" ]
+                        [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] []
+                        ]
+                    , div [ class "col-sm-2 col-md-1 col-lg-1" ]
+                        [ div [ id "fileBtn" ] []
                         ]
                     ]
 

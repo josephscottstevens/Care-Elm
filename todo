@@ -10,19 +10,13 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-all of the html controls need optional types, having to butcher all my model to satisfy is required bs
-Validation is a bit meh, a bit of duplicated code, and had to convert everything to string to validate
-Edit Button's class name is "-Column", and I am styling that class, but if we have any columns without a name... how to handle?
-	Maybe have a type, Column-With-ClassName function?
-
-In Recording add new, user is actually required.
-As is CallSid, and Recording Sid
-	
-Create add new in edit
-Implement Hospitalizations
+User is required, but not enforced in call recordings.
 
 Filter above each header
 Don't sort on header click :/ oh my
+
+Create add new in edit
+Implement Hospitalizations
 Sort, like sorts twice, because of initial sort on Call Recordings
 oh my... haha... when they change recordTypeId from Category, need to change the edit view
 there seems to be a bit of logic on transfer logic... not sure how to handle or if I am already
@@ -43,6 +37,8 @@ When page left is disabled, you can still click it. (for pagination Grid)
 For example, when you are on page 12, and you filter down to like 20 rows, the highlighted row is gone (for pagination Grid)
 How can I put Elm-Make command as apart of vscode instead of needing to up arrow use recent command
 	see: https://github.com/Krzysztof-Cieslak/vscode-elm/blob/master/package.json
+Edit Button's class name is "-Column", and I am styling that class, but if we have any columns without a name... how to handle?
+	Maybe have a type, Column-With-ClassName function?
 	
 On Deploy Todo:
 	Validate File stuff still works
