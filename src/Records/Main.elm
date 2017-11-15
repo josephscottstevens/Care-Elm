@@ -106,7 +106,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Load (Ok t) ->
-            (getLoadedState model t) ! [ setLoadingStatus False ]
+            getLoadedState model t ! [ setLoadingStatus False ]
 
         Load (Err httpError) ->
             { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
@@ -350,9 +350,6 @@ formInputs newRecord =
 getColumns : Int -> Maybe Int -> List (Column RecordRow Msg)
 getColumns recordTypeId taskId =
     let
-        recordType =
-            getRecordType recordTypeId
-
         commonColumns =
             [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
             , stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
@@ -361,7 +358,7 @@ getColumns recordTypeId taskId =
             ]
 
         firstColumns =
-            case recordType of
+            case getRecordType recordTypeId of
                 PrimaryCare ->
                     commonColumns
 

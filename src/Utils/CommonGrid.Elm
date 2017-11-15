@@ -1,8 +1,8 @@
 module Utils.CommonGrid exposing (..)
 
-import Html exposing (Html, text, div, program, button, input, span, th, li, ul, a, label)
-import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, attribute, href, target, checked)
-import Html.Events exposing (onClick)
+import Html exposing (Html, text, div, button, input, span, th, li, ul, a)
+import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked)
+import Html.Events
 import Table
 import Utils.CommonTypes exposing (DropDownState)
 
@@ -116,7 +116,7 @@ hrefColumnCell displayText url =
 hrefColumnCellExtra : String -> String -> msg -> Table.HtmlDetails msg
 hrefColumnCellExtra displayText url event =
     Table.HtmlDetails []
-        [ a [ href url, onClick event ] [ text displayText ]
+        [ a [ href url, Html.Events.onClick event ] [ text displayText ]
         ]
 
 

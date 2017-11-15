@@ -59,8 +59,8 @@ dateTime str =
 date : String -> String
 date str =
     case Date.fromString str of
-        Ok date ->
-            dateToString date
+        Ok t ->
+            dateToString t
 
         Err _ ->
             ""
