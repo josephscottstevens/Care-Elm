@@ -22,7 +22,7 @@ standardTheadHelp ( name, status, onClick ) =
             style [ ( "margin-top", "5px" ) ]
 
         headerDiv =
-            div [ headerDivClass, headerDivStyle ] [ text name ]
+            div [ headerDivClass, headerDivStyle ]
 
         headerColumnClass =
             class ("e-columnheader e-default e-filterbarcell " ++ name ++ "-Column")
@@ -30,19 +30,19 @@ standardTheadHelp ( name, status, onClick ) =
         headerContent =
             case status of
                 Table.Unsortable ->
-                    headerDiv
+                    headerDiv [ text name ]
 
                 Table.Sortable selected ->
-                    headerDiv
+                    headerDiv [ text name ]
 
                 Table.Reversible Nothing ->
-                    headerDiv
+                    headerDiv [ text name ]
 
                 Table.Reversible (Just isReversed) ->
                     if isReversed then
-                        div [ class "glyphicon glyphicon-menu-up" ] [ headerDiv ]
+                        headerDiv [ text name, span [ class "glyphicon glyphicon-menu-up" ] [] ]
                     else
-                        div [ class "glyphicon glyphicon-menu-down" ] [ headerDiv ]
+                        headerDiv [ text name, span [ class "glyphicon glyphicon-menu-down" ] [] ]
 
         filterContent =
             if name == "" then

@@ -93,7 +93,7 @@ emptyModel flags =
         , patientId = flags.patientId
         , facilityId = Nothing
         , recordTypeId = recordType
-        , tableState = Table.initialSort "dob"
+        , tableState = Table.initialSort "Date"
         , query = ""
         , dropDownState = emptyDropDownState
         }
