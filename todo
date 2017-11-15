@@ -10,13 +10,16 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-Fix Call Recording column widths
+css
+	Fix Call Recording column widths
+	rowAttrs is a hack, need to change to css row alternating
+	change over all the record grid inline css to a stylesheet
+	
 Call recordings starts with date column sorted desc
 Call recorings loading isn't working? (the spinner stops early)
 Create add new in edit
 Implement Hospitalizations
 Enrollment looks weird
-SendMenuMessage is really heavy for a model update function, see if I can split out somehow
 
 Filter above each header
 Don't sort on header click :/ oh my

@@ -6,8 +6,7 @@ import Json.Decode.Pipeline exposing (..)
 import Http
 import Records.Model exposing (..)
 import Utils.CommonTypes exposing (..)
-import Date
-import Date.Extra
+import Utils.CommonFunctions exposing (..)
 
 
 decodeRecordRow : Decoder RecordRow
@@ -138,24 +137,8 @@ saveForm newRecord =
     Http.send SaveCompleted (saveFormRequest newRecord)
 
 
-maybeVal : (a -> Encode.Value) -> Maybe a -> Encode.Value
-maybeVal encoder =
-    Maybe.map encoder >> Maybe.withDefault Encode.null
 
-
-maybeToDateString : Maybe String -> Maybe String
-maybeToDateString maybeDateStr =
-    case maybeDateStr of
-        Just dateStr ->
-            case Date.fromString dateStr of
-                Ok date ->
-                    Just (Date.Extra.toUtcIsoString date)
-
-                Err _ ->
-                    Nothing
-
-        Nothing ->
-            Nothing
+--everything above here is related to HTTP stuff, everything below is update helpers, does it make sense to split out?
 
 
 getTaskId : Model -> Maybe Int
@@ -168,3 +151,54 @@ getTaskId model =
                 |> Maybe.map (\t -> t.taskId)
     in
         Maybe.withDefault Nothing records
+
+
+getMenuMessage : Model -> Int -> String -> MenuMessage
+getMenuMessage model recordId messageType =
+    let
+        maybeVerbalConsent =
+            model.records
+                |> List.filter (\t -> t.id == recordId)
+                |> List.head
+                |> Maybe.map (\t -> t.hasVerbalConsent)
+    in
+        MenuMessage messageType recordId model.recordTypeId maybeVerbalConsent
+
+
+flipConsent : List RecordRow -> Int -> List RecordRow
+flipConsent records recordId =
+    records
+        |> List.map
+            (\t ->
+                if t.id == recordId then
+                    { t | hasVerbalConsent = not t.hasVerbalConsent }
+                else
+                    t
+            )
+
+
+getNewRecord : Model -> NewRecord
+getNewRecord model =
+    { emptyNewRecord
+        | patientId = model.patientId
+        , recordTypeId = model.recordTypeId
+        , facilityId = model.facilityId
+    }
+
+
+getSyncFusionMessage : Model -> SyncFusionMessage
+getSyncFusionMessage model =
+    SyncFusionMessage model.facilities model.recordTypes model.users model.tasks model.facilityId model.recordTypeId
+
+
+getLoadedState : Model -> WebResponse -> Model
+getLoadedState model t =
+    { model
+        | state = Grid
+        , facilityId = t.facilityId
+        , records = t.records
+        , facilities = t.facilities
+        , recordTypes = t.recordTypes
+        , tasks = t.tasks
+        , users = t.users
+    }

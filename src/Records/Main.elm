@@ -106,16 +106,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Load (Ok t) ->
-            { model
-                | state = Grid
-                , facilityId = t.facilityId
-                , records = t.records
-                , facilities = t.facilities
-                , recordTypes = t.recordTypes
-                , tasks = t.tasks
-                , users = t.users
-            }
-                ! [ setLoadingStatus False ]
+            (getLoadedState model t) ! [ setLoadingStatus False ]
 
         Load (Err httpError) ->
             { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
@@ -124,36 +115,10 @@ update msg model =
             { model | tableState = newState } ! []
 
         SendMenuMessage recordId messageType ->
-            let
-                maybeVerbalConsent =
-                    model.records
-                        |> List.filter (\t -> t.id == recordId)
-                        |> List.head
-                        |> Maybe.map (\t -> t.hasVerbalConsent)
-
-                updatedRecords =
-                    model.records
-                        |> List.map
-                            (\t ->
-                                if t.id == recordId then
-                                    { t | hasVerbalConsent = not t.hasVerbalConsent }
-                                else
-                                    t
-                            )
-            in
-                { model | records = updatedRecords } ! [ sendMenuMessage (MenuMessage messageType recordId model.recordTypeId maybeVerbalConsent) ]
+            { model | records = flipConsent model.records recordId } ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
 
         AddNewStart ->
-            let
-                newRecord =
-                    { emptyNewRecord
-                        | patientId = model.patientId
-                        , recordTypeId = model.recordTypeId
-                        , facilityId = model.facilityId
-                    }
-            in
-                { model | state = AddNew newRecord }
-                    ! [ initSyncfusionControls (SyncFusionMessage model.facilities model.recordTypes model.users model.tasks model.facilityId model.recordTypeId) ]
+            { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model) ]
 
         Save newRecord ->
             let
@@ -278,7 +243,7 @@ view model =
 
                 validationErrorsDiv =
                     if newRecord.showValidationErrors == True && List.length errors > 0 then
-                        displayErrors errors
+                        div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
                     else
                         div [] []
 
@@ -300,11 +265,6 @@ view model =
 
         Error errMessage ->
             div [] [ text errMessage ]
-
-
-displayErrors : List String -> Html Msg
-displayErrors errors =
-    div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
 
 
 formInputs : NewRecord -> List (InputControlType Msg)
