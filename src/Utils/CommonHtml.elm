@@ -43,7 +43,7 @@ type InputControlType msg
     | NumrInput Int (String -> msg)
     | AreaInput String (String -> msg)
     | DropInput (Maybe Int) String
-    | DateInput String String
+    | DateInput String String (Maybe String -> msg)
     | FileInput String
 
 
@@ -86,6 +86,9 @@ commonValidation ( labelText, requiredType, controlType ) =
 
                 Nothing ->
                     Just (labelText ++ " is required")
+
+        DateInput displayValue _ _ ->
+            requiredStr labelText displayValue
 
         FileInput displayValue ->
             requiredStr labelText displayValue
@@ -149,9 +152,9 @@ common ( labelText, requiredType, controlType ) =
                     [ input [ type_ "text", id syncfusionId, value (toString displayValue) ] []
                     ]
 
-            DateInput displayValue syncfusionId ->
+            DateInput displayValue syncfusionId event ->
                 commonStructure
-                    [ input [ type_ "text", id syncfusionId, value displayValue ] []
+                    [ input [ type_ "text", id syncfusionId, value displayValue, onInput (defaultMaybeMsg event) ] []
                     ]
 
             FileInput displayValue ->

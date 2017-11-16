@@ -11,9 +11,19 @@ isAlpha char =
     isLower char || isUpper char
 
 
+defaultMaybeMsg : (Maybe String -> msg) -> String -> msg
+defaultMaybeMsg fromMaybe input =
+    fromMaybe (Just input)
+
+
 defaultString : Maybe String -> String
 defaultString str =
     Maybe.withDefault "" str
+
+
+defaultLower : Maybe String -> String
+defaultLower str =
+    String.toLower (defaultString str)
 
 
 defaultBool : Maybe Bool -> Bool
@@ -74,6 +84,16 @@ defaultDateTime str =
 defaultDate : Maybe String -> String
 defaultDate str =
     date (defaultString str)
+
+
+defaultLowerDate : Maybe String -> String
+defaultLowerDate str =
+    String.toLower (date (defaultString str))
+
+
+defaultLowerDateTime : Maybe String -> String
+defaultLowerDateTime str =
+    String.toLower (dateTime (defaultString str))
 
 
 defaultIntStr : String -> Int

@@ -181,24 +181,7 @@ update msg model =
                     model ! []
 
         SetFilter filterState ->
-            let
-                ( fieldName, fieldText ) =
-                    case filterState of
-                        FilterState a b ->
-                            ( a, b )
-
-                flds =
-                    model.filterFields
-
-                filterFields =
-                    if fieldName == "Date Collected" then
-                        { flds | date = Just fieldText }
-                    else if fieldName == "Doctor of Visit" then
-                        { flds | provider = Just fieldText }
-                    else
-                        flds
-            in
-                { model | filterFields = filterFields, query = fieldText } ! []
+            { model | filterFields = filterFields model.filterFields filterState } ! []
 
         UpdateSpecialty newRecord str ->
             { model | state = AddNew { newRecord | specialty = str } } ! [ setUnsavedChanges True ]
@@ -245,53 +228,47 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    let
-        filteredRecords =
-            model.records
-                |> List.filter (\t -> String.contains (defaultString model.filterFields.date) (defaultString t.date))
-                |> List.filter (\t -> String.contains (defaultString model.filterFields.provider) (defaultString t.provider))
-    in
-        case model.state of
-            Grid ->
-                div []
-                    [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
-                    , editDropDownDiv (dropDownItems model.recordTypeId model.dropDownState.rowId) model.dropDownState
-                    , div [ class "e-grid e-js e-waitingpopup" ]
-                        [ Table.view (config SetFilter model.recordTypeId (getTaskId model)) model.tableState filteredRecords ]
-                    ]
+    case model.state of
+        Grid ->
+            div []
+                [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
+                , editDropDownDiv (dropDownItems model.recordTypeId model.dropDownState.rowId) model.dropDownState
+                , div [ class "e-grid e-js e-waitingpopup" ]
+                    [ Table.view (config SetFilter model.recordTypeId (getTaskId model)) model.tableState (filteredRecords model) ]
+                ]
 
-            AddNew newRecord ->
-                let
-                    inputControls =
-                        makeControls (formInputs newRecord)
+        AddNew newRecord ->
+            let
+                inputControls =
+                    makeControls (formInputs newRecord)
 
-                    errors =
-                        getValidationErrors (formInputs newRecord)
+                errors =
+                    getValidationErrors (formInputs newRecord)
 
-                    validationErrorsDiv =
-                        if newRecord.showValidationErrors == True && List.length errors > 0 then
-                            div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
-                        else
-                            div [] []
+                validationErrorsDiv =
+                    if newRecord.showValidationErrors == True && List.length errors > 0 then
+                        div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
+                    else
+                        div [] []
 
-                    saveBtnClass =
-                        class "btn btn-success margin-left-5 pull-right"
+                saveBtnClass =
+                    class "btn btn-success margin-left-5 pull-right"
 
-                    footerControls =
-                        [ div [ class "form-group" ]
-                            [ div [ class fullWidth ]
-                                [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
-                                , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
-                                ]
+                footerControls =
+                    [ div [ class "form-group" ]
+                        [ div [ class fullWidth ]
+                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
+                            , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
                             ]
                         ]
-                in
-                    div
-                        [ class "form-horizontal" ]
-                        (validationErrorsDiv :: inputControls ++ footerControls)
+                    ]
+            in
+                div
+                    [ class "form-horizontal" ]
+                    (validationErrorsDiv :: inputControls ++ footerControls)
 
-            Error errMessage ->
-                div [] [ text errMessage ]
+        Error errMessage ->
+            div [] [ text errMessage ]
 
 
 formInputs : NewRecord -> List ( String, RequiredType, InputControlType Msg )
@@ -301,7 +278,7 @@ formInputs newRecord =
             getRecordType newRecord.recordTypeId
 
         defaultFields =
-            [ ( "Date of Visit", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" )
+            [ ( "Date of Visit", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" (UpdateTimeVisit newRecord) )
             , ( "Doctor of Visit", Optional, TextInput newRecord.provider (UpdateProvider newRecord) )
             , ( "Specialty of Visit", Optional, TextInput newRecord.specialty (UpdateSpecialty newRecord) )
             , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
@@ -322,8 +299,8 @@ formInputs newRecord =
                     defaultFields
 
                 Labs ->
-                    [ ( "Date/Time of Labs Collected", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" )
-                    , ( "Date/Time of Labs Accessioned", Required, DateInput (defaultString newRecord.timeAcc) "TimeAccId" )
+                    [ ( "Date/Time of Labs Collected", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" (UpdateTimeVisit newRecord) )
+                    , ( "Date/Time of Labs Accessioned", Required, DateInput (defaultString newRecord.timeAcc) "TimeAccId" (UpdateTimeAcc newRecord) )
                     , ( "Name of Lab", Optional, TextInput newRecord.title (UpdateTitle newRecord) )
                     , ( "Provider of Lab", Optional, TextInput newRecord.provider (UpdateProvider newRecord) )
                     , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
@@ -331,8 +308,8 @@ formInputs newRecord =
                     ]
 
                 Radiology ->
-                    [ ( "Date/Time of Study was done", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" )
-                    , ( "Date/Time of Study Accessioned", Required, DateInput (defaultString newRecord.timeAcc) "TimeAccId" )
+                    [ ( "Date/Time of Study was done", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" (UpdateTimeVisit newRecord) )
+                    , ( "Date/Time of Study Accessioned", Required, DateInput (defaultString newRecord.timeAcc) "TimeAccId" (UpdateTimeAcc newRecord) )
                     , ( "Name of Study", Optional, TextInput newRecord.title (UpdateTitle newRecord) )
                     , ( "Provider of Study", Optional, TextInput newRecord.provider (UpdateProvider newRecord) )
                     , ( "Comments", Required, TextInput newRecord.comments (UpdateComments newRecord) )
@@ -355,13 +332,13 @@ formInputs newRecord =
                     [ ( "Call Sid", Required, TextInput newRecord.callSid (UpdateCallSid newRecord) )
                     , ( "Recording Sid", Required, TextInput newRecord.recording (UpdateRecordingSid newRecord) )
                     , ( "Duration", Required, NumrInput newRecord.duration (UpdateDuration newRecord) )
-                    , ( "Recording Date", Required, DateInput (defaultString newRecord.recordingDate) "RecordingDateId" )
+                    , ( "Recording Date", Required, DateInput (defaultString newRecord.recordingDate) "RecordingDateId" (UpdateRecordingDate newRecord) )
                     , ( "User", Required, DropInput newRecord.userId "UserId" )
                     , ( "Task", Optional, DropInput newRecord.taskId "TaskId" )
                     ]
 
                 PreviousHistories ->
-                    [ ( "Report Date", Required, DateInput (defaultString newRecord.reportDate) "ReportDateId" )
+                    [ ( "Report Date", Required, DateInput (defaultString newRecord.reportDate) "ReportDateId" (UpdateReportDate newRecord) )
                     , ( "Upload Record File", Required, FileInput newRecord.fileName )
                     ]
 
@@ -413,7 +390,7 @@ getColumns recordTypeId taskId =
 
                 Legal ->
                     [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , stringColumn "Comments" (\t -> defaultDateTime t.comments)
+                    , stringColumn "Comments" (\t -> defaultString t.comments)
                     ]
 
                 CallRecordings ->

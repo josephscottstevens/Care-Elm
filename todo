@@ -4,13 +4,17 @@ QUESTIONS:
 	CCD's has no edit mode? no way to insert into the grid, but you can view records?
 		CCD's has no data in prod...
 	Why are there null recordtypes in the grid?
+	Previous histories shows a comment column, but doesn't have it in the edit?
 
 REQUESTED TODO:
 	put edit mode inside of grid  (but.. how?)
 	
 ===========================================================================================================
 
-Very nice start on filter, now, perhaps, no need for all columns, and all the columns should be a string
+CallRecordings's Recording column has hard coded Open text, is that right?
+I am getting random errors on grid... cannot append child of null... maybe a bad flag?
+nooooooo when screen is too small the stinkin popup is off to the left
+Why are grids getting scroll bars on my right screen?
 I have double border around the grids
 
 Create add new in edit
@@ -35,6 +39,8 @@ For example, when you are on page 12, and you filter down to like 20 rows, the h
 How can I put Elm-Make command as apart of vscode instead of needing to up arrow use recent command
 	see: https://github.com/Krzysztof-Cieslak/vscode-elm/blob/master/package.json
 recordTypeId should be a maybe type, there are hacks all over keeping from that
+I can optimize filter, since I don't need every filter all the time...
+refactor long else if filter in load, to case of instead of if else
 Edit Button's class name is "-Column", and I am styling that class, but if we have any columns without a name... how to handle?
 	Maybe have a type, Column-With-ClassName function?
 	

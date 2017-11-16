@@ -7,6 +7,7 @@ import Http
 import Records.Model exposing (..)
 import Utils.CommonTypes exposing (..)
 import Utils.CommonFunctions exposing (..)
+import String exposing (toLower)
 
 
 decodeRecordRow : Decoder RecordRow
@@ -202,3 +203,74 @@ getLoadedState model t =
         , tasks = t.tasks
         , users = t.users
     }
+
+
+
+-- Filtering update helpers
+
+
+filterFields : Filters -> FilterState -> Filters
+filterFields flds filterState =
+    let
+        ( fieldName, fieldText ) =
+            case filterState of
+                FilterState a b ->
+                    ( a, b )
+
+        t =
+            String.toLower fieldText
+    in
+        if fieldName == "Date Collected" then
+            { flds | date = t }
+        else if fieldName == "Doctor of Visit" then
+            { flds | provider = t }
+        else if fieldName == "Specialty" then
+            { flds | specialty = t }
+        else if fieldName == "Comments" then
+            { flds | comments = t }
+        else if fieldName == "Date Accessioned" then
+            { flds | dateAccessioned = t }
+        else if fieldName == "Name of Lab" then
+            { flds | title = t }
+        else if fieldName == "Name of Study" then
+            { flds | title = t }
+        else if fieldName == "Provider" then
+            { flds | provider = t }
+        else if fieldName == "Date" then
+            { flds | recordingDate = t }
+        else if fieldName == "Recording" then
+            { flds | recording = t }
+        else if fieldName == "Task" then
+            { flds | taskTitle = t }
+        else if fieldName == "During Enrollment" then
+            { flds | enrollment = t }
+        else if fieldName == "Consent" then
+            { flds | hasVerbalConsent = t }
+        else if fieldName == "User" then
+            { flds | staffName = t }
+        else if fieldName == "File Name" then
+            { flds | fileName = t }
+        else if fieldName == "Report Date" then
+            { flds | reportDate = t }
+        else
+            flds
+
+
+filteredRecords : Model -> List RecordRow
+filteredRecords model =
+    model.records
+        |> List.filter (\t -> String.contains model.filterFields.date (defaultLowerDateTime t.date))
+        |> List.filter (\t -> String.contains model.filterFields.provider (defaultLower t.provider))
+        |> List.filter (\t -> String.contains model.filterFields.specialty (defaultLower t.specialty))
+        |> List.filter (\t -> String.contains model.filterFields.comments (defaultLower t.comments))
+        |> List.filter (\t -> String.contains model.filterFields.dateAccessioned (defaultLowerDateTime t.dateAccessed))
+        |> List.filter (\t -> String.contains model.filterFields.provider (defaultLower t.provider))
+        |> List.filter (\t -> String.contains model.filterFields.title (defaultLower t.title))
+        |> List.filter (\t -> String.contains model.filterFields.recordingDate (toLower (dateTime t.recordingDate)))
+        |> List.filter (\t -> String.contains model.filterFields.recording (defaultLower t.recording))
+        |> List.filter (\t -> String.contains model.filterFields.taskTitle (defaultLower t.taskTitle))
+        |> List.filter (\t -> String.contains model.filterFields.enrollment (toLower (toString t.enrollment)))
+        |> List.filter (\t -> String.contains model.filterFields.hasVerbalConsent (toLower (toString t.hasVerbalConsent)))
+        |> List.filter (\t -> String.contains model.filterFields.staffName (defaultLower t.staffName))
+        |> List.filter (\t -> String.contains model.filterFields.fileName (defaultLower t.fileName))
+        |> List.filter (\t -> String.contains model.filterFields.reportDate (defaultLowerDate t.reportDate))

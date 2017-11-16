@@ -71,7 +71,7 @@ type alias Model =
     , recordTypeId : Int
     , tableState : Table.State
     , query : String
-    , filterFields : RecordRow
+    , filterFields : Filters
     , dropDownState : DropDownState
     }
 
@@ -98,9 +98,50 @@ emptyModel flags =
         , recordTypeId = recordType
         , tableState = Table.initialSort "Date"
         , query = ""
-        , filterFields = emptyRecordRow
+        , filterFields = emptyFilters
         , dropDownState = emptyDropDownState
         }
+
+
+
+-- , stringColumn "Report Date" (\t -> defaultDate t.reportDate)
+
+
+type alias Filters =
+    { date : String
+    , dateAccessioned : String
+    , provider : String
+    , specialty : String
+    , comments : String
+    , title : String
+    , recordingDate : String
+    , recording : String
+    , taskTitle : String
+    , enrollment : String
+    , hasVerbalConsent : String
+    , staffName : String
+    , fileName : String
+    , reportDate : String
+    }
+
+
+emptyFilters : Filters
+emptyFilters =
+    { date = ""
+    , dateAccessioned = ""
+    , provider = ""
+    , specialty = ""
+    , comments = ""
+    , title = ""
+    , recordingDate = ""
+    , recording = ""
+    , taskTitle = ""
+    , enrollment = ""
+    , hasVerbalConsent = ""
+    , staffName = ""
+    , fileName = ""
+    , reportDate = ""
+    }
 
 
 emptyNewRecord : NewRecord
@@ -161,44 +202,6 @@ type alias NewRecord =
 type alias FilterField =
     { fieldName : String
     , fieldText : String
-    }
-
-
-emptyRecordRow : RecordRow
-emptyRecordRow =
-    { id = 0
-    , date = Nothing
-    , specialty = Nothing
-    , comments = Nothing
-    , transferedTo = Nothing
-    , transferedOn = Nothing
-    , patientId = 0
-    , title = Nothing
-    , dateAccessed = Nothing
-    , provider = Nothing
-    , patientName = Nothing
-    , recordType = Nothing
-    , dateOfAdmission = Nothing
-    , dateOfDischarge = Nothing
-    , dischargePhysician = Nothing
-    , dischargeDiagnosis = Nothing
-    , hospitalizationServiceType = Nothing
-    , hospitalizationId = Nothing
-    , reportDate = Nothing
-    , fileName = Nothing
-    , canTransfer = False
-    , facility = Nothing
-    , facilityFax = Nothing
-    , recommendations = Nothing
-    , taskId = Nothing
-    , taskTitle = Nothing
-    , recording = Nothing
-    , recordingDate = ""
-    , recordingDuration = 0
-    , enrollment = False
-    , staffId = 0
-    , staffName = Nothing
-    , hasVerbalConsent = False
     }
 
 
