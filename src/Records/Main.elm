@@ -64,7 +64,7 @@ port updateUser : (DropDownItem -> msg) -> Sub msg
 port updateTask : (DropDownItem -> msg) -> Sub msg
 
 
-port dropDownToggle : (DropDownState -> msg) -> Sub msg
+port dropDownToggle : (Int -> msg) -> Sub msg
 
 
 port deleteConfirmed : (Int -> msg) -> Sub msg
@@ -116,7 +116,7 @@ update msg model =
             { model | tableState = newState } ! []
 
         SendMenuMessage recordId messageType ->
-            { model | records = flipConsent model.records recordId } ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
+            { model | records = flipConsent model.records recordId model.recordTypeId } ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
 
         AddNewStart ->
             { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model) ]
@@ -145,8 +145,8 @@ update msg model =
         Cancel ->
             { model | state = Grid } ! [ setUnsavedChanges False ]
 
-        DropDownToggle dropState ->
-            { model | dropDownState = dropState } ! []
+        DropDownToggle recordId ->
+            { model | records = flipDropDownOpen model.records recordId } ! []
 
         DeleteConfirmed rowId ->
             let
@@ -232,7 +232,6 @@ view model =
         Grid ->
             div []
                 [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
-                , editDropDownDiv (dropDownItems model.recordTypeId model.dropDownState.rowId) model.dropDownState
                 , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view (config SetFilter model.recordTypeId (getTaskId model)) model.tableState (filteredRecords model) ]
                 ]
@@ -351,8 +350,8 @@ formInputs newRecord =
         List.append firstColumns lastColumns
 
 
-getColumns : Int -> Maybe Int -> List (Column RecordRow Msg)
-getColumns recordTypeId taskId =
+getColumns : Int -> Maybe Int -> (data -> Int) -> List (Column RecordRow Msg)
+getColumns recordTypeId taskId rowId =
     let
         commonColumns =
             [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
@@ -418,10 +417,19 @@ getColumns recordTypeId taskId =
                     commonColumns
 
         lastColumns =
-            [ rowDropDown
+            [ rowDropDown recordTypeId
             ]
     in
         List.append firstColumns lastColumns
+
+
+rowDropDown : Int -> Table.Column RecordRow Msg
+rowDropDown recordTypeId =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData = (\t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropDownItems recordTypeId t.id))
+        , sorter = Table.unsortable
+        }
 
 
 config : (FilterState -> Msg) -> Int -> Maybe Int -> Config RecordRow Msg
@@ -429,7 +437,7 @@ config msg recordTypeId taskId =
     customConfig
         { toId = \t -> toString t.id
         , toMsg = SetTableState
-        , columns = getColumns recordTypeId taskId
+        , columns = getColumns recordTypeId taskId .id
         , customizations =
             { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = (standardThead msg) }
         }

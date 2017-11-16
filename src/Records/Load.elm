@@ -46,6 +46,7 @@ decodeRecordRow =
         |> required "StaffId" Decode.int
         |> required "StaffName" (maybe Decode.string)
         |> required "HasVerbalConsent" Decode.bool
+        |> hardcoded False
 
 
 encodeRecord : NewRecord -> Encode.Value
@@ -166,15 +167,32 @@ getMenuMessage model recordId messageType =
         MenuMessage messageType recordId model.recordTypeId maybeVerbalConsent
 
 
-flipConsent : List RecordRow -> Int -> List RecordRow
-flipConsent records recordId =
+flipConsent : List RecordRow -> Int -> Int -> List RecordRow
+flipConsent records recordId recordTypeId =
+    case getRecordType recordTypeId of
+        CallRecordings ->
+            records
+                |> List.map
+                    (\t ->
+                        if t.id == recordId then
+                            { t | hasVerbalConsent = not t.hasVerbalConsent }
+                        else
+                            t
+                    )
+
+        _ ->
+            records
+
+
+flipDropDownOpen : List RecordRow -> Int -> List RecordRow
+flipDropDownOpen records recordId =
     records
         |> List.map
             (\t ->
                 if t.id == recordId then
-                    { t | hasVerbalConsent = not t.hasVerbalConsent }
+                    { t | dropDownOpen = not t.dropDownOpen }
                 else
-                    t
+                    { t | dropDownOpen = False }
             )
 
 

@@ -3,14 +3,13 @@ module Records.Model exposing (..)
 import Table
 import Http
 import Utils.CommonTypes exposing (..)
-import Dict exposing (Dict, fromList)
 
 
 type Msg
     = Load (Result Http.Error WebResponse)
     | AddNewStart
     | SetTableState Table.State
-    | DropDownToggle DropDownState
+    | DropDownToggle Int
     | Save NewRecord
     | SendMenuMessage Int String
     | SetFilter FilterState
@@ -239,6 +238,7 @@ type alias RecordRow =
     , staffId : Int
     , staffName : Maybe String
     , hasVerbalConsent : Bool
+    , dropDownOpen : Bool
     }
 
 

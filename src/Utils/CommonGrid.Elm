@@ -1,7 +1,7 @@
 module Utils.CommonGrid exposing (..)
 
 import Html exposing (Html, text, div, button, input, span, th, li, ul, a)
-import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked)
+import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked, hidden)
 import Html.Events
 import Table
 import Utils.CommonTypes exposing (DropDownState, FilterState)
@@ -71,6 +71,24 @@ standardTableAttrs idValue =
     [ id idValue, class "", style [ ( "width", "100%" ) ] ]
 
 
+editColumn : (data -> Html.Attribute msg) -> Table.Column data msg
+editColumn toMsg =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData = editColumnCell << toMsg
+        , sorter = Table.unsortable
+        }
+
+
+editColumnCell : Html.Attribute msg -> Table.HtmlDetails msg
+editColumnCell clickEvent =
+    Table.HtmlDetails []
+        [ div [ style [ ( "text-align", "right" ) ] ]
+            [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", clickEvent ] []
+            ]
+        ]
+
+
 checkColumn : String -> (data -> Bool) -> Table.Column data msg
 checkColumn name toCheck =
     Table.veryCustomColumn
@@ -123,64 +141,37 @@ hrefColumnCellExtra displayText url event =
         ]
 
 
-editColumn : (data -> Html.Attribute msg) -> Table.Column data msg
-editColumn toMsg =
-    Table.veryCustomColumn
-        { name = ""
-        , viewData = editColumnCell << toMsg
-        , sorter = Table.unsortable
-        }
+rowDropDownDiv : Bool -> Html.Attribute msg -> List ( String, String, Html.Attribute msg ) -> Table.HtmlDetails msg
+rowDropDownDiv isVisible event dropDownItems =
+    let
+        dropMenu =
+            case isVisible of
+                True ->
+                    [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
+                        (List.map dropDownMenuItem dropDownItems)
+                    ]
 
-
-editColumnCell : Html.Attribute msg -> Table.HtmlDetails msg
-editColumnCell clickEvent =
-    Table.HtmlDetails []
-        [ div [ style [ ( "text-align", "right" ) ] ]
-            [ button [ class "btn btn-sm btn-default fa fa-angle-down btn-context-menu", clickEvent ] []
+                False ->
+                    []
+    in
+        Table.HtmlDetails []
+            [ div [ style [ ( "text-align", "right" ) ] ]
+                [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown", event, style [ ( "position", "relative" ) ] ]
+                    [ div [ id "editButtonMenu", dropDownMenuStyle ]
+                        dropMenu
+                    ]
+                ]
             ]
-        ]
 
 
-rowDropDownDiv : data -> Table.HtmlDetails msg
-rowDropDownDiv data =
-    Table.HtmlDetails []
-        [ div [ style [ ( "text-align", "right" ) ] ]
-            [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown", dataTarget (toString data) ] []
-            ]
-        ]
-
-
-rowDropDown : Table.Column { b | id : a } msg
-rowDropDown =
-    Table.veryCustomColumn
-        { name = ""
-        , viewData = rowDropDownDiv << .id
-        , sorter = Table.unsortable
-        }
-
-
-editDropDownDiv : List ( String, String, Html.Attribute msg ) -> DropDownState -> Html msg
-editDropDownDiv dropDownItems dropDownState =
-    div [ id "editButtonMenu", dropDownMenuStyle dropDownState ]
-        [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
-            (List.map dropDownMenuItem dropDownItems)
-        ]
-
-
-
--- (24 * maxnumber of elements) + 2
--- currently 6 items, so , set max height to 146
-
-
-dropDownMenuStyle : DropDownState -> Html.Attribute msg
-dropDownMenuStyle dropDownState =
+dropDownMenuStyle : Html.Attribute msg
+dropDownMenuStyle =
     style
         [ ( "z-index", "5000" )
         , ( "position", "absolute" )
         , ( "display", "block" )
-        , ( "left", toString dropDownState.x ++ "px" )
-        , ( "top", toString dropDownState.y ++ "px" )
-        , ( "height", "146px" )
+        , ( "left", "-173px" )
+        , ( "width", "178.74px" )
         ]
 
 
