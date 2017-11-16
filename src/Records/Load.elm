@@ -55,7 +55,7 @@ encodeRecord newRecord =
         [ ( "RecordId", Encode.int <| newRecord.recordId )
         , ( "PatientID", Encode.int <| newRecord.patientId )
         , ( "Title", Encode.string <| newRecord.title )
-        , ( "RecordTypeId", Encode.int <| newRecord.recordTypeId )
+        , ( "RecordTypeId", maybeVal Encode.int <| newRecord.recordTypeId )
         , ( "Specialty", Encode.string <| newRecord.specialty )
         , ( "Provider", Encode.string <| newRecord.provider )
         , ( "TimeVisit", maybeVal Encode.string <| maybeToDateString <| newRecord.timeVisit )
@@ -91,12 +91,12 @@ decodeModel =
         |> required "taskDropDown" (Decode.list decodeDropDownItem)
 
 
-request : Int -> Int -> Http.Request WebResponse
+request : Int -> Maybe Int -> Http.Request WebResponse
 request patientId recordTypeId =
-    Http.get ("/People/PatientRecordsGrid?patientId=" ++ toString patientId ++ "&recordTypeId=" ++ toString recordTypeId) decodeModel
+    Http.get ("/People/PatientRecordsGrid?patientId=" ++ toString patientId ++ "&recordTypeId=" ++ defaultIntToString recordTypeId) decodeModel
 
 
-getRecords : Int -> Int -> (Result Http.Error WebResponse -> msg) -> Cmd msg
+getRecords : Int -> Maybe Int -> (Result Http.Error WebResponse -> msg) -> Cmd msg
 getRecords patientId recordTypeId t =
     Http.send t (request patientId recordTypeId)
 
@@ -167,7 +167,7 @@ getMenuMessage model recordId messageType =
         MenuMessage messageType recordId model.recordTypeId maybeVerbalConsent
 
 
-flipConsent : List RecordRow -> Int -> Int -> List RecordRow
+flipConsent : List RecordRow -> Int -> Maybe Int -> List RecordRow
 flipConsent records recordId recordTypeId =
     case getRecordType recordTypeId of
         CallRecordings ->

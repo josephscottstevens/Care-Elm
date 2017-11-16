@@ -95,12 +95,7 @@ subscriptions model =
 
 init : Flags -> Cmd Msg
 init flag =
-    case flag.recordType of
-        Just recType ->
-            getRecords flag.patientId recType Load
-
-        Nothing ->
-            Cmd.none
+    getRecords flag.patientId flag.recordType Load
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -173,12 +168,20 @@ update msg model =
             model ! [ editTask taskId ]
 
         UpdateRecordType newRecord dropDownItem ->
-            case dropDownItem.id of
-                Just t ->
-                    { model | state = AddNew { newRecord | recordTypeId = t, recordTypeText = dropDownItem.name } } ! [ setUnsavedChanges True ]
+            let
+                newModel =
+                    if dropDownItem.id == model.recordTypeId then
+                        model
+                    else
+                        { model | state = AddNew { emptyNewRecord | recordTypeId = dropDownItem.id, recordTypeText = dropDownItem.name, patientId = model.patientId, facilityId = model.facilityId }, recordTypeId = dropDownItem.id }
 
-                Nothing ->
-                    model ! []
+                updates =
+                    if dropDownItem.id == model.recordTypeId then
+                        []
+                    else
+                        [ initSyncfusionControls (getSyncFusionMessage newModel) ]
+            in
+                newModel ! updates
 
         SetFilter filterState ->
             { model | filterFields = filterFields model.filterFields filterState } ! []
@@ -286,7 +289,7 @@ formInputs newRecord =
 
         firstColumns =
             [ ( "Facility", Required, DropInput newRecord.facilityId "FacilityId" )
-            , ( "Category", Required, DropInput (Just newRecord.recordTypeId) "CategoryId" )
+            , ( "Category", Required, DropInput newRecord.recordTypeId "CategoryId" )
             ]
 
         lastColumns =
@@ -350,7 +353,7 @@ formInputs newRecord =
         List.append firstColumns lastColumns
 
 
-getColumns : Int -> Maybe Int -> (data -> Int) -> List (Column RecordRow Msg)
+getColumns : Maybe Int -> Maybe Int -> (data -> Int) -> List (Column RecordRow Msg)
 getColumns recordTypeId taskId rowId =
     let
         commonColumns =
@@ -423,7 +426,7 @@ getColumns recordTypeId taskId rowId =
         List.append firstColumns lastColumns
 
 
-rowDropDown : Int -> Table.Column RecordRow Msg
+rowDropDown : Maybe Int -> Table.Column RecordRow Msg
 rowDropDown recordTypeId =
     Table.veryCustomColumn
         { name = ""
@@ -432,7 +435,7 @@ rowDropDown recordTypeId =
         }
 
 
-config : (FilterState -> Msg) -> Int -> Maybe Int -> Config RecordRow Msg
+config : (FilterState -> Msg) -> Maybe Int -> Maybe Int -> Config RecordRow Msg
 config msg recordTypeId taskId =
     customConfig
         { toId = \t -> toString t.id
@@ -443,7 +446,7 @@ config msg recordTypeId taskId =
         }
 
 
-dropDownItems : Int -> Int -> List ( String, String, Html.Attribute Msg )
+dropDownItems : Maybe Int -> Int -> List ( String, String, Html.Attribute Msg )
 dropDownItems recordTypeId rowId =
     case getRecordType recordTypeId of
         CallRecordings ->

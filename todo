@@ -14,7 +14,6 @@ REQUESTED TODO:
 
 Create add new in edit
 Implement Hospitalizations
-Sort, like sorts twice, because of initial sort on Call Recordings
 oh my... haha... when they change recordTypeId from Category, need to change the edit view
 there seems to be a bit of logic on transfer logic... not sure how to handle or if I am already
 Try and find some better icons for the dropdown menu

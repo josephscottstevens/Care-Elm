@@ -67,7 +67,7 @@ type alias Model =
     , tasks : List DropDownItem
     , patientId : Int
     , facilityId : Maybe Int
-    , recordTypeId : Int
+    , recordTypeId : Maybe Int
     , tableState : Table.State
     , query : String
     , filterFields : Filters
@@ -77,29 +77,20 @@ type alias Model =
 
 emptyModel : Flags -> Model
 emptyModel flags =
-    let
-        recordType =
-            case flags.recordType of
-                Just t ->
-                    t
-
-                Nothing ->
-                    Debug.crash "Invalid recordTypeId, cannot start program"
-    in
-        { state = Grid
-        , records = []
-        , facilities = []
-        , recordTypes = []
-        , users = []
-        , tasks = []
-        , patientId = flags.patientId
-        , facilityId = Nothing
-        , recordTypeId = recordType
-        , tableState = Table.initialSort "Date"
-        , query = ""
-        , filterFields = emptyFilters
-        , dropDownState = emptyDropDownState
-        }
+    { state = Grid
+    , records = []
+    , facilities = []
+    , recordTypes = []
+    , users = []
+    , tasks = []
+    , patientId = flags.patientId
+    , facilityId = Nothing
+    , recordTypeId = flags.recordType
+    , tableState = Table.initialSort "Date"
+    , query = ""
+    , filterFields = emptyFilters
+    , dropDownState = emptyDropDownState
+    }
 
 
 
@@ -148,7 +139,7 @@ emptyNewRecord =
     { recordId = 0
     , patientId = 0
     , title = ""
-    , recordTypeId = 0
+    , recordTypeId = Nothing
     , recordTypeText = ""
     , specialty = ""
     , provider = ""
@@ -175,7 +166,7 @@ type alias NewRecord =
     { recordId : Int
     , patientId : Int
     , title : String
-    , recordTypeId : Int
+    , recordTypeId : Maybe Int
     , recordTypeText : String
     , specialty : String
     , provider : String
@@ -256,13 +247,13 @@ type alias SyncFusionMessage =
     , users : List DropDownItem
     , tasks : List DropDownItem
     , facilityId : Maybe Int
-    , recordTypeId : Int
+    , recordTypeId : Maybe Int
     }
 
 
 type alias MenuMessage =
     { name : String
     , recordId : Int
-    , recordType : Int
+    , recordTypeId : Maybe Int
     , hasConsent : Maybe Bool
     }

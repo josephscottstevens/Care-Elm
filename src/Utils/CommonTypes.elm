@@ -49,72 +49,77 @@ type RecordType
 -- Ccds -> ?
 
 
-getRecordType : Int -> RecordType
-getRecordType id =
-    case id of
-        1 ->
-            PrimaryCare
+getRecordType : Maybe Int -> RecordType
+getRecordType maybeId =
+    case maybeId of
+        Just id ->
+            case id of
+                1 ->
+                    PrimaryCare
 
-        2 ->
-            Specialty
+                2 ->
+                    Specialty
 
-        3 ->
-            Labs
+                3 ->
+                    Labs
 
-        4 ->
-            Radiology
+                4 ->
+                    Radiology
 
-        9 ->
-            Hospitalizations
+                9 ->
+                    Hospitalizations
 
-        6 ->
-            Legal
+                6 ->
+                    Legal
 
-        10 ->
-            CallRecordings
+                10 ->
+                    CallRecordings
 
-        11 ->
-            PreviousHistories
+                11 ->
+                    PreviousHistories
 
-        12 ->
-            Enrollment
+                12 ->
+                    Enrollment
 
-        5 ->
-            Misc
+                5 ->
+                    Misc
 
-        _ ->
+                _ ->
+                    Debug.crash "Invalid recordId, cannot load program"
+
+        Nothing ->
             Debug.crash "Invalid recordId, cannot load program"
 
 
-getId : RecordType -> Int
+getId : RecordType -> Maybe Int
 getId recordType =
     case recordType of
         PrimaryCare ->
-            1
+            Just 1
 
         Specialty ->
-            2
+            Just 2
 
         Labs ->
-            3
+            Just 3
 
         Radiology ->
-            4
+            Just 4
 
         Hospitalizations ->
-            9
+            Just 9
 
         Legal ->
-            6
+            Just 6
 
         CallRecordings ->
-            10
+            Just 10
 
         PreviousHistories ->
-            11
+            Just 11
 
         Enrollment ->
-            12
+            Just 12
 
         Misc ->
-            5
+            Just 5
