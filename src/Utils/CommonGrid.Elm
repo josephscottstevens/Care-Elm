@@ -68,7 +68,7 @@ standardThead msg headers =
 
 standardTableAttrs : String -> List (Html.Attribute msg)
 standardTableAttrs idValue =
-    [ id idValue, class "e-grid e-js e-waitingpopup", style [ ( "width", "100%" ) ] ]
+    [ id idValue, class "", style [ ( "width", "100%" ) ] ]
 
 
 checkColumn : String -> (data -> Bool) -> Table.Column data msg
@@ -175,12 +175,12 @@ editDropDownDiv dropDownItems dropDownState =
 dropDownMenuStyle : DropDownState -> Html.Attribute msg
 dropDownMenuStyle dropDownState =
     style
-        [ ( "left", toString dropDownState.x ++ "px" )
-        , ( "top", toString dropDownState.y ++ "px" )
-        , ( "height", "146px" )
-        , ( "z-index", "5000" )
+        [ ( "z-index", "5000" )
         , ( "position", "absolute" )
         , ( "display", "block" )
+        , ( "left", toString dropDownState.x ++ "px" )
+        , ( "top", toString dropDownState.y ++ "px" )
+        , ( "height", "146px" )
         ]
 
 
