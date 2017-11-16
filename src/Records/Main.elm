@@ -10,7 +10,9 @@ import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
 import Utils.CommonTypes exposing (..)
 import Utils.CommonFunctions exposing (..)
-import Dict exposing (..)
+
+
+port resetUpdate : Maybe Int -> Cmd msg
 
 
 port sendMenuMessage : MenuMessage -> Cmd msg
@@ -35,6 +37,9 @@ port setLoadingStatus : Bool -> Cmd msg
 
 
 port setUnsavedChanges : Bool -> Cmd msg
+
+
+port resetUpdateComplete : (String -> msg) -> Sub msg
 
 
 port updateFacility : (DropDownItem -> msg) -> Sub msg
@@ -84,12 +89,14 @@ subscriptions model =
                 , updateRecordingDate (UpdateRecordingDate t)
                 , updateUser (UpdateUser t)
                 , updateTask (UpdateTask t)
+                , resetUpdateComplete ResetAddNew
                 ]
 
         _ ->
             Sub.batch
                 [ dropDownToggle DropDownToggle
                 , deleteConfirmed DeleteConfirmed
+                , resetUpdateComplete ResetAddNew
                 ]
 
 
@@ -114,6 +121,9 @@ update msg model =
             { model | records = flipConsent model.records recordId model.recordTypeId } ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
 
         AddNewStart ->
+            { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model) ]
+
+        ResetAddNew _ ->
             { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model) ]
 
         Save newRecord ->
@@ -168,20 +178,10 @@ update msg model =
             model ! [ editTask taskId ]
 
         UpdateRecordType newRecord dropDownItem ->
-            let
-                newModel =
-                    if dropDownItem.id == model.recordTypeId then
-                        model
-                    else
-                        { model | state = AddNew { emptyNewRecord | recordTypeId = dropDownItem.id, recordTypeText = dropDownItem.name, patientId = model.patientId, facilityId = model.facilityId }, recordTypeId = dropDownItem.id }
-
-                updates =
-                    if dropDownItem.id == model.recordTypeId then
-                        []
-                    else
-                        [ initSyncfusionControls (getSyncFusionMessage newModel) ]
-            in
-                newModel ! updates
+            if model.recordTypeId == dropDownItem.id then
+                model ! []
+            else
+                { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id ]
 
         SetFilter filterState ->
             { model | filterFields = filterFields model.filterFields filterState } ! []
@@ -268,6 +268,9 @@ view model =
                 div
                     [ class "form-horizontal" ]
                     (validationErrorsDiv :: inputControls ++ footerControls)
+
+        Limbo ->
+            div [] []
 
         Error errMessage ->
             div [] [ text errMessage ]

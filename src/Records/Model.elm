@@ -8,6 +8,7 @@ import Utils.CommonTypes exposing (..)
 type Msg
     = Load (Result Http.Error WebResponse)
     | AddNewStart
+    | ResetAddNew String
     | SetTableState Table.State
     | DropDownToggle Int
     | Save NewRecord
@@ -39,6 +40,7 @@ type Msg
 type ModelState
     = Grid
     | AddNew NewRecord
+    | Limbo
     | Error String
 
 
