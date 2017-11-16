@@ -71,7 +71,7 @@ type alias Model =
     , recordTypeId : Int
     , tableState : Table.State
     , query : String
-    , filterFields : Dict String String
+    , filterFields : RecordRow
     , dropDownState : DropDownState
     }
 
@@ -98,7 +98,7 @@ emptyModel flags =
         , recordTypeId = recordType
         , tableState = Table.initialSort "Date"
         , query = ""
-        , filterFields = fromList [ ( "Date Collected", "" ) ]
+        , filterFields = emptyRecordRow
         , dropDownState = emptyDropDownState
         }
 
@@ -161,6 +161,44 @@ type alias NewRecord =
 type alias FilterField =
     { fieldName : String
     , fieldText : String
+    }
+
+
+emptyRecordRow : RecordRow
+emptyRecordRow =
+    { id = 0
+    , date = Nothing
+    , specialty = Nothing
+    , comments = Nothing
+    , transferedTo = Nothing
+    , transferedOn = Nothing
+    , patientId = 0
+    , title = Nothing
+    , dateAccessed = Nothing
+    , provider = Nothing
+    , patientName = Nothing
+    , recordType = Nothing
+    , dateOfAdmission = Nothing
+    , dateOfDischarge = Nothing
+    , dischargePhysician = Nothing
+    , dischargeDiagnosis = Nothing
+    , hospitalizationServiceType = Nothing
+    , hospitalizationId = Nothing
+    , reportDate = Nothing
+    , fileName = Nothing
+    , canTransfer = False
+    , facility = Nothing
+    , facilityFax = Nothing
+    , recommendations = Nothing
+    , taskId = Nothing
+    , taskTitle = Nothing
+    , recording = Nothing
+    , recordingDate = ""
+    , recordingDuration = 0
+    , enrollment = False
+    , staffId = 0
+    , staffName = Nothing
+    , hasVerbalConsent = False
     }
 
 

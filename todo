@@ -10,7 +10,7 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-Filter above each header
+Very nice start on filter, now, perhaps, no need for all columns, and all the columns should be a string
 I have double border around the grids
 
 Create add new in edit

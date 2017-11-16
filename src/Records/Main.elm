@@ -187,8 +187,16 @@ update msg model =
                         FilterState a b ->
                             ( a, b )
 
+                flds =
+                    model.filterFields
+
                 filterFields =
-                    model.filterFields |> Dict.update fieldName (\_ -> Just fieldText)
+                    if fieldName == "Date Collected" then
+                        { flds | date = Just fieldText }
+                    else if fieldName == "Doctor of Visit" then
+                        { flds | provider = Just fieldText }
+                    else
+                        flds
             in
                 { model | filterFields = filterFields, query = fieldText } ! []
 
@@ -240,7 +248,8 @@ view model =
     let
         filteredRecords =
             model.records
-                |> List.filter (\t -> String.contains model.query (defaultDateTime t.date))
+                |> List.filter (\t -> String.contains (defaultString model.filterFields.date) (defaultString t.date))
+                |> List.filter (\t -> String.contains (defaultString model.filterFields.provider) (defaultString t.provider))
     in
         case model.state of
             Grid ->
