@@ -130,7 +130,7 @@ hrefColumnExtra name hrefText toHref event =
 hrefColumnCell : String -> String -> Table.HtmlDetails msg
 hrefColumnCell displayText url =
     Table.HtmlDetails []
-        [ a [ href url ] [ text displayText ]
+        [ a [ href url, target "_blank" ] [ text displayText ]
         ]
 
 
