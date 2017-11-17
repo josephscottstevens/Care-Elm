@@ -63,7 +63,7 @@ standardTheadHelp event ( name, status, onClick ) =
 
 standardThead : (FilterState -> msg) -> List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
 standardThead msg headers =
-    Table.HtmlDetails [ class "e-gridheader e-textover e-hidelines" ] (List.map (standardTheadHelp msg) headers)
+    Table.HtmlDetails [ class "e-gridheader e-columnheader e-hidelines" ] (List.map (standardTheadHelp msg) headers)
 
 
 standardTableAttrs : String -> List (Html.Attribute msg)

@@ -17,11 +17,9 @@ REQUESTED TODO:
 Create add new in edit
 Implement Hospitalizations
 there seems to be a bit of logic on transfer logic... not sure how to handle or if I am already
-Try and find some better icons for the dropdown menu
 
 LOW TODO:
 Task column is only shown... if... there is a task? How does that work?
-Style checkboxs
 should i set header to be unselectable?
 
 REALLY LOW TODO:
