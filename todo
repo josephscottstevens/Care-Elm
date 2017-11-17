@@ -14,13 +14,16 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
+rounded buttons? 
+and css popup? 
+
+Task column is only shown... if... there is a task? How does that work?
 Create add new in edit
 Implement Hospitalizations
 there seems to be a bit of logic on transfer logic... not sure how to handle or if I am already
 
 LOW TODO:
-Task column is only shown... if... there is a task? How does that work?
-should i set header to be unselectable?
+
 
 REALLY LOW TODO:
 if I think it is worth any performance boost, I don't need to return userDropDown or taskDropdown unless I am on recorcTypeId of 10
@@ -40,10 +43,8 @@ Edit Button's class name is "-Column", and I am styling that class, but if we ha
 On Deploy Todo:
 	Validate File stuff still works
 	DateTime is still correct
+	Test popups
 	Test DateTime conversions
 	Test Saving
 	Test Validation
 	Test Server errors
-	
-NOTE:
-	I am getting random errors on grid... cannot append child of null... maybe a bad flag? (see if I can replicate without hard refresh)

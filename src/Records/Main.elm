@@ -234,7 +234,7 @@ view model =
     case model.state of
         Grid ->
             div []
-                [ button [ type_ "button", class "btn btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
+                [ button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
                 , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view (config SetFilter model.recordTypeId (getTaskId model)) model.tableState (filteredRecords model) ]
                 ]
@@ -254,13 +254,13 @@ view model =
                         div [] []
 
                 saveBtnClass =
-                    class "btn btn-success margin-left-5 pull-right"
+                    class "btn btn-sm btn-success margin-left-5 pull-right"
 
                 footerControls =
                     [ div [ class "form-group" ]
                         [ div [ class fullWidth ]
                             [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
-                            , button [ type_ "button", onClick Cancel, class "btn btn-default pull-right" ] [ text "Cancel" ]
+                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
                             ]
                         ]
                     ]
