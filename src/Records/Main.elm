@@ -453,13 +453,13 @@ dropDownItems : Maybe Int -> Int -> List ( String, String, Html.Attribute Msg )
 dropDownItems recordTypeId rowId =
     case getRecordType recordTypeId of
         CallRecordings ->
-            [ ( "", "Mark As Consent", onClick (SendMenuMessage rowId "MarkAsConsent") ) ]
+            [ ( "e-edit", "Mark As Consent", onClick (SendMenuMessage rowId "MarkAsConsent") ) ]
 
         _ ->
-            [ ( "", "Transfer", onClick (SendMenuMessage rowId "Transfer") )
-            , ( "e-contextedit", "View File", onClick (SendMenuMessage rowId "ViewFile") )
-            , ( "", "Send By Email", onClick (SendMenuMessage rowId "SendByEmail") )
-            , ( "", "Send By Fax", onClick (SendMenuMessage rowId "SendByFax") )
-            , ( "", "Save To Client Portal", onClick (SendMenuMessage rowId "SaveToClientPortal") )
+            [ ( "e-sync", "Transfer", onClick (SendMenuMessage rowId "Transfer") )
+            , ( "e-download", "View File", onClick (SendMenuMessage rowId "ViewFile") )
+            , ( "e-mail", "Send By Email", onClick (SendMenuMessage rowId "SendByEmail") )
+            , ( "e-print_01", "Send By Fax", onClick (SendMenuMessage rowId "SendByFax") )
+            , ( "e-save", "Save To Client Portal", onClick (SendMenuMessage rowId "SaveToClientPortal") )
             , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "Delete") )
             ]
