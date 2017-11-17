@@ -5,6 +5,8 @@ QUESTIONS:
 		CCD's has no data in prod...
 	Why are there null recordtypes in the grid?
 	Previous histories shows a comment column, but doesn't have it in the edit?
+	We said to have cancel \ save on the left, where exactly on my edit form?
+	Perhaps an alternative to having inline edit grid mode... which doesn't add up to me, is a back button where new button was?
 
 	
 REQUESTED TODO:

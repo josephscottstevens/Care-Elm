@@ -205,9 +205,9 @@ getNewRecord model =
     }
 
 
-getSyncFusionMessage : Model -> SyncFusionMessage
-getSyncFusionMessage model =
-    SyncFusionMessage model.facilities model.recordTypes model.users model.tasks model.facilityId model.recordTypeId
+getSyncFusionMessage : Model -> Bool -> SyncFusionMessage
+getSyncFusionMessage model setFocus =
+    SyncFusionMessage model.facilities model.recordTypes model.users model.tasks model.facilityId model.recordTypeId setFocus
 
 
 getLoadedState : Model -> WebResponse -> Model

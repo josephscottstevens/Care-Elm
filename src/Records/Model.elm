@@ -250,6 +250,7 @@ type alias SyncFusionMessage =
     , tasks : List DropDownItem
     , facilityId : Maybe Int
     , recordTypeId : Maybe Int
+    , setFocus : Bool
     }
 
 

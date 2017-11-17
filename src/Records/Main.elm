@@ -121,10 +121,10 @@ update msg model =
             { model | records = flipConsent model.records recordId model.recordTypeId } ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
 
         AddNewStart ->
-            { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model) ]
+            { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model False) ]
 
         ResetAddNew _ ->
-            { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model) ]
+            { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model True) ]
 
         Save newRecord ->
             let
@@ -181,7 +181,7 @@ update msg model =
             if model.recordTypeId == dropDownItem.id then
                 model ! []
             else
-                { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id ]
+                { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
 
         SetFilter filterState ->
             { model | filterFields = filterFields model.filterFields filterState } ! []
