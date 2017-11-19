@@ -355,8 +355,8 @@ formInputs newRecord =
         List.append firstColumns lastColumns
 
 
-getColumns : Maybe Int -> Maybe Int -> (data -> Int) -> List (Column RecordRow Msg)
-getColumns recordTypeId taskId rowId =
+getColumns : Maybe Int -> Maybe Int -> List (Column RecordRow Msg)
+getColumns recordTypeId taskId =
     let
         commonColumns =
             [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
@@ -442,7 +442,7 @@ config msg recordTypeId taskId =
     customConfig
         { toId = \t -> toString t.id
         , toMsg = SetTableState
-        , columns = getColumns recordTypeId taskId .id
+        , columns = getColumns recordTypeId taskId
         , customizations =
             { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = (standardThead msg) }
         }

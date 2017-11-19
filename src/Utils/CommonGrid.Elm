@@ -2,7 +2,7 @@ module Utils.CommonGrid exposing (..)
 
 import Html exposing (Html, text, div, button, input, span, th, li, ul, a)
 import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked, hidden)
-import Html.Events
+import Html.Events as Events
 import Table
 import Utils.CommonTypes exposing (DropDownState, FilterState)
 import Json.Decode as Json
@@ -10,7 +10,7 @@ import Json.Decode as Json
 
 onInput : String -> (FilterState -> msg) -> Html.Attribute msg
 onInput name handler =
-    Html.Events.on "input" <| Json.map handler <| Json.map2 Utils.CommonTypes.FilterState (Json.succeed name) (Json.at [ "target", "value" ] Json.string)
+    Events.on "input" <| Json.map handler <| Json.map2 Utils.CommonTypes.FilterState (Json.succeed name) (Json.at [ "target", "value" ] Json.string)
 
 
 dataTarget : String -> Html.Attribute msg
@@ -118,6 +118,13 @@ hrefColumn name hrefText toHref =
         }
 
 
+hrefColumnCell : String -> String -> Table.HtmlDetails msg
+hrefColumnCell displayText url =
+    Table.HtmlDetails []
+        [ a [ href url, target "_blank" ] [ text displayText ]
+        ]
+
+
 hrefColumnExtra : String -> (data -> String) -> String -> msg -> Table.Column data msg
 hrefColumnExtra name hrefText toHref event =
     Table.veryCustomColumn
@@ -127,17 +134,10 @@ hrefColumnExtra name hrefText toHref event =
         }
 
 
-hrefColumnCell : String -> String -> Table.HtmlDetails msg
-hrefColumnCell displayText url =
-    Table.HtmlDetails []
-        [ a [ href url, target "_blank" ] [ text displayText ]
-        ]
-
-
 hrefColumnCellExtra : String -> String -> msg -> Table.HtmlDetails msg
 hrefColumnCellExtra displayText url event =
     Table.HtmlDetails []
-        [ a [ href url, Html.Events.onClick event ] [ text displayText ]
+        [ a [ href url, Events.onClick event ] [ text displayText ]
         ]
 
 
