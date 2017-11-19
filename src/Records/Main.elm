@@ -89,7 +89,6 @@ subscriptions model =
                 , updateRecordingDate (UpdateRecordingDate t)
                 , updateUser (UpdateUser t)
                 , updateTask (UpdateTask t)
-                , resetUpdateComplete ResetAddNew
                 ]
 
         _ ->
@@ -107,126 +106,126 @@ init flag =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        Load (Ok t) ->
-            getLoadedState model t ! [ setLoadingStatus False ]
+    let
+        updateAddNew t =
+            { model | state = AddNew t } ! [ setUnsavedChanges True ]
+    in
+        case msg of
+            Load (Ok t) ->
+                getLoadedState model t ! [ setLoadingStatus False ]
 
-        Load (Err httpError) ->
-            { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
+            Load (Err httpError) ->
+                { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
 
-        SetTableState newState ->
-            { model | tableState = newState } ! []
+            SetTableState newState ->
+                { model | tableState = newState } ! []
 
-        SendMenuMessage recordId messageType ->
-            { model | records = flipConsent model.records recordId model.recordTypeId } ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
+            SendMenuMessage recordId messageType ->
+                { model | records = flipConsent model.records recordId model.recordTypeId } ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
 
-        AddNewStart ->
-            { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model False) ]
+            AddNewStart ->
+                { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model False) ]
 
-        ResetAddNew _ ->
-            { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model True) ]
+            ResetAddNew _ ->
+                { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model True) ]
 
-        Save newRecord ->
-            let
-                actions =
-                    if List.length (getValidationErrors (formInputs newRecord)) > 0 then
-                        []
-                    else
-                        [ saveForm newRecord, setUnsavedChanges False ]
-            in
-                { model | state = AddNew { newRecord | showValidationErrors = True } } ! actions
+            Save newRecord ->
+                if List.length (getValidationErrors (formInputs newRecord)) > 0 then
+                    updateAddNew { newRecord | showValidationErrors = True }
+                else
+                    model ! [ saveForm newRecord, setUnsavedChanges False ]
 
-        SaveCompleted (Ok responseMsg) ->
-            case getResponseError responseMsg of
-                Just t ->
-                    model ! [ getRecords model.patientId model.recordTypeId Load, displayErrorMessage t ]
+            SaveCompleted (Ok responseMsg) ->
+                case getResponseError responseMsg of
+                    Just t ->
+                        model ! [ getRecords model.patientId model.recordTypeId Load, displayErrorMessage t ]
 
-                Nothing ->
-                    model ! [ getRecords model.patientId model.recordTypeId Load, displaySuccessMessage "Save completed successfully!" ]
+                    Nothing ->
+                        model ! [ getRecords model.patientId model.recordTypeId Load, displaySuccessMessage "Save completed successfully!" ]
 
-        SaveCompleted (Err httpError) ->
-            { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
+            SaveCompleted (Err httpError) ->
+                { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
 
-        Cancel ->
-            { model | state = Grid } ! [ setUnsavedChanges False ]
+            Cancel ->
+                { model | state = Grid } ! [ setUnsavedChanges False ]
 
-        DropDownToggle recordId ->
-            { model | records = flipDropDownOpen model.records recordId } ! []
+            DropDownToggle recordId ->
+                { model | records = flipDropDownOpen model.records recordId } ! []
 
-        DeleteConfirmed rowId ->
-            let
-                updatedRecords =
-                    model.records |> List.filter (\t -> t.id /= rowId)
-            in
-                { model | records = updatedRecords } ! [ deleteRequest rowId ]
+            DeleteConfirmed rowId ->
+                let
+                    updatedRecords =
+                        model.records |> List.filter (\t -> t.id /= rowId)
+                in
+                    { model | records = updatedRecords } ! [ deleteRequest rowId ]
 
-        DeleteCompleted (Ok responseMsg) ->
-            case getResponseError responseMsg of
-                Just t ->
-                    model ! [ displayErrorMessage t ]
+            DeleteCompleted (Ok responseMsg) ->
+                case getResponseError responseMsg of
+                    Just t ->
+                        model ! [ displayErrorMessage t ]
 
-                Nothing ->
-                    model ! [ displaySuccessMessage "Record deleted successfully!" ]
+                    Nothing ->
+                        model ! [ displaySuccessMessage "Record deleted successfully!" ]
 
-        DeleteCompleted (Err httpError) ->
-            { model | state = Error (toString httpError) } ! []
+            DeleteCompleted (Err httpError) ->
+                { model | state = Error (toString httpError) } ! []
 
-        UpdateTitle newRecord str ->
-            { model | state = AddNew { newRecord | title = str } } ! [ setUnsavedChanges True ]
+            UpdateTitle newRecord str ->
+                updateAddNew { newRecord | title = str }
 
-        OpenTask taskId ->
-            model ! [ editTask taskId ]
+            OpenTask taskId ->
+                model ! [ editTask taskId ]
 
-        UpdateRecordType newRecord dropDownItem ->
-            if model.recordTypeId == dropDownItem.id then
-                model ! []
-            else
-                { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
+            UpdateRecordType newRecord dropDownItem ->
+                if model.recordTypeId == dropDownItem.id then
+                    model ! []
+                else
+                    { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
 
-        SetFilter filterState ->
-            { model | filterFields = filterFields model.filterFields filterState } ! []
+            SetFilter filterState ->
+                { model | filterFields = filterFields model.filterFields filterState } ! []
 
-        UpdateSpecialty newRecord str ->
-            { model | state = AddNew { newRecord | specialty = str } } ! [ setUnsavedChanges True ]
+            UpdateSpecialty newRecord str ->
+                updateAddNew { newRecord | specialty = str }
 
-        UpdateProvider newRecord str ->
-            { model | state = AddNew { newRecord | provider = str } } ! [ setUnsavedChanges True ]
+            UpdateProvider newRecord str ->
+                updateAddNew { newRecord | provider = str }
 
-        UpdateTimeVisit newRecord str ->
-            { model | state = AddNew { newRecord | timeVisit = str } } ! [ setUnsavedChanges True ]
+            UpdateTimeVisit newRecord str ->
+                updateAddNew { newRecord | timeVisit = str }
 
-        UpdateTimeAcc newRecord str ->
-            { model | state = AddNew { newRecord | timeAcc = str } } ! [ setUnsavedChanges True ]
+            UpdateTimeAcc newRecord str ->
+                updateAddNew { newRecord | timeAcc = str }
 
-        UpdateFileName newRecord str ->
-            { model | state = AddNew { newRecord | fileName = str } } ! [ setUnsavedChanges True ]
+            UpdateFileName newRecord str ->
+                updateAddNew { newRecord | fileName = str }
 
-        UpdateComments newRecord str ->
-            { model | state = AddNew { newRecord | comments = str } } ! [ setUnsavedChanges True ]
+            UpdateComments newRecord str ->
+                updateAddNew { newRecord | comments = str }
 
-        UpdateFacility newRecord dropDownItem ->
-            { model | state = AddNew { newRecord | facilityId = dropDownItem.id, facilityText = dropDownItem.name } } ! [ setUnsavedChanges True ]
+            UpdateFacility newRecord dropDownItem ->
+                updateAddNew { newRecord | facilityId = dropDownItem.id, facilityText = dropDownItem.name }
 
-        UpdateReportDate newRecord str ->
-            { model | state = AddNew { newRecord | reportDate = str } } ! [ setUnsavedChanges True ]
+            UpdateReportDate newRecord str ->
+                updateAddNew { newRecord | reportDate = str }
 
-        UpdateCallSid newRecord str ->
-            { model | state = AddNew { newRecord | callSid = str } } ! [ setUnsavedChanges True ]
+            UpdateCallSid newRecord str ->
+                updateAddNew { newRecord | callSid = str }
 
-        UpdateRecordingSid newRecord str ->
-            { model | state = AddNew { newRecord | recording = str } } ! [ setUnsavedChanges True ]
+            UpdateRecordingSid newRecord str ->
+                updateAddNew { newRecord | recording = str }
 
-        UpdateDuration newRecord str ->
-            { model | state = AddNew { newRecord | duration = defaultIntStr str } } ! [ setUnsavedChanges True ]
+            UpdateDuration newRecord str ->
+                updateAddNew { newRecord | duration = defaultIntStr str }
 
-        UpdateRecordingDate newRecord str ->
-            { model | state = AddNew { newRecord | recordingDate = str } } ! [ setUnsavedChanges True ]
+            UpdateRecordingDate newRecord str ->
+                updateAddNew { newRecord | recordingDate = str }
 
-        UpdateUser newRecord dropDownItem ->
-            { model | state = AddNew { newRecord | userId = dropDownItem.id, userText = dropDownItem.name } } ! [ setUnsavedChanges True ]
+            UpdateUser newRecord dropDownItem ->
+                updateAddNew { newRecord | userId = dropDownItem.id, userText = dropDownItem.name }
 
-        UpdateTask newRecord dropDownItem ->
-            { model | state = AddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name } } ! [ setUnsavedChanges True ]
+            UpdateTask newRecord dropDownItem ->
+                updateAddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name }
 
 
 view : Model -> Html Msg
@@ -423,14 +422,14 @@ getColumns recordTypeId taskId rowId =
                     commonColumns
 
         lastColumns =
-            [ rowDropDown recordTypeId
+            [ rowDropDownColumn recordTypeId
             ]
     in
         List.append firstColumns lastColumns
 
 
-rowDropDown : Maybe Int -> Table.Column RecordRow Msg
-rowDropDown recordTypeId =
+rowDropDownColumn : Maybe Int -> Table.Column RecordRow Msg
+rowDropDownColumn recordTypeId =
     Table.veryCustomColumn
         { name = ""
         , viewData = (\t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropDownItems recordTypeId t.id))

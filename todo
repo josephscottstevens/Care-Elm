@@ -34,8 +34,12 @@ How can I put Elm-Make command as apart of vscode instead of needing to up arrow
 recordTypeId should be a maybe type, there are hacks all over keeping from that
 I can optimize filter, since I don't need every filter all the time...
 refactor long else if filter in load, to case of instead of if else
+the grid config is a big mess
 Edit Button's class name is "-Column", and I am styling that class, but if we have any columns without a name... how to handle?
 	Maybe have a type, Column-With-ClassName function?
+	
+Note: 
+	Type AutoPlay = Off | On {audio : Bool, withoutWifi: Bool }
 	
 On Deploy Todo:
 	Validate File stuff still works
