@@ -1,4 +1,4 @@
-module Records.Load exposing (..)
+module Records.Functions exposing (..)
 
 import Json.Decode as Decode exposing (..)
 import Json.Encode as Encode exposing (..)
@@ -8,6 +8,9 @@ import Records.Model exposing (..)
 import Utils.CommonTypes exposing (..)
 import Utils.CommonFunctions exposing (..)
 import String exposing (toLower)
+
+
+-- Http helper functions
 
 
 decodeRecordRow : Decoder RecordRow
@@ -140,11 +143,11 @@ saveForm newRecord =
 
 
 
---everything above here is related to HTTP stuff, everything below is update helpers, does it make sense to split out?
+-- update helper functions
 
 
-getTaskId : Model -> Maybe Int
-getTaskId model =
+updateTaskId : Model -> Maybe Int
+updateTaskId model =
     let
         records =
             model.records

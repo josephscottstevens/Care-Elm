@@ -1,4 +1,4 @@
-module Billing.Load exposing (getEmployment, newEmployers, updateEmployers)
+module Billing.Functions exposing (getEmployment, newEmployers, updateEmployers)
 
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)

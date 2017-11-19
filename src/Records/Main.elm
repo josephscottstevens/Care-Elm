@@ -1,6 +1,6 @@
 port module Records.Main exposing (..)
 
-import Records.Load exposing (..)
+import Records.Functions exposing (..)
 import Records.Model exposing (..)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, id, type_, value)
@@ -236,7 +236,7 @@ view model =
             div []
                 [ button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
                 , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config SetFilter model.recordTypeId (getTaskId model)) model.tableState (filteredRecords model) ]
+                    [ Table.view (config SetFilter model.recordTypeId (updateTaskId model)) model.tableState (filteredRecords model) ]
                 ]
 
         AddNew newRecord ->
