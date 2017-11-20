@@ -69,6 +69,25 @@ port updateUser : (DropDownItem -> msg) -> Sub msg
 port updateTask : (DropDownItem -> msg) -> Sub msg
 
 
+
+-- Hospitilizations
+
+
+port updateFacility2 : (DropDownItem -> msg) -> Sub msg
+
+
+port updateDateOfAdmission : (Maybe String -> msg) -> Sub msg
+
+
+port updateDateOfDischarge : (Maybe String -> msg) -> Sub msg
+
+
+port updateHospitalServiceType : (DropDownItem -> msg) -> Sub msg
+
+
+port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
+
+
 port dropDownToggle : (Int -> msg) -> Sub msg
 
 
@@ -89,6 +108,13 @@ subscriptions model =
                 , updateRecordingDate (UpdateRecordingDate t)
                 , updateUser (UpdateUser t)
                 , updateTask (UpdateTask t)
+
+                -- Hospitilizations
+                , updateFacility2 (UpdateFacility2 t)
+                , updateDateOfAdmission (UpdateDateOfAdmission t)
+                , updateDateOfDischarge (UpdateDateOfDischarge t)
+                , updateHospitalServiceType (UpdateHospitalServiceType t)
+                , updateDischargePhysician (UpdateDischargePhysician t)
                 ]
 
         _ ->
@@ -229,7 +255,7 @@ update msg model =
 
             -- Hospitilizations
             UpdateFacility2 newRecord dropDownItem ->
-                updateAddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name }
+                updateAddNew { newRecord | facilityId2 = dropDownItem.id, facilityText2 = dropDownItem.name }
 
             UpdateDateOfAdmission newRecord str ->
                 updateAddNew { newRecord | dateOfAdmission = str }
@@ -238,13 +264,13 @@ update msg model =
                 updateAddNew { newRecord | dateOfDischarge = str }
 
             UpdateHospitalServiceType newRecord dropDownItem ->
-                updateAddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name }
+                updateAddNew { newRecord | hospitalServiceTypeId = dropDownItem.id, hospitalServiceTypeText = dropDownItem.name }
 
             UpdateDischargeRecommendations newRecord str ->
                 updateAddNew { newRecord | dischargeRecommendations = str }
 
             UpdateDischargePhysician newRecord dropDownItem ->
-                updateAddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name }
+                updateAddNew { newRecord | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }
 
 
 view : Model -> Html Msg
@@ -349,20 +375,20 @@ formInputs newRecord =
                     ]
 
                 Hospitalizations ->
-                    case newRecord.newHospitilization of
-                        True ->
+                    case newRecord.hospitalizationId of
+                        Just t ->
+                            []
+
+                        Nothing ->
                             [ ( "Facility", Required, DropInput newRecord.facilityId2 "FacilityId2" )
                             , ( "Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId" (UpdateDateOfAdmission newRecord) )
                             , ( "Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId" (UpdateDateOfDischarge newRecord) )
                             , ( "Hospital Service Type", Required, DropInput newRecord.hospitalServiceTypeId "HospitalServiceTypeId" )
-                            , ( "Discharge Recommendations", Required, TextInput newRecord.comments (UpdateDischargeRecommendations newRecord) )
+                            , ( "Discharge Recommendations", Required, TextInput newRecord.dischargeRecommendations (UpdateDischargeRecommendations newRecord) )
                             , ( "Discharge Physician", Required, DropInput newRecord.dischargePhysicianId "DischargePhysicianId" )
-                            , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
+                            , ( "Comments", Required, TextInput newRecord.comments (UpdateComments newRecord) )
                             , ( "Upload Record File", Required, FileInput newRecord.fileName )
                             ]
-
-                        False ->
-                            []
 
                 CallRecordings ->
                     [ ( "Call Sid", Required, TextInput newRecord.callSid (UpdateCallSid newRecord) )

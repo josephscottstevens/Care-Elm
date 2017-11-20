@@ -13,7 +13,12 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
+create dropdown list + button event for hospitilizations
+create radio button 1 of 2 for (new or existing)
+add new facility depends on roles (see AddEditRecordsPartial)
+
 Implement Existing hospitilizations
+	add hospitilizations dropdown
 
 Hide CCD menu item
 Starting loading after saving, stop after complete\error
@@ -29,7 +34,7 @@ Implement Hospitalizations
 there seems to be a bit of logic on transfer logic... not sure how to handle or if I am already
 
 LOW TODO:
-Can I remove some stuff? Like am I really doing the whole dropdown thing anymore?
+Can I remove some stuff? Like am I really doing the whole dropdown (in elm Model) thing anymore?
 Cleanup double select statement in controller for grid source
 Change Model to Types ( the file)
 The abstraction for RecordType was created, but all accross the code, I am still using the id, kinda defeats the purpose

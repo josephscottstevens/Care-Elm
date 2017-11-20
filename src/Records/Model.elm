@@ -47,6 +47,7 @@ type Msg
 type ModelState
     = Grid
     | AddNew NewRecord
+      -- | AddNewFacility NewRecord NewFacility
     | Limbo
     | Error String
 
@@ -106,10 +107,6 @@ emptyModel flags =
     , filterFields = emptyFilters
     , dropDownState = emptyDropDownState
     }
-
-
-
--- , stringColumn "Report Date" (\t -> defaultDate t.reportDate)
 
 
 type alias Filters =
@@ -176,9 +173,9 @@ emptyNewRecord =
     , taskText = ""
 
     -- Hospitilizations
+    , hospitalizationId = Nothing
     , facilityId2 = Nothing
     , facilityText2 = ""
-    , newHospitilization = True
     , dateOfAdmission = Nothing
     , dateOfDischarge = Nothing
     , hospitalServiceTypeId = Nothing
@@ -215,9 +212,9 @@ type alias NewRecord =
     , taskText : String
 
     -- Hospitilizations
+    , hospitalizationId : Maybe Int
     , facilityId2 : Maybe Int
     , facilityText2 : String
-    , newHospitilization : Bool
     , dateOfAdmission : Maybe String
     , dateOfDischarge : Maybe String
     , hospitalServiceTypeId : Maybe Int
