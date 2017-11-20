@@ -92,6 +92,8 @@ decodeModel =
         |> required "recordTypeDropdown" (Decode.list decodeDropDownItem)
         |> required "userDropDown" (Decode.list decodeDropDownItem)
         |> required "taskDropDown" (Decode.list decodeDropDownItem)
+        |> required "hospitilizationServiceTypeDropdown" (Decode.list decodeDropDownItem)
+        |> required "hospitalizationDischargePhysicianDropdown" (Decode.list decodeDropDownItem)
 
 
 request : Int -> Maybe Int -> Http.Request WebResponse
@@ -210,7 +212,7 @@ getNewRecord model =
 
 getSyncFusionMessage : Model -> Bool -> SyncFusionMessage
 getSyncFusionMessage model setFocus =
-    SyncFusionMessage model.facilities model.recordTypes model.users model.tasks model.facilityId model.recordTypeId setFocus
+    SyncFusionMessage model.facilities model.recordTypes model.users model.tasks model.hospitilizationServiceTypes model.hospitalizationDischargePhysicians model.facilityId model.recordTypeId setFocus
 
 
 getLoadedState : Model -> WebResponse -> Model
@@ -223,6 +225,8 @@ getLoadedState model t =
         , recordTypes = t.recordTypes
         , tasks = t.tasks
         , users = t.users
+        , hospitilizationServiceTypes = t.hospitilizationServiceTypes
+        , hospitalizationDischargePhysicians = t.hospitalizationDischargePhysicians
     }
 
 

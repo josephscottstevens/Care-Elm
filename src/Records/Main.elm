@@ -227,6 +227,25 @@ update msg model =
             UpdateTask newRecord dropDownItem ->
                 updateAddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name }
 
+            -- Hospitilizations
+            UpdateFacility2 newRecord dropDownItem ->
+                updateAddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name }
+
+            UpdateDateOfAdmission newRecord str ->
+                updateAddNew { newRecord | dateOfAdmission = str }
+
+            UpdateDateOfDischarge newRecord str ->
+                updateAddNew { newRecord | dateOfDischarge = str }
+
+            UpdateHospitalServiceType newRecord dropDownItem ->
+                updateAddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name }
+
+            UpdateDischargeRecommendations newRecord str ->
+                updateAddNew { newRecord | dischargeRecommendations = str }
+
+            UpdateDischargePhysician newRecord dropDownItem ->
+                updateAddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name }
+
 
 view : Model -> Html Msg
 view model =
@@ -330,7 +349,20 @@ formInputs newRecord =
                     ]
 
                 Hospitalizations ->
-                    []
+                    case newRecord.newHospitilization of
+                        True ->
+                            [ ( "Facility", Required, DropInput newRecord.facilityId2 "FacilityId2" )
+                            , ( "Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId" (UpdateDateOfAdmission newRecord) )
+                            , ( "Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId" (UpdateDateOfDischarge newRecord) )
+                            , ( "Hospital Service Type", Required, DropInput newRecord.hospitalServiceTypeId "HospitalServiceTypeId" )
+                            , ( "Discharge Recommendations", Required, TextInput newRecord.comments (UpdateDischargeRecommendations newRecord) )
+                            , ( "Discharge Physician", Required, DropInput newRecord.dischargePhysicianId "DischargePhysicianId" )
+                            , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
+                            , ( "Upload Record File", Required, FileInput newRecord.fileName )
+                            ]
+
+                        False ->
+                            []
 
                 CallRecordings ->
                     [ ( "Call Sid", Required, TextInput newRecord.callSid (UpdateCallSid newRecord) )

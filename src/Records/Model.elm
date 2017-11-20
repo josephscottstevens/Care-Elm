@@ -34,6 +34,13 @@ type Msg
     | UpdateRecordingDate NewRecord (Maybe String)
     | UpdateUser NewRecord DropDownItem
     | UpdateTask NewRecord DropDownItem
+      -- Hospitilizations
+    | UpdateFacility2 NewRecord DropDownItem
+    | UpdateDateOfAdmission NewRecord (Maybe String)
+    | UpdateDateOfDischarge NewRecord (Maybe String)
+    | UpdateHospitalServiceType NewRecord DropDownItem
+    | UpdateDischargeRecommendations NewRecord String
+    | UpdateDischargePhysician NewRecord DropDownItem
     | Cancel
 
 
@@ -57,6 +64,8 @@ type alias WebResponse =
     , recordTypes : List DropDownItem
     , users : List DropDownItem
     , tasks : List DropDownItem
+    , hospitilizationServiceTypes : List DropDownItem
+    , hospitalizationDischargePhysicians : List DropDownItem
     }
 
 
@@ -67,6 +76,8 @@ type alias Model =
     , recordTypes : List DropDownItem
     , users : List DropDownItem
     , tasks : List DropDownItem
+    , hospitilizationServiceTypes : List DropDownItem
+    , hospitalizationDischargePhysicians : List DropDownItem
     , patientId : Int
     , facilityId : Maybe Int
     , recordTypeId : Maybe Int
@@ -85,6 +96,8 @@ emptyModel flags =
     , recordTypes = []
     , users = []
     , tasks = []
+    , hospitilizationServiceTypes = []
+    , hospitalizationDischargePhysicians = []
     , patientId = flags.patientId
     , facilityId = Nothing
     , recordTypeId = flags.recordType
@@ -161,6 +174,18 @@ emptyNewRecord =
     , userText = ""
     , taskId = Nothing
     , taskText = ""
+
+    -- Hospitilizations
+    , facilityId2 = Nothing
+    , facilityText2 = ""
+    , newHospitilization = True
+    , dateOfAdmission = Nothing
+    , dateOfDischarge = Nothing
+    , hospitalServiceTypeId = Nothing
+    , hospitalServiceTypeText = ""
+    , dischargeRecommendations = ""
+    , dischargePhysicianId = Nothing
+    , dischargePhysicianText = ""
     }
 
 
@@ -188,6 +213,18 @@ type alias NewRecord =
     , userText : String
     , taskId : Maybe Int
     , taskText : String
+
+    -- Hospitilizations
+    , facilityId2 : Maybe Int
+    , facilityText2 : String
+    , newHospitilization : Bool
+    , dateOfAdmission : Maybe String
+    , dateOfDischarge : Maybe String
+    , hospitalServiceTypeId : Maybe Int
+    , hospitalServiceTypeText : String
+    , dischargeRecommendations : String
+    , dischargePhysicianId : Maybe Int
+    , dischargePhysicianText : String
     }
 
 
@@ -248,6 +285,8 @@ type alias SyncFusionMessage =
     , recordTypes : List DropDownItem
     , users : List DropDownItem
     , tasks : List DropDownItem
+    , hospitilizationServiceTypes : List DropDownItem
+    , hospitalizationDischargePhysicians : List DropDownItem
     , facilityId : Maybe Int
     , recordTypeId : Maybe Int
     , setFocus : Bool

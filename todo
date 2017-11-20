@@ -1,7 +1,7 @@
 QUESTIONS:
 	why PreviousEnrollment has a comments column in the grid, but not on edit?
 	how does dropdown item "Save to Client Portal" work?
-	
+	on hospitilizations, a note, I would imagine they want more info on the discharge physician dropdown
 	Why are there null recordtypes in the grid?
 	Previous histories shows a comment column, but doesn't have it in the edit?
 	We said to have cancel \ save on the left, where exactly on my edit form?
@@ -13,7 +13,15 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-Hide CCD column
+Implement Existing hospitilizations
+
+Hide CCD menu item
+Starting loading after saving, stop after complete\error
+Hospitalizations column widths 
+looks like the active hospitilizations CSS thing is still around
+
+Perhaps the header being added will help with the whole.. where am?
+Should I add the form to breadcrumbs?
 Task column is only shown... if... there is a task? How does that work?
 bottom of grid is double width
 Create add new in edit
@@ -21,6 +29,9 @@ Implement Hospitalizations
 there seems to be a bit of logic on transfer logic... not sure how to handle or if I am already
 
 LOW TODO:
+Can I remove some stuff? Like am I really doing the whole dropdown thing anymore?
+Cleanup double select statement in controller for grid source
+Change Model to Types ( the file)
 The abstraction for RecordType was created, but all accross the code, I am still using the id, kinda defeats the purpose
 Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super duplicated stuff?) [no reason to be in same class right?]
 remove un-used fields in MVC list type
@@ -28,6 +39,7 @@ refactor long else if filter in load, to case of instead of if else
 the grid config doesn't really need TaskId, a column could able to get it... but... without knowing the model?
 
 REALLY LOW TODO:
+Would it make sense to load grid first, then fire second request to load all the dropdown info? easy enough right
 if I think it is worth any performance boost, I don't need to return userDropDown or taskDropdown unless I am on recorcTypeId of 10
 It would be nice to have the Call recordings grid refresh after task edit popup closes.
 When page left is disabled, you can still click it. (for pagination Grid)
@@ -35,6 +47,7 @@ For example, when you are on page 12, and you filter down to like 20 rows, the h
 How can I put Elm-Make command as apart of vscode instead of needing to up arrow use recent command
 	see: https://github.com/Krzysztof-Cieslak/vscode-elm/blob/master/package.json
 I can optimize filter, since I don't need every filter all the time...
+There has to be a better way to group up stuff... that isn't just all fields together right?
 Edit Button's class name is "-Column", and I am styling that class, but if we have any columns without a name... how to handle?
 	Maybe have a type, Column-With-ClassName function?
 	
