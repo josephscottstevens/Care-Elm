@@ -49,7 +49,6 @@ type Msg
 type ModelState
     = Grid
     | AddNew NewRecord
-      -- | AddNewFacility NewRecord NewFacility
     | Limbo
     | Error String
 
