@@ -285,6 +285,12 @@ update msg model =
                 updateAddNew { newRecord | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }
 
 
+bob : Model -> Html Msg
+bob model =
+    div [ class "e-grid e-js e-waitingpopup" ]
+        [ Table.view (config SetFilter model.recordTypeId (updateTaskId model)) model.tableState (filteredRecords model) ]
+
+
 view : Model -> Html Msg
 view model =
     case model.state of

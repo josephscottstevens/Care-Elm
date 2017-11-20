@@ -5,7 +5,10 @@ import Html exposing (div)
 import Billing.Main as Billing
 import Records.Main as Records
 import Utils.CommonTypes exposing (..)
-import Html.Events exposing (onClick)
+import Html exposing (Html, text, div, button)
+import Html.Attributes exposing (class, id, type_, value)
+import Html.Events exposing (onClick, onFocus)
+import Table exposing (..)
 
 
 subscriptions : Model -> Sub Msg
@@ -44,28 +47,28 @@ view model =
             div [] []
 
         BillingPage ->
-            Html.map BillingMsg (Billing.view model.billingState)
+            div [] []
 
         RecordsPage ->
-            Html.map RecordsMsg (Records.view model.recordsState)
+            div []
+                [ button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
+                , Html.map RecordsMsg (Records.view model.recordsState)
+                ]
 
 
 update : Msg -> Model -> ( Model, Cmd Model.Msg )
 update msg model =
     case msg of
         BillingMsg billingMsg ->
-            let
-                ( newBillingModel, pageCmd ) =
-                    Billing.update billingMsg model.billingState
-            in
-                ( { model | billingState = newBillingModel }, Cmd.map BillingMsg pageCmd )
+            model ! []
 
+        -- [ Cmd.map BillingMsg billingMsg ]
         RecordsMsg recordsMsg ->
             let
                 ( newRecordModel, pageCmd ) =
                     Records.update recordsMsg model.recordsState
             in
-                ( { model | recordsState = newRecordModel }, Cmd.map RecordsMsg pageCmd )
+                { model | recordsState = newRecordModel } ! [ Cmd.map RecordsMsg pageCmd ]
 
-        ChangePage page ->
-            { model | page = page } ! []
+        AddNewStart ->
+            { model | page = NoPage } ! []

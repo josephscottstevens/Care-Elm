@@ -5,6 +5,12 @@ import Records.Types as Records
 import Utils.CommonTypes exposing (..)
 
 
+type Page
+    = NoPage
+    | BillingPage
+    | RecordsPage
+
+
 type alias Model =
     { page : Page
     , patientId : Int
@@ -17,7 +23,7 @@ type alias Model =
 type Msg
     = BillingMsg Billing.Msg
     | RecordsMsg Records.Msg
-    | ChangePage Page
+    | AddNewStart
 
 
 emptyModel : Flags -> Model
