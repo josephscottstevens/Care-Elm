@@ -1,6 +1,12 @@
 module Utils.CommonTypes exposing (..)
 
 
+type Page
+    = NoPage
+    | BillingPage
+    | RecordsPage
+
+
 type FilterState
     = FilterState String String
 

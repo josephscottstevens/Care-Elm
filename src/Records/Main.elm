@@ -1,7 +1,7 @@
 port module Records.Main exposing (..)
 
 import Records.Functions exposing (..)
-import Records.Model exposing (..)
+import Records.Types exposing (..)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, id, type_, value)
 import Html.Events exposing (onClick, onFocus)
@@ -317,6 +317,7 @@ view model =
                         [ div [ class fullWidth ]
                             [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
                             , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                            , button [ type_ "button", class "btn btn-sm btn-default pull-right" ] [ text "Billing" ]
                             ]
                         ]
                     ]

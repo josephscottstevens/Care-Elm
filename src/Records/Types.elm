@@ -1,4 +1,4 @@
-module Records.Model exposing (..)
+module Records.Types exposing (..)
 
 import Table
 import Http

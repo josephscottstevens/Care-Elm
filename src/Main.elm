@@ -5,9 +5,7 @@ import Html exposing (div)
 import Billing.Main as Billing
 import Records.Main as Records
 import Utils.CommonTypes exposing (..)
-
-
-port openPage : (String -> msg) -> Sub msg
+import Html.Events exposing (onClick)
 
 
 subscriptions : Model -> Sub Msg
@@ -57,14 +55,17 @@ update msg model =
     case msg of
         BillingMsg billingMsg ->
             let
-                ( newBillingModel, widgetCmd ) =
+                ( newBillingModel, pageCmd ) =
                     Billing.update billingMsg model.billingState
             in
-                ( { model | billingState = newBillingModel }, Cmd.map BillingMsg widgetCmd )
+                ( { model | billingState = newBillingModel }, Cmd.map BillingMsg pageCmd )
 
         RecordsMsg recordsMsg ->
             let
-                ( newRecordModel, widgetCmd ) =
+                ( newRecordModel, pageCmd ) =
                     Records.update recordsMsg model.recordsState
             in
-                ( { model | recordsState = newRecordModel }, Cmd.map RecordsMsg widgetCmd )
+                ( { model | recordsState = newRecordModel }, Cmd.map RecordsMsg pageCmd )
+
+        ChangePage page ->
+            { model | page = page } ! []
