@@ -13,12 +13,15 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-create dropdown list + button event for hospitilizations
+go to Clinical Summary -> Hospitalizations to see missing stuff
+There is phone number validation, any other hidden validations?
+Get Transfer popup to show (get libc thingy)
+
 create radio button 1 of 2 for (new or existing)
 add new facility depends on roles (see AddEditRecordsPartial)
 
-Implement Existing hospitilizations
-	add hospitilizations dropdown
+The two new buttons on hospitilizations need icons
+style the file input button
 
 Hide CCD menu item
 Starting loading after saving, stop after complete\error

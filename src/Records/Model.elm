@@ -14,7 +14,9 @@ type Msg
     | Save NewRecord
     | SendMenuMessage Int String
     | SetFilter FilterState
-    | OpenTask Int
+    | EditTask Int
+    | AddNewFacility
+    | AddNewPhysician
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | SaveCompleted (Result Http.Error String)

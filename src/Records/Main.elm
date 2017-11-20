@@ -24,6 +24,12 @@ port toggleConsent : Bool -> Cmd msg
 port editTask : Int -> Cmd msg
 
 
+port addNewFacility : Maybe String -> Cmd msg
+
+
+port addNewPhysician : Maybe String -> Cmd msg
+
+
 port initSyncfusionControls : SyncFusionMessage -> Cmd msg
 
 
@@ -199,8 +205,14 @@ update msg model =
             UpdateTitle newRecord str ->
                 updateAddNew { newRecord | title = str }
 
-            OpenTask taskId ->
+            EditTask taskId ->
                 model ! [ editTask taskId ]
+
+            AddNewFacility ->
+                model ! [ addNewFacility Nothing ]
+
+            AddNewPhysician ->
+                model ! [ addNewPhysician Nothing ]
 
             UpdateRecordType newRecord dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then
@@ -380,13 +392,13 @@ formInputs newRecord =
                             []
 
                         Nothing ->
-                            [ ( "Facility", Required, DropInput newRecord.facilityId2 "FacilityId2" )
+                            [ ( "Facility", Required, DropInputWithButton newRecord.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
                             , ( "Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId" (UpdateDateOfAdmission newRecord) )
                             , ( "Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId" (UpdateDateOfDischarge newRecord) )
                             , ( "Hospital Service Type", Required, DropInput newRecord.hospitalServiceTypeId "HospitalServiceTypeId" )
                             , ( "Discharge Recommendations", Required, TextInput newRecord.dischargeRecommendations (UpdateDischargeRecommendations newRecord) )
-                            , ( "Discharge Physician", Required, DropInput newRecord.dischargePhysicianId "DischargePhysicianId" )
-                            , ( "Comments", Required, TextInput newRecord.comments (UpdateComments newRecord) )
+                            , ( "Discharge Physician", Required, DropInputWithButton newRecord.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "Add New Physician" )
+                            , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
                             , ( "Upload Record File", Required, FileInput newRecord.fileName )
                             ]
 
@@ -466,7 +478,7 @@ getColumns recordTypeId taskId =
                 CallRecordings ->
                     [ stringColumn "Date" (\t -> dateTime t.recordingDate)
                     , hrefColumn "Recording" "Open" (\t -> defaultString t.recording)
-                    , hrefColumnExtra "Task" (\t -> defaultString t.taskTitle) "#" (OpenTask (defaultInt taskId))
+                    , hrefColumnExtra "Task" (\t -> defaultString t.taskTitle) "#" (EditTask (defaultInt taskId))
                     , checkColumn "During Enrollment" (\t -> t.enrollment)
                     , checkColumn "Consent" (\t -> t.hasVerbalConsent)
                     , stringColumn "User" (\t -> defaultString t.staffName)

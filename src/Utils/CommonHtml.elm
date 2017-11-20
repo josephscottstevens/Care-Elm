@@ -2,7 +2,7 @@ module Utils.CommonHtml exposing (fullWidth, labelWidth, controlWidth, InputCont
 
 import Html exposing (Html, text, div, button, input, span, th, li, ul, a, label, textarea)
 import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name, readonly)
-import Html.Events exposing (onInput, on)
+import Html.Events exposing (onInput, onClick, on)
 import Json.Decode as Json
 import Utils.CommonFunctions exposing (..)
 import Utils.CommonTypes exposing (..)
@@ -43,6 +43,7 @@ type InputControlType msg
     | NumrInput Int (String -> msg)
     | AreaInput String (String -> msg)
     | DropInput (Maybe Int) String
+    | DropInputWithButton (Maybe Int) String msg String
     | DateInput String String (Maybe String -> msg)
     | FileInput String
 
@@ -152,6 +153,13 @@ common ( labelText, requiredType, controlType ) =
                     [ input [ type_ "text", id syncfusionId, value (toString displayValue) ] []
                     ]
 
+            DropInputWithButton displayValue syncfusionId event buttonText ->
+                div [ class "form-group" ]
+                    [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
+                    , div [ class controlWidth ] [ input [ type_ "text", id syncfusionId, value (toString displayValue) ] [] ]
+                    , div [ class labelWidth ] [ button [ class "btn btn-sm btn-default", onClick event ] [ text buttonText ] ]
+                    ]
+
             DateInput displayValue syncfusionId event ->
                 commonStructure
                     [ input [ type_ "text", id syncfusionId, value displayValue, onInput (defaultMaybeMsg event) ] []
@@ -159,14 +167,9 @@ common ( labelText, requiredType, controlType ) =
 
             FileInput displayValue ->
                 div [ class "form-group" ]
-                    [ label [ class (labelWidth ++ "control-label " ++ isRequiredStr requiredType), for "fileName" ]
-                        [ text labelText ]
-                    , div [ class "col-sm-6 col-md-4 col-lg-3" ]
-                        [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] []
-                        ]
-                    , div [ class "col-sm-2 col-md-1 col-lg-1" ]
-                        [ div [ id "fileBtn" ] []
-                        ]
+                    [ label [ class (labelWidth ++ "control-label " ++ isRequiredStr requiredType), for "fileName" ] [ text labelText ]
+                    , div [ class controlWidth ] [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] [] ]
+                    , div [ class labelWidth ] [ div [ id "fileBtn" ] [] ]
                     ]
 
 
