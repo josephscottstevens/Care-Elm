@@ -1,8 +1,7 @@
 QUESTIONS:
 	why PreviousEnrollment has a comments column in the grid, but not on edit?
 	how does dropdown item "Save to Client Portal" work?
-	CCD's has no edit mode? no way to insert into the grid, but you can view records?
-		CCD's has no data in prod...
+	
 	Why are there null recordtypes in the grid?
 	Previous histories shows a comment column, but doesn't have it in the edit?
 	We said to have cancel \ save on the left, where exactly on my edit form?
@@ -14,6 +13,7 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
+Hide CCD column
 Task column is only shown... if... there is a task? How does that work?
 bottom of grid is double width
 Create add new in edit
@@ -40,6 +40,8 @@ Edit Button's class name is "-Column", and I am styling that class, but if we ha
 	
 Note: 
 	Type AutoPlay = Off | On {audio : Bool, withoutWifi: Bool }
+	CCD's has no edit mode? no way to insert into the grid, but you can view records?
+		CCD's has no data in prod...
 	
 On Deploy Todo:
 	Validate File stuff still works

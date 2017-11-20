@@ -390,7 +390,15 @@ getColumns recordTypeId taskId =
                     ]
 
                 Hospitalizations ->
-                    []
+                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+                    , stringColumn "Hospitalization ID" (\t -> defaultIntToString t.hospitalizationId)
+                    , stringColumn "Admin Date" (\t -> defaultDateTime t.dateOfAdmission)
+                    , stringColumn "Discharge Date" (\t -> defaultDateTime t.dateOfDischarge)
+                    , stringColumn "Service Type" (\t -> defaultString t.hospitalizationServiceType)
+                    , stringColumn "Discharge Recommendations" (\t -> defaultString t.recommendations)
+                    , stringColumn "Discharge Physician" (\t -> defaultString t.dischargePhysician)
+                    , stringColumn "Comments" (\t -> defaultString t.comments)
+                    ]
 
                 Legal ->
                     [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
