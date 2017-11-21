@@ -69,12 +69,7 @@ view model =
 
         RecordAddNewPage addEditDataSource ->
             div [ class "form-horizontal" ]
-                [ Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState addEditDataSource)
-                , RecordAddNew.footerControls
-                    --button [ type_ "button", id "Save", value "AddNewRecord", onClick Save, RecordAddNew.saveBtnClass ] [ text "Save" ]
-                    [--, button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
-                    ]
-                ]
+                [ Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState addEditDataSource) ]
 
         Error str ->
             div [] [ text str ]

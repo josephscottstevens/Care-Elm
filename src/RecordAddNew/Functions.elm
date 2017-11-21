@@ -56,3 +56,8 @@ saveFormRequest model =
         , url = "/People/AddNewRecord"
         , withCredentials = False
         }
+
+
+saveForm : Model -> Cmd Msg
+saveForm model =
+    Http.send SaveCompleted (saveFormRequest model)

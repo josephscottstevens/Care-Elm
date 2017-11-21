@@ -125,24 +125,24 @@ view model addEditDataSource =
                 div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
             else
                 div [] []
+
+        saveBtnClass =
+            class "btn btn-sm btn-success margin-left-5 pull-right"
+
+        footerControls t =
+            div [ class "form-group" ]
+                [ div [ class fullWidth ]
+                    t
+                ]
     in
         div []
             [ validationErrorsDiv
             , makeControls (formInputs model)
-            , button [ type_ "button", id "Save", value "AddNewRecord", onClick Save, saveBtnClass ] [ text "Save" ]
-            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+            , footerControls
+                [ button [ type_ "button", id "Save", value "AddNewRecord", onClick Save, saveBtnClass ] [ text "Save" ]
+                , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                ]
             ]
-
-
-saveBtnClass =
-    class "btn btn-sm btn-success margin-left-5 pull-right"
-
-
-footerControls t =
-    div [ class "form-group" ]
-        [ div [ class fullWidth ]
-            t
-        ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -175,7 +175,7 @@ update msg model =
                 if List.length (getValidationErrors (formInputs model)) > 0 then
                     { model | showValidationErrors = True } ! []
                 else
-                    model ! []
+                    model ! [ saveForm model, setUnsavedChanges False ]
 
             SaveCompleted (Ok responseMsg) ->
                 case getResponseError responseMsg of
