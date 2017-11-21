@@ -10,19 +10,6 @@ import Utils.CommonFunctions exposing (..)
 import String exposing (toLower)
 
 
-getAddEditDataSource : AddEditDataSource -> Model
-getAddEditDataSource t =
-    { model
-        | facilityId = t.facilityId
-        , facilities = t.facilities
-        , recordTypes = t.recordTypes
-        , tasks = t.tasks
-        , users = t.users
-        , hospitilizationServiceTypes = t.hospitilizationServiceTypes
-        , hospitalizationDischargePhysicians = t.hospitalizationDischargePhysicians
-    }
-
-
 decodeDropDownItem : Decoder DropDownItem
 decodeDropDownItem =
     decode DropDownItem
@@ -40,3 +27,13 @@ decodeModel =
         |> required "taskDropDown" (Decode.list decodeDropDownItem)
         |> required "hospitilizationServiceTypeDropdown" (Decode.list decodeDropDownItem)
         |> required "hospitalizationDischargePhysicianDropdown" (Decode.list decodeDropDownItem)
+
+
+request : Int -> Http.Request AddEditDataSource
+request patientId =
+    Http.get ("/People/PatientRecordsDropdowns?patientId=" ++ toString patientId) decodeModel
+
+
+getDropDowns : Int -> (Result Http.Error AddEditDataSource -> msg) -> Cmd msg
+getDropDowns patientId t =
+    Http.send t (request patientId)

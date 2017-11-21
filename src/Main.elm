@@ -5,11 +5,13 @@ import Html exposing (div)
 import Billing.Main as Billing
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
+import Utils.CommonHtml exposing (..)
+import Utils.CommonFunctions exposing (..)
 import Utils.CommonTypes exposing (..)
+import Functions exposing (..)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, id, type_, value)
 import Html.Events exposing (onClick, onFocus)
-import Table exposing (..)
 
 
 subscriptions : Model -> Sub Msg
@@ -29,7 +31,7 @@ init flags =
         if flags.pageFlag == "billing" then
             ( { model | page = BillingPage }, Cmd.map BillingMsg Billing.init )
         else if flags.pageFlag == "records" then
-            ( { model | page = RecordsPage }, Cmd.map RecordsMsg (Records.init flags) )
+            { model | page = RecordsPage } ! [ Cmd.map RecordsMsg (Records.init flags), getDropDowns flags.patientId AddEditDataSourceLoaded ]
         else
             ( model, Cmd.none )
 
@@ -55,15 +57,34 @@ view model =
 
         RecordsPage ->
             div []
-                [ button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
+                [ case model.addEditDataSource of
+                    Just t ->
+                        button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick (AddNewStart t) ] [ text "New Record" ]
+
+                    Nothing ->
+                        button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
                 , Html.map RecordsMsg (Records.view model.recordsState)
+                , div [ class "form-group" ]
+                    [ div [ class fullWidth ]
+                        [--button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save model), saveBtnClass ] [ text "Save" ]
+                         -- , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                        ]
+                    ]
                 ]
 
-        RecordAddNewPage ->
-            div []
-                [ button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
-                , Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState)
+        RecordAddNewPage addEditDataSource ->
+            div [ class "form-horizontal" ]
+                [ button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5" ] [ text "Test" ]
+                , case model.addEditDataSource of
+                    Just t ->
+                        Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState t)
+
+                    Nothing ->
+                        div [] []
                 ]
+
+        Error str ->
+            div [] [ text str ]
 
 
 update : Msg -> Model -> ( Model, Cmd Model.Msg )
@@ -87,5 +108,11 @@ update msg model =
             in
                 { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
 
-        AddNewStart ->
-            { model | page = NoPage } ! []
+        AddNewStart addEditDataSource ->
+            { model | page = RecordAddNewPage addEditDataSource } ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource) ]
+
+        AddEditDataSourceLoaded (Ok t) ->
+            { model | addEditDataSource = Just t } ! []
+
+        AddEditDataSourceLoaded (Err httpError) ->
+            { model | page = Error (toString httpError) } ! [ setLoadingStatus False ]

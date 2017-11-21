@@ -4,9 +4,16 @@ import Char exposing (isLower, isUpper)
 import Date
 import Date.Extra
 import Json.Encode as Encode
+import Json.Decode exposing (..)
 
 
 port setLoadingStatus : Bool -> Cmd msg
+
+
+port displaySuccessMessage : String -> Cmd msg
+
+
+port displayErrorMessage : String -> Cmd msg
 
 
 isAlpha : Char -> Bool
@@ -126,4 +133,19 @@ maybeToDateString maybeDateStr =
                     Nothing
 
         Nothing ->
+            Nothing
+
+
+getResponseError : String -> Maybe String
+getResponseError str =
+    case decodeString (field "Error" int) str of
+        Ok _ ->
+            case decodeString (field "Message" string) str of
+                Ok t ->
+                    Just t
+
+                Err _ ->
+                    Just ""
+
+        Err _ ->
             Nothing

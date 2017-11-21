@@ -1,6 +1,5 @@
 module RecordAddNew.Types exposing (..)
 
-import Http
 import Utils.CommonTypes exposing (..)
 
 
@@ -45,6 +44,7 @@ type alias Model =
     { state : ModelState
     , recordId : Int
     , title : String
+    , patientId : Int
     , recordTypeId : Maybe Int
     , recordTypeText : String
     , specialty : String
@@ -67,7 +67,13 @@ type alias Model =
     , taskText : String
 
     -- dropdowns
-    -- , addEditDataSource : AddEditDataSource
+    -- , addEditDataSource : Maybe AddEditDataSource
+    -- , facilities : List DropDownItem
+    -- , recordTypes : List DropDownItem
+    -- , tasks : List DropDownItem
+    -- , users : List DropDownItem
+    -- , hospitilizationServiceTypes : List DropDownItem
+    -- , hospitalizationDischargePhysicians : List DropDownItem
     -- Hospitilizations
     , hospitalizationId : Maybe Int
     , facilityId2 : Maybe Int
@@ -82,13 +88,13 @@ type alias Model =
     }
 
 
-emptyModel : Model
-emptyModel =
+emptyModel : Flags -> Model
+emptyModel flags =
     { state = AddEdit
     , recordId = 0
-    , facilityId = Nothing
     , title = ""
-    , recordTypeId = Nothing
+    , patientId = flags.patientId
+    , recordTypeId = flags.recordType
     , recordTypeText = ""
     , specialty = ""
     , provider = ""
@@ -98,6 +104,7 @@ emptyModel =
     , comments = ""
     , showValidationErrors = False
     , reportDate = Nothing
+    , facilityId = Nothing
     , facilityText = ""
     , recording = ""
     , callSid = ""
@@ -109,7 +116,13 @@ emptyModel =
     , taskText = ""
 
     -- dropdowns
-    -- , addEditDataSource = dataSource
+    -- , addEditDataSource = Nothing
+    -- , facilities = []
+    -- , recordTypes = []
+    -- , tasks = []
+    -- , users = []
+    -- , hospitilizationServiceTypes = []
+    -- , hospitalizationDischargePhysicians = []
     -- Hospitilizations
     , hospitalizationId = Nothing
     , facilityId2 = Nothing

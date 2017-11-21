@@ -74,21 +74,6 @@ deleteRequest rowId =
     Http.send DeleteCompleted <| Http.getString ("/People/DeleteRecord?recordId=" ++ toString rowId)
 
 
-getResponseError : String -> Maybe String
-getResponseError str =
-    case decodeString (field "Error" Decode.int) str of
-        Ok _ ->
-            case decodeString (field "Message" Decode.string) str of
-                Ok t ->
-                    Just t
-
-                Err _ ->
-                    Just ""
-
-        Err _ ->
-            Nothing
-
-
 
 -- update helper functions
 

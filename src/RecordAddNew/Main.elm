@@ -81,9 +81,11 @@ port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
 --  AddNewStart ->
 --             { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model False) ]
 -- Okay... so before I can do this, I need dropdowns, and some fields, these aren't really apart of my Model, these are extra fields that should be loaded before I start
--- init : Flags -> Cmd Msg
--- init flag =
---     initSyncfusionControls (getSyncFusionMessage model False)
+
+
+init : AddEditDataSource -> Cmd Msg
+init addEditDataSource =
+    initSyncfusionControls addEditDataSource
 
 
 subscriptions : Model -> Sub Msg
@@ -112,8 +114,8 @@ subscriptions model =
 --        , resetUpdateComplete ResetAddNew
 
 
-view : Model -> Html Msg
-view model =
+view : Model -> AddEditDataSource -> Html Msg
+view model addEditDataSource =
     let
         errors =
             getValidationErrors (formInputs model)
@@ -135,8 +137,7 @@ view model =
                     ]
                 ]
     in
-        div
-            [ class "form-horizontal" ]
+        div []
             [ validationErrorsDiv
             , makeControls (formInputs model)
             , footerControls
