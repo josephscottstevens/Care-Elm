@@ -45,18 +45,14 @@ encodeRecord newRecord =
         ]
 
 
-
--- saveForm : Model -> Cmd Msg
--- saveForm model =
---     Http.send SaveCompleted (saveFormRequest model)
--- saveFormRequest : Model -> Http.Request String
--- saveFormRequest model =
---     Http.request
---         { body = encodeRecord model |> Http.jsonBody
---         , expect = Http.expectString
---         , headers = []
---         , method = "POST"
---         , timeout = Nothing
---         , url = "/People/AddNewRecord"
---         , withCredentials = False
---         }
+saveFormRequest : Model -> Http.Request String
+saveFormRequest model =
+    Http.request
+        { body = encodeRecord model |> Http.jsonBody
+        , expect = Http.expectString
+        , headers = []
+        , method = "POST"
+        , timeout = Nothing
+        , url = "/People/AddNewRecord"
+        , withCredentials = False
+        }

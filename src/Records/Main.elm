@@ -35,9 +35,9 @@ subscriptions model =
         ]
 
 
-init : Flags -> Cmd Msg
-init flag =
-    getRecords flag.patientId flag.recordType Load
+init : Int -> Maybe Int -> Cmd Msg
+init patientId recordType =
+    getRecords patientId recordType Load
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

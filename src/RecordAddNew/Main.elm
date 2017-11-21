@@ -125,23 +125,24 @@ view model addEditDataSource =
                 div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
             else
                 div [] []
-
-        saveBtnClass =
-            class "btn btn-sm btn-success margin-left-5 pull-right"
-
-        footerControls =
-            div [ class "form-group" ]
-                [ div [ class fullWidth ]
-                    [--button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save model), saveBtnClass ] [ text "Save" ]
-                     -- , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
-                    ]
-                ]
     in
         div []
             [ validationErrorsDiv
             , makeControls (formInputs model)
-            , footerControls
+            , button [ type_ "button", id "Save", value "AddNewRecord", onClick Save, saveBtnClass ] [ text "Save" ]
+            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
             ]
+
+
+saveBtnClass =
+    class "btn btn-sm btn-success margin-left-5 pull-right"
+
+
+footerControls t =
+    div [ class "form-group" ]
+        [ div [ class fullWidth ]
+            t
+        ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -152,7 +153,7 @@ update msg model =
     in
         case msg of
             -- Save newRecord ->
-            --     if List.length (getValidationErrors formInputs ) > 0 then
+            --     if List.length (getValidationErrors formInputs) > 0 then
             --         updateAddNew { newRecord | showValidationErrors = True }
             --     else
             --         model ! [ saveForm newRecord, setUnsavedChanges False ]
@@ -169,6 +170,26 @@ update msg model =
 
             AddNewPhysician ->
                 model ! [ addNewPhysician Nothing ]
+
+            Save ->
+                if List.length (getValidationErrors (formInputs model)) > 0 then
+                    { model | showValidationErrors = True } ! []
+                else
+                    model ! []
+
+            SaveCompleted (Ok responseMsg) ->
+                case getResponseError responseMsg of
+                    Just t ->
+                        model ! [ displayErrorMessage t ]
+
+                    Nothing ->
+                        model ! [ displaySuccessMessage "Save completed successfully!" ]
+
+            SaveCompleted (Err httpError) ->
+                { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
+
+            Cancel ->
+                model ! []
 
             -- Cancel ->
             --     { model | state = Grid } ! [ setUnsavedChanges False ]

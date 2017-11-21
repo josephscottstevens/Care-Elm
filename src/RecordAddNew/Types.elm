@@ -1,14 +1,17 @@
 module RecordAddNew.Types exposing (..)
 
 import Utils.CommonTypes exposing (..)
+import Http
 
 
 type Msg
-    = -- SaveCompleted (Result Http.Error String)
-      -- | Save
+    = --
       -- | ResetAddNew String
       AddNewFacility
     | AddNewPhysician
+    | Save
+    | SaveCompleted (Result Http.Error String)
+    | Cancel
     | UpdateTitle String
     | UpdateRecordType DropDownItem
     | UpdateSpecialty String
@@ -32,6 +35,11 @@ type Msg
     | UpdateHospitalServiceType DropDownItem
     | UpdateDischargeRecommendations String
     | UpdateDischargePhysician DropDownItem
+
+
+
+-- | SaveCompleted (Result Http.Error String)
+-- | Save
 
 
 type ModelState

@@ -7,7 +7,7 @@ import Utils.CommonTypes exposing (..)
 import Http
 
 
-type Page
+type State
     = NoPage
     | BillingPage
     | RecordsPage
@@ -16,9 +16,9 @@ type Page
 
 
 type alias Model =
-    { page : Page
+    { state : State
     , patientId : Int
-    , recordType : Maybe Int
+    , recordTypeId : Maybe Int
     , billingState : Billing.Model
     , recordsState : Records.Model
     , recordAddNewState : RecordAddNew.Model
@@ -36,9 +36,9 @@ type Msg
 
 emptyModel : Flags -> Model
 emptyModel flags =
-    { page = NoPage
+    { state = NoPage
     , patientId = flags.patientId
-    , recordType = flags.recordType
+    , recordTypeId = flags.recordType
     , billingState = Billing.emptyModel flags
     , recordsState = Records.emptyModel flags
     , recordAddNewState = RecordAddNew.emptyModel flags

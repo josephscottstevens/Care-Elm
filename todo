@@ -13,6 +13,8 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
+am I showing loading while loading dropdowns (kinda defeats the purpose) 
+
 go to Clinical Summary -> Hospitalizations to see missing stuff
 There is phone number validation, any other hidden validations?
 Get Transfer popup to show (get libc thingy)
