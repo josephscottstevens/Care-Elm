@@ -12,9 +12,6 @@ import Utils.CommonTypes exposing (..)
 import Utils.CommonFunctions exposing (..)
 
 
-port resetUpdate : Maybe Int -> Cmd msg
-
-
 port sendMenuMessage : MenuMessage -> Cmd msg
 
 
@@ -22,15 +19,6 @@ port toggleConsent : Bool -> Cmd msg
 
 
 port editTask : Int -> Cmd msg
-
-
-port addNewFacility : Maybe String -> Cmd msg
-
-
-port addNewPhysician : Maybe String -> Cmd msg
-
-
-port initSyncfusionControls : SyncFusionMessage -> Cmd msg
 
 
 port displaySuccessMessage : String -> Cmd msg
@@ -42,58 +30,6 @@ port displayErrorMessage : String -> Cmd msg
 port setLoadingStatus : Bool -> Cmd msg
 
 
-port setUnsavedChanges : Bool -> Cmd msg
-
-
-port resetUpdateComplete : (String -> msg) -> Sub msg
-
-
-port updateFacility : (DropDownItem -> msg) -> Sub msg
-
-
-port updateCategory : (DropDownItem -> msg) -> Sub msg
-
-
-port updateTimeVisit : (Maybe String -> msg) -> Sub msg
-
-
-port updateTimeAcc : (Maybe String -> msg) -> Sub msg
-
-
-port updateFileName : (String -> msg) -> Sub msg
-
-
-port updateReportDate : (Maybe String -> msg) -> Sub msg
-
-
-port updateRecordingDate : (Maybe String -> msg) -> Sub msg
-
-
-port updateUser : (DropDownItem -> msg) -> Sub msg
-
-
-port updateTask : (DropDownItem -> msg) -> Sub msg
-
-
-
--- Hospitilizations
-
-
-port updateFacility2 : (DropDownItem -> msg) -> Sub msg
-
-
-port updateDateOfAdmission : (Maybe String -> msg) -> Sub msg
-
-
-port updateDateOfDischarge : (Maybe String -> msg) -> Sub msg
-
-
-port updateHospitalServiceType : (DropDownItem -> msg) -> Sub msg
-
-
-port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
-
-
 port dropDownToggle : (Int -> msg) -> Sub msg
 
 
@@ -102,33 +38,10 @@ port deleteConfirmed : (Int -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case model.state of
-        AddNew t ->
-            Sub.batch
-                [ updateFacility (UpdateFacility t)
-                , updateCategory (UpdateRecordType t)
-                , updateTimeVisit (UpdateTimeVisit t)
-                , updateTimeAcc (UpdateTimeAcc t)
-                , updateFileName (UpdateFileName t)
-                , updateReportDate (UpdateReportDate t)
-                , updateRecordingDate (UpdateRecordingDate t)
-                , updateUser (UpdateUser t)
-                , updateTask (UpdateTask t)
-
-                -- Hospitilizations
-                , updateFacility2 (UpdateFacility2 t)
-                , updateDateOfAdmission (UpdateDateOfAdmission t)
-                , updateDateOfDischarge (UpdateDateOfDischarge t)
-                , updateHospitalServiceType (UpdateHospitalServiceType t)
-                , updateDischargePhysician (UpdateDischargePhysician t)
-                ]
-
-        _ ->
-            Sub.batch
-                [ dropDownToggle DropDownToggle
-                , deleteConfirmed DeleteConfirmed
-                , resetUpdateComplete ResetAddNew
-                ]
+    Sub.batch
+        [ dropDownToggle DropDownToggle
+        , deleteConfirmed DeleteConfirmed
+        ]
 
 
 init : Flags -> Cmd Msg
@@ -138,298 +51,59 @@ init flag =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    let
-        updateAddNew t =
-            { model | state = AddNew t } ! [ setUnsavedChanges True ]
-    in
-        case msg of
-            Load (Ok t) ->
-                getLoadedState model t ! [ setLoadingStatus False ]
+    case msg of
+        Load (Ok t) ->
+            getLoadedState model t ! [ setLoadingStatus False ]
 
-            Load (Err httpError) ->
-                { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
+        Load (Err httpError) ->
+            { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
 
-            SetTableState newState ->
-                { model | tableState = newState } ! []
+        SetTableState newState ->
+            { model | tableState = newState } ! []
 
-            SendMenuMessage recordId messageType ->
-                { model | records = flipConsent model.records recordId model.recordTypeId } ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
+        SendMenuMessage recordId messageType ->
+            { model | records = flipConsent model.records recordId model.recordTypeId } ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
 
-            AddNewStart ->
-                { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model False) ]
+        DropDownToggle recordId ->
+            { model | records = flipDropDownOpen model.records recordId } ! []
 
-            ResetAddNew _ ->
-                { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model True) ]
+        DeleteConfirmed rowId ->
+            let
+                updatedRecords =
+                    model.records |> List.filter (\t -> t.id /= rowId)
+            in
+                { model | records = updatedRecords } ! [ deleteRequest rowId ]
 
-            Save newRecord ->
-                if List.length (getValidationErrors (formInputs newRecord)) > 0 then
-                    updateAddNew { newRecord | showValidationErrors = True }
-                else
-                    model ! [ saveForm newRecord, setUnsavedChanges False ]
+        DeleteCompleted (Ok responseMsg) ->
+            case getResponseError responseMsg of
+                Just t ->
+                    model ! [ displayErrorMessage t ]
 
-            SaveCompleted (Ok responseMsg) ->
-                case getResponseError responseMsg of
-                    Just t ->
-                        model ! [ getRecords model.patientId model.recordTypeId Load, displayErrorMessage t ]
+                Nothing ->
+                    model ! [ displaySuccessMessage "Record deleted successfully!" ]
 
-                    Nothing ->
-                        model ! [ getRecords model.patientId model.recordTypeId Load, displaySuccessMessage "Save completed successfully!" ]
+        DeleteCompleted (Err httpError) ->
+            { model | state = Error (toString httpError) } ! []
 
-            SaveCompleted (Err httpError) ->
-                { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
+        EditTask taskId ->
+            model ! [ editTask taskId ]
 
-            Cancel ->
-                { model | state = Grid } ! [ setUnsavedChanges False ]
-
-            DropDownToggle recordId ->
-                { model | records = flipDropDownOpen model.records recordId } ! []
-
-            DeleteConfirmed rowId ->
-                let
-                    updatedRecords =
-                        model.records |> List.filter (\t -> t.id /= rowId)
-                in
-                    { model | records = updatedRecords } ! [ deleteRequest rowId ]
-
-            DeleteCompleted (Ok responseMsg) ->
-                case getResponseError responseMsg of
-                    Just t ->
-                        model ! [ displayErrorMessage t ]
-
-                    Nothing ->
-                        model ! [ displaySuccessMessage "Record deleted successfully!" ]
-
-            DeleteCompleted (Err httpError) ->
-                { model | state = Error (toString httpError) } ! []
-
-            UpdateTitle newRecord str ->
-                updateAddNew { newRecord | title = str }
-
-            EditTask taskId ->
-                model ! [ editTask taskId ]
-
-            AddNewFacility ->
-                model ! [ addNewFacility Nothing ]
-
-            AddNewPhysician ->
-                model ! [ addNewPhysician Nothing ]
-
-            UpdateRecordType newRecord dropDownItem ->
-                if model.recordTypeId == dropDownItem.id then
-                    model ! []
-                else
-                    { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
-
-            SetFilter filterState ->
-                { model | filterFields = filterFields model.filterFields filterState } ! []
-
-            UpdateSpecialty newRecord str ->
-                updateAddNew { newRecord | specialty = str }
-
-            UpdateProvider newRecord str ->
-                updateAddNew { newRecord | provider = str }
-
-            UpdateTimeVisit newRecord str ->
-                updateAddNew { newRecord | timeVisit = str }
-
-            UpdateTimeAcc newRecord str ->
-                updateAddNew { newRecord | timeAcc = str }
-
-            UpdateFileName newRecord str ->
-                updateAddNew { newRecord | fileName = str }
-
-            UpdateComments newRecord str ->
-                updateAddNew { newRecord | comments = str }
-
-            UpdateFacility newRecord dropDownItem ->
-                updateAddNew { newRecord | facilityId = dropDownItem.id, facilityText = dropDownItem.name }
-
-            UpdateReportDate newRecord str ->
-                updateAddNew { newRecord | reportDate = str }
-
-            UpdateCallSid newRecord str ->
-                updateAddNew { newRecord | callSid = str }
-
-            UpdateRecordingSid newRecord str ->
-                updateAddNew { newRecord | recording = str }
-
-            UpdateDuration newRecord str ->
-                updateAddNew { newRecord | duration = defaultIntStr str }
-
-            UpdateRecordingDate newRecord str ->
-                updateAddNew { newRecord | recordingDate = str }
-
-            UpdateUser newRecord dropDownItem ->
-                updateAddNew { newRecord | userId = dropDownItem.id, userText = dropDownItem.name }
-
-            UpdateTask newRecord dropDownItem ->
-                updateAddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name }
-
-            -- Hospitilizations
-            UpdateFacility2 newRecord dropDownItem ->
-                updateAddNew { newRecord | facilityId2 = dropDownItem.id, facilityText2 = dropDownItem.name }
-
-            UpdateDateOfAdmission newRecord str ->
-                updateAddNew { newRecord | dateOfAdmission = str }
-
-            UpdateDateOfDischarge newRecord str ->
-                updateAddNew { newRecord | dateOfDischarge = str }
-
-            UpdateHospitalServiceType newRecord dropDownItem ->
-                updateAddNew { newRecord | hospitalServiceTypeId = dropDownItem.id, hospitalServiceTypeText = dropDownItem.name }
-
-            UpdateDischargeRecommendations newRecord str ->
-                updateAddNew { newRecord | dischargeRecommendations = str }
-
-            UpdateDischargePhysician newRecord dropDownItem ->
-                updateAddNew { newRecord | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }
-
-
-bob : Model -> Html Msg
-bob model =
-    div [ class "e-grid e-js e-waitingpopup" ]
-        [ Table.view (config SetFilter model.recordTypeId (updateTaskId model)) model.tableState (filteredRecords model) ]
+        SetFilter filterState ->
+            { model | filterFields = filterFields model.filterFields filterState } ! []
 
 
 view : Model -> Html Msg
 view model =
     case model.state of
         Grid ->
-            div []
-                [ button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
-                , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config SetFilter model.recordTypeId (updateTaskId model)) model.tableState (filteredRecords model) ]
-                ]
-
-        AddNew newRecord ->
-            let
-                inputControls =
-                    makeControls (formInputs newRecord)
-
-                errors =
-                    getValidationErrors (formInputs newRecord)
-
-                validationErrorsDiv =
-                    if newRecord.showValidationErrors == True && List.length errors > 0 then
-                        div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
-                    else
-                        div [] []
-
-                saveBtnClass =
-                    class "btn btn-sm btn-success margin-left-5 pull-right"
-
-                footerControls =
-                    [ div [ class "form-group" ]
-                        [ div [ class fullWidth ]
-                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
-                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
-                            , button [ type_ "button", class "btn btn-sm btn-default pull-right" ] [ text "Billing" ]
-                            ]
-                        ]
-                    ]
-            in
-                div
-                    [ class "form-horizontal" ]
-                    (validationErrorsDiv :: inputControls ++ footerControls)
+            div [ class "e-grid e-js e-waitingpopup" ]
+                [ Table.view (config SetFilter model.recordTypeId (updateTaskId model)) model.tableState (filteredRecords model) ]
 
         Limbo ->
             div [] []
 
         Error errMessage ->
             div [] [ text errMessage ]
-
-
-formInputs : NewRecord -> List ( String, RequiredType, InputControlType Msg )
-formInputs newRecord =
-    let
-        recordType =
-            getRecordType newRecord.recordTypeId
-
-        defaultFields =
-            [ ( "Date of Visit", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" (UpdateTimeVisit newRecord) )
-            , ( "Doctor of Visit", Optional, TextInput newRecord.provider (UpdateProvider newRecord) )
-            , ( "Specialty of Visit", Optional, TextInput newRecord.specialty (UpdateSpecialty newRecord) )
-            , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
-            , ( "Upload Record File", Required, FileInput newRecord.fileName )
-            ]
-
-        firstColumns =
-            [ ( "Facility", Required, DropInput newRecord.facilityId "FacilityId" )
-            , ( "Category", Required, DropInput newRecord.recordTypeId "CategoryId" )
-            ]
-
-        lastColumns =
-            case recordType of
-                PrimaryCare ->
-                    defaultFields
-
-                Specialty ->
-                    defaultFields
-
-                Labs ->
-                    [ ( "Date/Time of Labs Collected", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" (UpdateTimeVisit newRecord) )
-                    , ( "Date/Time of Labs Accessioned", Required, DateInput (defaultString newRecord.timeAcc) "TimeAccId" (UpdateTimeAcc newRecord) )
-                    , ( "Name of Lab", Optional, TextInput newRecord.title (UpdateTitle newRecord) )
-                    , ( "Provider of Lab", Optional, TextInput newRecord.provider (UpdateProvider newRecord) )
-                    , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
-                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
-                    ]
-
-                Radiology ->
-                    [ ( "Date/Time of Study was done", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" (UpdateTimeVisit newRecord) )
-                    , ( "Date/Time of Study Accessioned", Required, DateInput (defaultString newRecord.timeAcc) "TimeAccId" (UpdateTimeAcc newRecord) )
-                    , ( "Name of Study", Optional, TextInput newRecord.title (UpdateTitle newRecord) )
-                    , ( "Provider of Study", Optional, TextInput newRecord.provider (UpdateProvider newRecord) )
-                    , ( "Comments", Required, TextInput newRecord.comments (UpdateComments newRecord) )
-                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
-                    ]
-
-                Misc ->
-                    defaultFields
-
-                Legal ->
-                    [ ( "Title", Optional, TextInput newRecord.title (UpdateTitle newRecord) )
-                    , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
-                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
-                    ]
-
-                Hospitalizations ->
-                    case newRecord.hospitalizationId of
-                        Just t ->
-                            []
-
-                        Nothing ->
-                            [ ( "Facility", Required, DropInputWithButton newRecord.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
-                            , ( "Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId" (UpdateDateOfAdmission newRecord) )
-                            , ( "Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId" (UpdateDateOfDischarge newRecord) )
-                            , ( "Hospital Service Type", Required, DropInput newRecord.hospitalServiceTypeId "HospitalServiceTypeId" )
-                            , ( "Discharge Recommendations", Required, TextInput newRecord.dischargeRecommendations (UpdateDischargeRecommendations newRecord) )
-                            , ( "Discharge Physician", Required, DropInputWithButton newRecord.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "Add New Physician" )
-                            , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
-                            , ( "Upload Record File", Required, FileInput newRecord.fileName )
-                            ]
-
-                CallRecordings ->
-                    [ ( "Call Sid", Required, TextInput newRecord.callSid (UpdateCallSid newRecord) )
-                    , ( "Recording Sid", Required, TextInput newRecord.recording (UpdateRecordingSid newRecord) )
-                    , ( "Duration", Required, NumrInput newRecord.duration (UpdateDuration newRecord) )
-                    , ( "Recording Date", Required, DateInput (defaultString newRecord.recordingDate) "RecordingDateId" (UpdateRecordingDate newRecord) )
-                    , ( "User", Required, DropInput newRecord.userId "UserId" )
-                    , ( "Task", Optional, DropInput newRecord.taskId "TaskId" )
-                    ]
-
-                PreviousHistories ->
-                    [ ( "Report Date", Required, DateInput (defaultString newRecord.reportDate) "ReportDateId" (UpdateReportDate newRecord) )
-                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
-                    ]
-
-                Enrollment ->
-                    [ ( "Title", Optional, TextInput newRecord.title (UpdateTitle newRecord) )
-                    , ( "Comments", Required, AreaInput newRecord.comments (UpdateComments newRecord) )
-                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
-                    ]
-    in
-        List.append firstColumns lastColumns
 
 
 getColumns : Maybe Int -> Maybe Int -> List (Column RecordRow Msg)

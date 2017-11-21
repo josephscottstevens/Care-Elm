@@ -52,57 +52,11 @@ decodeRecordRow =
         |> hardcoded False
 
 
-encodeRecord : NewRecord -> Encode.Value
-encodeRecord newRecord =
-    Encode.object
-        [ ( "RecordId", Encode.int <| newRecord.recordId )
-        , ( "PatientId", Encode.int <| newRecord.patientId )
-        , ( "Title", Encode.string <| newRecord.title )
-        , ( "RecordTypeId", maybeVal Encode.int <| newRecord.recordTypeId )
-        , ( "Specialty", Encode.string <| newRecord.specialty )
-        , ( "Provider", Encode.string <| newRecord.provider )
-        , ( "TimeVisit", maybeVal Encode.string <| maybeToDateString <| newRecord.timeVisit )
-        , ( "TimeAcc", maybeVal Encode.string <| maybeToDateString <| newRecord.timeAcc )
-        , ( "RecordFile", Encode.string <| newRecord.fileName )
-        , ( "Comments", Encode.string <| newRecord.comments )
-        , ( "FacilityId", maybeVal Encode.int <| newRecord.facilityId )
-        , ( "ReportDate", maybeVal Encode.string <| maybeToDateString <| newRecord.reportDate )
-        , ( "CallSid", Encode.string <| newRecord.callSid )
-        , ( "RecordingSid", Encode.string <| newRecord.recording )
-        , ( "RecordingDuration", Encode.int <| newRecord.duration )
-        , ( "RecordingDate", maybeVal Encode.string <| maybeToDateString <| newRecord.recordingDate )
-        , ( "StaffId", maybeVal Encode.int <| newRecord.userId )
-        , ( "TaskId", maybeVal Encode.int <| newRecord.taskId )
-
-        -- Hospitilizations
-        , ( "HospitalizationId", maybeVal Encode.int <| newRecord.hospitalizationId )
-        , ( "FacilityId2", maybeVal Encode.int <| newRecord.facilityId2 )
-        , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfAdmission )
-        , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfDischarge )
-        , ( "HospitalServiceTypeId", maybeVal Encode.int <| newRecord.hospitalServiceTypeId )
-        , ( "DischargeRecommendations", Encode.string <| newRecord.dischargeRecommendations )
-        , ( "DischargePhysicianId", maybeVal Encode.int <| newRecord.dischargePhysicianId )
-        ]
-
-
-decodeDropDownItem : Decoder DropDownItem
-decodeDropDownItem =
-    decode DropDownItem
-        |> required "Id" (maybe Decode.int)
-        |> required "Name" Decode.string
-
-
 decodeModel : Decoder WebResponse
 decodeModel =
     decode WebResponse
         |> required "facilityId" (maybe Decode.int)
         |> required "list" (Decode.list decodeRecordRow)
-        |> required "facilityDropdown" (Decode.list decodeDropDownItem)
-        |> required "recordTypeDropdown" (Decode.list decodeDropDownItem)
-        |> required "userDropDown" (Decode.list decodeDropDownItem)
-        |> required "taskDropDown" (Decode.list decodeDropDownItem)
-        |> required "hospitilizationServiceTypeDropdown" (Decode.list decodeDropDownItem)
-        |> required "hospitalizationDischargePhysicianDropdown" (Decode.list decodeDropDownItem)
 
 
 request : Int -> Maybe Int -> Http.Request WebResponse
@@ -120,19 +74,6 @@ deleteRequest rowId =
     Http.send DeleteCompleted <| Http.getString ("/People/DeleteRecord?recordId=" ++ toString rowId)
 
 
-saveFormRequest : NewRecord -> Http.Request String
-saveFormRequest record =
-    Http.request
-        { body = encodeRecord record |> Http.jsonBody
-        , expect = Http.expectString
-        , headers = []
-        , method = "POST"
-        , timeout = Nothing
-        , url = "/People/AddNewRecord"
-        , withCredentials = False
-        }
-
-
 getResponseError : String -> Maybe String
 getResponseError str =
     case decodeString (field "Error" Decode.int) str of
@@ -146,11 +87,6 @@ getResponseError str =
 
         Err _ ->
             Nothing
-
-
-saveForm : NewRecord -> Cmd Msg
-saveForm newRecord =
-    Http.send SaveCompleted (saveFormRequest newRecord)
 
 
 
@@ -210,32 +146,12 @@ flipDropDownOpen records recordId =
             )
 
 
-getNewRecord : Model -> NewRecord
-getNewRecord model =
-    { emptyNewRecord
-        | patientId = model.patientId
-        , recordTypeId = model.recordTypeId
-        , facilityId = model.facilityId
-    }
-
-
-getSyncFusionMessage : Model -> Bool -> SyncFusionMessage
-getSyncFusionMessage model setFocus =
-    SyncFusionMessage model.facilities model.recordTypes model.users model.tasks model.hospitilizationServiceTypes model.hospitalizationDischargePhysicians model.facilityId model.recordTypeId setFocus
-
-
 getLoadedState : Model -> WebResponse -> Model
 getLoadedState model t =
     { model
         | state = Grid
         , facilityId = t.facilityId
         , records = t.records
-        , facilities = t.facilities
-        , recordTypes = t.recordTypes
-        , tasks = t.tasks
-        , users = t.users
-        , hospitilizationServiceTypes = t.hospitilizationServiceTypes
-        , hospitalizationDischargePhysicians = t.hospitalizationDischargePhysicians
     }
 
 

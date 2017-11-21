@@ -123,3 +123,16 @@ getId recordType =
 
         Misc ->
             Just 5
+
+
+type alias AddEditDataSource =
+    { facilityId : Maybe Int
+    , recordTypeId : Maybe Int
+    , facilities : List DropDownItem
+    , recordTypes : List DropDownItem
+    , users : List DropDownItem
+    , tasks : List DropDownItem
+    , hospitilizationServiceTypes : List DropDownItem
+    , hospitalizationDischargePhysicians : List DropDownItem
+    , setFocus : Bool
+    }

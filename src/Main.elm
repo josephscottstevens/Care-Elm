@@ -4,6 +4,7 @@ import Model exposing (..)
 import Html exposing (div)
 import Billing.Main as Billing
 import Records.Main as Records
+import RecordAddNew.Main as RecordAddNew
 import Utils.CommonTypes exposing (..)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, id, type_, value)
@@ -13,7 +14,10 @@ import Table exposing (..)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map RecordsMsg (Records.subscriptions model.recordsState)
+    Sub.batch
+        [ Sub.map RecordsMsg (Records.subscriptions model.recordsState)
+        , Sub.map RecordAddNewMsg (RecordAddNew.subscriptions model.recordAddNewState)
+        ]
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -55,6 +59,12 @@ view model =
                 , Html.map RecordsMsg (Records.view model.recordsState)
                 ]
 
+        RecordAddNewPage ->
+            div []
+                [ button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
+                , Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState)
+                ]
+
 
 update : Msg -> Model -> ( Model, Cmd Model.Msg )
 update msg model =
@@ -65,10 +75,17 @@ update msg model =
         -- [ Cmd.map BillingMsg billingMsg ]
         RecordsMsg recordsMsg ->
             let
-                ( newRecordModel, pageCmd ) =
+                ( newModel, pageCmd ) =
                     Records.update recordsMsg model.recordsState
             in
-                { model | recordsState = newRecordModel } ! [ Cmd.map RecordsMsg pageCmd ]
+                { model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ]
+
+        RecordAddNewMsg recordAddNewMsg ->
+            let
+                ( newModel, pageCmd ) =
+                    RecordAddNew.update recordAddNewMsg model.recordAddNewState
+            in
+                { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
 
         AddNewStart ->
             { model | page = NoPage } ! []
