@@ -109,14 +109,6 @@ emptyModel flags =
     , taskId = Nothing
     , taskText = ""
 
-    -- dropdowns
-    -- , addEditDataSource = Nothing
-    -- , facilities = []
-    -- , recordTypes = []
-    -- , tasks = []
-    -- , users = []
-    -- , hospitilizationServiceTypes = []
-    -- , hospitalizationDischargePhysicians = []
     -- Hospitilizations
     , hospitalizationId = Nothing
     , facilityId2 = Nothing
