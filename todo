@@ -13,6 +13,8 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
+UpdatePage needs to factor in the page name 
+rename recordType to recordTypeId
 am I showing loading while loading dropdowns (kinda defeats the purpose) 
 re-add the focus boolean
 
