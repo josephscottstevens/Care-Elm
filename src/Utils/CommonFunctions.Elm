@@ -16,7 +16,7 @@ port displaySuccessMessage : String -> Cmd msg
 port displayErrorMessage : String -> Cmd msg
 
 
-port changePage : String -> Cmd msg
+port changePage : ( String, Maybe Int ) -> Cmd msg
 
 
 isAlpha : Char -> Bool

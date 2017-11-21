@@ -24,6 +24,7 @@ decodeModel recordTypeId =
         |> required "hospitilizationServiceTypeDropdown" (Decode.list decodeDropDownItem)
         |> required "hospitalizationDischargePhysicianDropdown" (Decode.list decodeDropDownItem)
         |> hardcoded recordTypeId
+        |> hardcoded False
 
 
 request : Maybe Int -> Int -> Http.Request AddEditDataSource

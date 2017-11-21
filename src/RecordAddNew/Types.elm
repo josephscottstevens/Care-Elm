@@ -7,7 +7,7 @@ import Http
 type Msg
     = AddNewFacility
     | AddNewPhysician
-    | ResetAddNew String
+    | ResetUpdateComplete (Maybe Int)
     | Save
     | SaveCompleted (Result Http.Error String)
     | Cancel

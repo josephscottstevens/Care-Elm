@@ -25,7 +25,7 @@ port initSyncfusionControls : AddEditDataSource -> Cmd msg
 port setUnsavedChanges : Bool -> Cmd msg
 
 
-port resetUpdateComplete : (String -> msg) -> Sub msg
+port resetUpdateComplete : (Maybe Int -> msg) -> Sub msg
 
 
 port updateFacility : (DropDownItem -> msg) -> Sub msg
@@ -91,7 +91,7 @@ subscriptions =
         , updateRecordingDate UpdateRecordingDate
         , updateUser UpdateUser
         , updateTask UpdateTask
-        , resetUpdateComplete ResetAddNew
+        , resetUpdateComplete ResetUpdateComplete
 
         -- Hospitilizations
         , updateFacility2 UpdateFacility2
@@ -154,16 +154,23 @@ update msg model =
                         model ! [ displayErrorMessage t ]
 
                     Nothing ->
-                        model ! [ displaySuccessMessage "Save completed successfully!", changePage "Records" ]
+                        model ! [ displaySuccessMessage "Save completed successfully!", changePage ( "Records", Nothing ) ]
 
             SaveCompleted (Err httpError) ->
                 { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
 
             Cancel ->
-                model ! [ changePage "Records", setUnsavedChanges False ]
+                model ! [ changePage ( "Records", Nothing ), setUnsavedChanges False ]
 
-            ResetAddNew _ ->
-                model ! [ changePage "RecordAddEdit" ]
+            ResetUpdateComplete dropDownId ->
+                Debug.crash ""
+
+            -- { model | state = AddEdit } ! [ changePage ( "RecordAddEdit", dropDownId ) ]
+            UpdateRecordType dropDownItem ->
+                if model.recordTypeId == dropDownItem.id then
+                    model ! []
+                else
+                    { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ changePage ( "RecordAddEdit", dropDownItem.id ), setLoadingStatus True ]
 
             -- { model | state = AddEdit (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model True) ]
             UpdateTitle str ->
@@ -229,12 +236,6 @@ update msg model =
 
             UpdateDischargePhysician dropDownItem ->
                 updateAddNew { model | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }
-
-            UpdateRecordType dropDownItem ->
-                if model.recordTypeId == dropDownItem.id then
-                    model ! []
-                else
-                    { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
 
 
 updateAddNewState : AddEditDataSource -> Flags -> Model

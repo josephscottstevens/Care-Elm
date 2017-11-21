@@ -28,7 +28,7 @@ type Msg
     | RecordAddNewMsg RecordAddNew.Msg
     | AddNewStart AddEditDataSource
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
-    | UpdatePage String
+    | UpdatePage ( String, Maybe Int )
 
 
 emptyModel : Flags -> Model

@@ -129,15 +129,24 @@ type alias AddEditDataSource =
     , hospitilizationServiceTypes : List DropDownItem
     , hospitalizationDischargePhysicians : List DropDownItem
     , recordTypeId : Maybe Int
+    , setFocus : Bool
     }
 
 
 type Page
     = Billing
     | Records
-    | RecordAddNew AddEditDataSource
+    | RecordAddNew (Maybe Int)
 
 
-pageToString : Page
-pageToString =
-    Records
+pageToString : Page -> ( String, Maybe Int )
+pageToString page =
+    case page of
+        Billing ->
+            ( "Billing", Nothing )
+
+        Records ->
+            ( "Records", Nothing )
+
+        RecordAddNew t ->
+            ( "RecordAddNew", t )

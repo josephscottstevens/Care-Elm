@@ -14,7 +14,7 @@ import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 
 
-port updatePage : (String -> msg) -> Sub msg
+port updatePage : (( String, Maybe Int ) -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
@@ -31,14 +31,11 @@ init flags =
     let
         model =
             emptyModel flags
-
-        recordModel =
-            RecordTypes.emptyModel flags
     in
         if flags.pageFlag == "billing" then
             { model | state = BillingPage BillingTypes.emptyModel } ! []
         else if flags.pageFlag == "records" then
-            { model | state = RecordsPage recordModel }
+            { model | state = RecordsPage (RecordTypes.emptyModel flags) }
                 ! [ Cmd.map RecordsMsg (Records.init flags)
                   , getDropDowns flags.recordType flags.patientId AddEditDataSourceLoaded
                   ]
@@ -118,15 +115,22 @@ update msg model =
         ( AddEditDataSourceLoaded (Err httpError), _ ) ->
             { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
 
-        ( UpdatePage pageName, _ ) ->
+        ( UpdatePage ( pageName, dropId ), _ ) ->
             case pageName of
                 "Records" ->
-                    { model | state = NoPage } ! [ Cmd.map RecordsMsg (Records.init model.flags) ]
+                    { model | state = RecordsPage (RecordTypes.emptyModel model.flags) } ! [ Cmd.map RecordsMsg (Records.init model.flags) ]
 
                 "RecordAddEdit" ->
                     case model.addEditDataSource of
-                        Just addEditDataSource ->
-                            { model | state = RecordAddNewPage (RecordAddNewTypes.emptyModel model.flags) } ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource) ]
+                        Just t ->
+                            if dropId == t.recordTypeId then
+                                model ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init { t | recordTypeId = dropId, setFocus = True }), setLoadingStatus False ]
+                            else
+                                { model
+                                    | state = RecordAddNewPage (RecordAddNewTypes.emptyModel model.flags)
+                                    , addEditDataSource = Just { t | recordTypeId = dropId }
+                                }
+                                    ! []
 
                         Nothing ->
                             model ! []
