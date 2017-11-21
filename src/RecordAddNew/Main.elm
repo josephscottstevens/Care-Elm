@@ -249,9 +249,13 @@ update msg model =
                     { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
 
 
-updateAddNewState : Model -> AddEditDataSource -> Model
-updateAddNewState model addEditDataSource =
-    { model | facilityId = addEditDataSource.facilityId }
+updateAddNewState : AddEditDataSource -> Int -> Maybe Int -> Model
+updateAddNewState addEditDataSource patientId recordTypeId =
+    let
+        model =
+            emptyModel patientId recordTypeId
+    in
+        { model | facilityId = addEditDataSource.facilityId }
 
 
 formInputs : Model -> List ( String, RequiredType, InputControlType Msg )

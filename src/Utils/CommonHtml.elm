@@ -80,8 +80,13 @@ commonValidation ( labelText, _, controlType ) =
         AreaInput displayValue _ ->
             requiredStr labelText displayValue
 
-        DropInput _ _ ->
-            Just (labelText ++ " is required")
+        DropInput displayValue _ ->
+            case displayValue of
+                Just _ ->
+                    Nothing
+
+                Nothing ->
+                    Just (labelText ++ " is required")
 
         DateInput displayValue _ _ ->
             requiredStr labelText displayValue

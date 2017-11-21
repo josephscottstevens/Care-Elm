@@ -23,11 +23,11 @@ subscriptions model =
         RecordsPage recordState ->
             Sub.map RecordsMsg (Records.subscriptions recordState)
 
+        RecordAddNewPage recordAddNewState ->
+            Sub.map RecordAddNewMsg (RecordAddNew.subscriptions recordAddNewState)
+
         _ ->
-            Sub.batch
-                [ Sub.map RecordAddNewMsg (RecordAddNew.subscriptions model.recordAddNewState)
-                , updatePage UpdatePage
-                ]
+            updatePage UpdatePage
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -80,9 +80,9 @@ view model =
                 , Html.map RecordsMsg (Records.view recordModel)
                 ]
 
-        RecordAddNewPage ->
+        RecordAddNewPage recordAddNewModel ->
             div [ class "form-horizontal" ]
-                [ Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState) ]
+                [ Html.map RecordAddNewMsg (RecordAddNew.view recordAddNewModel) ]
 
         Error str ->
             div [] [ text str ]
@@ -90,42 +90,40 @@ view model =
 
 update : Msg -> Model -> ( Model, Cmd Model.Msg )
 update msg model =
-    case msg of
-        BillingMsg billingMsg billingModel ->
-            { model | state = BillingPage billingModel } ! []
+    case ( msg, model.state ) of
+        ( BillingMsg _, BillingPage t ) ->
+            model ! []
 
-        RecordsMsg recordsMsg ->
-            case model.state of
-                RecordsPage recordState ->
-                    let
-                        ( newModel, pageCmd ) =
-                            Records.update recordsMsg recordState
-                    in
-                        { model | state = RecordsPage recordState } ! [ Cmd.map RecordsMsg pageCmd ]
-
-                _ ->
-                    model ! []
-
-        RecordAddNewMsg recordAddNewMsg ->
+        ( RecordsMsg recordsMsg, RecordsPage recordModel ) ->
             let
                 ( newModel, pageCmd ) =
-                    RecordAddNew.update recordAddNewMsg model.recordAddNewState
+                    Records.update recordsMsg recordModel
             in
-                { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
+                { model | state = RecordsPage newModel } ! [ Cmd.map RecordsMsg pageCmd ]
 
-        AddNewStart addEditDataSource ->
+        ( RecordAddNewMsg recordAddNewMsg, RecordAddNewPage recordAddNewModel ) ->
+            let
+                ( newModel, pageCmd ) =
+                    RecordAddNew.update recordAddNewMsg recordAddNewModel
+            in
+                { model | state = RecordAddNewPage newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
+
+        ( AddNewStart addEditDataSource, _ ) ->
             let
                 newState =
-                    RecordAddNew.updateAddNewState model.recordAddNewState addEditDataSource
+                    RecordAddNew.updateAddNewState addEditDataSource model.patientId model.recordTypeId
             in
-                { model | state = RecordAddNewPage, recordAddNewState = newState }
+                { model | state = RecordAddNewPage newState }
                     ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource) ]
 
-        AddEditDataSourceLoaded (Ok t) ->
+        ( AddEditDataSourceLoaded (Ok t), _ ) ->
             { model | addEditDataSource = Just t } ! []
 
-        AddEditDataSourceLoaded (Err httpError) ->
+        ( AddEditDataSourceLoaded (Err httpError), _ ) ->
             { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
 
-        UpdatePage pageName ->
+        ( UpdatePage pageName, _ ) ->
             { model | state = NoPage } ! [ Cmd.map RecordsMsg (Records.init model.patientId model.recordTypeId) ]
+
+        ( _, _ ) ->
+            model ! []

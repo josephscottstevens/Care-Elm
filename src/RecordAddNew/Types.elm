@@ -91,13 +91,13 @@ type alias Model =
     }
 
 
-emptyModel : Flags -> Model
-emptyModel flags =
+emptyModel : Int -> Maybe Int -> Model
+emptyModel patientId recordType =
     { state = AddEdit
     , recordId = 0
     , title = ""
-    , patientId = flags.patientId
-    , recordTypeId = flags.recordType
+    , patientId = patientId
+    , recordTypeId = recordType
     , recordTypeText = ""
     , specialty = ""
     , provider = ""
