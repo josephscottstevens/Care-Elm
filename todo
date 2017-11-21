@@ -13,12 +13,9 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-How do I stop keeping the state for all my views? I don't even want to have that
-	Ideally, I don't have recordState, I just when, in the case of RecordPage, pass that along
-	Trick is, how do I grab it again? Err.. pass it?
-
 make labelText \ displayValue consistant.. .they got mucked together
 UpdatePage needs to factor in the page name 
+get reset add new working again 
 rename recordType to recordTypeId
 am I showing loading while loading dropdowns (kinda defeats the purpose) 
 re-add the focus boolean

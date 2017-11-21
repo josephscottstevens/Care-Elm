@@ -123,7 +123,12 @@ update msg model =
             { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
 
         ( UpdatePage pageName, _ ) ->
-            { model | state = NoPage } ! [ Cmd.map RecordsMsg (Records.init model.patientId model.recordTypeId) ]
+            case pageName of
+                "Records" ->
+                    { model | state = NoPage } ! [ Cmd.map RecordsMsg (Records.init model.patientId model.recordTypeId) ]
+
+                _ ->
+                    model ! []
 
         ( _, _ ) ->
             model ! []

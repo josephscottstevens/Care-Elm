@@ -5,10 +5,9 @@ import Http
 
 
 type Msg
-    = --
-      -- | ResetAddNew String
-      AddNewFacility
+    = AddNewFacility
     | AddNewPhysician
+    | ResetAddNew String
     | Save
     | SaveCompleted (Result Http.Error String)
     | Cancel
@@ -69,14 +68,6 @@ type alias Model =
     , taskId : Maybe Int
     , taskText : String
 
-    -- dropdowns
-    -- , addEditDataSource : Maybe AddEditDataSource
-    -- , facilities : List DropDownItem
-    -- , recordTypes : List DropDownItem
-    -- , tasks : List DropDownItem
-    -- , users : List DropDownItem
-    -- , hospitilizationServiceTypes : List DropDownItem
-    -- , hospitalizationDischargePhysicians : List DropDownItem
     -- Hospitilizations
     , hospitalizationId : Maybe Int
     , facilityId2 : Maybe Int

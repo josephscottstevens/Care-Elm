@@ -76,13 +76,6 @@ port updateHospitalServiceType : (DropDownItem -> msg) -> Sub msg
 port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
 
 
-
--- my init function
---  AddNewStart ->
---             { model | state = AddNew (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model False) ]
--- Okay... so before I can do this, I need dropdowns, and some fields, these aren't really apart of my Model, these are extra fields that should be loaded before I start
-
-
 init : AddEditDataSource -> Cmd Msg
 init addEditDataSource =
     initSyncfusionControls addEditDataSource
@@ -100,6 +93,7 @@ subscriptions model =
         , updateRecordingDate UpdateRecordingDate
         , updateUser UpdateUser
         , updateTask UpdateTask
+        , resetUpdateComplete ResetAddNew
 
         -- Hospitilizations
         , updateFacility2 UpdateFacility2
@@ -108,10 +102,6 @@ subscriptions model =
         , updateHospitalServiceType UpdateHospitalServiceType
         , updateDischargePhysician UpdateDischargePhysician
         ]
-
-
-
---        , resetUpdateComplete ResetAddNew
 
 
 view : Model -> Html Msg
@@ -176,8 +166,10 @@ update msg model =
 
             -- Cancel ->
             --     { model | state = Grid } ! [ setUnsavedChanges False ]
-            -- ResetAddNew _ ->
-            --     { model | state = AddEdit (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model True) ]
+            ResetAddNew _ ->
+                model ! [ changePage "Records" ]
+
+            -- { model | state = AddEdit (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model True) ]
             UpdateTitle str ->
                 updateAddNew { model | title = str }
 
