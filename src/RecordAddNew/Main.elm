@@ -104,29 +104,37 @@ subscriptions =
 
 view : Model -> Html Msg
 view model =
-    let
-        errors =
-            getValidationErrors (formInputs model)
+    case model.state of
+        AddEdit ->
+            let
+                errors =
+                    getValidationErrors (formInputs model)
 
-        validationErrorsDiv =
-            if model.showValidationErrors == True && List.length errors > 0 then
-                div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
-            else
-                div [] []
+                validationErrorsDiv =
+                    if model.showValidationErrors == True && List.length errors > 0 then
+                        div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
+                    else
+                        div [] []
 
-        saveBtnClass =
-            class "btn btn-sm btn-success margin-left-5 pull-right"
-    in
-        div []
-            [ validationErrorsDiv
-            , makeControls (formInputs model)
-            , div [ class "form-group" ]
-                [ div [ class fullWidth ]
-                    [ button [ type_ "button", id "Save", value "AddNewRecord", onClick Save, saveBtnClass ] [ text "Save" ]
-                    , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                saveBtnClass =
+                    class "btn btn-sm btn-success margin-left-5 pull-right"
+            in
+                div []
+                    [ validationErrorsDiv
+                    , makeControls (formInputs model)
+                    , div [ class "form-group" ]
+                        [ div [ class fullWidth ]
+                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick Save, saveBtnClass ] [ text "Save" ]
+                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                            ]
+                        ]
                     ]
-                ]
-            ]
+
+        Limbo ->
+            div [] []
+
+        Error str ->
+            div [] [ text str ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -163,14 +171,13 @@ update msg model =
                 model ! [ changePage ( "Records", Nothing ), setUnsavedChanges False ]
 
             ResetUpdateComplete dropDownId ->
-                Debug.crash ""
+                { model | state = AddEdit } ! [ changePage ( "RecordAddEdit", dropDownId ) ]
 
-            -- { model | state = AddEdit } ! [ changePage ( "RecordAddEdit", dropDownId ) ]
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then
                     model ! []
                 else
-                    { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ changePage ( "RecordAddEdit", dropDownItem.id ), setLoadingStatus True ]
+                    { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
 
             -- { model | state = AddEdit (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model True) ]
             UpdateTitle str ->

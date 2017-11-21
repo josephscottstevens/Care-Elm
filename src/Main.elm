@@ -124,13 +124,12 @@ update msg model =
                     case model.addEditDataSource of
                         Just t ->
                             if dropId == t.recordTypeId then
-                                model ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init { t | recordTypeId = dropId, setFocus = True }), setLoadingStatus False ]
+                                model ! [ setLoadingStatus False ]
                             else
                                 { model
-                                    | state = RecordAddNewPage (RecordAddNewTypes.emptyModel model.flags)
-                                    , addEditDataSource = Just { t | recordTypeId = dropId }
+                                    | addEditDataSource = Just { t | recordTypeId = dropId }
                                 }
-                                    ! []
+                                    ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init { t | recordTypeId = dropId, setFocus = True }) ]
 
                         Nothing ->
                             model ! []
