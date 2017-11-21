@@ -27,9 +27,6 @@ port displaySuccessMessage : String -> Cmd msg
 port displayErrorMessage : String -> Cmd msg
 
 
-port setLoadingStatus : Bool -> Cmd msg
-
-
 port dropDownToggle : (Int -> msg) -> Sub msg
 
 

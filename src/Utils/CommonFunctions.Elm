@@ -1,9 +1,12 @@
-module Utils.CommonFunctions exposing (..)
+port module Utils.CommonFunctions exposing (..)
 
 import Char exposing (isLower, isUpper)
 import Date
 import Date.Extra
 import Json.Encode as Encode
+
+
+port setLoadingStatus : Bool -> Cmd msg
 
 
 isAlpha : Char -> Bool

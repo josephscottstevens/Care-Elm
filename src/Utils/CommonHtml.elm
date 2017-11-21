@@ -48,9 +48,9 @@ type InputControlType msg
     | FileInput String
 
 
-makeControls : List ( String, RequiredType, InputControlType msg ) -> List (Html msg)
+makeControls : List ( String, RequiredType, InputControlType msg ) -> Html msg
 makeControls controls =
-    List.map common controls
+    div [] (List.map common controls)
 
 
 isRequired : ( String, RequiredType, InputControlType msg ) -> Bool

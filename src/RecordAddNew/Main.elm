@@ -24,9 +24,6 @@ port addNewPhysician : Maybe String -> Cmd msg
 port initSyncfusionControls : AddEditDataSource -> Cmd msg
 
 
-port setLoadingStatus : Bool -> Cmd msg
-
-
 port setUnsavedChanges : Bool -> Cmd msg
 
 
@@ -118,9 +115,6 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     let
-        inputControls =
-            makeControls (formInputs model)
-
         errors =
             getValidationErrors (formInputs model)
 
@@ -134,17 +128,19 @@ view model =
             class "btn btn-sm btn-success margin-left-5 pull-right"
 
         footerControls =
-            [ div [ class "form-group" ]
+            div [ class "form-group" ]
                 [ div [ class fullWidth ]
                     [--button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save model), saveBtnClass ] [ text "Save" ]
                      -- , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
                     ]
                 ]
-            ]
     in
         div
             [ class "form-horizontal" ]
-            (validationErrorsDiv :: inputControls ++ footerControls)
+            [ validationErrorsDiv
+            , makeControls (formInputs model)
+            , footerControls
+            ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
