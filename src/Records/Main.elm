@@ -2,12 +2,11 @@ port module Records.Main exposing (..)
 
 import Records.Functions exposing (..)
 import Records.Types exposing (..)
-import Html exposing (Html, text, div, button)
-import Html.Attributes exposing (class, id, type_, value)
-import Html.Events exposing (onClick, onFocus)
+import Html exposing (Html, text, div)
+import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 import Table exposing (..)
 import Utils.CommonGrid exposing (..)
-import Utils.CommonHtml exposing (..)
 import Utils.CommonTypes exposing (..)
 import Utils.CommonFunctions exposing (..)
 
@@ -27,8 +26,8 @@ port dropDownToggle : (Int -> msg) -> Sub msg
 port deleteConfirmed : (Int -> msg) -> Sub msg
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions : Sub Msg
+subscriptions =
     Sub.batch
         [ dropDownToggle DropDownToggle
         , deleteConfirmed DeleteConfirmed
@@ -182,7 +181,7 @@ rowDropDownColumn : Maybe Int -> Table.Column RecordRow Msg
 rowDropDownColumn recordTypeId =
     Table.veryCustomColumn
         { name = ""
-        , viewData = (\t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropDownItems recordTypeId t.id))
+        , viewData = \t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropDownItems recordTypeId t.id)
         , sorter = Table.unsortable
         }
 
@@ -194,7 +193,7 @@ config msg recordTypeId taskId =
         , toMsg = SetTableState
         , columns = getColumns recordTypeId taskId
         , customizations =
-            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = (standardThead msg) }
+            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = standardThead msg }
         }
 
 

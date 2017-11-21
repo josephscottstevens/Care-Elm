@@ -1,9 +1,8 @@
 module Utils.CommonHtml exposing (fullWidth, labelWidth, controlWidth, InputControlType(..), makeControls, getValidationErrors)
 
-import Html exposing (Html, text, div, button, input, span, th, li, ul, a, label, textarea)
-import Html.Attributes exposing (style, class, type_, id, value, tabindex, for, name, readonly)
-import Html.Events exposing (onInput, onClick, on)
-import Json.Decode as Json
+import Html exposing (Html, text, div, button, input, label, textarea)
+import Html.Attributes exposing (class, type_, id, value, for, name, readonly)
+import Html.Events exposing (onInput, onClick)
 import Utils.CommonFunctions exposing (..)
 import Utils.CommonTypes exposing (..)
 

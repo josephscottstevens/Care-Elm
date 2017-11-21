@@ -3,10 +3,8 @@ port module RecordAddNew.Main exposing (..)
 import RecordAddNew.Functions exposing (..)
 import RecordAddNew.Types exposing (..)
 import Html exposing (Html, text, div, button)
-import Html.Attributes exposing (class, id, type_, value)
-import Html.Events exposing (onClick, onFocus)
-import Table exposing (..)
-import Utils.CommonGrid exposing (..)
+import Html.Attributes exposing (class, id, value, type_)
+import Html.Events exposing (onClick)
 import Utils.CommonHtml exposing (..)
 import Utils.CommonTypes exposing (..)
 import Utils.CommonFunctions exposing (..)
@@ -81,8 +79,8 @@ init addEditDataSource =
     initSyncfusionControls addEditDataSource
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions : Sub Msg
+subscriptions =
     Sub.batch
         [ updateFacility UpdateFacility
         , updateCategory UpdateRecordType
@@ -162,12 +160,10 @@ update msg model =
                 { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
 
             Cancel ->
-                model ! []
+                model ! [ changePage "Records", setUnsavedChanges False ]
 
-            -- Cancel ->
-            --     { model | state = Grid } ! [ setUnsavedChanges False ]
             ResetAddNew _ ->
-                model ! [ changePage "Records" ]
+                model ! [ changePage "RecordAddEdit" ]
 
             -- { model | state = AddEdit (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model True) ]
             UpdateTitle str ->
@@ -306,7 +302,7 @@ formInputs newRecord =
 
                 Hospitalizations ->
                     case newRecord.hospitalizationId of
-                        Just t ->
+                        Just _ ->
                             []
 
                         Nothing ->

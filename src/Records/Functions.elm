@@ -1,7 +1,6 @@
 module Records.Functions exposing (..)
 
 import Json.Decode as Decode exposing (..)
-import Json.Encode as Encode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
 import Records.Types exposing (..)
