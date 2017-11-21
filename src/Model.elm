@@ -10,7 +10,7 @@ import Http
 type State
     = NoPage
     | BillingPage Billing.Model
-    | RecordsPage
+    | RecordsPage Records.Model
     | RecordAddNewPage
     | Error String
 
@@ -19,7 +19,6 @@ type alias Model =
     { state : State
     , patientId : Int
     , recordTypeId : Maybe Int
-    , recordsState : Records.Model
     , recordAddNewState : RecordAddNew.Model
     , addEditDataSource : Maybe AddEditDataSource
     }
@@ -39,7 +38,6 @@ emptyModel flags =
     { state = NoPage
     , patientId = flags.patientId
     , recordTypeId = flags.recordType
-    , recordsState = Records.emptyModel flags
     , recordAddNewState = RecordAddNew.emptyModel flags
     , addEditDataSource = Nothing
     }

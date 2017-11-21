@@ -5,6 +5,7 @@ import Html exposing (text, div, button)
 import Billing.Main as Billing
 import Billing.Types as BillingTypes
 import Records.Main as Records
+import Records.Types as RecordTypes
 import RecordAddNew.Main as RecordAddNew
 import Utils.CommonFunctions exposing (..)
 import Utils.CommonTypes exposing (..)
@@ -18,11 +19,15 @@ port updatePage : (String -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch
-        [ Sub.map RecordsMsg (Records.subscriptions model.recordsState)
-        , Sub.map RecordAddNewMsg (RecordAddNew.subscriptions model.recordAddNewState)
-        , updatePage UpdatePage
-        ]
+    case model.state of
+        RecordsPage recordState ->
+            Sub.map RecordsMsg (Records.subscriptions recordState)
+
+        _ ->
+            Sub.batch
+                [ Sub.map RecordAddNewMsg (RecordAddNew.subscriptions model.recordAddNewState)
+                , updatePage UpdatePage
+                ]
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -31,14 +36,14 @@ init flags =
         model =
             emptyModel flags
 
-        tt =
-            Records.init flags.patientId flags.recordType
+        recordModel =
+            (RecordTypes.emptyModel flags)
     in
         if flags.pageFlag == "billing" then
             { model | state = BillingPage BillingTypes.emptyModel } ! []
         else if flags.pageFlag == "records" then
-            { model | state = RecordsPage }
-                ! [ Cmd.map RecordsMsg tt
+            { model | state = RecordsPage recordModel }
+                ! [ Cmd.map RecordsMsg (Records.init flags.patientId flags.recordType)
                   , getDropDowns flags.recordType flags.patientId AddEditDataSourceLoaded
                   ]
         else
@@ -64,7 +69,7 @@ view model =
         BillingPage billingModel ->
             div [] []
 
-        RecordsPage ->
+        RecordsPage recordModel ->
             div []
                 [ case model.addEditDataSource of
                     Just t ->
@@ -72,7 +77,7 @@ view model =
 
                     Nothing ->
                         button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
-                , Html.map RecordsMsg (Records.view model.recordsState)
+                , Html.map RecordsMsg (Records.view recordModel)
                 ]
 
         RecordAddNewPage ->
@@ -90,11 +95,16 @@ update msg model =
             { model | state = BillingPage billingModel } ! []
 
         RecordsMsg recordsMsg ->
-            let
-                ( newModel, pageCmd ) =
-                    Records.update recordsMsg model.recordsState
-            in
-                { model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ]
+            case model.state of
+                RecordsPage recordState ->
+                    let
+                        ( newModel, pageCmd ) =
+                            Records.update recordsMsg recordState
+                    in
+                        { model | state = RecordsPage recordState } ! [ Cmd.map RecordsMsg pageCmd ]
+
+                _ ->
+                    model ! []
 
         RecordAddNewMsg recordAddNewMsg ->
             let
@@ -118,4 +128,4 @@ update msg model =
             { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
 
         UpdatePage pageName ->
-            { model | state = RecordsPage } ! [ Cmd.map RecordsMsg (Records.init model.patientId model.recordTypeId) ]
+            { model | state = NoPage } ! [ Cmd.map RecordsMsg (Records.init model.patientId model.recordTypeId) ]
