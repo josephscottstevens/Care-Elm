@@ -3,7 +3,7 @@ module Utils.GridPaging exposing (itemsPerPage, pagesPerBlock, getNewState, pagi
 import Html exposing (Html, Attribute, div, text, span, a)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
-import Billing.Model exposing (..)
+import Billing.Types exposing (..)
 
 
 itemsPerPage : Int

@@ -1,7 +1,7 @@
 module Billing.Main exposing (..)
 
 import Billing.Functions exposing (..)
-import Billing.Model exposing (..)
+import Billing.Types exposing (..)
 import Html exposing (Html, text, div, input, program, button, select, option, span, a)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)

@@ -1,4 +1,4 @@
-module Billing.Model exposing (..)
+module Billing.Types exposing (..)
 
 import Table
 import Http
@@ -51,8 +51,8 @@ type alias Model =
     }
 
 
-emptyModel : Flags -> Model
-emptyModel flags =
+emptyModel : Model
+emptyModel =
     { state = Initial
     , billingCcm = []
     , tableState = Table.initialSort "dob"

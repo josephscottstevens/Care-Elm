@@ -3,6 +3,7 @@ port module Main exposing (..)
 import Model exposing (..)
 import Html exposing (text, div, button)
 import Billing.Main as Billing
+import Billing.Types as BillingTypes
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
 import Utils.CommonFunctions exposing (..)
@@ -29,11 +30,17 @@ init flags =
     let
         model =
             emptyModel flags
+
+        tt =
+            Records.init flags.patientId flags.recordType
     in
         if flags.pageFlag == "billing" then
-            ( { model | state = BillingPage }, Cmd.map BillingMsg Billing.init )
+            { model | state = BillingPage BillingTypes.emptyModel } ! []
         else if flags.pageFlag == "records" then
-            { model | state = RecordsPage } ! [ Cmd.map RecordsMsg (Records.init flags.patientId flags.recordType), getDropDowns flags.recordType flags.patientId AddEditDataSourceLoaded ]
+            { model | state = RecordsPage }
+                ! [ Cmd.map RecordsMsg tt
+                  , getDropDowns flags.recordType flags.patientId AddEditDataSourceLoaded
+                  ]
         else
             ( model, Cmd.none )
 
@@ -54,7 +61,7 @@ view model =
         NoPage ->
             div [] []
 
-        BillingPage ->
+        BillingPage billingModel ->
             div [] []
 
         RecordsPage ->
@@ -79,8 +86,8 @@ view model =
 update : Msg -> Model -> ( Model, Cmd Model.Msg )
 update msg model =
     case msg of
-        BillingMsg billingMsg ->
-            model ! []
+        BillingMsg billingMsg billingModel ->
+            { model | state = BillingPage billingModel } ! []
 
         RecordsMsg recordsMsg ->
             let
@@ -101,7 +108,7 @@ update msg model =
                 newState =
                     RecordAddNew.updateAddNewState model.recordAddNewState addEditDataSource
             in
-                { model | state = RecordAddNewPage addEditDataSource, recordAddNewState = newState }
+                { model | state = RecordAddNewPage, recordAddNewState = newState }
                     ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource) ]
 
         AddEditDataSourceLoaded (Ok t) ->

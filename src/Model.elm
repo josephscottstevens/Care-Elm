@@ -1,6 +1,6 @@
 module Model exposing (..)
 
-import Billing.Model as Billing
+import Billing.Types as Billing
 import Records.Types as Records
 import RecordAddNew.Types as RecordAddNew
 import Utils.CommonTypes exposing (..)
@@ -9,7 +9,7 @@ import Http
 
 type State
     = NoPage
-    | BillingPage
+    | BillingPage Billing.Model
     | RecordsPage
     | RecordAddNewPage
     | Error String
@@ -19,7 +19,6 @@ type alias Model =
     { state : State
     , patientId : Int
     , recordTypeId : Maybe Int
-    , billingState : Billing.Model
     , recordsState : Records.Model
     , recordAddNewState : RecordAddNew.Model
     , addEditDataSource : Maybe AddEditDataSource
@@ -27,7 +26,7 @@ type alias Model =
 
 
 type Msg
-    = BillingMsg Billing.Msg
+    = BillingMsg Billing.Msg Billing.Model
     | RecordsMsg Records.Msg
     | RecordAddNewMsg RecordAddNew.Msg
     | AddNewStart AddEditDataSource
@@ -40,7 +39,6 @@ emptyModel flags =
     { state = NoPage
     , patientId = flags.patientId
     , recordTypeId = flags.recordType
-    , billingState = Billing.emptyModel flags
     , recordsState = Records.emptyModel flags
     , recordAddNewState = RecordAddNew.emptyModel flags
     , addEditDataSource = Nothing

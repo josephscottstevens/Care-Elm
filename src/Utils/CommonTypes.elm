@@ -136,3 +136,8 @@ type Page
     = Billing
     | Records
     | RecordAddNew AddEditDataSource
+
+
+pageToString : Page
+pageToString =
+    Records

@@ -3,7 +3,7 @@ module Billing.Functions exposing (getEmployment, newEmployers, updateEmployers)
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
-import Billing.Model exposing (BillingCcm, Model)
+import Billing.Types exposing (BillingCcm, Model)
 import Table
 
 
@@ -98,7 +98,7 @@ decodeBillingCcm =
 decodeModel : Decoder Model
 decodeModel =
     decode Model
-        |> hardcoded Billing.Model.Initial
+        |> hardcoded Billing.Types.Initial
         |> required "list" (list decodeBillingCcm)
         |> hardcoded (Table.initialSort "dob")
         |> hardcoded ""
