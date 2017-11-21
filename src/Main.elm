@@ -32,7 +32,7 @@ init flags =
         if flags.pageFlag == "billing" then
             ( { model | state = BillingPage }, Cmd.map BillingMsg Billing.init )
         else if flags.pageFlag == "records" then
-            { model | state = RecordsPage } ! [ Cmd.map RecordsMsg (Records.init flags.patientId flags.recordType), getDropDowns flags.patientId AddEditDataSourceLoaded ]
+            { model | state = RecordsPage } ! [ Cmd.map RecordsMsg (Records.init flags.patientId flags.recordType), getDropDowns flags.recordType flags.patientId AddEditDataSourceLoaded ]
         else
             ( model, Cmd.none )
 

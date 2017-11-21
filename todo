@@ -14,6 +14,7 @@ REQUESTED TODO:
 ===========================================================================================================
 
 am I showing loading while loading dropdowns (kinda defeats the purpose) 
+re-add the focus boolean
 
 go to Clinical Summary -> Hospitalizations to see missing stuff
 There is phone number validation, any other hidden validations?

@@ -17,8 +17,8 @@ decodeDropDownItem =
         |> required "Name" Decode.string
 
 
-decodeModel : Decoder AddEditDataSource
-decodeModel =
+decodeModel : Maybe Int -> Decoder AddEditDataSource
+decodeModel recordTypeId =
     decode AddEditDataSource
         |> required "facilityId" (maybe Decode.int)
         |> required "facilityDropdown" (Decode.list decodeDropDownItem)
@@ -27,13 +27,14 @@ decodeModel =
         |> required "taskDropDown" (Decode.list decodeDropDownItem)
         |> required "hospitilizationServiceTypeDropdown" (Decode.list decodeDropDownItem)
         |> required "hospitalizationDischargePhysicianDropdown" (Decode.list decodeDropDownItem)
+        |> hardcoded recordTypeId
 
 
-request : Int -> Http.Request AddEditDataSource
-request patientId =
-    Http.get ("/People/PatientRecordsDropdowns?patientId=" ++ toString patientId) decodeModel
+request : Maybe Int -> Int -> Http.Request AddEditDataSource
+request recordTypeId patientId =
+    Http.get ("/People/PatientRecordsDropdowns?patientId=" ++ toString patientId) (decodeModel recordTypeId)
 
 
-getDropDowns : Int -> (Result Http.Error AddEditDataSource -> msg) -> Cmd msg
-getDropDowns patientId t =
-    Http.send t (request patientId)
+getDropDowns : Maybe Int -> Int -> (Result Http.Error AddEditDataSource -> msg) -> Cmd msg
+getDropDowns recordTypeId patientId t =
+    Http.send t (request recordTypeId patientId)
