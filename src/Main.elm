@@ -43,7 +43,7 @@ init flags =
             { model | state = BillingPage BillingTypes.emptyModel } ! []
         else if flags.pageFlag == "records" then
             { model | state = RecordsPage recordModel }
-                ! [ Cmd.map RecordsMsg (Records.init flags.patientId flags.recordType)
+                ! [ Cmd.map RecordsMsg (Records.init flags)
                   , getDropDowns flags.recordType flags.patientId AddEditDataSourceLoaded
                   ]
         else
@@ -111,7 +111,7 @@ update msg model =
         ( AddNewStart addEditDataSource, _ ) ->
             let
                 newState =
-                    RecordAddNew.updateAddNewState addEditDataSource model.patientId model.recordTypeId
+                    RecordAddNew.updateAddNewState addEditDataSource model.flags
             in
                 { model | state = RecordAddNewPage newState }
                     ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource) ]
@@ -125,7 +125,7 @@ update msg model =
         ( UpdatePage pageName, _ ) ->
             case pageName of
                 "Records" ->
-                    { model | state = NoPage } ! [ Cmd.map RecordsMsg (Records.init model.patientId model.recordTypeId) ]
+                    { model | state = NoPage } ! [ Cmd.map RecordsMsg (Records.init model.flags) ]
 
                 _ ->
                     model ! []

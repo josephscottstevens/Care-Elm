@@ -241,11 +241,11 @@ update msg model =
                     { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
 
 
-updateAddNewState : AddEditDataSource -> Int -> Maybe Int -> Model
-updateAddNewState addEditDataSource patientId recordTypeId =
+updateAddNewState : AddEditDataSource -> Flags -> Model
+updateAddNewState addEditDataSource flags =
     let
         model =
-            emptyModel patientId recordTypeId
+            emptyModel flags
     in
         { model | facilityId = addEditDataSource.facilityId }
 

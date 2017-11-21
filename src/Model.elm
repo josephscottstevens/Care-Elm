@@ -17,8 +17,7 @@ type State
 
 type alias Model =
     { state : State
-    , patientId : Int
-    , recordTypeId : Maybe Int
+    , flags : Flags
     , addEditDataSource : Maybe AddEditDataSource
     }
 
@@ -35,7 +34,6 @@ type Msg
 emptyModel : Flags -> Model
 emptyModel flags =
     { state = NoPage
-    , patientId = flags.patientId
-    , recordTypeId = flags.recordType
+    , flags = flags
     , addEditDataSource = Nothing
     }
