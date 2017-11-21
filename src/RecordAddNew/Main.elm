@@ -114,8 +114,8 @@ subscriptions model =
 --        , resetUpdateComplete ResetAddNew
 
 
-view : Model -> AddEditDataSource -> Html Msg
-view model addEditDataSource =
+view : Model -> Html Msg
+view model =
     let
         errors =
             getValidationErrors (formInputs model)
@@ -247,6 +247,11 @@ update msg model =
                     model ! []
                 else
                     { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
+
+
+updateAddNewState : Model -> AddEditDataSource -> Model
+updateAddNewState model addEditDataSource =
+    { model | facilityId = addEditDataSource.facilityId }
 
 
 formInputs : Model -> List ( String, RequiredType, InputControlType Msg )

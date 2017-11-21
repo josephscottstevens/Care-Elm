@@ -14,11 +14,9 @@ encodeRecord : Model -> Encode.Value
 encodeRecord newRecord =
     Encode.object
         [ ( "RecordId", Encode.int <| newRecord.recordId )
-
-        -- , ( "PatientId", Encode.int <| newRecord.patientId )
+        , ( "PatientId", Encode.int <| newRecord.patientId )
         , ( "Title", Encode.string <| newRecord.title )
-
-        -- , ( "RecordTypeId", maybeVal Encode.int <| newRecord.recordTypeId )
+        , ( "RecordTypeId", maybeVal Encode.int <| newRecord.recordTypeId )
         , ( "Specialty", Encode.string <| newRecord.specialty )
         , ( "Provider", Encode.string <| newRecord.provider )
         , ( "TimeVisit", maybeVal Encode.string <| maybeToDateString <| newRecord.timeVisit )

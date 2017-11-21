@@ -71,7 +71,7 @@ view model =
 
         RecordAddNewPage addEditDataSource ->
             div [ class "form-horizontal" ]
-                [ Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState addEditDataSource) ]
+                [ Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState) ]
 
         Error str ->
             div [] [ text str ]
@@ -98,7 +98,12 @@ update msg model =
                 { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
 
         AddNewStart addEditDataSource ->
-            { model | state = RecordAddNewPage addEditDataSource } ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource) ]
+            let
+                newState =
+                    RecordAddNew.updateAddNewState model.recordAddNewState addEditDataSource
+            in
+                { model | state = RecordAddNewPage addEditDataSource, recordAddNewState = newState }
+                    ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource) ]
 
         AddEditDataSourceLoaded (Ok t) ->
             { model | addEditDataSource = Just t } ! []

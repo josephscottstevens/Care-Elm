@@ -37,11 +37,6 @@ type Msg
     | UpdateDischargePhysician DropDownItem
 
 
-
--- | SaveCompleted (Result Http.Error String)
--- | Save
-
-
 type ModelState
     = AddEdit
     | Limbo
