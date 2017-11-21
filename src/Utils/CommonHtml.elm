@@ -72,7 +72,7 @@ getValidationErrors controls =
 
 
 commonValidation : ( String, RequiredType, InputControlType msg ) -> Maybe String
-commonValidation ( labelText, requiredType, controlType ) =
+commonValidation ( labelText, _, controlType ) =
     case controlType of
         TextInput displayValue _ ->
             requiredStr labelText displayValue
@@ -80,13 +80,8 @@ commonValidation ( labelText, requiredType, controlType ) =
         AreaInput displayValue _ ->
             requiredStr labelText displayValue
 
-        DropInput displayValue _ ->
-            case displayValue of
-                Just t ->
-                    Nothing
-
-                Nothing ->
-                    Just (labelText ++ " is required")
+        DropInput _ _ ->
+            Just (labelText ++ " is required")
 
         DateInput displayValue _ _ ->
             requiredStr labelText displayValue
@@ -171,8 +166,3 @@ common ( labelText, requiredType, controlType ) =
                     , div [ class controlWidth ] [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] [] ]
                     , div [ class labelWidth ] [ div [ id "fileBtn" ] [] ]
                     ]
-
-
-onChange : (String -> msg) -> Html.Attribute msg
-onChange handler =
-    on "change" <| Json.map handler <| Json.at [ "target", "value" ] Json.string

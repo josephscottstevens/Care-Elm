@@ -1,16 +1,15 @@
 port module Main exposing (..)
 
 import Model exposing (..)
-import Html exposing (div)
+import Html exposing (text, div, button)
 import Billing.Main as Billing
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
 import Utils.CommonFunctions exposing (..)
 import Utils.CommonTypes exposing (..)
 import Functions exposing (..)
-import Html exposing (Html, text, div, button)
-import Html.Attributes exposing (class, id, type_, value)
-import Html.Events exposing (onClick, onFocus)
+import Html.Attributes exposing (class, type_)
+import Html.Events exposing (onClick)
 
 
 port updatePage : (String -> msg) -> Sub msg
@@ -69,7 +68,7 @@ view model =
                 , Html.map RecordsMsg (Records.view model.recordsState)
                 ]
 
-        RecordAddNewPage addEditDataSource ->
+        RecordAddNewPage ->
             div [ class "form-horizontal" ]
                 [ Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState) ]
 
@@ -113,7 +112,3 @@ update msg model =
 
         UpdatePage pageName ->
             { model | state = RecordsPage } ! [ Cmd.map RecordsMsg (Records.init model.patientId model.recordTypeId) ]
-
-
-
--- Cmd.map RecordsMsg (Records.init flags.patientId flags.recordType)

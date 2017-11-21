@@ -1,13 +1,9 @@
 module Functions exposing (..)
 
 import Json.Decode as Decode exposing (..)
-import Json.Encode as Encode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
-import RecordAddNew.Types exposing (..)
 import Utils.CommonTypes exposing (..)
-import Utils.CommonFunctions exposing (..)
-import String exposing (toLower)
 
 
 decodeDropDownItem : Decoder DropDownItem

@@ -108,9 +108,6 @@ pagingView currentPage totalVisiblePages =
             else
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
 
-        employersCount =
-            toString totalVisiblePages
-
         pagerText =
             let
                 currentPageText =

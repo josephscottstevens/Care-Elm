@@ -44,11 +44,6 @@ type RecordType
     | Misc
 
 
-
--- Feel like this should get used to CommonFunctions, but... later
--- Ccds -> ?
-
-
 getRecordType : Maybe Int -> RecordType
 getRecordType maybeId =
     case maybeId of

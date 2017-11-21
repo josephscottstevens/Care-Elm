@@ -11,7 +11,7 @@ type State
     = NoPage
     | BillingPage
     | RecordsPage
-    | RecordAddNewPage AddEditDataSource
+    | RecordAddNewPage
     | Error String
 
 
