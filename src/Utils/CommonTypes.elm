@@ -135,3 +135,9 @@ type alias AddEditDataSource =
     , hospitalizationDischargePhysicians : List DropDownItem
     , recordTypeId : Maybe Int
     }
+
+
+type Page
+    = Billing
+    | Records
+    | RecordAddNew AddEditDataSource

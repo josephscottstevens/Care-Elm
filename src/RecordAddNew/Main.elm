@@ -128,19 +128,15 @@ view model addEditDataSource =
 
         saveBtnClass =
             class "btn btn-sm btn-success margin-left-5 pull-right"
-
-        footerControls t =
-            div [ class "form-group" ]
-                [ div [ class fullWidth ]
-                    t
-                ]
     in
         div []
             [ validationErrorsDiv
             , makeControls (formInputs model)
-            , footerControls
-                [ button [ type_ "button", id "Save", value "AddNewRecord", onClick Save, saveBtnClass ] [ text "Save" ]
-                , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+            , div [ class "form-group" ]
+                [ div [ class fullWidth ]
+                    [ button [ type_ "button", id "Save", value "AddNewRecord", onClick Save, saveBtnClass ] [ text "Save" ]
+                    , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                    ]
                 ]
             ]
 
@@ -152,19 +148,6 @@ update msg model =
             t ! [ setUnsavedChanges True ]
     in
         case msg of
-            -- Save newRecord ->
-            --     if List.length (getValidationErrors formInputs) > 0 then
-            --         updateAddNew { newRecord | showValidationErrors = True }
-            --     else
-            --         model ! [ saveForm newRecord, setUnsavedChanges False ]
-            -- SaveCompleted (Ok responseMsg) ->
-            --     case getResponseError responseMsg of
-            --         Just t ->
-            --             model ! [ getRecords model.patientId model.recordTypeId Load, displayErrorMessage t ]
-            --         Nothing ->
-            --             model ! [ getRecords model.patientId model.recordTypeId Load, displaySuccessMessage "Save completed successfully!" ]
-            -- SaveCompleted (Err httpError) ->
-            --     { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
             AddNewFacility ->
                 model ! [ addNewFacility Nothing ]
 
@@ -183,7 +166,7 @@ update msg model =
                         model ! [ displayErrorMessage t ]
 
                     Nothing ->
-                        model ! [ displaySuccessMessage "Save completed successfully!" ]
+                        model ! [ displaySuccessMessage "Save completed successfully!", changePage "Records" ]
 
             SaveCompleted (Err httpError) ->
                 { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]

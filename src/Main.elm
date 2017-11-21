@@ -5,14 +5,15 @@ import Html exposing (div)
 import Billing.Main as Billing
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
-import RecordAddNew.Functions exposing (saveFormRequest)
 import Utils.CommonFunctions exposing (..)
 import Utils.CommonTypes exposing (..)
 import Functions exposing (..)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, id, type_, value)
 import Html.Events exposing (onClick, onFocus)
-import Http
+
+
+port updatePage : (String -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
@@ -20,6 +21,7 @@ subscriptions model =
     Sub.batch
         [ Sub.map RecordsMsg (Records.subscriptions model.recordsState)
         , Sub.map RecordAddNewMsg (RecordAddNew.subscriptions model.recordAddNewState)
+        , updatePage UpdatePage
         ]
 
 
@@ -103,3 +105,10 @@ update msg model =
 
         AddEditDataSourceLoaded (Err httpError) ->
             { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
+
+        UpdatePage pageName ->
+            { model | state = RecordsPage } ! []
+
+
+
+-- Cmd.map RecordsMsg (Records.init flags.patientId flags.recordType)

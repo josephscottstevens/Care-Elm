@@ -16,6 +16,9 @@ port displaySuccessMessage : String -> Cmd msg
 port displayErrorMessage : String -> Cmd msg
 
 
+port changePage : String -> Cmd msg
+
+
 isAlpha : Char -> Bool
 isAlpha char =
     isLower char || isUpper char
