@@ -13,7 +13,7 @@ type RequiredType
 type alias Flags =
     { pageFlag : String
     , patientId : Int
-    , recordType : Maybe Int
+    , recordTypeId : Maybe Int
     }
 
 

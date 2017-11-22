@@ -36,7 +36,7 @@ subscriptions =
 
 init : Flags -> Cmd Msg
 init flags =
-    getRecords flags.patientId flags.recordType Load
+    getRecords flags.patientId flags.recordTypeId Load
 
 
 update : Msg -> Model -> ( ( Model, Cmd Msg ), Maybe AddEditDataSource )

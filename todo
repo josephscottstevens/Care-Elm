@@ -13,13 +13,6 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-see if I can get addEditDataSource out of maybe state on AddEdit side
-test the recordType change again, most likely broke it?
-can I make setFocus not apart of initSyncfusionControls? kinda ugly having to mutate the thing all over
-
-make labelText \ displayValue consistant.. .they got mucked together
-UpdatePage needs to factor in the page name 
-get reset add new working again 
 rename recordType to recordTypeId
 am I showing loading while loading dropdowns (kinda defeats the purpose) 
 re-add the focus boolean

@@ -79,7 +79,7 @@ port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
 
 init : Flags -> AddEditDataSource -> Cmd Msg
 init flags addEditDataSource =
-    initSyncfusionControls (getSyncfusionMessage addEditDataSource flags.recordType False)
+    initSyncfusionControls (getSyncfusionMessage addEditDataSource flags.recordTypeId False)
 
 
 subscriptions : Sub Msg
