@@ -19,7 +19,7 @@ port addNewFacility : Maybe String -> Cmd msg
 port addNewPhysician : Maybe String -> Cmd msg
 
 
-port initSyncfusionControls : AddEditDataSource -> Cmd msg
+port initSyncfusionControls : SyncfusionMessage -> Cmd msg
 
 
 port setUnsavedChanges : Bool -> Cmd msg
@@ -77,9 +77,9 @@ port updateHospitalServiceType : (DropDownItem -> msg) -> Sub msg
 port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
 
 
-init : AddEditDataSource -> Cmd Msg
-init addEditDataSource =
-    initSyncfusionControls addEditDataSource
+init : Flags -> AddEditDataSource -> Cmd Msg
+init flags addEditDataSource =
+    initSyncfusionControls (getSyncfusionMessage addEditDataSource flags.recordType False)
 
 
 subscriptions : Sub Msg
@@ -177,13 +177,13 @@ update msg model =
             ResetUpdateComplete dropDownId ->
                 case model.addEditDataSource of
                     Just t ->
-                        ( { model | state = AddEdit } ! [ initSyncfusionControls { t | setFocus = True } ], False )
+                        ( { model | state = AddEdit } ! [ initSyncfusionControls (getSyncfusionMessage t model.facilityId True) ], False )
 
                     Nothing ->
                         Debug.crash "error, no drops"
 
             LoadDataSource addEditDataSource ->
-                ( { model | addEditDataSource = Just ({ addEditDataSource | setFocus = False }) } ! [ setLoadingStatus False ], False )
+                ( { model | addEditDataSource = Just addEditDataSource } ! [ setLoadingStatus False ], False )
 
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then

@@ -124,3 +124,16 @@ emptyModel flags =
     , dischargePhysicianId = Nothing
     , dischargePhysicianText = ""
     }
+
+
+type alias SyncfusionMessage =
+    { facilityId : Maybe Int
+    , facilities : List DropDownItem
+    , recordTypes : List DropDownItem
+    , users : List DropDownItem
+    , tasks : List DropDownItem
+    , hospitilizationServiceTypes : List DropDownItem
+    , hospitalizationDischargePhysicians : List DropDownItem
+    , recordTypeId : Maybe Int
+    , setFocus : Bool
+    }

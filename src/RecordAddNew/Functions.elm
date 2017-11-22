@@ -57,3 +57,17 @@ saveFormRequest model =
 saveForm : Model -> Cmd Msg
 saveForm model =
     Http.send SaveCompleted (saveFormRequest model)
+
+
+getSyncfusionMessage : AddEditDataSource -> Maybe Int -> Bool -> SyncfusionMessage
+getSyncfusionMessage addEditDataSource recordTypeId setFocus =
+    { facilityId = addEditDataSource.facilityId
+    , facilities = addEditDataSource.facilities
+    , recordTypes = addEditDataSource.recordTypes
+    , users = addEditDataSource.users
+    , tasks = addEditDataSource.tasks
+    , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
+    , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
+    , recordTypeId = recordTypeId
+    , setFocus = setFocus
+    }

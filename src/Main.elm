@@ -30,7 +30,7 @@ init flags =
         else if flags.pageFlag == "records" then
             { model | page = RecordsPage }
                 ! [ Cmd.map RecordsMsg (Records.init flags)
-                  , getDropDowns flags.recordType flags.patientId AddEditDataSourceLoaded
+                  , getDropDowns flags.patientId AddEditDataSourceLoaded
                   ]
         else
             ( model, Cmd.none )
@@ -78,7 +78,7 @@ update msg model =
             in
                 case addEditDataSource of
                     Just t ->
-                        { model | page = RecordAddNewPage } ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init t) ]
+                        { model | page = RecordAddNewPage } ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.flags t) ]
 
                     Nothing ->
                         { model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ]
