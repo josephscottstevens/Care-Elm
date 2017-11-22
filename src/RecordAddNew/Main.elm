@@ -145,7 +145,7 @@ update : Msg -> Model -> ( ( Model, Cmd Msg ), Bool )
 update msg model =
     let
         updateAddNew t =
-            t ! [ setUnsavedChanges True ]
+            ( t ! [ setUnsavedChanges True ], False )
     in
         case msg of
             AddNewFacility ->
@@ -192,68 +192,71 @@ update msg model =
                     ( { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ], False )
 
             UpdateTitle str ->
-                ( updateAddNew { model | title = str }, False )
+                updateAddNew { model | title = str }
 
             UpdateSpecialty str ->
-                ( updateAddNew { model | specialty = str }, False )
+                updateAddNew { model | specialty = str }
 
             UpdateProvider str ->
-                ( updateAddNew { model | provider = str }, False )
+                updateAddNew { model | provider = str }
 
             UpdateTimeVisit str ->
-                ( updateAddNew { model | timeVisit = str }, False )
+                updateAddNew { model | timeVisit = str }
 
             UpdateTimeAcc str ->
-                ( updateAddNew { model | timeAcc = str }, False )
+                updateAddNew { model | timeAcc = str }
 
             UpdateFileName str ->
-                ( updateAddNew { model | fileName = str }, False )
+                updateAddNew { model | fileName = str }
 
             UpdateComments str ->
-                ( updateAddNew { model | comments = str }, False )
+                updateAddNew { model | comments = str }
 
             UpdateFacility dropDownItem ->
-                ( updateAddNew { model | facilityId = dropDownItem.id, facilityText = dropDownItem.name }, False )
+                updateAddNew { model | facilityId = dropDownItem.id, facilityText = dropDownItem.name }
 
             UpdateReportDate str ->
-                ( updateAddNew { model | reportDate = str }, False )
+                updateAddNew { model | reportDate = str }
 
             UpdateCallSid str ->
-                ( updateAddNew { model | callSid = str }, False )
+                updateAddNew { model | callSid = str }
 
             UpdateRecordingSid str ->
-                ( updateAddNew { model | recording = str }, False )
+                updateAddNew { model | recording = str }
 
             UpdateDuration str ->
-                ( updateAddNew { model | duration = defaultIntStr str }, False )
+                updateAddNew { model | duration = defaultIntStr str }
 
             UpdateRecordingDate str ->
-                ( updateAddNew { model | recordingDate = str }, False )
+                updateAddNew { model | recordingDate = str }
 
             UpdateUser dropDownItem ->
-                ( updateAddNew { model | userId = dropDownItem.id, userText = dropDownItem.name }, False )
+                updateAddNew { model | userId = dropDownItem.id, userText = dropDownItem.name }
 
             UpdateTask dropDownItem ->
-                ( updateAddNew { model | taskId = dropDownItem.id, taskText = dropDownItem.name }, False )
+                updateAddNew { model | taskId = dropDownItem.id, taskText = dropDownItem.name }
 
             -- Hospitilizations
+            UpdatePatientReported bool ->
+                updateAddNew { model | patientReported = bool }
+
             UpdateFacility2 dropDownItem ->
-                ( updateAddNew { model | facilityId2 = dropDownItem.id, facilityText2 = dropDownItem.name }, False )
+                updateAddNew { model | facilityId2 = dropDownItem.id, facilityText2 = dropDownItem.name }
 
             UpdateDateOfAdmission str ->
-                ( updateAddNew { model | dateOfAdmission = str }, False )
+                updateAddNew { model | dateOfAdmission = str }
 
             UpdateDateOfDischarge str ->
-                ( updateAddNew { model | dateOfDischarge = str }, False )
+                updateAddNew { model | dateOfDischarge = str }
 
             UpdateHospitalServiceType dropDownItem ->
-                ( updateAddNew { model | hospitalServiceTypeId = dropDownItem.id, hospitalServiceTypeText = dropDownItem.name }, False )
+                updateAddNew { model | hospitalServiceTypeId = dropDownItem.id, hospitalServiceTypeText = dropDownItem.name }
 
             UpdateDischargeRecommendations str ->
-                ( updateAddNew { model | dischargeRecommendations = str }, False )
+                updateAddNew { model | dischargeRecommendations = str }
 
             UpdateDischargePhysician dropDownItem ->
-                ( updateAddNew { model | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }, False )
+                updateAddNew { model | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }
 
 
 formInputs : Model -> List ( String, RequiredType, InputControlType Msg )
@@ -262,20 +265,25 @@ formInputs newRecord =
         recordType =
             getRecordType newRecord.recordTypeId
 
-        defaultFields =
-            [ ( "Date of Visit", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" UpdateTimeVisit )
-            , ( "Doctor of Visit", Optional, TextInput newRecord.provider UpdateProvider )
-            , ( "Specialty of Visit", Optional, TextInput newRecord.specialty UpdateSpecialty )
-            , ( "Comments", Required, AreaInput newRecord.comments UpdateComments )
-            , ( "Upload Record File", Required, FileInput newRecord.fileName )
-            ]
-
         firstColumns =
             [ ( "Facility", Required, DropInput newRecord.facilityId "FacilityId" )
             , ( "Category", Required, DropInput newRecord.recordTypeId "CategoryId" )
             ]
 
         lastColumns =
+            [ ( "Comments", Required, AreaInput newRecord.comments UpdateComments )
+            , ( "Upload Record File", Required, FileInput newRecord.fileName )
+            ]
+
+        defaultFields =
+            firstColumns
+                ++ [ ( "Date of Visit", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" UpdateTimeVisit )
+                   , ( "Doctor of Visit", Optional, TextInput newRecord.provider UpdateProvider )
+                   , ( "Specialty of Visit", Optional, TextInput newRecord.specialty UpdateSpecialty )
+                   ]
+                ++ lastColumns
+
+        columns =
             case recordType of
                 PrimaryCare ->
                     defaultFields
@@ -284,31 +292,30 @@ formInputs newRecord =
                     defaultFields
 
                 Labs ->
-                    [ ( "Date/Time of Labs Collected", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" UpdateTimeVisit )
-                    , ( "Date/Time of Labs Accessioned", Required, DateInput (defaultString newRecord.timeAcc) "TimeAccId" UpdateTimeAcc )
-                    , ( "Name of Lab", Optional, TextInput newRecord.title UpdateTitle )
-                    , ( "Provider of Lab", Optional, TextInput newRecord.provider UpdateProvider )
-                    , ( "Comments", Required, AreaInput newRecord.comments UpdateComments )
-                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
-                    ]
+                    firstColumns
+                        ++ [ ( "Date/Time of Labs Collected", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" UpdateTimeVisit )
+                           , ( "Date/Time of Labs Accessioned", Required, DateInput (defaultString newRecord.timeAcc) "TimeAccId" UpdateTimeAcc )
+                           , ( "Name of Lab", Optional, TextInput newRecord.title UpdateTitle )
+                           , ( "Provider of Lab", Optional, TextInput newRecord.provider UpdateProvider )
+                           ]
+                        ++ lastColumns
 
                 Radiology ->
-                    [ ( "Date/Time of Study was done", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" UpdateTimeVisit )
-                    , ( "Date/Time of Study Accessioned", Required, DateInput (defaultString newRecord.timeAcc) "TimeAccId" UpdateTimeAcc )
-                    , ( "Name of Study", Optional, TextInput newRecord.title UpdateTitle )
-                    , ( "Provider of Study", Optional, TextInput newRecord.provider UpdateProvider )
-                    , ( "Comments", Required, TextInput newRecord.comments UpdateComments )
-                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
-                    ]
+                    firstColumns
+                        ++ [ ( "Date/Time of Study was done", Required, DateInput (defaultString newRecord.timeVisit) "TimeVisitId" UpdateTimeVisit )
+                           , ( "Date/Time of Study Accessioned", Required, DateInput (defaultString newRecord.timeAcc) "TimeAccId" UpdateTimeAcc )
+                           , ( "Name of Study", Optional, TextInput newRecord.title UpdateTitle )
+                           , ( "Provider of Study", Optional, TextInput newRecord.provider UpdateProvider )
+                           ]
+                        ++ lastColumns
 
                 Misc ->
                     defaultFields
 
                 Legal ->
-                    [ ( "Title", Optional, TextInput newRecord.title UpdateTitle )
-                    , ( "Comments", Required, AreaInput newRecord.comments UpdateComments )
-                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
-                    ]
+                    firstColumns
+                        ++ [ ( "Title", Optional, TextInput newRecord.title UpdateTitle ) ]
+                        ++ lastColumns
 
                 Hospitalizations ->
                     case newRecord.hospitalizationId of
@@ -316,34 +323,40 @@ formInputs newRecord =
                             []
 
                         Nothing ->
-                            [ ( "Facility", Required, DropInputWithButton newRecord.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
+                            [ ( "Patient Reported", Optional, CheckInput UpdatePatientReported )
+                            , ( "Facility", Required, DropInputWithButton newRecord.facilityId "FacilityId" AddNewFacility "Add New Facility" )
                             , ( "Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId" UpdateDateOfAdmission )
                             , ( "Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId" UpdateDateOfDischarge )
                             , ( "Hospital Service Type", Required, DropInput newRecord.hospitalServiceTypeId "HospitalServiceTypeId" )
+                            , ( "Chief Complaint", Required, AreaInput newRecord.comments UpdateComments )
+                            , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
                             , ( "Discharge Recommendations", Required, TextInput newRecord.dischargeRecommendations UpdateDischargeRecommendations )
-                            , ( "Discharge Physician", Required, DropInputWithButton newRecord.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "Add New Physician" )
-                            , ( "Comments", Required, AreaInput newRecord.comments UpdateComments )
-                            , ( "Upload Record File", Required, FileInput newRecord.fileName )
+                            , ( "Discharge Physician", Required, DropInputWithButton newRecord.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "New Provider" )
+                            , ( "Secondary Facility Name", Required, DropInputWithButton newRecord.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
+                            , ( "Secondary Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId" UpdateDateOfAdmission )
+                            , ( "Secondary Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId" UpdateDateOfDischarge )
                             ]
 
                 CallRecordings ->
-                    [ ( "Call Sid", Required, TextInput newRecord.callSid UpdateCallSid )
-                    , ( "Recording Sid", Required, TextInput newRecord.recording UpdateRecordingSid )
-                    , ( "Duration", Required, NumrInput newRecord.duration UpdateDuration )
-                    , ( "Recording Date", Required, DateInput (defaultString newRecord.recordingDate) "RecordingDateId" UpdateRecordingDate )
-                    , ( "User", Required, DropInput newRecord.userId "UserId" )
-                    , ( "Task", Optional, DropInput newRecord.taskId "TaskId" )
-                    ]
+                    firstColumns
+                        ++ [ ( "Call Sid", Required, TextInput newRecord.callSid UpdateCallSid )
+                           , ( "Recording Sid", Required, TextInput newRecord.recording UpdateRecordingSid )
+                           , ( "Duration", Required, NumrInput newRecord.duration UpdateDuration )
+                           , ( "Recording Date", Required, DateInput (defaultString newRecord.recordingDate) "RecordingDateId" UpdateRecordingDate )
+                           , ( "User", Required, DropInput newRecord.userId "UserId" )
+                           , ( "Task", Optional, DropInput newRecord.taskId "TaskId" )
+                           ]
 
                 PreviousHistories ->
-                    [ ( "Report Date", Required, DateInput (defaultString newRecord.reportDate) "ReportDateId" UpdateReportDate )
-                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
-                    ]
+                    firstColumns
+                        ++ [ ( "Report Date", Required, DateInput (defaultString newRecord.reportDate) "ReportDateId" UpdateReportDate )
+                           , ( "Upload Record File", Required, FileInput newRecord.fileName )
+                           ]
 
                 Enrollment ->
-                    [ ( "Title", Optional, TextInput newRecord.title UpdateTitle )
-                    , ( "Comments", Required, AreaInput newRecord.comments UpdateComments )
-                    , ( "Upload Record File", Required, FileInput newRecord.fileName )
-                    ]
+                    firstColumns
+                        ++ [ ( "Title", Optional, TextInput newRecord.title UpdateTitle )
+                           ]
+                        ++ lastColumns
     in
-        List.append firstColumns lastColumns
+        columns

@@ -29,6 +29,7 @@ type Msg
     | UpdateUser DropDownItem
     | UpdateTask DropDownItem
       -- Hospitilizations
+    | UpdatePatientReported Bool
     | UpdateFacility2 DropDownItem
     | UpdateDateOfAdmission (Maybe String)
     | UpdateDateOfDischarge (Maybe String)
@@ -71,6 +72,7 @@ type alias Model =
     , addEditDataSource : Maybe AddEditDataSource
 
     -- Hospitilizations
+    , patientReported : Bool
     , hospitalizationId : Maybe Int
     , facilityId2 : Maybe Int
     , facilityText2 : String
@@ -113,6 +115,7 @@ emptyModel flags =
     , addEditDataSource = Nothing
 
     -- Hospitilizations
+    , patientReported = False
     , hospitalizationId = Nothing
     , facilityId2 = Nothing
     , facilityText2 = ""

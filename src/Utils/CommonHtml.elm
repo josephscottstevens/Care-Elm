@@ -2,7 +2,7 @@ module Utils.CommonHtml exposing (fullWidth, labelWidth, controlWidth, InputCont
 
 import Html exposing (Html, text, div, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, readonly)
-import Html.Events exposing (onInput, onClick)
+import Html.Events exposing (onInput, onClick, onCheck)
 import Utils.CommonFunctions exposing (..)
 import Utils.CommonTypes exposing (..)
 
@@ -40,7 +40,9 @@ controlWidth =
 type InputControlType msg
     = TextInput String (String -> msg)
     | NumrInput Int (String -> msg)
+    | CheckInput (Bool -> msg)
     | AreaInput String (String -> msg)
+    | KnockInput String
     | DropInput (Maybe Int) String
     | DropInputWithButton (Maybe Int) String msg String
     | DateInput String String (Maybe String -> msg)
@@ -142,6 +144,11 @@ common ( labelText, requiredType, controlType ) =
                     [ input [ type_ "number", class "e-textbox", idAttr labelText, nameAttr labelText, onInput event, value (toString displayValue) ] []
                     ]
 
+            CheckInput event ->
+                commonStructure
+                    [ input [ type_ "checkbox", onCheck event ] []
+                    ]
+
             AreaInput displayValue event ->
                 commonStructure
                     [ textarea [ idAttr labelText, class "e-textarea", onInput event, value displayValue ] []
@@ -150,6 +157,11 @@ common ( labelText, requiredType, controlType ) =
             DropInput displayValue syncfusionId ->
                 commonStructure
                     [ input [ type_ "text", id syncfusionId, value (toString displayValue) ] []
+                    ]
+
+            KnockInput syncfusionId ->
+                commonStructure
+                    [ div [ id syncfusionId ] []
                     ]
 
             DropInputWithButton displayValue syncfusionId event buttonText ->

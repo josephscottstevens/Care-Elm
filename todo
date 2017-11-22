@@ -13,9 +13,7 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-rename recordType to recordTypeId
-am I showing loading while loading dropdowns (kinda defeats the purpose) 
-re-add the focus boolean
+style checkbox, sadly... no more common for first few columns?
 
 go to Clinical Summary -> Hospitalizations to see missing stuff
 There is phone number validation, any other hidden validations?
