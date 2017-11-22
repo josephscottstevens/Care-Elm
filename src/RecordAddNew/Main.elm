@@ -177,13 +177,13 @@ update msg model =
             ResetUpdateComplete dropDownId ->
                 case model.addEditDataSource of
                     Just t ->
-                        ( { model | state = AddEdit } ! [ initSyncfusionControls t ], False )
+                        ( { model | state = AddEdit } ! [ initSyncfusionControls { t | setFocus = True } ], False )
 
                     Nothing ->
                         Debug.crash "error, no drops"
 
             LoadDataSource addEditDataSource ->
-                ( { model | addEditDataSource = Just addEditDataSource } ! [], False )
+                ( { model | addEditDataSource = Just ({ addEditDataSource | setFocus = False }) } ! [ setLoadingStatus False ], False )
 
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then
