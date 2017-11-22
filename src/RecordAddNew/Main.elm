@@ -177,7 +177,7 @@ update msg model =
             ResetUpdateComplete dropDownId ->
                 case model.addEditDataSource of
                     Just t ->
-                        ( { model | state = AddEdit } ! [ initSyncfusionControls (getSyncfusionMessage t model.facilityId True) ], False )
+                        ( { model | state = AddEdit } ! [ initSyncfusionControls (getSyncfusionMessage t model.recordTypeId True) ], False )
 
                     Nothing ->
                         Debug.crash "error, no drops"
