@@ -119,7 +119,7 @@ view model =
                 saveBtnClass =
                     class "btn btn-sm btn-success margin-left-5 pull-right"
             in
-                div []
+                div [ class "form-horizontal" ]
                     [ validationErrorsDiv
                     , makeControls (formInputs model)
                     , div [ class "form-group" ]

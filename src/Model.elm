@@ -7,18 +7,21 @@ import Utils.CommonTypes exposing (..)
 import Http
 
 
-type State
+type Page
     = NoPage
-    | BillingPage Billing.Model
-    | RecordsPage Records.Model
-    | RecordAddNewPage RecordAddNew.Model
+    | BillingPage
+    | RecordsPage
+    | RecordAddNewPage
     | Error String
 
 
 type alias Model =
-    { state : State
+    { page : Page
     , flags : Flags
     , addEditDataSource : Maybe AddEditDataSource
+    , billingState : Billing.Model
+    , recordsState : Records.Model
+    , recordAddNewState : RecordAddNew.Model
     }
 
 
@@ -26,14 +29,19 @@ type Msg
     = BillingMsg Billing.Msg
     | RecordsMsg Records.Msg
     | RecordAddNewMsg RecordAddNew.Msg
-    | AddNewStart AddEditDataSource
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
-    | UpdatePage ( String, Maybe Int )
+
+
+
+-- | UpdatePage ( String, Maybe Int )
 
 
 emptyModel : Flags -> Model
 emptyModel flags =
-    { state = NoPage
+    { page = NoPage
     , flags = flags
     , addEditDataSource = Nothing
+    , billingState = Billing.emptyModel flags
+    , recordsState = Records.emptyModel flags
+    , recordAddNewState = RecordAddNew.emptyModel flags
     }

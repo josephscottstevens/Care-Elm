@@ -51,8 +51,8 @@ type alias Model =
     }
 
 
-emptyModel : Model
-emptyModel =
+emptyModel : Flags -> Model
+emptyModel flags =
     { state = Initial
     , billingCcm = []
     , tableState = Table.initialSort "dob"

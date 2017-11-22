@@ -14,6 +14,7 @@ type Msg
     | EditTask Int
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
+    | AddNewStart AddEditDataSource
 
 
 type ModelState

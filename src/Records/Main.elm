@@ -2,8 +2,8 @@ port module Records.Main exposing (..)
 
 import Records.Functions exposing (..)
 import Records.Types exposing (..)
-import Html exposing (Html, text, div)
-import Html.Attributes exposing (class)
+import Html exposing (Html, text, div, button)
+import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Table exposing (..)
 import Utils.CommonGrid exposing (..)
@@ -39,55 +39,95 @@ init flags =
     getRecords flags.patientId flags.recordType Load
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> ( ( Model, Cmd Msg ), Maybe AddEditDataSource )
 update msg model =
     case msg of
         Load (Ok t) ->
-            getLoadedState model t ! [ setLoadingStatus False ]
+            ( getLoadedState model t ! [ setLoadingStatus False ], Nothing )
 
         Load (Err httpError) ->
-            { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
+            ( { model | state = Error (toString httpError) } ! [ setLoadingStatus False ], Nothing )
 
         SetTableState newState ->
-            { model | tableState = newState } ! []
+            ( { model | tableState = newState } ! [], Nothing )
 
         SendMenuMessage recordId messageType ->
-            { model | records = flipConsent model.records recordId model.recordTypeId } ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
+            ( { model | records = flipConsent model.records recordId model.recordTypeId } ! [ sendMenuMessage (getMenuMessage model recordId messageType) ], Nothing )
 
         DropDownToggle recordId ->
-            { model | records = flipDropDownOpen model.records recordId } ! []
+            ( { model | records = flipDropDownOpen model.records recordId } ! [], Nothing )
 
         DeleteConfirmed rowId ->
             let
                 updatedRecords =
                     model.records |> List.filter (\t -> t.id /= rowId)
             in
-                { model | records = updatedRecords } ! [ deleteRequest rowId ]
+                ( { model | records = updatedRecords } ! [ deleteRequest rowId ], Nothing )
 
         DeleteCompleted (Ok responseMsg) ->
             case getResponseError responseMsg of
                 Just t ->
-                    model ! [ displayErrorMessage t ]
+                    ( model ! [ displayErrorMessage t ], Nothing )
 
                 Nothing ->
-                    model ! [ displaySuccessMessage "Record deleted successfully!" ]
+                    ( model ! [ displaySuccessMessage "Record deleted successfully!" ], Nothing )
 
         DeleteCompleted (Err httpError) ->
-            { model | state = Error (toString httpError) } ! []
+            ( { model | state = Error (toString httpError) } ! [], Nothing )
 
         EditTask taskId ->
-            model ! [ editTask taskId ]
+            ( model ! [ editTask taskId ], Nothing )
 
         SetFilter filterState ->
-            { model | filterFields = filterFields model.filterFields filterState } ! []
+            ( { model | filterFields = filterFields model.filterFields filterState } ! [], Nothing )
+
+        AddNewStart addEditDataSource ->
+            ( model ! [], Just addEditDataSource )
 
 
-view : Model -> Html Msg
-view model =
+
+-- let
+--     newState =
+--         RecordAddNew.updateAddNewState addEditDataSource model.flags
+-- in
+--     { model | state = RecordAddNewPage newState }
+--         ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource) ]
+-- UpdatePage ( pageName, dropId ) ->
+--     case pageName of
+--         "Records" ->
+--             { model | state = RecordsPage (RecordTypes.emptyModel model.flags) } ! [ Cmd.map RecordsMsg (Records.init model.flags) ]
+--         "RecordAddEdit" ->
+--             case model.addEditDataSource of
+--                 Just t ->
+--                     if dropId == t.recordTypeId then
+--                         model ! [ setLoadingStatus False ]
+--                     else
+--                         { model
+--                             | addEditDataSource = Just { t | recordTypeId = dropId }
+--                         }
+--                             ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init { t | recordTypeId = dropId, setFocus = True }) ]
+--                 Nothing ->
+--                     model ! []
+--         _ ->
+--             model ! []
+-- ( _, _ ) ->
+--     model ! []
+
+
+view : Model -> Maybe AddEditDataSource -> Html Msg
+view model addEditDataSource =
     case model.state of
         Grid ->
-            div [ class "e-grid e-js e-waitingpopup" ]
-                [ Table.view (config SetFilter model.recordTypeId (updateTaskId model)) model.tableState (filteredRecords model) ]
+            div []
+                [ case addEditDataSource of
+                    Just t ->
+                        button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick (AddNewStart t) ] [ text "New Record" ]
+
+                    Nothing ->
+                        button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
+                , div [ class "e-grid e-js e-waitingpopup" ]
+                    [ Table.view (config SetFilter model.recordTypeId (updateTaskId model)) model.tableState (filteredRecords model) ]
+                ]
 
         Limbo ->
             div [] []
