@@ -25,6 +25,9 @@ port initSyncfusionControls : AddEditDataSource -> Cmd msg
 port setUnsavedChanges : Bool -> Cmd msg
 
 
+port loadDataSourceComplete : (AddEditDataSource -> msg) -> Sub msg
+
+
 port resetUpdateComplete : (Maybe Int -> msg) -> Sub msg
 
 
@@ -92,6 +95,7 @@ subscriptions =
         , updateUser UpdateUser
         , updateTask UpdateTask
         , resetUpdateComplete ResetUpdateComplete
+        , loadDataSourceComplete LoadDataSource
 
         -- Hospitilizations
         , updateFacility2 UpdateFacility2
@@ -137,7 +141,7 @@ view model =
             div [] [ text str ]
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> ( ( Model, Cmd Msg ), Bool )
 update msg model =
     let
         updateAddNew t =
@@ -145,113 +149,111 @@ update msg model =
     in
         case msg of
             AddNewFacility ->
-                model ! [ addNewFacility Nothing ]
+                ( model ! [ addNewFacility Nothing ], False )
 
             AddNewPhysician ->
-                model ! [ addNewPhysician Nothing ]
+                ( model ! [ addNewPhysician Nothing ], False )
 
             Save ->
                 if List.length (getValidationErrors (formInputs model)) > 0 then
-                    { model | showValidationErrors = True } ! []
+                    ( { model | showValidationErrors = True } ! [], False )
                 else
-                    model ! [ saveForm model, setUnsavedChanges False ]
+                    ( model ! [ saveForm model, setUnsavedChanges False ], False )
 
             SaveCompleted (Ok responseMsg) ->
                 case getResponseError responseMsg of
                     Just t ->
-                        model ! [ displayErrorMessage t ]
+                        ( model ! [ displayErrorMessage t ], False )
 
                     Nothing ->
-                        model ! [ displaySuccessMessage "Save completed successfully!", changePage ( "Records", Nothing ) ]
+                        ( model ! [ displaySuccessMessage "Save completed successfully!" ], True )
 
             SaveCompleted (Err httpError) ->
-                { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
+                ( { model | state = Error (toString httpError) } ! [ setLoadingStatus False ], False )
 
             Cancel ->
-                model ! [ changePage ( "Records", Nothing ), setUnsavedChanges False ]
+                ( model ! [ setUnsavedChanges False ], True )
 
             ResetUpdateComplete dropDownId ->
-                { model | state = AddEdit } ! [ changePage ( "RecordAddEdit", dropDownId ) ]
+                case model.addEditDataSource of
+                    Just t ->
+                        ( { model | state = AddEdit } ! [ initSyncfusionControls t ], False )
+
+                    Nothing ->
+                        Debug.crash "error, no drops"
+
+            LoadDataSource addEditDataSource ->
+                ( { model | addEditDataSource = Just addEditDataSource } ! [], False )
 
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then
-                    model ! []
+                    ( model ! [], False )
                 else
-                    { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
+                    ( { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ], False )
 
-            -- { model | state = AddEdit (getNewRecord model) } ! [ initSyncfusionControls (getSyncFusionMessage model True) ]
             UpdateTitle str ->
-                updateAddNew { model | title = str }
+                ( updateAddNew { model | title = str }, False )
 
             UpdateSpecialty str ->
-                updateAddNew { model | specialty = str }
+                ( updateAddNew { model | specialty = str }, False )
 
             UpdateProvider str ->
-                updateAddNew { model | provider = str }
+                ( updateAddNew { model | provider = str }, False )
 
             UpdateTimeVisit str ->
-                updateAddNew { model | timeVisit = str }
+                ( updateAddNew { model | timeVisit = str }, False )
 
             UpdateTimeAcc str ->
-                updateAddNew { model | timeAcc = str }
+                ( updateAddNew { model | timeAcc = str }, False )
 
             UpdateFileName str ->
-                updateAddNew { model | fileName = str }
+                ( updateAddNew { model | fileName = str }, False )
 
             UpdateComments str ->
-                updateAddNew { model | comments = str }
+                ( updateAddNew { model | comments = str }, False )
 
             UpdateFacility dropDownItem ->
-                updateAddNew { model | facilityId = dropDownItem.id, facilityText = dropDownItem.name }
+                ( updateAddNew { model | facilityId = dropDownItem.id, facilityText = dropDownItem.name }, False )
 
             UpdateReportDate str ->
-                updateAddNew { model | reportDate = str }
+                ( updateAddNew { model | reportDate = str }, False )
 
             UpdateCallSid str ->
-                updateAddNew { model | callSid = str }
+                ( updateAddNew { model | callSid = str }, False )
 
             UpdateRecordingSid str ->
-                updateAddNew { model | recording = str }
+                ( updateAddNew { model | recording = str }, False )
 
             UpdateDuration str ->
-                updateAddNew { model | duration = defaultIntStr str }
+                ( updateAddNew { model | duration = defaultIntStr str }, False )
 
             UpdateRecordingDate str ->
-                updateAddNew { model | recordingDate = str }
+                ( updateAddNew { model | recordingDate = str }, False )
 
             UpdateUser dropDownItem ->
-                updateAddNew { model | userId = dropDownItem.id, userText = dropDownItem.name }
+                ( updateAddNew { model | userId = dropDownItem.id, userText = dropDownItem.name }, False )
 
             UpdateTask dropDownItem ->
-                updateAddNew { model | taskId = dropDownItem.id, taskText = dropDownItem.name }
+                ( updateAddNew { model | taskId = dropDownItem.id, taskText = dropDownItem.name }, False )
 
             -- Hospitilizations
             UpdateFacility2 dropDownItem ->
-                updateAddNew { model | facilityId2 = dropDownItem.id, facilityText2 = dropDownItem.name }
+                ( updateAddNew { model | facilityId2 = dropDownItem.id, facilityText2 = dropDownItem.name }, False )
 
             UpdateDateOfAdmission str ->
-                updateAddNew { model | dateOfAdmission = str }
+                ( updateAddNew { model | dateOfAdmission = str }, False )
 
             UpdateDateOfDischarge str ->
-                updateAddNew { model | dateOfDischarge = str }
+                ( updateAddNew { model | dateOfDischarge = str }, False )
 
             UpdateHospitalServiceType dropDownItem ->
-                updateAddNew { model | hospitalServiceTypeId = dropDownItem.id, hospitalServiceTypeText = dropDownItem.name }
+                ( updateAddNew { model | hospitalServiceTypeId = dropDownItem.id, hospitalServiceTypeText = dropDownItem.name }, False )
 
             UpdateDischargeRecommendations str ->
-                updateAddNew { model | dischargeRecommendations = str }
+                ( updateAddNew { model | dischargeRecommendations = str }, False )
 
             UpdateDischargePhysician dropDownItem ->
-                updateAddNew { model | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }
-
-
-updateAddNewState : AddEditDataSource -> Flags -> Model
-updateAddNewState addEditDataSource flags =
-    let
-        model =
-            emptyModel flags
-    in
-        { model | facilityId = addEditDataSource.facilityId }
+                ( updateAddNew { model | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }, False )
 
 
 formInputs : Model -> List ( String, RequiredType, InputControlType Msg )

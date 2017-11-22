@@ -9,7 +9,6 @@ import RecordAddNew.Main as RecordAddNew
 import Utils.CommonFunctions exposing (..)
 import Utils.CommonTypes exposing (..)
 import Functions exposing (..)
-import Html.Attributes exposing (class, type_)
 
 
 subscriptions : Model -> Sub Msg
@@ -86,10 +85,15 @@ update msg model =
 
         RecordAddNewMsg recordAddNewMsg ->
             let
-                ( newModel, pageCmd ) =
+                ( ( newModel, pageCmd ), isDone ) =
                     RecordAddNew.update recordAddNewMsg model.recordAddNewState
             in
-                { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
+                case isDone of
+                    True ->
+                        { model | page = RecordsPage } ! [ Cmd.map RecordsMsg (Records.init model.flags) ]
+
+                    False ->
+                        { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
 
         AddEditDataSourceLoaded (Ok t) ->
             { model | addEditDataSource = Just t } ! []

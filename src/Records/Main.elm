@@ -85,35 +85,6 @@ update msg model =
             ( model ! [], Just addEditDataSource )
 
 
-
--- let
---     newState =
---         RecordAddNew.updateAddNewState addEditDataSource model.flags
--- in
---     { model | state = RecordAddNewPage newState }
---         ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource) ]
--- UpdatePage ( pageName, dropId ) ->
---     case pageName of
---         "Records" ->
---             { model | state = RecordsPage (RecordTypes.emptyModel model.flags) } ! [ Cmd.map RecordsMsg (Records.init model.flags) ]
---         "RecordAddEdit" ->
---             case model.addEditDataSource of
---                 Just t ->
---                     if dropId == t.recordTypeId then
---                         model ! [ setLoadingStatus False ]
---                     else
---                         { model
---                             | addEditDataSource = Just { t | recordTypeId = dropId }
---                         }
---                             ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init { t | recordTypeId = dropId, setFocus = True }) ]
---                 Nothing ->
---                     model ! []
---         _ ->
---             model ! []
--- ( _, _ ) ->
---     model ! []
-
-
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
     case model.state of

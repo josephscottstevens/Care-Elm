@@ -7,6 +7,7 @@ import Http
 type Msg
     = AddNewFacility
     | AddNewPhysician
+    | LoadDataSource AddEditDataSource
     | ResetUpdateComplete (Maybe Int)
     | Save
     | SaveCompleted (Result Http.Error String)
@@ -67,6 +68,7 @@ type alias Model =
     , userText : String
     , taskId : Maybe Int
     , taskText : String
+    , addEditDataSource : Maybe AddEditDataSource
 
     -- Hospitilizations
     , hospitalizationId : Maybe Int
@@ -108,6 +110,7 @@ emptyModel flags =
     , userText = ""
     , taskId = Nothing
     , taskText = ""
+    , addEditDataSource = Nothing
 
     -- Hospitilizations
     , hospitalizationId = Nothing
