@@ -1,7 +1,6 @@
 module RecordAddNew.Functions exposing (..)
 
 import Json.Encode as Encode exposing (..)
-import Json.Decode.Pipeline exposing (..)
 import Http
 import RecordAddNew.Types exposing (..)
 import Utils.CommonTypes exposing (..)

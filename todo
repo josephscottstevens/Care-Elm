@@ -13,6 +13,16 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
+
+neat so I can Console.log in 
+	C:\Users\jstevens\.vscode\extensions\sbrink.elm-0.15.1\out\src
+C:\\Projects\\NavCare\\HC360-Integration-UserInterfaceEnhancements-Phase2-Joe\\trunk\\Care-24-7\\Care-24-7-MVC\\Scripts\\People\\app.js
+	
+	elm format is failing
+	
+	Sickkkkk, so cool that we can modify extensions so sinmply
+	
+	for extensions, see why stuff isnt lining up
 un-break _PatientProblemSelection.cshtml (Perhaps make a copy, make a alternative version)
 style checkbox, sadly... no more common for first few columns?
 

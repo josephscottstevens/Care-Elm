@@ -1,5 +1,0 @@
-{
-    "elm.makeCommand": "elm-make Src\\Main.Elm",
-    "elm.formatCommand": "elm-format Src/",
-    "elm.formatOnSave": true
-}

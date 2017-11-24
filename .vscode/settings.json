@@ -8,5 +8,9 @@
         "**/.git": true,
         "**/node_modules": true,
         "**/elm-stuff": true
-    }
+    },
+    //"elm.makeCommand": "elm-make",
+    "elm.makeSpecialFile": "Src\\Main.elm",
+    "elm.makeOutput": "C:\\Projects\\NavCare\\HC360-Integration-UserInterfaceEnhancements-Phase2-Joe\\trunk\\Care-24-7\\Care-24-7-MVC\\Scripts\\People\\app.js",
+    "elm.formatOnSave": true
 }
