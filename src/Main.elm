@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Model exposing (..)
-import Html exposing (text, div, button)
+import Html exposing (text, div)
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
 import Utils.CommonFunctions exposing (..)
