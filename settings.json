@@ -1,4 +1,5 @@
 {
-    "elm.makeCommand": ".\\node_modules\\.bin\\elm-make",
+    "elm.makeCommand": "elm-make Src\\Main.Elm",
+    "elm.formatCommand": "elm-format Src/",
     "elm.formatOnSave": true
 }
