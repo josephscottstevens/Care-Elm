@@ -160,9 +160,7 @@ common ( labelText, requiredType, controlType ) =
                     ]
 
             KnockInput syncfusionId ->
-                commonStructure
-                    [ div [ id syncfusionId ] []
-                    ]
+                div [ id syncfusionId ] []
 
             DropInputWithButton displayValue syncfusionId event buttonText ->
                 div [ class "form-group" ]

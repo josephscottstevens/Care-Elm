@@ -330,6 +330,7 @@ formInputs newRecord =
                             , ( "Hospital Service Type", Required, DropInput newRecord.hospitalServiceTypeId "HospitalServiceTypeId" )
                             , ( "Chief Complaint", Required, AreaInput newRecord.comments UpdateComments )
                             , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
+                            , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
                             , ( "Discharge Recommendations", Required, TextInput newRecord.dischargeRecommendations UpdateDischargeRecommendations )
                             , ( "Discharge Physician", Required, DropInputWithButton newRecord.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "New Provider" )
                             , ( "Secondary Facility Name", Required, DropInputWithButton newRecord.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
