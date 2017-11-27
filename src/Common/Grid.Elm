@@ -1,7 +1,7 @@
 module Common.Grid exposing (..)
 
 import Html exposing (Html, text, div, button, input, span, th, li, ul, a)
-import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked, hidden)
+import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked, hidden, id)
 import Html.Events as Events
 import Table
 import Common.Types exposing (FilterState)
@@ -63,15 +63,15 @@ standardTheadHelp event ( name, status, onClick ) =
             style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ), ( "padding-left", "5px" ) ]
 
         filterCancelStyle =
-            style [ ( "top", "22px" ), ( "right", "7%" ) ]
+            style [ ( "top", "22px" ), ( "right", "7%" ), ( "display", "none" ) ]
 
         filterContent =
             if name == "" then
                 div [] []
             else
                 div [ class "e-filterdiv e-fltrinputdiv" ]
-                    [ input [ class "e-ejinputtext e-filtertext", filterStyle, onInput name event ] []
-                    , span [ class "e-cancel e-icon", filterCancelStyle, onInputClear name event ] []
+                    [ input [ class "e-ejinputtext e-filtertext", filterStyle, onInput name event, id ("filter-" ++ name) ] []
+                    , span [ class ("e-cancel e-icon "), id ("filter-" ++ name ++ "-btn"), filterCancelStyle, onInputClear name event ] []
                     ]
     in
         th [ headerColumnClass ] [ headerContent, filterContent ]

@@ -77,6 +77,8 @@ type alias Filters =
     , staffName : String
     , fileName : String
     , reportDate : String
+
+    -- Hospitilizations: TODO
     }
 
 

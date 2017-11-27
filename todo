@@ -23,7 +23,7 @@ Get Transfer popup to show (get libc thingy)
 
 create radio button 1 of 2 for (new or existing)
 add new facility depends on roles (see AddEditRecordsPartial)
-add x button for filter
+don't show x button if no text in filter
 
 The two new buttons on hospitilizations need icons
 style the file input button
@@ -33,7 +33,6 @@ Starting loading after saving, stop after complete\error
 Hospitalizations column widths 
 looks like the active hospitilizations CSS thing is still around
 
-Perhaps the header being added will help with the whole.. where am?
 Should I add the form to breadcrumbs?
 Task column is only shown... if... there is a task? How does that work?
 bottom of grid is double width
