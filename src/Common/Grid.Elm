@@ -88,7 +88,7 @@ standardThead event headers =
 
 standardTableAttrs : String -> List (Html.Attribute msg)
 standardTableAttrs idValue =
-    [ id idValue, class "", style [ ( "width", "100%" ) ] ]
+    [ id idValue, class "", style [ ( "width", "100%" ), ( "border-bottom-style", "hidden" ) ] ]
 
 
 editColumn : (data -> Html.Attribute msg) -> Table.Column data msg
