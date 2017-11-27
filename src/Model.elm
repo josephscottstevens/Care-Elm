@@ -3,7 +3,7 @@ module Model exposing (..)
 import Billing.Types as Billing
 import Records.Types as Records
 import RecordAddNew.Types as RecordAddNew
-import Utils.CommonTypes exposing (..)
+import Common.Types exposing (..)
 import Http
 
 

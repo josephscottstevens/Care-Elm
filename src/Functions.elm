@@ -3,7 +3,7 @@ module Functions exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
-import Utils.CommonTypes exposing (..)
+import Common.Types exposing (..)
 
 
 decodeDropDownItem : Decoder DropDownItem

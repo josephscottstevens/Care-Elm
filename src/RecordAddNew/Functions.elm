@@ -3,8 +3,8 @@ module RecordAddNew.Functions exposing (..)
 import Json.Encode as Encode exposing (..)
 import Http
 import RecordAddNew.Types exposing (..)
-import Utils.CommonTypes exposing (..)
-import Utils.CommonFunctions exposing (..)
+import Common.Types exposing (..)
+import Common.Functions exposing (..)
 
 
 encodeRecord : Model -> Encode.Value

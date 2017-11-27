@@ -1,6 +1,6 @@
 module RecordAddNew.Types exposing (..)
 
-import Utils.CommonTypes exposing (..)
+import Common.Types exposing (..)
 import Http
 
 

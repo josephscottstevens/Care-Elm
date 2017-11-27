@@ -5,9 +5,9 @@ import RecordAddNew.Types exposing (..)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, id, value, type_)
 import Html.Events exposing (onClick)
-import Utils.CommonHtml exposing (..)
-import Utils.CommonTypes exposing (..)
-import Utils.CommonFunctions exposing (..)
+import Common.Html exposing (..)
+import Common.Types exposing (..)
+import Common.Functions exposing (..)
 
 
 port resetUpdate : Maybe Int -> Cmd msg

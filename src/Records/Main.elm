@@ -6,9 +6,9 @@ import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Table exposing (..)
-import Utils.CommonGrid exposing (..)
-import Utils.CommonTypes exposing (..)
-import Utils.CommonFunctions exposing (..)
+import Common.Grid exposing (..)
+import Common.Types exposing (..)
+import Common.Functions exposing (..)
 
 
 port sendMenuMessage : MenuMessage -> Cmd msg

@@ -2,7 +2,7 @@ module Records.Types exposing (..)
 
 import Table
 import Http
-import Utils.CommonTypes exposing (..)
+import Common.Types exposing (..)
 
 
 type Msg

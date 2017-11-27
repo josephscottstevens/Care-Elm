@@ -1,10 +1,10 @@
-module Utils.CommonHtml exposing (fullWidth, labelWidth, controlWidth, InputControlType(..), makeControls, getValidationErrors)
+module Common.Html exposing (fullWidth, labelWidth, controlWidth, InputControlType(..), makeControls, getValidationErrors)
 
 import Html exposing (Html, text, div, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, readonly, style)
 import Html.Events exposing (onInput, onClick, onCheck)
-import Utils.CommonFunctions exposing (..)
-import Utils.CommonTypes exposing (..)
+import Common.Functions exposing (..)
+import Common.Types exposing (..)
 
 
 forId : String -> Html.Attribute msg

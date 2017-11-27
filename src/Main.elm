@@ -5,8 +5,8 @@ import Html exposing (text, div)
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
 import RecordAddNew.Types as RecordAddNewTypes
-import Utils.CommonFunctions exposing (..)
-import Utils.CommonTypes exposing (..)
+import Common.Functions exposing (..)
+import Common.Types exposing (..)
 import Functions exposing (..)
 
 

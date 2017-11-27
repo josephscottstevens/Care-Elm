@@ -6,9 +6,9 @@ import Html exposing (Html, text, div, input, program, button, select, option, s
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)
 import Table exposing (..)
-import Utils.GridPaging exposing (..)
-import Utils.CommonGrid exposing (..)
-import Utils.CommonFunctions exposing (..)
+import Common.GridPaging exposing (..)
+import Common.Grid exposing (..)
+import Common.Functions exposing (..)
 
 
 init : Cmd Msg

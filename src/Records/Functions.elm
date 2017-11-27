@@ -4,8 +4,8 @@ import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
 import Records.Types exposing (..)
-import Utils.CommonTypes exposing (..)
-import Utils.CommonFunctions exposing (..)
+import Common.Types exposing (..)
+import Common.Functions exposing (..)
 import String exposing (toLower)
 
 

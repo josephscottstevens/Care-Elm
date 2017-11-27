@@ -18,6 +18,7 @@ fix
 	move it out to its own file, pass a bool or something (perhaps partial name?)
 
 Rename Utils to Common, and remove Common from file name
+Re-test filters, see if any missing
 There is phone number validation, any other hidden validations?
 Get Transfer popup to show (get libc thingy)
 

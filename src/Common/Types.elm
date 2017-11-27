@@ -1,4 +1,4 @@
-module Utils.CommonTypes exposing (..)
+module Common.Types exposing (..)
 
 
 type FilterState

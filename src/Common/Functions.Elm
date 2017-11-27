@@ -1,4 +1,4 @@
-port module Utils.CommonFunctions exposing (..)
+port module Common.Functions exposing (..)
 
 import Char exposing (isLower, isUpper)
 import Date

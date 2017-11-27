@@ -1,16 +1,16 @@
-module Utils.CommonGrid exposing (..)
+module Common.Grid exposing (..)
 
 import Html exposing (Html, text, div, button, input, span, th, li, ul, a)
 import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked, hidden)
 import Html.Events as Events
 import Table
-import Utils.CommonTypes exposing (DropDownState, FilterState)
+import Common.Types exposing (DropDownState, FilterState)
 import Json.Decode as Json
 
 
 onInput : String -> (FilterState -> msg) -> Html.Attribute msg
 onInput name handler =
-    Events.on "input" <| Json.map handler <| Json.map2 Utils.CommonTypes.FilterState (Json.succeed name) (Json.at [ "target", "value" ] Json.string)
+    Events.on "input" <| Json.map handler <| Json.map2 Common.Types.FilterState (Json.succeed name) (Json.at [ "target", "value" ] Json.string)
 
 
 dataTarget : String -> Html.Attribute msg

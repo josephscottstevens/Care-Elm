@@ -2,7 +2,7 @@ module Billing.Types exposing (..)
 
 import Table
 import Http
-import Utils.CommonTypes exposing (Flags)
+import Common.Types exposing (Flags)
 
 
 type Page
