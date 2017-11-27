@@ -10,7 +10,16 @@ import Json.Decode as Json
 
 onInput : String -> (FilterState -> msg) -> Html.Attribute msg
 onInput name handler =
-    Events.on "input" <| Json.map handler <| Json.map2 Common.Types.FilterState (Json.succeed name) (Json.at [ "target", "value" ] Json.string)
+    Events.on "input" <|
+        Json.map handler <|
+            Json.map2 Common.Types.FilterState (Json.succeed name) (Json.at [ "target", "value" ] Json.string)
+
+
+onInputClear : String -> (FilterState -> msg) -> Html.Attribute msg
+onInputClear name handler =
+    Events.on "click" <|
+        Json.map handler <|
+            Json.map2 Common.Types.FilterState (Json.succeed name) (Json.succeed "")
 
 
 dataTarget : String -> Html.Attribute msg
@@ -50,12 +59,19 @@ standardTheadHelp event ( name, status, onClick ) =
                     else
                         headerDiv [ text name, span [ class "glyphicon glyphicon-menu-down" ] [] ]
 
+        filterStyle =
+            style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ), ( "padding-left", "5px" ) ]
+
+        filterCancelStyle =
+            style [ ( "top", "22px" ), ( "right", "7%" ) ]
+
         filterContent =
             if name == "" then
                 div [] []
             else
                 div [ class "e-filterdiv e-fltrinputdiv" ]
-                    [ input [ class "e-ejinputtext e-filtertext", style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ) ], onInput name event ] []
+                    [ input [ class "e-ejinputtext e-filtertext", filterStyle, onInput name event ] []
+                    , span [ class "e-cancel e-icon", filterCancelStyle, onInputClear name event ] []
                     ]
     in
         th [ headerColumnClass ] [ headerContent, filterContent ]
