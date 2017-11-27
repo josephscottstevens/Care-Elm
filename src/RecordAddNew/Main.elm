@@ -62,6 +62,9 @@ port updateTask : (DropDownItem -> msg) -> Sub msg
 -- Hospitilizations
 
 
+port updateHospitilization : (DropDownItem -> msg) -> Sub msg
+
+
 port updateFacility2 : (DropDownItem -> msg) -> Sub msg
 
 
@@ -79,7 +82,7 @@ port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
 
 init : Flags -> AddEditDataSource -> Cmd Msg
 init flags addEditDataSource =
-    initSyncfusionControls (getSyncfusionMessage addEditDataSource flags.recordTypeId False)
+    initSyncfusionControls (getSyncfusionMessage addEditDataSource flags.recordTypeId False False)
 
 
 subscriptions : Sub Msg
@@ -98,6 +101,7 @@ subscriptions =
         , loadDataSourceComplete LoadDataSource
 
         -- Hospitilizations
+        , updateHospitilization UpdateHospitilization
         , updateFacility2 UpdateFacility2
         , updateDateOfAdmission UpdateDateOfAdmission
         , updateDateOfDischarge UpdateDateOfDischarge
@@ -177,10 +181,10 @@ update msg model =
             ResetUpdateComplete dropDownId ->
                 case model.addEditDataSource of
                     Just t ->
-                        ( { model | state = AddEdit } ! [ initSyncfusionControls (getSyncfusionMessage t model.recordTypeId True) ], False )
+                        ( { model | state = AddEdit } ! [ initSyncfusionControls (getSyncfusionMessage t model.recordTypeId True model.isExistingHospitilization) ], False )
 
                     Nothing ->
-                        Debug.crash "error, no drops"
+                        Debug.crash "error, no datasource"
 
             LoadDataSource addEditDataSource ->
                 ( { model | addEditDataSource = Just addEditDataSource } ! [ setLoadingStatus False ], False )
@@ -237,6 +241,15 @@ update msg model =
                 updateAddNew { model | taskId = dropDownItem.id, taskText = dropDownItem.name }
 
             -- Hospitilizations
+            UpdateIsExistingHospitilization bool ->
+                if model.isExistingHospitilization == bool then
+                    ( model ! [], False )
+                else
+                    ( { model | state = Limbo, isExistingHospitilization = bool } ! [ resetUpdate model.recordTypeId, setLoadingStatus True ], False )
+
+            UpdateHospitilization dropDownItem ->
+                updateAddNew { model | hospitalizationId = dropDownItem.id, hospitalizationText = dropDownItem.name }
+
             UpdatePatientReported bool ->
                 updateAddNew { model | patientReported = bool }
 
@@ -318,25 +331,28 @@ formInputs newRecord =
                         ++ lastColumns
 
                 Hospitalizations ->
-                    case newRecord.hospitalizationId of
-                        Just _ ->
-                            []
+                    [ ( "Existing Hospitilization", Optional, CheckInput newRecord.isExistingHospitilization UpdateIsExistingHospitilization ) ]
+                        ++ case newRecord.isExistingHospitilization of
+                            True ->
+                                [ ( "Select Hospitalization", Required, DropInput newRecord.hospitalizationId "HospitalizationsId" )
+                                ]
+                                    ++ lastColumns
 
-                        Nothing ->
-                            [ ( "Patient Reported", Optional, CheckInput UpdatePatientReported )
-                            , ( "Facility", Required, DropInputWithButton newRecord.facilityId "FacilityId" AddNewFacility "Add New Facility" )
-                            , ( "Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId" UpdateDateOfAdmission )
-                            , ( "Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId" UpdateDateOfDischarge )
-                            , ( "Hospital Service Type", Required, DropInput newRecord.hospitalServiceTypeId "HospitalServiceTypeId" )
-                            , ( "Chief Complaint", Required, AreaInput newRecord.comments UpdateComments )
-                            , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
-                            , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
-                            , ( "Discharge Recommendations", Required, TextInput newRecord.dischargeRecommendations UpdateDischargeRecommendations )
-                            , ( "Discharge Physician", Required, DropInputWithButton newRecord.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "New Provider" )
-                            , ( "Secondary Facility Name", Required, DropInputWithButton newRecord.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
-                            , ( "Secondary Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId2" UpdateDateOfAdmission )
-                            , ( "Secondary Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId2" UpdateDateOfDischarge )
-                            ]
+                            False ->
+                                [ ( "Patient Reported", Optional, CheckInput newRecord.patientReported UpdatePatientReported )
+                                , ( "Facility", Required, DropInputWithButton newRecord.facilityId "FacilityId" AddNewFacility "Add New Facility" )
+                                , ( "Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId" UpdateDateOfAdmission )
+                                , ( "Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId" UpdateDateOfDischarge )
+                                , ( "Hospital Service Type", Required, DropInput newRecord.hospitalServiceTypeId "HospitalServiceTypeId" )
+                                , ( "Chief Complaint", Required, AreaInput newRecord.comments UpdateComments )
+                                , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
+                                , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
+                                , ( "Discharge Recommendations", Required, TextInput newRecord.dischargeRecommendations UpdateDischargeRecommendations )
+                                , ( "Discharge Physician", Required, DropInputWithButton newRecord.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "New Provider" )
+                                , ( "Secondary Facility Name", Required, DropInputWithButton newRecord.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
+                                , ( "Secondary Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId2" UpdateDateOfAdmission )
+                                , ( "Secondary Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId2" UpdateDateOfDischarge )
+                                ]
 
                 CallRecordings ->
                     firstColumns

@@ -5,6 +5,7 @@ import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, h
 import Html.Events as Events
 import Table
 import Common.Types exposing (FilterState)
+import Common.Functions exposing (isAlpha)
 import Json.Decode as Json
 
 
@@ -39,8 +40,11 @@ standardTheadHelp event ( name, status, onClick ) =
         headerDiv =
             div [ headerDivClass, headerDivStyle, onClick ]
 
+        headerClassName =
+            String.filter isAlpha name
+
         headerColumnClass =
-            class ("e-columnheader e-default e-filterbarcell " ++ name ++ "-Column")
+            class ("e-columnheader e-default e-filterbarcell " ++ headerClassName ++ "-Column")
 
         headerContent =
             case status of

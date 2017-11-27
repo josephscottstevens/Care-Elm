@@ -130,6 +130,7 @@ type alias AddEditDataSource =
     , tasks : List DropDownItem
     , hospitilizationServiceTypes : List DropDownItem
     , hospitalizationDischargePhysicians : List DropDownItem
+    , hospitilizations : List DropDownItem
     }
 
 

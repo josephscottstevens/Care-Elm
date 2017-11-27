@@ -17,21 +17,15 @@ fix
 	_PatientProblemSelection.cshtml
 	move it out to its own file, pass a bool or something (perhaps partial name?)
 
-Re-test filters, see if any missing
 There is phone number validation, any other hidden validations?
-Get Transfer popup to show (get libc thingy)
 
 create radio button 1 of 2 for (new or existing)
 add new facility depends on roles (see AddEditRecordsPartial)
 
-disable checkbox in grid
 The two new buttons on hospitilizations need icons
 style the file input button
-
-Hide CCD menu item
-Starting loading after saving, stop after complete\error
-Hospitalizations column widths 
-looks like the active hospitilizations CSS thing is still around
+style manage problems
+pick better values for hospitilization dropdown display text (c# side)
 
 Should I add the form to breadcrumbs?
 Task column is only shown... if... there is a task? How does that work?

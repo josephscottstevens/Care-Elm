@@ -1,7 +1,7 @@
 module Common.Html exposing (fullWidth, labelWidth, controlWidth, InputControlType(..), makeControls, getValidationErrors)
 
 import Html exposing (Html, text, div, button, input, label, textarea)
-import Html.Attributes exposing (class, type_, id, value, for, name, readonly, style)
+import Html.Attributes exposing (class, type_, id, value, for, name, readonly, style, checked)
 import Html.Events exposing (onInput, onClick, onCheck)
 import Common.Functions exposing (..)
 import Common.Types exposing (..)
@@ -45,7 +45,7 @@ checkStyle =
 type InputControlType msg
     = TextInput String (String -> msg)
     | NumrInput Int (String -> msg)
-    | CheckInput (Bool -> msg)
+    | CheckInput Bool (Bool -> msg)
     | AreaInput String (String -> msg)
     | KnockInput String
     | DropInput (Maybe Int) String
@@ -149,9 +149,9 @@ common ( labelText, requiredType, controlType ) =
                     [ input [ type_ "number", class "e-textbox", idAttr labelText, nameAttr labelText, onInput event, value (toString displayValue) ] []
                     ]
 
-            CheckInput event ->
+            CheckInput displayValue event ->
                 commonStructure
-                    [ input [ type_ "checkbox", onCheck event, checkStyle ] []
+                    [ input [ type_ "checkbox", onCheck event, checkStyle, checked displayValue ] []
                     ]
 
             AreaInput displayValue event ->

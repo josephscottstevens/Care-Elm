@@ -29,6 +29,8 @@ type Msg
     | UpdateUser DropDownItem
     | UpdateTask DropDownItem
       -- Hospitilizations
+    | UpdateIsExistingHospitilization Bool
+    | UpdateHospitilization DropDownItem
     | UpdatePatientReported Bool
     | UpdateFacility2 DropDownItem
     | UpdateDateOfAdmission (Maybe String)
@@ -72,8 +74,10 @@ type alias Model =
     , addEditDataSource : Maybe AddEditDataSource
 
     -- Hospitilizations
+    , isExistingHospitilization : Bool
     , patientReported : Bool
     , hospitalizationId : Maybe Int
+    , hospitalizationText : String
     , facilityId2 : Maybe Int
     , facilityText2 : String
     , dateOfAdmission : Maybe String
@@ -115,8 +119,10 @@ emptyModel facilityId flags =
     , addEditDataSource = Nothing
 
     -- Hospitilizations
+    , isExistingHospitilization = False
     , patientReported = False
     , hospitalizationId = Nothing
+    , hospitalizationText = ""
     , facilityId2 = Nothing
     , facilityText2 = ""
     , dateOfAdmission = Nothing
@@ -137,6 +143,8 @@ type alias SyncfusionMessage =
     , tasks : List DropDownItem
     , hospitilizationServiceTypes : List DropDownItem
     , hospitalizationDischargePhysicians : List DropDownItem
+    , hospitilizations : List DropDownItem
     , recordTypeId : Maybe Int
     , setFocus : Bool
+    , isExistingHospitilization : Bool
     }

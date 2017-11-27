@@ -23,6 +23,7 @@ decodeModel =
         |> required "taskDropDown" (Decode.list decodeDropDownItem)
         |> required "hospitilizationServiceTypeDropdown" (Decode.list decodeDropDownItem)
         |> required "hospitalizationDischargePhysicianDropdown" (Decode.list decodeDropDownItem)
+        |> required "hospitilizations" (Decode.list decodeDropDownItem)
 
 
 request : Int -> Http.Request AddEditDataSource

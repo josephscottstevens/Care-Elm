@@ -58,8 +58,8 @@ saveForm model =
     Http.send SaveCompleted (saveFormRequest model)
 
 
-getSyncfusionMessage : AddEditDataSource -> Maybe Int -> Bool -> SyncfusionMessage
-getSyncfusionMessage addEditDataSource recordTypeId setFocus =
+getSyncfusionMessage : AddEditDataSource -> Maybe Int -> Bool -> Bool -> SyncfusionMessage
+getSyncfusionMessage addEditDataSource recordTypeId setFocus isExistingHospitilization =
     { facilityId = addEditDataSource.facilityId
     , facilities = addEditDataSource.facilities
     , recordTypes = addEditDataSource.recordTypes
@@ -67,6 +67,8 @@ getSyncfusionMessage addEditDataSource recordTypeId setFocus =
     , tasks = addEditDataSource.tasks
     , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
     , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
+    , hospitilizations = addEditDataSource.hospitilizations
     , recordTypeId = recordTypeId
     , setFocus = setFocus
+    , isExistingHospitilization = isExistingHospitilization
     }
