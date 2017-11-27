@@ -341,6 +341,7 @@ formInputs newRecord =
                             False ->
                                 [ ( "Patient Reported", Optional, CheckInput newRecord.patientReported UpdatePatientReported )
                                 , ( "Facility", Required, DropInputWithButton newRecord.facilityId "FacilityId" AddNewFacility "Add New Facility" )
+                                , ( "Category", Required, DropInput newRecord.recordTypeId "CategoryId" )
                                 , ( "Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId" UpdateDateOfAdmission )
                                 , ( "Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId" UpdateDateOfDischarge )
                                 , ( "Hospital Service Type", Required, DropInput newRecord.hospitalServiceTypeId "HospitalServiceTypeId" )

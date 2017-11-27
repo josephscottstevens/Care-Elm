@@ -6,32 +6,9 @@ QUESTIONS:
 	Previous histories shows a comment column, but doesn't have it in the edit?
 	We said to have cancel \ save on the left, where exactly on my edit form?
 	Perhaps an alternative to having inline edit grid mode... which doesn't add up to me, is a back button where new button was?
-
-	
-REQUESTED TODO:
-	put edit mode inside of grid  (but.. how?)
 	
 ===========================================================================================================
 
-fix 
-	_PatientProblemSelection.cshtml
-	move it out to its own file, pass a bool or something (perhaps partial name?)
-
-There is phone number validation, any other hidden validations?
-
-create radio button 1 of 2 for (new or existing)
-add new facility depends on roles (see AddEditRecordsPartial)
-
-The two new buttons on hospitilizations need icons
-style the file input button
-style manage problems
-pick better values for hospitilization dropdown display text (c# side)
-
-Should I add the form to breadcrumbs?
-Task column is only shown... if... there is a task? How does that work?
-bottom of grid is double width
-Create add new in edit
-Implement Hospitalizations
 there seems to be a bit of logic on transfer logic... not sure how to handle or if I am already
 
 LOW TODO:
@@ -43,6 +20,7 @@ Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super d
 remove un-used fields in MVC list type
 refactor long else if filter in load, to case of instead of if else
 the grid config doesn't really need TaskId, a column could able to get it... but... without knowing the model?
+There is phone number validation, any other hidden validations?
 
 REALLY LOW TODO:
 Would it make sense to load grid first, then fire second request to load all the dropdown info? easy enough right
@@ -59,8 +37,12 @@ Edit Button's class name is "-Column", and I am styling that class, but if we ha
 	
 Note: 
 	Type AutoPlay = Off | On {audio : Bool, withoutWifi: Bool }
-	CCD's has no edit mode? no way to insert into the grid, but you can view records?
-		CCD's has no data in prod...
+	Should I add the form to breadcrumbs?
+	
+Trying to avoid:
+	add new facility depends on roles (see AddEditRecordsPartial)
+	Task column is only shown... if... there is a task? How does that work? (let them point it out if they want it)
+	put edit mode inside of grid  (but.. how?) (REQUESTED TODO)
 	
 On Deploy Todo:
 	Validate File stuff still works
