@@ -1,7 +1,7 @@
 module Utils.CommonHtml exposing (fullWidth, labelWidth, controlWidth, InputControlType(..), makeControls, getValidationErrors)
 
 import Html exposing (Html, text, div, button, input, label, textarea)
-import Html.Attributes exposing (class, type_, id, value, for, name, readonly)
+import Html.Attributes exposing (class, type_, id, value, for, name, readonly, style)
 import Html.Events exposing (onInput, onClick, onCheck)
 import Utils.CommonFunctions exposing (..)
 import Utils.CommonTypes exposing (..)
@@ -35,6 +35,11 @@ labelWidth =
 controlWidth : String
 controlWidth =
     "col-sm-8 col-md-5 col-lg-4"
+
+
+checkStyle : Html.Attribute msg
+checkStyle =
+    style [ ( "height", "20px" ), ( "width", "20px" ), ( "margin-top", "2px" ) ]
 
 
 type InputControlType msg
@@ -146,7 +151,7 @@ common ( labelText, requiredType, controlType ) =
 
             CheckInput event ->
                 commonStructure
-                    [ input [ type_ "checkbox", onCheck event ] []
+                    [ input [ type_ "checkbox", onCheck event, checkStyle ] []
                     ]
 
             AreaInput displayValue event ->
