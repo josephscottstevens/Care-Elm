@@ -187,25 +187,51 @@ filterFields flds filterState =
             { flds | fileName = t }
         else if fieldName == "Report Date" then
             { flds | reportDate = t }
+            -- hospitilizations
+        else if fieldName == "Hospitalization ID" then
+            { flds | hospitalizationId = t }
+        else if fieldName == "Admin Date" then
+            { flds | dateOfAdmission = t }
+        else if fieldName == "Discharge Date" then
+            { flds | dateOfDischarge = t }
+        else if fieldName == "Service Type" then
+            { flds | hospitalizationServiceType = t }
+        else if fieldName == "Discharge Recommendations" then
+            { flds | recommendations = t }
+        else if fieldName == "Discharge Physician" then
+            { flds | dischargePhysician = t }
         else
             flds
 
 
 filteredRecords : Model -> List RecordRow
 filteredRecords model =
-    model.records
-        |> List.filter (\t -> String.contains model.filterFields.date (defaultLowerDateTime t.date))
-        |> List.filter (\t -> String.contains model.filterFields.provider (defaultLower t.provider))
-        |> List.filter (\t -> String.contains model.filterFields.specialty (defaultLower t.specialty))
-        |> List.filter (\t -> String.contains model.filterFields.comments (defaultLower t.comments))
-        |> List.filter (\t -> String.contains model.filterFields.dateAccessioned (defaultLowerDateTime t.dateAccessed))
-        |> List.filter (\t -> String.contains model.filterFields.provider (defaultLower t.provider))
-        |> List.filter (\t -> String.contains model.filterFields.title (defaultLower t.title))
-        |> List.filter (\t -> String.contains model.filterFields.recordingDate (toLower (dateTime t.recordingDate)))
-        |> List.filter (\t -> String.contains model.filterFields.recording (defaultLower t.recording))
-        |> List.filter (\t -> String.contains model.filterFields.taskTitle (defaultLower t.taskTitle))
-        |> List.filter (\t -> String.contains model.filterFields.enrollment (toLower (toString t.enrollment)))
-        |> List.filter (\t -> String.contains model.filterFields.hasVerbalConsent (toLower (toString t.hasVerbalConsent)))
-        |> List.filter (\t -> String.contains model.filterFields.staffName (defaultLower t.staffName))
-        |> List.filter (\t -> String.contains model.filterFields.fileName (defaultLower t.fileName))
-        |> List.filter (\t -> String.contains model.filterFields.reportDate (defaultLowerDate t.reportDate))
+    case defaultInt model.recordTypeId == 9 of
+        False ->
+            model.records
+                |> List.filter (\t -> String.contains model.filterFields.date (defaultLowerDateTime t.date))
+                |> List.filter (\t -> String.contains model.filterFields.provider (defaultLower t.provider))
+                |> List.filter (\t -> String.contains model.filterFields.specialty (defaultLower t.specialty))
+                |> List.filter (\t -> String.contains model.filterFields.comments (defaultLower t.comments))
+                |> List.filter (\t -> String.contains model.filterFields.dateAccessioned (defaultLowerDateTime t.dateAccessed))
+                |> List.filter (\t -> String.contains model.filterFields.provider (defaultLower t.provider))
+                |> List.filter (\t -> String.contains model.filterFields.title (defaultLower t.title))
+                |> List.filter (\t -> String.contains model.filterFields.recordingDate (toLower (dateTime t.recordingDate)))
+                |> List.filter (\t -> String.contains model.filterFields.recording (defaultLower t.recording))
+                |> List.filter (\t -> String.contains model.filterFields.taskTitle (defaultLower t.taskTitle))
+                |> List.filter (\t -> String.contains model.filterFields.enrollment (toLower (toString t.enrollment)))
+                |> List.filter (\t -> String.contains model.filterFields.hasVerbalConsent (toLower (toString t.hasVerbalConsent)))
+                |> List.filter (\t -> String.contains model.filterFields.staffName (defaultLower t.staffName))
+                |> List.filter (\t -> String.contains model.filterFields.fileName (defaultLower t.fileName))
+                |> List.filter (\t -> String.contains model.filterFields.reportDate (defaultLowerDate t.reportDate))
+
+        True ->
+            model.records
+                |> List.filter (\t -> String.contains model.filterFields.date (defaultLowerDateTime t.date))
+                |> List.filter (\t -> String.contains model.filterFields.hospitalizationId (defaultIntToString t.hospitalizationId))
+                |> List.filter (\t -> String.contains model.filterFields.dateOfAdmission (defaultDateTime t.dateOfAdmission))
+                |> List.filter (\t -> String.contains model.filterFields.dateOfDischarge (defaultDateTime t.dateOfDischarge))
+                |> List.filter (\t -> String.contains model.filterFields.hospitalizationServiceType (defaultLower t.hospitalizationServiceType))
+                |> List.filter (\t -> String.contains model.filterFields.recommendations (defaultLower t.recommendations))
+                |> List.filter (\t -> String.contains model.filterFields.dischargePhysician (defaultLower t.dischargePhysician))
+                |> List.filter (\t -> String.contains model.filterFields.comments (defaultLower t.comments))

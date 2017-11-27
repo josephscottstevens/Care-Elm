@@ -1,7 +1,7 @@
 module Common.Grid exposing (..)
 
 import Html exposing (Html, text, div, button, input, span, th, li, ul, a)
-import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked, hidden, id)
+import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked, hidden, id, disabled)
 import Html.Events as Events
 import Table
 import Common.Types exposing (FilterState)
@@ -119,7 +119,7 @@ checkColumnCell isChecked =
     Table.HtmlDetails []
         [ div [ class "e-checkcell" ]
             [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
-                [ input [ type_ "checkbox", checked isChecked ] []
+                [ input [ type_ "checkbox", disabled True, checked isChecked ] []
                 ]
             ]
         ]

@@ -78,7 +78,13 @@ type alias Filters =
     , fileName : String
     , reportDate : String
 
-    -- Hospitilizations: TODO
+    -- Hospitilizations:
+    , hospitalizationId : String
+    , dateOfAdmission : String
+    , dateOfDischarge : String
+    , hospitalizationServiceType : String
+    , recommendations : String
+    , dischargePhysician : String
     }
 
 
@@ -98,6 +104,14 @@ emptyFilters =
     , staffName = ""
     , fileName = ""
     , reportDate = ""
+
+    -- Hospitilizations:
+    , hospitalizationId = ""
+    , dateOfAdmission = ""
+    , dateOfDischarge = ""
+    , hospitalizationServiceType = ""
+    , recommendations = ""
+    , dischargePhysician = ""
     }
 
 

@@ -23,8 +23,8 @@ Get Transfer popup to show (get libc thingy)
 
 create radio button 1 of 2 for (new or existing)
 add new facility depends on roles (see AddEditRecordsPartial)
-don't show x button if no text in filter
 
+disable checkbox in grid
 The two new buttons on hospitilizations need icons
 style the file input button
 
