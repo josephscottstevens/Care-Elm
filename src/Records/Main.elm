@@ -198,13 +198,13 @@ rowDropDownColumn recordTypeId =
 
 
 config : (FilterState -> Msg) -> Maybe Int -> Maybe Int -> Config RecordRow Msg
-config msg recordTypeId taskId =
+config event recordTypeId taskId =
     customConfig
         { toId = \t -> toString t.id
         , toMsg = SetTableState
         , columns = getColumns recordTypeId taskId
         , customizations =
-            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = standardThead msg }
+            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = standardThead event }
         }
 
 

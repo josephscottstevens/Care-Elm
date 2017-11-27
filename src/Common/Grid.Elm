@@ -42,10 +42,6 @@ standardTheadHelp event ( name, status, onClick ) =
         headerColumnClass =
             class ("e-columnheader e-default e-filterbarcell " ++ name ++ "-Column")
 
-        -- ( fieldName, fieldText ) =
-        --     case event of
-        --         Common.Types.FilterState a b ->
-        --             ( a, b )
         headerContent =
             case status of
                 Table.Unsortable ->
@@ -82,8 +78,8 @@ standardTheadHelp event ( name, status, onClick ) =
 
 
 standardThead : (FilterState -> msg) -> List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
-standardThead msg headers =
-    Table.HtmlDetails [ class "e-gridheader e-columnheader e-hidelines" ] (List.map (standardTheadHelp msg) headers)
+standardThead event headers =
+    Table.HtmlDetails [ class "e-gridheader e-columnheader e-hidelines" ] (List.map (standardTheadHelp event) headers)
 
 
 standardTableAttrs : String -> List (Html.Attribute msg)
