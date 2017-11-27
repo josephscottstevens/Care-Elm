@@ -1,8 +1,10 @@
 module Common.Types exposing (..)
 
 
-type FilterState
-    = FilterState String String
+type alias FilterState =
+    { name : String
+    , value : String
+    }
 
 
 type RequiredType

@@ -146,10 +146,11 @@ getLoadedState model t =
 filterFields : Filters -> FilterState -> Filters
 filterFields flds filterState =
     let
-        ( fieldName, fieldText ) =
-            case filterState of
-                FilterState a b ->
-                    ( a, b )
+        fieldName =
+            filterState.name
+
+        fieldText =
+            filterState.value
 
         t =
             String.toLower fieldText

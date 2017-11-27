@@ -4,7 +4,7 @@ import Html exposing (Html, text, div, button, input, span, th, li, ul, a)
 import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked, hidden)
 import Html.Events as Events
 import Table
-import Common.Types exposing (DropDownState, FilterState)
+import Common.Types exposing (FilterState)
 import Json.Decode as Json
 
 
@@ -12,14 +12,14 @@ onInput : String -> (FilterState -> msg) -> Html.Attribute msg
 onInput name handler =
     Events.on "input" <|
         Json.map handler <|
-            Json.map2 Common.Types.FilterState (Json.succeed name) (Json.at [ "target", "value" ] Json.string)
+            Json.map2 FilterState (Json.succeed name) (Json.at [ "target", "value" ] Json.string)
 
 
 onInputClear : String -> (FilterState -> msg) -> Html.Attribute msg
 onInputClear name handler =
     Events.on "click" <|
         Json.map handler <|
-            Json.map2 Common.Types.FilterState (Json.succeed name) (Json.succeed "")
+            Json.map2 FilterState (Json.succeed name) (Json.succeed "")
 
 
 dataTarget : String -> Html.Attribute msg
@@ -42,6 +42,10 @@ standardTheadHelp event ( name, status, onClick ) =
         headerColumnClass =
             class ("e-columnheader e-default e-filterbarcell " ++ name ++ "-Column")
 
+        -- ( fieldName, fieldText ) =
+        --     case event of
+        --         Common.Types.FilterState a b ->
+        --             ( a, b )
         headerContent =
             case status of
                 Table.Unsortable ->
