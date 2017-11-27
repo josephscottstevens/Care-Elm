@@ -13,25 +13,18 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
+fix 
+	_PatientProblemSelection.cshtml
+	move it out to its own file, pass a bool or something (perhaps partial name?)
 
-neat so I can Console.log in 
-	C:\Users\jstevens\.vscode\extensions\sbrink.elm-0.15.1\out\src
-C:\\Projects\\NavCare\\HC360-Integration-UserInterfaceEnhancements-Phase2-Joe\\trunk\\Care-24-7\\Care-24-7-MVC\\Scripts\\People\\app.js
-	
-	elm format is failing
-	
-	Sickkkkk, so cool that we can modify extensions so sinmply
-	
-	for extensions, see why stuff isnt lining up
-un-break _PatientProblemSelection.cshtml (Perhaps make a copy, make a alternative version)
-style checkbox, sadly... no more common for first few columns?
-
-go to Clinical Summary -> Hospitalizations to see missing stuff
+Rename Utils to Common, and remove Common from file name
+convert checkbox to port checkbox
 There is phone number validation, any other hidden validations?
 Get Transfer popup to show (get libc thingy)
 
 create radio button 1 of 2 for (new or existing)
 add new facility depends on roles (see AddEditRecordsPartial)
+add x button for filter
 
 The two new buttons on hospitilizations need icons
 style the file input button

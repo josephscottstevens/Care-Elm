@@ -21,7 +21,7 @@ type alias Model =
     , addEditDataSource : Maybe AddEditDataSource
     , billingState : Billing.Model
     , recordsState : Records.Model
-    , recordAddNewState : RecordAddNew.Model
+    , recordAddNewState : Maybe RecordAddNew.Model
     }
 
 
@@ -43,5 +43,5 @@ emptyModel flags =
     , addEditDataSource = Nothing
     , billingState = Billing.emptyModel flags
     , recordsState = Records.emptyModel flags
-    , recordAddNewState = RecordAddNew.emptyModel flags
+    , recordAddNewState = Nothing
     }

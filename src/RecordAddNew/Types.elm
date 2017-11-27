@@ -86,8 +86,8 @@ type alias Model =
     }
 
 
-emptyModel : Flags -> Model
-emptyModel flags =
+emptyModel : Maybe Int -> Flags -> Model
+emptyModel facilityId flags =
     { state = AddEdit
     , recordId = 0
     , title = ""
@@ -102,7 +102,7 @@ emptyModel flags =
     , comments = ""
     , showValidationErrors = False
     , reportDate = Nothing
-    , facilityId = Nothing
+    , facilityId = facilityId
     , facilityText = ""
     , recording = ""
     , callSid = ""

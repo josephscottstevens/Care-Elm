@@ -4,6 +4,7 @@ import Model exposing (..)
 import Html exposing (text, div)
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
+import RecordAddNew.Types as RecordAddNewTypes
 import Utils.CommonFunctions exposing (..)
 import Utils.CommonTypes exposing (..)
 import Functions exposing (..)
@@ -57,7 +58,12 @@ view model =
             Html.map RecordsMsg (Records.view model.recordsState model.addEditDataSource)
 
         RecordAddNewPage ->
-            Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState)
+            case model.recordAddNewState of
+                Just t ->
+                    Html.map RecordAddNewMsg (RecordAddNew.view t)
+
+                Nothing ->
+                    div [] [ text "No datasource loaded" ]
 
         Error str ->
             div [] [ text str ]
@@ -76,22 +82,31 @@ update msg model =
             in
                 case addEditDataSource of
                     Just t ->
-                        { model | page = RecordAddNewPage } ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.flags t) ]
+                        { model
+                            | page = RecordAddNewPage
+                            , recordAddNewState = Just (RecordAddNewTypes.emptyModel t.facilityId model.flags)
+                        }
+                            ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.flags t) ]
 
                     Nothing ->
                         { model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ]
 
         RecordAddNewMsg recordAddNewMsg ->
-            let
-                ( ( newModel, pageCmd ), isDone ) =
-                    RecordAddNew.update recordAddNewMsg model.recordAddNewState
-            in
-                case isDone of
-                    True ->
-                        { model | page = RecordsPage } ! [ Cmd.map RecordsMsg (Records.init model.flags) ]
+            case model.recordAddNewState of
+                Just t ->
+                    let
+                        ( ( newModel, pageCmd ), isDone ) =
+                            RecordAddNew.update recordAddNewMsg t
+                    in
+                        case isDone of
+                            True ->
+                                { model | page = RecordsPage } ! [ Cmd.map RecordsMsg (Records.init model.flags) ]
 
-                    False ->
-                        { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
+                            False ->
+                                { model | recordAddNewState = Just newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
+
+                Nothing ->
+                    { model | page = Error "Can't display this page without a datasource" } ! []
 
         AddEditDataSourceLoaded (Ok t) ->
             { model | addEditDataSource = Just t } ! []
