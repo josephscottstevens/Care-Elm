@@ -33,8 +33,8 @@ type alias InitRecordAddNew =
     }
 
 
-getSyncfusionMessage : AddEditDataSource -> Maybe Int -> Bool -> Bool -> InitRecordAddNew
-getSyncfusionMessage addEditDataSource recordTypeId setFocus isExistingHospitilization =
+getAddEditMsg : AddEditDataSource -> Maybe Int -> Bool -> Bool -> InitRecordAddNew
+getAddEditMsg addEditDataSource recordTypeId setFocus isExistingHospitilization =
     { facilityId = addEditDataSource.facilityId
     , facilities = addEditDataSource.facilities
     , recordTypes = addEditDataSource.recordTypes

@@ -138,7 +138,7 @@ update msg model =
                 RecordAddNew ->
                     case model.addEditDataSource of
                         Just addEditDataSource ->
-                            { model | page = RecordAddNew } ! [ setPage (getSyncfusionMessage addEditDataSource model.recordAddNewState.recordTypeId False False) ]
+                            { model | page = RecordAddNew } ! [ setPage (getAddEditMsg addEditDataSource model.recordAddNewState.recordTypeId False False) ]
 
                         Nothing ->
                             { model | page = Error "Can't display this page without a datasource" } ! []
