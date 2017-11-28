@@ -25,6 +25,8 @@ type Msg
     | RecordAddNewMsg RecordAddNew.Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | HospitilizationsMsg Hospitilizations.Msg
+    | PageLoadStart String
+    | PageLoadComplete String
 
 
 emptyModel : Flags -> Model

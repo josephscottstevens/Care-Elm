@@ -10,6 +10,47 @@ type Page
     | Error String
 
 
+getPage : String -> Page
+getPage page =
+    case page of
+        "Billing" ->
+            Billing
+
+        "Records" ->
+            Records
+
+        "RecordAddNew" ->
+            RecordAddNew Nothing
+
+        "Hospitilizations" ->
+            Hospitilizations
+
+        _ ->
+            Error "Page not found"
+
+
+pageToString : Page -> String
+pageToString page =
+    case page of
+        None ->
+            "None"
+
+        Billing ->
+            "Billing"
+
+        Records ->
+            "Records"
+
+        RecordAddNew _ ->
+            "RecordAddNew"
+
+        Hospitilizations ->
+            "Hospitilizations"
+
+        Error _ ->
+            "Error"
+
+
 type alias FilterState =
     { name : String
     , value : String

@@ -9,6 +9,7 @@ import Common.Functions exposing (..)
 import Common.Types exposing (..)
 import Functions exposing (..)
 import Ports exposing (..)
+import Task
 
 
 subscriptions : Model -> Sub Msg
@@ -16,6 +17,8 @@ subscriptions _ =
     Sub.batch
         [ Sub.map RecordsMsg Records.subscriptions
         , Sub.map RecordAddNewMsg RecordAddNew.subscriptions
+        , initComplete PageLoadComplete
+        , initStartComplete PageLoadStart
         ]
 
 
@@ -79,17 +82,7 @@ update msg model =
         handle maybePage t =
             case maybePage of
                 Just page ->
-                    case page of
-                        RecordAddNew recordTypeId ->
-                            case model.addEditDataSource of
-                                Just addEditDataSource ->
-                                    { model | page = None } ! [ initRecordAddNew (getSyncfusionMessage addEditDataSource recordTypeId False False) ]
-
-                                Nothing ->
-                                    model ! []
-
-                        _ ->
-                            model ! []
+                    { model | page = None } ! [ initStart (pageToString page) ]
 
                 Nothing ->
                     t
@@ -103,15 +96,7 @@ update msg model =
                     ( ( newModel, pageCmd ), nextPage ) =
                         Records.update recordsMsg model.recordsState
                 in
-                    -- case nextPage of
-                    --     Just t ->
-                    --         { model
-                    --             | page = RecordAddNew Nothing
-                    --             , recordAddNewState = Just (RecordAddNewTypes.emptyModel t.facilityId model.flags)
-                    --         }
-                    --             ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.flags t) ]
-                    --     Nothing ->
-                    { model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ]
+                    handle nextPage ({ model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ])
 
             RecordAddNewMsg recordAddNewMsg ->
                 -- case model.recordAddNewState of
@@ -126,8 +111,6 @@ update msg model =
                     --     False ->
                     { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
 
-            -- Nothing ->
-            --     { model | page = Error "Can't display this page without a datasource" } ! []
             HospitilizationsMsg hospitilizationsMsg ->
                 let
                     ( ( newModel, pageCmd ), isDone ) =
@@ -140,3 +123,19 @@ update msg model =
 
             AddEditDataSourceLoaded (Err httpError) ->
                 { model | page = Error (toString httpError) } ! [ setLoadingStatus False ]
+
+            PageLoadStart pageStr ->
+                { model | page = getPage pageStr } ! [ setLoadingStatus False ]
+
+            PageLoadComplete page ->
+                case getPage page of
+                    RecordAddNew recordTypeId ->
+                        case model.addEditDataSource of
+                            Just addEditDataSource ->
+                                model ! [ initRecordAddNew (getSyncfusionMessage addEditDataSource recordTypeId False False) ]
+
+                            Nothing ->
+                                { model | page = Error "Can't display this page without a datasource" } ! []
+
+                    _ ->
+                        model ! []

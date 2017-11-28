@@ -6,7 +6,16 @@ import Common.Types exposing (..)
 port resetUpdate : Maybe Int -> Cmd msg
 
 
+port initStart : String -> Cmd msg
+
+
+port initStartComplete : (String -> msg) -> Sub msg
+
+
 port initRecordAddNew : InitRecordAddNew -> Cmd msg
+
+
+port initComplete : (String -> msg) -> Sub msg
 
 
 type alias InitRecordAddNew =

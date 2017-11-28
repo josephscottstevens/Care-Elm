@@ -81,7 +81,7 @@ view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
     div []
         [ case addEditDataSource of
-            Just t ->
+            Just _ ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
 
             Nothing ->
