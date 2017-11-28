@@ -8,22 +8,13 @@ import Common.Types exposing (..)
 import Http
 
 
-type Page
-    = NoPage
-    | BillingPage
-    | RecordsPage
-    | RecordAddNewPage
-    | HospitilizationsPage
-    | Error String
-
-
 type alias Model =
     { page : Page
     , flags : Flags
     , addEditDataSource : Maybe AddEditDataSource
     , billingState : Billing.Model
     , recordsState : Records.Model
-    , recordAddNewState : Maybe RecordAddNew.Model
+    , recordAddNewState : RecordAddNew.Model
     , hospitalizationsState : Hospitilizations.Model
     }
 
@@ -38,11 +29,11 @@ type Msg
 
 emptyModel : Flags -> Model
 emptyModel flags =
-    { page = NoPage
+    { page = None
     , flags = flags
     , addEditDataSource = Nothing
     , billingState = Billing.emptyModel flags
     , recordsState = Records.emptyModel flags
-    , recordAddNewState = Nothing
+    , recordAddNewState = RecordAddNew.emptyModel flags
     , hospitalizationsState = Hospitilizations.emptyModel flags
     }

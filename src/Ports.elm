@@ -6,6 +6,38 @@ import Common.Types exposing (..)
 port resetUpdate : Maybe Int -> Cmd msg
 
 
+port initRecordAddNew : InitRecordAddNew -> Cmd msg
+
+
+type alias InitRecordAddNew =
+    { facilityId : Maybe Int
+    , facilities : List DropDownItem
+    , recordTypes : List DropDownItem
+    , users : List DropDownItem
+    , tasks : List DropDownItem
+    , hospitilizationServiceTypes : List DropDownItem
+    , hospitalizationDischargePhysicians : List DropDownItem
+    , hospitilizations : List DropDownItem
+    , recordTypeId : Maybe Int
+    , setFocus : Bool
+    , isExistingHospitilization : Bool
+    }
+
+
+getSyncfusionMessage : AddEditDataSource -> Maybe Int -> Bool -> Bool -> InitRecordAddNew
+getSyncfusionMessage addEditDataSource recordTypeId setFocus isExistingHospitilization =
+    { facilityId = addEditDataSource.facilityId
+    , facilities = addEditDataSource.facilities
+    , recordTypes = addEditDataSource.recordTypes
+    , users = addEditDataSource.users
+    , tasks = addEditDataSource.tasks
+    , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
+    , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
+    , hospitilizations = addEditDataSource.hospitilizations
+    , recordTypeId = recordTypeId
+    , setFocus = setFocus
+    , isExistingHospitilization = isExistingHospitilization
+    }
 
 
 port toggleConsent : Bool -> Cmd msg

@@ -8,7 +8,6 @@ type Msg
     = AddNewFacility
     | AddNewPhysician
     | LoadDataSource AddEditDataSource
-    | ResetUpdateComplete (Maybe Int)
     | Save
     | SaveCompleted (Result Http.Error String)
     | Cancel
@@ -40,15 +39,8 @@ type Msg
     | UpdateDischargePhysician DropDownItem
 
 
-type ModelState
-    = AddEdit
-    | Limbo
-    | Error String
-
-
 type alias Model =
-    { state : ModelState
-    , recordId : Int
+    { recordId : Int
     , title : String
     , patientId : Int
     , recordTypeId : Maybe Int
@@ -90,10 +82,9 @@ type alias Model =
     }
 
 
-emptyModel : Maybe Int -> Flags -> Model
-emptyModel facilityId flags =
-    { state = AddEdit
-    , recordId = 0
+emptyModel : Flags -> Model
+emptyModel flags =
+    { recordId = 0
     , title = ""
     , patientId = flags.patientId
     , recordTypeId = flags.recordTypeId
@@ -106,7 +97,7 @@ emptyModel facilityId flags =
     , comments = ""
     , showValidationErrors = False
     , reportDate = Nothing
-    , facilityId = facilityId
+    , facilityId = Nothing
     , facilityText = ""
     , recording = ""
     , callSid = ""
@@ -132,19 +123,4 @@ emptyModel facilityId flags =
     , dischargeRecommendations = ""
     , dischargePhysicianId = Nothing
     , dischargePhysicianText = ""
-    }
-
-
-type alias SyncfusionMessage =
-    { facilityId : Maybe Int
-    , facilities : List DropDownItem
-    , recordTypes : List DropDownItem
-    , users : List DropDownItem
-    , tasks : List DropDownItem
-    , hospitilizationServiceTypes : List DropDownItem
-    , hospitalizationDischargePhysicians : List DropDownItem
-    , hospitilizations : List DropDownItem
-    , recordTypeId : Maybe Int
-    , setFocus : Bool
-    , isExistingHospitilization : Bool
     }

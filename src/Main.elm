@@ -4,11 +4,11 @@ import Model exposing (..)
 import Html exposing (text, div)
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
-import RecordAddNew.Types as RecordAddNewTypes
 import Hospitilizations.Main as Hospitilizations
 import Common.Functions exposing (..)
 import Common.Types exposing (..)
 import Functions exposing (..)
+import Ports exposing (..)
 
 
 subscriptions : Model -> Sub Msg
@@ -26,14 +26,14 @@ init flags =
             emptyModel flags
     in
         if flags.pageFlag == "billing" then
-            { model | page = BillingPage } ! []
+            { model | page = Billing } ! []
         else if flags.pageFlag == "records" then
-            { model | page = RecordsPage }
+            { model | page = Records }
                 ! [ Cmd.map RecordsMsg (Records.init flags)
                   , getDropDowns flags.patientId AddEditDataSourceLoaded
                   ]
         else if flags.pageFlag == "hospitilizations" then
-            { model | page = HospitilizationsPage }
+            { model | page = Hospitilizations }
                 ! [ Cmd.map HospitilizationsMsg (Hospitilizations.init flags)
                   , getDropDowns flags.patientId AddEditDataSourceLoaded
                   ]
@@ -54,24 +54,19 @@ main =
 view : Model -> Html.Html Msg
 view model =
     case model.page of
-        NoPage ->
+        None ->
             div [] []
 
-        BillingPage ->
+        Billing ->
             div [] []
 
-        RecordsPage ->
+        Records ->
             Html.map RecordsMsg (Records.view model.recordsState model.addEditDataSource)
 
-        RecordAddNewPage ->
-            case model.recordAddNewState of
-                Just t ->
-                    Html.map RecordAddNewMsg (RecordAddNew.view t)
+        RecordAddNew _ ->
+            Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState)
 
-                Nothing ->
-                    div [] [ text "No datasource loaded" ]
-
-        HospitilizationsPage ->
+        Hospitilizations ->
             Html.map HospitilizationsMsg (Hospitilizations.view model.hospitalizationsState model.addEditDataSource)
 
         Error str ->
@@ -80,52 +75,68 @@ view model =
 
 update : Msg -> Model -> ( Model, Cmd Model.Msg )
 update msg model =
-    case msg of
-        BillingMsg billingMsg ->
-            model ! []
+    let
+        handle maybePage t =
+            case maybePage of
+                Just page ->
+                    case page of
+                        RecordAddNew recordTypeId ->
+                            case model.addEditDataSource of
+                                Just addEditDataSource ->
+                                    { model | page = None } ! [ initRecordAddNew (getSyncfusionMessage addEditDataSource recordTypeId False False) ]
 
-        RecordsMsg recordsMsg ->
-            let
-                ( ( newModel, pageCmd ), addEditDataSource ) =
-                    Records.update recordsMsg model.recordsState
-            in
-                case addEditDataSource of
-                    Just t ->
-                        { model
-                            | page = RecordAddNewPage
-                            , recordAddNewState = Just (RecordAddNewTypes.emptyModel t.facilityId model.flags)
-                        }
-                            ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.flags t) ]
+                                Nothing ->
+                                    model ! []
 
-                    Nothing ->
-                        { model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ]
-
-        RecordAddNewMsg recordAddNewMsg ->
-            case model.recordAddNewState of
-                Just t ->
-                    let
-                        ( ( newModel, pageCmd ), isDone ) =
-                            RecordAddNew.update recordAddNewMsg t
-                    in
-                        case isDone of
-                            True ->
-                                { model | page = RecordsPage } ! [ Cmd.map RecordsMsg (Records.init model.flags) ]
-
-                            False ->
-                                { model | recordAddNewState = Just newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
+                        _ ->
+                            model ! []
 
                 Nothing ->
-                    { model | page = Error "Can't display this page without a datasource" } ! []
+                    t
+    in
+        case msg of
+            BillingMsg billingMsg ->
+                model ! []
 
-        HospitilizationsMsg hospitilizationsMsg ->
-            let
-                ( ( newModel, pageCmd ), isDone ) =
-                    Hospitilizations.update hospitilizationsMsg model.hospitalizationsState
-            in
-                { model | hospitalizationsState = newModel } ! [ Cmd.map HospitilizationsMsg pageCmd ]
+            RecordsMsg recordsMsg ->
+                let
+                    ( ( newModel, pageCmd ), nextPage ) =
+                        Records.update recordsMsg model.recordsState
+                in
+                    -- case nextPage of
+                    --     Just t ->
+                    --         { model
+                    --             | page = RecordAddNew Nothing
+                    --             , recordAddNewState = Just (RecordAddNewTypes.emptyModel t.facilityId model.flags)
+                    --         }
+                    --             ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.flags t) ]
+                    --     Nothing ->
+                    { model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ]
 
-        AddEditDataSourceLoaded (Ok t) ->
-            { model | addEditDataSource = Just t } ! []
+            RecordAddNewMsg recordAddNewMsg ->
+                -- case model.recordAddNewState of
+                --     Just t ->
+                let
+                    ( ( newModel, pageCmd ), isDone ) =
+                        RecordAddNew.update recordAddNewMsg model.recordAddNewState
+                in
+                    -- case isDone of
+                    --     True ->
+                    --         { model | page = Records } ! [ Cmd.map RecordsMsg (Records.init model.flags) ]
+                    --     False ->
+                    { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
 
-        AddEditDataSourceLoaded (Err httpError) ->
-            { model | page = Error (toString httpError) } ! [ setLoadingStatus False ]
+            -- Nothing ->
+            --     { model | page = Error "Can't display this page without a datasource" } ! []
+            HospitilizationsMsg hospitilizationsMsg ->
+                let
+                    ( ( newModel, pageCmd ), isDone ) =
+                        Hospitilizations.update hospitilizationsMsg model.hospitalizationsState
+                in
+                    { model | hospitalizationsState = newModel } ! [ Cmd.map HospitilizationsMsg pageCmd ]
+
+            AddEditDataSourceLoaded (Ok t) ->
+                { model | addEditDataSource = Just t } ! []
+
+            AddEditDataSourceLoaded (Err httpError) ->
+                { model | page = Error (toString httpError) } ! [ setLoadingStatus False ]

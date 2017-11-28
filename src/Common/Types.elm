@@ -1,6 +1,15 @@
 module Common.Types exposing (..)
 
 
+type Page
+    = None
+    | Billing
+    | Records
+    | RecordAddNew (Maybe Int)
+    | Hospitilizations
+    | Error String
+
+
 type alias FilterState =
     { name : String
     , value : String
@@ -132,22 +141,3 @@ type alias AddEditDataSource =
     , hospitalizationDischargePhysicians : List DropDownItem
     , hospitilizations : List DropDownItem
     }
-
-
-type Page
-    = Billing
-    | Records
-    | RecordAddNew (Maybe Int)
-
-
-pageToString : Page -> ( String, Maybe Int )
-pageToString page =
-    case page of
-        Billing ->
-            ( "Billing", Nothing )
-
-        Records ->
-            ( "Records", Nothing )
-
-        RecordAddNew t ->
-            ( "RecordAddNew", t )

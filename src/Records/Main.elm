@@ -28,20 +28,23 @@ init flags =
     getRecords flags.patientId flags.recordTypeId Load
 
 
-update : Msg -> Model -> ( ( Model, Cmd Msg ), Maybe AddEditDataSource )
+update : Msg -> Model -> ( ( Model, Cmd Msg ), Maybe Page )
 update msg model =
     case msg of
         Load (Ok t) ->
             ( getLoadedState model t ! [ setLoadingStatus False ], Nothing )
 
-        Load (Err httpError) ->
-            ( { model | state = Error (toString httpError) } ! [ setLoadingStatus False ], Nothing )
+        Load (Err t) ->
+            ( model ! [ setLoadingStatus False ], error t )
 
         SetTableState newState ->
             ( { model | tableState = newState } ! [], Nothing )
 
         SendMenuMessage recordId messageType ->
-            ( { model | records = flipConsent model.records recordId model.recordTypeId } ! [ sendMenuMessage (getMenuMessage model recordId messageType) ], Nothing )
+            ( { model | records = flipConsent model.records recordId model.recordTypeId }
+                ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
+            , Nothing
+            )
 
         DropDownToggle recordId ->
             ( { model | records = flipDropDownOpen model.records recordId } ! [], Nothing )
@@ -61,8 +64,8 @@ update msg model =
                 Nothing ->
                     ( model ! [ displaySuccessMessage "Record deleted successfully!" ], Nothing )
 
-        DeleteCompleted (Err httpError) ->
-            ( { model | state = Error (toString httpError) } ! [], Nothing )
+        DeleteCompleted (Err t) ->
+            ( model ! [], error t )
 
         EditTask taskId ->
             ( model ! [ editTask taskId ], Nothing )
@@ -70,30 +73,22 @@ update msg model =
         SetFilter filterState ->
             ( { model | filterFields = filterFields model.filterFields filterState } ! [], Nothing )
 
-        AddNewStart addEditDataSource ->
-            ( model ! [], Just addEditDataSource )
+        AddNewStart ->
+            ( model ! [], Just (RecordAddNew model.recordTypeId) )
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
-    case model.state of
-        Grid ->
-            div []
-                [ case addEditDataSource of
-                    Just t ->
-                        button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick (AddNewStart t) ] [ text "New Record" ]
+    div []
+        [ case addEditDataSource of
+            Just t ->
+                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
 
-                    Nothing ->
-                        button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
-                , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config SetFilter model.recordTypeId (updateTaskId model)) model.tableState (filteredRecords model) ]
-                ]
-
-        Limbo ->
-            div [] []
-
-        Error errMessage ->
-            div [] [ text errMessage ]
+            Nothing ->
+                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
+        , div [ class "e-grid e-js e-waitingpopup" ]
+            [ Table.view (config SetFilter model.recordTypeId (updateTaskId model)) model.tableState (filteredRecords model) ]
+        ]
 
 
 getColumns : Maybe Int -> Maybe Int -> List (Column RecordRow Msg)

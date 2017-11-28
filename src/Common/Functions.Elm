@@ -5,6 +5,8 @@ import Date
 import Date.Extra
 import Json.Encode as Encode
 import Json.Decode exposing (..)
+import Common.Types exposing (..)
+import Http
 
 
 port setLoadingStatus : Bool -> Cmd msg
@@ -14,6 +16,11 @@ port displaySuccessMessage : String -> Cmd msg
 
 
 port displayErrorMessage : String -> Cmd msg
+
+
+error : Http.Error -> Maybe Page
+error httpError =
+    Just (Error (toString httpError))
 
 
 isAlpha : Char -> Bool

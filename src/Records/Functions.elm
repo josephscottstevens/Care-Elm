@@ -133,8 +133,7 @@ flipDropDownOpen records recordId =
 getLoadedState : Model -> WebResponse -> Model
 getLoadedState model t =
     { model
-        | state = Grid
-        , facilityId = t.facilityId
+        | facilityId = t.facilityId
         , records = t.records
     }
 

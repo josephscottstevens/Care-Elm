@@ -11,14 +11,6 @@ import Common.Functions exposing (..)
 import Ports exposing (..)
 
 
-port initSyncfusionControls : SyncfusionMessage -> Cmd msg
-
-
-init : Flags -> AddEditDataSource -> Cmd Msg
-init flags addEditDataSource =
-    initSyncfusionControls (getSyncfusionMessage addEditDataSource flags.recordTypeId False False)
-
-
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
@@ -31,7 +23,6 @@ subscriptions =
         , updateRecordingDate UpdateRecordingDate
         , updateUser UpdateUser
         , updateTask UpdateTask
-        , resetUpdateComplete ResetUpdateComplete
         , loadDataSourceComplete LoadDataSource
 
         -- Hospitilizations
@@ -46,88 +37,72 @@ subscriptions =
 
 view : Model -> Html Msg
 view model =
-    case model.state of
-        AddEdit ->
-            let
-                errors =
-                    getValidationErrors (formInputs model)
+    let
+        errors =
+            getValidationErrors (formInputs model)
 
-                validationErrorsDiv =
-                    if model.showValidationErrors == True && List.length errors > 0 then
-                        div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
-                    else
-                        div [] []
+        validationErrorsDiv =
+            if model.showValidationErrors == True && List.length errors > 0 then
+                div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
+            else
+                div [] []
 
-                saveBtnClass =
-                    class "btn btn-sm btn-success margin-left-5 pull-right"
-            in
-                div [ class "form-horizontal" ]
-                    [ validationErrorsDiv
-                    , makeControls (formInputs model)
-                    , div [ class "form-group" ]
-                        [ div [ class fullWidth ]
-                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick Save, saveBtnClass ] [ text "Save" ]
-                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
-                            ]
-                        ]
+        saveBtnClass =
+            class "btn btn-sm btn-success margin-left-5 pull-right"
+    in
+        div [ class "form-horizontal" ]
+            [ validationErrorsDiv
+            , makeControls (formInputs model)
+            , div [ class "form-group" ]
+                [ div [ class fullWidth ]
+                    [ button [ type_ "button", id "Save", value "AddNewRecord", onClick Save, saveBtnClass ] [ text "Save" ]
+                    , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
                     ]
-
-        Limbo ->
-            div [] []
-
-        Error str ->
-            div [] [ text str ]
+                ]
+            ]
 
 
-update : Msg -> Model -> ( ( Model, Cmd Msg ), Bool )
+update : Msg -> Model -> ( ( Model, Cmd Msg ), Maybe Page )
 update msg model =
     let
         updateAddNew t =
-            ( t ! [ setUnsavedChanges True ], False )
+            ( t ! [ setUnsavedChanges True ], Nothing )
     in
         case msg of
             AddNewFacility ->
-                ( model ! [ addNewFacility Nothing ], False )
+                ( model ! [ addNewFacility Nothing ], Nothing )
 
             AddNewPhysician ->
-                ( model ! [ addNewPhysician Nothing ], False )
+                ( model ! [ addNewPhysician Nothing ], Nothing )
 
             Save ->
                 if List.length (getValidationErrors (formInputs model)) > 0 then
-                    ( { model | showValidationErrors = True } ! [], False )
+                    ( { model | showValidationErrors = True } ! [], Nothing )
                 else
-                    ( model ! [ saveForm model, setUnsavedChanges False ], False )
+                    ( model ! [ saveForm model, setUnsavedChanges False ], Nothing )
 
             SaveCompleted (Ok responseMsg) ->
                 case getResponseError responseMsg of
                     Just t ->
-                        ( model ! [ displayErrorMessage t ], False )
+                        ( model ! [ displayErrorMessage t ], Nothing )
 
                     Nothing ->
-                        ( model ! [ displaySuccessMessage "Save completed successfully!" ], True )
+                        ( model ! [ displaySuccessMessage "Save completed successfully!" ], Just Records )
 
-            SaveCompleted (Err httpError) ->
-                ( { model | state = Error (toString httpError) } ! [ setLoadingStatus False ], False )
+            SaveCompleted (Err t) ->
+                ( model ! [ setLoadingStatus False ], error t )
 
             Cancel ->
-                ( model ! [ setUnsavedChanges False ], True )
-
-            ResetUpdateComplete dropDownId ->
-                case model.addEditDataSource of
-                    Just t ->
-                        ( { model | state = AddEdit } ! [ initSyncfusionControls (getSyncfusionMessage t model.recordTypeId True model.isExistingHospitilization) ], False )
-
-                    Nothing ->
-                        Debug.crash "error, no datasource"
+                ( model ! [ setUnsavedChanges False ], Just Records )
 
             LoadDataSource addEditDataSource ->
-                ( { model | addEditDataSource = Just addEditDataSource } ! [ setLoadingStatus False ], False )
+                ( { model | addEditDataSource = Just addEditDataSource } ! [ setLoadingStatus False ], Nothing )
 
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then
-                    ( model ! [], False )
+                    ( model ! [], Nothing )
                 else
-                    ( { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ], False )
+                    ( { model | recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ], Nothing )
 
             UpdateTitle str ->
                 updateAddNew { model | title = str }
@@ -177,9 +152,9 @@ update msg model =
             -- Hospitilizations
             UpdateIsExistingHospitilization bool ->
                 if model.isExistingHospitilization == bool then
-                    ( model ! [], False )
+                    ( model ! [], Nothing )
                 else
-                    ( { model | state = Limbo, isExistingHospitilization = bool } ! [ resetUpdate model.recordTypeId, setLoadingStatus True ], False )
+                    ( { model | isExistingHospitilization = bool } ! [ resetUpdate model.recordTypeId, setLoadingStatus True ], Nothing )
 
             UpdateHospitilization dropDownItem ->
                 updateAddNew { model | hospitalizationId = dropDownItem.id, hospitalizationText = dropDownItem.name }

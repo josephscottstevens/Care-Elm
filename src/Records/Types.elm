@@ -14,13 +14,7 @@ type Msg
     | EditTask Int
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
-    | AddNewStart AddEditDataSource
-
-
-type ModelState
-    = Grid
-    | Limbo
-    | Error String
+    | AddNewStart
 
 
 type SortMode
@@ -36,8 +30,7 @@ type alias WebResponse =
 
 
 type alias Model =
-    { state : ModelState
-    , records : List RecordRow
+    { records : List RecordRow
     , patientId : Int
     , facilityId : Maybe Int
     , recordTypeId : Maybe Int
@@ -50,8 +43,7 @@ type alias Model =
 
 emptyModel : Flags -> Model
 emptyModel flags =
-    { state = Grid
-    , records = []
+    { records = []
     , patientId = flags.patientId
     , facilityId = Nothing
     , recordTypeId = flags.recordTypeId

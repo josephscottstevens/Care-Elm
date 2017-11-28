@@ -10,7 +10,7 @@ type Msg
     | SetTableState Table.State
     | SetFilter FilterState
     | EditTask Int
-    | AddNewStart AddEditDataSource
+    | AddNewStart
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
 

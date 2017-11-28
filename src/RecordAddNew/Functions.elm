@@ -5,6 +5,7 @@ import Http
 import RecordAddNew.Types exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
+import Ports
 
 
 encodeRecord : Model -> Encode.Value
@@ -56,19 +57,3 @@ saveFormRequest model =
 saveForm : Model -> Cmd Msg
 saveForm model =
     Http.send SaveCompleted (saveFormRequest model)
-
-
-getSyncfusionMessage : AddEditDataSource -> Maybe Int -> Bool -> Bool -> SyncfusionMessage
-getSyncfusionMessage addEditDataSource recordTypeId setFocus isExistingHospitilization =
-    { facilityId = addEditDataSource.facilityId
-    , facilities = addEditDataSource.facilities
-    , recordTypes = addEditDataSource.recordTypes
-    , users = addEditDataSource.users
-    , tasks = addEditDataSource.tasks
-    , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
-    , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
-    , hospitilizations = addEditDataSource.hospitilizations
-    , recordTypeId = recordTypeId
-    , setFocus = setFocus
-    , isExistingHospitilization = isExistingHospitilization
-    }
