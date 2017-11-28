@@ -6,7 +6,6 @@ import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
 import RecordAddNew.Types as RecordAddNewTypes
 import Hospitilizations.Main as Hospitilizations
-import Hospitilizations.Types as HospitilizationsTypes
 import Common.Functions exposing (..)
 import Common.Types exposing (..)
 import Functions exposing (..)
