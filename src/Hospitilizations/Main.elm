@@ -9,18 +9,7 @@ import Table exposing (..)
 import Common.Grid exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
-
-
-port toggleConsent : Bool -> Cmd msg
-
-
-port editTask : Int -> Cmd msg
-
-
-port dropDownToggle : (Int -> msg) -> Sub msg
-
-
-port deleteConfirmed : (Int -> msg) -> Sub msg
+import Ports exposing (..)
 
 
 subscriptions : Sub Msg

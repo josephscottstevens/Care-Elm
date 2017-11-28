@@ -3,7 +3,7 @@ module Model exposing (..)
 import Billing.Types as Billing
 import Records.Types as Records
 import RecordAddNew.Types as RecordAddNew
-import Hospitilizations.Types as Hospitalizations
+import Hospitilizations.Types as Hospitilizations
 import Common.Types exposing (..)
 import Http
 
@@ -13,6 +13,7 @@ type Page
     | BillingPage
     | RecordsPage
     | RecordAddNewPage
+    | HospitilizationsPage
     | Error String
 
 
@@ -23,7 +24,7 @@ type alias Model =
     , billingState : Billing.Model
     , recordsState : Records.Model
     , recordAddNewState : Maybe RecordAddNew.Model
-    , hospitalizationsState : Maybe Hospitalizations.Model
+    , hospitalizationsState : Hospitilizations.Model
     }
 
 
@@ -32,10 +33,7 @@ type Msg
     | RecordsMsg Records.Msg
     | RecordAddNewMsg RecordAddNew.Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
-
-
-
--- | UpdatePage ( String, Maybe Int )
+    | HospitilizationsMsg Hospitilizations.Msg
 
 
 emptyModel : Flags -> Model
@@ -46,5 +44,5 @@ emptyModel flags =
     , billingState = Billing.emptyModel flags
     , recordsState = Records.emptyModel flags
     , recordAddNewState = Nothing
-    , hospitalizationsState = Hospitalizations.emptyModel flags
+    , hospitalizationsState = Hospitilizations.emptyModel flags
     }

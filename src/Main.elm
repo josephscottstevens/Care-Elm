@@ -5,6 +5,8 @@ import Html exposing (text, div)
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
 import RecordAddNew.Types as RecordAddNewTypes
+import Hospitilizations.Main as Hospitilizations
+import Hospitilizations.Types as HospitilizationsTypes
 import Common.Functions exposing (..)
 import Common.Types exposing (..)
 import Functions exposing (..)
@@ -29,6 +31,11 @@ init flags =
         else if flags.pageFlag == "records" then
             { model | page = RecordsPage }
                 ! [ Cmd.map RecordsMsg (Records.init flags)
+                  , getDropDowns flags.patientId AddEditDataSourceLoaded
+                  ]
+        else if flags.pageFlag == "hospitilizations" then
+            { model | page = HospitilizationsPage }
+                ! [ Cmd.map HospitilizationsMsg (Hospitilizations.init flags)
                   , getDropDowns flags.patientId AddEditDataSourceLoaded
                   ]
         else
@@ -64,6 +71,9 @@ view model =
 
                 Nothing ->
                     div [] [ text "No datasource loaded" ]
+
+        HospitilizationsPage ->
+            Html.map HospitilizationsMsg (Hospitilizations.view model.hospitalizationsState model.addEditDataSource)
 
         Error str ->
             div [] [ text str ]
@@ -107,6 +117,13 @@ update msg model =
 
                 Nothing ->
                     { model | page = Error "Can't display this page without a datasource" } ! []
+
+        HospitilizationsMsg hospitilizationsMsg ->
+            let
+                ( ( newModel, pageCmd ), isDone ) =
+                    Hospitilizations.update hospitilizationsMsg model.hospitalizationsState
+            in
+                { model | hospitalizationsState = newModel } ! [ Cmd.map HospitilizationsMsg pageCmd ]
 
         AddEditDataSourceLoaded (Ok t) ->
             { model | addEditDataSource = Just t } ! []
