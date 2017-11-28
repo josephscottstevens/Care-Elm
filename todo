@@ -9,7 +9,9 @@ QUESTIONS:
 	
 ===========================================================================================================
 
-there seems to be a bit of logic on transfer logic... not sure how to handle or if I am already
+Fix are you sure you want to leave
+test validation
+how to clear sort?
 
 LOW TODO:
 Can I remove some stuff? Like am I really doing the whole dropdown (in elm Model) thing anymore?
@@ -43,6 +45,7 @@ Trying to avoid:
 	add new facility depends on roles (see AddEditRecordsPartial)
 	Task column is only shown... if... there is a task? How does that work? (let them point it out if they want it)
 	put edit mode inside of grid  (but.. how?) (REQUESTED TODO)
+	there seems to be a bit of logic on transfer logic... not sure how to handle or if I am already
 	
 On Deploy Todo:
 	Validate File stuff still works

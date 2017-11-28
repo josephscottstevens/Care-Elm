@@ -3,6 +3,7 @@ module Model exposing (..)
 import Billing.Types as Billing
 import Records.Types as Records
 import RecordAddNew.Types as RecordAddNew
+import Hospitilizations.Types as Hospitalizations
 import Common.Types exposing (..)
 import Http
 
@@ -22,6 +23,7 @@ type alias Model =
     , billingState : Billing.Model
     , recordsState : Records.Model
     , recordAddNewState : Maybe RecordAddNew.Model
+    , hospitalizationsState : Maybe Hospitalizations.Model
     }
 
 
@@ -44,4 +46,5 @@ emptyModel flags =
     , billingState = Billing.emptyModel flags
     , recordsState = Records.emptyModel flags
     , recordAddNewState = Nothing
+    , hospitalizationsState = Hospitalizations.emptyModel flags
     }
