@@ -74,7 +74,7 @@ update msg model =
             ( { model | filterFields = filterFields model.filterFields filterState } ! [], Nothing )
 
         AddNewStart ->
-            ( model ! [], Just (RecordAddNew model.recordTypeId) )
+            ( model ! [], Just RecordAddNew )
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg

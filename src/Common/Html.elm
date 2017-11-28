@@ -161,7 +161,7 @@ common ( labelText, requiredType, controlType ) =
 
             DropInput displayValue syncfusionId ->
                 commonStructure
-                    [ input [ type_ "text", id syncfusionId, value (toString displayValue) ] []
+                    [ input [ type_ "text", id syncfusionId ] []
                     ]
 
             KnockInput syncfusionId ->
@@ -170,7 +170,7 @@ common ( labelText, requiredType, controlType ) =
             DropInputWithButton displayValue syncfusionId event buttonText ->
                 div [ class "form-group" ]
                     [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
-                    , div [ class controlWidth ] [ input [ type_ "text", id syncfusionId, value (toString displayValue) ] [] ]
+                    , div [ class controlWidth ] [ input [ type_ "text", id syncfusionId ] [] ]
                     , div [ class labelWidth ] [ button [ class "btn btn-sm btn-default", onClick event ] [ text buttonText ] ]
                     ]
 

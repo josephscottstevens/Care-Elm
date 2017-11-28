@@ -5,7 +5,7 @@ type Page
     = None
     | Billing
     | Records
-    | RecordAddNew (Maybe Int)
+    | RecordAddNew
     | Hospitilizations
     | Error String
 
@@ -20,7 +20,7 @@ getPage page =
             Records
 
         "RecordAddNew" ->
-            RecordAddNew Nothing
+            RecordAddNew
 
         "Hospitilizations" ->
             Hospitilizations
@@ -41,7 +41,7 @@ pageToString page =
         Records ->
             "Records"
 
-        RecordAddNew _ ->
+        RecordAddNew ->
             "RecordAddNew"
 
         Hospitilizations ->

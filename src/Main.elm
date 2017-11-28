@@ -65,7 +65,7 @@ view model =
         Records ->
             Html.map RecordsMsg (Records.view model.recordsState model.addEditDataSource)
 
-        RecordAddNew recordTypeId ->
+        RecordAddNew ->
             Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState)
 
         Hospitilizations ->
@@ -77,75 +77,75 @@ view model =
 
 update : Msg -> Model -> ( Model, Cmd Model.Msg )
 update msg model =
-    let
-        handle maybePage t =
-            case maybePage of
-                Just page ->
-                    { model | page = page } ! [ presetPage (pageToString page) ]
+    case msg of
+        BillingMsg billingMsg ->
+            model ! []
 
-                Nothing ->
-                    t
-    in
-        case msg of
-            BillingMsg billingMsg ->
-                model ! []
+        RecordsMsg recordsMsg ->
+            let
+                ( ( newModel, pageCmd ), nextPage ) =
+                    Records.update recordsMsg model.recordsState
+            in
+                case nextPage of
+                    Just page ->
+                        { model | page = page, recordsState = newModel } ! [ presetPage (pageToString page) ]
 
-            RecordsMsg recordsMsg ->
-                let
-                    ( ( newModel, pageCmd ), nextPage ) =
-                        Records.update recordsMsg model.recordsState
-                in
-                    handle nextPage ({ model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ])
+                    Nothing ->
+                        { model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ]
 
-            RecordAddNewMsg recordAddNewMsg ->
-                -- case model.recordAddNewState of
-                --     Just t ->
-                let
-                    ( ( newModel, pageCmd ), isDone ) =
-                        RecordAddNew.update recordAddNewMsg model.recordAddNewState
-                in
-                    -- case isDone of
-                    --     True ->
-                    --         { model | page = Records } ! [ Cmd.map RecordsMsg (Records.init model.flags) ]
-                    --     False ->
-                    { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
+        RecordAddNewMsg recordAddNewMsg ->
+            let
+                ( ( newModel, pageCmd ), nextPage ) =
+                    RecordAddNew.update recordAddNewMsg model.recordAddNewState
+            in
+                case nextPage of
+                    Just page ->
+                        { model | page = page, recordAddNewState = newModel } ! [ presetPage (pageToString page) ]
 
-            HospitilizationsMsg hospitilizationsMsg ->
-                let
-                    ( ( newModel, pageCmd ), isDone ) =
-                        Hospitilizations.update hospitilizationsMsg model.hospitalizationsState
-                in
-                    { model | hospitalizationsState = newModel } ! [ Cmd.map HospitilizationsMsg pageCmd ]
+                    Nothing ->
+                        { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
 
-            AddEditDataSourceLoaded (Ok t) ->
-                let
-                    newState =
-                        model.recordAddNewState
+        HospitilizationsMsg hospitilizationsMsg ->
+            let
+                ( ( newModel, pageCmd ), nextPage ) =
+                    Hospitilizations.update hospitilizationsMsg model.hospitalizationsState
+            in
+                case nextPage of
+                    Just page ->
+                        { model | page = page, hospitalizationsState = newModel } ! [ presetPage (pageToString page) ]
 
-                    tt =
-                        { newState | facilityId = t.facilityId }
-                in
-                    { model | addEditDataSource = Just t, recordAddNewState = tt } ! []
+                    Nothing ->
+                        { model | hospitalizationsState = newModel } ! [ Cmd.map HospitilizationsMsg pageCmd ]
 
-            AddEditDataSourceLoaded (Err httpError) ->
-                { model | page = Error (toString httpError) } ! []
+        AddEditDataSourceLoaded (Ok t) ->
+            let
+                newState =
+                    model.recordAddNewState
 
-            PresetPageComplete pageStr ->
-                case getPage pageStr of
-                    Records ->
-                        { model | page = Records } ! []
+                tt =
+                    { newState | facilityId = t.facilityId }
+            in
+                { model | addEditDataSource = Just t, recordAddNewState = tt } ! []
 
-                    RecordAddNew recordTypeId ->
-                        case model.addEditDataSource of
-                            Just addEditDataSource ->
-                                { model | page = RecordAddNew recordTypeId } ! [ setPage (getSyncfusionMessage addEditDataSource model.recordAddNewState.recordTypeId False False) ]
+        AddEditDataSourceLoaded (Err httpError) ->
+            { model | page = Error (toString httpError) } ! []
 
-                            Nothing ->
-                                { model | page = Error "Can't display this page without a datasource" } ! []
+        PresetPageComplete pageStr ->
+            case getPage pageStr of
+                Records ->
+                    { model | page = Records } ! []
 
-                    _ ->
-                        model
-                            ! []
+                RecordAddNew ->
+                    case model.addEditDataSource of
+                        Just addEditDataSource ->
+                            { model | page = RecordAddNew } ! [ setPage (getSyncfusionMessage addEditDataSource model.recordAddNewState.recordTypeId False False) ]
 
-            SetPageComplete page ->
-                model ! [ setLoadingStatus False ]
+                        Nothing ->
+                            { model | page = Error "Can't display this page without a datasource" } ! []
+
+                _ ->
+                    model
+                        ! []
+
+        SetPageComplete page ->
+            model ! [ setLoadingStatus False ]

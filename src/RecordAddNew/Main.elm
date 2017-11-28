@@ -98,7 +98,7 @@ update msg model =
                 if model.recordTypeId == dropDownItem.id then
                     ( model ! [], Nothing )
                 else
-                    ( { model | recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ], Nothing )
+                    ( { model | recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ], Just RecordAddNew )
 
             UpdateTitle str ->
                 updateAddNew { model | title = str }
