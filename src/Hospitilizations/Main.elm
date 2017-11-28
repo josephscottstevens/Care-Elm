@@ -61,7 +61,7 @@ update msg model =
             ( { model | filterFields = filterFields model.filterFields filterState } ! [], Nothing )
 
         AddNewStart ->
-            ( model ! [], Nothing )
+            ( model ! [], Just HospitilizationsAddEdit )
 
 
 

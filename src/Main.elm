@@ -5,6 +5,7 @@ import Html exposing (text, div)
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
 import Hospitilizations.Main as Hospitilizations
+import HospitilizationsAddEdit.Main as HospitilizationsAddEdit
 import Common.Functions exposing (..)
 import Common.Types exposing (..)
 import Functions exposing (..)
@@ -71,6 +72,9 @@ view model =
         Hospitilizations ->
             Html.map HospitilizationsMsg (Hospitilizations.view model.hospitalizationsState model.addEditDataSource)
 
+        HospitilizationsAddEdit ->
+            Html.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.view model.hospitilizationsAddEditState)
+
         Error str ->
             div [] [ text str ]
 
@@ -117,6 +121,18 @@ update msg model =
                     Nothing ->
                         { model | hospitalizationsState = newModel } ! [ Cmd.map HospitilizationsMsg pageCmd ]
 
+        HospitilizationsAddEditMsg hospitilizationsAddEditMsg ->
+            let
+                ( ( newModel, pageCmd ), nextPage ) =
+                    HospitilizationsAddEdit.update hospitilizationsAddEditMsg model.hospitilizationsAddEditState
+            in
+                case nextPage of
+                    Just newPage ->
+                        { model | page = None, hospitilizationsAddEditState = newModel } ! [ presetPage (pageToString newPage) ]
+
+                    Nothing ->
+                        { model | hospitilizationsAddEditState = newModel } ! [ Cmd.map HospitilizationsAddEditMsg pageCmd ]
+
         AddEditDataSourceLoaded (Ok t) ->
             let
                 newState =
@@ -139,6 +155,14 @@ update msg model =
                     case model.addEditDataSource of
                         Just addEditDataSource ->
                             { model | page = RecordAddNew } ! [ setPage (getAddEditMsg addEditDataSource model.recordAddNewState.recordTypeId False False) ]
+
+                        Nothing ->
+                            { model | page = Error "Can't display this page without a datasource" } ! []
+
+                HospitilizationsAddEdit ->
+                    case model.addEditDataSource of
+                        Just addEditDataSource ->
+                            { model | page = HospitilizationsAddEdit } ! [ setPage (getAddEditMsg addEditDataSource model.recordAddNewState.recordTypeId False False) ]
 
                         Nothing ->
                             { model | page = Error "Can't display this page without a datasource" } ! []

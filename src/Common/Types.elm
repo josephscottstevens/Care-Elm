@@ -7,6 +7,7 @@ type Page
     | Records
     | RecordAddNew
     | Hospitilizations
+    | HospitilizationsAddEdit
     | Error String
 
 
@@ -24,6 +25,9 @@ getPage page =
 
         "Hospitilizations" ->
             Hospitilizations
+
+        "HospitilizationsAddEdit" ->
+            HospitilizationsAddEdit
 
         _ ->
             Error "Page not found"
@@ -46,6 +50,9 @@ pageToString page =
 
         Hospitilizations ->
             "Hospitilizations"
+
+        HospitilizationsAddEdit ->
+            "HospitilizationsAddEdit"
 
         Error _ ->
             "Error"

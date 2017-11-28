@@ -4,6 +4,7 @@ import Billing.Types as Billing
 import Records.Types as Records
 import RecordAddNew.Types as RecordAddNew
 import Hospitilizations.Types as Hospitilizations
+import HospitilizationsAddEdit.Types as HospitilizationsAddEdit
 import Common.Types exposing (..)
 import Http
 
@@ -16,6 +17,7 @@ type alias Model =
     , recordsState : Records.Model
     , recordAddNewState : RecordAddNew.Model
     , hospitalizationsState : Hospitilizations.Model
+    , hospitilizationsAddEditState : HospitilizationsAddEdit.Model
     }
 
 
@@ -25,6 +27,7 @@ type Msg
     | RecordAddNewMsg RecordAddNew.Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | HospitilizationsMsg Hospitilizations.Msg
+    | HospitilizationsAddEditMsg HospitilizationsAddEdit.Msg
     | PresetPageComplete String
     | SetPageComplete String
 
@@ -38,4 +41,5 @@ emptyModel flags =
     , recordsState = Records.emptyModel flags
     , recordAddNewState = RecordAddNew.emptyModel flags
     , hospitalizationsState = Hospitilizations.emptyModel flags
+    , hospitilizationsAddEditState = HospitilizationsAddEdit.emptyModel flags
     }

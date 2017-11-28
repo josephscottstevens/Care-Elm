@@ -87,12 +87,6 @@ update msg model =
             AddNewPhysician ->
                 ( model ! [ addNewPhysician Nothing ], Nothing )
 
-            UpdateIsExistingHospitilization bool ->
-                if model.isExistingHospitilization == bool then
-                    ( model ! [], Nothing )
-                else
-                    ( { model | isExistingHospitilization = bool } ! [ resetUpdate model.recordTypeId, setLoadingStatus True ], Nothing )
-
             UpdateHospitilization dropDownItem ->
                 updateAddNew { model | hospitalizationId = dropDownItem.id, hospitalizationText = dropDownItem.name }
 
@@ -125,7 +119,6 @@ formInputs : Model -> List ( String, RequiredType, InputControlType Msg )
 formInputs newRecord =
     [ ( "Patient Reported", Optional, CheckInput newRecord.patientReported UpdatePatientReported )
     , ( "Facility", Required, DropInputWithButton newRecord.facilityId "FacilityId" AddNewFacility "Add New Facility" )
-    , ( "Category", Required, DropInput newRecord.recordTypeId "CategoryId" )
     , ( "Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId" UpdateDateOfAdmission )
     , ( "Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId" UpdateDateOfDischarge )
     , ( "Hospital Service Type", Required, DropInput newRecord.hospitalServiceTypeId "HospitalServiceTypeId" )
