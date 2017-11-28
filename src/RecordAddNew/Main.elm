@@ -23,7 +23,6 @@ subscriptions =
         , updateRecordingDate UpdateRecordingDate
         , updateUser UpdateUser
         , updateTask UpdateTask
-        , loadDataSourceComplete LoadDataSource
 
         -- Hospitilizations
         , updateHospitilization UpdateHospitilization
@@ -94,9 +93,6 @@ update msg model =
 
             Cancel ->
                 ( model ! [ setUnsavedChanges False ], Just Records )
-
-            LoadDataSource addEditDataSource ->
-                ( { model | addEditDataSource = Just addEditDataSource } ! [ setLoadingStatus False ], Nothing )
 
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then

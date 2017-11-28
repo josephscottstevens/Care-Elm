@@ -9,7 +9,6 @@ import Common.Functions exposing (..)
 import Common.Types exposing (..)
 import Functions exposing (..)
 import Ports exposing (..)
-import Task
 
 
 subscriptions : Model -> Sub Msg
@@ -17,8 +16,8 @@ subscriptions _ =
     Sub.batch
         [ Sub.map RecordsMsg Records.subscriptions
         , Sub.map RecordAddNewMsg RecordAddNew.subscriptions
-        , initComplete PageLoadComplete
-        , initStartComplete PageLoadStart
+        , presetPageComplete PresetPageComplete
+        , setPageComplete SetPageComplete
         ]
 
 
@@ -66,7 +65,7 @@ view model =
         Records ->
             Html.map RecordsMsg (Records.view model.recordsState model.addEditDataSource)
 
-        RecordAddNew _ ->
+        RecordAddNew recordTypeId ->
             Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState)
 
         Hospitilizations ->
@@ -82,7 +81,7 @@ update msg model =
         handle maybePage t =
             case maybePage of
                 Just page ->
-                    { model | page = None } ! [ initStart (pageToString page) ]
+                    { model | page = page } ! [ presetPage (pageToString page) ]
 
                 Nothing ->
                     t
@@ -119,23 +118,34 @@ update msg model =
                     { model | hospitalizationsState = newModel } ! [ Cmd.map HospitilizationsMsg pageCmd ]
 
             AddEditDataSourceLoaded (Ok t) ->
-                { model | addEditDataSource = Just t } ! []
+                let
+                    newState =
+                        model.recordAddNewState
+
+                    tt =
+                        { newState | facilityId = t.facilityId }
+                in
+                    { model | addEditDataSource = Just t, recordAddNewState = tt } ! []
 
             AddEditDataSourceLoaded (Err httpError) ->
-                { model | page = Error (toString httpError) } ! [ setLoadingStatus False ]
+                { model | page = Error (toString httpError) } ! []
 
-            PageLoadStart pageStr ->
-                { model | page = getPage pageStr } ! [ setLoadingStatus False ]
+            PresetPageComplete pageStr ->
+                case getPage pageStr of
+                    Records ->
+                        { model | page = Records } ! []
 
-            PageLoadComplete page ->
-                case getPage page of
                     RecordAddNew recordTypeId ->
                         case model.addEditDataSource of
                             Just addEditDataSource ->
-                                model ! [ initRecordAddNew (getSyncfusionMessage addEditDataSource recordTypeId False False) ]
+                                { model | page = RecordAddNew recordTypeId } ! [ setPage (getSyncfusionMessage addEditDataSource model.recordAddNewState.recordTypeId False False) ]
 
                             Nothing ->
                                 { model | page = Error "Can't display this page without a datasource" } ! []
 
                     _ ->
-                        model ! []
+                        model
+                            ! []
+
+            SetPageComplete page ->
+                model ! [ setLoadingStatus False ]
