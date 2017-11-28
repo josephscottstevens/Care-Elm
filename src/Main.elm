@@ -87,8 +87,8 @@ update msg model =
                     Records.update recordsMsg model.recordsState
             in
                 case nextPage of
-                    Just page ->
-                        { model | page = page, recordsState = newModel } ! [ presetPage (pageToString page) ]
+                    Just newPage ->
+                        { model | page = None, recordsState = newModel } ! [ presetPage (pageToString newPage) ]
 
                     Nothing ->
                         { model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ]
@@ -99,8 +99,8 @@ update msg model =
                     RecordAddNew.update recordAddNewMsg model.recordAddNewState
             in
                 case nextPage of
-                    Just page ->
-                        { model | page = page, recordAddNewState = newModel } ! [ presetPage (pageToString page) ]
+                    Just newPage ->
+                        { model | page = None, recordAddNewState = newModel } ! [ presetPage (pageToString newPage) ]
 
                     Nothing ->
                         { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
@@ -111,8 +111,8 @@ update msg model =
                     Hospitilizations.update hospitilizationsMsg model.hospitalizationsState
             in
                 case nextPage of
-                    Just page ->
-                        { model | page = page, hospitalizationsState = newModel } ! [ presetPage (pageToString page) ]
+                    Just newPage ->
+                        { model | page = None, hospitalizationsState = newModel } ! [ presetPage (pageToString newPage) ]
 
                     Nothing ->
                         { model | hospitalizationsState = newModel } ! [ Cmd.map HospitilizationsMsg pageCmd ]
