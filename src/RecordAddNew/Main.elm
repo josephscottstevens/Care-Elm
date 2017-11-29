@@ -1,4 +1,4 @@
-port module RecordAddNew.Main exposing (..)
+module RecordAddNew.Main exposing (..)
 
 import RecordAddNew.Functions exposing (..)
 import RecordAddNew.Types exposing (..)
@@ -98,7 +98,10 @@ update msg model =
                 if model.recordTypeId == dropDownItem.id then
                     ( model ! [], Nothing )
                 else
-                    ( { model | recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ], Just RecordAddNew )
+                    ( { model | recordTypeId = dropDownItem.id }
+                        ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
+                    , Just RecordAddNew
+                    )
 
             UpdateTitle str ->
                 updateAddNew { model | title = str }

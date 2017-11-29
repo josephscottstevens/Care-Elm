@@ -3,9 +3,7 @@ module HospitilizationsAddEdit.Functions exposing (..)
 import Json.Encode as Encode exposing (..)
 import Http
 import HospitilizationsAddEdit.Types exposing (..)
-import Common.Types exposing (..)
 import Common.Functions exposing (..)
-import Ports
 
 
 encodeRecord : Model -> Encode.Value

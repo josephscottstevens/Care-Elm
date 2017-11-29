@@ -9,9 +9,17 @@ QUESTIONS:
 	
 ===========================================================================================================
 
+implement HospitilizationsAddEdit cancel
+implement HospitilizationsAddEdit edit
+implement HospitilizationsAddEdit delete
+perhaps, it would be better to just remove displayValue, I mean... it's not like I am changing what the user is typing... 
 Facility Name is always blank
 Bool columns aren't right
 Why is just showing up?
+Nothing in HospitilizationsAddEdit is being populated if existing
+remove un-used ports
+centralize ports
+remove port tags from modules that aren't ports
 
 in tasks... there is a another hospitilizations????
 Fix are you sure you want to leave

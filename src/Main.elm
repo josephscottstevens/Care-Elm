@@ -171,5 +171,5 @@ update msg model =
                     model
                         ! []
 
-        SetPageComplete page ->
+        SetPageComplete _ ->
             model ! [ setLoadingStatus False ]

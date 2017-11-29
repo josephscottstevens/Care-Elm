@@ -141,12 +141,12 @@ common ( labelText, requiredType, controlType ) =
         case controlType of
             TextInput displayValue event ->
                 commonStructure
-                    [ input [ type_ "textbox", class "e-textbox", idAttr labelText, nameAttr labelText, onInput event, value displayValue ] []
+                    [ input [ type_ "textbox", class "e-textbox", nameAttr labelText, onInput event, value displayValue ] []
                     ]
 
             NumrInput displayValue event ->
                 commonStructure
-                    [ input [ type_ "number", class "e-textbox", idAttr labelText, nameAttr labelText, onInput event, value (toString displayValue) ] []
+                    [ input [ type_ "number", class "e-textbox", nameAttr labelText, onInput event, value (toString displayValue) ] []
                     ]
 
             CheckInput displayValue event ->
@@ -159,7 +159,7 @@ common ( labelText, requiredType, controlType ) =
                     [ textarea [ idAttr labelText, class "e-textarea", onInput event, value displayValue ] []
                     ]
 
-            DropInput displayValue syncfusionId ->
+            DropInput _ syncfusionId ->
                 commonStructure
                     [ input [ type_ "text", id syncfusionId ] []
                     ]
@@ -167,7 +167,7 @@ common ( labelText, requiredType, controlType ) =
             KnockInput syncfusionId ->
                 div [ id syncfusionId ] []
 
-            DropInputWithButton displayValue syncfusionId event buttonText ->
+            DropInputWithButton _ syncfusionId event buttonText ->
                 div [ class "form-group" ]
                     [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
                     , div [ class controlWidth ] [ input [ type_ "text", id syncfusionId ] [] ]

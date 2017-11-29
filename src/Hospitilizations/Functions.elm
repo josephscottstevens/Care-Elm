@@ -6,7 +6,6 @@ import Http
 import Hospitilizations.Types exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
-import String exposing (toLower)
 
 
 -- Http helper functions
@@ -32,14 +31,14 @@ decodeModel =
         |> required "list" (Decode.list decodeRecordRow)
 
 
-request : Int -> Maybe Int -> Http.Request WebResponse
-request patientId recordTypeId =
+request : Int -> Http.Request WebResponse
+request patientId =
     Http.get ("/People/HospitilizationsGrid?patientId=" ++ toString patientId) decodeModel
 
 
-getHospitilizations : Int -> Maybe Int -> (Result Http.Error WebResponse -> msg) -> Cmd msg
-getHospitilizations patientId recordTypeId t =
-    Http.send t (request patientId recordTypeId)
+getHospitilizations : Int -> (Result Http.Error WebResponse -> msg) -> Cmd msg
+getHospitilizations patientId t =
+    Http.send t (request patientId)
 
 
 deleteRequest : Int -> Cmd Msg

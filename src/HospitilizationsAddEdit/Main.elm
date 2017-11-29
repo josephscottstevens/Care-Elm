@@ -1,4 +1,4 @@
-port module HospitilizationsAddEdit.Main exposing (..)
+module HospitilizationsAddEdit.Main exposing (..)
 
 import HospitilizationsAddEdit.Functions exposing (..)
 import HospitilizationsAddEdit.Types exposing (..)

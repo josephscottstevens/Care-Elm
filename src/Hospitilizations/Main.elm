@@ -1,4 +1,4 @@
-port module Hospitilizations.Main exposing (..)
+module Hospitilizations.Main exposing (..)
 
 import Hospitilizations.Functions exposing (..)
 import Hospitilizations.Types exposing (..)
@@ -21,7 +21,7 @@ subscriptions =
 
 init : Flags -> Cmd Msg
 init flags =
-    getHospitilizations flags.patientId flags.recordTypeId Load
+    getHospitilizations flags.patientId Load
 
 
 update : Msg -> Model -> ( ( Model, Cmd Msg ), Maybe Page )
@@ -64,15 +64,11 @@ update msg model =
             ( model ! [], Just HospitilizationsAddEdit )
 
 
-
---Todo AddNewStart (send to a page)
-
-
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
     div []
         [ case addEditDataSource of
-            Just t ->
+            Just _ ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
 
             Nothing ->
