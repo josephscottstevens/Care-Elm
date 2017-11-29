@@ -100,27 +100,17 @@ update msg model =
 
         RecordAddNewMsg recordAddNewMsg ->
             let
-                ( ( newModel, pageCmd ), nextPage ) =
+                ( newModel, pageCmd ) =
                     RecordAddNew.update recordAddNewMsg model.recordAddNewState
             in
-                case nextPage of
-                    Just newPage ->
-                        { model | page = None, recordAddNewState = newModel } ! [ presetPage (pageToString newPage) ]
-
-                    Nothing ->
-                        { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
+                { model | recordAddNewState = newModel } ! [ Cmd.map RecordAddNewMsg pageCmd ]
 
         HospitilizationsMsg hospitilizationsMsg ->
             let
-                ( ( newModel, pageCmd ), nextPage ) =
+                ( newModel, pageCmd ) =
                     Hospitilizations.update hospitilizationsMsg model.hospitalizationsState
             in
-                case nextPage of
-                    Just newPage ->
-                        { model | page = None, hospitalizationsState = newModel } ! [ presetPage (pageToString newPage) ]
-
-                    Nothing ->
-                        { model | hospitalizationsState = newModel } ! [ Cmd.map HospitilizationsMsg pageCmd ]
+                { model | hospitalizationsState = newModel } ! [ Cmd.map HospitilizationsMsg pageCmd ]
 
         HospitilizationsAddEditMsg hospitilizationsAddEditMsg ->
             let
@@ -176,9 +166,4 @@ update msg model =
             model ! [ setLoadingStatus False ]
 
         UrlChange location ->
-            case location.hash of
-                "#/people/_hospitalizations/new" ->
-                    { model | page = HospitilizationsAddEdit, currentUrl = location } ! []
-
-                _ ->
-                    { model | currentUrl = location } ! []
+            { model | page = getPage location.hash } ! []

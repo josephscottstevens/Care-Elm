@@ -10,7 +10,7 @@ import Common.Grid exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
 import Ports exposing (..)
-import Navigation
+import Common.Routes exposing (navHospitilizationsAddEdit)
 
 
 subscriptions : Sub Msg
@@ -25,44 +25,44 @@ init flags =
     getHospitilizations flags.patientId Load
 
 
-update : Msg -> Model -> ( ( Model, Cmd Msg ), Maybe Page )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Load (Ok t) ->
-            ( getLoadedState model t ! [ setLoadingStatus False ], Nothing )
+            getLoadedState model t ! [ setLoadingStatus False ]
 
         Load (Err t) ->
-            ( model ! [ setLoadingStatus False ], error t )
+            model ! [ setLoadingStatus False ]
 
         SetTableState newState ->
-            ( { model | tableState = newState } ! [], Nothing )
+            { model | tableState = newState } ! []
 
         DeleteConfirmed rowId ->
             let
                 updatedRecords =
                     model.hospitilizations |> List.filter (\t -> t.id /= rowId)
             in
-                ( { model | hospitilizations = updatedRecords } ! [ deleteRequest rowId ], Nothing )
+                { model | hospitilizations = updatedRecords } ! [ deleteRequest rowId ]
 
         DeleteCompleted (Ok responseMsg) ->
             case getResponseError responseMsg of
                 Just t ->
-                    ( model ! [ displayErrorMessage t ], Nothing )
+                    model ! [ displayErrorMessage t ]
 
                 Nothing ->
-                    ( model ! [ displaySuccessMessage "Record deleted successfully!" ], Nothing )
+                    model ! [ displaySuccessMessage "Record deleted successfully!" ]
 
         DeleteCompleted (Err t) ->
-            ( model ! [], error t )
+            model ! []
 
         EditTask taskId ->
-            ( model ! [ editTask taskId ], Nothing )
+            model ! [ editTask taskId ]
 
         SetFilter filterState ->
-            ( { model | filterFields = filterFields model.filterFields filterState } ! [], Nothing )
+            { model | filterFields = filterFields model.filterFields filterState } ! []
 
         AddNewStart ->
-            ( model ! [ Navigation.load "#/people/_hospitalizations/new" ], Nothing )
+            model ! [ navHospitilizationsAddEdit ]
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg

@@ -8,6 +8,7 @@ import Html.Events exposing (onClick)
 import Common.Html exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
+import Common.Routes exposing (navRecords)
 import Ports exposing (..)
 
 
@@ -61,47 +62,45 @@ view model =
             ]
 
 
-update : Msg -> Model -> ( ( Model, Cmd Msg ), Maybe Page )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
         updateAddNew t =
-            ( t ! [ setUnsavedChanges True ], Nothing )
+            t ! [ setUnsavedChanges True ]
     in
         case msg of
             AddNewFacility ->
-                ( model ! [ addNewFacility Nothing ], Nothing )
+                model ! [ addNewFacility Nothing ]
 
             AddNewPhysician ->
-                ( model ! [ addNewPhysician Nothing ], Nothing )
+                model ! [ addNewPhysician Nothing ]
 
             Save ->
                 if List.length (getValidationErrors (formInputs model)) > 0 then
-                    ( { model | showValidationErrors = True } ! [], Nothing )
+                    { model | showValidationErrors = True } ! []
                 else
-                    ( model ! [ saveForm model, setUnsavedChanges False ], Nothing )
+                    model ! [ saveForm model, setUnsavedChanges False ]
 
             SaveCompleted (Ok responseMsg) ->
                 case getResponseError responseMsg of
                     Just t ->
-                        ( model ! [ displayErrorMessage t ], Nothing )
+                        model ! [ displayErrorMessage t ]
 
                     Nothing ->
-                        ( model ! [ displaySuccessMessage "Save completed successfully!" ], Just Records )
+                        model ! [ displaySuccessMessage "Save completed successfully!" ]
 
             SaveCompleted (Err t) ->
-                ( model ! [ setLoadingStatus False ], error t )
+                (model ! [ displayErrorMessage (toString t) ])
 
             Cancel ->
-                ( model ! [ setUnsavedChanges False ], Just Records )
+                (model ! [ setUnsavedChanges False, navRecords ])
 
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then
-                    ( model ! [], Nothing )
+                    model ! []
                 else
-                    ( { model | recordTypeId = dropDownItem.id }
+                    { model | recordTypeId = dropDownItem.id }
                         ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
-                    , Just RecordAddNew
-                    )
 
             UpdateTitle str ->
                 updateAddNew { model | title = str }
@@ -151,9 +150,9 @@ update msg model =
             -- Hospitilizations
             UpdateIsExistingHospitilization bool ->
                 if model.isExistingHospitilization == bool then
-                    ( model ! [], Nothing )
+                    model ! []
                 else
-                    ( { model | isExistingHospitilization = bool } ! [ resetUpdate model.recordTypeId, setLoadingStatus True ], Nothing )
+                    { model | isExistingHospitilization = bool } ! [ resetUpdate model.recordTypeId, setLoadingStatus True ]
 
             UpdateHospitilization dropDownItem ->
                 updateAddNew { model | hospitalizationId = dropDownItem.id, hospitalizationText = dropDownItem.name }
