@@ -33,7 +33,7 @@ type alias Model =
     { records : List RecordRow
     , patientId : Int
     , facilityId : Maybe Int
-    , recordTypeId : Maybe Int
+    , recordType : RecordType
     , tableState : Table.State
     , query : String
     , filterFields : Filters
@@ -41,12 +41,12 @@ type alias Model =
     }
 
 
-emptyModel : Flags -> Model
-emptyModel flags =
+emptyModel : RecordType -> Int -> Model
+emptyModel recordType patientId =
     { records = []
-    , patientId = flags.patientId
+    , patientId = patientId
     , facilityId = Nothing
-    , recordTypeId = flags.recordTypeId
+    , recordType = recordType
     , tableState = Table.initialSort "Date"
     , query = ""
     , filterFields = emptyFilters

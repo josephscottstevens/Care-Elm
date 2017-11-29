@@ -23,9 +23,13 @@ subscriptions =
         ]
 
 
-init : Flags -> Cmd Msg
-init flags =
-    getRecords flags.patientId flags.recordTypeId Load
+init : RecordType -> Int -> Cmd Msg
+init recordType patientId =
+    let
+        recordTypeId =
+            getId recordType
+    in
+        getRecords patientId recordTypeId Load
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -41,7 +45,7 @@ update msg model =
             { model | tableState = newState } ! []
 
         SendMenuMessage recordId messageType ->
-            { model | records = flipConsent model.records recordId model.recordTypeId }
+            { model | records = flipConsent model.records recordId model.recordType }
                 ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
 
         DropDownToggle recordId ->
@@ -85,12 +89,12 @@ view model addEditDataSource =
             Nothing ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
         , div [ class "e-grid e-js e-waitingpopup" ]
-            [ Table.view (config SetFilter model.recordTypeId (updateTaskId model)) model.tableState (filteredRecords model) ]
+            [ Table.view (config SetFilter model.recordType (updateTaskId model)) model.tableState (filteredRecords model) ]
         ]
 
 
-getColumns : Maybe Int -> Maybe Int -> List (Column RecordRow Msg)
-getColumns recordTypeId taskId =
+getColumns : RecordType -> Maybe Int -> List (Column RecordRow Msg)
+getColumns recordType taskId =
     let
         commonColumns =
             [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
@@ -100,7 +104,7 @@ getColumns recordTypeId taskId =
             ]
 
         firstColumns =
-            case getRecordType recordTypeId of
+            case recordType of
                 PrimaryCare ->
                     commonColumns
 
@@ -164,35 +168,35 @@ getColumns recordTypeId taskId =
                     commonColumns
 
         lastColumns =
-            [ rowDropDownColumn recordTypeId
+            [ rowDropDownColumn recordType
             ]
     in
         List.append firstColumns lastColumns
 
 
-rowDropDownColumn : Maybe Int -> Table.Column RecordRow Msg
-rowDropDownColumn recordTypeId =
+rowDropDownColumn : RecordType -> Table.Column RecordRow Msg
+rowDropDownColumn recordType =
     Table.veryCustomColumn
         { name = ""
-        , viewData = \t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropDownItems recordTypeId t.id)
+        , viewData = \t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropDownItems recordType t.id)
         , sorter = Table.unsortable
         }
 
 
-config : (FilterState -> Msg) -> Maybe Int -> Maybe Int -> Config RecordRow Msg
-config event recordTypeId taskId =
+config : (FilterState -> Msg) -> RecordType -> Maybe Int -> Config RecordRow Msg
+config event recordType taskId =
     customConfig
         { toId = \t -> toString t.id
         , toMsg = SetTableState
-        , columns = getColumns recordTypeId taskId
+        , columns = getColumns recordType taskId
         , customizations =
             { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = standardThead event }
         }
 
 
-dropDownItems : Maybe Int -> Int -> List ( String, String, Html.Attribute Msg )
-dropDownItems recordTypeId rowId =
-    case getRecordType recordTypeId of
+dropDownItems : RecordType -> Int -> List ( String, String, Html.Attribute Msg )
+dropDownItems recordType rowId =
+    case recordType of
         CallRecordings ->
             [ ( "e-edit", "Mark As Consent", onClick (SendMenuMessage rowId "MarkAsConsent") ) ]
 

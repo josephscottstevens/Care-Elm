@@ -8,11 +8,11 @@ import HospitilizationsAddEdit.Types as HospitilizationsAddEdit
 import Common.Types exposing (..)
 import Http
 import Navigation
+import Common.Routes exposing (getPage, getRecordType, getPatientId)
 
 
 type alias Model =
     { page : Page
-    , flags : Flags
     , addEditDataSource : Maybe AddEditDataSource
     , billingState : Billing.Model
     , recordsState : Records.Model
@@ -35,15 +35,24 @@ type Msg
     | UrlChange Navigation.Location
 
 
-emptyModel : Navigation.Location -> Flags -> Model
-emptyModel location flags =
-    { page = None
-    , flags = flags
-    , addEditDataSource = Nothing
-    , billingState = Billing.emptyModel flags
-    , recordsState = Records.emptyModel flags
-    , recordAddNewState = RecordAddNew.emptyModel flags
-    , hospitalizationsState = Hospitilizations.emptyModel flags
-    , hospitilizationsAddEditState = HospitilizationsAddEdit.emptyModel flags
-    , currentUrl = location
-    }
+emptyModel : Navigation.Location -> Model
+emptyModel location =
+    let
+        page =
+            getPage location
+
+        recordType =
+            getRecordType location
+
+        patientId =
+            getPatientId location
+    in
+        { page = None
+        , addEditDataSource = Nothing
+        , billingState = Billing.emptyModel
+        , recordsState = Records.emptyModel recordType patientId
+        , recordAddNewState = RecordAddNew.emptyModel recordType patientId
+        , hospitalizationsState = Hospitilizations.emptyModel patientId
+        , hospitilizationsAddEditState = HospitilizationsAddEdit.emptyModel patientId
+        , currentUrl = location
+        }

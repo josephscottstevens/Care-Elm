@@ -1,20 +1,38 @@
 module Common.Routes exposing (..)
 
 import Navigation
-import Common.Types as Pages
+import Common.Types as CommonTypes
+import Char exposing (isDigit)
 
 
-getPage : String -> Pages.Page
-getPage pageStr =
-    case pageStr of
+getPage : Navigation.Location -> CommonTypes.Page
+getPage location =
+    case location.href of
         "#/people/_hospitalizations/" ->
-            Pages.Hospitilizations
+            CommonTypes.Hospitilizations
 
         "#/people/_hospitalizations/addedit" ->
-            Pages.HospitilizationsAddEdit
+            CommonTypes.HospitilizationsAddEdit
 
         _ ->
-            Pages.None
+            CommonTypes.None
+
+
+getRecordType : Navigation.Location -> CommonTypes.RecordType
+getRecordType location =
+    case location.href of
+        "" ->
+            CommonTypes.PrimaryCare
+
+        _ ->
+            CommonTypes.Misc
+
+
+getPatientId : Navigation.Location -> Int
+getPatientId location =
+    String.filter isDigit location.search
+        |> String.toInt
+        |> Result.withDefault -17
 
 
 navHospitilizations : Cmd msg

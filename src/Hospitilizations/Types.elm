@@ -43,11 +43,11 @@ type alias Model =
     }
 
 
-emptyModel : Flags -> Model
-emptyModel flags =
+emptyModel : Int -> Model
+emptyModel patientId =
     { state = Grid
     , hospitilizations = []
-    , patientId = flags.patientId
+    , patientId = patientId
     , facilityId = Nothing
     , tableState = Table.initialSort "Date"
     , query = ""

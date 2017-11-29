@@ -57,13 +57,6 @@ type RequiredType
     | Optional
 
 
-type alias Flags =
-    { pageFlag : String
-    , patientId : Int
-    , recordTypeId : Maybe Int
-    }
-
-
 type alias DropDownItem =
     { id : Maybe Int
     , name : String
@@ -84,53 +77,42 @@ type RecordType
     | Radiology
     | Hospitalizations
     | Legal
-      -- | CCDS
     | CallRecordings
     | PreviousHistories
     | Enrollment
     | Misc
 
 
-getRecordType : Maybe Int -> RecordType
-getRecordType maybeId =
-    case maybeId of
-        Just id ->
-            case id of
-                1 ->
-                    PrimaryCare
 
-                2 ->
-                    Specialty
-
-                3 ->
-                    Labs
-
-                4 ->
-                    Radiology
-
-                9 ->
-                    Hospitalizations
-
-                6 ->
-                    Legal
-
-                10 ->
-                    CallRecordings
-
-                11 ->
-                    PreviousHistories
-
-                12 ->
-                    Enrollment
-
-                5 ->
-                    Misc
-
-                _ ->
-                    Debug.crash "Invalid recordId, cannot load program"
-
-        Nothing ->
-            Debug.crash "Invalid recordId, cannot load program"
+-- getRecordType : Maybe Int -> RecordType
+-- getRecordType maybeId =
+--     case maybeId of
+--         Just id ->
+--             case id of
+--                 1 ->
+--                     PrimaryCare
+--                 2 ->
+--                     Specialty
+--                 3 ->
+--                     Labs
+--                 4 ->
+--                     Radiology
+--                 9 ->
+--                     Hospitalizations
+--                 6 ->
+--                     Legal
+--                 10 ->
+--                     CallRecordings
+--                 11 ->
+--                     PreviousHistories
+--                 12 ->
+--                     Enrollment
+--                 5 ->
+--                     Misc
+--                 _ ->
+--                     Debug.crash "Invalid recordId, cannot load program"
+--         Nothing ->
+--             Debug.crash "Invalid recordId, cannot load program"
 
 
 getId : RecordType -> Maybe Int

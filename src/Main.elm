@@ -24,31 +24,23 @@ subscriptions _ =
         ]
 
 
-init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
-init flags location =
+init : Navigation.Location -> ( Model, Cmd Msg )
+init location =
     let
         model =
-            emptyModel location flags
+            emptyModel location
+
+        patientId =
+            Routes.getPatientId location
+
+        newModel =
+            { model | page = Routes.getPage location }
     in
-        if flags.pageFlag == "billing" then
-            { model | page = Billing } ! []
-        else if flags.pageFlag == "records" then
-            { model | page = Records }
-                ! [ Cmd.map RecordsMsg (Records.init flags)
-                  , getDropDowns flags.patientId AddEditDataSourceLoaded
-                  ]
-        else if flags.pageFlag == "hospitilizations" then
-            { model | page = Hospitilizations }
-                ! [ Cmd.map HospitilizationsMsg (Hospitilizations.init flags)
-                  , getDropDowns flags.patientId AddEditDataSourceLoaded
-                  ]
-        else
-            ( model, Cmd.none )
+        newModel ! [ getDropDowns patientId AddEditDataSourceLoaded ]
 
 
-main : Program Flags Model Msg
 main =
-    Navigation.programWithFlags UrlChange
+    Navigation.program UrlChange
         { init = init
         , view = view
         , update = update
@@ -129,32 +121,10 @@ update msg model =
             { model | page = Error (toString httpError) } ! []
 
         PresetPageComplete pageStr ->
-            case Routes.getPage pageStr of
-                Records ->
-                    { model | page = Records } ! []
-
-                RecordAddNew ->
-                    case model.addEditDataSource of
-                        Just addEditDataSource ->
-                            { model | page = RecordAddNew } ! [ setPage (getAddEditMsg addEditDataSource model.recordAddNewState.recordTypeId False False) ]
-
-                        Nothing ->
-                            { model | page = Error "Can't display this page without a datasource" } ! []
-
-                HospitilizationsAddEdit ->
-                    case model.addEditDataSource of
-                        Just addEditDataSource ->
-                            { model | page = HospitilizationsAddEdit } ! [ setPage (getAddEditMsg addEditDataSource model.recordAddNewState.recordTypeId False False) ]
-
-                        Nothing ->
-                            { model | page = Error "Can't display this page without a datasource" } ! []
-
-                _ ->
-                    model
-                        ! []
+            model ! []
 
         SetPageComplete _ ->
             model ! [ setLoadingStatus False ]
 
         UrlChange location ->
-            { model | page = Routes.getPage location.hash } ! []
+            { model | page = Routes.getPage location } ! []

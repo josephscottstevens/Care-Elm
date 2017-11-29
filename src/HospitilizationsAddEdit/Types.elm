@@ -44,10 +44,10 @@ type alias Model =
     }
 
 
-emptyModel : Flags -> Model
-emptyModel flags =
+emptyModel : Int -> Model
+emptyModel patientId =
     { id = Nothing
-    , patientId = flags.patientId
+    , patientId = patientId
     , facilityId = Nothing
     , facilityText = ""
     , patientReported = False

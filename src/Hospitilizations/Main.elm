@@ -20,9 +20,9 @@ subscriptions =
         ]
 
 
-init : Flags -> Cmd Msg
-init flags =
-    getHospitilizations flags.patientId Load
+init : Int -> Cmd Msg
+init patientId =
+    getHospitilizations patientId Load
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

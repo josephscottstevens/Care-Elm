@@ -97,13 +97,16 @@ getMenuMessage model recordId messageType =
                 |> List.filter (\t -> t.id == recordId)
                 |> List.head
                 |> Maybe.map (\t -> t.hasVerbalConsent)
+
+        recordTypeId =
+            getId model.recordType
     in
-        MenuMessage messageType recordId model.recordTypeId maybeVerbalConsent
+        MenuMessage messageType recordId recordTypeId maybeVerbalConsent
 
 
-flipConsent : List RecordRow -> Int -> Maybe Int -> List RecordRow
-flipConsent records recordId recordTypeId =
-    case getRecordType recordTypeId of
+flipConsent : List RecordRow -> Int -> RecordType -> List RecordRow
+flipConsent records recordId recordType =
+    case recordType of
         CallRecordings ->
             records
                 |> List.map
@@ -205,8 +208,19 @@ filterFields flds filterState =
 
 filteredRecords : Model -> List RecordRow
 filteredRecords model =
-    case defaultInt model.recordTypeId == 9 of
-        False ->
+    case model.recordType of
+        Hospitalizations ->
+            model.records
+                |> List.filter (\t -> String.contains model.filterFields.date (defaultLowerDateTime t.date))
+                |> List.filter (\t -> String.contains model.filterFields.hospitalizationId (defaultIntToString t.hospitalizationId))
+                |> List.filter (\t -> String.contains model.filterFields.dateOfAdmission (defaultDateTime t.dateOfAdmission))
+                |> List.filter (\t -> String.contains model.filterFields.dateOfDischarge (defaultDateTime t.dateOfDischarge))
+                |> List.filter (\t -> String.contains model.filterFields.hospitalizationServiceType (defaultLower t.hospitalizationServiceType))
+                |> List.filter (\t -> String.contains model.filterFields.recommendations (defaultLower t.recommendations))
+                |> List.filter (\t -> String.contains model.filterFields.dischargePhysician (defaultLower t.dischargePhysician))
+                |> List.filter (\t -> String.contains model.filterFields.comments (defaultLower t.comments))
+
+        _ ->
             model.records
                 |> List.filter (\t -> String.contains model.filterFields.date (defaultLowerDateTime t.date))
                 |> List.filter (\t -> String.contains model.filterFields.provider (defaultLower t.provider))
@@ -223,14 +237,3 @@ filteredRecords model =
                 |> List.filter (\t -> String.contains model.filterFields.staffName (defaultLower t.staffName))
                 |> List.filter (\t -> String.contains model.filterFields.fileName (defaultLower t.fileName))
                 |> List.filter (\t -> String.contains model.filterFields.reportDate (defaultLowerDate t.reportDate))
-
-        True ->
-            model.records
-                |> List.filter (\t -> String.contains model.filterFields.date (defaultLowerDateTime t.date))
-                |> List.filter (\t -> String.contains model.filterFields.hospitalizationId (defaultIntToString t.hospitalizationId))
-                |> List.filter (\t -> String.contains model.filterFields.dateOfAdmission (defaultDateTime t.dateOfAdmission))
-                |> List.filter (\t -> String.contains model.filterFields.dateOfDischarge (defaultDateTime t.dateOfDischarge))
-                |> List.filter (\t -> String.contains model.filterFields.hospitalizationServiceType (defaultLower t.hospitalizationServiceType))
-                |> List.filter (\t -> String.contains model.filterFields.recommendations (defaultLower t.recommendations))
-                |> List.filter (\t -> String.contains model.filterFields.dischargePhysician (defaultLower t.dischargePhysician))
-                |> List.filter (\t -> String.contains model.filterFields.comments (defaultLower t.comments))

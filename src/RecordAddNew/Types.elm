@@ -42,6 +42,7 @@ type alias Model =
     { recordId : Int
     , title : String
     , patientId : Int
+    , recordType : RecordType
     , recordTypeId : Maybe Int
     , recordTypeText : String
     , specialty : String
@@ -80,12 +81,13 @@ type alias Model =
     }
 
 
-emptyModel : Flags -> Model
-emptyModel flags =
+emptyModel : RecordType -> Int -> Model
+emptyModel recordType patientId =
     { recordId = 0
     , title = ""
-    , patientId = flags.patientId
-    , recordTypeId = flags.recordTypeId
+    , patientId = patientId
+    , recordType = recordType
+    , recordTypeId = getId recordType
     , recordTypeText = ""
     , specialty = ""
     , provider = ""
