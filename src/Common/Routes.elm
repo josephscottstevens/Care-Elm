@@ -30,3 +30,8 @@ navHospitilizationsAddEdit =
 navRecords : Cmd msg
 navRecords =
     Navigation.load "#/people/_records"
+
+
+navRecordAddNew : Cmd msg
+navRecordAddNew =
+    Navigation.load "#/people/_records/addedit"

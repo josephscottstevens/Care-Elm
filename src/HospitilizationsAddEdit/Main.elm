@@ -9,6 +9,7 @@ import Common.Html exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
 import Ports exposing (..)
+import Common.Routes exposing (navRecords)
 
 
 subscriptions : Sub Msg
@@ -51,41 +52,41 @@ view model =
             ]
 
 
-update : Msg -> Model -> ( ( Model, Cmd Msg ), Maybe Page )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
         updateAddNew t =
-            ( t ! [ setUnsavedChanges True ], Nothing )
+            t ! [ setUnsavedChanges True ]
     in
         case msg of
             Save ->
                 if List.length (getValidationErrors (formInputs model)) > 0 then
-                    ( { model | showValidationErrors = True } ! [], Nothing )
+                    { model | showValidationErrors = True } ! []
                 else
-                    ( model ! [ saveForm model, setUnsavedChanges False ], Nothing )
+                    model ! [ saveForm model, setUnsavedChanges False ]
 
             SaveCompleted (Ok responseMsg) ->
                 case getResponseError responseMsg of
                     Just t ->
-                        ( model ! [ displayErrorMessage t ], Nothing )
+                        model ! [ displayErrorMessage t ]
 
                     Nothing ->
-                        ( model ! [ displaySuccessMessage "Save completed successfully!" ], Just Records )
+                        model ! [ displaySuccessMessage "Save completed successfully!", navRecords ]
 
             SaveCompleted (Err t) ->
-                ( model ! [ setLoadingStatus False ], error t )
+                model ! [ setLoadingStatus False ]
 
             Cancel ->
-                ( model ! [ setUnsavedChanges False ], Just Records )
+                model ! [ setUnsavedChanges False, navRecords ]
 
             UpdateFacility dropDownItem ->
                 updateAddNew { model | facilityId = dropDownItem.id, facilityText = dropDownItem.name }
 
             AddNewFacility ->
-                ( model ! [ addNewFacility Nothing ], Nothing )
+                model ! [ addNewFacility Nothing ]
 
             AddNewPhysician ->
-                ( model ! [ addNewPhysician Nothing ], Nothing )
+                model ! [ addNewPhysician Nothing ]
 
             UpdateHospitilization dropDownItem ->
                 updateAddNew { model | hospitalizationId = dropDownItem.id, hospitalizationText = dropDownItem.name }

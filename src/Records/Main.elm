@@ -28,53 +28,51 @@ init flags =
     getRecords flags.patientId flags.recordTypeId Load
 
 
-update : Msg -> Model -> ( ( Model, Cmd Msg ), Maybe Page )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Load (Ok t) ->
-            ( getLoadedState model t ! [ setLoadingStatus False ], Nothing )
+            getLoadedState model t ! [ setLoadingStatus False ]
 
         Load (Err t) ->
-            ( model ! [ setLoadingStatus False ], error t )
+            model ! [ displayErrorMessage (toString t) ]
 
         SetTableState newState ->
-            ( { model | tableState = newState } ! [], Nothing )
+            { model | tableState = newState } ! []
 
         SendMenuMessage recordId messageType ->
-            ( { model | records = flipConsent model.records recordId model.recordTypeId }
+            { model | records = flipConsent model.records recordId model.recordTypeId }
                 ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
-            , Nothing
-            )
 
         DropDownToggle recordId ->
-            ( { model | records = flipDropDownOpen model.records recordId } ! [], Nothing )
+            { model | records = flipDropDownOpen model.records recordId } ! []
 
         DeleteConfirmed rowId ->
             let
                 updatedRecords =
                     model.records |> List.filter (\t -> t.id /= rowId)
             in
-                ( { model | records = updatedRecords } ! [ deleteRequest rowId ], Nothing )
+                { model | records = updatedRecords } ! [ deleteRequest rowId ]
 
         DeleteCompleted (Ok responseMsg) ->
             case getResponseError responseMsg of
                 Just t ->
-                    ( model ! [ displayErrorMessage t ], Nothing )
+                    model ! [ displayErrorMessage t ]
 
                 Nothing ->
-                    ( model ! [ displaySuccessMessage "Record deleted successfully!" ], Nothing )
+                    model ! [ displaySuccessMessage "Record deleted successfully!" ]
 
         DeleteCompleted (Err t) ->
-            ( model ! [], error t )
+            model ! [ displayErrorMessage (toString t) ]
 
         EditTask taskId ->
-            ( model ! [ editTask taskId ], Nothing )
+            model ! [ editTask taskId ]
 
         SetFilter filterState ->
-            ( { model | filterFields = filterFields model.filterFields filterState } ! [], Nothing )
+            { model | filterFields = filterFields model.filterFields filterState } ! []
 
         AddNewStart ->
-            ( model ! [], Just RecordAddNew )
+            (model ! [])
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg

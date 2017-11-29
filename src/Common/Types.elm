@@ -11,51 +11,39 @@ type Page
     | Error String
 
 
-getPage : String -> Page
-getPage page =
-    case page of
-        "Billing" ->
-            Billing
 
-        "Records" ->
-            Records
-
-        "RecordAddNew" ->
-            RecordAddNew
-
-        "Hospitilizations" ->
-            Hospitilizations
-
-        "HospitilizationsAddEdit" ->
-            HospitilizationsAddEdit
-
-        _ ->
-            Error "Page not found"
-
-
-pageToString : Page -> String
-pageToString page =
-    case page of
-        None ->
-            "None"
-
-        Billing ->
-            "Billing"
-
-        Records ->
-            "Records"
-
-        RecordAddNew ->
-            "RecordAddNew"
-
-        Hospitilizations ->
-            "Hospitilizations"
-
-        HospitilizationsAddEdit ->
-            "HospitilizationsAddEdit"
-
-        Error _ ->
-            "Error"
+-- getPage : String -> Page
+-- getPage page =
+--     case page of
+--         "Billing" ->
+--             Billing
+--         "Records" ->
+--             Records
+--         "RecordAddNew" ->
+--             RecordAddNew
+--         "Hospitilizations" ->
+--             Hospitilizations
+--         "HospitilizationsAddEdit" ->
+--             HospitilizationsAddEdit
+--         _ ->
+--             Error "Page not found"
+-- pageToString : Page -> String
+-- pageToString page =
+--     case page of
+--         None ->
+--             "None"
+--         Billing ->
+--             "Billing"
+--         Records ->
+--             "Records"
+--         RecordAddNew ->
+--             "RecordAddNew"
+--         Hospitilizations ->
+--             "Hospitilizations"
+--         HospitilizationsAddEdit ->
+--             "HospitilizationsAddEdit"
+--         Error _ ->
+--             "Error"
 
 
 type alias FilterState =

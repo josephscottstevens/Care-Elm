@@ -11,6 +11,7 @@ import Common.Types exposing (..)
 import Functions exposing (..)
 import Ports exposing (..)
 import Navigation
+import Common.Routes as Routes
 
 
 subscriptions : Model -> Sub Msg
@@ -88,15 +89,10 @@ update msg model =
 
         RecordsMsg recordsMsg ->
             let
-                ( ( newModel, pageCmd ), nextPage ) =
+                ( newModel, pageCmd ) =
                     Records.update recordsMsg model.recordsState
             in
-                case nextPage of
-                    Just newPage ->
-                        { model | page = None, recordsState = newModel } ! [ presetPage (pageToString newPage) ]
-
-                    Nothing ->
-                        { model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ]
+                { model | recordsState = newModel } ! [ Cmd.map RecordsMsg pageCmd ]
 
         RecordAddNewMsg recordAddNewMsg ->
             let
@@ -114,15 +110,10 @@ update msg model =
 
         HospitilizationsAddEditMsg hospitilizationsAddEditMsg ->
             let
-                ( ( newModel, pageCmd ), nextPage ) =
+                ( newModel, pageCmd ) =
                     HospitilizationsAddEdit.update hospitilizationsAddEditMsg model.hospitilizationsAddEditState
             in
-                case nextPage of
-                    Just newPage ->
-                        { model | page = None, hospitilizationsAddEditState = newModel } ! [ presetPage (pageToString newPage) ]
-
-                    Nothing ->
-                        { model | hospitilizationsAddEditState = newModel } ! [ Cmd.map HospitilizationsAddEditMsg pageCmd ]
+                { model | hospitilizationsAddEditState = newModel } ! [ Cmd.map HospitilizationsAddEditMsg pageCmd ]
 
         AddEditDataSourceLoaded (Ok t) ->
             let
@@ -138,7 +129,7 @@ update msg model =
             { model | page = Error (toString httpError) } ! []
 
         PresetPageComplete pageStr ->
-            case getPage pageStr of
+            case Routes.getPage pageStr of
                 Records ->
                     { model | page = Records } ! []
 
@@ -166,4 +157,4 @@ update msg model =
             model ! [ setLoadingStatus False ]
 
         UrlChange location ->
-            { model | page = getPage location.hash } ! []
+            { model | page = Routes.getPage location.hash } ! []
