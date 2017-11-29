@@ -4,8 +4,8 @@ module Common.Types exposing (..)
 type Page
     = None
     | Billing
-    | Records
-    | RecordAddNew
+    | Records RecordType
+    | RecordAddNew RecordType
     | Hospitilizations
     | HospitilizationsAddEdit
     | Error String

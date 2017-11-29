@@ -2,7 +2,7 @@ port module Records.Main exposing (..)
 
 import Records.Functions exposing (..)
 import Records.Types exposing (..)
-import Html exposing (Html, text, div, button)
+import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Table exposing (..)
@@ -82,7 +82,8 @@ update msg model =
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
     div []
-        [ case addEditDataSource of
+        [ h4 [] [ text (toString model.recordType ++ " Records") ]
+        , case addEditDataSource of
             Just _ ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
 

@@ -9,6 +9,7 @@ QUESTIONS:
 	
 ===========================================================================================================
 
+can I remove getRecordType ? (returns the Maybe Id)
 quite sure the url change is much better than current crazy method, switch to that
 can I remove functions from Main?
 implement HospitilizationsAddEdit cancel

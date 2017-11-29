@@ -3,6 +3,12 @@ port module Ports exposing (..)
 import Common.Types exposing (..)
 
 
+port isApp : (String -> msg) -> Sub msg
+
+
+port decideApp : Bool -> Cmd msg
+
+
 port resetUpdate : Maybe Int -> Cmd msg
 
 

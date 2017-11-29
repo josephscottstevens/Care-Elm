@@ -8,7 +8,7 @@ import HospitilizationsAddEdit.Types as HospitilizationsAddEdit
 import Common.Types exposing (..)
 import Http
 import Navigation
-import Common.Routes exposing (getPage, getRecordType, getPatientId)
+import Common.Routes exposing (getPage, getPatientId)
 
 
 type alias Model =
@@ -33,19 +33,17 @@ type Msg
     | PresetPageComplete String
     | SetPageComplete String
     | UrlChange Navigation.Location
+    | IsApp String
 
 
 emptyModel : Navigation.Location -> Model
 emptyModel location =
     let
         page =
-            getPage location
-
-        recordType =
-            getRecordType location
+            getPage location.href
 
         patientId =
-            getPatientId location
+            getPatientId location.href
     in
         { page = None
         , addEditDataSource = Nothing

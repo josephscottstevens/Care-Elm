@@ -21,6 +21,7 @@ subscriptions _ =
         , Sub.map RecordAddNewMsg RecordAddNew.subscriptions
         , presetPageComplete PresetPageComplete
         , setPageComplete SetPageComplete
+        , isApp IsApp
         ]
 
 
@@ -31,14 +32,12 @@ init location =
             emptyModel location
 
         patientId =
-            Routes.getPatientId location
-
-        newModel =
-            { model | page = Routes.getPage location }
+            Routes.getPatientId location.href
     in
-        newModel ! [ getDropDowns patientId AddEditDataSourceLoaded ]
+        model ! ([ getDropDowns patientId AddEditDataSourceLoaded, setLoadingStatus False ])
 
 
+main : Program Never Model Msg
 main =
     Navigation.program UrlChange
         { init = init
@@ -57,10 +56,10 @@ view model =
         Billing ->
             div [] []
 
-        Records ->
+        Records _ ->
             Html.map RecordsMsg (Records.view model.recordsState model.addEditDataSource)
 
-        RecordAddNew ->
+        RecordAddNew _ ->
             Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState)
 
         Hospitilizations ->
@@ -126,5 +125,25 @@ update msg model =
         SetPageComplete _ ->
             model ! [ setLoadingStatus False ]
 
-        UrlChange location ->
-            { model | page = Routes.getPage location } ! []
+        UrlChange url ->
+            { model | currentUrl = url } ! []
+
+        IsApp urlHash ->
+            let
+                patientId =
+                    Routes.getPatientId urlHash
+
+                recordType =
+                    Routes.getRecordType urlHash
+
+                commands =
+                    case Routes.getPage urlHash of
+                        Records recordType ->
+                            [ Cmd.map RecordsMsg (Records.init recordType patientId)
+                            , decideApp True
+                            ]
+
+                        _ ->
+                            [ decideApp False ]
+            in
+                { model | page = Routes.getPage urlHash } ! commands
