@@ -10,6 +10,7 @@ import Common.Grid exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
 import Ports exposing (..)
+import Navigation
 
 
 subscriptions : Sub Msg
@@ -61,7 +62,7 @@ update msg model =
             ( { model | filterFields = filterFields model.filterFields filterState } ! [], Nothing )
 
         AddNewStart ->
-            ( model ! [], Just HospitilizationsAddEdit )
+            ( model ! [ Navigation.load "#/people/_hospitalizations/new" ], Nothing )
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg

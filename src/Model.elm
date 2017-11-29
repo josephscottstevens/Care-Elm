@@ -7,6 +7,7 @@ import Hospitilizations.Types as Hospitilizations
 import HospitilizationsAddEdit.Types as HospitilizationsAddEdit
 import Common.Types exposing (..)
 import Http
+import Navigation
 
 
 type alias Model =
@@ -18,6 +19,7 @@ type alias Model =
     , recordAddNewState : RecordAddNew.Model
     , hospitalizationsState : Hospitilizations.Model
     , hospitilizationsAddEditState : HospitilizationsAddEdit.Model
+    , currentUrl : Navigation.Location
     }
 
 
@@ -30,10 +32,11 @@ type Msg
     | HospitilizationsAddEditMsg HospitilizationsAddEdit.Msg
     | PresetPageComplete String
     | SetPageComplete String
+    | UrlChange Navigation.Location
 
 
-emptyModel : Flags -> Model
-emptyModel flags =
+emptyModel : Navigation.Location -> Flags -> Model
+emptyModel location flags =
     { page = None
     , flags = flags
     , addEditDataSource = Nothing
@@ -42,4 +45,5 @@ emptyModel flags =
     , recordAddNewState = RecordAddNew.emptyModel flags
     , hospitalizationsState = Hospitilizations.emptyModel flags
     , hospitilizationsAddEditState = HospitilizationsAddEdit.emptyModel flags
+    , currentUrl = location
     }

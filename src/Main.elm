@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Model exposing (..)
-import Html exposing (text, div)
+import Html exposing (Html, text, div)
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
 import Hospitilizations.Main as Hospitilizations
@@ -10,6 +10,7 @@ import Common.Functions exposing (..)
 import Common.Types exposing (..)
 import Functions exposing (..)
 import Ports exposing (..)
+import Navigation
 
 
 subscriptions : Model -> Sub Msg
@@ -22,11 +23,11 @@ subscriptions _ =
         ]
 
 
-init : Flags -> ( Model, Cmd Msg )
-init flags =
+init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
+init flags location =
     let
         model =
-            emptyModel flags
+            emptyModel location flags
     in
         if flags.pageFlag == "billing" then
             { model | page = Billing } ! []
@@ -46,7 +47,7 @@ init flags =
 
 main : Program Flags Model Msg
 main =
-    Html.programWithFlags
+    Navigation.programWithFlags UrlChange
         { init = init
         , view = view
         , update = update
@@ -54,7 +55,7 @@ main =
         }
 
 
-view : Model -> Html.Html Msg
+view : Model -> Html Msg
 view model =
     case model.page of
         None ->
@@ -173,3 +174,11 @@ update msg model =
 
         SetPageComplete _ ->
             model ! [ setLoadingStatus False ]
+
+        UrlChange location ->
+            case location.hash of
+                "#/people/_hospitalizations/new" ->
+                    { model | page = HospitilizationsAddEdit, currentUrl = location } ! []
+
+                _ ->
+                    { model | currentUrl = location } ! []
