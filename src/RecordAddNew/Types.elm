@@ -7,7 +7,7 @@ import Http
 type Msg
     = AddNewFacility
     | AddNewPhysician
-    | Save
+    | Save RecordType
     | SaveCompleted (Result Http.Error String)
     | Cancel
     | UpdateTitle String
@@ -42,7 +42,6 @@ type alias Model =
     { recordId : Int
     , title : String
     , patientId : Int
-    , recordType : RecordType
     , recordTypeId : Maybe Int
     , recordTypeText : String
     , specialty : String
@@ -81,13 +80,12 @@ type alias Model =
     }
 
 
-emptyModel : RecordType -> Int -> Model
-emptyModel recordType patientId =
+emptyModel : Int -> Model
+emptyModel patientId =
     { recordId = 0
     , title = ""
     , patientId = patientId
-    , recordType = recordType
-    , recordTypeId = getId recordType
+    , recordTypeId = Nothing
     , recordTypeText = ""
     , specialty = ""
     , provider = ""

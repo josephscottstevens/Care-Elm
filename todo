@@ -9,6 +9,13 @@ QUESTIONS:
 	
 ===========================================================================================================
 
+re-add recordTypeId for addnewModel (fix)
+
+can i remove the value in html?  I never touch it
+Did I wind up using anything from the two routing libraries?
+trim down ports
+	some are un-used
+
 can I remove getRecordType ? (returns the Maybe Id)
 quite sure the url change is much better than current crazy method, switch to that
 can I remove functions from Main?

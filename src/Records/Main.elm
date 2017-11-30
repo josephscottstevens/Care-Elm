@@ -44,9 +44,9 @@ update msg model =
         SetTableState newState ->
             { model | tableState = newState } ! []
 
-        SendMenuMessage recordId messageType ->
-            { model | records = flipConsent model.records recordId model.recordType }
-                ! [ sendMenuMessage (getMenuMessage model recordId messageType) ]
+        SendMenuMessage recordId recordType messageType ->
+            { model | records = flipConsent model.records recordId recordType }
+                ! [ sendMenuMessage (getMenuMessage model.records recordType recordId messageType) ]
 
         DropDownToggle recordId ->
             { model | records = flipDropDownOpen model.records recordId } ! []
@@ -79,10 +79,10 @@ update msg model =
             (model ! [])
 
 
-view : Model -> Maybe AddEditDataSource -> Html Msg
-view model addEditDataSource =
+view : Model -> RecordType -> Maybe AddEditDataSource -> Html Msg
+view model recordType addEditDataSource =
     div []
-        [ h4 [] [ text (toString model.recordType ++ " Records") ]
+        [ h4 [] [ text (toString recordType ++ " Records") ]
         , case addEditDataSource of
             Just _ ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
@@ -90,7 +90,7 @@ view model addEditDataSource =
             Nothing ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
         , div [ class "e-grid e-js e-waitingpopup" ]
-            [ Table.view (config SetFilter model.recordType (updateTaskId model)) model.tableState (filteredRecords model) ]
+            [ Table.view (config SetFilter recordType (updateTaskId model)) model.tableState (filteredRecords model.records model.filterFields recordType) ]
         ]
 
 
@@ -199,13 +199,13 @@ dropDownItems : RecordType -> Int -> List ( String, String, Html.Attribute Msg )
 dropDownItems recordType rowId =
     case recordType of
         CallRecordings ->
-            [ ( "e-edit", "Mark As Consent", onClick (SendMenuMessage rowId "MarkAsConsent") ) ]
+            [ ( "e-edit", "Mark As Consent", onClick (SendMenuMessage rowId recordType "MarkAsConsent") ) ]
 
         _ ->
-            [ ( "e-sync", "Transfer", onClick (SendMenuMessage rowId "Transfer") )
-            , ( "e-download", "View File", onClick (SendMenuMessage rowId "ViewFile") )
-            , ( "e-mail", "Send By Email", onClick (SendMenuMessage rowId "SendByEmail") )
-            , ( "e-print_01", "Send By Fax", onClick (SendMenuMessage rowId "SendByFax") )
-            , ( "e-save", "Save To Client Portal", onClick (SendMenuMessage rowId "SaveToClientPortal") )
-            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "Delete") )
+            [ ( "e-sync", "Transfer", onClick (SendMenuMessage rowId recordType "Transfer") )
+            , ( "e-download", "View File", onClick (SendMenuMessage rowId recordType "ViewFile") )
+            , ( "e-mail", "Send By Email", onClick (SendMenuMessage rowId recordType "SendByEmail") )
+            , ( "e-print_01", "Send By Fax", onClick (SendMenuMessage rowId recordType "SendByFax") )
+            , ( "e-save", "Save To Client Portal", onClick (SendMenuMessage rowId recordType "SaveToClientPortal") )
+            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId recordType "Delete") )
             ]

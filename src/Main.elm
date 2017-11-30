@@ -56,11 +56,11 @@ view model =
         Billing ->
             div [] []
 
-        Records _ ->
-            Html.map RecordsMsg (Records.view model.recordsState model.addEditDataSource)
+        Records recordType ->
+            Html.map RecordsMsg (Records.view model.recordsState recordType model.addEditDataSource)
 
-        RecordAddNew _ ->
-            Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState)
+        RecordAddNew recordType ->
+            Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState recordType)
 
         Hospitilizations ->
             Html.map HospitilizationsMsg (Hospitilizations.view model.hospitalizationsState model.addEditDataSource)
@@ -133,11 +133,11 @@ update msg model =
                 patientId =
                     Routes.getPatientId urlHash
 
-                recordType =
-                    Routes.getRecordType urlHash
+                newPage =
+                    Routes.getPage urlHash
 
                 commands =
-                    case Routes.getPage urlHash of
+                    case newPage of
                         Records recordType ->
                             [ Cmd.map RecordsMsg (Records.init recordType patientId)
                             , decideApp True
@@ -146,4 +146,4 @@ update msg model =
                         _ ->
                             [ decideApp False ]
             in
-                { model | page = Routes.getPage urlHash } ! commands
+                { model | page = newPage } ! commands

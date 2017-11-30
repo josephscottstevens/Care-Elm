@@ -89,17 +89,17 @@ updateTaskId model =
         Maybe.withDefault Nothing records
 
 
-getMenuMessage : Model -> Int -> String -> MenuMessage
-getMenuMessage model recordId messageType =
+getMenuMessage : List RecordRow -> RecordType -> Int -> String -> MenuMessage
+getMenuMessage records recordType recordId messageType =
     let
         maybeVerbalConsent =
-            model.records
+            records
                 |> List.filter (\t -> t.id == recordId)
                 |> List.head
                 |> Maybe.map (\t -> t.hasVerbalConsent)
 
         recordTypeId =
-            getId model.recordType
+            getId recordType
     in
         MenuMessage messageType recordId recordTypeId maybeVerbalConsent
 
@@ -206,34 +206,34 @@ filterFields flds filterState =
             flds
 
 
-filteredRecords : Model -> List RecordRow
-filteredRecords model =
-    case model.recordType of
+filteredRecords : List RecordRow -> Filters -> RecordType -> List RecordRow
+filteredRecords records filterFields recordType =
+    case recordType of
         Hospitalizations ->
-            model.records
-                |> List.filter (\t -> String.contains model.filterFields.date (defaultLowerDateTime t.date))
-                |> List.filter (\t -> String.contains model.filterFields.hospitalizationId (defaultIntToString t.hospitalizationId))
-                |> List.filter (\t -> String.contains model.filterFields.dateOfAdmission (defaultDateTime t.dateOfAdmission))
-                |> List.filter (\t -> String.contains model.filterFields.dateOfDischarge (defaultDateTime t.dateOfDischarge))
-                |> List.filter (\t -> String.contains model.filterFields.hospitalizationServiceType (defaultLower t.hospitalizationServiceType))
-                |> List.filter (\t -> String.contains model.filterFields.recommendations (defaultLower t.recommendations))
-                |> List.filter (\t -> String.contains model.filterFields.dischargePhysician (defaultLower t.dischargePhysician))
-                |> List.filter (\t -> String.contains model.filterFields.comments (defaultLower t.comments))
+            records
+                |> List.filter (\t -> String.contains filterFields.date (defaultLowerDateTime t.date))
+                |> List.filter (\t -> String.contains filterFields.hospitalizationId (defaultIntToString t.hospitalizationId))
+                |> List.filter (\t -> String.contains filterFields.dateOfAdmission (defaultDateTime t.dateOfAdmission))
+                |> List.filter (\t -> String.contains filterFields.dateOfDischarge (defaultDateTime t.dateOfDischarge))
+                |> List.filter (\t -> String.contains filterFields.hospitalizationServiceType (defaultLower t.hospitalizationServiceType))
+                |> List.filter (\t -> String.contains filterFields.recommendations (defaultLower t.recommendations))
+                |> List.filter (\t -> String.contains filterFields.dischargePhysician (defaultLower t.dischargePhysician))
+                |> List.filter (\t -> String.contains filterFields.comments (defaultLower t.comments))
 
         _ ->
-            model.records
-                |> List.filter (\t -> String.contains model.filterFields.date (defaultLowerDateTime t.date))
-                |> List.filter (\t -> String.contains model.filterFields.provider (defaultLower t.provider))
-                |> List.filter (\t -> String.contains model.filterFields.specialty (defaultLower t.specialty))
-                |> List.filter (\t -> String.contains model.filterFields.comments (defaultLower t.comments))
-                |> List.filter (\t -> String.contains model.filterFields.dateAccessioned (defaultLowerDateTime t.dateAccessed))
-                |> List.filter (\t -> String.contains model.filterFields.provider (defaultLower t.provider))
-                |> List.filter (\t -> String.contains model.filterFields.title (defaultLower t.title))
-                |> List.filter (\t -> String.contains model.filterFields.recordingDate (toLower (dateTime t.recordingDate)))
-                |> List.filter (\t -> String.contains model.filterFields.recording (defaultLower t.recording))
-                |> List.filter (\t -> String.contains model.filterFields.taskTitle (defaultLower t.taskTitle))
-                |> List.filter (\t -> String.contains model.filterFields.enrollment (toLower (toString t.enrollment)))
-                |> List.filter (\t -> String.contains model.filterFields.hasVerbalConsent (toLower (toString t.hasVerbalConsent)))
-                |> List.filter (\t -> String.contains model.filterFields.staffName (defaultLower t.staffName))
-                |> List.filter (\t -> String.contains model.filterFields.fileName (defaultLower t.fileName))
-                |> List.filter (\t -> String.contains model.filterFields.reportDate (defaultLowerDate t.reportDate))
+            records
+                |> List.filter (\t -> String.contains filterFields.date (defaultLowerDateTime t.date))
+                |> List.filter (\t -> String.contains filterFields.provider (defaultLower t.provider))
+                |> List.filter (\t -> String.contains filterFields.specialty (defaultLower t.specialty))
+                |> List.filter (\t -> String.contains filterFields.comments (defaultLower t.comments))
+                |> List.filter (\t -> String.contains filterFields.dateAccessioned (defaultLowerDateTime t.dateAccessed))
+                |> List.filter (\t -> String.contains filterFields.provider (defaultLower t.provider))
+                |> List.filter (\t -> String.contains filterFields.title (defaultLower t.title))
+                |> List.filter (\t -> String.contains filterFields.recordingDate (toLower (dateTime t.recordingDate)))
+                |> List.filter (\t -> String.contains filterFields.recording (defaultLower t.recording))
+                |> List.filter (\t -> String.contains filterFields.taskTitle (defaultLower t.taskTitle))
+                |> List.filter (\t -> String.contains filterFields.enrollment (toLower (toString t.enrollment)))
+                |> List.filter (\t -> String.contains filterFields.hasVerbalConsent (toLower (toString t.hasVerbalConsent)))
+                |> List.filter (\t -> String.contains filterFields.staffName (defaultLower t.staffName))
+                |> List.filter (\t -> String.contains filterFields.fileName (defaultLower t.fileName))
+                |> List.filter (\t -> String.contains filterFields.reportDate (defaultLowerDate t.reportDate))

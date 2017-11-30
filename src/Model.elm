@@ -1,10 +1,10 @@
 module Model exposing (..)
 
 import Billing.Types as Billing
-import Records.Types as Records
-import RecordAddNew.Types as RecordAddNew
 import Hospitilizations.Types as Hospitilizations
 import HospitilizationsAddEdit.Types as HospitilizationsAddEdit
+import Records.Types as Records
+import RecordAddNew.Types as RecordAddNew
 import Common.Types exposing (..)
 import Http
 import Navigation
@@ -48,8 +48,8 @@ emptyModel location =
         { page = None
         , addEditDataSource = Nothing
         , billingState = Billing.emptyModel
-        , recordsState = Records.emptyModel recordType patientId
-        , recordAddNewState = RecordAddNew.emptyModel recordType patientId
+        , recordsState = Records.emptyModel patientId
+        , recordAddNewState = RecordAddNew.emptyModel patientId
         , hospitalizationsState = Hospitilizations.emptyModel patientId
         , hospitilizationsAddEditState = HospitilizationsAddEdit.emptyModel patientId
         , currentUrl = location

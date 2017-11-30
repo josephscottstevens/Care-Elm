@@ -9,7 +9,7 @@ type Msg
     = Load (Result Http.Error WebResponse)
     | SetTableState Table.State
     | DropDownToggle Int
-    | SendMenuMessage Int String
+    | SendMenuMessage Int RecordType String
     | SetFilter FilterState
     | EditTask Int
     | DeleteConfirmed Int
@@ -33,7 +33,6 @@ type alias Model =
     { records : List RecordRow
     , patientId : Int
     , facilityId : Maybe Int
-    , recordType : RecordType
     , tableState : Table.State
     , query : String
     , filterFields : Filters
@@ -41,12 +40,11 @@ type alias Model =
     }
 
 
-emptyModel : RecordType -> Int -> Model
-emptyModel recordType patientId =
+emptyModel : Int -> Model
+emptyModel patientId =
     { records = []
     , patientId = patientId
     , facilityId = Nothing
-    , recordType = recordType
     , tableState = Table.initialSort "Date"
     , query = ""
     , filterFields = emptyFilters

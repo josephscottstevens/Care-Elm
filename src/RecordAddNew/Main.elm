@@ -35,11 +35,11 @@ subscriptions =
         ]
 
 
-view : Model -> Html Msg
-view model =
+view : Model -> RecordType -> Html Msg
+view model recordType =
     let
         errors =
-            getValidationErrors (formInputs model)
+            getValidationErrors (formInputs model recordType)
 
         validationErrorsDiv =
             if model.showValidationErrors == True && List.length errors > 0 then
@@ -52,10 +52,10 @@ view model =
     in
         div [ class "form-horizontal" ]
             [ validationErrorsDiv
-            , makeControls (formInputs model)
+            , makeControls (formInputs model recordType)
             , div [ class "form-group" ]
                 [ div [ class fullWidth ]
-                    [ button [ type_ "button", id "Save", value "Addmodel", onClick Save, saveBtnClass ] [ text "Save" ]
+                    [ button [ type_ "button", id "Save", value "Addmodel", onClick (Save recordType), saveBtnClass ] [ text "Save" ]
                     , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
                     ]
                 ]
@@ -75,8 +75,8 @@ update msg model =
             AddNewPhysician ->
                 model ! [ addNewPhysician Nothing ]
 
-            Save ->
-                if List.length (getValidationErrors (formInputs model)) > 0 then
+            Save recordType ->
+                if List.length (getValidationErrors (formInputs model recordType)) > 0 then
                     { model | showValidationErrors = True } ! []
                 else
                     model ! [ saveForm model, setUnsavedChanges False ]
@@ -179,8 +179,8 @@ update msg model =
                 updateAddNew { model | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }
 
 
-formInputs : Model -> List ( String, RequiredType, InputControlType Msg )
-formInputs model =
+formInputs : Model -> RecordType -> List ( String, RequiredType, InputControlType Msg )
+formInputs model recordType =
     let
         firstColumns =
             [ ( "Facility", Required, DropInput model.facilityId "FacilityId" )
@@ -201,7 +201,7 @@ formInputs model =
                 ++ lastColumns
 
         columns =
-            case model.recordType of
+            case recordType of
                 PrimaryCare ->
                     defaultFields
 
