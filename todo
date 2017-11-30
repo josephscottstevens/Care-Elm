@@ -9,7 +9,8 @@ QUESTIONS:
 	
 ===========================================================================================================
 perhaps... better to not have a port file, instead put it where it is used... but are there shared ports?
-
+hide singlePageUrls array in main.js
+fix reload in new urls
 re-add recordTypeId for addnewModel (fix)
 when elm app first launches, it kills whatever page is current
 
@@ -17,8 +18,7 @@ can i remove the value in html?  I never touch it
 Did I wind up using anything from the two routing libraries?
 trim down ports
 	some are un-used
-Error state is redundant, instead, page none, and use port to send error message (keeps it standard)
-Move ports file to Common
+	
 	
 can I remove getRecordType ? (returns the Maybe Id)
 quite sure the url change is much better than current crazy method, switch to that

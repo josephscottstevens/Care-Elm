@@ -10,6 +10,7 @@ import Common.Grid exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
 import Ports exposing (..)
+import Common.Routes exposing (navRecordAddNew)
 
 
 port sendMenuMessage : MenuMessage -> Cmd msg
@@ -75,8 +76,8 @@ update msg model =
         SetFilter filterState ->
             { model | filterFields = filterFields model.filterFields filterState } ! []
 
-        AddNewStart ->
-            (model ! [])
+        AddNewStart recordType ->
+            (model ! [ navRecordAddNew recordType ])
 
 
 view : Model -> RecordType -> Maybe AddEditDataSource -> Html Msg
@@ -85,7 +86,7 @@ view model recordType addEditDataSource =
         [ h4 [] [ text (toString recordType ++ " Records") ]
         , case addEditDataSource of
             Just _ ->
-                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
+                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick (AddNewStart recordType) ] [ text "New Record" ]
 
             Nothing ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]

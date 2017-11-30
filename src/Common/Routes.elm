@@ -44,6 +44,36 @@ getPage locationHref =
         "#/people/_miscrecords" ->
             Records Misc
 
+        "#/people/_records/addedit/PrimaryCare" ->
+            RecordAddNew PrimaryCare
+
+        "#/people/_records/addedit/Specialty" ->
+            RecordAddNew Specialty
+
+        "#/people/_records/addedit/Labs" ->
+            RecordAddNew Labs
+
+        "#/people/_records/addedit/Radiology" ->
+            RecordAddNew Radiology
+
+        "#/people/_records/addedit/Hospitalizations" ->
+            RecordAddNew Hospitalizations
+
+        "#/people/_records/addedit/Legal" ->
+            RecordAddNew Legal
+
+        "#/people/_records/addedit/PreviousHistories" ->
+            RecordAddNew PreviousHistories
+
+        "#/people/_records/addedit/CallRecordings" ->
+            RecordAddNew CallRecordings
+
+        "#/people/_records/addedit/Enrollment" ->
+            RecordAddNew Enrollment
+
+        "#/people/_records/addedit/Misc" ->
+            RecordAddNew Misc
+
         _ ->
             Error (locationHref ++ " not found")
 
@@ -70,6 +100,6 @@ navRecords =
     Navigation.modifyUrl "#/people/_records"
 
 
-navRecordAddNew : Cmd msg
-navRecordAddNew =
-    Navigation.modifyUrl "#/people/_records/addedit"
+navRecordAddNew : RecordType -> Cmd msg
+navRecordAddNew recordType =
+    Navigation.modifyUrl ("#/people/_records/addedit/" ++ (toString recordType))

@@ -32,7 +32,7 @@ init location =
             emptyModel location
 
         patientId =
-            Routes.getPatientId location.href
+            Routes.getPatientId location.search
     in
         model ! ([ getDropDowns patientId AddEditDataSourceLoaded, setLoadingStatus False ])
 
@@ -147,12 +147,12 @@ getNewPage model urlStr =
             Routes.getPatientId urlHash
 
         newPage =
-            Routes.getPage (String.dropLeft 1 urlHash)
+            Routes.getPage urlHash
 
         commands =
             case newPage of
                 Billing ->
-                    []
+                    [ displayErrorMessage "Billing Not implemented" ]
 
                 Records recordType ->
                     [ Cmd.map RecordsMsg (Records.init recordType patientId) ]
@@ -169,10 +169,10 @@ getNewPage model urlStr =
                     [ Cmd.map HospitilizationsMsg (Hospitilizations.init patientId) ]
 
                 HospitilizationsAddEdit ->
-                    []
+                    [ displayErrorMessage "HospitilizationsAddEdit Not implemented" ]
 
                 None ->
-                    []
+                    [ displayErrorMessage "None... not implemented?" ]
 
                 Error t ->
                     [ displayErrorMessage t ]
