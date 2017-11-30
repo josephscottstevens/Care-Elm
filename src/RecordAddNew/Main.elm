@@ -2,7 +2,7 @@ port module RecordAddNew.Main exposing (..)
 
 import RecordAddNew.Functions exposing (..)
 import RecordAddNew.Types exposing (..)
-import Html exposing (Html, text, div, button)
+import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, id, value, type_)
 import Html.Events exposing (onClick)
 import Common.Html exposing (..)
@@ -59,7 +59,8 @@ view model recordType =
             class "btn btn-sm btn-success margin-left-5 pull-right"
     in
         div [ class "form-horizontal" ]
-            [ validationErrorsDiv
+            [ h4 [] [ text (getDesc recordType) ]
+            , validationErrorsDiv
             , makeControls (formInputs model recordType)
             , div [ class "form-group" ]
                 [ div [ class fullWidth ]

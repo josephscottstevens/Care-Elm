@@ -8,74 +8,77 @@ import Char exposing (isDigit)
 getPage : String -> Page
 getPage locationHref =
     case locationHref of
-        "#/people/_hospitalizations" ->
+        "#/people/hospitilizations" ->
             Hospitilizations
 
-        "#/people/_hospitalizations/addedit" ->
+        "#/people/hospitilizations/addedit" ->
             HospitilizationsAddEdit
 
         "#/people/_primarycarerecords" ->
             Records PrimaryCare
 
-        "#/people/_specialtyrecords" ->
+        "#/people/records/primarycare" ->
+            Records PrimaryCare
+
+        "#/people/records/specialty" ->
             Records Specialty
 
-        "#/people/_labrecords" ->
+        "#/people/records/labs" ->
             Records Labs
 
-        "#/people/_radiologyrecords" ->
+        "#/people/records/radiology" ->
             Records Radiology
 
-        "#/people/_hospitalizationrecords" ->
+        "#/people/records/hospitalizations" ->
             Records Hospitalizations
 
-        "#/people/_legalrecords" ->
+        "#/people/records/legal" ->
             Records Legal
 
-        "#/people/_previoushistoryrecords" ->
+        "#/people/records/previoushistories" ->
             Records PreviousHistories
 
-        "#/people/_callrecordingrecords" ->
+        "#/people/records/callrecordings" ->
             Records CallRecordings
 
-        "#/people/_enrollmentrecords" ->
+        "#/people/records/enrollment" ->
             Records Enrollment
 
-        "#/people/_miscrecords" ->
+        "#/people/records/misc" ->
             Records Misc
 
-        "#/people/_records/addedit/PrimaryCare" ->
+        "#/people/records/primarycare/addedit" ->
             RecordAddNew PrimaryCare
 
-        "#/people/_records/addedit/Specialty" ->
+        "#/people/records/specialty/addedit" ->
             RecordAddNew Specialty
 
-        "#/people/_records/addedit/Labs" ->
+        "#/people/records/labs/addedit" ->
             RecordAddNew Labs
 
-        "#/people/_records/addedit/Radiology" ->
+        "#/people/records/radiology/addedit" ->
             RecordAddNew Radiology
 
-        "#/people/_records/addedit/Hospitalizations" ->
+        "#/people/records/hospitalizations/addedit" ->
             RecordAddNew Hospitalizations
 
-        "#/people/_records/addedit/Legal" ->
+        "#/people/records/legal/addedit" ->
             RecordAddNew Legal
 
-        "#/people/_records/addedit/PreviousHistories" ->
+        "#/people/records/previoushistories/addedit" ->
             RecordAddNew PreviousHistories
 
-        "#/people/_records/addedit/CallRecordings" ->
+        "#/people/records/callrecordings/addedit" ->
             RecordAddNew CallRecordings
 
-        "#/people/_records/addedit/Enrollment" ->
+        "#/people/records/enrollment/addedit" ->
             RecordAddNew Enrollment
 
-        "#/people/_records/addedit/Misc" ->
+        "#/people/records/misc/addedit" ->
             RecordAddNew Misc
 
         _ ->
-            Error (locationHref ++ " not found")
+            None
 
 
 getPatientId : String -> Int
@@ -87,23 +90,27 @@ getPatientId locationHref =
 
 navHospitilizations : Cmd msg
 navHospitilizations =
-    Navigation.modifyUrl "#/people/_hospitalizations"
+    Navigation.modifyUrl "#/people/hospitalizations"
 
 
 navHospitilizationsAddEdit : Cmd msg
 navHospitilizationsAddEdit =
-    Navigation.modifyUrl "#/people/_hospitalizations/addedit"
+    Navigation.modifyUrl "#/people/hospitalizations/addedit/"
 
 
 navRecords : RecordType -> Cmd msg
 navRecords recordType =
     let
         record =
-            "_" ++ String.toLower (toString recordType)
+            String.toLower (toString recordType)
     in
-        Navigation.modifyUrl "#/people/_records"
+        Navigation.modifyUrl ("#/people/records/" ++ record)
 
 
 navRecordAddNew : RecordType -> Cmd msg
 navRecordAddNew recordType =
-    Navigation.modifyUrl ("#/people/" ++ (toString recordType))
+    let
+        record =
+            String.toLower (toString recordType)
+    in
+        Navigation.modifyUrl ("#/people/records/" ++ record ++ "/addedit")

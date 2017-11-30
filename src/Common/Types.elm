@@ -83,6 +83,40 @@ type RecordType
     | Misc
 
 
+getDesc : RecordType -> String
+getDesc recordType =
+    case recordType of
+        PrimaryCare ->
+            "Primary Care Records"
+
+        Specialty ->
+            "Specialty Records"
+
+        Labs ->
+            "Lab Records"
+
+        Radiology ->
+            "Radiology Records"
+
+        Hospitalizations ->
+            "Hospitalization Records"
+
+        Legal ->
+            "Legal Records"
+
+        CallRecordings ->
+            "Call Recording Records"
+
+        PreviousHistories ->
+            "Previous History Recprds"
+
+        Enrollment ->
+            "Enrollment Records"
+
+        Misc ->
+            "Miscellaneous Records"
+
+
 
 -- getRecordType : Maybe Int -> RecordType
 -- getRecordType maybeId =

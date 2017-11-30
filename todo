@@ -8,11 +8,15 @@ QUESTIONS:
 	Perhaps an alternative to having inline edit grid mode... which doesn't add up to me, is a back button where new button was?
 	
 ===========================================================================================================
+
+start updating history bar
+
 perhaps... better to not have a port file, instead put it where it is used... but are there shared ports?
 hide singlePageUrls array in main.js
 fix reload in new urls
 re-add recordTypeId for addnewModel (fix)
-when elm app first launches, it kills whatever page is current
+remove url parser lib, safe right?
+when elm app first launches, it kills whatever page is current (test)
 
 can i remove the value in html?  I never touch it
 Did I wind up using anything from the two routing libraries?

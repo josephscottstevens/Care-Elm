@@ -172,9 +172,9 @@ getNewPage model urlStr =
                     [ displayErrorMessage "HospitilizationsAddEdit Not implemented" ]
 
                 None ->
-                    [ displayErrorMessage "None... not implemented?" ]
+                    []
 
                 Error t ->
-                    [ displayErrorMessage t ]
+                    []
     in
         { model | page = newPage } ! commands

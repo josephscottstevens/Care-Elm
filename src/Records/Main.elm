@@ -83,7 +83,7 @@ update msg model =
 view : Model -> RecordType -> Maybe AddEditDataSource -> Html Msg
 view model recordType addEditDataSource =
     div []
-        [ h4 [] [ text (toString recordType ++ " Records") ]
+        [ h4 [] [ text (getDesc recordType) ]
         , case addEditDataSource of
             Just _ ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick (AddNewStart recordType) ] [ text "New Record" ]
