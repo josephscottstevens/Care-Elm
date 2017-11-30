@@ -95,11 +95,15 @@ navHospitilizationsAddEdit =
     Navigation.modifyUrl "#/people/_hospitalizations/addedit"
 
 
-navRecords : Cmd msg
-navRecords =
-    Navigation.modifyUrl "#/people/_records"
+navRecords : RecordType -> Cmd msg
+navRecords recordType =
+    let
+        record =
+            "_" ++ String.toLower (toString recordType)
+    in
+        Navigation.modifyUrl "#/people/_records"
 
 
 navRecordAddNew : RecordType -> Cmd msg
 navRecordAddNew recordType =
-    Navigation.modifyUrl ("#/people/_records/addedit/" ++ (toString recordType))
+    Navigation.modifyUrl ("#/people/" ++ (toString recordType))

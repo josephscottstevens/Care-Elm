@@ -9,7 +9,7 @@ type Msg
     | AddNewPhysician
     | Save RecordType
     | SaveCompleted (Result Http.Error String)
-    | Cancel
+    | Cancel RecordType
     | UpdateTitle String
     | UpdateRecordType DropDownItem
     | UpdateSpecialty String

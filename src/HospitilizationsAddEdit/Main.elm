@@ -9,7 +9,7 @@ import Common.Html exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
 import Ports exposing (..)
-import Common.Routes exposing (navRecords)
+import Common.Routes exposing (navHospitilizations)
 
 
 subscriptions : Sub Msg
@@ -71,13 +71,13 @@ update msg model =
                         model ! [ displayErrorMessage t ]
 
                     Nothing ->
-                        model ! [ displaySuccessMessage "Save completed successfully!", navRecords ]
+                        model ! [ displaySuccessMessage "Save completed successfully!", navHospitilizations ]
 
             SaveCompleted (Err t) ->
                 model ! [ displayErrorMessage (toString t) ]
 
             Cancel ->
-                model ! [ setUnsavedChanges False, navRecords ]
+                model ! [ setUnsavedChanges False, navHospitilizations ]
 
             UpdateFacility dropDownItem ->
                 updateAddNew { model | facilityId = dropDownItem.id, facilityText = dropDownItem.name }

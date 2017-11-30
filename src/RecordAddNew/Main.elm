@@ -64,7 +64,7 @@ view model recordType =
             , div [ class "form-group" ]
                 [ div [ class fullWidth ]
                     [ button [ type_ "button", id "Save", value "Addmodel", onClick (Save recordType), saveBtnClass ] [ text "Save" ]
-                    , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                    , button [ type_ "button", onClick (Cancel recordType), class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
                     ]
                 ]
             ]
@@ -87,7 +87,7 @@ update msg model =
                 if List.length (getValidationErrors (formInputs model recordType)) > 0 then
                     { model | showValidationErrors = True } ! []
                 else
-                    model ! [ saveForm model, setUnsavedChanges False ]
+                    model ! [ saveForm model, setUnsavedChanges False, navRecords recordType ]
 
             SaveCompleted (Ok responseMsg) ->
                 case getResponseError responseMsg of
@@ -100,8 +100,8 @@ update msg model =
             SaveCompleted (Err t) ->
                 (model ! [ displayErrorMessage (toString t) ])
 
-            Cancel ->
-                (model ! [ setUnsavedChanges False, navRecords ])
+            Cancel recordType ->
+                (model ! [ setUnsavedChanges False, navRecords recordType ])
 
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then
