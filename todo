@@ -17,6 +17,7 @@ fix reload in new urls
 re-add recordTypeId for addnewModel (fix)
 remove url parser lib, safe right?
 when elm app first launches, it kills whatever page is current (test)
+re-add _ for urls?
 
 can i remove the value in html?  I never touch it
 Did I wind up using anything from the two routing libraries?

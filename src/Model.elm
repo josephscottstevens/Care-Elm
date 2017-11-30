@@ -13,6 +13,7 @@ import Common.Routes exposing (getPage, getPatientId)
 
 type alias Model =
     { page : Page
+    , patientId : Int
     , addEditDataSource : Maybe AddEditDataSource
     , billingState : Billing.Model
     , recordsState : Records.Model
@@ -43,9 +44,10 @@ emptyModel location =
             getPage location.href
 
         patientId =
-            getPatientId location.href
+            getPatientId location.search
     in
         { page = None
+        , patientId = patientId
         , addEditDataSource = Nothing
         , billingState = Billing.emptyModel
         , recordsState = Records.emptyModel patientId

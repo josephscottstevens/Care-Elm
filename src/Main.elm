@@ -126,7 +126,11 @@ update msg model =
             model ! [ setLoadingStatus False ]
 
         UrlChange url ->
-            getNewPage model url.hash
+            let
+                newModel =
+                    { model | currentUrl = url, patientId = Routes.getPatientId url.search }
+            in
+                getNewPage newModel url.hash
 
         IsApp url ->
             getNewPage model url
@@ -143,9 +147,6 @@ getNewPage model urlStr =
                 False ->
                     "#" ++ urlStr
 
-        patientId =
-            Routes.getPatientId urlHash
-
         newPage =
             Routes.getPage urlHash
 
@@ -155,7 +156,7 @@ getNewPage model urlStr =
                     [ displayErrorMessage "Billing Not implemented" ]
 
                 Records recordType ->
-                    [ Cmd.map RecordsMsg (Records.init recordType patientId) ]
+                    [ Cmd.map RecordsMsg (Records.init recordType model.patientId) ]
 
                 RecordAddNew recordType ->
                     case model.addEditDataSource of
@@ -166,7 +167,7 @@ getNewPage model urlStr =
                             [ displayErrorMessage "Cannot load RecordAddNew without a datasource!" ]
 
                 Hospitilizations ->
-                    [ Cmd.map HospitilizationsMsg (Hospitilizations.init patientId) ]
+                    [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
                 HospitilizationsAddEdit ->
                     [ displayErrorMessage "HospitilizationsAddEdit Not implemented" ]

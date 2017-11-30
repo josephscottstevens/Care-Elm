@@ -8,10 +8,10 @@ import Char exposing (isDigit)
 getPage : String -> Page
 getPage locationHref =
     case locationHref of
-        "#/people/hospitilizations" ->
+        "#/people/_hospitalizations" ->
             Hospitilizations
 
-        "#/people/hospitilizations/addedit" ->
+        "#/people/_hospitalizations/addedit" ->
             HospitilizationsAddEdit
 
         "#/people/_primarycarerecords" ->
@@ -90,12 +90,12 @@ getPatientId locationHref =
 
 navHospitilizations : Cmd msg
 navHospitilizations =
-    Navigation.modifyUrl "#/people/hospitalizations"
+    Navigation.modifyUrl "#/people/_hospitalizations"
 
 
 navHospitilizationsAddEdit : Cmd msg
 navHospitilizationsAddEdit =
-    Navigation.modifyUrl "#/people/hospitalizations/addedit/"
+    Navigation.modifyUrl "#/people/_hospitalizations/addedit/"
 
 
 navRecords : RecordType -> Cmd msg
