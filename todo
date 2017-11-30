@@ -10,6 +10,7 @@ QUESTIONS:
 ===========================================================================================================
 
 re-add recordTypeId for addnewModel (fix)
+when elm app first launches, it kills whatever page is current
 
 can i remove the value in html?  I never touch it
 Did I wind up using anything from the two routing libraries?

@@ -53,7 +53,7 @@ update msg model =
                     model ! [ displaySuccessMessage "Record deleted successfully!" ]
 
         DeleteCompleted (Err t) ->
-            model ! []
+            model ! [ displayErrorMessage (toString t) ]
 
         EditTask taskId ->
             model ! [ editTask taskId ]

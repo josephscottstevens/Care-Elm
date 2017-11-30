@@ -138,12 +138,25 @@ update msg model =
 
                 commands =
                     case newPage of
-                        Records recordType ->
-                            [ Cmd.map RecordsMsg (Records.init recordType patientId)
-                            , decideApp True
-                            ]
+                        Billing ->
+                            []
 
-                        _ ->
-                            [ decideApp False ]
+                        Records recordType ->
+                            [ Cmd.map RecordsMsg (Records.init recordType patientId) ]
+
+                        RecordAddNew recordType ->
+                            []
+
+                        Hospitilizations ->
+                            [ Cmd.map HospitilizationsMsg (Hospitilizations.init patientId) ]
+
+                        HospitilizationsAddEdit ->
+                            []
+
+                        None ->
+                            []
+
+                        Error t ->
+                            [ displayErrorMessage t ]
             in
                 { model | page = newPage } ! commands

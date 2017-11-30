@@ -74,7 +74,7 @@ update msg model =
                         model ! [ displaySuccessMessage "Save completed successfully!", navRecords ]
 
             SaveCompleted (Err t) ->
-                model ! [ setLoadingStatus False ]
+                model ! [ displayErrorMessage (toString t) ]
 
             Cancel ->
                 model ! [ setUnsavedChanges False, navRecords ]
