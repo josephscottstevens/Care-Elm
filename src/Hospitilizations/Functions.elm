@@ -22,7 +22,8 @@ decodeRecordRow =
         |> required "DischargeProblem" (maybe Decode.string)
         |> required "ServiceType" (maybe Decode.string)
         |> required "FromTcm" Decode.bool
-        |> required "HasRecord" Decode.bool
+        |> required "RecordId" (maybe Decode.int)
+        |> hardcoded False
 
 
 decodeModel : Decoder WebResponse
@@ -43,11 +44,33 @@ getHospitilizations patientId t =
 
 deleteRequest : Int -> Cmd Msg
 deleteRequest rowId =
-    Http.send DeleteCompleted <| Http.getString ("/People/DeleteRecord?recordId=" ++ toString rowId)
+    Http.send DeleteCompleted <| Http.getString ("/People/DeleteHospitilization?id=" ++ toString rowId)
 
 
 
 -- update helper functions
+-- getRecordId : Model -> Maybe Int
+-- getRecordId model =
+--     let
+--         hospitilizations =
+--             model.hospitilizations
+--                 |> List.filter (\t -> t.id == model.dropDownState.rowId)
+--                 |> List.head
+--                 |> Maybe.map (\t -> t.recordId)
+--     in
+--         Maybe.withDefault Nothing hospitilizations
+
+
+flipDropDownOpen : List HospitilizationsRow -> Int -> List HospitilizationsRow
+flipDropDownOpen hospitilizations recordId =
+    hospitilizations
+        |> List.map
+            (\t ->
+                if t.id == recordId then
+                    { t | dropDownOpen = not t.dropDownOpen }
+                else
+                    { t | dropDownOpen = False }
+            )
 
 
 getLoadedState : Model -> WebResponse -> Model
@@ -83,7 +106,7 @@ filterFields flds filterState =
         else if filterState.name == "Name of Study" then
             { flds | fromTcm = t }
         else if filterState.name == "Provider" then
-            { flds | hasRecord = t }
+            { flds | recordId = t }
         else
             flds
 
@@ -93,10 +116,10 @@ filteredRecords model =
     model.hospitilizations
         |> List.filter (\t -> String.contains model.filterFields.id (toString t.id))
         |> List.filter (\t -> String.contains model.filterFields.facilityName (defaultLower t.facilityName))
-        |> List.filter (\t -> String.contains model.filterFields.dateOfAdmission (defaultDateTime t.dateOfAdmission))
-        |> List.filter (\t -> String.contains model.filterFields.admitProblem (defaultDateTime t.admitProblem))
-        |> List.filter (\t -> String.contains model.filterFields.dateOfDischarge (defaultDateTime t.dateOfDischarge))
+        |> List.filter (\t -> String.contains model.filterFields.dateOfAdmission (defaultDate t.dateOfAdmission))
+        |> List.filter (\t -> String.contains model.filterFields.admitProblem (defaultLower t.admitProblem))
+        |> List.filter (\t -> String.contains model.filterFields.dateOfDischarge (defaultDate t.dateOfDischarge))
         |> List.filter (\t -> String.contains model.filterFields.dischargeProblem (defaultLower t.dischargeProblem))
         |> List.filter (\t -> String.contains model.filterFields.serviceType (defaultLower t.serviceType))
         |> List.filter (\t -> String.contains model.filterFields.fromTcm (toString t.fromTcm))
-        |> List.filter (\t -> String.contains model.filterFields.hasRecord (toString t.hasRecord))
+        |> List.filter (\t -> String.contains model.filterFields.recordId (toString t.recordId))

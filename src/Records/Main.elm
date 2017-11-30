@@ -13,9 +13,6 @@ import Ports exposing (..)
 import Common.Routes exposing (navRecordAddNew)
 
 
-port sendMenuMessage : MenuMessage -> Cmd msg
-
-
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
@@ -91,7 +88,7 @@ view model recordType addEditDataSource =
             Nothing ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
         , div [ class "e-grid e-js e-waitingpopup" ]
-            [ Table.view (config SetFilter recordType (updateTaskId model)) model.tableState (filteredRecords model.records model.filterFields recordType) ]
+            [ Table.view (config SetFilter recordType (getTaskId model)) model.tableState (filteredRecords model.records model.filterFields recordType) ]
         ]
 
 

@@ -77,8 +77,8 @@ deleteRequest rowId =
 -- update helper functions
 
 
-updateTaskId : Model -> Maybe Int
-updateTaskId model =
+getTaskId : Model -> Maybe Int
+getTaskId model =
     let
         records =
             model.records

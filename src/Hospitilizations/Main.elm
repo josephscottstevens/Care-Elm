@@ -2,8 +2,8 @@ module Hospitilizations.Main exposing (..)
 
 import Hospitilizations.Functions exposing (..)
 import Hospitilizations.Types exposing (..)
-import Html exposing (Html, text, div, button)
-import Html.Attributes exposing (class, type_)
+import Html exposing (Html, text, div, button, a)
+import Html.Attributes exposing (class, type_, href)
 import Html.Events exposing (onClick)
 import Table exposing (..)
 import Common.Grid exposing (..)
@@ -36,6 +36,12 @@ update msg model =
 
         SetTableState newState ->
             { model | tableState = newState } ! []
+
+        DropDownToggle recordId ->
+            { model | hospitilizations = flipDropDownOpen model.hospitilizations recordId } ! []
+
+        SendMenuMessage recordId messageType ->
+            model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
         DeleteConfirmed rowId ->
             let
@@ -83,14 +89,50 @@ getColumns : List (Column HospitilizationsRow Msg)
 getColumns =
     [ stringColumn "ID" (\t -> toString t.id)
     , stringColumn "Facility Name" (\t -> defaultString t.facilityName)
-    , stringColumn "Date Of Admission" (\t -> defaultDateTime t.dateOfAdmission)
+    , stringColumn "Date Of Admission" (\t -> defaultDate t.dateOfAdmission)
     , stringColumn "Admit Problem" (\t -> defaultString t.admitProblem)
-    , stringColumn "Date Of Discharge" (\t -> defaultDateTime t.dateOfDischarge)
+    , stringColumn "Date Of Discharge" (\t -> defaultDate t.dateOfDischarge)
     , stringColumn "Discharge Problem" (\t -> defaultString t.dischargeProblem)
     , stringColumn "Svc Type" (\t -> toString t.serviceType)
     , stringColumn "Is From TCM" (\t -> toString t.fromTcm)
-    , stringColumn "Has Record" (\t -> toString t.hasRecord)
+    , customColumn
+    , rowDropDownColumn
     ]
+
+
+customColumn : Table.Column HospitilizationsRow Msg
+customColumn =
+    Table.veryCustomColumn
+        { name = "hasFile"
+        , viewData = viewCustomColumn
+        , sorter = Table.unsortable
+        }
+
+
+viewCustomColumn : HospitilizationsRow -> Table.HtmlDetails Msg
+viewCustomColumn { recordId } =
+    Table.HtmlDetails []
+        [ case recordId of
+            Just t ->
+                div [ class "RecordTableHref", onClick (SendMenuMessage t "ViewFile") ] [ text "File" ]
+
+            Nothing ->
+                div [] []
+        ]
+
+
+rowDropDownColumn : Table.Column HospitilizationsRow Msg
+rowDropDownColumn =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData = \t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropDownItems t.id)
+        , sorter = Table.unsortable
+        }
+
+
+dropDownItems : Int -> List ( String, String, Html.Attribute Msg )
+dropDownItems rowId =
+    [ ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "Delete") ) ]
 
 
 config : (FilterState -> Msg) -> Config HospitilizationsRow Msg

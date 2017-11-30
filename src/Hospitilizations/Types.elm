@@ -9,10 +9,12 @@ type Msg
     = Load (Result Http.Error WebResponse)
     | SetTableState Table.State
     | SetFilter FilterState
+    | DropDownToggle Int
     | EditTask Int
     | AddNewStart
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
+    | SendMenuMessage Int String
 
 
 type ModelState
@@ -55,6 +57,20 @@ emptyModel patientId =
     }
 
 
+type alias HospitilizationsRow =
+    { id : Int
+    , facilityName : Maybe String
+    , dateOfAdmission : Maybe String
+    , admitProblem : Maybe String
+    , dateOfDischarge : Maybe String
+    , dischargeProblem : Maybe String
+    , serviceType : Maybe String
+    , fromTcm : Bool
+    , recordId : Maybe Int
+    , dropDownOpen : Bool
+    }
+
+
 type alias Filters =
     { id : String
     , facilityName : String
@@ -64,7 +80,7 @@ type alias Filters =
     , dischargeProblem : String
     , serviceType : String
     , fromTcm : String
-    , hasRecord : String
+    , recordId : String
     }
 
 
@@ -76,17 +92,4 @@ emptyFilters =
 type alias FilterField =
     { fieldName : String
     , fieldText : String
-    }
-
-
-type alias HospitilizationsRow =
-    { id : Int
-    , facilityName : Maybe String
-    , dateOfAdmission : Maybe String
-    , admitProblem : Maybe String
-    , dateOfDischarge : Maybe String
-    , dischargeProblem : Maybe String
-    , serviceType : Maybe String
-    , fromTcm : Bool
-    , hasRecord : Bool
     }

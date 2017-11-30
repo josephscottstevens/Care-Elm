@@ -3,6 +3,9 @@ port module Ports exposing (..)
 import Common.Types exposing (..)
 
 
+port sendMenuMessage : MenuMessage -> Cmd msg
+
+
 port isApp : (String -> msg) -> Sub msg
 
 

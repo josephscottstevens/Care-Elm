@@ -140,9 +140,16 @@ hrefColumn name hrefText toHref =
 
 hrefColumnCell : String -> String -> Table.HtmlDetails msg
 hrefColumnCell displayText url =
-    Table.HtmlDetails []
-        [ a [ href url, target "_blank" ] [ text displayText ]
-        ]
+    let
+        newDisplayText =
+            if url == "" then
+                ""
+            else
+                displayText
+    in
+        Table.HtmlDetails []
+            [ a [ href url, target "_blank" ] [ text newDisplayText ]
+            ]
 
 
 hrefColumnExtra : String -> (data -> String) -> String -> msg -> Table.Column data msg
@@ -156,9 +163,16 @@ hrefColumnExtra name hrefText toHref event =
 
 hrefColumnCellExtra : String -> String -> msg -> Table.HtmlDetails msg
 hrefColumnCellExtra displayText url event =
-    Table.HtmlDetails []
-        [ a [ href url, Events.onClick event ] [ text displayText ]
-        ]
+    let
+        newDisplayText =
+            if url == "" then
+                ""
+            else
+                displayText
+    in
+        Table.HtmlDetails []
+            [ a [ href url, Events.onClick event ] [ text newDisplayText ]
+            ]
 
 
 rowDropDownDiv : Bool -> Html.Attribute msg -> List ( String, String, Html.Attribute msg ) -> Table.HtmlDetails msg

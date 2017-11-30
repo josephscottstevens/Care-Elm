@@ -155,11 +155,3 @@ emptyDropDownState =
     , y = 0.0
     , rowId = 0
     }
-
-
-type alias MenuMessage =
-    { name : String
-    , recordId : Int
-    , recordTypeId : Maybe Int
-    , hasConsent : Maybe Bool
-    }

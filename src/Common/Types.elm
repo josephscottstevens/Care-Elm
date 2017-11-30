@@ -70,6 +70,14 @@ type alias DropDownState =
     }
 
 
+type alias MenuMessage =
+    { name : String
+    , recordId : Int
+    , recordTypeId : Maybe Int
+    , hasConsent : Maybe Bool
+    }
+
+
 type RecordType
     = PrimaryCare
     | Specialty
@@ -108,45 +116,13 @@ getDesc recordType =
             "Call Recording Records"
 
         PreviousHistories ->
-            "Previous History Recprds"
+            "Previous History Records"
 
         Enrollment ->
             "Enrollment Records"
 
         Misc ->
             "Miscellaneous Records"
-
-
-
--- getRecordType : Maybe Int -> RecordType
--- getRecordType maybeId =
---     case maybeId of
---         Just id ->
---             case id of
---                 1 ->
---                     PrimaryCare
---                 2 ->
---                     Specialty
---                 3 ->
---                     Labs
---                 4 ->
---                     Radiology
---                 9 ->
---                     Hospitalizations
---                 6 ->
---                     Legal
---                 10 ->
---                     CallRecordings
---                 11 ->
---                     PreviousHistories
---                 12 ->
---                     Enrollment
---                 5 ->
---                     Misc
---                 _ ->
---                     Debug.crash "Invalid recordId, cannot load program"
---         Nothing ->
---             Debug.crash "Invalid recordId, cannot load program"
 
 
 getId : RecordType -> Maybe Int
