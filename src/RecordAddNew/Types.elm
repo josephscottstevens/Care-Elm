@@ -121,3 +121,18 @@ emptyModel patientId =
     , dischargePhysicianId = Nothing
     , dischargePhysicianText = ""
     }
+
+
+type alias InitRecordAddNew =
+    { facilityId : Maybe Int
+    , facilities : List DropDownItem
+    , recordTypes : List DropDownItem
+    , users : List DropDownItem
+    , tasks : List DropDownItem
+    , hospitilizationServiceTypes : List DropDownItem
+    , hospitalizationDischargePhysicians : List DropDownItem
+    , hospitilizations : List DropDownItem
+    , recordTypeId : Maybe Int
+    , setFocus : Bool
+    , isExistingHospitilization : Bool
+    }

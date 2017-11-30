@@ -8,40 +8,40 @@ import Char exposing (isDigit)
 getPage : String -> Page
 getPage locationHref =
     case locationHref of
-        "/people/_hospitalizations" ->
+        "#/people/_hospitalizations" ->
             Hospitilizations
 
-        "/people/_hospitalizations/addedit" ->
+        "#/people/_hospitalizations/addedit" ->
             HospitilizationsAddEdit
 
-        "/people/_primarycarerecords" ->
+        "#/people/_primarycarerecords" ->
             Records PrimaryCare
 
-        "/people/_specialtyrecords" ->
+        "#/people/_specialtyrecords" ->
             Records Specialty
 
-        "/people/_labrecords" ->
+        "#/people/_labrecords" ->
             Records Labs
 
-        "/people/_radiologyrecords" ->
+        "#/people/_radiologyrecords" ->
             Records Radiology
 
-        "/people/_hospitalizationrecords" ->
+        "#/people/_hospitalizationrecords" ->
             Records Hospitalizations
 
-        "/people/_legalrecords" ->
+        "#/people/_legalrecords" ->
             Records Legal
 
-        "/people/_previoushistoryrecords" ->
+        "#/people/_previoushistoryrecords" ->
             Records PreviousHistories
 
-        "/people/_callrecordingrecords" ->
+        "#/people/_callrecordingrecords" ->
             Records CallRecordings
 
-        "/people/_enrollmentrecords" ->
+        "#/people/_enrollmentrecords" ->
             Records Enrollment
 
-        "/people/_miscrecords" ->
+        "#/people/_miscrecords" ->
             Records Misc
 
         _ ->

@@ -15,41 +15,7 @@ port presetPage : String -> Cmd msg
 port presetPageComplete : (String -> msg) -> Sub msg
 
 
-port setPage : InitRecordAddNew -> Cmd msg
-
-
 port setPageComplete : (String -> msg) -> Sub msg
-
-
-type alias InitRecordAddNew =
-    { facilityId : Maybe Int
-    , facilities : List DropDownItem
-    , recordTypes : List DropDownItem
-    , users : List DropDownItem
-    , tasks : List DropDownItem
-    , hospitilizationServiceTypes : List DropDownItem
-    , hospitalizationDischargePhysicians : List DropDownItem
-    , hospitilizations : List DropDownItem
-    , recordTypeId : Maybe Int
-    , setFocus : Bool
-    , isExistingHospitilization : Bool
-    }
-
-
-getAddEditMsg : AddEditDataSource -> Maybe Int -> Bool -> Bool -> InitRecordAddNew
-getAddEditMsg addEditDataSource recordTypeId setFocus isExistingHospitilization =
-    { facilityId = addEditDataSource.facilityId
-    , facilities = addEditDataSource.facilities
-    , recordTypes = addEditDataSource.recordTypes
-    , users = addEditDataSource.users
-    , tasks = addEditDataSource.tasks
-    , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
-    , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
-    , hospitilizations = addEditDataSource.hospitilizations
-    , recordTypeId = recordTypeId
-    , setFocus = setFocus
-    , isExistingHospitilization = isExistingHospitilization
-    }
 
 
 port toggleConsent : Bool -> Cmd msg

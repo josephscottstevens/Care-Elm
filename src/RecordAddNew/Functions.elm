@@ -57,3 +57,19 @@ saveFormRequest model =
 saveForm : Model -> Cmd Msg
 saveForm model =
     Http.send SaveCompleted (saveFormRequest model)
+
+
+getAddEditMsg : AddEditDataSource -> Maybe Int -> Bool -> Bool -> InitRecordAddNew
+getAddEditMsg addEditDataSource recordTypeId setFocus isExistingHospitilization =
+    { facilityId = addEditDataSource.facilityId
+    , facilities = addEditDataSource.facilities
+    , recordTypes = addEditDataSource.recordTypes
+    , users = addEditDataSource.users
+    , tasks = addEditDataSource.tasks
+    , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
+    , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
+    , hospitilizations = addEditDataSource.hospitilizations
+    , recordTypeId = recordTypeId
+    , setFocus = setFocus
+    , isExistingHospitilization = isExistingHospitilization
+    }

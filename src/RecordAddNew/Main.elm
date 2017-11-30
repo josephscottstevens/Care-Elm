@@ -1,4 +1,4 @@
-module RecordAddNew.Main exposing (..)
+port module RecordAddNew.Main exposing (..)
 
 import RecordAddNew.Functions exposing (..)
 import RecordAddNew.Types exposing (..)
@@ -10,6 +10,14 @@ import Common.Types exposing (..)
 import Common.Functions exposing (..)
 import Common.Routes exposing (navRecords)
 import Ports exposing (..)
+
+
+port setPage : InitRecordAddNew -> Cmd msg
+
+
+init : AddEditDataSource -> RecordType -> Cmd Msg
+init addEditDataSource recordType =
+    setPage (getAddEditMsg addEditDataSource (getId recordType) False False)
 
 
 subscriptions : Sub Msg

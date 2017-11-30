@@ -126,37 +126,55 @@ update msg model =
             model ! [ setLoadingStatus False ]
 
         UrlChange url ->
-            { model | currentUrl = url } ! []
+            getNewPage model url.hash
 
-        IsApp urlHash ->
-            let
-                patientId =
-                    Routes.getPatientId urlHash
+        IsApp url ->
+            getNewPage model url
 
-                newPage =
-                    Routes.getPage urlHash
 
-                commands =
-                    case newPage of
-                        Billing ->
-                            []
+getNewPage : Model -> String -> ( Model, Cmd Model.Msg )
+getNewPage model urlStr =
+    let
+        urlHash =
+            case String.contains "#" urlStr of
+                True ->
+                    urlStr
 
-                        Records recordType ->
-                            [ Cmd.map RecordsMsg (Records.init recordType patientId) ]
+                False ->
+                    "#" ++ urlStr
 
-                        RecordAddNew recordType ->
-                            []
+        patientId =
+            Routes.getPatientId urlHash
 
-                        Hospitilizations ->
-                            [ Cmd.map HospitilizationsMsg (Hospitilizations.init patientId) ]
+        newPage =
+            Routes.getPage (String.dropLeft 1 urlHash)
 
-                        HospitilizationsAddEdit ->
-                            []
+        commands =
+            case newPage of
+                Billing ->
+                    []
 
-                        None ->
-                            []
+                Records recordType ->
+                    [ Cmd.map RecordsMsg (Records.init recordType patientId) ]
 
-                        Error t ->
-                            [ displayErrorMessage t ]
-            in
-                { model | page = newPage } ! commands
+                RecordAddNew recordType ->
+                    case model.addEditDataSource of
+                        Just t ->
+                            [ Cmd.map RecordAddNewMsg (RecordAddNew.init t recordType) ]
+
+                        Nothing ->
+                            [ displayErrorMessage "Cannot load RecordAddNew without a datasource!" ]
+
+                Hospitilizations ->
+                    [ Cmd.map HospitilizationsMsg (Hospitilizations.init patientId) ]
+
+                HospitilizationsAddEdit ->
+                    []
+
+                None ->
+                    []
+
+                Error t ->
+                    [ displayErrorMessage t ]
+    in
+        { model | page = newPage } ! commands
