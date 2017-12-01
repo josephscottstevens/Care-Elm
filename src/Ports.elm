@@ -33,6 +33,9 @@ port dropDownToggle : (Int -> msg) -> Sub msg
 port deleteConfirmed : (Int -> msg) -> Sub msg
 
 
+port deleteHospitilizationConfirmed : (Int -> msg) -> Sub msg
+
+
 port addNewFacility : Maybe String -> Cmd msg
 
 

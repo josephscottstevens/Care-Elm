@@ -16,7 +16,7 @@ import Common.Routes exposing (navHospitilizationsAddEdit)
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
-        [ deleteConfirmed DeleteConfirmed
+        [ deleteHospitilizationConfirmed DeleteHospitilizationConfirmed
         ]
 
 
@@ -43,12 +43,12 @@ update msg model =
         SendMenuMessage recordId messageType ->
             model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
-        DeleteConfirmed rowId ->
+        DeleteHospitilizationConfirmed rowId ->
             let
                 updatedRecords =
                     model.hospitilizations |> List.filter (\t -> t.id /= rowId)
             in
-                { model | hospitilizations = updatedRecords } ! [ deleteRequest rowId ]
+                { model | hospitilizations = updatedRecords, patientId = 7000 } ! [ deleteHospitilization rowId ]
 
         DeleteCompleted (Ok responseMsg) ->
             case getResponseError responseMsg of
@@ -133,7 +133,7 @@ rowDropDownColumn =
 dropDownItems : Int -> List ( String, String, Html.Attribute Msg )
 dropDownItems rowId =
     [ ( "e-edit", "Edit", onClick (Edit (Just rowId)) )
-    , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "Delete") )
+    , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "HospitilizationDelete") )
     ]
 
 

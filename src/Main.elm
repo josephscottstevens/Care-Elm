@@ -19,6 +19,7 @@ subscriptions _ =
     Sub.batch
         [ Sub.map RecordsMsg Records.subscriptions
         , Sub.map RecordAddNewMsg RecordAddNew.subscriptions
+        , Sub.map HospitilizationsMsg Hospitilizations.subscriptions
         , presetPageComplete PresetPageComplete
         , setPageComplete SetPageComplete
         , isApp IsApp

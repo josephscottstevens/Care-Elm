@@ -42,8 +42,8 @@ getHospitilizations patientId t =
     Http.send t (request patientId)
 
 
-deleteRequest : Int -> Cmd Msg
-deleteRequest rowId =
+deleteHospitilization : Int -> Cmd Msg
+deleteHospitilization rowId =
     Http.send DeleteCompleted <| Http.getString ("/People/DeleteHospitilization?id=" ++ toString rowId)
 
 

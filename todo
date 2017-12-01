@@ -9,15 +9,16 @@ QUESTIONS:
 	
 ===========================================================================================================
 
-implement HospitilizationsAddEdit cancel
-implement HospitilizationsAddEdit edit
 implement HospitilizationsAddEdit delete
+implement HospitilizationsAddEdit dropdown close 
+implement HospitilizationsAddEdit edit
+implement HospitilizationsAddEdit save
+re-add _ for urls
 
 start updating history bar
 perhaps... better to not have a port file, instead put it where it is used... but are there shared ports?
 fix reload in new urls
 remove url parser lib, safe right?
-re-add _ for urls?
 
 can i remove the value in html?  I never touch it
 Did I wind up using anything from the two routing libraries?

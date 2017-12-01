@@ -12,7 +12,7 @@ type Msg
     | DropDownToggle Int
     | Edit (Maybe Int)
     | AddNewStart (Maybe Int)
-    | DeleteConfirmed Int
+    | DeleteHospitilizationConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | SendMenuMessage Int String
 
