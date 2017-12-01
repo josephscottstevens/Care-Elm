@@ -13,13 +13,17 @@ encodeRecord newRecord =
         [ ( "Id", maybeVal Encode.int <| newRecord.id )
         , ( "PatientId", Encode.int <| newRecord.patientId )
         , ( "FacilityId", maybeVal Encode.int <| newRecord.facilityId )
+        , ( "PatientReported", Encode.bool <| newRecord.patientReported )
         , ( "HospitalizationId", maybeVal Encode.int <| newRecord.hospitalizationId )
-        , ( "FacilityId2", maybeVal Encode.int <| newRecord.facilityId2 )
         , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfAdmission )
         , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfDischarge )
         , ( "HospitalServiceTypeId", maybeVal Encode.int <| newRecord.hospitalServiceTypeId )
+        , ( "ChiefComplaint", Encode.string <| newRecord.chiefComplaint )
         , ( "DischargeRecommendations", Encode.string <| newRecord.dischargeRecommendations )
         , ( "DischargePhysicianId", maybeVal Encode.int <| newRecord.dischargePhysicianId )
+        , ( "FacilityId2", maybeVal Encode.int <| newRecord.facilityId2 )
+        , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfAdmission2 )
+        , ( "DateOfDischarge2", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfDischarge2 )
         ]
 
 
@@ -31,7 +35,7 @@ saveFormRequest model =
         , headers = []
         , method = "POST"
         , timeout = Nothing
-        , url = "/People/AddNewRecord"
+        , url = "/People/AddNewHospitilization"
         , withCredentials = False
         }
 
