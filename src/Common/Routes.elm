@@ -95,7 +95,7 @@ navHospitilizations =
 
 navHospitilizationsAddEdit : Cmd msg
 navHospitilizationsAddEdit =
-    Navigation.modifyUrl "#/people/_hospitalizations/addedit/"
+    Navigation.modifyUrl "#/people/_hospitalizations/addedit"
 
 
 navRecords : RecordType -> Cmd msg

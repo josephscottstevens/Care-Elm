@@ -93,8 +93,8 @@ getColumns =
     , stringColumn "Admit Problem" (\t -> defaultString t.admitProblem)
     , stringColumn "Date Of Discharge" (\t -> defaultDate t.dateOfDischarge)
     , stringColumn "Discharge Problem" (\t -> defaultString t.dischargeProblem)
-    , stringColumn "Svc Type" (\t -> toString t.serviceType)
-    , stringColumn "Is From TCM" (\t -> toString t.fromTcm)
+    , stringColumn "Svc Type" (\t -> defaultString t.serviceType)
+    , checkColumn "Is From TCM" (\t -> t.fromTcm)
     , customColumn
     , rowDropDownColumn
     ]

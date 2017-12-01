@@ -12,12 +12,12 @@ import Common.Routes exposing (navRecords)
 import Ports exposing (..)
 
 
-port setPage : InitRecordAddNew -> Cmd msg
+port initRecords : InitRecordAddNew -> Cmd msg
 
 
 init : AddEditDataSource -> RecordType -> Cmd Msg
 init addEditDataSource recordType =
-    setPage (getAddEditMsg addEditDataSource (getId recordType) False False)
+    initRecords (getAddEditMsg addEditDataSource (getId recordType) False False)
 
 
 subscriptions : Sub Msg

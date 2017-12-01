@@ -1,4 +1,4 @@
-module HospitilizationsAddEdit.Main exposing (..)
+port module HospitilizationsAddEdit.Main exposing (..)
 
 import HospitilizationsAddEdit.Functions exposing (..)
 import HospitilizationsAddEdit.Types exposing (..)
@@ -10,6 +10,14 @@ import Common.Types exposing (..)
 import Common.Functions exposing (..)
 import Ports exposing (..)
 import Common.Routes exposing (navHospitilizations)
+
+
+port initHospitilizations : InitHospitilizationsAddNew -> Cmd msg
+
+
+init : AddEditDataSource -> Cmd Msg
+init addEditDataSource =
+    initHospitilizations (getAddEditMsg addEditDataSource)
 
 
 subscriptions : Sub Msg

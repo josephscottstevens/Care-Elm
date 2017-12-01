@@ -170,7 +170,12 @@ getNewPage model urlStr =
                     [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
                 HospitilizationsAddEdit ->
-                    [ displayErrorMessage "HospitilizationsAddEdit Not implemented" ]
+                    case model.addEditDataSource of
+                        Just t ->
+                            [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t) ]
+
+                        Nothing ->
+                            [ displayErrorMessage "Cannot load RecordAddNew without a datasource!" ]
 
                 None ->
                     []

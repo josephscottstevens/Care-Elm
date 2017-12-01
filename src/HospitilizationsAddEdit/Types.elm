@@ -65,3 +65,13 @@ emptyModel patientId =
     , dischargePhysicianText = ""
     , showValidationErrors = False
     }
+
+
+type alias InitHospitilizationsAddNew =
+    { facilityId : Maybe Int
+    , facilities : List DropDownItem
+    , hospitilizationServiceTypes : List DropDownItem
+    , hospitalizationDischargePhysicians : List DropDownItem
+    , hospitilizations : List DropDownItem
+    , hospitilizationId : Maybe Int
+    }

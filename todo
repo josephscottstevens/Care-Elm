@@ -9,6 +9,7 @@ QUESTIONS:
 	
 ===========================================================================================================
 
+Implement edit
 start updating history bar
 
 perhaps... better to not have a port file, instead put it where it is used... but are there shared ports?
