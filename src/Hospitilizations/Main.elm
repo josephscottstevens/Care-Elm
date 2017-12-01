@@ -104,7 +104,7 @@ getColumns =
 customColumn : Table.Column HospitilizationsRow Msg
 customColumn =
     Table.veryCustomColumn
-        { name = "hasFile"
+        { name = "Has File"
         , viewData = viewCustomColumn
         , sorter = Table.unsortable
         }

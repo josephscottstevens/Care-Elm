@@ -176,7 +176,7 @@ common ( labelText, requiredType, controlType ) =
 
             DateInput displayValue syncfusionId event ->
                 commonStructure
-                    [ input [ type_ "text", id syncfusionId, value displayValue, onInput (defaultMaybeMsg event) ] []
+                    [ input [ type_ "text", id syncfusionId, value displayValue, onInput (defaultMaybeMsg event), value displayValue ] []
                     ]
 
             FileInput displayValue ->

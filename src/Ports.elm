@@ -80,21 +80,3 @@ port updateTask : (DropDownItem -> msg) -> Sub msg
 
 
 -- Hospitilizations
-
-
-port updateHospitilization : (DropDownItem -> msg) -> Sub msg
-
-
-port updateFacility2 : (DropDownItem -> msg) -> Sub msg
-
-
-port updateDateOfAdmission : (Maybe String -> msg) -> Sub msg
-
-
-port updateDateOfDischarge : (Maybe String -> msg) -> Sub msg
-
-
-port updateHospitalServiceType : (DropDownItem -> msg) -> Sub msg
-
-
-port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg

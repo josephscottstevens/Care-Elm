@@ -13,13 +13,15 @@ type Msg
     | AddNewPhysician
     | UpdateHospitilization DropDownItem
     | UpdatePatientReported Bool
-    | UpdateFacility2 DropDownItem
     | UpdateDateOfAdmission (Maybe String)
     | UpdateDateOfDischarge (Maybe String)
     | UpdateHospitalServiceType DropDownItem
     | UpdateChiefComplaint String
     | UpdateDischargeRecommendations String
     | UpdateDischargePhysician DropDownItem
+    | UpdateFacility2 DropDownItem
+    | UpdateDateOfAdmission2 (Maybe String)
+    | UpdateDateOfDischarge2 (Maybe String)
 
 
 type alias Model =
@@ -30,8 +32,6 @@ type alias Model =
     , patientReported : Bool
     , hospitalizationId : Maybe Int
     , hospitalizationText : String
-    , facilityId2 : Maybe Int
-    , facilityText2 : String
     , dateOfAdmission : Maybe String
     , dateOfDischarge : Maybe String
     , hospitalServiceTypeId : Maybe Int
@@ -40,6 +40,10 @@ type alias Model =
     , dischargeRecommendations : String
     , dischargePhysicianId : Maybe Int
     , dischargePhysicianText : String
+    , facilityId2 : Maybe Int
+    , facilityText2 : String
+    , dateOfAdmission2 : Maybe String
+    , dateOfDischarge2 : Maybe String
     , showValidationErrors : Bool
     }
 
@@ -53,8 +57,6 @@ emptyModel patientId =
     , patientReported = False
     , hospitalizationId = Nothing
     , hospitalizationText = ""
-    , facilityId2 = Nothing
-    , facilityText2 = ""
     , dateOfAdmission = Nothing
     , dateOfDischarge = Nothing
     , hospitalServiceTypeId = Nothing
@@ -63,6 +65,10 @@ emptyModel patientId =
     , dischargeRecommendations = ""
     , dischargePhysicianId = Nothing
     , dischargePhysicianText = ""
+    , facilityId2 = Nothing
+    , facilityText2 = ""
+    , dateOfAdmission2 = Nothing
+    , dateOfDischarge2 = Nothing
     , showValidationErrors = False
     }
 

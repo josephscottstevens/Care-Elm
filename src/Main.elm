@@ -20,6 +20,7 @@ subscriptions _ =
         [ Sub.map RecordsMsg Records.subscriptions
         , Sub.map RecordAddNewMsg RecordAddNew.subscriptions
         , Sub.map HospitilizationsMsg Hospitilizations.subscriptions
+        , Sub.map HospitilizationsAddEditMsg HospitilizationsAddEdit.subscriptions
         , presetPageComplete PresetPageComplete
         , setPageComplete SetPageComplete
         , isApp IsApp

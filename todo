@@ -20,13 +20,16 @@ test records (full sweep)
 start updating history bar
 perhaps... better to not have a port file, instead put it where it is used... but are there shared ports?
 fix reload in new urls
+get back button to work exactly right
 remove url parser lib, safe right?
+ports are turning into a hairball quick (updateFacility vs updateHospFacility) yuck
 
 can i remove the value in html?  I never touch it
 Did I wind up using anything from the two routing libraries?
 Right now, dropdownToggle is being listened to twice, because hosp and records are both listening
 trim down ports
 	some are un-used
+Perhaps try to connect hospitilizations into the other one
 	
 can I remove functions from Main?	
 perhaps, it would be better to just remove displayValue, I mean... it's not like I am changing what the user is typing... 

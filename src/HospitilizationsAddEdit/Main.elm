@@ -8,11 +8,41 @@ import Html.Events exposing (onClick)
 import Common.Html exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
-import Ports exposing (..)
 import Common.Routes exposing (navHospitilizations)
+import Ports exposing (setUnsavedChanges)
 
 
 port initHospitilizations : InitHospitilizationsAddNew -> Cmd msg
+
+
+port updateHospFacility : (DropDownItem -> msg) -> Sub msg
+
+
+port updateHospFacility2 : (DropDownItem -> msg) -> Sub msg
+
+
+port updateHospDateOfAdmission : (Maybe String -> msg) -> Sub msg
+
+
+port updateHospDateOfDischarge : (Maybe String -> msg) -> Sub msg
+
+
+port updateHospHospitalServiceType : (DropDownItem -> msg) -> Sub msg
+
+
+port updateHospDischargePhysician : (DropDownItem -> msg) -> Sub msg
+
+
+port updateHospDateOfAdmission2 : (Maybe String -> msg) -> Sub msg
+
+
+port updateHospDateOfDischarge2 : (Maybe String -> msg) -> Sub msg
+
+
+port addHospNewFacility : Maybe String -> Cmd msg
+
+
+port addHospNewPhysician : Maybe String -> Cmd msg
 
 
 init : AddEditDataSource -> Maybe Int -> Cmd Msg
@@ -23,13 +53,15 @@ init addEditDataSource hospitilizationId =
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
-        [ updateFacility UpdateFacility
-        , updateHospitilization UpdateHospitilization
-        , updateFacility2 UpdateFacility2
-        , updateDateOfAdmission UpdateDateOfAdmission
-        , updateDateOfDischarge UpdateDateOfDischarge
-        , updateHospitalServiceType UpdateHospitalServiceType
-        , updateDischargePhysician UpdateDischargePhysician
+        [ updateHospFacility UpdateFacility
+        , updateHospDateOfAdmission UpdateDateOfAdmission
+        , updateHospDateOfDischarge UpdateDateOfDischarge
+        , updateHospFacility2 UpdateFacility2
+        , updateHospDateOfDischarge UpdateDateOfDischarge
+        , updateHospHospitalServiceType UpdateHospitalServiceType
+        , updateHospDischargePhysician UpdateDischargePhysician
+        , updateHospDateOfAdmission2 UpdateDateOfAdmission2
+        , updateHospDateOfDischarge2 UpdateDateOfDischarge2
         ]
 
 
@@ -91,19 +123,16 @@ update msg model =
                 updateAddNew { model | facilityId = dropDownItem.id, facilityText = dropDownItem.name }
 
             AddNewFacility ->
-                model ! [ addNewFacility Nothing ]
+                model ! [ addHospNewFacility Nothing ]
 
             AddNewPhysician ->
-                model ! [ addNewPhysician Nothing ]
+                model ! [ addHospNewPhysician Nothing ]
 
             UpdateHospitilization dropDownItem ->
                 updateAddNew { model | hospitalizationId = dropDownItem.id, hospitalizationText = dropDownItem.name }
 
             UpdatePatientReported bool ->
                 updateAddNew { model | patientReported = bool }
-
-            UpdateFacility2 dropDownItem ->
-                updateAddNew { model | facilityId2 = dropDownItem.id, facilityText2 = dropDownItem.name }
 
             UpdateDateOfAdmission str ->
                 updateAddNew { model | dateOfAdmission = str }
@@ -123,6 +152,15 @@ update msg model =
             UpdateDischargePhysician dropDownItem ->
                 updateAddNew { model | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }
 
+            UpdateFacility2 dropDownItem ->
+                updateAddNew { model | facilityId2 = dropDownItem.id, facilityText2 = dropDownItem.name }
+
+            UpdateDateOfAdmission2 str ->
+                updateAddNew { model | dateOfAdmission2 = str }
+
+            UpdateDateOfDischarge2 str ->
+                updateAddNew { model | dateOfDischarge2 = str }
+
 
 formInputs : Model -> List ( String, RequiredType, InputControlType Msg )
 formInputs newRecord =
@@ -137,6 +175,6 @@ formInputs newRecord =
     , ( "Discharge Recommendations", Required, TextInput newRecord.dischargeRecommendations UpdateDischargeRecommendations )
     , ( "Discharge Physician", Required, DropInputWithButton newRecord.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "New Provider" )
     , ( "Secondary Facility Name", Required, DropInputWithButton newRecord.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
-    , ( "Secondary Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId2" UpdateDateOfAdmission )
-    , ( "Secondary Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId2" UpdateDateOfDischarge )
+    , ( "Secondary Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId2" UpdateDateOfAdmission2 )
+    , ( "Secondary Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId2" UpdateDateOfDischarge2 )
     ]

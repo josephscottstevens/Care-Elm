@@ -15,6 +15,24 @@ import Ports exposing (..)
 port initRecords : InitRecordAddNew -> Cmd msg
 
 
+port updateHospitilization : (DropDownItem -> msg) -> Sub msg
+
+
+port updateFacility2 : (DropDownItem -> msg) -> Sub msg
+
+
+port updateDateOfAdmission : (Maybe String -> msg) -> Sub msg
+
+
+port updateDateOfDischarge : (Maybe String -> msg) -> Sub msg
+
+
+port updateHospitalServiceType : (DropDownItem -> msg) -> Sub msg
+
+
+port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
+
+
 init : AddEditDataSource -> RecordType -> Cmd Msg
 init addEditDataSource recordType =
     initRecords (getAddEditMsg addEditDataSource (getId recordType) False False)
