@@ -17,6 +17,7 @@ subscriptions : Sub Msg
 subscriptions =
     Sub.batch
         [ deleteHospitilizationConfirmed DeleteHospitilizationConfirmed
+        , dropDownToggle DropDownToggle
         ]
 
 
