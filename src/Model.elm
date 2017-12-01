@@ -41,7 +41,7 @@ emptyModel : Navigation.Location -> Model
 emptyModel location =
     let
         page =
-            getPage location.href
+            getPage location.hash
 
         patientId =
             getPatientId location.search

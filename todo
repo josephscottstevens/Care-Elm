@@ -9,15 +9,14 @@ QUESTIONS:
 	
 ===========================================================================================================
 
-Implement edit
-start updating history bar
+implement HospitilizationsAddEdit cancel
+implement HospitilizationsAddEdit edit
+implement HospitilizationsAddEdit delete
 
+start updating history bar
 perhaps... better to not have a port file, instead put it where it is used... but are there shared ports?
-hide singlePageUrls array in main.js
 fix reload in new urls
-re-add recordTypeId for addnewModel (fix)
 remove url parser lib, safe right?
-when elm app first launches, it kills whatever page is current (test)
 re-add _ for urls?
 
 can i remove the value in html?  I never touch it
@@ -25,16 +24,8 @@ Did I wind up using anything from the two routing libraries?
 trim down ports
 	some are un-used
 	
-	
-can I remove getRecordType ? (returns the Maybe Id)
-quite sure the url change is much better than current crazy method, switch to that
-can I remove functions from Main?
-implement HospitilizationsAddEdit cancel
-implement HospitilizationsAddEdit edit
-implement HospitilizationsAddEdit delete
+can I remove functions from Main?	
 perhaps, it would be better to just remove displayValue, I mean... it's not like I am changing what the user is typing... 
-Facility Name is always blank
-Bool columns aren't right
 Why is just showing up?
 Nothing in HospitilizationsAddEdit is being populated if existing
 remove un-used ports

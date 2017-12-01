@@ -15,8 +15,8 @@ import Common.Routes exposing (navHospitilizations)
 port initHospitilizations : InitHospitilizationsAddNew -> Cmd msg
 
 
-init : AddEditDataSource -> Cmd Msg
-init addEditDataSource =
+init : AddEditDataSource -> Maybe Int -> Cmd Msg
+init addEditDataSource hospitilizationId =
     initHospitilizations (getAddEditMsg addEditDataSource)
 
 

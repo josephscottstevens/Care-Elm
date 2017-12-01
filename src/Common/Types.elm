@@ -7,7 +7,7 @@ type Page
     | Records RecordType
     | RecordAddNew RecordType
     | Hospitilizations
-    | HospitilizationsAddEdit
+    | HospitilizationsAddEdit (Maybe Int)
     | Error String
 
 

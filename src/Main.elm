@@ -65,7 +65,7 @@ view model =
         Hospitilizations ->
             Html.map HospitilizationsMsg (Hospitilizations.view model.hospitalizationsState model.addEditDataSource)
 
-        HospitilizationsAddEdit ->
+        HospitilizationsAddEdit hospitilizationId ->
             Html.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.view model.hospitilizationsAddEditState)
 
         Error str ->
@@ -169,13 +169,13 @@ getNewPage model urlStr =
                 Hospitilizations ->
                     [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
-                HospitilizationsAddEdit ->
+                HospitilizationsAddEdit hospitilizationId ->
                     case model.addEditDataSource of
                         Just t ->
-                            [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t) ]
+                            [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t hospitilizationId) ]
 
                         Nothing ->
-                            [ displayErrorMessage "Cannot load RecordAddNew without a datasource!" ]
+                            [ displayErrorMessage "Cannot load HospitilizationsAddEdit without a datasource!" ]
 
                 None ->
                     []

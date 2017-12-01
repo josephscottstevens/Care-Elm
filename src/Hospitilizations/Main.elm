@@ -61,14 +61,14 @@ update msg model =
         DeleteCompleted (Err t) ->
             model ! [ displayErrorMessage (toString t) ]
 
-        EditTask taskId ->
-            model ! [ editTask taskId ]
+        Edit hospitilizationId ->
+            model ! [ navHospitilizationsAddEdit hospitilizationId ]
 
         SetFilter filterState ->
             { model | filterFields = filterFields model.filterFields filterState } ! []
 
-        AddNewStart ->
-            model ! [ navHospitilizationsAddEdit ]
+        AddNewStart hospitilizationId ->
+            model ! [ navHospitilizationsAddEdit Nothing ]
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
@@ -76,7 +76,7 @@ view model addEditDataSource =
     div []
         [ case addEditDataSource of
             Just _ ->
-                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
+                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick (AddNewStart Nothing) ] [ text "New Record" ]
 
             Nothing ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
@@ -132,7 +132,9 @@ rowDropDownColumn =
 
 dropDownItems : Int -> List ( String, String, Html.Attribute Msg )
 dropDownItems rowId =
-    [ ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "Delete") ) ]
+    [ ( "e-edit", "Edit", onClick (Edit (Just rowId)) )
+    , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "Delete") )
+    ]
 
 
 config : (FilterState -> Msg) -> Config HospitilizationsRow Msg

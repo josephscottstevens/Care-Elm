@@ -10,8 +10,8 @@ type Msg
     | SetTableState Table.State
     | SetFilter FilterState
     | DropDownToggle Int
-    | EditTask Int
-    | AddNewStart
+    | Edit (Maybe Int)
+    | AddNewStart (Maybe Int)
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | SendMenuMessage Int String
