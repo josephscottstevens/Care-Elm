@@ -35,3 +35,15 @@ request patientId =
 getDropDowns : Int -> (Result Http.Error AddEditDataSource -> msg) -> Cmd msg
 getDropDowns patientId t =
     Http.send t (request patientId)
+
+
+getHospitilizationsRow : List HospitilizationsRow -> Maybe Int -> Maybe HospitilizationsRow
+getHospitilizationsRow rows maybeRowId =
+    case maybeRowId of
+        Just rowId ->
+            rows
+                |> List.filter (\t -> t.id == rowId)
+                |> List.head
+
+        Nothing ->
+            Nothing

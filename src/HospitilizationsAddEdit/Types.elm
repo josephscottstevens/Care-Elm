@@ -80,26 +80,32 @@ emptyModel patientId =
 
 
 type alias InitHospitilizationsAddNew =
-    { facilityId : Maybe Int
-    , facilities : List DropDownItem
-    , hospitilizationServiceTypes : List DropDownItem
-    , hospitalizationDischargePhysicians : List DropDownItem
-    , hospitilizations : List DropDownItem
-    , hospitilizationId : Maybe Int
-
-    -- for edit
-    , patientId : Int
-    , patientReported : Bool
-    , hospitalizationId : Maybe Int
-    , dateOfAdmission : Maybe String
-    , dateOfDischarge : Maybe String
-    , hospitalServiceTypeId : Maybe Int
-    , chiefComplaint : String
-    , admitDiagnosisId : Maybe Int
-    , dischargeDiagnosisId : Maybe Int
-    , dischargeRecommendations : String
-    , dischargePhysicianId : Maybe Int
-    , facilityId2 : Maybe Int
-    , dateOfAdmission2 : Maybe String
-    , dateOfDischarge2 : Maybe String
+    { addEditDataSource : AddEditDataSource
+    , hospitilizationsRow : Maybe HospitilizationsRow
     }
+
+
+
+-- type alias InitHospitilizationsAddNew =
+--     { facilityId : Maybe Int
+--     , facilities : List DropDownItem
+--     , hospitilizationServiceTypes : List DropDownItem
+--     , hospitalizationDischargePhysicians : List DropDownItem
+--     , hospitilizations : List DropDownItem
+--     , hospitilizationId : Maybe Int
+--     -- for edit
+--     , patientId : Int
+--     , patientReported : Bool
+--     , hospitalizationId : Maybe Int
+--     , dateOfAdmission : Maybe String
+--     , dateOfDischarge : Maybe String
+--     , hospitalServiceTypeId : Maybe Int
+--     , chiefComplaint : String
+--     , admitDiagnosisId : Maybe Int
+--     , dischargeDiagnosisId : Maybe Int
+--     , dischargeRecommendations : String
+--     , dischargePhysicianId : Maybe Int
+--     , facilityId2 : Maybe Int
+--     , dateOfAdmission2 : Maybe String
+--     , dateOfDischarge2 : Maybe String
+--     }

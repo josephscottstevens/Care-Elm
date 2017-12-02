@@ -14,7 +14,6 @@ Why does hospitilizations have a reference to RecordAddNewInitData?
 
 clean up fields
 	In Filters... recordId vs id?
-	HospitilizationsAddEdit init in main is hella confusing
 	HospitalizationId == Id?
 	
 Clean up un-used fields
