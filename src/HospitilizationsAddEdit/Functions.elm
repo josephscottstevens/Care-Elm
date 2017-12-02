@@ -74,29 +74,22 @@ getHospitilizationMsg addEditDataSource hospitilizationId t =
     }
 
 
-
--- { facilityId : Maybe Int
--- , facilities : List DropDownItem
--- , hospitilizationServiceTypes : List DropDownItem
--- , hospitalizationDischargePhysicians : List DropDownItem
--- , hospitilizations : List DropDownItem
--- , hospitilizationId : Maybe Int
--- -- for edit
--- , patientId : Int
--- , facilityText : String
--- , patientReported : Bool
--- , hospitalizationId : Maybe Int
--- , hospitalizationText : String
--- , hospitalServiceTypeId : Maybe Int
--- , hospitalServiceTypeText : String
--- , chiefComplaint : String
--- , admitDiagnosisId : Maybe Int
--- , dischargeDiagnosisId : Maybe Int
--- , dischargeRecommendations : String
--- , dischargePhysicianId : Maybe Int
--- , dischargePhysicianText : String
--- , facilityId2 : Maybe Int
--- , facilityText2 : String
--- , dateOfAdmission2 : Maybe String
--- , dateOfDischarge2 : Maybe String
--- }
+updateModel : RecordAddNewInitData -> Model -> Model
+updateModel t model =
+    { model
+        | patientId = t.patientId
+        , facilityId = t.facilityId
+        , patientReported = t.patientReported
+        , hospitalizationId = t.hospitalizationId
+        , dateOfAdmission = t.dateOfAdmission
+        , dateOfDischarge = t.dateOfDischarge
+        , hospitalServiceTypeId = t.hospitalServiceTypeId
+        , chiefComplaint = t.chiefComplaint
+        , admitDiagnosisId = t.admitDiagnosisId
+        , dischargeDiagnosisId = t.dischargeDiagnosisId
+        , dischargeRecommendations = t.dischargeRecommendations -- dischargeRecommendations?
+        , dischargePhysicianId = t.dischargePhysicianId -- dischargePhysicianId?
+        , facilityId2 = t.facilityId2 -- facilityId2?
+        , dateOfAdmission2 = t.dateOfAdmission2
+        , dateOfDischarge2 = t.dateOfDischarge2
+    }

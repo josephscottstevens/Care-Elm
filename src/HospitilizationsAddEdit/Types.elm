@@ -89,27 +89,17 @@ type alias InitHospitilizationsAddNew =
 
     -- for edit
     , patientId : Int
-
-    -- , facilityText : String
     , patientReported : Bool
     , hospitalizationId : Maybe Int
-
-    -- , hospitalizationText : String
     , dateOfAdmission : Maybe String
     , dateOfDischarge : Maybe String
     , hospitalServiceTypeId : Maybe Int
-
-    -- , hospitalServiceTypeText : String
     , chiefComplaint : String
     , admitDiagnosisId : Maybe Int
     , dischargeDiagnosisId : Maybe Int
     , dischargeRecommendations : String
     , dischargePhysicianId : Maybe Int
-
-    -- , dischargePhysicianText : String
     , facilityId2 : Maybe Int
-
-    -- , facilityText2 : String
     , dateOfAdmission2 : Maybe String
     , dateOfDischarge2 : Maybe String
     }

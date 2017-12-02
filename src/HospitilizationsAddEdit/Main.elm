@@ -51,9 +51,19 @@ port addHospNewFacility : Maybe String -> Cmd msg
 port addHospNewPhysician : Maybe String -> Cmd msg
 
 
-init : AddEditDataSource -> Maybe Int -> RecordAddNewInitData -> Cmd Msg
+init : AddEditDataSource -> Maybe Int -> RecordAddNewInitData -> ( Model, Cmd Msg )
 init addEditDataSource hospitilizationId recordAddNewInitData =
-    initHospitilizations (getHospitilizationMsg addEditDataSource hospitilizationId recordAddNewInitData)
+    let
+        commands =
+            initHospitilizations (getHospitilizationMsg addEditDataSource hospitilizationId recordAddNewInitData)
+
+        model =
+            emptyModel recordAddNewInitData.patientId
+
+        newModel =
+            updateModel recordAddNewInitData model
+    in
+        newModel ! [ commands ]
 
 
 subscriptions : Sub Msg

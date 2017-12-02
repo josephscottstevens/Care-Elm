@@ -27,20 +27,15 @@ decodeRecordRow =
         -- For edit only
         |> required "PatientId" Decode.int
         |> required "FacilityId" (maybe Decode.int)
-        -- |> required "FacilityText" Decode.string
         |> required "PatientReported" Decode.bool
         |> required "HospitalizationId" (maybe Decode.int)
-        -- |> required "HospitalizationText" Decode.string
         |> required "HospitalServiceTypeId" (maybe Decode.int)
-        -- |> required "HospitalServiceTypeText" Decode.string
         |> required "ChiefComplaint" Decode.string
         |> required "AdmitDiagnosisId" (maybe Decode.int)
         |> required "DischargeDiagnosisId" (maybe Decode.int)
         |> required "DischargeRecommendations" Decode.string
         |> required "DischargePhysicianId" (maybe Decode.int)
-        -- |> required "DischargePhysicianText" Decode.string
         |> required "FacilityId2" (maybe Decode.int)
-        -- |> required "FacilityText2" Decode.string
         |> required "DateOfAdmission2" (maybe Decode.string)
         |> required "DateOfDischarge2" (maybe Decode.string)
 

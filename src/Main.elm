@@ -158,46 +158,47 @@ getNewPage model urlStr =
         newPage =
             Routes.getPage urlHash
 
-        commands =
-            case newPage of
-                Billing ->
-                    [ displayErrorMessage "Billing Not implemented" ]
-
-                Records recordType ->
-                    [ Cmd.map RecordsMsg (Records.init recordType model.patientId) ]
-
-                RecordAddNew recordType ->
-                    case model.addEditDataSource of
-                        Just t ->
-                            [ Cmd.map RecordAddNewMsg (RecordAddNew.init t recordType) ]
-
-                        Nothing ->
-                            [ displayErrorMessage "Cannot load RecordAddNew without a datasource!" ]
-
-                Hospitilizations ->
-                    [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
-
-                HospitilizationsAddEdit hospitilizationId ->
-                    case model.addEditDataSource of
-                        Just t ->
-                            let
-                                newModel =
-                                    case hospitilizationId of
-                                        Just hospId ->
-                                            Hospitilizations.getExistingHospitilization hospId model.hospitalizationsState
-
-                                        Nothing ->
-                                            Debug.crash "no can do either"
-                            in
-                                [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t hospitilizationId newModel) ]
-
-                        Nothing ->
-                            [ displayErrorMessage "Cannot load HospitilizationsAddEdit without a datasource!" ]
-
-                None ->
-                    []
-
-                Error t ->
-                    [ displayErrorMessage t ]
+        mainModel =
+            { model | page = newPage }
     in
-        { model | page = newPage } ! commands
+        case newPage of
+            Billing ->
+                mainModel ! [ displayErrorMessage "Billing Not implemented" ]
+
+            Records recordType ->
+                mainModel ! [ Cmd.map RecordsMsg (Records.init recordType model.patientId) ]
+
+            RecordAddNew recordType ->
+                case model.addEditDataSource of
+                    Just t ->
+                        mainModel ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init t recordType) ]
+
+                    Nothing ->
+                        mainModel ! [ displayErrorMessage "Cannot load RecordAddNew without a datasource!" ]
+
+            Hospitilizations ->
+                mainModel ! [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
+
+            HospitilizationsAddEdit hospitilizationId ->
+                case model.addEditDataSource of
+                    Just t ->
+                        let
+                            hospId =
+                                defaultInt hospitilizationId
+
+                            passModel =
+                                Hospitilizations.getExistingHospitilization hospId model.hospitalizationsState
+
+                            ( newState, cmds ) =
+                                HospitilizationsAddEdit.init t hospitilizationId passModel
+                        in
+                            { mainModel | hospitilizationsAddEditState = newState } ! [ Cmd.map HospitilizationsAddEditMsg cmds ]
+
+                    Nothing ->
+                        mainModel ! [ displayErrorMessage "Cannot load HospitilizationsAddEdit without a datasource!" ]
+
+            None ->
+                mainModel ! []
+
+            Error t ->
+                mainModel ! [ displayErrorMessage t ]

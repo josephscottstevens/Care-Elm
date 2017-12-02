@@ -11,6 +11,13 @@ QUESTIONS:
 HospitilizationsAddEdit init in main is hella confusing
 HospitalizationId == Id?
 
+In Filters... recordId vs id?
+is this needed? (I am getting that already right?) 
+	ttt = { newHospState | facilityId = t.facilityId }
+FacilityName is missing again
+Admit\Discharge problems... how the heck am I going to populate that?
+					
+
 HospitilizationsAddEdit
 	secondary dates aren't saving
 	How does Admit problem get saved?
