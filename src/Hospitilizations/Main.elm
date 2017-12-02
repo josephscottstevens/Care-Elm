@@ -1,16 +1,19 @@
-module Hospitilizations.Main exposing (..)
+port module Hospitilizations.Main exposing (..)
 
-import Hospitilizations.Functions exposing (..)
+import Hospitilizations.Functions exposing (getHospitilizations, getLoadedState, flipDropDownOpen, deleteHospitilization, filterFields, filteredRecords)
 import Hospitilizations.Types exposing (..)
 import Html exposing (Html, text, div, button, a)
 import Html.Attributes exposing (class, type_, href)
 import Html.Events exposing (onClick)
-import Table exposing (..)
-import Common.Grid exposing (..)
-import Common.Types exposing (..)
-import Common.Functions exposing (..)
-import Ports exposing (..)
+import Table exposing (defaultCustomizations)
+import Common.Grid exposing (checkColumn, standardTableAttrs, standardThead, rowDropDownDiv)
+import Common.Types exposing (MenuMessage, FilterState, AddEditDataSource, RecordAddNewInitData)
+import Common.Functions exposing (setLoadingStatus, displayErrorMessage, getResponseError, displaySuccessMessage, defaultString, defaultDate)
+import Ports exposing (dropDownToggle, sendMenuMessage)
 import Common.Routes exposing (navHospitilizationsAddEdit)
+
+
+port deleteHospitilizationConfirmed : (Int -> msg) -> Sub msg
 
 
 subscriptions : Sub Msg
@@ -86,15 +89,15 @@ view model addEditDataSource =
         ]
 
 
-getColumns : List (Column HospitilizationsRow Msg)
+getColumns : List (Table.Column HospitilizationsRow Msg)
 getColumns =
-    [ stringColumn "ID" (\t -> toString t.id)
-    , stringColumn "Facility Name" (\t -> defaultString t.facilityName)
-    , stringColumn "Date Of Admission" (\t -> defaultDate t.dateOfAdmission)
-    , stringColumn "Admit Problem" (\t -> defaultString t.admitProblem)
-    , stringColumn "Date Of Discharge" (\t -> defaultDate t.dateOfDischarge)
-    , stringColumn "Discharge Problem" (\t -> defaultString t.dischargeProblem)
-    , stringColumn "Svc Type" (\t -> defaultString t.serviceType)
+    [ Table.stringColumn "ID" (\t -> toString t.id)
+    , Table.stringColumn "Facility Name" (\t -> defaultString t.facilityName)
+    , Table.stringColumn "Date Of Admission" (\t -> defaultDate t.dateOfAdmission)
+    , Table.stringColumn "Admit Problem" (\t -> defaultString t.admitProblem)
+    , Table.stringColumn "Date Of Discharge" (\t -> defaultDate t.dateOfDischarge)
+    , Table.stringColumn "Discharge Problem" (\t -> defaultString t.dischargeProblem)
+    , Table.stringColumn "Svc Type" (\t -> defaultString t.serviceType)
     , checkColumn "Is From TCM" (\t -> t.fromTcm)
     , customColumn
     , rowDropDownColumn
@@ -138,9 +141,9 @@ dropDownItems rowId =
     ]
 
 
-config : (FilterState -> Msg) -> Config HospitilizationsRow Msg
+config : (FilterState -> Msg) -> Table.Config HospitilizationsRow Msg
 config event =
-    customConfig
+    Table.customConfig
         { toId = \t -> toString t.id
         , toMsg = SetTableState
         , columns = getColumns

@@ -8,25 +8,24 @@ QUESTIONS:
 	Perhaps an alternative to having inline edit grid mode... which doesn't add up to me, is a back button where new button was?
 	
 ===========================================================================================================
-HospitilizationsAddEdit init in main is hella confusing
-HospitalizationId == Id?
 
-In Filters... recordId vs id?
-is this needed? (I am getting that already right?) 
+Change all import \ export to be explicit
+
+clean up fields
+	In Filters... recordId vs id?
 	ttt = { newHospState | facilityId = t.facilityId }
-FacilityName is missing again
-Admit\Discharge problems... how the heck am I going to populate that?
-					
+	HospitilizationsAddEdit init in main is hella confusing
+	HospitalizationId == Id?
+	
+Clean up un-used fields
+Discharge Recommendations aren't saving.. or aren't loading on edit
+not clearing fields on add
+implement edit server side
+verify required fields are correct
+quick test on validation (test4)
+unbreak records -> hospitilizations save
+	
 
-HospitilizationsAddEdit
-	secondary dates aren't saving
-	How does Admit problem get saved?
-	crap... not clearing fields on add
-	populate edit fields
-	implement edit server side
-	verify required fields are correct
-	quick test on validation (test4)
-	unbreak record -> hospitilizations save
 
 re-add _ for urls
 test records (full sweep)

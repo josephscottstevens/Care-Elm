@@ -1,49 +1,49 @@
 module Hospitilizations.Functions exposing (..)
 
-import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (..)
+import Json.Decode as Decode
+import Json.Decode.Pipeline as Pipeline
 import Http
 import Hospitilizations.Types exposing (..)
-import Common.Types exposing (..)
-import Common.Functions exposing (..)
+import Common.Types exposing (FilterState)
+import Common.Functions exposing (defaultLower, defaultDate)
 
 
 -- Http helper functions
 
 
-decodeRecordRow : Decoder HospitilizationsRow
+decodeRecordRow : Decode.Decoder HospitilizationsRow
 decodeRecordRow =
-    decode HospitilizationsRow
-        |> required "Id" Decode.int
-        |> required "FacilityName" (maybe Decode.string)
-        |> required "DateOfAdmission" (maybe Decode.string)
-        |> required "AdmitProblem" (maybe Decode.string)
-        |> required "DateOfDischarge" (maybe Decode.string)
-        |> required "DischargeProblem" (maybe Decode.string)
-        |> required "ServiceType" (maybe Decode.string)
-        |> required "FromTcm" Decode.bool
-        |> required "RecordId" (maybe Decode.int)
-        |> hardcoded False
+    Pipeline.decode HospitilizationsRow
+        |> Pipeline.required "Id" Decode.int
+        |> Pipeline.required "FacilityName" (Decode.maybe Decode.string)
+        |> Pipeline.required "DateOfAdmission" (Decode.maybe Decode.string)
+        |> Pipeline.required "AdmitProblem" (Decode.maybe Decode.string)
+        |> Pipeline.required "DateOfDischarge" (Decode.maybe Decode.string)
+        |> Pipeline.required "DischargeProblem" (Decode.maybe Decode.string)
+        |> Pipeline.required "ServiceType" (Decode.maybe Decode.string)
+        |> Pipeline.required "FromTcm" Decode.bool
+        |> Pipeline.required "RecordId" (Decode.maybe Decode.int)
+        |> Pipeline.hardcoded False
         -- For edit only
-        |> required "PatientId" Decode.int
-        |> required "FacilityId" (maybe Decode.int)
-        |> required "PatientReported" Decode.bool
-        |> required "HospitalizationId" (maybe Decode.int)
-        |> required "HospitalServiceTypeId" (maybe Decode.int)
-        |> required "ChiefComplaint" Decode.string
-        |> required "AdmitDiagnosisId" (maybe Decode.int)
-        |> required "DischargeDiagnosisId" (maybe Decode.int)
-        |> required "DischargeRecommendations" Decode.string
-        |> required "DischargePhysicianId" (maybe Decode.int)
-        |> required "FacilityId2" (maybe Decode.int)
-        |> required "DateOfAdmission2" (maybe Decode.string)
-        |> required "DateOfDischarge2" (maybe Decode.string)
+        |> Pipeline.required "PatientId" Decode.int
+        |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
+        |> Pipeline.required "PatientReported" Decode.bool
+        |> Pipeline.required "HospitalizationId" (Decode.maybe Decode.int)
+        |> Pipeline.required "HospitalServiceTypeId" (Decode.maybe Decode.int)
+        |> Pipeline.required "ChiefComplaint" Decode.string
+        |> Pipeline.required "AdmitDiagnosisId" (Decode.maybe Decode.int)
+        |> Pipeline.required "DischargeDiagnosisId" (Decode.maybe Decode.int)
+        |> Pipeline.required "DischargeRecommendations" Decode.string
+        |> Pipeline.required "DischargePhysicianId" (Decode.maybe Decode.int)
+        |> Pipeline.required "FacilityId2" (Decode.maybe Decode.int)
+        |> Pipeline.required "DateOfAdmission2" (Decode.maybe Decode.string)
+        |> Pipeline.required "DateOfDischarge2" (Decode.maybe Decode.string)
 
 
-decodeModel : Decoder WebResponse
+decodeModel : Decode.Decoder WebResponse
 decodeModel =
-    decode WebResponse
-        |> required "list" (Decode.list decodeRecordRow)
+    Pipeline.decode WebResponse
+        |> Pipeline.required "list" (Decode.list decodeRecordRow)
 
 
 request : Int -> Http.Request WebResponse
@@ -61,20 +61,6 @@ deleteHospitilization rowId =
     Http.send DeleteCompleted <| Http.getString ("/People/DeleteHospitilization?id=" ++ toString rowId)
 
 
-
--- update helper functions
--- getRecordId : Model -> Maybe Int
--- getRecordId model =
---     let
---         hospitilizations =
---             model.hospitilizations
---                 |> List.filter (\t -> t.id == model.dropDownState.rowId)
---                 |> List.head
---                 |> Maybe.map (\t -> t.recordId)
---     in
---         Maybe.withDefault Nothing hospitilizations
-
-
 flipDropDownOpen : List HospitilizationsRow -> Int -> List HospitilizationsRow
 flipDropDownOpen hospitilizations recordId =
     hospitilizations
@@ -90,8 +76,7 @@ flipDropDownOpen hospitilizations recordId =
 getLoadedState : Model -> WebResponse -> Model
 getLoadedState model t =
     { model
-        | state = Grid
-        , hospitilizations = t.hospitilizations
+        | hospitilizations = t.hospitilizations
     }
 
 

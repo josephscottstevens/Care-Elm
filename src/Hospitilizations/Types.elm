@@ -2,7 +2,7 @@ module Hospitilizations.Types exposing (..)
 
 import Table
 import Http
-import Common.Types exposing (..)
+import Common.Types exposing (FilterState)
 
 
 type Msg
@@ -17,12 +17,6 @@ type Msg
     | SendMenuMessage Int String
 
 
-type ModelState
-    = Grid
-    | Limbo
-    | Error String
-
-
 type SortMode
     = SortNone
     | SortAsc
@@ -35,8 +29,7 @@ type alias WebResponse =
 
 
 type alias Model =
-    { state : ModelState
-    , hospitilizations : List HospitilizationsRow
+    { hospitilizations : List HospitilizationsRow
     , patientId : Int
     , facilityId : Maybe Int
     , tableState : Table.State
@@ -47,8 +40,7 @@ type alias Model =
 
 emptyModel : Int -> Model
 emptyModel patientId =
-    { state = Grid
-    , hospitilizations = []
+    { hospitilizations = []
     , patientId = patientId
     , facilityId = Nothing
     , tableState = Table.initialSort "Date"
