@@ -5,7 +5,6 @@ import Http
 import RecordAddNew.Types exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
-import Ports
 
 
 encodeRecord : Model -> Encode.Value

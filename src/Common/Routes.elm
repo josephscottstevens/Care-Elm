@@ -107,7 +107,7 @@ navHospitilizationsAddEdit : Maybe Int -> Cmd msg
 navHospitilizationsAddEdit hospitalizationId =
     case hospitalizationId of
         Just t ->
-            Navigation.modifyUrl ("#/people/_hospitalizations/edit/" ++ (toString t))
+            Navigation.modifyUrl ("#/people/_hospitalizations/edit/" ++ toString t)
 
         Nothing ->
             Navigation.modifyUrl "#/people/_hospitalizations/add"

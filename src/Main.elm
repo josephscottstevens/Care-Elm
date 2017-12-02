@@ -112,14 +112,8 @@ update msg model =
             let
                 newState =
                     model.recordAddNewState
-
-                newHospState =
-                    model.hospitilizationsAddEditState
-
-                tt =
-                    { newState | facilityId = t.facilityId }
             in
-                { model | addEditDataSource = Just t, recordAddNewState = tt } ! []
+                { model | addEditDataSource = Just t, recordAddNewState = { newState | facilityId = t.facilityId } } ! []
 
         AddEditDataSourceLoaded (Err httpError) ->
             { model | page = Error (toString httpError) } ! []

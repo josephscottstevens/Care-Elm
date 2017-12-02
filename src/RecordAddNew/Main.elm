@@ -258,16 +258,15 @@ formInputs model recordType =
 
                 Legal ->
                     firstColumns
-                        ++ [ ( "Title", Optional, TextInput model.title UpdateTitle ) ]
-                        ++ lastColumns
+                        ++ ( "Title", Optional, TextInput model.title UpdateTitle )
+                        :: lastColumns
 
                 Hospitalizations ->
                     [ ( "Existing Hospitilization", Optional, CheckInput model.isExistingHospitilization UpdateIsExistingHospitilization ) ]
                         ++ case model.isExistingHospitilization of
                             True ->
-                                [ ( "Select Hospitalization", Required, DropInput model.hospitalizationId "HospitalizationsId" )
-                                ]
-                                    ++ lastColumns
+                                ( "Select Hospitalization", Required, DropInput model.hospitalizationId "HospitalizationsId" )
+                                    :: lastColumns
 
                             False ->
                                 [ ( "Patient Reported", Optional, CheckInput model.patientReported UpdatePatientReported )
@@ -304,8 +303,7 @@ formInputs model recordType =
 
                 Enrollment ->
                     firstColumns
-                        ++ [ ( "Title", Optional, TextInput model.title UpdateTitle )
-                           ]
-                        ++ lastColumns
+                        ++ ( "Title", Optional, TextInput model.title UpdateTitle )
+                        :: lastColumns
     in
         columns

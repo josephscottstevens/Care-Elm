@@ -9,6 +9,8 @@ QUESTIONS:
 	
 ===========================================================================================================
 
+Changing between records  ( on Records -> hospitilizations) seems broken
+
 Change all import \ export to be explicit
 Why does hospitilizations have a reference to RecordAddNewInitData?
 
@@ -23,14 +25,14 @@ implement edit server side
 verify required fields are correct
 quick test on validation (test4)
 unbreak records -> hospitilizations save
-	
+hospitilizations getLoadedState is pretty silly
 
 
 re-add _ for urls
 test records (full sweep)
 
 start updating history bar
-perhaps... better to not have a port file, instead put it where it is used... but are there shared ports?
+
 fix reload in new urls
 get back button to work exactly right
 remove url parser lib, safe right?
@@ -45,6 +47,7 @@ Right now, dropdownToggle is being listened to twice, because hosp and records a
 trim down ports
 	some are un-used
 Perhaps try to connect hospitilizations into the other one
+perhaps... better to not have a port file, instead put it where it is used... but are there shared ports?
 	
 can I remove functions from Main?	
 perhaps, it would be better to just remove displayValue, I mean... it's not like I am changing what the user is typing... 
@@ -60,6 +63,7 @@ test validation
 how to clear sort?
 
 LOW TODO:
+I can optionally listen to DropDownToggle right?
 Can I remove some stuff? Like am I really doing the whole dropdown (in elm Model) thing anymore?
 Cleanup double select statement in controller for grid source
 Change Model to Types ( the file)
@@ -87,6 +91,7 @@ Edit Button's class name is "-Column", and I am styling that class, but if we ha
 Note: 
 	Type AutoPlay = Off | On {audio : Bool, withoutWifi: Bool }
 	Should I add the form to breadcrumbs?
+	Would it make sense to have knockout set everything... based on the init function?
 	
 Trying to avoid:
 	add new facility depends on roles (see AddEditRecordsPartial)
