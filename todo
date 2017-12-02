@@ -11,13 +11,13 @@ QUESTIONS:
 
 Changing between records  ( on Records -> hospitilizations) seems broken
 
-Change all import \ export to be explicit
-
 clean up fields
 	In Filters... recordId vs id?
 	HospitalizationId == Id?
 	
-Clean up un-used fields
+Clean up un-used fields (in models)
+Perhaps try to connect hospitilizations into the other one
+common ports are fine, but not everything should go there
 Discharge Recommendations aren't saving.. or aren't loading on edit
 not clearing fields on add
 implement edit server side
@@ -25,7 +25,9 @@ verify required fields are correct
 quick test on validation (test4)
 unbreak records -> hospitilizations save
 hospitilizations getLoadedState is pretty silly
-
+Change all import \ export to be explicit
+Move ports file to Common
+trim down ports (find out which ones are un-used)
 
 re-add _ for urls
 test records (full sweep)
@@ -34,32 +36,15 @@ start updating history bar
 
 fix reload in new urls
 get back button to work exactly right
-remove url parser lib, safe right?
-ports are turning into a hairball quick (updateFacility vs updateHospFacility) yuck
-Can I butcher the manage problems more by getting dropdown, then just getting the button later?
-can I put value back for the dropdowns and dates?
 can I make the names a bit more consistant? seems like everyone is calling everything what they like
-
-can i remove the value in html?  I never touch it
-Did I wind up using anything from the two routing libraries?
-Right now, dropdownToggle is being listened to twice, because hosp and records are both listening
-trim down ports
-	some are un-used
-Perhaps try to connect hospitilizations into the other one
-perhaps... better to not have a port file, instead put it where it is used... but are there shared ports?
 	
-can I remove functions from Main?	
 perhaps, it would be better to just remove displayValue, I mean... it's not like I am changing what the user is typing... 
 Why is just showing up?
 Nothing in HospitilizationsAddEdit is being populated if existing
-remove un-used ports
-centralize ports
-remove port tags from modules that aren't ports
 
 in tasks... there is a another hospitilizations????
 Fix are you sure you want to leave
-test validation
-how to clear sort?
+
 
 LOW TODO:
 I can optionally listen to DropDownToggle right?
@@ -73,6 +58,7 @@ refactor long else if filter in load, to case of instead of if else
 the grid config doesn't really need TaskId, a column could able to get it... but... without knowing the model?
 There is phone number validation, any other hidden validations?
 Perhaps hrefExtra doesn't really belong in grid
+how to clear sort?
 
 REALLY LOW TODO:
 Would it make sense to load grid first, then fire second request to load all the dropdown info? easy enough right
