@@ -4,7 +4,7 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Http
 import Hospitilizations.Types exposing (..)
-import Common.Types exposing (FilterState)
+import Common.Types exposing (FilterState, HospitilizationsRow)
 import Common.Functions exposing (defaultLower, defaultDate)
 
 

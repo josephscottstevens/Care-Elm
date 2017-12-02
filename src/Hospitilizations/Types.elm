@@ -2,7 +2,7 @@ module Hospitilizations.Types exposing (..)
 
 import Table
 import Http
-import Common.Types exposing (FilterState)
+import Common.Types exposing (FilterState, HospitilizationsRow)
 
 
 type Msg
@@ -11,7 +11,7 @@ type Msg
     | SetFilter FilterState
     | DropDownToggle Int
     | Edit (Maybe Int)
-    | AddNewStart (Maybe Int)
+    | AddNewStart (Maybe HospitilizationsRow)
     | DeleteHospitilizationConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | SendMenuMessage Int String
@@ -46,35 +46,6 @@ emptyModel patientId =
     , tableState = Table.initialSort "Date"
     , query = ""
     , filterFields = emptyFilters
-    }
-
-
-type alias HospitilizationsRow =
-    { id : Int
-    , facilityName : Maybe String
-    , dateOfAdmission : Maybe String
-    , admitProblem : Maybe String
-    , dateOfDischarge : Maybe String
-    , dischargeProblem : Maybe String
-    , serviceType : Maybe String
-    , fromTcm : Bool
-    , recordId : Maybe Int
-    , dropDownOpen : Bool
-
-    -- for edit
-    , patientId : Int
-    , facilityId : Maybe Int
-    , patientReported : Bool
-    , hospitalizationId : Maybe Int
-    , hospitalServiceTypeId : Maybe Int
-    , chiefComplaint : String
-    , admitDiagnosisId : Maybe Int
-    , dischargeDiagnosisId : Maybe Int
-    , dischargeRecommendations : String
-    , dischargePhysicianId : Maybe Int
-    , facilityId2 : Maybe Int
-    , dateOfAdmission2 : Maybe String
-    , dateOfDischarge2 : Maybe String
     }
 
 
