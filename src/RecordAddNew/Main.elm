@@ -33,7 +33,7 @@ port updateHospitalServiceType : (DropDownItem -> msg) -> Sub msg
 port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
 
 
-init : AddEditDataSource -> RecordType -> Cmd Msg
+init : Maybe AddEditDataSource -> RecordType -> Cmd Msg
 init addEditDataSource recordType =
     initRecords (getAddEditMsg addEditDataSource (getId recordType) False False)
 

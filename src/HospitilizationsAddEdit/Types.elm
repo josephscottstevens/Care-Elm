@@ -80,6 +80,6 @@ emptyModel patientId =
 
 
 type alias InitHospitilizationsAddNew =
-    { addEditDataSource : AddEditDataSource
+    { addEditDataSource : Maybe AddEditDataSource
     , hospitilizationsRow : Maybe HospitilizationsRow
     }

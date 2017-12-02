@@ -4,7 +4,6 @@ import Json.Encode as Encode exposing (..)
 import Http
 import HospitilizationsAddEdit.Types exposing (..)
 import Common.Functions exposing (..)
-import Common.Types exposing (HospitilizationsRow)
 
 
 encodeRecord : Model -> Encode.Value
@@ -45,24 +44,3 @@ saveFormRequest model =
 saveForm : Model -> Cmd Msg
 saveForm model =
     Http.send SaveCompleted (saveFormRequest model)
-
-
-updateModel : Model -> HospitilizationsRow -> Model
-updateModel model t =
-    { model
-        | patientId = t.patientId
-        , facilityId = t.facilityId
-        , patientReported = t.patientReported
-        , hospitalizationId = t.hospitalizationId
-        , dateOfAdmission = t.dateOfAdmission
-        , dateOfDischarge = t.dateOfDischarge
-        , hospitalServiceTypeId = t.hospitalServiceTypeId
-        , chiefComplaint = t.chiefComplaint
-        , admitDiagnosisId = t.admitDiagnosisId
-        , dischargeDiagnosisId = t.dischargeDiagnosisId
-        , dischargeRecommendations = t.dischargeRecommendations
-        , dischargePhysicianId = t.dischargePhysicianId
-        , facilityId2 = t.facilityId2
-        , dateOfAdmission2 = t.dateOfAdmission2
-        , dateOfDischarge2 = t.dateOfDischarge2
-    }
