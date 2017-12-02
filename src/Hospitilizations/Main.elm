@@ -71,7 +71,7 @@ update msg model =
         SetFilter filterState ->
             { model | filterFields = filterFields model.filterFields filterState } ! []
 
-        AddNewStart hospitilizationId ->
+        AddNewStart ->
             model ! [ navHospitilizationsAddEdit Nothing ]
 
 
@@ -80,7 +80,7 @@ view model addEditDataSource =
     div []
         [ case addEditDataSource of
             Just _ ->
-                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick (AddNewStart Nothing) ] [ text "New Record" ]
+                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
 
             Nothing ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]

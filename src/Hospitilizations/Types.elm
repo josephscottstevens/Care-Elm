@@ -11,7 +11,7 @@ type Msg
     | SetFilter FilterState
     | DropDownToggle Int
     | Edit (Maybe Int)
-    | AddNewStart (Maybe HospitilizationsRow)
+    | AddNewStart
     | DeleteHospitilizationConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | SendMenuMessage Int String
