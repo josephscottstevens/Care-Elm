@@ -23,7 +23,7 @@ subscriptions _ =
         , Sub.map HospitilizationsAddEditMsg HospitilizationsAddEdit.subscriptions
         , presetPageComplete PresetPageComplete
         , setPageComplete SetPageComplete
-        , isApp IsApp
+        , isApp KnockoutUrlChange
         ]
 
 
@@ -140,7 +140,7 @@ update msg model =
             in
                 getNewPage newModel url.hash
 
-        IsApp url ->
+        KnockoutUrlChange url ->
             getNewPage model url
 
 

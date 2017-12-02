@@ -34,7 +34,7 @@ type Msg
     | PresetPageComplete String
     | SetPageComplete String
     | UrlChange Navigation.Location
-    | IsApp String
+    | KnockoutUrlChange String
 
 
 emptyModel : Navigation.Location -> Model
