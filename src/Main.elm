@@ -36,7 +36,7 @@ init location =
         patientId =
             Routes.getPatientId location.search
     in
-        model ! ([ getDropDowns patientId AddEditDataSourceLoaded, setLoadingStatus False ])
+        model ! [ getDropDowns patientId AddEditDataSourceLoaded, setLoadingStatus False ]
 
 
 main : Program Never Model Msg
@@ -118,11 +118,8 @@ update msg model =
 
                 tt =
                     { newState | facilityId = t.facilityId }
-
-                ttt =
-                    { newHospState | facilityId = t.facilityId }
             in
-                { model | addEditDataSource = Just t, recordAddNewState = tt, hospitilizationsAddEditState = ttt } ! []
+                { model | addEditDataSource = Just t, recordAddNewState = tt } ! []
 
         AddEditDataSourceLoaded (Err httpError) ->
             { model | page = Error (toString httpError) } ! []

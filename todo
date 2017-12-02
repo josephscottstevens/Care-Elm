@@ -13,7 +13,6 @@ Change all import \ export to be explicit
 
 clean up fields
 	In Filters... recordId vs id?
-	ttt = { newHospState | facilityId = t.facilityId }
 	HospitilizationsAddEdit init in main is hella confusing
 	HospitalizationId == Id?
 	
