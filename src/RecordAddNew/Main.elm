@@ -262,8 +262,8 @@ formInputs model recordType =
                         :: lastColumns
 
                 Hospitalizations ->
-                    [ ( "Existing Hospitilization", Optional, CheckInput model.isExistingHospitilization UpdateIsExistingHospitilization ) ]
-                        ++ case model.isExistingHospitilization of
+                    ( "Existing Hospitilization", Optional, CheckInput model.isExistingHospitilization UpdateIsExistingHospitilization )
+                        :: case model.isExistingHospitilization of
                             True ->
                                 ( "Select Hospitalization", Required, DropInput model.hospitalizationId "HospitalizationsId" )
                                     :: lastColumns

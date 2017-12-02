@@ -12,7 +12,6 @@ QUESTIONS:
 Changing between records  ( on Records -> hospitilizations) seems broken
 
 Change all import \ export to be explicit
-Why does hospitilizations have a reference to RecordAddNewInitData?
 
 clean up fields
 	In Filters... recordId vs id?

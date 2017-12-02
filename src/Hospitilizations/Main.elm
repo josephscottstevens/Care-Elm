@@ -2,8 +2,8 @@ port module Hospitilizations.Main exposing (..)
 
 import Hospitilizations.Functions exposing (getHospitilizations, getLoadedState, flipDropDownOpen, deleteHospitilization, filterFields, filteredRecords)
 import Hospitilizations.Types exposing (..)
-import Html exposing (Html, text, div, button, a)
-import Html.Attributes exposing (class, type_, href)
+import Html exposing (Html, text, div, button)
+import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Table exposing (defaultCustomizations)
 import Common.Grid exposing (checkColumn, standardTableAttrs, standardThead, rowDropDownDiv)
@@ -36,7 +36,7 @@ update msg model =
             getLoadedState model t ! [ setLoadingStatus False ]
 
         Load (Err t) ->
-            model ! [ setLoadingStatus False ]
+            model ! [ displayErrorMessage (toString t) ]
 
         SetTableState newState ->
             { model | tableState = newState } ! []

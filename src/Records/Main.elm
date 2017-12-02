@@ -1,4 +1,4 @@
-port module Records.Main exposing (..)
+module Records.Main exposing (..)
 
 import Records.Functions exposing (..)
 import Records.Types exposing (..)

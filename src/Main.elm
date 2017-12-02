@@ -67,7 +67,7 @@ view model =
         Hospitilizations ->
             Html.map HospitilizationsMsg (Hospitilizations.view model.hospitalizationsState model.addEditDataSource)
 
-        HospitilizationsAddEdit hospitilizationId ->
+        HospitilizationsAddEdit _ ->
             Html.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.view model.hospitilizationsAddEditState)
 
         Error str ->
