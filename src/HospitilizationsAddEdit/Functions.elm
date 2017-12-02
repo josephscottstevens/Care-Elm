@@ -47,31 +47,58 @@ saveForm model =
     Http.send SaveCompleted (saveFormRequest model)
 
 
-getHospitilizationMsg : AddEditDataSource -> Maybe Int -> RecordAddNewInitData -> InitHospitilizationsAddNew
-getHospitilizationMsg addEditDataSource hospitilizationId t =
-    { facilityId = addEditDataSource.facilityId
-    , facilities = addEditDataSource.facilities
-    , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
-    , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
-    , hospitilizations = addEditDataSource.hospitilizations
-    , hospitilizationId = hospitilizationId
+getHospitilizationMsg : AddEditDataSource -> Maybe Int -> Maybe RecordAddNewInitData -> InitHospitilizationsAddNew
+getHospitilizationMsg addEditDataSource hospitilizationId recordAddNewInitData =
+    case recordAddNewInitData of
+        Just t ->
+            { facilityId = addEditDataSource.facilityId
+            , facilities = addEditDataSource.facilities
+            , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
+            , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
+            , hospitilizations = addEditDataSource.hospitilizations
+            , hospitilizationId = hospitilizationId
 
-    -- for edit
-    , patientId = t.patientId
-    , patientReported = t.patientReported
-    , hospitalizationId = t.hospitalizationId
-    , dateOfAdmission = t.dateOfAdmission
-    , dateOfDischarge = t.dateOfDischarge
-    , hospitalServiceTypeId = t.hospitalServiceTypeId
-    , chiefComplaint = t.chiefComplaint
-    , admitDiagnosisId = t.admitDiagnosisId
-    , dischargeDiagnosisId = t.dischargeDiagnosisId
-    , dischargeRecommendations = t.dischargeRecommendations
-    , dischargePhysicianId = t.dischargePhysicianId
-    , facilityId2 = t.facilityId2
-    , dateOfAdmission2 = t.dateOfAdmission2
-    , dateOfDischarge2 = t.dateOfDischarge2
-    }
+            -- for edit
+            , patientId = t.patientId
+            , patientReported = t.patientReported
+            , hospitalizationId = t.hospitalizationId
+            , dateOfAdmission = t.dateOfAdmission
+            , dateOfDischarge = t.dateOfDischarge
+            , hospitalServiceTypeId = t.hospitalServiceTypeId
+            , chiefComplaint = t.chiefComplaint
+            , admitDiagnosisId = t.admitDiagnosisId
+            , dischargeDiagnosisId = t.dischargeDiagnosisId
+            , dischargeRecommendations = t.dischargeRecommendations
+            , dischargePhysicianId = t.dischargePhysicianId
+            , facilityId2 = t.facilityId2
+            , dateOfAdmission2 = t.dateOfAdmission2
+            , dateOfDischarge2 = t.dateOfDischarge2
+            }
+
+        Nothing ->
+            { facilityId = addEditDataSource.facilityId
+            , patientId = addEditDataSource.patientId
+            , facilities = addEditDataSource.facilities
+            , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
+            , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
+            , hospitilizations = addEditDataSource.hospitilizations
+            , hospitilizationId = hospitilizationId
+
+            -- for edit
+            , patientReported = False
+            , hospitalizationId = Nothing
+            , dateOfAdmission = Nothing
+            , dateOfDischarge = Nothing
+            , hospitalServiceTypeId = Nothing
+            , chiefComplaint = ""
+            , admitDiagnosisId = Nothing
+            , dischargeDiagnosisId = Nothing
+            , dischargeRecommendations = ""
+            , dischargePhysicianId = Nothing
+            , facilityId2 = Nothing
+            , dateOfAdmission2 = Nothing
+            , dateOfDischarge2 = Nothing
+            }
 
 
 updateModel : RecordAddNewInitData -> Model -> Model

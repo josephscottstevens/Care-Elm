@@ -51,17 +51,22 @@ port addHospNewFacility : Maybe String -> Cmd msg
 port addHospNewPhysician : Maybe String -> Cmd msg
 
 
-init : AddEditDataSource -> Maybe Int -> RecordAddNewInitData -> ( Model, Cmd Msg )
+init : AddEditDataSource -> Maybe Int -> Maybe RecordAddNewInitData -> ( Model, Cmd Msg )
 init addEditDataSource hospitilizationId recordAddNewInitData =
     let
         commands =
             initHospitilizations (getHospitilizationMsg addEditDataSource hospitilizationId recordAddNewInitData)
 
         model =
-            emptyModel recordAddNewInitData.patientId
+            emptyModel 1
 
         newModel =
-            updateModel recordAddNewInitData model
+            case recordAddNewInitData of
+                Just t ->
+                    updateModel t model
+
+                Nothing ->
+                    model
     in
         newModel ! [ commands ]
 

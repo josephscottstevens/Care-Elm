@@ -17,6 +17,7 @@ decodeModel : Decoder AddEditDataSource
 decodeModel =
     decode AddEditDataSource
         |> required "facilityId" (maybe Decode.int)
+        |> required "patientId" Decode.int
         |> required "facilityDropdown" (Decode.list decodeDropDownItem)
         |> required "recordTypeDropdown" (Decode.list decodeDropDownItem)
         |> required "userDropDown" (Decode.list decodeDropDownItem)

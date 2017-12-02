@@ -126,6 +126,7 @@ getId recordType =
 
 type alias AddEditDataSource =
     { facilityId : Maybe Int
+    , patientId : Int
     , facilities : List DropDownItem
     , recordTypes : List DropDownItem
     , users : List DropDownItem

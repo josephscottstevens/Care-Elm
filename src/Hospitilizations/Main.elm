@@ -149,33 +149,39 @@ config event =
         }
 
 
-getExistingHospitilization : Int -> Model -> RecordAddNewInitData
-getExistingHospitilization hospId model =
-    let
-        hospitilizations =
-            model.hospitilizations
-                |> List.filter (\t -> t.id == hospId)
-                |> List.head
-    in
-        case hospitilizations of
-            Just t ->
-                { id = Just t.id
-                , patientId = t.patientId
-                , facilityId = t.facilityId
-                , patientReported = t.patientReported
-                , hospitalizationId = t.hospitalizationId
-                , dateOfAdmission = t.dateOfAdmission
-                , dateOfDischarge = t.dateOfDischarge
-                , hospitalServiceTypeId = t.hospitalServiceTypeId
-                , chiefComplaint = t.chiefComplaint
-                , admitDiagnosisId = t.admitDiagnosisId
-                , dischargeDiagnosisId = t.dischargeDiagnosisId
-                , dischargeRecommendations = t.dischargeRecommendations
-                , dischargePhysicianId = t.dischargePhysicianId
-                , facilityId2 = t.facilityId2
-                , dateOfAdmission2 = t.dateOfAdmission2
-                , dateOfDischarge2 = t.dateOfDischarge2
-                }
+getExistingHospitilization : Maybe Int -> Model -> Maybe RecordAddNewInitData
+getExistingHospitilization hospitilizationId model =
+    case hospitilizationId of
+        Just hospId ->
+            let
+                hospitilizations =
+                    model.hospitilizations
+                        |> List.filter (\t -> t.id == hospId)
+                        |> List.head
+            in
+                case hospitilizations of
+                    Just t ->
+                        Just
+                            { id = Just t.id
+                            , patientId = t.patientId
+                            , facilityId = t.facilityId
+                            , patientReported = t.patientReported
+                            , hospitalizationId = t.hospitalizationId
+                            , dateOfAdmission = t.dateOfAdmission
+                            , dateOfDischarge = t.dateOfDischarge
+                            , hospitalServiceTypeId = t.hospitalServiceTypeId
+                            , chiefComplaint = t.chiefComplaint
+                            , admitDiagnosisId = t.admitDiagnosisId
+                            , dischargeDiagnosisId = t.dischargeDiagnosisId
+                            , dischargeRecommendations = t.dischargeRecommendations
+                            , dischargePhysicianId = t.dischargePhysicianId
+                            , facilityId2 = t.facilityId2
+                            , dateOfAdmission2 = t.dateOfAdmission2
+                            , dateOfDischarge2 = t.dateOfDischarge2
+                            }
 
-            Nothing ->
-                Debug.crash "no can do"
+                    Nothing ->
+                        Nothing
+
+        Nothing ->
+            Nothing

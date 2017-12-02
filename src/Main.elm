@@ -183,14 +183,11 @@ getNewPage model urlStr =
                 case model.addEditDataSource of
                     Just t ->
                         let
-                            hospId =
-                                defaultInt hospitilizationId
-
-                            passModel =
-                                Hospitilizations.getExistingHospitilization hospId model.hospitalizationsState
+                            recordAddNewInitData =
+                                Hospitilizations.getExistingHospitilization hospitilizationId model.hospitalizationsState
 
                             ( newState, cmds ) =
-                                HospitilizationsAddEdit.init t hospitilizationId passModel
+                                HospitilizationsAddEdit.init t hospitilizationId recordAddNewInitData
                         in
                             { mainModel | hospitilizationsAddEditState = newState } ! [ Cmd.map HospitilizationsAddEditMsg cmds ]
 
