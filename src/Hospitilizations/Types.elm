@@ -68,6 +68,21 @@ type alias HospitilizationsRow =
     , fromTcm : Bool
     , recordId : Maybe Int
     , dropDownOpen : Bool
+
+    -- for edit
+    , patientId : Int
+    , facilityId : Maybe Int
+    , patientReported : Bool
+    , hospitalizationId : Maybe Int
+    , hospitalServiceTypeId : Maybe Int
+    , chiefComplaint : String
+    , admitDiagnosisId : Maybe Int
+    , dischargeDiagnosisId : Maybe Int
+    , dischargeRecommendations : String
+    , dischargePhysicianId : Maybe Int
+    , facilityId2 : Maybe Int
+    , dateOfAdmission2 : Maybe String
+    , dateOfDischarge2 : Maybe String
     }
 
 

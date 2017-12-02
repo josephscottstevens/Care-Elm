@@ -11,41 +11,6 @@ type Page
     | Error String
 
 
-
--- getPage : String -> Page
--- getPage page =
---     case page of
---         "Billing" ->
---             Billing
---         "Records" ->
---             Records
---         "RecordAddNew" ->
---             RecordAddNew
---         "Hospitilizations" ->
---             Hospitilizations
---         "HospitilizationsAddEdit" ->
---             HospitilizationsAddEdit
---         _ ->
---             Error "Page not found"
--- pageToString : Page -> String
--- pageToString page =
---     case page of
---         None ->
---             "None"
---         Billing ->
---             "Billing"
---         Records ->
---             "Records"
---         RecordAddNew ->
---             "RecordAddNew"
---         Hospitilizations ->
---             "Hospitilizations"
---         HospitilizationsAddEdit ->
---             "HospitilizationsAddEdit"
---         Error _ ->
---             "Error"
-
-
 type alias FilterState =
     { name : String
     , value : String
@@ -168,4 +133,24 @@ type alias AddEditDataSource =
     , hospitilizationServiceTypes : List DropDownItem
     , hospitalizationDischargePhysicians : List DropDownItem
     , hospitilizations : List DropDownItem
+    }
+
+
+type alias RecordAddNewInitData =
+    { id : Maybe Int
+    , patientId : Int
+    , facilityId : Maybe Int
+    , patientReported : Bool
+    , hospitalizationId : Maybe Int
+    , dateOfAdmission : Maybe String
+    , dateOfDischarge : Maybe String
+    , hospitalServiceTypeId : Maybe Int
+    , chiefComplaint : String
+    , admitDiagnosisId : Maybe Int
+    , dischargeDiagnosisId : Maybe Int
+    , dischargeRecommendations : String
+    , dischargePhysicianId : Maybe Int
+    , facilityId2 : Maybe Int
+    , dateOfAdmission2 : Maybe String
+    , dateOfDischarge2 : Maybe String
     }

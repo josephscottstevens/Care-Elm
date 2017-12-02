@@ -143,6 +143,16 @@ maybeToDateString maybeDateStr =
             Nothing
 
 
+maybeStringToInt : String -> Maybe Int
+maybeStringToInt str =
+    case String.toInt str of
+        Ok t ->
+            Just t
+
+        Err _ ->
+            Nothing
+
+
 getResponseError : String -> Maybe String
 getResponseError str =
     case decodeString (field "Error" int) str of

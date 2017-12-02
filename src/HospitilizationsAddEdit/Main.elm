@@ -30,6 +30,12 @@ port updateHospDateOfDischarge : (Maybe String -> msg) -> Sub msg
 port updateHospHospitalServiceType : (DropDownItem -> msg) -> Sub msg
 
 
+port updateAdmitDiagnosis : (String -> msg) -> Sub msg
+
+
+port updateDischargeDiagnosis : (String -> msg) -> Sub msg
+
+
 port updateHospDischargePhysician : (DropDownItem -> msg) -> Sub msg
 
 
@@ -45,9 +51,9 @@ port addHospNewFacility : Maybe String -> Cmd msg
 port addHospNewPhysician : Maybe String -> Cmd msg
 
 
-init : AddEditDataSource -> Maybe Int -> Cmd Msg
-init addEditDataSource hospitilizationId =
-    initHospitilizations (getAddEditMsg addEditDataSource)
+init : AddEditDataSource -> Maybe Int -> RecordAddNewInitData -> Cmd Msg
+init addEditDataSource hospitilizationId recordAddNewInitData =
+    initHospitilizations (getHospitilizationMsg addEditDataSource hospitilizationId recordAddNewInitData)
 
 
 subscriptions : Sub Msg
@@ -59,6 +65,8 @@ subscriptions =
         , updateHospFacility2 UpdateFacility2
         , updateHospDateOfDischarge UpdateDateOfDischarge
         , updateHospHospitalServiceType UpdateHospitalServiceType
+        , updateAdmitDiagnosis UpdateAdmitDiagnosis
+        , updateDischargeDiagnosis UpdateDischargeDiagnosis
         , updateHospDischargePhysician UpdateDischargePhysician
         , updateHospDateOfAdmission2 UpdateDateOfAdmission2
         , updateHospDateOfDischarge2 UpdateDateOfDischarge2
@@ -146,6 +154,12 @@ update msg model =
             UpdateChiefComplaint str ->
                 updateAddNew { model | chiefComplaint = str }
 
+            UpdateAdmitDiagnosis str ->
+                updateAddNew { model | admitDiagnosisId = maybeStringToInt str }
+
+            UpdateDischargeDiagnosis str ->
+                updateAddNew { model | dischargeDiagnosisId = maybeStringToInt str }
+
             UpdateDischargeRecommendations str ->
                 updateAddNew { model | dischargeRecommendations = str }
 
@@ -165,7 +179,7 @@ update msg model =
 formInputs : Model -> List ( String, RequiredType, InputControlType Msg )
 formInputs newRecord =
     [ ( "Patient Reported", Optional, CheckInput newRecord.patientReported UpdatePatientReported )
-    , ( "Facility", Required, DropInputWithButton newRecord.facilityId "FacilityId" AddNewFacility "Add New Facility" )
+    , ( "Facility Name", Required, DropInputWithButton newRecord.facilityId "FacilityId" AddNewFacility "Add New Facility" )
     , ( "Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId" UpdateDateOfAdmission )
     , ( "Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId" UpdateDateOfDischarge )
     , ( "Hospital Service Type", Required, DropInput newRecord.hospitalServiceTypeId "HospitalServiceTypeId" )
@@ -173,8 +187,8 @@ formInputs newRecord =
     , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
     , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
     , ( "Discharge Recommendations", Required, TextInput newRecord.dischargeRecommendations UpdateDischargeRecommendations )
-    , ( "Discharge Physician", Required, DropInputWithButton newRecord.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "New Provider" )
-    , ( "Secondary Facility Name", Required, DropInputWithButton newRecord.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
-    , ( "Secondary Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId2" UpdateDateOfAdmission2 )
-    , ( "Secondary Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId2" UpdateDateOfDischarge2 )
+    , ( "Discharge Physician", Optional, DropInputWithButton newRecord.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "New Provider" )
+    , ( "Secondary Facility Name", Optional, DropInputWithButton newRecord.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
+    , ( "Secondary Date of Admission", Optional, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId2" UpdateDateOfAdmission2 )
+    , ( "Secondary Date of Discharge", Optional, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId2" UpdateDateOfDischarge2 )
     ]

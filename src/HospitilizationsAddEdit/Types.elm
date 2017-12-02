@@ -17,6 +17,8 @@ type Msg
     | UpdateDateOfDischarge (Maybe String)
     | UpdateHospitalServiceType DropDownItem
     | UpdateChiefComplaint String
+    | UpdateAdmitDiagnosis String
+    | UpdateDischargeDiagnosis String
     | UpdateDischargeRecommendations String
     | UpdateDischargePhysician DropDownItem
     | UpdateFacility2 DropDownItem
@@ -37,6 +39,8 @@ type alias Model =
     , hospitalServiceTypeId : Maybe Int
     , hospitalServiceTypeText : String
     , chiefComplaint : String
+    , admitDiagnosisId : Maybe Int
+    , dischargeDiagnosisId : Maybe Int
     , dischargeRecommendations : String
     , dischargePhysicianId : Maybe Int
     , dischargePhysicianText : String
@@ -62,6 +66,8 @@ emptyModel patientId =
     , hospitalServiceTypeId = Nothing
     , hospitalServiceTypeText = ""
     , chiefComplaint = ""
+    , admitDiagnosisId = Nothing
+    , dischargeDiagnosisId = Nothing
     , dischargeRecommendations = ""
     , dischargePhysicianId = Nothing
     , dischargePhysicianText = ""
@@ -80,4 +86,30 @@ type alias InitHospitilizationsAddNew =
     , hospitalizationDischargePhysicians : List DropDownItem
     , hospitilizations : List DropDownItem
     , hospitilizationId : Maybe Int
+
+    -- for edit
+    , patientId : Int
+
+    -- , facilityText : String
+    , patientReported : Bool
+    , hospitalizationId : Maybe Int
+
+    -- , hospitalizationText : String
+    , dateOfAdmission : Maybe String
+    , dateOfDischarge : Maybe String
+    , hospitalServiceTypeId : Maybe Int
+
+    -- , hospitalServiceTypeText : String
+    , chiefComplaint : String
+    , admitDiagnosisId : Maybe Int
+    , dischargeDiagnosisId : Maybe Int
+    , dischargeRecommendations : String
+    , dischargePhysicianId : Maybe Int
+
+    -- , dischargePhysicianText : String
+    , facilityId2 : Maybe Int
+
+    -- , facilityText2 : String
+    , dateOfAdmission2 : Maybe String
+    , dateOfDischarge2 : Maybe String
     }

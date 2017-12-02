@@ -113,10 +113,16 @@ update msg model =
                 newState =
                     model.recordAddNewState
 
+                newHospState =
+                    model.hospitilizationsAddEditState
+
                 tt =
                     { newState | facilityId = t.facilityId }
+
+                ttt =
+                    { newHospState | facilityId = t.facilityId }
             in
-                { model | addEditDataSource = Just t, recordAddNewState = tt } ! []
+                { model | addEditDataSource = Just t, recordAddNewState = tt, hospitilizationsAddEditState = ttt } ! []
 
         AddEditDataSourceLoaded (Err httpError) ->
             { model | page = Error (toString httpError) } ! []
@@ -174,7 +180,16 @@ getNewPage model urlStr =
                 HospitilizationsAddEdit hospitilizationId ->
                     case model.addEditDataSource of
                         Just t ->
-                            [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t hospitilizationId) ]
+                            let
+                                newModel =
+                                    case hospitilizationId of
+                                        Just hospId ->
+                                            Hospitilizations.getExistingHospitilization hospId model.hospitalizationsState
+
+                                        Nothing ->
+                                            Debug.crash "no can do either"
+                            in
+                                [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t hospitilizationId newModel) ]
 
                         Nothing ->
                             [ displayErrorMessage "Cannot load HospitilizationsAddEdit without a datasource!" ]
@@ -183,6 +198,6 @@ getNewPage model urlStr =
                     []
 
                 Error t ->
-                    []
+                    [ displayErrorMessage t ]
     in
         { model | page = newPage } ! commands

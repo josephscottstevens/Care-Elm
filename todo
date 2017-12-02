@@ -8,11 +8,18 @@ QUESTIONS:
 	Perhaps an alternative to having inline edit grid mode... which doesn't add up to me, is a back button where new button was?
 	
 ===========================================================================================================
+HospitilizationsAddEdit init in main is hella confusing
+HospitalizationId == Id?
+
 HospitilizationsAddEdit
-	implement save
-	fix validation for dropdowns \ date
+	secondary dates aren't saving
+	How does Admit problem get saved?
+	crap... not clearing fields on add
+	populate edit fields
+	implement edit server side
 	verify required fields are correct
-	implement edit
+	quick test on validation (test4)
+	unbreak record -> hospitilizations save
 
 re-add _ for urls
 test records (full sweep)
@@ -23,6 +30,9 @@ fix reload in new urls
 get back button to work exactly right
 remove url parser lib, safe right?
 ports are turning into a hairball quick (updateFacility vs updateHospFacility) yuck
+Can I butcher the manage problems more by getting dropdown, then just getting the button later?
+can I put value back for the dropdowns and dates?
+can I make the names a bit more consistant? seems like everyone is calling everything what they like
 
 can i remove the value in html?  I never touch it
 Did I wind up using anything from the two routing libraries?
@@ -54,6 +64,7 @@ remove un-used fields in MVC list type
 refactor long else if filter in load, to case of instead of if else
 the grid config doesn't really need TaskId, a column could able to get it... but... without knowing the model?
 There is phone number validation, any other hidden validations?
+Perhaps hrefExtra doesn't really belong in grid
 
 REALLY LOW TODO:
 Would it make sense to load grid first, then fire second request to load all the dropdown info? easy enough right
