@@ -12,65 +12,25 @@ import Common.Routes exposing (navHospitilizations)
 import Ports exposing (setUnsavedChanges)
 
 
-port initHospitilizations : InitHospitilizationsAddNew -> Cmd msg
+port initHospitilizations : HospitilizationsInitData -> Cmd msg
 
 
-port updateHospFacility : (DropDownItem -> msg) -> Sub msg
-
-
-port updateHospFacility2 : (DropDownItem -> msg) -> Sub msg
-
-
-port updateHospDateOfAdmission : (Maybe String -> msg) -> Sub msg
-
-
-port updateHospDateOfDischarge : (Maybe String -> msg) -> Sub msg
-
-
-port updateHospHospitalServiceType : (DropDownItem -> msg) -> Sub msg
-
-
-port updateAdmitDiagnosis : (String -> msg) -> Sub msg
-
-
-port updateDischargeDiagnosis : (String -> msg) -> Sub msg
-
-
-port updateHospDischargePhysician : (DropDownItem -> msg) -> Sub msg
-
-
-port updateHospDateOfAdmission2 : (Maybe String -> msg) -> Sub msg
-
-
-port updateHospDateOfDischarge2 : (Maybe String -> msg) -> Sub msg
-
-
-port addHospNewFacility : Maybe String -> Cmd msg
-
-
-port addHospNewPhysician : Maybe String -> Cmd msg
+port updateHospitilizations : (HospitilizationsInitData -> msg) -> Sub msg
 
 
 init : Maybe AddEditDataSource -> Maybe HospitilizationsRow -> Cmd Msg
 init addEditDataSource hospitilizationsRow =
-    initHospitilizations (InitHospitilizationsAddNew addEditDataSource hospitilizationsRow)
+    case addEditDataSource of
+        Just t ->
+            initHospitilizations (getHospitilizationsInitData t hospitilizationsRow)
+
+        Nothing ->
+            displayErrorMessage "Cannot load Hospitilizations without a datasource!"
 
 
 subscriptions : Sub Msg
 subscriptions =
-    Sub.batch
-        [ updateHospFacility UpdateFacility
-        , updateHospDateOfAdmission UpdateDateOfAdmission
-        , updateHospDateOfDischarge UpdateDateOfDischarge
-        , updateHospFacility2 UpdateFacility2
-        , updateHospDateOfDischarge UpdateDateOfDischarge
-        , updateHospHospitalServiceType UpdateHospitalServiceType
-        , updateAdmitDiagnosis UpdateAdmitDiagnosis
-        , updateDischargeDiagnosis UpdateDischargeDiagnosis
-        , updateHospDischargePhysician UpdateDischargePhysician
-        , updateHospDateOfAdmission2 UpdateDateOfAdmission2
-        , updateHospDateOfDischarge2 UpdateDateOfDischarge2
-        ]
+    updateHospitilizations UpdateHospitilizationsInitData
 
 
 view : Model -> Html Msg
@@ -127,17 +87,8 @@ update msg model =
             Cancel ->
                 model ! [ setUnsavedChanges False, navHospitilizations ]
 
-            UpdateFacility dropDownItem ->
-                updateAddNew { model | facilityId = dropDownItem.id, facilityText = dropDownItem.name }
-
-            AddNewFacility ->
-                model ! [ addHospNewFacility Nothing ]
-
-            AddNewPhysician ->
-                model ! [ addHospNewPhysician Nothing ]
-
-            UpdateHospitilization dropDownItem ->
-                updateAddNew { model | hospitalizationId = dropDownItem.id, hospitalizationText = dropDownItem.name }
+            UpdateHospitilizationsInitData hospitilizationsInitData ->
+                { model | initData = hospitilizationsInitData } ! []
 
             UpdatePatientReported bool ->
                 updateAddNew { model | patientReported = bool }
@@ -148,26 +99,11 @@ update msg model =
             UpdateDateOfDischarge str ->
                 updateAddNew { model | dateOfDischarge = str }
 
-            UpdateHospitalServiceType dropDownItem ->
-                updateAddNew { model | hospitalServiceTypeId = dropDownItem.id, hospitalServiceTypeText = dropDownItem.name }
-
             UpdateChiefComplaint str ->
                 updateAddNew { model | chiefComplaint = str }
 
-            UpdateAdmitDiagnosis str ->
-                updateAddNew { model | admitDiagnosisId = maybeStringToInt str }
-
-            UpdateDischargeDiagnosis str ->
-                updateAddNew { model | dischargeDiagnosisId = maybeStringToInt str }
-
             UpdateDischargeRecommendations str ->
                 updateAddNew { model | dischargeRecommendations = str }
-
-            UpdateDischargePhysician dropDownItem ->
-                updateAddNew { model | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }
-
-            UpdateFacility2 dropDownItem ->
-                updateAddNew { model | facilityId2 = dropDownItem.id, facilityText2 = dropDownItem.name }
 
             UpdateDateOfAdmission2 str ->
                 updateAddNew { model | dateOfAdmission2 = str }
@@ -177,18 +113,18 @@ update msg model =
 
 
 formInputs : Model -> List ( String, RequiredType, InputControlType Msg )
-formInputs newRecord =
-    [ ( "Patient Reported", Optional, CheckInput newRecord.patientReported UpdatePatientReported )
-    , ( "Facility Name", Required, DropInputWithButton newRecord.facilityId "FacilityId" AddNewFacility "Add New Facility" )
-    , ( "Date of Admission", Required, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId" UpdateDateOfAdmission )
-    , ( "Date of Discharge", Required, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId" UpdateDateOfDischarge )
-    , ( "Hospital Service Type", Required, DropInput newRecord.hospitalServiceTypeId "HospitalServiceTypeId" )
-    , ( "Chief Complaint", Required, AreaInput newRecord.chiefComplaint UpdateChiefComplaint )
+formInputs model =
+    [ ( "Patient Reported", Optional, CheckInput model.patientReported UpdatePatientReported )
+    , ( "Facility Name", Required, DropInputWithButton model.initData.facilityId "FacilityId" "Add New Facility" )
+    , ( "Date of Admission", Required, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId" UpdateDateOfAdmission )
+    , ( "Date of Discharge", Required, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId" UpdateDateOfDischarge )
+    , ( "Hospital Service Type", Required, DropInput model.initData.hospitalServiceTypeId "HospitalServiceTypeId" )
+    , ( "Chief Complaint", Required, AreaInput model.chiefComplaint UpdateChiefComplaint )
     , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
     , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
-    , ( "Discharge Recommendations", Required, TextInput newRecord.dischargeRecommendations UpdateDischargeRecommendations )
-    , ( "Discharge Physician", Optional, DropInputWithButton newRecord.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "New Provider" )
-    , ( "Secondary Facility Name", Optional, DropInputWithButton newRecord.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
-    , ( "Secondary Date of Admission", Optional, DateInput (defaultString newRecord.dateOfAdmission) "DateOfAdmissionId2" UpdateDateOfAdmission2 )
-    , ( "Secondary Date of Discharge", Optional, DateInput (defaultString newRecord.dateOfDischarge) "DateOfDischargeId2" UpdateDateOfDischarge2 )
+    , ( "Discharge Recommendations", Required, TextInput model.dischargeRecommendations UpdateDischargeRecommendations )
+    , ( "Discharge Physician", Optional, DropInputWithButton model.initData.dischargePhysicianId "DischargePhysicianId" "New Provider" )
+    , ( "Secondary Facility Name", Optional, DropInputWithButton model.initData.facilityId2 "FacilityId2" "Add New Facility" )
+    , ( "Secondary Date of Admission", Optional, DateInput (defaultString model.initData.dateOfAdmission) "DateOfAdmissionId2" UpdateDateOfAdmission2 )
+    , ( "Secondary Date of Discharge", Optional, DateInput (defaultString model.initData.dateOfDischarge) "DateOfDischargeId2" UpdateDateOfDischarge2 )
     ]

@@ -4,27 +4,28 @@ import Json.Encode as Encode exposing (..)
 import Http
 import HospitilizationsAddEdit.Types exposing (..)
 import Common.Functions exposing (..)
+import Common.Types exposing (AddEditDataSource, HospitilizationsRow, HospitilizationsInitData)
 
 
 encodeRecord : Model -> Encode.Value
 encodeRecord newRecord =
     Encode.object
-        [ ( "Id", maybeVal Encode.int <| newRecord.id )
-        , ( "PatientId", Encode.int <| newRecord.patientId )
-        , ( "FacilityId", maybeVal Encode.int <| newRecord.facilityId )
+        [ ( "PatientId", Encode.int <| newRecord.patientId )
+        , ( "FacilityId", maybeVal Encode.int <| newRecord.initData.facilityId )
         , ( "PatientReported", Encode.bool <| newRecord.patientReported )
-        , ( "HospitalizationId", maybeVal Encode.int <| newRecord.hospitalizationId )
+
+        -- , ( "HospitalizationId", maybeVal Encode.int <| newRecord.hospitalizationId )
         , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfAdmission )
         , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfDischarge )
-        , ( "HospitalServiceTypeId", maybeVal Encode.int <| newRecord.hospitalServiceTypeId )
+        , ( "HospitalServiceTypeId", maybeVal Encode.int <| newRecord.initData.hospitalServiceTypeId )
         , ( "ChiefComplaint", Encode.string <| newRecord.chiefComplaint )
-        , ( "AdmitDiagnosisId", maybeVal Encode.int <| newRecord.admitDiagnosisId )
-        , ( "DischargeDiagnosisId", maybeVal Encode.int <| newRecord.dischargeDiagnosisId )
+        , ( "AdmitDiagnosisId", maybeVal Encode.int <| newRecord.initData.admitDiagnosisId )
+        , ( "DischargeDiagnosisId", maybeVal Encode.int <| newRecord.initData.dischargeDiagnosisId )
         , ( "DischargeRecommendations", Encode.string <| newRecord.dischargeRecommendations )
-        , ( "DischargePhysicianId", maybeVal Encode.int <| newRecord.dischargePhysicianId )
-        , ( "FacilityId2", maybeVal Encode.int <| newRecord.facilityId2 )
-        , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfAdmission2 )
-        , ( "DateOfDischarge2", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfDischarge2 )
+        , ( "DischargePhysicianId", maybeVal Encode.int <| newRecord.initData.dischargePhysicianId )
+        , ( "FacilityId2", maybeVal Encode.int <| newRecord.initData.facilityId2 )
+        , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfAdmission2 )
+        , ( "DateOfDischarge2", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfDischarge2 )
         ]
 
 
@@ -44,3 +45,31 @@ saveFormRequest model =
 saveForm : Model -> Cmd Msg
 saveForm model =
     Http.send SaveCompleted (saveFormRequest model)
+
+
+getHospitilizationsInitData : AddEditDataSource -> Maybe HospitilizationsRow -> HospitilizationsInitData
+getHospitilizationsInitData addEditDataSource maybeHospitilizationsRow =
+    let
+        hospitilizationsRow =
+            case maybeHospitilizationsRow of
+                Just t ->
+                    t
+
+                Nothing ->
+                    emptyHospitilizationRow
+    in
+        { facilities = addEditDataSource.facilities
+        , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
+        , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
+        , patientId = addEditDataSource.patientId
+        , facilityId = addEditDataSource.facilityId
+        , admitDiagnosisId = hospitilizationsRow.admitDiagnosisId
+        , dischargeDiagnosisId = hospitilizationsRow.dischargeDiagnosisId
+        , facilityId2 = hospitilizationsRow.facilityId2
+        , hospitalServiceTypeId = hospitilizationsRow.hospitalServiceTypeId
+        , dischargePhysicianId = hospitilizationsRow.dischargePhysicianId
+        , dateOfAdmission = hospitilizationsRow.dateOfAdmission
+        , dateOfDischarge = hospitilizationsRow.dateOfDischarge
+        , dateOfAdmission2 = hospitilizationsRow.dateOfAdmission2
+        , dateOfDischarge2 = hospitilizationsRow.dateOfDischarge2
+        }

@@ -8,44 +8,25 @@ type Msg
     = Save
     | SaveCompleted (Result Http.Error String)
     | Cancel
-    | UpdateFacility DropDownItem
-    | AddNewFacility
-    | AddNewPhysician
-    | UpdateHospitilization DropDownItem
+    | UpdateHospitilizationsInitData HospitilizationsInitData
     | UpdatePatientReported Bool
     | UpdateDateOfAdmission (Maybe String)
     | UpdateDateOfDischarge (Maybe String)
-    | UpdateHospitalServiceType DropDownItem
     | UpdateChiefComplaint String
-    | UpdateAdmitDiagnosis String
-    | UpdateDischargeDiagnosis String
     | UpdateDischargeRecommendations String
-    | UpdateDischargePhysician DropDownItem
-    | UpdateFacility2 DropDownItem
     | UpdateDateOfAdmission2 (Maybe String)
     | UpdateDateOfDischarge2 (Maybe String)
 
 
 type alias Model =
     { id : Maybe Int
+    , initData : HospitilizationsInitData
     , patientId : Int
-    , facilityId : Maybe Int
-    , facilityText : String
     , patientReported : Bool
-    , hospitalizationId : Maybe Int
-    , hospitalizationText : String
     , dateOfAdmission : Maybe String
     , dateOfDischarge : Maybe String
-    , hospitalServiceTypeId : Maybe Int
-    , hospitalServiceTypeText : String
     , chiefComplaint : String
-    , admitDiagnosisId : Maybe Int
-    , dischargeDiagnosisId : Maybe Int
     , dischargeRecommendations : String
-    , dischargePhysicianId : Maybe Int
-    , dischargePhysicianText : String
-    , facilityId2 : Maybe Int
-    , facilityText2 : String
     , dateOfAdmission2 : Maybe String
     , dateOfDischarge2 : Maybe String
     , showValidationErrors : Bool
@@ -56,30 +37,68 @@ emptyModel : Int -> Model
 emptyModel patientId =
     { id = Nothing
     , patientId = patientId
-    , facilityId = Nothing
-    , facilityText = ""
     , patientReported = False
-    , hospitalizationId = Nothing
-    , hospitalizationText = ""
+    , initData = emptyHospitilizationsInitData
     , dateOfAdmission = Nothing
     , dateOfDischarge = Nothing
-    , hospitalServiceTypeId = Nothing
-    , hospitalServiceTypeText = ""
     , chiefComplaint = ""
-    , admitDiagnosisId = Nothing
-    , dischargeDiagnosisId = Nothing
     , dischargeRecommendations = ""
-    , dischargePhysicianId = Nothing
-    , dischargePhysicianText = ""
-    , facilityId2 = Nothing
-    , facilityText2 = ""
     , dateOfAdmission2 = Nothing
     , dateOfDischarge2 = Nothing
     , showValidationErrors = False
     }
 
 
-type alias InitHospitilizationsAddNew =
+type alias HospitilizationsData =
     { addEditDataSource : Maybe AddEditDataSource
-    , hospitilizationsRow : Maybe HospitilizationsRow
+    , hospitilizationsRow : HospitilizationsRow
+    }
+
+
+emptyHospitilizationsInitData : HospitilizationsInitData
+emptyHospitilizationsInitData =
+    { facilities = []
+    , hospitilizationServiceTypes = []
+    , hospitalizationDischargePhysicians = []
+    , patientId = -47
+    , facilityId = Nothing
+    , admitDiagnosisId = Nothing
+    , dischargeDiagnosisId = Nothing
+    , facilityId2 = Nothing
+    , hospitalServiceTypeId = Nothing
+    , dischargePhysicianId = Nothing
+    , dateOfAdmission = Nothing
+    , dateOfDischarge = Nothing
+    , dateOfAdmission2 = Nothing
+    , dateOfDischarge2 = Nothing
+    }
+
+
+emptyHospitilizationRow : HospitilizationsRow
+emptyHospitilizationRow =
+    { id = 0
+    , facilityName = Nothing
+    , dateOfAdmission = Nothing
+    , admitProblem = Nothing
+    , dateOfDischarge = Nothing
+    , dischargeProblem = Nothing
+    , serviceType = Nothing
+    , fromTcm = False
+    , recordId = Nothing
+    , dropDownOpen = False
+
+    -- for edit
+    , patientId = 0
+    , facilityId = Nothing
+    , patientReported = False
+    , hospitalizationId = Nothing
+    , hospitalServiceTypeId = Nothing
+    , chiefComplaint = ""
+    , admitDiagnosisId = Nothing
+    , dischargeDiagnosisId = Nothing
+    , dischargeRecommendations = ""
+    , dischargePhysicianId = Nothing
+    , facilityId2 = Nothing
+    , dateOfAdmission2 = Nothing
+    , dateOfDischarge2 = Nothing
     }

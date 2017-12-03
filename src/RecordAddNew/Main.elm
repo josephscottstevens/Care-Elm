@@ -270,7 +270,8 @@ formInputs model recordType =
 
                             False ->
                                 [ ( "Patient Reported", Optional, CheckInput model.patientReported UpdatePatientReported )
-                                , ( "Facility", Required, DropInputWithButton model.facilityId "FacilityId" AddNewFacility "Add New Facility" )
+
+                                -- , ( "Facility", Required, DropInputWithButton model.facilityId "FacilityId" AddNewFacility "Add New Facility" )
                                 , ( "Category", Required, DropInput model.recordTypeId "CategoryId" )
                                 , ( "Date of Admission", Required, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId" UpdateDateOfAdmission )
                                 , ( "Date of Discharge", Required, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId" UpdateDateOfDischarge )
@@ -279,8 +280,9 @@ formInputs model recordType =
                                 , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
                                 , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
                                 , ( "Discharge Recommendations", Required, TextInput model.dischargeRecommendations UpdateDischargeRecommendations )
-                                , ( "Discharge Physician", Required, DropInputWithButton model.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "New Provider" )
-                                , ( "Secondary Facility Name", Required, DropInputWithButton model.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
+
+                                -- , ( "Discharge Physician", Required, DropInputWithButton model.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "New Provider" )
+                                -- , ( "Secondary Facility Name", Required, DropInputWithButton model.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
                                 , ( "Secondary Date of Admission", Required, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId2" UpdateDateOfAdmission )
                                 , ( "Secondary Date of Discharge", Required, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId2" UpdateDateOfDischarge )
                                 ]

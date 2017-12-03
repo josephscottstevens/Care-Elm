@@ -49,7 +49,7 @@ type InputControlType msg
     | AreaInput String (String -> msg)
     | KnockInput String
     | DropInput (Maybe Int) String
-    | DropInputWithButton (Maybe Int) String msg String
+    | DropInputWithButton (Maybe Int) String String
     | DateInput String String (Maybe String -> msg)
     | FileInput String
 
@@ -167,11 +167,11 @@ common ( labelText, requiredType, controlType ) =
             KnockInput syncfusionId ->
                 div [ id syncfusionId ] []
 
-            DropInputWithButton _ syncfusionId event buttonText ->
+            DropInputWithButton _ syncfusionId buttonText ->
                 div [ class "form-group" ]
                     [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
                     , div [ class controlWidth ] [ input [ type_ "text", id syncfusionId ] [] ]
-                    , div [ class labelWidth ] [ button [ class "btn btn-sm btn-default", onClick event ] [ text buttonText ] ]
+                    , div [ class labelWidth ] [ button [ class "btn btn-sm btn-default" ] [ text buttonText ] ]
                     ]
 
             DateInput displayValue syncfusionId event ->
