@@ -72,4 +72,8 @@ getHospitilizationsInitData addEditDataSource maybeHospitilizationsRow =
         , dateOfDischarge = hospitilizationsRow.dateOfDischarge
         , dateOfAdmission2 = hospitilizationsRow.dateOfAdmission2
         , dateOfDischarge2 = hospitilizationsRow.dateOfDischarge2
+
+        -- Our control
+        , chiefComplaint = hospitilizationsRow.chiefComplaint
+        , dischargeRecommendations = hospitilizationsRow.dischargeRecommendations
         }

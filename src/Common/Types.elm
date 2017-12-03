@@ -172,6 +172,10 @@ type alias HospitilizationsInitData =
     , dateOfDischarge : Maybe String
     , dateOfAdmission2 : Maybe String
     , dateOfDischarge2 : Maybe String
+
+    -- Our control
+    , chiefComplaint : String
+    , dischargeRecommendations : String
     }
 
 

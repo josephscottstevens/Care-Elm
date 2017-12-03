@@ -71,6 +71,10 @@ emptyHospitilizationsInitData =
     , dateOfDischarge = Nothing
     , dateOfAdmission2 = Nothing
     , dateOfDischarge2 = Nothing
+
+    -- Our control
+    , chiefComplaint = ""
+    , dischargeRecommendations = ""
     }
 
 
