@@ -18,6 +18,9 @@ type alias Model =
     { id : Maybe Int
     , initData : HospitilizationsInitData
     , patientId : Int
+    , patientReported : Bool
+    , chiefComplaint : String
+    , dischargeRecommendations : String
     , showValidationErrors : Bool
     }
 
@@ -27,6 +30,9 @@ emptyModel patientId =
     { id = Nothing
     , patientId = patientId
     , initData = emptyHospitilizationsInitData
+    , patientReported = False
+    , chiefComplaint = ""
+    , dischargeRecommendations = ""
     , showValidationErrors = False
     }
 
@@ -53,11 +59,6 @@ emptyHospitilizationsInitData =
     , dateOfDischarge = Nothing
     , dateOfAdmission2 = Nothing
     , dateOfDischarge2 = Nothing
-
-    -- Our control
-    , patientReported = False
-    , chiefComplaint = ""
-    , dischargeRecommendations = ""
     }
 
 

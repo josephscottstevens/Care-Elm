@@ -149,34 +149,34 @@ getNewPage model urlStr =
         newPage =
             Routes.getPage urlHash
 
-        cmds =
-            case newPage of
-                Billing ->
-                    [ displayErrorMessage "Billing Not implemented" ]
-
-                Records recordType ->
-                    [ Cmd.map RecordsMsg (Records.init recordType model.patientId) ]
-
-                RecordAddNew recordType ->
-                    [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.addEditDataSource recordType) ]
-
-                Hospitilizations ->
-                    [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
-
-                HospitilizationsAddEdit hospitilizationId ->
-                    let
-                        hospitilizationsRow =
-                            getHospitilizationsRow model.hospitalizationsState.hospitilizations hospitilizationId
-
-                        cmd =
-                            HospitilizationsAddEdit.init model.addEditDataSource hospitilizationsRow
-                    in
-                        [ Cmd.map HospitilizationsAddEditMsg cmd ]
-
-                None ->
-                    []
-
-                Error t ->
-                    [ displayErrorMessage t ]
+        newModel =
+            { model | page = newPage }
     in
-        { model | page = newPage } ! cmds
+        case newPage of
+            Billing ->
+                newModel ! [ displayErrorMessage "Billing Not implemented" ]
+
+            Records recordType ->
+                newModel ! [ Cmd.map RecordsMsg (Records.init recordType model.patientId) ]
+
+            RecordAddNew recordType ->
+                newModel ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.addEditDataSource recordType) ]
+
+            Hospitilizations ->
+                newModel ! [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
+
+            HospitilizationsAddEdit hospitilizationId ->
+                let
+                    hospitilizationsRow =
+                        getHospitilizationsRow model.hospitalizationsState.hospitilizations hospitilizationId
+
+                    ( t, cmd ) =
+                        HospitilizationsAddEdit.init model.addEditDataSource hospitilizationsRow model.patientId
+                in
+                    { newModel | hospitilizationsAddEditState = t } ! [ Cmd.map HospitilizationsAddEditMsg cmd ]
+
+            None ->
+                newModel ! []
+
+            Error t ->
+                newModel ! [ displayErrorMessage t ]

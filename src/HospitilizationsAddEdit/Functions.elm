@@ -12,16 +12,16 @@ encodeRecord newRecord =
     Encode.object
         [ ( "PatientId", Encode.int <| newRecord.patientId )
         , ( "FacilityId", maybeVal Encode.int <| newRecord.initData.facilityId )
-        , ( "PatientReported", Encode.bool <| newRecord.initData.patientReported )
+        , ( "PatientReported", Encode.bool <| newRecord.patientReported )
 
         -- , ( "HospitalizationId", maybeVal Encode.int <| newRecord.hospitalizationId )
         , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfAdmission )
         , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfDischarge )
         , ( "HospitalServiceTypeId", maybeVal Encode.int <| newRecord.initData.hospitalServiceTypeId )
-        , ( "ChiefComplaint", Encode.string <| newRecord.initData.chiefComplaint )
+        , ( "ChiefComplaint", Encode.string <| newRecord.chiefComplaint )
         , ( "AdmitDiagnosisId", maybeVal Encode.int <| newRecord.initData.admitDiagnosisId )
         , ( "DischargeDiagnosisId", maybeVal Encode.int <| newRecord.initData.dischargeDiagnosisId )
-        , ( "DischargeRecommendations", Encode.string <| newRecord.initData.dischargeRecommendations )
+        , ( "DischargeRecommendations", Encode.string <| newRecord.dischargeRecommendations )
         , ( "DischargePhysicianId", maybeVal Encode.int <| newRecord.initData.dischargePhysicianId )
         , ( "FacilityId2", maybeVal Encode.int <| newRecord.initData.facilityId2 )
         , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfAdmission2 )
@@ -72,9 +72,18 @@ getHospitilizationsInitData addEditDataSource maybeHospitilizationsRow =
         , dateOfDischarge = hospitilizationsRow.dateOfDischarge
         , dateOfAdmission2 = hospitilizationsRow.dateOfAdmission2
         , dateOfDischarge2 = hospitilizationsRow.dateOfDischarge2
-
-        -- Our control
-        , patientReported = hospitilizationsRow.patientReported
-        , chiefComplaint = hospitilizationsRow.chiefComplaint
-        , dischargeRecommendations = hospitilizationsRow.dischargeRecommendations
         }
+
+
+updateModel : Model -> Maybe HospitilizationsRow -> Model
+updateModel model maybeHospitilizationsRow =
+    case maybeHospitilizationsRow of
+        Just hospitilizationsRow ->
+            { model
+                | patientReported = hospitilizationsRow.patientReported
+                , chiefComplaint = hospitilizationsRow.chiefComplaint
+                , dischargeRecommendations = hospitilizationsRow.dischargeRecommendations
+            }
+
+        Nothing ->
+            model

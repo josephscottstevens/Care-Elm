@@ -18,14 +18,18 @@ port initHospitilizations : HospitilizationsInitData -> Cmd msg
 port updateHospitilizations : (HospitilizationsInitData -> msg) -> Sub msg
 
 
-init : Maybe AddEditDataSource -> Maybe HospitilizationsRow -> Cmd Msg
-init addEditDataSource hospitilizationsRow =
-    case addEditDataSource of
-        Just t ->
-            initHospitilizations (getHospitilizationsInitData t hospitilizationsRow)
+init : Maybe AddEditDataSource -> Maybe HospitilizationsRow -> Int -> ( Model, Cmd Msg )
+init addEditDataSource hospitilizationsRow patientId =
+    let
+        model =
+            emptyModel patientId
+    in
+        case addEditDataSource of
+            Just t ->
+                updateModel model hospitilizationsRow ! [ initHospitilizations (getHospitilizationsInitData t hospitilizationsRow) ]
 
-        Nothing ->
-            displayErrorMessage "Cannot load Hospitilizations without a datasource!"
+            Nothing ->
+                model ! [ displayErrorMessage "Cannot load Hospitilizations without a datasource!" ]
 
 
 subscriptions : Sub Msg
@@ -63,11 +67,8 @@ view model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
-        initData =
-            model.initData
-
         updateAddNew t =
-            { model | initData = t } ! [ setUnsavedChanges True ]
+            t ! [ setUnsavedChanges True ]
     in
         case msg of
             Save ->
@@ -94,26 +95,26 @@ update msg model =
                 { model | initData = hospitilizationsInitData } ! []
 
             UpdatePatientReported bool ->
-                updateAddNew { initData | patientReported = bool }
+                updateAddNew { model | patientReported = bool }
 
             UpdateChiefComplaint str ->
-                updateAddNew { initData | chiefComplaint = str }
+                updateAddNew { model | chiefComplaint = str }
 
             UpdateDischargeRecommendations str ->
-                updateAddNew { initData | dischargeRecommendations = str }
+                updateAddNew { model | dischargeRecommendations = str }
 
 
 formInputs : Model -> List ( String, RequiredType, InputControlType Msg )
 formInputs model =
-    [ ( "Patient Reported", Optional, CheckInput model.initData.patientReported UpdatePatientReported )
+    [ ( "Patient Reported", Optional, CheckInput model.patientReported UpdatePatientReported )
     , ( "Facility Name", Required, DropInputWithButton model.initData.facilityId "FacilityId" "Add New Facility" )
     , ( "Date of Admission", Required, DateInput (defaultString model.initData.dateOfAdmission) "DateOfAdmissionId" )
     , ( "Date of Discharge", Required, DateInput (defaultString model.initData.dateOfDischarge) "DateOfDischargeId" )
     , ( "Hospital Service Type", Required, DropInput model.initData.hospitalServiceTypeId "HospitalServiceTypeId" )
-    , ( "Chief Complaint", Required, AreaInput model.initData.chiefComplaint UpdateChiefComplaint )
+    , ( "Chief Complaint", Required, AreaInput model.chiefComplaint UpdateChiefComplaint )
     , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
     , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
-    , ( "Discharge Recommendations", Required, TextInput model.initData.dischargeRecommendations UpdateDischargeRecommendations )
+    , ( "Discharge Recommendations", Required, TextInput model.dischargeRecommendations UpdateDischargeRecommendations )
     , ( "Discharge Physician", Optional, DropInputWithButton model.initData.dischargePhysicianId "DischargePhysicianId" "New Provider" )
     , ( "Secondary Facility Name", Optional, DropInputWithButton model.initData.facilityId2 "FacilityId2" "Add New Facility" )
     , ( "Secondary Date of Admission", Optional, DateInput (defaultString model.initData.dateOfAdmission) "DateOfAdmissionId2" )
