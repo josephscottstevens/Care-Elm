@@ -43,7 +43,8 @@ type alias HospitilizationsData =
 
 emptyHospitilizationsInitData : HospitilizationsInitData
 emptyHospitilizationsInitData =
-    { facilities = []
+    { id = Nothing
+    , facilities = []
     , hospitilizationServiceTypes = []
     , hospitalizationDischargePhysicians = []
     , facilityId = Nothing
@@ -76,7 +77,6 @@ emptyHospitilizationRow =
     , patientId = 0
     , facilityId = Nothing
     , patientReported = False
-    , hospitalizationId = Nothing
     , hospitalServiceTypeId = Nothing
     , chiefComplaint = ""
     , admitDiagnosisId = Nothing

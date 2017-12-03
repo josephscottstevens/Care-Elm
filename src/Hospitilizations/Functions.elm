@@ -28,7 +28,6 @@ decodeRecordRow =
         |> Pipeline.required "PatientId" Decode.int
         |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
         |> Pipeline.required "PatientReported" Decode.bool
-        |> Pipeline.required "HospitalizationId" (Decode.maybe Decode.int)
         |> Pipeline.required "HospitalServiceTypeId" (Decode.maybe Decode.int)
         |> Pipeline.required "ChiefComplaint" Decode.string
         |> Pipeline.required "AdmitDiagnosisId" (Decode.maybe Decode.int)

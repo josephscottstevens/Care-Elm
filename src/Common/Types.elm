@@ -158,7 +158,8 @@ type alias RecordAddNewInitData =
 
 
 type alias HospitilizationsInitData =
-    { facilities : List DropDownItem
+    { id : Maybe Int
+    , facilities : List DropDownItem
     , hospitilizationServiceTypes : List DropDownItem
     , hospitalizationDischargePhysicians : List DropDownItem
     , facilityId : Maybe Int
@@ -190,7 +191,6 @@ type alias HospitilizationsRow =
     , patientId : Int
     , facilityId : Maybe Int
     , patientReported : Bool
-    , hospitalizationId : Maybe Int
     , hospitalServiceTypeId : Maybe Int
     , chiefComplaint : String
     , admitDiagnosisId : Maybe Int

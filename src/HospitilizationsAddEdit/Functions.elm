@@ -10,11 +10,10 @@ import Common.Types exposing (AddEditDataSource, HospitilizationsRow, Hospitiliz
 encodeRecord : Model -> Encode.Value
 encodeRecord newRecord =
     Encode.object
-        [ ( "PatientId", Encode.int <| newRecord.patientId )
+        [ ( "Id", maybeVal Encode.int <| newRecord.initData.id )
+        , ( "PatientId", Encode.int <| newRecord.patientId )
         , ( "FacilityId", maybeVal Encode.int <| newRecord.initData.facilityId )
         , ( "PatientReported", Encode.bool <| newRecord.patientReported )
-
-        -- , ( "HospitalizationId", maybeVal Encode.int <| newRecord.hospitalizationId )
         , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfAdmission )
         , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfDischarge )
         , ( "HospitalServiceTypeId", maybeVal Encode.int <| newRecord.initData.hospitalServiceTypeId )
@@ -51,14 +50,10 @@ getHospitilizationsInitData : AddEditDataSource -> Maybe HospitilizationsRow -> 
 getHospitilizationsInitData addEditDataSource maybeHospitilizationsRow =
     let
         hospitilizationsRow =
-            case maybeHospitilizationsRow of
-                Just t ->
-                    t
-
-                Nothing ->
-                    emptyHospitilizationRow
+            Maybe.withDefault emptyHospitilizationRow maybeHospitilizationsRow
     in
-        { facilities = addEditDataSource.facilities
+        { id = Just hospitilizationsRow.id
+        , facilities = addEditDataSource.facilities
         , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
         , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
         , facilityId = addEditDataSource.facilityId

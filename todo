@@ -8,46 +8,27 @@ QUESTIONS:
 	Perhaps an alternative to having inline edit grid mode... which doesn't add up to me, is a back button where new button was?
 	
 ===========================================================================================================
-
-Changing between records  ( on Records -> hospitilizations) seems broken
-
-clean up fields
-	In Filters... recordId vs id?
-	HospitalizationId == Id?
+	in tasks... there is a another hospitilizations????
+===========================================================================================================
 	
-Clean up un-used fields (in models)
-Perhaps try to connect hospitilizations into the other one
-common ports are fine, but not everything should go there
-Discharge Recommendations aren't saving.. or aren't loading on edit
-not clearing fields on add
-implement edit server side
-verify required fields are correct
+Changing between records  ( on Records -> hospitilizations) seems broken
 quick test on validation (test4)
 unbreak records -> hospitilizations save
-hospitilizations getLoadedState is pretty silly
-Change all import \ export to be explicit
-Move ports file to Common
-trim down ports (find out which ones are un-used)
-
 re-add _ for urls
 test records (full sweep)
-
-start updating history bar
-
-fix reload in new urls
-get back button to work exactly right
-can I make the names a bit more consistant? seems like everyone is calling everything what they like
-	
-perhaps, it would be better to just remove displayValue, I mean... it's not like I am changing what the user is typing... 
-Why is just showing up?
-Nothing in HospitilizationsAddEdit is being populated if existing
-
-in tasks... there is a another hospitilizations????
+test back button some more	
 Fix are you sure you want to leave
 
-
 LOW TODO:
-I can optionally listen to DropDownToggle right?
+Move ports file to Common
+trim down ports (find out which ones are un-used)
+Change record ports over to the single port pair
+common ports are fine, but not everything should go there
+Perhaps try to connect hospitilizations into the other one
+Change all import \ export to be explicit
+clean up Filters... recordId vs id?
+remove HospitalizationId server side
+start updating history bar
 Can I remove some stuff? Like am I really doing the whole dropdown (in elm Model) thing anymore?
 Cleanup double select statement in controller for grid source
 Change Model to Types ( the file)
@@ -59,8 +40,11 @@ the grid config doesn't really need TaskId, a column could able to get it... but
 There is phone number validation, any other hidden validations?
 Perhaps hrefExtra doesn't really belong in grid
 how to clear sort?
+Clean up un-used fields (in models)
 
 REALLY LOW TODO:
+fix reload in new urls
+I can optionally listen to DropDownToggle right?
 Would it make sense to load grid first, then fire second request to load all the dropdown info? easy enough right
 if I think it is worth any performance boost, I don't need to return userDropDown or taskDropdown unless I am on recorcTypeId of 10
 It would be nice to have the Call recordings grid refresh after task edit popup closes.
