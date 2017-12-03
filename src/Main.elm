@@ -107,11 +107,7 @@ update msg model =
                 { model | hospitilizationsAddEditState = newModel } ! [ Cmd.map HospitilizationsAddEditMsg pageCmd ]
 
         AddEditDataSourceLoaded (Ok t) ->
-            let
-                newState =
-                    model.recordAddNewState
-            in
-                { model | addEditDataSource = Just t, recordAddNewState = { newState | facilityId = t.facilityId } } ! []
+            { model | addEditDataSource = Just t } ! []
 
         AddEditDataSourceLoaded (Err httpError) ->
             { model | page = Error (toString httpError) } ! []
@@ -154,7 +150,7 @@ getNewPage model urlStr =
             RecordAddNew recordType ->
                 let
                     ( t, cmd ) =
-                        RecordAddNew.init model.recordAddNewState model.addEditDataSource recordType
+                        RecordAddNew.init model.addEditDataSource recordType
                 in
                     { newModel | recordAddNewState = t } ! [ Cmd.map RecordAddNewMsg cmd ]
 

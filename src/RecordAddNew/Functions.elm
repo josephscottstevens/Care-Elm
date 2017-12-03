@@ -34,9 +34,13 @@ encodeRecord newRecord =
         , ( "FacilityId2", maybeVal Encode.int <| newRecord.facilityId2 )
         , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfAdmission )
         , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfDischarge )
+        , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfAdmission2 )
+        , ( "DateOfDischarge2", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfDischarge2 )
         , ( "HospitalServiceTypeId", maybeVal Encode.int <| newRecord.hospitalServiceTypeId )
         , ( "DischargeRecommendations", Encode.string <| newRecord.dischargeRecommendations )
         , ( "DischargePhysicianId", maybeVal Encode.int <| newRecord.dischargePhysicianId )
+        , ( "AdmitDiagnosisId", maybeVal Encode.int <| newRecord.admitDiagnosisId )
+        , ( "DischargeDiagnosisId", maybeVal Encode.int <| newRecord.dischargeDiagnosisId )
         ]
 
 

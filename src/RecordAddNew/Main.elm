@@ -27,7 +27,19 @@ port updateDateOfAdmission : (Maybe String -> msg) -> Sub msg
 port updateDateOfDischarge : (Maybe String -> msg) -> Sub msg
 
 
+port updateDateOfAdmission2 : (Maybe String -> msg) -> Sub msg
+
+
+port updateDateOfDischarge2 : (Maybe String -> msg) -> Sub msg
+
+
 port updateHospitalServiceType : (DropDownItem -> msg) -> Sub msg
+
+
+port updateAdmitDiagnosis : (Maybe Int -> msg) -> Sub msg
+
+
+port updateDischargeDiagnosis : (Maybe Int -> msg) -> Sub msg
 
 
 port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
@@ -45,13 +57,24 @@ port resetUpdate : Maybe Int -> Cmd msg
 port resetUpdateComplete : (Maybe Int -> msg) -> Sub msg
 
 
-init : Model -> Maybe AddEditDataSource -> RecordType -> ( Model, Cmd Msg )
-init model addEditDataSource recordType =
-    let
-        cmd =
-            initRecords (getAddEditMsg addEditDataSource (getId recordType) False False)
-    in
-        { model | addEditDataSource = addEditDataSource, recordType = recordType, recordTypeId = getId recordType } ! [ cmd ]
+init : Maybe AddEditDataSource -> RecordType -> ( Model, Cmd Msg )
+init addEditDataSource recordType =
+    case addEditDataSource of
+        Just t ->
+            let
+                model =
+                    emptyModel t.patientId
+            in
+                { model
+                    | addEditDataSource = addEditDataSource
+                    , recordType = recordType
+                    , recordTypeId = getId recordType
+                    , facilityId = t.facilityId
+                }
+                    ! [ initRecords (getAddEditMsg addEditDataSource (getId recordType) False False) ]
+
+        Nothing ->
+            emptyModel -22 ! [ displayErrorMessage "Cannot load RecordType Addnew without datasource!" ]
 
 
 subscriptions : Sub Msg
@@ -74,7 +97,11 @@ subscriptions =
         , updateDateOfAdmission UpdateDateOfAdmission
         , updateDateOfDischarge UpdateDateOfDischarge
         , updateHospitalServiceType UpdateHospitalServiceType
+        , updateAdmitDiagnosis UpdateAdmitDiagnosis
+        , updateDischargeDiagnosis UpdateDischargeDiagnosis
         , updateDischargePhysician UpdateDischargePhysician
+        , updateDateOfAdmission2 UpdateDateOfAdmission2
+        , updateDateOfDischarge2 UpdateDateOfDischarge2
         ]
 
 
@@ -230,8 +257,20 @@ update msg model =
             UpdateDateOfDischarge str ->
                 updateAddNew { model | dateOfDischarge = str }
 
+            UpdateDateOfAdmission2 str ->
+                updateAddNew { model | dateOfAdmission2 = str }
+
+            UpdateDateOfDischarge2 str ->
+                updateAddNew { model | dateOfDischarge2 = str }
+
             UpdateHospitalServiceType dropDownItem ->
                 updateAddNew { model | hospitalServiceTypeId = dropDownItem.id, hospitalServiceTypeText = dropDownItem.name }
+
+            UpdateAdmitDiagnosis admitDiagnosisId ->
+                updateAddNew { model | admitDiagnosisId = admitDiagnosisId }
+
+            UpdateDischargeDiagnosis dischargeDiagnosisId ->
+                updateAddNew { model | dischargeDiagnosisId = dischargeDiagnosisId }
 
             UpdateDischargeRecommendations str ->
                 updateAddNew { model | dischargeRecommendations = str }
@@ -317,6 +356,7 @@ formInputs model recordType =
                                 , ( "Secondary Facility Name", Required, DropInputWithButton model.facilityId2 "FacilityId2" "Add New Facility" )
                                 , ( "Secondary Date of Admission", Required, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId2" )
                                 , ( "Secondary Date of Discharge", Required, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId2" )
+                                , ( "Upload Record File", Required, FileInput model.fileName )
                                 ]
 
                 CallRecordings ->

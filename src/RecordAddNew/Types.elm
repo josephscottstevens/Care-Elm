@@ -34,7 +34,11 @@ type Msg
     | UpdateFacility2 DropDownItem
     | UpdateDateOfAdmission (Maybe String)
     | UpdateDateOfDischarge (Maybe String)
+    | UpdateDateOfAdmission2 (Maybe String)
+    | UpdateDateOfDischarge2 (Maybe String)
     | UpdateHospitalServiceType DropDownItem
+    | UpdateAdmitDiagnosis (Maybe Int)
+    | UpdateDischargeDiagnosis (Maybe Int)
     | UpdateDischargeRecommendations String
     | UpdateDischargePhysician DropDownItem
 
@@ -81,8 +85,12 @@ type alias Model =
     , facilityText2 : String
     , dateOfAdmission : Maybe String
     , dateOfDischarge : Maybe String
+    , dateOfAdmission2 : Maybe String
+    , dateOfDischarge2 : Maybe String
     , hospitalServiceTypeId : Maybe Int
     , hospitalServiceTypeText : String
+    , admitDiagnosisId : Maybe Int
+    , dischargeDiagnosisId : Maybe Int
     , dischargeRecommendations : String
     , dischargePhysicianId : Maybe Int
     , dischargePhysicianText : String
@@ -127,8 +135,12 @@ emptyModel patientId =
     , facilityText2 = ""
     , dateOfAdmission = Nothing
     , dateOfDischarge = Nothing
+    , dateOfAdmission2 = Nothing
+    , dateOfDischarge2 = Nothing
     , hospitalServiceTypeId = Nothing
     , hospitalServiceTypeText = ""
+    , admitDiagnosisId = Nothing
+    , dischargeDiagnosisId = Nothing
     , dischargeRecommendations = ""
     , dischargePhysicianId = Nothing
     , dischargePhysicianText = ""

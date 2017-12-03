@@ -10,9 +10,18 @@ QUESTIONS:
 ===========================================================================================================
 	in tasks... there is a another hospitilizations????
 ===========================================================================================================
-test saving
+Add
+	DateOfAdmission2
+	DateOfDischarge2
+	AdmitDiagnosisId
+	DischargeDiagnosisId
+
+	to addedit records hospitilizations model ... weird... seems like no good way to save most?
+	
+	
 test hospitilizations update\edit on records
 test callrecordings add on records
+scroll to top when displaying validation errors
 
 does hospitilizations in records have a facility dropdown?
 
