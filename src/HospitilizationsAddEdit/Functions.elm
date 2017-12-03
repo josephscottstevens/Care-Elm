@@ -61,7 +61,6 @@ getHospitilizationsInitData addEditDataSource maybeHospitilizationsRow =
         { facilities = addEditDataSource.facilities
         , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
         , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
-        , patientId = addEditDataSource.patientId
         , facilityId = addEditDataSource.facilityId
         , admitDiagnosisId = hospitilizationsRow.admitDiagnosisId
         , dischargeDiagnosisId = hospitilizationsRow.dischargeDiagnosisId

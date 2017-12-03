@@ -48,7 +48,6 @@ emptyHospitilizationsInitData =
     { facilities = []
     , hospitilizationServiceTypes = []
     , hospitalizationDischargePhysicians = []
-    , patientId = -47
     , facilityId = Nothing
     , admitDiagnosisId = Nothing
     , dischargeDiagnosisId = Nothing

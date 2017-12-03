@@ -161,7 +161,6 @@ type alias HospitilizationsInitData =
     { facilities : List DropDownItem
     , hospitilizationServiceTypes : List DropDownItem
     , hospitalizationDischargePhysicians : List DropDownItem
-    , patientId : Int
     , facilityId : Maybe Int
     , admitDiagnosisId : Maybe Int
     , dischargeDiagnosisId : Maybe Int
