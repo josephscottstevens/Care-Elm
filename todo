@@ -10,11 +10,13 @@ QUESTIONS:
 ===========================================================================================================
 	in tasks... there is a another hospitilizations????
 ===========================================================================================================
-	
-resetUpdate looks dead 
-is presetPageComplete dead?
+test saving
+test hospitilizations update\edit on records
+test callrecordings add on records
 
-Changing between records  ( on Records -> hospitilizations) seems broken
+test cross update from hospitilizations
+ResetUpdate is for editing of existing hospitilizations, test
+
 quick test on validation (test4)
 unbreak records -> hospitilizations save
 re-add _ for urls

@@ -39,13 +39,19 @@ port presetPage : Maybe Int -> Cmd msg
 port presetPageComplete : (Maybe Int -> msg) -> Sub msg
 
 
+port resetUpdate : Maybe Int -> Cmd msg
+
+
+port resetUpdateComplete : (Maybe Int -> msg) -> Sub msg
+
+
 init : Model -> Maybe AddEditDataSource -> RecordType -> ( Model, Cmd Msg )
 init model addEditDataSource recordType =
     let
         cmd =
             initRecords (getAddEditMsg addEditDataSource (getId recordType) False False)
     in
-        { model | addEditDataSource = addEditDataSource, recordType = recordType } ! [ cmd ]
+        { model | addEditDataSource = addEditDataSource, recordType = recordType, recordTypeId = getId recordType } ! [ cmd ]
 
 
 

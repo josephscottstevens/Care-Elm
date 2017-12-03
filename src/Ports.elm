@@ -9,9 +9,6 @@ port sendMenuMessage : MenuMessage -> Cmd msg
 port isApp : (String -> msg) -> Sub msg
 
 
-port resetUpdate : Maybe Int -> Cmd msg
-
-
 port toggleConsent : Bool -> Cmd msg
 
 
@@ -34,9 +31,6 @@ port setUnsavedChanges : Bool -> Cmd msg
 
 
 port loadDataSourceComplete : (AddEditDataSource -> msg) -> Sub msg
-
-
-port resetUpdateComplete : (Maybe Int -> msg) -> Sub msg
 
 
 port updateFacility : (DropDownItem -> msg) -> Sub msg
