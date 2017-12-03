@@ -10,6 +10,8 @@ type Msg
     | Save RecordType
     | SaveCompleted (Result Http.Error String)
     | Cancel RecordType
+    | PresetPageComplete (Maybe Int)
+    | SetPageComplete (Maybe Int)
     | UpdateTitle String
     | UpdateRecordType DropDownItem
     | UpdateSpecialty String
@@ -38,8 +40,16 @@ type Msg
     | UpdateDischargePhysician DropDownItem
 
 
+type State
+    = Edit
+    | Limbo
+
+
 type alias Model =
-    { recordId : Int
+    { state : State
+    , addEditDataSource : Maybe AddEditDataSource
+    , recordType : RecordType
+    , recordId : Int
     , title : String
     , patientId : Int
     , recordTypeId : Maybe Int
@@ -82,7 +92,10 @@ type alias Model =
 
 emptyModel : Int -> Model
 emptyModel patientId =
-    { recordId = 0
+    { state = Edit
+    , addEditDataSource = Nothing
+    , recordType = PrimaryCare
+    , recordId = 0
     , title = ""
     , patientId = patientId
     , recordTypeId = Nothing

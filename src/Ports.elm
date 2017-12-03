@@ -12,15 +12,6 @@ port isApp : (String -> msg) -> Sub msg
 port resetUpdate : Maybe Int -> Cmd msg
 
 
-port presetPage : String -> Cmd msg
-
-
-port presetPageComplete : (String -> msg) -> Sub msg
-
-
-port setPageComplete : (String -> msg) -> Sub msg
-
-
 port toggleConsent : Bool -> Cmd msg
 
 

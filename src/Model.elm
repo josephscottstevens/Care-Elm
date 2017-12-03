@@ -31,8 +31,6 @@ type Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | HospitilizationsMsg Hospitilizations.Msg
     | HospitilizationsAddEditMsg HospitilizationsAddEdit.Msg
-    | PresetPageComplete String
-    | SetPageComplete String
     | UrlChange Navigation.Location
     | KnockoutUrlChange String
 

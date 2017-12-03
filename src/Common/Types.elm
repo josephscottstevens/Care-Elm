@@ -90,6 +90,48 @@ getDesc recordType =
             "Miscellaneous Records"
 
 
+getRecordTypeById : Maybe Int -> Maybe RecordType
+getRecordTypeById maybeInt =
+    case maybeInt of
+        Just int ->
+            case int of
+                1 ->
+                    Just PrimaryCare
+
+                2 ->
+                    Just Specialty
+
+                3 ->
+                    Just Labs
+
+                4 ->
+                    Just Radiology
+
+                9 ->
+                    Just Hospitalizations
+
+                6 ->
+                    Just Legal
+
+                10 ->
+                    Just CallRecordings
+
+                11 ->
+                    Just PreviousHistories
+
+                12 ->
+                    Just Enrollment
+
+                5 ->
+                    Just Misc
+
+                _ ->
+                    Nothing
+
+        Nothing ->
+            Nothing
+
+
 getId : RecordType -> Maybe Int
 getId recordType =
     case recordType of

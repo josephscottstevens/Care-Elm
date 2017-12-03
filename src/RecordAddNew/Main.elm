@@ -8,7 +8,7 @@ import Html.Events exposing (onClick)
 import Common.Html exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
-import Common.Routes exposing (navRecords)
+import Common.Routes exposing (navRecords, navRecordAddNew)
 import Ports exposing (..)
 
 
@@ -33,15 +33,39 @@ port updateHospitalServiceType : (DropDownItem -> msg) -> Sub msg
 port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
 
 
-init : Maybe AddEditDataSource -> RecordType -> Cmd Msg
-init addEditDataSource recordType =
-    initRecords (getAddEditMsg addEditDataSource (getId recordType) False False)
+port setPage : Maybe Int -> Cmd msg
+
+
+port setPageComplete : (Maybe Int -> msg) -> Sub msg
+
+
+port presetPage : Maybe Int -> Cmd msg
+
+
+port presetPageComplete : (Maybe Int -> msg) -> Sub msg
+
+
+init : Model -> Maybe AddEditDataSource -> RecordType -> ( Model, Cmd Msg )
+init model addEditDataSource recordType =
+    let
+        cmd =
+            initRecords (getAddEditMsg addEditDataSource (getId recordType) False False)
+    in
+        { model | addEditDataSource = addEditDataSource, recordType = recordType } ! [ cmd ]
+
+
+
+-- TODO: cleanup
+-- Ignoring updating for now
+-- { model | state = Edit } ! [ cmd ]
 
 
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
-        [ updateFacility UpdateFacility
+        [ setPageComplete SetPageComplete
+        , presetPageComplete PresetPageComplete
+        , updateFacility UpdateFacility
         , updateCategory UpdateRecordType
         , updateTimeVisit UpdateTimeVisit
         , updateTimeAcc UpdateTimeAcc
@@ -63,30 +87,35 @@ subscriptions =
 
 view : Model -> RecordType -> Html Msg
 view model recordType =
-    let
-        errors =
-            getValidationErrors (formInputs model recordType)
+    case model.state of
+        Edit ->
+            let
+                errors =
+                    getValidationErrors (formInputs model recordType)
 
-        validationErrorsDiv =
-            if model.showValidationErrors == True && List.length errors > 0 then
-                div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
-            else
-                div [] []
+                validationErrorsDiv =
+                    if model.showValidationErrors == True && List.length errors > 0 then
+                        div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
+                    else
+                        div [] []
 
-        saveBtnClass =
-            class "btn btn-sm btn-success margin-left-5 pull-right"
-    in
-        div [ class "form-horizontal" ]
-            [ h4 [] [ text (getDesc recordType) ]
-            , validationErrorsDiv
-            , makeControls (formInputs model recordType)
-            , div [ class "form-group" ]
-                [ div [ class fullWidth ]
-                    [ button [ type_ "button", id "Save", value "Addmodel", onClick (Save recordType), saveBtnClass ] [ text "Save" ]
-                    , button [ type_ "button", onClick (Cancel recordType), class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                saveBtnClass =
+                    class "btn btn-sm btn-success margin-left-5 pull-right"
+            in
+                div [ class "form-horizontal" ]
+                    [ h4 [] [ text (getDesc recordType) ]
+                    , validationErrorsDiv
+                    , makeControls (formInputs model recordType)
+                    , div [ class "form-group" ]
+                        [ div [ class fullWidth ]
+                            [ button [ type_ "button", id "Save", value "Addmodel", onClick (Save recordType), saveBtnClass ] [ text "Save" ]
+                            , button [ type_ "button", onClick (Cancel recordType), class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                            ]
+                        ]
                     ]
-                ]
-            ]
+
+        Limbo ->
+            div [] []
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -120,14 +149,29 @@ update msg model =
                 (model ! [ displayErrorMessage (toString t) ])
 
             Cancel recordType ->
-                (model ! [ setUnsavedChanges False, navRecords recordType ])
+                model ! [ setUnsavedChanges False, navRecords recordType ]
+
+            PresetPageComplete recordTypeId ->
+                { model | state = Edit } ! [ setPage recordTypeId ]
+
+            SetPageComplete recordTypeId ->
+                model ! [ initRecords (getAddEditMsg model.addEditDataSource recordTypeId True False) ]
 
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then
                     model ! []
                 else
-                    { model | recordTypeId = dropDownItem.id }
-                        ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
+                    case getRecordTypeById dropDownItem.id of
+                        Just t ->
+                            { model
+                                | recordTypeId = dropDownItem.id
+                                , recordType = t
+                                , state = Limbo
+                            }
+                                ! [ presetPage dropDownItem.id, setLoadingStatus True ]
+
+                        Nothing ->
+                            model ! [ displayErrorMessage ("Cannot load invalid record type: " ++ toString dropDownItem.id) ]
 
             UpdateTitle str ->
                 updateAddNew { model | title = str }

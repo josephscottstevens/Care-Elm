@@ -21,8 +21,6 @@ subscriptions _ =
         , Sub.map RecordAddNewMsg RecordAddNew.subscriptions
         , Sub.map HospitilizationsMsg Hospitilizations.subscriptions
         , Sub.map HospitilizationsAddEditMsg HospitilizationsAddEdit.subscriptions
-        , presetPageComplete PresetPageComplete
-        , setPageComplete SetPageComplete
         , isApp KnockoutUrlChange
         ]
 
@@ -118,12 +116,6 @@ update msg model =
         AddEditDataSourceLoaded (Err httpError) ->
             { model | page = Error (toString httpError) } ! []
 
-        PresetPageComplete pageStr ->
-            model ! []
-
-        SetPageComplete _ ->
-            model ! [ setLoadingStatus False ]
-
         UrlChange url ->
             let
                 newModel =
@@ -160,7 +152,11 @@ getNewPage model urlStr =
                 newModel ! [ Cmd.map RecordsMsg (Records.init recordType model.patientId) ]
 
             RecordAddNew recordType ->
-                newModel ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.addEditDataSource recordType) ]
+                let
+                    ( t, cmd ) =
+                        RecordAddNew.init model.recordAddNewState model.addEditDataSource recordType
+                in
+                    { newModel | recordAddNewState = t } ! [ Cmd.map RecordAddNewMsg cmd ]
 
             Hospitilizations ->
                 newModel ! [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
