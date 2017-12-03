@@ -54,12 +54,6 @@ init model addEditDataSource recordType =
         { model | addEditDataSource = addEditDataSource, recordType = recordType, recordTypeId = getId recordType } ! [ cmd ]
 
 
-
--- TODO: cleanup
--- Ignoring updating for now
--- { model | state = Edit } ! [ cmd ]
-
-
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
@@ -310,8 +304,7 @@ formInputs model recordType =
 
                             False ->
                                 [ ( "Patient Reported", Optional, CheckInput model.patientReported UpdatePatientReported )
-
-                                -- , ( "Facility", Required, DropInputWithButton model.facilityId "FacilityId" AddNewFacility "Add New Facility" )
+                                , ( "Facility", Required, DropInputWithButton model.facilityId "FacilityId" "Add New Facility" )
                                 , ( "Category", Required, DropInput model.recordTypeId "CategoryId" )
                                 , ( "Date of Admission", Required, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId" )
                                 , ( "Date of Discharge", Required, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId" )
@@ -320,9 +313,8 @@ formInputs model recordType =
                                 , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
                                 , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
                                 , ( "Discharge Recommendations", Required, TextInput model.dischargeRecommendations UpdateDischargeRecommendations )
-
-                                -- , ( "Discharge Physician", Required, DropInputWithButton model.dischargePhysicianId "DischargePhysicianId" AddNewPhysician "New Provider" )
-                                -- , ( "Secondary Facility Name", Required, DropInputWithButton model.facilityId2 "FacilityId2" AddNewFacility "Add New Facility" )
+                                , ( "Discharge Physician", Required, DropInputWithButton model.dischargePhysicianId "DischargePhysicianId" "New Provider" )
+                                , ( "Secondary Facility Name", Required, DropInputWithButton model.facilityId2 "FacilityId2" "Add New Facility" )
                                 , ( "Secondary Date of Admission", Required, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId2" )
                                 , ( "Secondary Date of Discharge", Required, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId2" )
                                 ]

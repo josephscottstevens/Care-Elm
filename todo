@@ -14,6 +14,10 @@ test saving
 test hospitilizations update\edit on records
 test callrecordings add on records
 
+does hospitilizations in records have a facility dropdown?
+
+Secondary Date of Discharge\Admission is marked as required...
+
 test cross update from hospitilizations
 ResetUpdate is for editing of existing hospitilizations, test
 
