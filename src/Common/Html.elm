@@ -2,7 +2,7 @@ module Common.Html exposing (fullWidth, labelWidth, controlWidth, InputControlTy
 
 import Html exposing (Html, text, div, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, readonly, style, checked)
-import Html.Events exposing (onInput, onClick, onCheck)
+import Html.Events exposing (onInput, onCheck)
 import Common.Functions exposing (..)
 import Common.Types exposing (..)
 

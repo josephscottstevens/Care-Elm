@@ -15,8 +15,7 @@ type Msg
 
 
 type alias Model =
-    { id : Maybe Int
-    , initData : HospitilizationsInitData
+    { initData : HospitilizationsInitData
     , patientId : Int
     , patientReported : Bool
     , chiefComplaint : String
@@ -27,8 +26,7 @@ type alias Model =
 
 emptyModel : Int -> Model
 emptyModel patientId =
-    { id = Nothing
-    , patientId = patientId
+    { patientId = patientId
     , initData = emptyHospitilizationsInitData
     , patientReported = False
     , chiefComplaint = ""
