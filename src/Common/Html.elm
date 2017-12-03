@@ -50,7 +50,7 @@ type InputControlType msg
     | KnockInput String
     | DropInput (Maybe Int) String
     | DropInputWithButton (Maybe Int) String String
-    | DateInput String String (Maybe String -> msg)
+    | DateInput String String
     | FileInput String
 
 
@@ -94,7 +94,7 @@ commonValidation ( labelText, _, controlType ) =
                 Nothing ->
                     Just (labelText ++ " is required")
 
-        DateInput displayValue _ _ ->
+        DateInput displayValue _ ->
             requiredStr labelText displayValue
 
         FileInput displayValue ->
@@ -174,9 +174,9 @@ common ( labelText, requiredType, controlType ) =
                     , div [ class labelWidth ] [ button [ class "btn btn-sm btn-default" ] [ text buttonText ] ]
                     ]
 
-            DateInput displayValue syncfusionId event ->
+            DateInput displayValue syncfusionId ->
                 commonStructure
-                    [ input [ type_ "text", id syncfusionId, value displayValue, onInput (defaultMaybeMsg event), value displayValue ] []
+                    [ input [ type_ "text", id syncfusionId, value displayValue, value displayValue ] []
                     ]
 
             FileInput displayValue ->

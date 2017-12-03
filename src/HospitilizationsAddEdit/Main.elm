@@ -63,8 +63,11 @@ view model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
+        initData =
+            model.initData
+
         updateAddNew t =
-            t ! [ setUnsavedChanges True ]
+            { model | initData = t } ! [ setUnsavedChanges True ]
     in
         case msg of
             Save ->
@@ -91,40 +94,28 @@ update msg model =
                 { model | initData = hospitilizationsInitData } ! []
 
             UpdatePatientReported bool ->
-                updateAddNew { model | patientReported = bool }
-
-            UpdateDateOfAdmission str ->
-                updateAddNew { model | dateOfAdmission = str }
-
-            UpdateDateOfDischarge str ->
-                updateAddNew { model | dateOfDischarge = str }
+                updateAddNew { initData | patientReported = bool }
 
             UpdateChiefComplaint str ->
-                updateAddNew { model | chiefComplaint = str }
+                updateAddNew { initData | chiefComplaint = str }
 
             UpdateDischargeRecommendations str ->
-                updateAddNew { model | dischargeRecommendations = str }
-
-            UpdateDateOfAdmission2 str ->
-                updateAddNew { model | dateOfAdmission2 = str }
-
-            UpdateDateOfDischarge2 str ->
-                updateAddNew { model | dateOfDischarge2 = str }
+                updateAddNew { initData | dischargeRecommendations = str }
 
 
 formInputs : Model -> List ( String, RequiredType, InputControlType Msg )
 formInputs model =
-    [ ( "Patient Reported", Optional, CheckInput model.patientReported UpdatePatientReported )
+    [ ( "Patient Reported", Optional, CheckInput model.initData.patientReported UpdatePatientReported )
     , ( "Facility Name", Required, DropInputWithButton model.initData.facilityId "FacilityId" "Add New Facility" )
-    , ( "Date of Admission", Required, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId" UpdateDateOfAdmission )
-    , ( "Date of Discharge", Required, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId" UpdateDateOfDischarge )
+    , ( "Date of Admission", Required, DateInput (defaultString model.initData.dateOfAdmission) "DateOfAdmissionId" )
+    , ( "Date of Discharge", Required, DateInput (defaultString model.initData.dateOfDischarge) "DateOfDischargeId" )
     , ( "Hospital Service Type", Required, DropInput model.initData.hospitalServiceTypeId "HospitalServiceTypeId" )
-    , ( "Chief Complaint", Required, AreaInput model.chiefComplaint UpdateChiefComplaint )
+    , ( "Chief Complaint", Required, AreaInput model.initData.chiefComplaint UpdateChiefComplaint )
     , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
     , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
-    , ( "Discharge Recommendations", Required, TextInput model.dischargeRecommendations UpdateDischargeRecommendations )
+    , ( "Discharge Recommendations", Required, TextInput model.initData.dischargeRecommendations UpdateDischargeRecommendations )
     , ( "Discharge Physician", Optional, DropInputWithButton model.initData.dischargePhysicianId "DischargePhysicianId" "New Provider" )
     , ( "Secondary Facility Name", Optional, DropInputWithButton model.initData.facilityId2 "FacilityId2" "Add New Facility" )
-    , ( "Secondary Date of Admission", Optional, DateInput (defaultString model.initData.dateOfAdmission) "DateOfAdmissionId2" UpdateDateOfAdmission2 )
-    , ( "Secondary Date of Discharge", Optional, DateInput (defaultString model.initData.dateOfDischarge) "DateOfDischargeId2" UpdateDateOfDischarge2 )
+    , ( "Secondary Date of Admission", Optional, DateInput (defaultString model.initData.dateOfAdmission) "DateOfAdmissionId2" )
+    , ( "Secondary Date of Discharge", Optional, DateInput (defaultString model.initData.dateOfDischarge) "DateOfDischargeId2" )
     ]

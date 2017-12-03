@@ -12,16 +12,16 @@ encodeRecord newRecord =
     Encode.object
         [ ( "PatientId", Encode.int <| newRecord.patientId )
         , ( "FacilityId", maybeVal Encode.int <| newRecord.initData.facilityId )
-        , ( "PatientReported", Encode.bool <| newRecord.patientReported )
+        , ( "PatientReported", Encode.bool <| newRecord.initData.patientReported )
 
         -- , ( "HospitalizationId", maybeVal Encode.int <| newRecord.hospitalizationId )
-        , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfAdmission )
-        , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfDischarge )
+        , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfAdmission )
+        , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfDischarge )
         , ( "HospitalServiceTypeId", maybeVal Encode.int <| newRecord.initData.hospitalServiceTypeId )
-        , ( "ChiefComplaint", Encode.string <| newRecord.chiefComplaint )
+        , ( "ChiefComplaint", Encode.string <| newRecord.initData.chiefComplaint )
         , ( "AdmitDiagnosisId", maybeVal Encode.int <| newRecord.initData.admitDiagnosisId )
         , ( "DischargeDiagnosisId", maybeVal Encode.int <| newRecord.initData.dischargeDiagnosisId )
-        , ( "DischargeRecommendations", Encode.string <| newRecord.dischargeRecommendations )
+        , ( "DischargeRecommendations", Encode.string <| newRecord.initData.dischargeRecommendations )
         , ( "DischargePhysicianId", maybeVal Encode.int <| newRecord.initData.dischargePhysicianId )
         , ( "FacilityId2", maybeVal Encode.int <| newRecord.initData.facilityId2 )
         , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfAdmission2 )
@@ -74,6 +74,7 @@ getHospitilizationsInitData addEditDataSource maybeHospitilizationsRow =
         , dateOfDischarge2 = hospitilizationsRow.dateOfDischarge2
 
         -- Our control
+        , patientReported = hospitilizationsRow.patientReported
         , chiefComplaint = hospitilizationsRow.chiefComplaint
         , dischargeRecommendations = hospitilizationsRow.dischargeRecommendations
         }

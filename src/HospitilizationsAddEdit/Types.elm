@@ -10,25 +10,14 @@ type Msg
     | Cancel
     | UpdateHospitilizationsInitData HospitilizationsInitData
     | UpdatePatientReported Bool
-    | UpdateDateOfAdmission (Maybe String)
-    | UpdateDateOfDischarge (Maybe String)
     | UpdateChiefComplaint String
     | UpdateDischargeRecommendations String
-    | UpdateDateOfAdmission2 (Maybe String)
-    | UpdateDateOfDischarge2 (Maybe String)
 
 
 type alias Model =
     { id : Maybe Int
     , initData : HospitilizationsInitData
     , patientId : Int
-    , patientReported : Bool
-    , dateOfAdmission : Maybe String
-    , dateOfDischarge : Maybe String
-    , chiefComplaint : String
-    , dischargeRecommendations : String
-    , dateOfAdmission2 : Maybe String
-    , dateOfDischarge2 : Maybe String
     , showValidationErrors : Bool
     }
 
@@ -37,14 +26,7 @@ emptyModel : Int -> Model
 emptyModel patientId =
     { id = Nothing
     , patientId = patientId
-    , patientReported = False
     , initData = emptyHospitilizationsInitData
-    , dateOfAdmission = Nothing
-    , dateOfDischarge = Nothing
-    , chiefComplaint = ""
-    , dischargeRecommendations = ""
-    , dateOfAdmission2 = Nothing
-    , dateOfDischarge2 = Nothing
     , showValidationErrors = False
     }
 
@@ -73,6 +55,7 @@ emptyHospitilizationsInitData =
     , dateOfDischarge2 = Nothing
 
     -- Our control
+    , patientReported = False
     , chiefComplaint = ""
     , dischargeRecommendations = ""
     }
