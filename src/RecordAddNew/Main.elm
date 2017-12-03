@@ -33,12 +33,6 @@ port updateHospitalServiceType : (DropDownItem -> msg) -> Sub msg
 port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
 
 
-port setPage : Maybe Int -> Cmd msg
-
-
-port setPageComplete : (Maybe Int -> msg) -> Sub msg
-
-
 port presetPage : Maybe Int -> Cmd msg
 
 
@@ -63,8 +57,7 @@ init model addEditDataSource recordType =
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
-        [ setPageComplete SetPageComplete
-        , presetPageComplete PresetPageComplete
+        [ presetPageComplete PresetPageComplete
         , updateFacility UpdateFacility
         , updateCategory UpdateRecordType
         , updateTimeVisit UpdateTimeVisit
@@ -152,10 +145,7 @@ update msg model =
                 model ! [ setUnsavedChanges False, navRecords recordType ]
 
             PresetPageComplete recordTypeId ->
-                { model | state = Edit } ! [ setPage recordTypeId ]
-
-            SetPageComplete recordTypeId ->
-                model ! [ initRecords (getAddEditMsg model.addEditDataSource recordTypeId True False) ]
+                { model | state = Edit } ! [ initRecords (getAddEditMsg model.addEditDataSource recordTypeId True False) ]
 
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then

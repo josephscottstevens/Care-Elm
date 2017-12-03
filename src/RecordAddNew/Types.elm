@@ -11,7 +11,6 @@ type Msg
     | SaveCompleted (Result Http.Error String)
     | Cancel RecordType
     | PresetPageComplete (Maybe Int)
-    | SetPageComplete (Maybe Int)
     | UpdateTitle String
     | UpdateRecordType DropDownItem
     | UpdateSpecialty String
