@@ -23,64 +23,64 @@ getPage urlHash =
                 "#/people/_primarycarerecords" ->
                     Records PrimaryCare
 
-                "#/people/records/primarycare" ->
+                "#/people/records/_primarycare" ->
                     Records PrimaryCare
 
-                "#/people/records/specialty" ->
+                "#/people/records/_specialty" ->
                     Records Specialty
 
-                "#/people/records/labs" ->
+                "#/people/records/_labs" ->
                     Records Labs
 
-                "#/people/records/radiology" ->
+                "#/people/records/_radiology" ->
                     Records Radiology
 
-                "#/people/records/hospitalizations" ->
+                "#/people/records/_hospitalizations" ->
                     Records Hospitalizations
 
-                "#/people/records/legal" ->
+                "#/people/records/_legal" ->
                     Records Legal
 
-                "#/people/records/previoushistories" ->
+                "#/people/records/_previoushistories" ->
                     Records PreviousHistories
 
-                "#/people/records/callrecordings" ->
+                "#/people/records/_callrecordings" ->
                     Records CallRecordings
 
-                "#/people/records/enrollment" ->
+                "#/people/records/_enrollment" ->
                     Records Enrollment
 
-                "#/people/records/misc" ->
+                "#/people/records/_misc" ->
                     Records Misc
 
-                "#/people/records/primarycare/addedit" ->
+                "#/people/records/_primarycare/addedit" ->
                     RecordAddNew PrimaryCare
 
-                "#/people/records/specialty/addedit" ->
+                "#/people/records/_specialty/addedit" ->
                     RecordAddNew Specialty
 
-                "#/people/records/labs/addedit" ->
+                "#/people/records/_labs/addedit" ->
                     RecordAddNew Labs
 
-                "#/people/records/radiology/addedit" ->
+                "#/people/records/_radiology/addedit" ->
                     RecordAddNew Radiology
 
-                "#/people/records/hospitalizations/addedit" ->
+                "#/people/records/_hospitalizations/addedit" ->
                     RecordAddNew Hospitalizations
 
-                "#/people/records/legal/addedit" ->
+                "#/people/records/_legal/addedit" ->
                     RecordAddNew Legal
 
-                "#/people/records/previoushistories/addedit" ->
+                "#/people/records/_previoushistories/addedit" ->
                     RecordAddNew PreviousHistories
 
-                "#/people/records/callrecordings/addedit" ->
+                "#/people/records/_callrecordings/addedit" ->
                     RecordAddNew CallRecordings
 
-                "#/people/records/enrollment/addedit" ->
+                "#/people/records/_enrollment/addedit" ->
                     RecordAddNew Enrollment
 
-                "#/people/records/misc/addedit" ->
+                "#/people/records/_misc/addedit" ->
                     RecordAddNew Misc
 
                 _ ->
@@ -119,7 +119,7 @@ navRecords recordType =
         record =
             String.toLower (toString recordType)
     in
-        Navigation.modifyUrl ("#/people/records/" ++ record)
+        Navigation.modifyUrl ("#/people/records/_" ++ record)
 
 
 navRecordAddNew : RecordType -> Cmd msg
@@ -128,4 +128,4 @@ navRecordAddNew recordType =
         record =
             String.toLower (toString recordType)
     in
-        Navigation.modifyUrl ("#/people/records/" ++ record ++ "/addedit")
+        Navigation.modifyUrl ("#/people/records/_" ++ record ++ "/addedit")

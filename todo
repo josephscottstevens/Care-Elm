@@ -10,21 +10,12 @@ QUESTIONS:
 ===========================================================================================================
 	in tasks... there is a another hospitilizations????
 ===========================================================================================================
-Add
-	DateOfAdmission2
-	DateOfDischarge2
-	AdmitDiagnosisId
-	DischargeDiagnosisId
 
-test cross update from hospitilizations
-ResetUpdate is for editing of existing hospitilizations, test
-
-quick test on validation (test4)
-unbreak records -> hospitilizations save
-re-add _ for urls
-test records (full sweep)
-test back button some more	
+Integrate with Matt's changes 
 Fix are you sure you want to leave
+
+validate my url changes with new ones
+test cross update from hospitilizations
 
 LOW TODO:
 scroll to top when displaying validation errors
@@ -49,6 +40,7 @@ There is phone number validation, any other hidden validations?
 Perhaps hrefExtra doesn't really belong in grid
 how to clear sort?
 Clean up un-used fields (in models)
+Can I fix navigation for everyone else as well?
 
 REALLY LOW TODO:
 Standardize Records ports to be like hospitilizations ( 1 in, 1 out), SF manages some, Elm manages other
