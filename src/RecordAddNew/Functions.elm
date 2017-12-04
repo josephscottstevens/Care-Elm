@@ -30,6 +30,7 @@ encodeRecord newRecord =
         , ( "TaskId", maybeVal Encode.int <| newRecord.taskId )
 
         -- Hospitilizations
+        , ( "PatientReported", Encode.bool <| newRecord.patientReported )
         , ( "HospitalizationId", maybeVal Encode.int <| newRecord.hospitalizationId )
         , ( "FacilityId2", maybeVal Encode.int <| newRecord.facilityId2 )
         , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.dateOfAdmission )

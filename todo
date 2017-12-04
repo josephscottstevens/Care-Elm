@@ -16,15 +16,6 @@ Add
 	AdmitDiagnosisId
 	DischargeDiagnosisId
 
-New hospitilizations isn't being saved on records\hospitilizations
-test hospitilizations update\edit on records
-test callrecordings add on records
-scroll to top when displaying validation errors
-
-does hospitilizations in records have a facility dropdown?
-
-Secondary Date of Discharge\Admission is marked as required...
-
 test cross update from hospitilizations
 ResetUpdate is for editing of existing hospitilizations, test
 
@@ -36,6 +27,7 @@ test back button some more
 Fix are you sure you want to leave
 
 LOW TODO:
+scroll to top when displaying validation errors
 Move ports file to Common
 trim down ports (find out which ones are un-used)
 Change record ports over to the single port pair
@@ -59,6 +51,7 @@ how to clear sort?
 Clean up un-used fields (in models)
 
 REALLY LOW TODO:
+Standardize Records ports to be like hospitilizations ( 1 in, 1 out), SF manages some, Elm manages other
 fix reload in new urls
 I can optionally listen to DropDownToggle right?
 Would it make sense to load grid first, then fire second request to load all the dropdown info? easy enough right

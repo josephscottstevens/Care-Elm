@@ -240,7 +240,7 @@ update msg model =
                 if model.isExistingHospitilization == bool then
                     model ! []
                 else
-                    { model | isExistingHospitilization = bool } ! [ resetUpdate model.recordTypeId, setLoadingStatus True ]
+                    { model | isExistingHospitilization = bool, state = Limbo } ! [ presetPage model.recordTypeId, setLoadingStatus True ]
 
             UpdateHospitilization dropDownItem ->
                 updateAddNew { model | hospitalizationId = dropDownItem.id, hospitalizationText = dropDownItem.name }
@@ -343,7 +343,7 @@ formInputs model recordType =
 
                             False ->
                                 [ ( "Patient Reported", Optional, CheckInput model.patientReported UpdatePatientReported )
-                                , ( "Facility", Required, DropInputWithButton model.facilityId "FacilityId" "Add New Facility" )
+                                , ( "Facility", Optional, DropInputWithButton model.facilityId "FacilityId" "Add New Facility" )
                                 , ( "Category", Required, DropInput model.recordTypeId "CategoryId" )
                                 , ( "Date of Admission", Required, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId" )
                                 , ( "Date of Discharge", Required, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId" )
@@ -352,10 +352,10 @@ formInputs model recordType =
                                 , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
                                 , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
                                 , ( "Discharge Recommendations", Required, TextInput model.dischargeRecommendations UpdateDischargeRecommendations )
-                                , ( "Discharge Physician", Required, DropInputWithButton model.dischargePhysicianId "DischargePhysicianId" "New Provider" )
-                                , ( "Secondary Facility Name", Required, DropInputWithButton model.facilityId2 "FacilityId2" "Add New Facility" )
-                                , ( "Secondary Date of Admission", Required, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId2" )
-                                , ( "Secondary Date of Discharge", Required, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId2" )
+                                , ( "Discharge Physician", Optional, DropInputWithButton model.dischargePhysicianId "DischargePhysicianId" "New Provider" )
+                                , ( "Secondary Facility Name", Optional, DropInputWithButton model.facilityId2 "FacilityId2" "Add New Facility" )
+                                , ( "Secondary Date of Admission", Optional, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId2" )
+                                , ( "Secondary Date of Discharge", Optional, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId2" )
                                 , ( "Upload Record File", Required, FileInput model.fileName )
                                 ]
 

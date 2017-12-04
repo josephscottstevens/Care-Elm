@@ -96,7 +96,7 @@ getMenuMessage records recordType recordId messageType =
             records
                 |> List.filter (\t -> t.id == recordId)
                 |> List.head
-                |> Maybe.map (\t -> t.hasVerbalConsent)
+                |> Maybe.map (\t -> not t.hasVerbalConsent)
 
         recordTypeId =
             getId recordType
