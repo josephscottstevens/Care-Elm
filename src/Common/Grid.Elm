@@ -152,29 +152,6 @@ hrefColumnCell displayText url =
             ]
 
 
-hrefColumnExtra : String -> (data -> String) -> String -> msg -> Table.Column data msg
-hrefColumnExtra name hrefText toHref event =
-    Table.veryCustomColumn
-        { name = name
-        , viewData = \data -> hrefColumnCellExtra (hrefText data) toHref event
-        , sorter = Table.unsortable
-        }
-
-
-hrefColumnCellExtra : String -> String -> msg -> Table.HtmlDetails msg
-hrefColumnCellExtra displayText url event =
-    let
-        newDisplayText =
-            if url == "" then
-                ""
-            else
-                displayText
-    in
-        Table.HtmlDetails []
-            [ a [ href url, Events.onClick event ] [ text newDisplayText ]
-            ]
-
-
 rowDropDownDiv : Bool -> Html.Attribute msg -> List ( String, String, Html.Attribute msg ) -> Table.HtmlDetails msg
 rowDropDownDiv isVisible event dropDownItems =
     let

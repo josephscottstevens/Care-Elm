@@ -16,9 +16,7 @@ Add
 	AdmitDiagnosisId
 	DischargeDiagnosisId
 
-	to addedit records hospitilizations model ... weird... seems like no good way to save most?
-	
-	
+New hospitilizations isn't being saved on records\hospitilizations
 test hospitilizations update\edit on records
 test callrecordings add on records
 scroll to top when displaying validation errors

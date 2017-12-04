@@ -2,8 +2,8 @@ module Records.Main exposing (..)
 
 import Records.Functions exposing (..)
 import Records.Types exposing (..)
-import Html exposing (Html, text, div, button, h4)
-import Html.Attributes exposing (class, type_)
+import Html exposing (Html, text, div, button, h4, a)
+import Html.Attributes exposing (class, type_, href)
 import Html.Events exposing (onClick)
 import Table exposing (..)
 import Common.Grid exposing (..)
@@ -145,7 +145,7 @@ getColumns recordType taskId =
                 CallRecordings ->
                     [ stringColumn "Date" (\t -> dateTime t.recordingDate)
                     , hrefColumn "Recording" "Open" (\t -> defaultString t.recording)
-                    , hrefColumnExtra "Task" (\t -> defaultString t.taskTitle) "#" (EditTask (defaultInt taskId))
+                    , hrefCustom
                     , checkColumn "During Enrollment" (\t -> t.enrollment)
                     , checkColumn "Consent" (\t -> t.hasVerbalConsent)
                     , stringColumn "User" (\t -> defaultString t.staffName)
@@ -191,6 +191,27 @@ config event recordType taskId =
         , customizations =
             { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = standardThead event }
         }
+
+
+hrefCustom : Table.Column RecordRow Msg
+hrefCustom =
+    Table.veryCustomColumn
+        { name = "Task"
+        , viewData = \t -> hrefCustomDetails t.taskId t.taskTitle
+        , sorter = Table.unsortable
+        }
+
+
+hrefCustomDetails : Maybe Int -> Maybe String -> Table.HtmlDetails Msg
+hrefCustomDetails taskId taskTitle =
+    Table.HtmlDetails []
+        [ case ( taskId, taskTitle ) of
+            ( Just t, Just y ) ->
+                div [ class "RecordTableHref", onClick (EditTask t) ] [ text y ]
+
+            _ ->
+                div [] []
+        ]
 
 
 dropDownItems : RecordType -> Int -> List ( String, String, Html.Attribute Msg )
