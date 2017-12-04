@@ -4,6 +4,7 @@ import Navigation
 import Common.Types exposing (..)
 import Char exposing (isDigit)
 import Common.Functions exposing (defaultIntStr)
+import Regex exposing (..)
 
 
 getPage : String -> Page
@@ -93,9 +94,17 @@ getPage urlHash =
 
 getPatientId : String -> Int
 getPatientId urlSearch =
-    String.filter isDigit urlSearch
-        |> String.toInt
-        |> Result.withDefault -17
+    let
+        searchOnlyPatient =
+            find (AtMost 1) (regex "patientId=(\\d+)") urlSearch
+                |> List.map .match
+                |> List.head
+                |> Maybe.withDefault "-19"
+    in
+        searchOnlyPatient
+            |> String.filter isDigit
+            |> String.toInt
+            |> Result.withDefault -17
 
 
 navHospitilizations : Cmd msg

@@ -10,8 +10,16 @@ QUESTIONS:
 ===========================================================================================================
 	in tasks... there is a another hospitilizations????
 ===========================================================================================================
+CRITICAL: 
+Facility Name is missing on grid 
+Hosptization existing insert didn't look like it worked
 
-Integrate with Matt's changes 
+
+TODO:
+test Index.css (try like... records task update popup)
+test demographics 1 more (30 seconds)
+AddNewHospitilization Server side isn't returning an error message if it fails
+Quick scan of Column widths
 Fix are you sure you want to leave
 
 validate my url changes with new ones
@@ -41,6 +49,7 @@ Perhaps hrefExtra doesn't really belong in grid
 how to clear sort?
 Clean up un-used fields (in models)
 Can I fix navigation for everyone else as well?
+getPatientId function in Route is a hack, better to display an error
 
 REALLY LOW TODO:
 Standardize Records ports to be like hospitilizations ( 1 in, 1 out), SF manages some, Elm manages other
@@ -77,3 +86,35 @@ On Deploy Todo:
 	Test Saving
 	Test Validation
 	Test Server errors
+	
+===========================================================================================================
+	SQL Stuff
+===========================================================================================================
+-- Testing queries
+select * from ptn.Hospitalization where patientid = 1 and Id = 1540
+
+select * from ptn.Records order by ReceivedAt desc
+
+--update ptn.Hospitalization 
+--set AdmitReason = 'reason'
+--, DischargeDiagnosis = 'disch'
+--where Id = 1539
+
+
+--URL changes
+
+--select * from dbo.NavigationItems
+
+
+--UPDATE dbo.NavigationItems SET [Href] = '/people/records/_primarycare' WHERE [Id] = 55
+--UPDATE dbo.NavigationItems SET [Href] = '/people/records/_specialty' WHERE [Id] = 56
+--UPDATE dbo.NavigationItems SET [Href] = '/people/records/_labs' WHERE [Id] = 57
+--UPDATE dbo.NavigationItems SET [Href] = '/people/records/_radiology' WHERE [Id] = 58
+--UPDATE dbo.NavigationItems SET [Href] = '/people/records/_hospitalizations' WHERE [Id] = 59
+--UPDATE dbo.NavigationItems SET [Href] = '/people/records/_legal' WHERE [Id] = 60
+--DELETE FROM dbo.NavigationItems WHERE [Id] = 61
+--UPDATE dbo.NavigationItems SET [Href] = '/people/records/_callrecordings' WHERE [Id] = 62
+--UPDATE dbo.NavigationItems SET [Href] = '/people/records/_previoushistories' WHERE [Id] = 63
+--UPDATE dbo.NavigationItems SET [Href] = '/people/records/_enrollment' WHERE [Id] = 64
+--UPDATE dbo.NavigationItems SET [Href] = '/people/records/_misc' WHERE [Id] = 65
+--GO
