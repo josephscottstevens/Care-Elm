@@ -92,19 +92,15 @@ getPage urlHash =
             None
 
 
-getPatientId : String -> Int
+getPatientId : String -> Maybe Int
 getPatientId urlSearch =
-    let
-        searchOnlyPatient =
-            find (AtMost 1) (regex "patientId=(\\d+)") urlSearch
-                |> List.map .match
-                |> List.head
-                |> Maybe.withDefault "-19"
-    in
-        searchOnlyPatient
-            |> String.filter isDigit
-            |> String.toInt
-            |> Result.withDefault -17
+    urlSearch
+        |> find (AtMost 1) (regex "patientId=(\\d+)")
+        |> List.map .match
+        |> List.head
+        |> Maybe.map (String.filter isDigit)
+        |> Maybe.map String.toInt
+        |> Maybe.andThen Result.toMaybe
 
 
 navHospitilizations : Cmd msg

@@ -28,13 +28,18 @@ subscriptions _ =
 init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
     let
-        model =
-            emptyModel location
-
         patientId =
             Routes.getPatientId location.search
+
+        model =
+            emptyModel (defaultInt patientId) location
     in
-        model ! [ getDropDowns patientId AddEditDataSourceLoaded, setLoadingStatus False ]
+        case patientId of
+            Just t ->
+                model ! [ getDropDowns t AddEditDataSourceLoaded, setLoadingStatus False ]
+
+            Nothing ->
+                { model | page = Error "Cannot load page without patientId" } ! []
 
 
 main : Program Never Model Msg
@@ -113,11 +118,12 @@ update msg model =
             { model | page = Error (toString httpError) } ! []
 
         UrlChange url ->
-            let
-                newModel =
-                    { model | currentUrl = url, patientId = Routes.getPatientId url.search }
-            in
-                getNewPage newModel url.hash
+            case Routes.getPatientId url.search of
+                Just patientId ->
+                    getNewPage { model | currentUrl = url, patientId = patientId } url.hash
+
+                Nothing ->
+                    { model | page = Error "Cannot route to page without patientId" } ! []
 
         KnockoutUrlChange url ->
             getNewPage model url

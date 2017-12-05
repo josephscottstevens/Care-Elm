@@ -35,22 +35,15 @@ type Msg
     | KnockoutUrlChange String
 
 
-emptyModel : Navigation.Location -> Model
-emptyModel location =
-    let
-        page =
-            getPage location.hash
-
-        patientId =
-            getPatientId location.search
-    in
-        { page = None
-        , patientId = patientId
-        , addEditDataSource = Nothing
-        , billingState = Billing.emptyModel
-        , recordsState = Records.emptyModel patientId
-        , recordAddNewState = RecordAddNew.emptyModel patientId
-        , hospitalizationsState = Hospitilizations.emptyModel patientId
-        , hospitilizationsAddEditState = HospitilizationsAddEdit.emptyModel patientId
-        , currentUrl = location
-        }
+emptyModel : Int -> Navigation.Location -> Model
+emptyModel patientId location =
+    { page = None
+    , patientId = patientId
+    , addEditDataSource = Nothing
+    , billingState = Billing.emptyModel
+    , recordsState = Records.emptyModel patientId
+    , recordAddNewState = RecordAddNew.emptyModel patientId
+    , hospitalizationsState = Hospitilizations.emptyModel patientId
+    , hospitilizationsAddEditState = HospitilizationsAddEdit.emptyModel patientId
+    , currentUrl = location
+    }
