@@ -25,17 +25,17 @@ nameAttr str =
 
 fullWidth : String
 fullWidth =
-    "col-sm-10 col-md-7 col-lg-6"
+    "col-sm-10 col-md-7 col-lg-6 "
 
 
 labelWidth : String
 labelWidth =
-    "col-sm-2 col-md-2 col-lg-2"
+    "col-sm-2 col-md-2 col-lg-2 "
 
 
 controlWidth : String
 controlWidth =
-    "col-sm-8 col-md-5 col-lg-4"
+    "col-sm-8 col-md-5 col-lg-4 "
 
 
 type InputControlType msg
@@ -119,7 +119,7 @@ inputCommonFormat : String -> RequiredType -> List (Html msg) -> Html msg
 inputCommonFormat displayText requiredType t =
     let
         firstItem =
-            label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId displayText ] [ text displayText ]
+            label [ class (labelWidth ++ isRequiredStr requiredType), forId displayText ] [ text (displayText ++ ":") ]
     in
         div [ class "form-group" ]
             (firstItem :: t)
@@ -159,14 +159,9 @@ common ( labelText, requiredType, controlType ) =
 
             FileInput displayValue ->
                 div [ class "form-group" ]
-                    [ label [ class (labelWidth ++ "control-label " ++ isRequiredStr requiredType), for "fileName" ]
-                        [ text labelText ]
-                    , div [ class "col-sm-6 col-md-4 col-lg-3" ]
-                        [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] []
-                        ]
-                    , div [ class "col-sm-2 col-md-1 col-lg-1" ]
-                        [ div [ id "fileBtn" ] []
-                        ]
+                    [ label [ class (labelWidth ++ isRequiredStr requiredType), for "fileName" ] [ text labelText ]
+                    , div [ class controlWidth ] [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] [] ]
+                    , div [ class labelWidth ] [ div [ id "fileBtn" ] [] ]
                     ]
 
 

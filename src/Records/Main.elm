@@ -2,8 +2,8 @@ port module Records.Main exposing (..)
 
 import Records.Load exposing (..)
 import Records.Model exposing (..)
-import Html exposing (Html, text, div, button)
-import Html.Attributes exposing (class, id, type_, value)
+import Html exposing (Html, text, div, button, ul, li, a)
+import Html.Attributes exposing (class, id, type_, value, style)
 import Html.Events exposing (onClick, onFocus)
 import Table exposing (..)
 import Utils.CommonGrid exposing (..)
@@ -229,14 +229,24 @@ update msg model =
             { model | state = AddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name } } ! [ setUnsavedChanges True ]
 
 
+toolbar : Html Msg
+toolbar =
+    div [ class "e-gridtoolbar e-toolbar e-js e-widget e-box e-toolbarspan e-tooltip" ]
+        [ ul [ class "e-ul e-horizontal" ]
+            [ li [ class "e-tooltxt" ]
+                [ a [ class "e-addnewitem e-toolbaricons e-icon e-addnew", onClick AddNewStart, style [ ( "cursor", "pointer" ) ] ] []
+                ]
+            ]
+        ]
+
+
 view : Model -> Html Msg
 view model =
     case model.state of
         Grid ->
-            div []
-                [ button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
-                , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config SetFilter model.recordTypeId (getTaskId model)) model.tableState (filteredRecords model) ]
+            div [ class "e-grid e-js e-waitingpopup" ]
+                [ toolbar
+                , Table.view (config SetFilter model.recordTypeId (getTaskId model)) model.tableState (filteredRecords model)
                 ]
 
         AddNew newRecord ->
@@ -254,13 +264,13 @@ view model =
                         div [] []
 
                 saveBtnClass =
-                    class "btn btn-sm btn-success margin-left-5 pull-right"
+                    class "btn btn-sm btn-default btn-success"
 
                 footerControls =
                     [ div [ class "form-group" ]
                         [ div [ class fullWidth ]
                             [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
-                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
                             ]
                         ]
                     ]
