@@ -8,7 +8,7 @@ import Html.Events exposing (onClick)
 import Common.Html exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
-import Common.Routes exposing (navRecords, navRecordAddNew)
+import Route exposing (Route)
 import Ports exposing (..)
 
 
@@ -155,7 +155,7 @@ update msg model =
                 if List.length (getValidationErrors (formInputs model recordType)) > 0 then
                     { model | showValidationErrors = True } ! []
                 else
-                    model ! [ saveForm model, setUnsavedChanges False, navRecords recordType ]
+                    model ! [ saveForm model, setUnsavedChanges False, Route.modifyUrl (Route.RecordAddNew recordType) ]
 
             SaveCompleted (Ok responseMsg) ->
                 case getResponseError responseMsg of
@@ -169,7 +169,7 @@ update msg model =
                 (model ! [ displayErrorMessage (toString t) ])
 
             Cancel recordType ->
-                model ! [ setUnsavedChanges False, navRecords recordType ]
+                model ! [ setUnsavedChanges False, Route.modifyUrl (Route.RecordAddNew recordType) ]
 
             PresetPageComplete recordTypeId ->
                 { model | state = Edit } ! [ initRecords (getAddEditMsg model.addEditDataSource recordTypeId True False) ]

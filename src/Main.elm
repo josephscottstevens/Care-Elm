@@ -1,17 +1,55 @@
 module Main exposing (..)
 
-import Model exposing (..)
 import Html exposing (Html, text, div)
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
 import Hospitilizations.Main as Hospitilizations
 import HospitilizationsAddEdit.Main as HospitilizationsAddEdit
+import Billing.Types
+import Hospitilizations.Types
+import HospitilizationsAddEdit.Types
+import Records.Types
+import RecordAddNew.Types
 import Common.Functions exposing (..)
 import Common.Types exposing (..)
 import Functions exposing (..)
 import Ports exposing (..)
-import Navigation
-import Common.Routes as Routes
+import Navigation exposing (Location)
+import Route exposing (Route)
+import Http exposing (Error)
+
+
+type Page
+    = None
+    | Billing
+    | Records RecordType
+    | RecordAddNew RecordType
+    | Hospitilizations
+    | HospitilizationsAddEdit (Maybe Int)
+    | Error String
+
+
+type alias Model =
+    { patientId : Int
+    , page : Page
+    }
+
+
+init : Location -> ( Model, Cmd Msg )
+init location =
+    let
+        patientId =
+            Route.getPatientId location.search
+
+        model =
+            Model (defaultInt patientId) None
+    in
+        case patientId of
+            Just t ->
+                model ! [ getDropDowns t AddEditDataSourceLoaded, setLoadingStatus False ]
+
+            Nothing ->
+                { model | page = Route.Error "Cannot load page without patientId" } ! []
 
 
 subscriptions : Model -> Sub Msg
@@ -23,23 +61,6 @@ subscriptions _ =
         , Sub.map HospitilizationsAddEditMsg HospitilizationsAddEdit.subscriptions
         , isApp KnockoutUrlChange
         ]
-
-
-init : Navigation.Location -> ( Model, Cmd Msg )
-init location =
-    let
-        patientId =
-            Routes.getPatientId location.search
-
-        model =
-            emptyModel (defaultInt patientId) location
-    in
-        case patientId of
-            Just t ->
-                model ! [ getDropDowns t AddEditDataSourceLoaded, setLoadingStatus False ]
-
-            Nothing ->
-                { model | page = Error "Cannot load page without patientId" } ! []
 
 
 main : Program Never Model Msg
@@ -55,31 +76,142 @@ main =
 view : Model -> Html Msg
 view model =
     case model.page of
-        None ->
+        Route.None ->
             div [] []
 
-        Billing ->
+        Route.Billing ->
             div [] []
 
-        Records recordType ->
+        Route.Records recordType ->
             Html.map RecordsMsg (Records.view model.recordsState recordType model.addEditDataSource)
 
-        RecordAddNew recordType ->
+        Route.RecordAddNew recordType ->
             Html.map RecordAddNewMsg (RecordAddNew.view model.recordAddNewState recordType)
 
-        Hospitilizations ->
+        Route.Hospitilizations ->
             Html.map HospitilizationsMsg (Hospitilizations.view model.hospitalizationsState model.addEditDataSource)
 
-        HospitilizationsAddEdit _ ->
+        Route.HospitilizationsAdd ->
             Html.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.view model.hospitilizationsAddEditState)
 
-        Error str ->
+        Route.Error str ->
             div [] [ text str ]
 
 
-update : Msg -> Model -> ( Model, Cmd Model.Msg )
+pageSubscriptions : Page -> Sub Msg
+pageSubscriptions page =
+    case page of
+        Route.Billing ->
+            Sub.none
+
+        Route.Records recordType ->
+            Records.subscriptions
+
+        Route.RecordAddNew recordType ->
+            RecordAddNew.subscriptions
+
+        Route.Hospitilizations ->
+            Hospitilizations.subscriptions
+
+        Route.HospitilizationsAdd ->
+            HospitilizationsAddEdit.subscriptions
+
+        Route.HospitilizationsEdit hospitilizationId ->
+            HospitilizationsAddEdit.subscriptions
+
+        Route.None ->
+            Sub.none
+
+        Route.Error t ->
+            Sub.none
+
+
+
+-- UPDATE --
+
+
+type Msg
+    = SetRoute (Maybe Route)
+    | BillingMsg Billing.Types.Msg
+    | RecordsMsg Records.Types.Msg
+    | RecordAddNewMsg RecordAddNew.Types.Msg
+    | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
+    | HospitilizationsMsg Hospitilizations.Types.Msg
+    | HospitilizationsAddEditMsg HospitilizationsAddEdit.Types.Msg
+    | UrlChange Navigation.Location
+    | KnockoutUrlChange String
+
+
+pageErrored : Model -> ActivePage -> String -> ( Model, Cmd msg )
+pageErrored model activePage errorMessage =
+    let
+        error =
+            Errored.pageLoadError activePage errorMessage
+    in
+        { model | pageState = Loaded (Errored error) } => Cmd.none
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
+    updatePage (getPage model.pageState) msg model
+
+
+updatePage : Page -> Msg -> Model -> ( Model, Cmd Msg )
+updatePage page msg model =
+    let
+        toPage toModel toMsg subUpdate subMsg subModel =
+            let
+                ( newModel, newCmd ) =
+                    subUpdate subMsg subModel
+            in
+                ( { model | pageState = toModel newModel }, Cmd.map toMsg newCmd )
+
+        errored =
+            pageErrored model
+    in
+        case ( msg, page ) of
+            ( SetRoute route, _ ) ->
+                setRoute route model
+
+            Page.Billing ->
+                newModel ! [ displayErrorMessage "Billing Not implemented" ]
+
+            Page.Records recordType ->
+                newModel ! [ Cmd.map RecordsMsg (Records.init recordType model.patientId) ]
+
+            Page.RecordAddNew recordType ->
+                let
+                    ( t, cmd ) =
+                        RecordAddNew.init model.addEditDataSource recordType
+                in
+                    { newModel | recordAddNewState = t } ! [ Cmd.map RecordAddNewMsg cmd ]
+
+            Route.Hospitilizations ->
+                Page ! [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
+
+            Page.HospitilizationsAddEdit hospitilizationId ->
+                let
+                    hospitilizationsRow =
+                        getHospitilizationsRow model.hospitalizationsState.hospitilizations hospitilizationId
+
+                    ( t, cmd ) =
+                        HospitilizationsAddEdit.init model.addEditDataSource hospitilizationsRow model.patientId
+                in
+                    { newModel | hospitilizationsAddEditState = t } ! [ Cmd.map HospitilizationsAddEditMsg cmd ]
+
+            Route.None ->
+                newModel ! []
+
+            Route.Error t ->
+                newModel ! [ displayErrorMessage t ]
+
+
+update : Page -> Msg -> Model -> ( Model, Cmd Model.Msg )
+update page msg model =
+    case ( msg, page ) of
+        ( SetRoute route, _ ) ->
+            setRoute route model
+
         BillingMsg billingMsg ->
             model ! []
 
@@ -115,66 +247,15 @@ update msg model =
             { model | addEditDataSource = Just t } ! []
 
         AddEditDataSourceLoaded (Err httpError) ->
-            { model | page = Error (toString httpError) } ! []
+            { model | page = Route.Error (toString httpError) } ! []
 
         UrlChange url ->
-            case Routes.getPatientId url.search of
+            case Route.getPatientId url.search of
                 Just patientId ->
                     getNewPage { model | currentUrl = url, patientId = patientId } url.hash
 
                 Nothing ->
-                    { model | page = Error "Cannot route to page without patientId" } ! []
+                    { model | page = Route.Error "Cannot route to page without patientId" } ! []
 
         KnockoutUrlChange url ->
             getNewPage model url
-
-
-getNewPage : Model -> String -> ( Model, Cmd Model.Msg )
-getNewPage model urlStr =
-    let
-        urlHash =
-            case String.contains "#" urlStr of
-                True ->
-                    urlStr
-
-                False ->
-                    "#" ++ urlStr
-
-        newPage =
-            Routes.getPage urlHash
-
-        newModel =
-            { model | page = newPage }
-    in
-        case newPage of
-            Billing ->
-                newModel ! [ displayErrorMessage "Billing Not implemented" ]
-
-            Records recordType ->
-                newModel ! [ Cmd.map RecordsMsg (Records.init recordType model.patientId) ]
-
-            RecordAddNew recordType ->
-                let
-                    ( t, cmd ) =
-                        RecordAddNew.init model.addEditDataSource recordType
-                in
-                    { newModel | recordAddNewState = t } ! [ Cmd.map RecordAddNewMsg cmd ]
-
-            Hospitilizations ->
-                newModel ! [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
-
-            HospitilizationsAddEdit hospitilizationId ->
-                let
-                    hospitilizationsRow =
-                        getHospitilizationsRow model.hospitalizationsState.hospitilizations hospitilizationId
-
-                    ( t, cmd ) =
-                        HospitilizationsAddEdit.init model.addEditDataSource hospitilizationsRow model.patientId
-                in
-                    { newModel | hospitilizationsAddEditState = t } ! [ Cmd.map HospitilizationsAddEditMsg cmd ]
-
-            None ->
-                newModel ! []
-
-            Error t ->
-                newModel ! [ displayErrorMessage t ]

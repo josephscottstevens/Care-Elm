@@ -8,7 +8,7 @@ import Html.Events exposing (onClick)
 import Common.Html exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
-import Common.Routes exposing (navHospitilizations)
+import Route exposing (Route)
 import Ports exposing (setUnsavedChanges)
 
 
@@ -83,13 +83,13 @@ update msg model =
                         model ! [ displayErrorMessage t ]
 
                     Nothing ->
-                        model ! [ displaySuccessMessage "Save completed successfully!", navHospitilizations ]
+                        model ! [ displaySuccessMessage "Save completed successfully!", Route.modifyUrl Route.Hospitilizations ]
 
             SaveCompleted (Err t) ->
                 model ! [ displayErrorMessage (toString t) ]
 
             Cancel ->
-                model ! [ setUnsavedChanges False, navHospitilizations ]
+                model ! [ setUnsavedChanges False, Route.modifyUrl Route.Hospitilizations ]
 
             UpdateHospitilizationsInitData hospitilizationsInitData ->
                 { model | initData = hospitilizationsInitData } ! []

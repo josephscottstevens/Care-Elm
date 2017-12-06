@@ -10,23 +10,13 @@ QUESTIONS:
 ===========================================================================================================
 	in tasks... there is a another hospitilizations????
 ===========================================================================================================
-CRITICAL: 
-Facility Name is missing on grid 
-Hosptization existing insert didn't look like it worked
-
 
 TODO:
-test Index.css (try like... records task update popup)
-test demographics 1 more (30 seconds)
-AddNewHospitilization Server side isn't returning an error message if it fails
-Quick scan of Column widths
 Fix are you sure you want to leave
-
-validate my url changes with new ones
-test cross update from hospitilizations
 
 LOW TODO:
 scroll to top when displaying validation errors
+AddNewHospitilization Server side isn't returning an error message if it fails
 Move ports file to Common
 trim down ports (find out which ones are un-used)
 Change record ports over to the single port pair
@@ -77,9 +67,11 @@ Trying to avoid:
 	Task column is only shown... if... there is a task? How does that work? (let them point it out if they want it)
 	put edit mode inside of grid  (but.. how?) (REQUESTED TODO)
 	there seems to be a bit of logic on transfer logic... not sure how to handle or if I am already
+	Hosptization existing insert didn't look like it worked (compare against Test4 behavior)
 	
 On Deploy Todo:
 	Validate File stuff still works
+	SQL url changes below
 	DateTime is still correct
 	Test popups
 	Test DateTime conversions

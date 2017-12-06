@@ -14,7 +14,6 @@ type Msg
     | EditTask Int
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
-    | AddNewStart RecordType
 
 
 type SortMode

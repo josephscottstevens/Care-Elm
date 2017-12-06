@@ -10,7 +10,7 @@ import Common.Grid exposing (checkColumn, standardTableAttrs, standardThead, row
 import Common.Types exposing (MenuMessage, FilterState, AddEditDataSource, HospitilizationsRow)
 import Common.Functions exposing (setLoadingStatus, displayErrorMessage, getResponseError, displaySuccessMessage, defaultString, defaultDate)
 import Ports exposing (dropDownToggle, sendMenuMessage)
-import Common.Routes exposing (navHospitilizationsAddEdit)
+import Route exposing (Route)
 
 
 port deleteHospitilizationConfirmed : (Int -> msg) -> Sub msg
@@ -65,14 +65,8 @@ update msg model =
         DeleteCompleted (Err t) ->
             model ! [ displayErrorMessage (toString t) ]
 
-        Edit hospitilizationId ->
-            model ! [ navHospitilizationsAddEdit hospitilizationId ]
-
         SetFilter filterState ->
             { model | filterFields = filterFields model.filterFields filterState } ! []
-
-        AddNewStart ->
-            model ! [ navHospitilizationsAddEdit Nothing ]
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
@@ -80,7 +74,7 @@ view model addEditDataSource =
     div []
         [ case addEditDataSource of
             Just _ ->
-                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick AddNewStart ] [ text "New Record" ]
+                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", Route.href Route.Hospitilizations ] [ text "New Record" ]
 
             Nothing ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
@@ -136,7 +130,7 @@ rowDropDownColumn =
 
 dropDownItems : Int -> List ( String, String, Html.Attribute Msg )
 dropDownItems rowId =
-    [ ( "e-edit", "Edit", onClick (Edit (Just rowId)) )
+    [ ( "e-edit", "Edit", Route.href (Route.HospitilizationsEdit rowId) )
     , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "HospitilizationDelete") )
     ]
 

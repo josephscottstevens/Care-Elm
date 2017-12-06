@@ -5,8 +5,8 @@ import Date
 import Date.Extra
 import Json.Encode as Encode
 import Json.Decode exposing (..)
-import Common.Types exposing (..)
 import Http
+import Route exposing (Route)
 
 
 port setLoadingStatus : Bool -> Cmd msg
@@ -18,9 +18,9 @@ port displaySuccessMessage : String -> Cmd msg
 port displayErrorMessage : String -> Cmd msg
 
 
-error : Http.Error -> Maybe Page
+error : Http.Error -> Maybe Route
 error httpError =
-    Just (Error (toString httpError))
+    Just (Route.Error (toString httpError))
 
 
 isAlpha : Char -> Bool

@@ -1,16 +1,6 @@
 module Common.Types exposing (..)
 
 
-type Page
-    = None
-    | Billing
-    | Records RecordType
-    | RecordAddNew RecordType
-    | Hospitilizations
-    | HospitilizationsAddEdit (Maybe Int)
-    | Error String
-
-
 type alias FilterState =
     { name : String
     , value : String
