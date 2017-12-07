@@ -17,6 +17,7 @@ import Ports exposing (..)
 import Navigation exposing (Location)
 import Route exposing (Route)
 import Http exposing (Error)
+import Task
 
 
 type alias Model =
@@ -41,18 +42,16 @@ init location =
     let
         patientId =
             Route.getPatientId location.search
-
-        -- todo a bit heavy code here
-        -- todo no defaultint
     in
         case patientId of
             Just t ->
-                { patientId = t
-                , page = None
-                , addEditDataSource = Nothing
-                }
-                    ! [ getDropDowns t AddEditDataSourceLoaded, setLoadingStatus False ]
+                setRoute (Route.fromLocation location)
+                    { patientId = t
+                    , page = None
+                    , addEditDataSource = Nothing
+                    }
 
+            --! [ getDropDowns t AddEditDataSourceLoaded ]
             Nothing ->
                 { patientId = 0
                 , page = Error "Cannot load page without patientId"
@@ -64,29 +63,15 @@ init location =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ Sub.map RecordsMsg Records.subscriptions
-        , Sub.map RecordAddNewMsg RecordAddNew.subscriptions
-        , Sub.map HospitilizationsMsg Hospitilizations.subscriptions
-        , Sub.map HospitilizationsAddEditMsg HospitilizationsAddEdit.subscriptions
-        , isApp KnockoutUrlChange
+        [ pageSubscriptions model.page
         ]
-
-
-main : Program Never Model Msg
-main =
-    Navigation.program UrlChange
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = subscriptions
-        }
 
 
 view : Model -> Html Msg
 view model =
     case model.page of
         None ->
-            div [] []
+            div [] [ text "no view here" ]
 
         Billing ->
             div [] []
@@ -140,17 +125,48 @@ type Msg
     = SetRoute (Maybe Route)
     | BillingMsg Billing.Types.Msg
     | RecordsMsg Records.Types.Msg
+    | RecordsLoaded (Result Http.Error Records.Types.Model)
     | RecordAddNewMsg RecordAddNew.Types.Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | HospitilizationsMsg Hospitilizations.Types.Msg
     | HospitilizationsAddEditMsg HospitilizationsAddEdit.Types.Msg
-    | UrlChange Navigation.Location
+      -- | UrlChange Navigation.Location
     | KnockoutUrlChange String
+
+
+model : Model
+model =
+    Model 0 None Nothing
+
+
+transition : (Result x a -> msg) -> Task.Task x a -> ( Model, Cmd msg )
+transition toMsg task =
+    ( model, Task.attempt toMsg task )
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
 setRoute maybeRoute model =
-    model ! []
+    let
+        extraCmd =
+            case model.addEditDataSource of
+                Just _ ->
+                    Cmd.none
+
+                Nothing ->
+                    getDropDowns model.patientId AddEditDataSourceLoaded
+
+        transition toMsg task =
+            model ! [ Task.attempt toMsg task, setLoadingStatus False, extraCmd ]
+    in
+        case maybeRoute of
+            Just (Route.Records PrimaryCare) ->
+                transition RecordsLoaded (Records.init PrimaryCare model.patientId)
+
+            Nothing ->
+                { model | page = Error "no route provided" } ! []
+
+            _ ->
+                { model | page = Error "unknown page" } ! []
 
 
 
@@ -176,7 +192,7 @@ updatePage page msg model =
                 ( newModel, newCmd ) =
                     subUpdate subMsg subModel
             in
-                ( { model | page = toModel newModel }, Cmd.map toMsg newCmd )
+                { model | page = toModel newModel } ! [ Cmd.map toMsg newCmd ]
 
         -- errored =
         --     pageErrored model
@@ -184,6 +200,23 @@ updatePage page msg model =
         case ( msg, page ) of
             ( SetRoute route, _ ) ->
                 setRoute route model
+
+            ( AddEditDataSourceLoaded response, _ ) ->
+                case response of
+                    Ok t ->
+                        { model | addEditDataSource = Just t } ! []
+
+                    Err t ->
+                        { model | page = Error (toString t) } ! []
+
+            ( RecordsLoaded (Ok subModel), _ ) ->
+                { model | page = Records PrimaryCare subModel } ! []
+
+            ( RecordsLoaded (Err err), _ ) ->
+                { model | page = Error (toString err) } ! []
+
+            ( KnockoutUrlChange location, _ ) ->
+                model ! []
 
             _ ->
                 model ! []
@@ -214,3 +247,13 @@ updatePage page msg model =
 --     newModel ! []
 -- (Page.Error t ->
 --     newModel ! [ displayErrorMessage t ]
+
+
+main : Program Never Model Msg
+main =
+    Navigation.program (Route.fromLocation >> SetRoute)
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }

@@ -61,6 +61,12 @@ routeToString route =
 --     "#/people/_previoushistoryrecords" ->
 --     "#/people/_enrollmentrecords" ->
 --     "#/people/_miscrecords" ->
+-- getRecordType : String -> RecordType
+-- getRecordType str =
+--     PrimaryCare
+-- parseRecordType : Parser (String -> RecordType) RecordType
+-- parseRecordType str =
+--     custom "_primarycarerecords" getRecordType
 
 
 route : Parser (Route -> a) a
@@ -68,7 +74,7 @@ route =
     oneOf
         [ Url.map None (s "")
         , Url.map Billing (s "login")
-        , Url.map (Records Specialty) (s "logout")
+        , Url.map (Records PrimaryCare) (s "people" </> s "_primarycarerecords")
         , Url.map (RecordAddNew Specialty) (s "logout")
         , Url.map HospitilizationsAdd (s "settings")
         , Url.map HospitilizationsEdit (s "register" </> int)
