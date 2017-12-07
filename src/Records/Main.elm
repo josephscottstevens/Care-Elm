@@ -42,6 +42,9 @@ update msg model =
         Load (Err t) ->
             model ! [ displayErrorMessage (toString t) ]
 
+        NewRecord ->
+            model ! [ Route.modifyUrl (Route.RecordAddNew model.recordType) ]
+
         SetTableState newState ->
             { model | tableState = newState } ! []
 
@@ -83,7 +86,7 @@ view model addEditDataSource =
         [ h4 [] [ text (getDesc model.recordType) ]
         , case addEditDataSource of
             Just _ ->
-                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", Route.href (Route.RecordAddNew model.recordType) ] [ text "New Record" ]
+                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick NewRecord ] [ text "New Record" ]
 
             Nothing ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]

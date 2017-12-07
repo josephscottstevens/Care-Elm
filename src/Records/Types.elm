@@ -8,6 +8,7 @@ import Common.Types exposing (..)
 type Msg
     = Load (Result Http.Error WebResponse)
     | SetTableState Table.State
+    | NewRecord
     | DropDownToggle Int
     | SendMenuMessage Int RecordType String
     | SetFilter FilterState

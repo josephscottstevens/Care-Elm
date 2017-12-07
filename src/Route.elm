@@ -21,6 +21,20 @@ type Route
     | Error String
 
 
+bob : String -> String
+bob str =
+    "_" ++ str
+
+
+formatRecordType : RecordType -> String
+formatRecordType recordType =
+    recordType
+        |> toString
+        |> String.toLower
+        |> bob
+        |> String.append "records"
+
+
 routeToString : Route -> String
 routeToString route =
     case route of
@@ -54,6 +68,8 @@ route =
     oneOf
         [ Url.map None (s "")
         , Url.map Billing (s "login")
+
+        -- Records Grid
         , Url.map (Records PrimaryCare) (s "people" </> s "_primarycarerecords")
         , Url.map (Records Specialty) (s "people" </> s "_specialtyrecords")
         , Url.map (Records Labs) (s "people" </> s "_labrecords")
@@ -64,7 +80,20 @@ route =
         , Url.map (Records PreviousHistories) (s "people" </> s "_previoushistoryrecords")
         , Url.map (Records Enrollment) (s "people" </> s "_enrollmentrecords")
         , Url.map (Records Misc) (s "people" </> s "_miscrecords")
-        , Url.map (RecordAddNew Specialty) (s "logout")
+
+        -- Records Edit
+        , Url.map (RecordAddNew PrimaryCare) (s "people" </> s "_primarycarerecords" </> s "addedit")
+        , Url.map (RecordAddNew Specialty) (s "people" </> s "_specialtyrecords" </> s "addedit")
+        , Url.map (RecordAddNew Labs) (s "people" </> s "_labrecords" </> s "addedit")
+        , Url.map (RecordAddNew Radiology) (s "people" </> s "_radiologyrecords" </> s "addedit")
+        , Url.map (RecordAddNew Hospitalizations) (s "people" </> s "_hospitalizationrecords" </> s "addedit")
+        , Url.map (RecordAddNew Legal) (s "people" </> s "_legalrecords" </> s "addedit")
+        , Url.map (RecordAddNew CallRecordings) (s "people" </> s "_callrecordingrecords" </> s "addedit")
+        , Url.map (RecordAddNew PreviousHistories) (s "people" </> s "_previoushistoryrecords" </> s "addedit")
+        , Url.map (RecordAddNew Enrollment) (s "people" </> s "_enrollmentrecords" </> s "addedit")
+        , Url.map (RecordAddNew Misc) (s "people" </> s "_miscrecords" </> s "addedit")
+
+        --
         , Url.map HospitilizationsAdd (s "settings")
         , Url.map HospitilizationsEdit (s "register" </> int)
         , Url.map Error (s "article" </> string)
