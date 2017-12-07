@@ -13,7 +13,6 @@ import RecordAddNew.Types
 import Common.Functions exposing (..)
 import Common.Types exposing (..)
 import Functions exposing (..)
-import Ports exposing (..)
 import Navigation exposing (Location)
 import Route exposing (Route)
 import Http exposing (Error)
@@ -156,11 +155,12 @@ setRoute maybeRoute model =
                     getDropDowns model.patientId AddEditDataSourceLoaded
 
         transition toMsg task =
-            model ! [ Task.attempt toMsg task, setLoadingStatus False, extraCmd ]
+            [ Task.attempt toMsg task, setLoadingStatus False, extraCmd ]
     in
         case maybeRoute of
             Just (Route.Records PrimaryCare) ->
-                transition RecordsLoaded (Records.init PrimaryCare model.patientId)
+                { model | page = Records PrimaryCare (Records.Types.emptyModel PrimaryCare model.patientId) }
+                    ! transition RecordsLoaded (Records.init PrimaryCare model.patientId)
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []

@@ -39,8 +39,20 @@ type alias Model =
     }
 
 
-emptyModel : RecordType -> Int -> List RecordRow -> Model
-emptyModel recordType patientId recordRows =
+emptyModel : RecordType -> Int -> Model
+emptyModel recordType patientId =
+    { records = []
+    , patientId = patientId
+    , facilityId = Nothing
+    , tableState = Table.initialSort "Date"
+    , query = ""
+    , filterFields = emptyFilters
+    , dropDownState = emptyDropDownState
+    }
+
+
+loadModel : RecordType -> Int -> List RecordRow -> Model
+loadModel recordType patientId recordRows =
     { records = recordRows
     , patientId = patientId
     , facilityId = Nothing

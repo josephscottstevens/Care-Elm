@@ -30,7 +30,7 @@ init recordType patientId =
             rows recordType patientId
                 |> Http.toTask
     in
-        Task.map (emptyModel recordType patientId) loadRecordRows
+        Task.map (loadModel recordType patientId) loadRecordRows
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
