@@ -50,7 +50,6 @@ init location =
                     , addEditDataSource = Nothing
                     }
 
-            --! [ getDropDowns t AddEditDataSourceLoaded ]
             Nothing ->
                 { patientId = 0
                 , page = Error "Cannot load page without patientId"
@@ -60,7 +59,7 @@ init location =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
+subscriptions model =
     Sub.batch
         [ pageSubscriptions model.page
         ]
@@ -129,18 +128,6 @@ type Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | HospitilizationsMsg Hospitilizations.Types.Msg
     | HospitilizationsAddEditMsg HospitilizationsAddEdit.Types.Msg
-      -- | UrlChange Navigation.Location
-    | KnockoutUrlChange String
-
-
-model : Model
-model =
-    Model 0 None Nothing
-
-
-transition : (Result x a -> msg) -> Task.Task x a -> ( Model, Cmd msg )
-transition toMsg task =
-    ( model, Task.attempt toMsg task )
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -169,16 +156,6 @@ setRoute maybeRoute model =
                 { model | page = Error "unknown page" } ! []
 
 
-
--- pageErrored : Model -> Page -> String -> ( Model, Cmd msg )
--- pageErrored model activePage errorMessage =
---     let
---         error =
---             Errored.pageLoadError activePage errorMessage
---     in
---         { model | pageState = Error error } => Cmd.none
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     updatePage model.page msg model
@@ -193,9 +170,6 @@ updatePage page msg model =
                     subUpdate subMsg subModel
             in
                 { model | page = toModel newModel } ! [ Cmd.map toMsg newCmd ]
-
-        -- errored =
-        --     pageErrored model
     in
         case ( msg, page ) of
             ( SetRoute route, _ ) ->
@@ -214,9 +188,6 @@ updatePage page msg model =
 
             ( RecordsLoaded (Err err), _ ) ->
                 { model | page = Error (toString err) } ! []
-
-            ( KnockoutUrlChange location, _ ) ->
-                model ! []
 
             _ ->
                 model ! []
