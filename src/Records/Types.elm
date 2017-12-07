@@ -29,7 +29,8 @@ type alias WebResponse =
 
 
 type alias Model =
-    { records : List RecordRow
+    { recordType : RecordType
+    , records : List RecordRow
     , patientId : Int
     , facilityId : Maybe Int
     , tableState : Table.State
@@ -41,7 +42,8 @@ type alias Model =
 
 emptyModel : RecordType -> Int -> Model
 emptyModel recordType patientId =
-    { records = []
+    { recordType = recordType
+    , records = []
     , patientId = patientId
     , facilityId = Nothing
     , tableState = Table.initialSort "Date"
@@ -53,7 +55,8 @@ emptyModel recordType patientId =
 
 loadModel : RecordType -> Int -> List RecordRow -> Model
 loadModel recordType patientId recordRows =
-    { records = recordRows
+    { recordType = recordType
+    , records = recordRows
     , patientId = patientId
     , facilityId = Nothing
     , tableState = Table.initialSort "Date"

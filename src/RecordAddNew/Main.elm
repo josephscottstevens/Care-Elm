@@ -105,13 +105,13 @@ subscriptions =
         ]
 
 
-view : Model -> RecordType -> Html Msg
-view model recordType =
+view : Model -> Html Msg
+view model =
     case model.state of
         Edit ->
             let
                 errors =
-                    getValidationErrors (formInputs model recordType)
+                    getValidationErrors (formInputs model model.recordType)
 
                 validationErrorsDiv =
                     if model.showValidationErrors == True && List.length errors > 0 then
@@ -123,13 +123,13 @@ view model recordType =
                     class "btn btn-sm btn-success margin-left-5 pull-right"
             in
                 div [ class "form-horizontal" ]
-                    [ h4 [] [ text (getDesc recordType) ]
+                    [ h4 [] [ text (getDesc model.recordType) ]
                     , validationErrorsDiv
-                    , makeControls (formInputs model recordType)
+                    , makeControls (formInputs model model.recordType)
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
-                            [ button [ type_ "button", id "Save", value "Addmodel", onClick (Save recordType), saveBtnClass ] [ text "Save" ]
-                            , button [ type_ "button", onClick (Cancel recordType), class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                            [ button [ type_ "button", id "Save", value "Addmodel", onClick (Save model.recordType), saveBtnClass ] [ text "Save" ]
+                            , button [ type_ "button", onClick (Cancel model.recordType), class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
                             ]
                         ]
                     ]

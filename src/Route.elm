@@ -49,32 +49,21 @@ routeToString route =
             "#/Error" ++ t
 
 
-
---         "#/people/_primarycarerecords" ->
---     "#/people/_specialtyrecords" ->
---     "#/people/_labrecords" ->
---     "#/people/_radiologyrecords" ->
---     "#/people/_hospitalizationrecords" ->
---    "#/people/_legalrecords" ->
---     "#/people/_ccdrecords" ->
---     "#/people/_callrecordingrecords" ->
---     "#/people/_previoushistoryrecords" ->
---     "#/people/_enrollmentrecords" ->
---     "#/people/_miscrecords" ->
--- getRecordType : String -> RecordType
--- getRecordType str =
---     PrimaryCare
--- parseRecordType : Parser (String -> RecordType) RecordType
--- parseRecordType str =
---     custom "_primarycarerecords" getRecordType
-
-
 route : Parser (Route -> a) a
 route =
     oneOf
         [ Url.map None (s "")
         , Url.map Billing (s "login")
         , Url.map (Records PrimaryCare) (s "people" </> s "_primarycarerecords")
+        , Url.map (Records Specialty) (s "people" </> s "_specialtyrecords")
+        , Url.map (Records Labs) (s "people" </> s "_labrecords")
+        , Url.map (Records Radiology) (s "people" </> s "_radiologyrecords")
+        , Url.map (Records Hospitalizations) (s "people" </> s "_hospitalizationrecords")
+        , Url.map (Records Legal) (s "people" </> s "_legalrecords")
+        , Url.map (Records CallRecordings) (s "people" </> s "_callrecordingrecords")
+        , Url.map (Records PreviousHistories) (s "people" </> s "_previoushistoryrecords")
+        , Url.map (Records Enrollment) (s "people" </> s "_enrollmentrecords")
+        , Url.map (Records Misc) (s "people" </> s "_miscrecords")
         , Url.map (RecordAddNew Specialty) (s "logout")
         , Url.map HospitilizationsAdd (s "settings")
         , Url.map HospitilizationsEdit (s "register" </> int)

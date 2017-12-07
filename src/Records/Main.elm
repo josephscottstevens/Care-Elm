@@ -77,18 +77,18 @@ update msg model =
             { model | filterFields = filterFields model.filterFields filterState } ! []
 
 
-view : Model -> RecordType -> Maybe AddEditDataSource -> Html Msg
-view model recordType addEditDataSource =
+view : Model -> Maybe AddEditDataSource -> Html Msg
+view model addEditDataSource =
     div []
-        [ h4 [] [ text (getDesc recordType) ]
+        [ h4 [] [ text (getDesc model.recordType) ]
         , case addEditDataSource of
             Just _ ->
-                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", Route.href (Route.RecordAddNew recordType) ] [ text "New Record" ]
+                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", Route.href (Route.RecordAddNew model.recordType) ] [ text "New Record" ]
 
             Nothing ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
         , div [ class "e-grid e-js e-waitingpopup" ]
-            [ Table.view (config SetFilter recordType (getTaskId model)) model.tableState (filteredRecords model.records model.filterFields recordType) ]
+            [ Table.view (config SetFilter model.recordType (getTaskId model)) model.tableState (filteredRecords model.records model.filterFields model.recordType) ]
         ]
 
 

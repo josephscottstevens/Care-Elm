@@ -29,8 +29,8 @@ type alias Model =
 type Page
     = None
     | Billing
-    | Records RecordType Records.Types.Model
-    | RecordAddNew RecordType RecordAddNew.Types.Model
+    | Records Records.Types.Model
+    | RecordAddNew RecordAddNew.Types.Model
     | Hospitilizations Hospitilizations.Types.Model
     | HospitilizationsAddEdit HospitilizationsAddEdit.Types.Model
     | Error String
@@ -75,11 +75,11 @@ view model =
         Billing ->
             div [] []
 
-        Records recordType subModel ->
-            Html.map RecordsMsg (Records.view subModel recordType model.addEditDataSource)
+        Records subModel ->
+            Html.map RecordsMsg (Records.view subModel model.addEditDataSource)
 
-        RecordAddNew recordType subModel ->
-            Html.map RecordAddNewMsg (RecordAddNew.view subModel recordType)
+        RecordAddNew subModel ->
+            Html.map RecordAddNewMsg (RecordAddNew.view subModel)
 
         Hospitilizations subModel ->
             Html.map HospitilizationsMsg (Hospitilizations.view subModel model.addEditDataSource)
@@ -100,10 +100,10 @@ pageSubscriptions page =
         Billing ->
             Sub.none
 
-        Records _ _ ->
+        Records _ ->
             Sub.map RecordsMsg Records.subscriptions
 
-        RecordAddNew _ _ ->
+        RecordAddNew _ ->
             Sub.map RecordAddNewMsg RecordAddNew.subscriptions
 
         Hospitilizations _ ->
@@ -158,9 +158,9 @@ setRoute maybeRoute model =
             [ Task.attempt toMsg task, setLoadingStatus False, extraCmd ]
     in
         case maybeRoute of
-            Just (Route.Records PrimaryCare) ->
-                { model | page = Records PrimaryCare (Records.Types.emptyModel PrimaryCare model.patientId) }
-                    ! transition RecordsLoaded (Records.init PrimaryCare model.patientId)
+            Just (Route.Records t) ->
+                { model | page = Records (Records.Types.emptyModel t model.patientId) }
+                    ! transition RecordsLoaded (Records.init t model.patientId)
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []
@@ -210,7 +210,7 @@ updatePage page msg model =
                         { model | page = Error (toString t) } ! []
 
             ( RecordsLoaded (Ok subModel), _ ) ->
-                { model | page = Records PrimaryCare subModel } ! []
+                { model | page = Records subModel } ! []
 
             ( RecordsLoaded (Err err), _ ) ->
                 { model | page = Error (toString err) } ! []
@@ -220,33 +220,6 @@ updatePage page msg model =
 
             _ ->
                 model ! []
-
-
-
--- (Page.Billing ->
---     newModel ! [ displayErrorMessage "Billing Not implemented" ]
--- (Page.Records recordType ->
---     newModel ! [ Cmd.map RecordsMsg (Records.init recordType model.patientId) ]
--- (Page.RecordAddNew recordType ->
---     let
---         ( t, cmd ) =
---             RecordAddNew.init model.addEditDataSource recordType
---     in
---         { newModel | recordAddNewState = t } ! [ Cmd.map RecordAddNewMsg cmd ]
--- (Page.Hospitilizations ->
---     Page ! [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
--- (Page.HospitilizationsAddEdit hospitilizationId ->
---     let
---         hospitilizationsRow =
---             getHospitilizationsRow model.hospitalizationsState.hospitilizations hospitilizationId
---         ( t, cmd ) =
---             HospitilizationsAddEdit.init model.addEditDataSource hospitilizationsRow model.patientId
---     in
---         { newModel | hospitilizationsAddEditState = t } ! [ Cmd.map HospitilizationsAddEditMsg cmd ]
--- (Page.None ->
---     newModel ! []
--- (Page.Error t ->
---     newModel ! [ displayErrorMessage t ]
 
 
 main : Program Never Model Msg
