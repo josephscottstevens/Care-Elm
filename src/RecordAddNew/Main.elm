@@ -68,10 +68,10 @@ init addEditDataSource recordType =
                 { model
                     | addEditDataSource = addEditDataSource
                     , recordType = recordType
-                    , recordTypeId = getId recordType
+                    , recordTypeId = Just <| getId recordType
                     , facilityId = t.facilityId
                 }
-                    ! [ initRecords (getAddEditMsg addEditDataSource (getId recordType) False False) ]
+                    ! [ initRecords (getAddEditMsg addEditDataSource (Just <| getId recordType) False False) ]
 
         Nothing ->
             emptyModel -22 ! [ displayErrorMessage "Cannot load RecordType Addnew without datasource!" ]

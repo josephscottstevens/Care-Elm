@@ -39,9 +39,9 @@ type alias Model =
     }
 
 
-emptyModel : Int -> Model
-emptyModel patientId =
-    { records = []
+emptyModel : RecordType -> Int -> List RecordRow -> Model
+emptyModel recordType patientId recordRows =
+    { records = recordRows
     , patientId = patientId
     , facilityId = Nothing
     , tableState = Table.initialSort "Date"

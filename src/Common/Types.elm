@@ -122,38 +122,38 @@ getRecordTypeById maybeInt =
             Nothing
 
 
-getId : RecordType -> Maybe Int
+getId : RecordType -> Int
 getId recordType =
     case recordType of
         PrimaryCare ->
-            Just 1
+            1
 
         Specialty ->
-            Just 2
+            2
 
         Labs ->
-            Just 3
+            3
 
         Radiology ->
-            Just 4
+            4
 
         Hospitalizations ->
-            Just 9
+            9
 
         Legal ->
-            Just 6
+            6
 
         CallRecordings ->
-            Just 10
+            10
 
         PreviousHistories ->
-            Just 11
+            11
 
         Enrollment ->
-            Just 12
+            12
 
         Misc ->
-            Just 5
+            5
 
 
 type alias AddEditDataSource =

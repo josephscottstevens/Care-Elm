@@ -9,8 +9,10 @@ import Table exposing (..)
 import Common.Grid exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
+import Http
 import Ports exposing (..)
 import Route exposing (Route)
+import Task exposing (Task)
 
 
 subscriptions : Sub Msg
@@ -21,13 +23,14 @@ subscriptions =
         ]
 
 
-init : RecordType -> Int -> Cmd Msg
+init : RecordType -> Int -> Task Http.Error Model
 init recordType patientId =
     let
-        recordTypeId =
-            getId recordType
+        loadRecordRows =
+            rows recordType patientId
+                |> Http.toTask
     in
-        getRecords patientId recordTypeId Load
+        Task.map (emptyModel recordType patientId) loadRecordRows
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

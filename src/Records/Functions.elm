@@ -3,6 +3,7 @@ module Records.Functions exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Http
+import Table
 import Records.Types exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
@@ -51,21 +52,17 @@ decodeRecordRow =
         |> hardcoded False
 
 
-decodeModel : Decoder WebResponse
-decodeModel =
-    decode WebResponse
-        |> required "facilityId" (maybe Decode.int)
-        |> required "list" (Decode.list decodeRecordRow)
+rows : RecordType -> Int -> Http.Request (List RecordRow)
+rows recordType patientId =
+    let
+        recordTypeId =
+            getId recordType
 
-
-request : Int -> Maybe Int -> Http.Request WebResponse
-request patientId recordTypeId =
-    Http.get ("/People/PatientRecordsGrid?patientId=" ++ toString patientId ++ "&recordTypeId=" ++ defaultIntToString recordTypeId) decodeModel
-
-
-getRecords : Int -> Maybe Int -> (Result Http.Error WebResponse -> msg) -> Cmd msg
-getRecords patientId recordTypeId t =
-    Http.send t (request patientId recordTypeId)
+        url =
+            "/People/PatientRecordsGrid?patientId=" ++ toString patientId ++ "&recordTypeId=" ++ toString recordTypeId
+    in
+        Decode.field "list" (Decode.list decodeRecordRow)
+            |> Http.get url
 
 
 deleteRequest : Int -> Cmd Msg
@@ -99,7 +96,7 @@ getMenuMessage records recordType recordId messageType =
                 |> Maybe.map (\t -> not t.hasVerbalConsent)
 
         recordTypeId =
-            getId recordType
+            Just <| getId recordType
     in
         MenuMessage messageType recordId recordTypeId maybeVerbalConsent
 
