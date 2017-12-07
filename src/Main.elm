@@ -196,8 +196,8 @@ updatePage page msg model =
             ( RecordsMsg subMsg, Records subModel ) ->
                 toPage Records RecordsMsg Records.update subMsg subModel
 
-            ( RecordAddNewMsg msg, RecordAddNew subModel ) ->
-                { model | page = RecordAddNew subModel } ! []
+            ( RecordAddNewMsg subMsg, RecordAddNew subModel ) ->
+                toPage RecordAddNew RecordAddNewMsg RecordAddNew.update subMsg subModel
 
             _ ->
                 { model | page = Error <| toString msg ++ " - " ++ toString page } ! []

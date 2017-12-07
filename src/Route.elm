@@ -21,9 +21,38 @@ type Route
     | Error String
 
 
-formatRecordType : RecordType -> String
-formatRecordType recordType =
-    "_" ++ (toString recordType |> String.toLower) ++ "records/addedit"
+recordTypeToString : RecordType -> String
+recordTypeToString recordType =
+    case recordType of
+        PrimaryCare ->
+            "_primarycarerecords"
+
+        Specialty ->
+            "_specialtyrecords"
+
+        Labs ->
+            "_labrecords"
+
+        Radiology ->
+            "_radiologyrecords"
+
+        Hospitalizations ->
+            "_hospitalizationrecords"
+
+        Legal ->
+            "_legalrecords"
+
+        CallRecordings ->
+            "_callrecordingrecords"
+
+        PreviousHistories ->
+            "_previoushistoryrecords"
+
+        Enrollment ->
+            "_enrollmentrecords"
+
+        Misc ->
+            "_miscrecords"
 
 
 routeToString : Route -> String
@@ -35,11 +64,11 @@ routeToString route =
         Billing ->
             "#"
 
-        Records _ ->
-            ""
+        Records recordType ->
+            "#/people/" ++ (recordTypeToString recordType)
 
         RecordAddNew recordType ->
-            "#/people/" ++ (formatRecordType recordType)
+            "#/people/" ++ (recordTypeToString recordType) ++ "/addedit"
 
         Hospitilizations ->
             ""

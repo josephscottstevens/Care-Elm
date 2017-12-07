@@ -140,7 +140,7 @@ update msg model =
                 if List.length (getValidationErrors (formInputs model recordType)) > 0 then
                     { model | showValidationErrors = True } ! []
                 else
-                    model ! [ saveForm model, setUnsavedChanges False, Route.modifyUrl (Route.RecordAddNew recordType) ]
+                    model ! [ saveForm model, setUnsavedChanges False, Route.modifyUrl (Route.Records recordType) ]
 
             SaveCompleted (Ok responseMsg) ->
                 case getResponseError responseMsg of
@@ -154,7 +154,7 @@ update msg model =
                 (model ! [ displayErrorMessage (toString t) ])
 
             Cancel recordType ->
-                model ! [ setUnsavedChanges False, Route.modifyUrl (Route.RecordAddNew recordType) ]
+                model ! [ setUnsavedChanges False, Route.modifyUrl (Route.Records recordType) ]
 
             PresetPageComplete recordTypeId ->
                 { model | state = Edit } ! [ initRecords (getAddEditMsg model.addEditDataSource recordTypeId True False) ]
@@ -170,7 +170,7 @@ update msg model =
                                 , recordType = t
                                 , state = Limbo
                             }
-                                ! [ presetPage dropDownItem.id, setLoadingStatus True ]
+                                ! [ presetPage dropDownItem.id ]
 
                         Nothing ->
                             model ! [ displayErrorMessage ("Cannot load invalid record type: " ++ toString dropDownItem.id) ]
