@@ -149,6 +149,10 @@ setRoute maybeRoute model =
                 { model | page = Records (Records.Types.emptyModel t model.patientId) }
                     ! transition RecordsLoaded (Records.init t model.patientId)
 
+            Just (Route.RecordAddNew t) ->
+                { model | page = RecordAddNew (RecordAddNew.Types.emptyModel t model.addEditDataSource model.patientId) }
+                    ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.addEditDataSource t) ]
+
             Nothing ->
                 { model | page = Error "no route provided" } ! []
 
@@ -189,8 +193,14 @@ updatePage page msg model =
             ( RecordsLoaded (Err err), _ ) ->
                 { model | page = Error (toString err) } ! []
 
+            ( RecordsMsg subMsg, Records subModel ) ->
+                toPage Records RecordsMsg Records.update subMsg subModel
+
+            ( RecordAddNewMsg msg, RecordAddNew subModel ) ->
+                { model | page = RecordAddNew subModel } ! []
+
             _ ->
-                model ! []
+                { model | page = Error <| toString msg ++ " - " ++ toString page } ! []
 
 
 main : Program Never Model Msg

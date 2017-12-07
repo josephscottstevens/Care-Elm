@@ -97,15 +97,15 @@ type alias Model =
     }
 
 
-emptyModel : Int -> Model
-emptyModel patientId =
+emptyModel : RecordType -> Maybe AddEditDataSource -> Int -> Model
+emptyModel recordType addEditDataSource patientId =
     { state = Edit
-    , addEditDataSource = Nothing
-    , recordType = PrimaryCare
+    , addEditDataSource = addEditDataSource
+    , recordType = recordType
     , recordId = 0
     , title = ""
     , patientId = patientId
-    , recordTypeId = Nothing
+    , recordTypeId = Just <| getId recordType
     , recordTypeText = ""
     , specialty = ""
     , provider = ""
@@ -115,7 +115,7 @@ emptyModel patientId =
     , comments = ""
     , showValidationErrors = False
     , reportDate = Nothing
-    , facilityId = Nothing
+    , facilityId = addEditDataSource |> Maybe.andThen .facilityId
     , facilityText = ""
     , recording = ""
     , callSid = ""

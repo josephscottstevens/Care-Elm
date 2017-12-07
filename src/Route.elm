@@ -21,18 +21,9 @@ type Route
     | Error String
 
 
-bob : String -> String
-bob str =
-    "_" ++ str
-
-
 formatRecordType : RecordType -> String
 formatRecordType recordType =
-    recordType
-        |> toString
-        |> String.toLower
-        |> bob
-        |> String.append "records"
+    "_" ++ (toString recordType |> String.toLower) ++ "records/addedit"
 
 
 routeToString : Route -> String
@@ -47,8 +38,8 @@ routeToString route =
         Records _ ->
             ""
 
-        RecordAddNew _ ->
-            ""
+        RecordAddNew recordType ->
+            "#/people/" ++ (formatRecordType recordType)
 
         Hospitilizations ->
             ""

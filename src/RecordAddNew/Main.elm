@@ -57,24 +57,9 @@ port resetUpdate : Maybe Int -> Cmd msg
 port resetUpdateComplete : (Maybe Int -> msg) -> Sub msg
 
 
-init : Maybe AddEditDataSource -> RecordType -> ( Model, Cmd Msg )
+init : Maybe AddEditDataSource -> RecordType -> Cmd Msg
 init addEditDataSource recordType =
-    case addEditDataSource of
-        Just t ->
-            let
-                model =
-                    emptyModel t.patientId
-            in
-                { model
-                    | addEditDataSource = addEditDataSource
-                    , recordType = recordType
-                    , recordTypeId = Just <| getId recordType
-                    , facilityId = t.facilityId
-                }
-                    ! [ initRecords (getAddEditMsg addEditDataSource (Just <| getId recordType) False False) ]
-
-        Nothing ->
-            emptyModel -22 ! [ displayErrorMessage "Cannot load RecordType Addnew without datasource!" ]
+    initRecords (getAddEditMsg addEditDataSource (Just <| getId recordType) False False)
 
 
 subscriptions : Sub Msg
