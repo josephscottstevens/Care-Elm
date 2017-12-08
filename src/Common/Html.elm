@@ -91,7 +91,7 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ input [ type_ "checkbox", class "e-textbox", nameAttr labelText, onCheck event, checked displayValue ] []
+                            [ input [ type_ "checkbox", checkStyle, nameAttr labelText, onCheck event, checked displayValue ] []
                             ]
                         ]
 
@@ -128,8 +128,9 @@ makeControls config controls =
 
                 FileInput labelText requiredType displayValue ->
                     div [ class "form-group" ]
-                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), for "fileName" ] [ text labelText ]
-                        , div [ class controlWidth ] [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] [] ]
+                        [ commonLabel labelText requiredType
+                        , div config.controlAttributes
+                            [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] [] ]
                         , div [ class labelWidth ] [ div [ id "fileBtn" ] [] ]
                         ]
 

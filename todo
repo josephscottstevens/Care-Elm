@@ -14,6 +14,26 @@ QUESTIONS:
 TODO:
 Fix are you sure you want to leave
 
+who should have RecordType, the model, or pass to view?
+I dont want the models aware of patientId, because then they both have a copy, and sync bug right?
+
+getDropDowns no longer being called now
+still have patientId EVERYWHERE
+
+not listneing to KnockoutUrl Change I dont think... and everything seems fine?
+how does app handle crash crash?
+
+url change isn't firing my stuff anymore (back foward buttons)
+
+..somehow make controlWidth apart of config :/
+
+required validation logic is gone
+
+verify noone else is calling deleted methods
+why rnReviewedCarePlan?
+
+un-used taskId in records main getColumns
+
 LOW TODO:
 scroll to top when displaying validation errors
 AddNewHospitilization Server side isn't returning an error message if it fails

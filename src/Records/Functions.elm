@@ -21,12 +21,10 @@ decodeRecordRow =
         |> required "Specialty" (maybe Decode.string)
         |> required "Comments" (maybe Decode.string)
         |> required "TransferedTo" (maybe Decode.string)
-        |> required "TransferedOn" (maybe Decode.string)
         |> required "PatientId" Decode.int
         |> required "Title" (maybe Decode.string)
         |> required "DateAccessed" (maybe Decode.string)
         |> required "Provider" (maybe Decode.string)
-        |> required "PatientName" (maybe Decode.string)
         |> required "RecordType" (maybe Decode.string)
         |> required "DateOfAdmission" (maybe Decode.string)
         |> required "DateOfDischarge" (maybe Decode.string)
@@ -36,9 +34,6 @@ decodeRecordRow =
         |> required "HospitalizationId" (maybe Decode.int)
         |> required "ReportDate" (maybe Decode.string)
         |> required "FileName" (maybe Decode.string)
-        |> required "CanTransfer" Decode.bool
-        |> required "Facility" (maybe Decode.string)
-        |> required "FacilityFax" (maybe Decode.string)
         |> required "Recommendations" (maybe Decode.string)
         |> required "TaskId" (maybe Decode.int)
         |> required "TaskTitle" (maybe Decode.string)

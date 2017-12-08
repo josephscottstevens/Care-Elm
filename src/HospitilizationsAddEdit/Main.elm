@@ -106,21 +106,17 @@ update msg model =
 
 formInputs : Model -> List (InputControlType Msg)
 formInputs model =
-    []
-
-
-
--- [ ( "Patient Reported", Optional, CheckInput model.patientReported UpdatePatientReported )
--- , ( "Facility Name", Required, DropInputWithButton model.initData.facilityId "FacilityId" "Add New Facility" )
--- , ( "Date of Admission", Required, DateInput (defaultString model.initData.dateOfAdmission) "DateOfAdmissionId" )
--- , ( "Date of Discharge", Required, DateInput (defaultString model.initData.dateOfDischarge) "DateOfDischargeId" )
--- , ( "Hospital Service Type", Required, DropInput model.initData.hospitalServiceTypeId "HospitalServiceTypeId" )
--- , ( "Chief Complaint", Required, AreaInput model.chiefComplaint UpdateChiefComplaint )
--- , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
--- , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
--- , ( "Discharge Recommendations", Required, TextInput model.dischargeRecommendations UpdateDischargeRecommendations )
--- , ( "Discharge Physician", Optional, DropInputWithButton model.initData.dischargePhysicianId "DischargePhysicianId" "New Provider" )
--- , ( "Secondary Facility Name", Optional, DropInputWithButton model.initData.facilityId2 "FacilityId2" "Add New Facility" )
--- , ( "Secondary Date of Admission", Optional, DateInput (defaultString model.initData.dateOfAdmission) "DateOfAdmissionId2" )
--- , ( "Secondary Date of Discharge", Optional, DateInput (defaultString model.initData.dateOfDischarge) "DateOfDischargeId2" )
--- ]
+    [ CheckInput "Patient Reported" Optional model.patientReported UpdatePatientReported
+    , DropInputWithButton "Facility Name" Required model.initData.facilityId "FacilityId" "Add New Facility"
+    , DateInput "Date of Admission" Required (defaultString model.initData.dateOfAdmission) "DateOfAdmissionId"
+    , DateInput "Date of Discharge" Required (defaultString model.initData.dateOfDischarge) "DateOfDischargeId"
+    , DropInput "Hospital Service Type" Required model.initData.hospitalServiceTypeId "HospitalServiceTypeId"
+    , AreaInput "Chief Complaint" Required model.chiefComplaint UpdateChiefComplaint
+    , KnockInput "Admit Diagnosis" Required "HospitalizationAdmitProblemSelection"
+    , KnockInput "Discharge Diagnosis" Required "HospitalizationDischargeProblemSelection"
+    , TextInput "Discharge Recommendations" Required model.dischargeRecommendations UpdateDischargeRecommendations
+    , DropInputWithButton "Discharge Physician" Optional model.initData.dischargePhysicianId "DischargePhysicianId" "New Provider"
+    , DropInputWithButton "Secondary Facility Name" Optional model.initData.facilityId2 "FacilityId2" "Add New Facility"
+    , DateInput "Secondary Date of Admission" Optional (defaultString model.initData.dateOfAdmission) "DateOfAdmissionId2"
+    , DateInput "Secondary Date of Discharge" Optional (defaultString model.initData.dateOfDischarge) "DateOfDischargeId2"
+    ]

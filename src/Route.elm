@@ -75,7 +75,7 @@ routeToString route =
             "#/people/" ++ (recordTypeToString recordType) ++ "/addedit"
 
         Hospitilizations ->
-            ""
+            "#/people/_hospitalizations"
 
         HospitilizationsAdd ->
             "#/people/_hospitalizations/add"
@@ -94,6 +94,7 @@ route =
 
         -- Clinical Summary
         , Url.map ClinicalSummary (s "people" </> s "_clinicalsummary")
+        , Url.map Hospitilizations (s "people" </> s "_hospitalizations")
         , Url.map HospitilizationsAdd (s "settings")
         , Url.map HospitilizationsEdit (s "register" </> int)
 

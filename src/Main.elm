@@ -153,22 +153,26 @@ setRoute maybeRoute model =
                     getDropDowns model.patientId AddEditDataSourceLoaded
 
         transition toMsg task =
-            Cmd.batch [ Task.attempt toMsg task, setLoadingStatus False, extraCmd ]
+            [ Task.attempt toMsg task, setLoadingStatus False, extraCmd ]
     in
         case maybeRoute of
+            Just Route.ClinicalSummary ->
+                { model | page = ClinicalSummary (ClinicalSummary.emptyModel model.patientId) }
+                    ! (clinicalSummaryInit (SomeDropDowns monthDropdown yearDropdown)
+                        :: transition ClinicalSummaryLoaded (ClinicalSummary.init model.patientId)
+                      )
+
+            Just Route.Hospitilizations ->
+                { model | page = Hospitilizations (Hospitilizations.Types.emptyModel model.patientId) }
+                    ! [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
+
             Just (Route.Records t) ->
                 { model | page = Records (Records.Types.emptyModel t model.patientId) }
-                    ! [ transition RecordsLoaded (Records.init t model.patientId) ]
+                    ! transition RecordsLoaded (Records.init t model.patientId)
 
             Just (Route.RecordAddNew t) ->
                 { model | page = RecordAddNew (RecordAddNew.Types.emptyModel t model.addEditDataSource model.patientId) }
                     ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.addEditDataSource t) ]
-
-            Just Route.ClinicalSummary ->
-                { model | page = ClinicalSummary (ClinicalSummary.emptyModel model.patientId) }
-                    ! [ transition ClinicalSummaryLoaded (ClinicalSummary.init model.patientId)
-                      , clinicalSummaryInit (SomeDropDowns monthDropdown yearDropdown)
-                      ]
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []
@@ -204,6 +208,12 @@ updatePage page msg model =
                     Err t ->
                         { model | page = Error (toString t) } ! []
 
+            ( HospitilizationsMsg subMsg, Hospitilizations subModel ) ->
+                toPage Hospitilizations HospitilizationsMsg Hospitilizations.update subMsg subModel
+
+            ( HospitilizationsAddEditMsg subMsg, HospitilizationsAddEdit subModel ) ->
+                toPage HospitilizationsAddEdit HospitilizationsAddEditMsg HospitilizationsAddEdit.update subMsg subModel
+
             ( ClinicalSummaryMsg subMsg, ClinicalSummary subModel ) ->
                 toPage ClinicalSummary ClinicalSummaryMsg ClinicalSummary.update subMsg subModel
 
@@ -226,7 +236,7 @@ updatePage page msg model =
                 toPage RecordAddNew RecordAddNewMsg RecordAddNew.update subMsg subModel
 
             _ ->
-                { model | page = Error <| toString msg ++ " - " ++ toString page } ! []
+                { model | page = Error <| "Missing Page Message" ++ toString msg ++ " - " ++ (toString page) } ! []
 
 
 main : Program Never Model Msg

@@ -132,12 +132,10 @@ type alias RecordRow =
     , specialty : Maybe String
     , comments : Maybe String
     , transferedTo : Maybe String
-    , transferedOn : Maybe String
     , patientId : Int
     , title : Maybe String
     , dateAccessed : Maybe String
     , provider : Maybe String
-    , patientName : Maybe String
     , recordType : Maybe String
     , dateOfAdmission : Maybe String
     , dateOfDischarge : Maybe String
@@ -147,9 +145,6 @@ type alias RecordRow =
     , hospitalizationId : Maybe Int
     , reportDate : Maybe String
     , fileName : Maybe String
-    , canTransfer : Bool
-    , facility : Maybe String
-    , facilityFax : Maybe String
     , recommendations : Maybe String
     , taskId : Maybe Int
     , taskTitle : Maybe String
