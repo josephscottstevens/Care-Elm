@@ -13,15 +13,79 @@ import Json.Decode.Pipeline exposing (..)
 
 type alias Model =
     { id : Maybe Int
-    , comments : String
+    , summary : String
     , carePlan : String
     , codeLegalStatus : String
-    , diagnosis : String
     , impairment : String
-    , summary : String
+    , comments : String
     , rnReviewedCarePlan : Bool
-    , patientId : Int
     }
+
+
+init : Int -> Task Http.Error Model
+init patientId =
+    decodeClinicalSummary
+        |> Http.get ("/People/ClinicalSummary?patientId=" ++ toString patientId)
+        |> Http.toTask
+
+
+type Msg
+    = UpdateSummary String
+    | UpdateCarePlan String
+    | UpdateCodeLegalStatus String
+    | UpdateImpairment String
+    | UpdateComments String
+
+
+view : Model -> Html Msg
+view model =
+    div [ class "form-horizontal" ]
+        [ h4 [] [ text "Clinical Summary" ]
+        , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs model)
+        ]
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        UpdateSummary str ->
+            { model | summary = str } ! []
+
+        UpdateCarePlan str ->
+            { model | carePlan = str } ! []
+
+        UpdateCodeLegalStatus str ->
+            { model | codeLegalStatus = str } ! []
+
+        UpdateImpairment str ->
+            { model | impairment = str } ! []
+
+        UpdateComments str ->
+            { model | comments = str } ! []
+
+
+formInputs : Model -> List (InputControlType Msg)
+formInputs { summary, carePlan, codeLegalStatus, impairment, comments } =
+    [ HtmlElement <| button [ class "btn btn-sm btn-default" ] [ text "Generate Care Plan Letter" ]
+    , AreaInput "Clinical Summary" Optional summary UpdateSummary
+    , AreaInput "Instructions and Care Plan" Optional carePlan UpdateCarePlan
+    , AreaInput "Code/Legal Status" Optional codeLegalStatus UpdateCodeLegalStatus
+    , AreaInput "Impairment" Optional impairment UpdateImpairment
+    , AreaInput "Comments" Optional comments UpdateComments
+    , HtmlElement <| button [ class "btn btn-sm btn-primary" ] [ text "Update" ]
+    ]
+
+
+decodeClinicalSummary : Decode.Decoder Model
+decodeClinicalSummary =
+    decode Model
+        |> required "Id" (maybe Decode.int)
+        |> required "Summary" Decode.string
+        |> required "CarePlan" Decode.string
+        |> required "CodeLegalStatus" Decode.string
+        |> required "Impairment" Decode.string
+        |> required "Comments" Decode.string
+        |> required "RnReviewedCarePlan" Decode.bool
 
 
 emptyModel : Int -> Model
@@ -30,55 +94,7 @@ emptyModel patientId =
     , comments = ""
     , carePlan = ""
     , codeLegalStatus = ""
-    , diagnosis = ""
     , impairment = ""
     , summary = ""
     , rnReviewedCarePlan = False
-    , patientId = patientId
     }
-
-
-init : Int -> Task Http.Error Model
-init patientId =
-    decodeClinicalSummary
-        |> Http.get ("/People/ClinicalSummaryViewData?patientId=" ++ toString patientId)
-        |> Http.toTask
-
-
-type Msg
-    = UpdateComments String
-
-
-view : Model -> Html Msg
-view model =
-    div [ class "form-horizontal" ]
-        [ h4 [] [ text "Clinical Summary" ]
-        , makeControls { labelAttributes = [ class "col-md-8" ] } (formInputs model)
-        ]
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        UpdateComments str ->
-            { model | comments = str } ! []
-
-
-formInputs : Model -> List (InputControlType Msg)
-formInputs model =
-    [ AreaInput "Facility" Optional model.comments UpdateComments
-    ]
-
-
-decodeClinicalSummary : Decode.Decoder Model
-decodeClinicalSummary =
-    decode Model
-        |> required "ID" (maybe Decode.int)
-        |> required "Comments" Decode.string
-        |> required "CarePlan" Decode.string
-        |> required "CodeLegalStatus" Decode.string
-        |> required "Diagnosis" Decode.string
-        |> required "Impairment" Decode.string
-        |> required "Summary" Decode.string
-        |> required "RnReviewedCarePlan" Decode.bool
-        |> required "PatientId" Decode.int

@@ -43,13 +43,13 @@ checkStyle =
 
 
 type alias Config msg =
-    { labelAttributes : List (Html.Attribute msg)
+    { controlAttributes : List (Html.Attribute msg)
     }
 
 
 defaultConfig : Config msg
 defaultConfig =
-    { labelAttributes = [ class controlWidth ]
+    { controlAttributes = [ class controlWidth ]
     }
 
 
@@ -63,6 +63,7 @@ type InputControlType msg
     | DropInputWithButton String RequiredType (Maybe Int) String String
     | DateInput String RequiredType String String
     | FileInput String RequiredType String
+    | HtmlElement (Html msg)
 
 
 makeControls : Config msg -> List (InputControlType msg) -> Html msg
@@ -72,39 +73,39 @@ makeControls config controls =
             case controlType of
                 TextInput labelText requiredType displayValue event ->
                     div [ class "form-group" ]
-                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
-                        , div config.labelAttributes
+                        [ commonLabel labelText requiredType
+                        , div config.controlAttributes
                             [ input [ type_ "textbox", class "e-textbox", nameAttr labelText, onInput event, value displayValue ] []
                             ]
                         ]
 
                 NumrInput labelText requiredType displayValue event ->
                     div [ class "form-group" ]
-                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
-                        , div config.labelAttributes
+                        [ commonLabel labelText requiredType
+                        , div config.controlAttributes
                             [ input [ type_ "number", class "e-textbox", nameAttr labelText, onInput event, value <| toString displayValue ] []
                             ]
                         ]
 
                 CheckInput labelText requiredType displayValue event ->
                     div [ class "form-group" ]
-                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
-                        , div config.labelAttributes
+                        [ commonLabel labelText requiredType
+                        , div config.controlAttributes
                             [ input [ type_ "checkbox", class "e-textbox", nameAttr labelText, onCheck event, checked displayValue ] []
                             ]
                         ]
 
                 AreaInput labelText requiredType displayValue event ->
                     div [ class "form-group" ]
-                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
-                        , div config.labelAttributes
+                        [ commonLabel labelText requiredType
+                        , div config.controlAttributes
                             [ textarea [ idAttr labelText, class "e-textbox", onInput event, value displayValue ] []
                             ]
                         ]
 
                 DropInput labelText requiredType _ syncfusionId ->
                     div [ class "form-group" ]
-                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
+                        [ commonLabel labelText requiredType
                         , input [ type_ "text", id syncfusionId ] []
                         ]
 
@@ -113,25 +114,48 @@ makeControls config controls =
 
                 DropInputWithButton labelText requiredType _ syncfusionId buttonText ->
                     div [ class "form-group" ]
-                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
+                        [ commonLabel labelText requiredType
                         , div [ class controlWidth ] [ input [ type_ "text", id syncfusionId ] [] ]
                         , div [ class labelWidth ] [ button [ class "btn btn-sm btn-default" ] [ text buttonText ] ]
                         ]
 
                 DateInput labelText requiredType displayValue syncfusionId ->
                     div [ class "form-group" ]
-                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
+                        [ commonLabel labelText requiredType
                         , input [ type_ "text", id syncfusionId, value displayValue, value displayValue ] []
                         ]
 
                 FileInput labelText requiredType displayValue ->
                     div [ class "form-group" ]
-                        [ label [ class (labelWidth ++ "control-label " ++ isRequiredStr requiredType), for "fileName" ] [ text labelText ]
+                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), for "fileName" ] [ text labelText ]
                         , div [ class controlWidth ] [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] [] ]
                         , div [ class labelWidth ] [ div [ id "fileBtn" ] [] ]
                         ]
+
+                HtmlElement htmlElement ->
+                    div [ class "form-group" ]
+                        [ commonLabel "" Optional
+                        , div [ class controlWidth ] [ htmlElement ]
+                        ]
     in
         div [] (controls |> List.map common)
+
+
+commonLabel : String -> RequiredType -> Html msg
+commonLabel labelText requiredType =
+    let
+        lastChar =
+            String.right 1 labelText
+
+        formattedLabelText =
+            if lastChar == ":" then
+                labelText
+            else if labelText == "" then
+                ""
+            else
+                labelText ++ ":"
+    in
+        label [ class (labelWidth ++ " control-label " ++ isRequiredStr requiredType), forId labelText ] [ text formattedLabelText ]
 
 
 isRequired : InputControlType msg -> Bool
