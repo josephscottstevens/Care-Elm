@@ -103,8 +103,9 @@ makeControls config controls =
                         ]
 
                 DropInput labelText requiredType _ syncfusionId ->
-                    div [ class controlWidth ]
-                        [ input [ type_ "text", id syncfusionId ] []
+                    div [ class "form-group" ]
+                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
+                        , input [ type_ "text", id syncfusionId ] []
                         ]
 
                 KnockInput labelText requiredType syncfusionId ->
@@ -118,8 +119,9 @@ makeControls config controls =
                         ]
 
                 DateInput labelText requiredType displayValue syncfusionId ->
-                    div [ class controlWidth ]
-                        [ input [ type_ "text", id syncfusionId, value displayValue, value displayValue ] []
+                    div [ class "form-group" ]
+                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
+                        , input [ type_ "text", id syncfusionId, value displayValue, value displayValue ] []
                         ]
 
                 FileInput labelText requiredType displayValue ->
@@ -135,14 +137,6 @@ makeControls config controls =
 isRequired : InputControlType msg -> Bool
 isRequired controlType =
     False
-
-
-
--- case requiredType of
---     Required ->
---         True
---     Optional ->
---         False
 
 
 getValidationErrors : List (InputControlType msg) -> List String
