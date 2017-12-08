@@ -79,7 +79,7 @@ getTaskId model =
     let
         records =
             model.records
-                |> List.filter (\t -> t.id == model.dropDownState.rowId)
+                |> List.filter (\t -> t.id == model.dropDownState)
                 |> List.head
                 |> Maybe.map (\t -> t.taskId)
     in

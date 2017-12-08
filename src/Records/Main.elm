@@ -7,10 +7,10 @@ import Html.Attributes exposing (class, type_, href)
 import Html.Events exposing (onClick)
 import Table exposing (..)
 import Common.Grid exposing (..)
-import Common.Types exposing (..)
-import Common.Functions exposing (..)
+import Common.Types exposing (RecordType(..), AddEditDataSource, getDesc, FilterState)
+import Common.Functions as Functions exposing (displaySuccessMessage, displayErrorMessage)
 import Http
-import Ports exposing (..)
+import Ports exposing (dropDownToggle, deleteConfirmed, sendMenuMessage, editTask)
 import Route exposing (Route)
 import Task exposing (Task)
 
@@ -37,7 +37,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Load (Ok t) ->
-            getLoadedState model t ! [ setLoadingStatus False ]
+            getLoadedState model t ! [ Functions.setLoadingStatus False ]
 
         Load (Err t) ->
             model ! [ displayErrorMessage (toString t) ]
@@ -63,7 +63,7 @@ update msg model =
                 { model | records = updatedRecords } ! [ deleteRequest rowId ]
 
         DeleteCompleted (Ok responseMsg) ->
-            case getResponseError responseMsg of
+            case Functions.getResponseError responseMsg of
                 Just t ->
                     model ! [ displayErrorMessage t ]
 
@@ -99,10 +99,10 @@ getColumns : RecordType -> Maybe Int -> List (Column RecordRow Msg)
 getColumns recordType taskId =
     let
         commonColumns =
-            [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-            , stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
-            , stringColumn "Specialty" (\t -> defaultString t.specialty)
-            , stringColumn "Comments" (\t -> defaultString t.comments)
+            [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+            , stringColumn "Doctor of Visit" (\t -> Functions.defaultString t.provider)
+            , stringColumn "Specialty" (\t -> Functions.defaultString t.specialty)
+            , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
             ]
 
         firstColumns =
@@ -114,56 +114,56 @@ getColumns recordType taskId =
                     commonColumns
 
                 Labs ->
-                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , stringColumn "Date Accessioned" (\t -> defaultDateTime t.dateAccessed)
-                    , stringColumn "Name of Lab" (\t -> defaultString t.title)
-                    , stringColumn "Provider" (\t -> defaultString t.provider)
-                    , stringColumn "Comments" (\t -> defaultString t.comments)
+                    [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+                    , stringColumn "Date Accessioned" (\t -> Functions.defaultDateTime t.dateAccessed)
+                    , stringColumn "Name of Lab" (\t -> Functions.defaultString t.title)
+                    , stringColumn "Provider" (\t -> Functions.defaultString t.provider)
+                    , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
                 Radiology ->
-                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , stringColumn "Date Accessioned" (\t -> defaultDateTime t.dateAccessed)
-                    , stringColumn "Name of Study" (\t -> defaultString t.title)
-                    , stringColumn "Provider" (\t -> defaultString t.provider)
-                    , stringColumn "Comments" (\t -> defaultString t.comments)
+                    [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+                    , stringColumn "Date Accessioned" (\t -> Functions.defaultDateTime t.dateAccessed)
+                    , stringColumn "Name of Study" (\t -> Functions.defaultString t.title)
+                    , stringColumn "Provider" (\t -> Functions.defaultString t.provider)
+                    , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
                 Hospitalizations ->
-                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , stringColumn "Hospitalization ID" (\t -> defaultIntToString t.hospitalizationId)
-                    , stringColumn "Admin Date" (\t -> defaultDateTime t.dateOfAdmission)
-                    , stringColumn "Discharge Date" (\t -> defaultDateTime t.dateOfDischarge)
-                    , stringColumn "Service Type" (\t -> defaultString t.hospitalizationServiceType)
-                    , stringColumn "Discharge Recommendations" (\t -> defaultString t.recommendations)
-                    , stringColumn "Discharge Physician" (\t -> defaultString t.dischargePhysician)
-                    , stringColumn "Comments" (\t -> defaultString t.comments)
+                    [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+                    , stringColumn "Hospitalization ID" (\t -> Functions.defaultIntToString t.hospitalizationId)
+                    , stringColumn "Admin Date" (\t -> Functions.defaultDateTime t.dateOfAdmission)
+                    , stringColumn "Discharge Date" (\t -> Functions.defaultDateTime t.dateOfDischarge)
+                    , stringColumn "Service Type" (\t -> Functions.defaultString t.hospitalizationServiceType)
+                    , stringColumn "Discharge Recommendations" (\t -> Functions.defaultString t.recommendations)
+                    , stringColumn "Discharge Physician" (\t -> Functions.defaultString t.dischargePhysician)
+                    , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
                 Legal ->
-                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , stringColumn "Comments" (\t -> defaultString t.comments)
+                    [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+                    , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
                 CallRecordings ->
-                    [ stringColumn "Date" (\t -> dateTime t.recordingDate)
-                    , hrefColumn "Recording" "Open" (\t -> defaultString t.recording)
+                    [ stringColumn "Date" (\t -> Functions.dateTime t.recordingDate)
+                    , hrefColumn "Recording" "Open" (\t -> Functions.defaultString t.recording)
                     , hrefCustom
                     , checkColumn "During Enrollment" (\t -> t.enrollment)
                     , checkColumn "Consent" (\t -> t.hasVerbalConsent)
-                    , stringColumn "User" (\t -> defaultString t.staffName)
+                    , stringColumn "User" (\t -> Functions.defaultString t.staffName)
                     ]
 
                 PreviousHistories ->
-                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , stringColumn "File Name" (\t -> defaultString t.fileName)
-                    , stringColumn "Report Date" (\t -> defaultDate t.reportDate)
-                    , stringColumn "Comments" (\t -> defaultString t.comments)
+                    [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+                    , stringColumn "File Name" (\t -> Functions.defaultString t.fileName)
+                    , stringColumn "Report Date" (\t -> Functions.defaultDate t.reportDate)
+                    , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
                 Enrollment ->
-                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , stringColumn "Comments" (\t -> defaultString t.comments)
+                    [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+                    , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
                 Misc ->

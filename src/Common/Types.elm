@@ -18,13 +18,6 @@ type alias DropDownItem =
     }
 
 
-type alias DropDownState =
-    { x : Float
-    , y : Float
-    , rowId : Int
-    }
-
-
 type alias MenuMessage =
     { name : String
     , recordId : Int

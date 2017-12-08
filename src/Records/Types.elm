@@ -2,7 +2,7 @@ module Records.Types exposing (..)
 
 import Table
 import Http
-import Common.Types exposing (..)
+import Common.Types exposing (RecordType, FilterState)
 
 
 type Msg
@@ -37,7 +37,7 @@ type alias Model =
     , tableState : Table.State
     , query : String
     , filterFields : Filters
-    , dropDownState : DropDownState
+    , dropDownState : Int
     }
 
 
@@ -50,7 +50,7 @@ emptyModel recordType patientId =
     , tableState = Table.initialSort "Date"
     , query = ""
     , filterFields = emptyFilters
-    , dropDownState = emptyDropDownState
+    , dropDownState = -1
     }
 
 
@@ -63,7 +63,7 @@ loadModel recordType patientId recordRows =
     , tableState = Table.initialSort "Date"
     , query = ""
     , filterFields = emptyFilters
-    , dropDownState = emptyDropDownState
+    , dropDownState = -1
     }
 
 
@@ -161,12 +161,4 @@ type alias RecordRow =
     , staffName : Maybe String
     , hasVerbalConsent : Bool
     , dropDownOpen : Bool
-    }
-
-
-emptyDropDownState : DropDownState
-emptyDropDownState =
-    { x = -5000.0
-    , y = 0.0
-    , rowId = 0
     }

@@ -9,9 +9,6 @@ port clinicalSummaryInit : SomeDropDowns -> Cmd msg
 port sendMenuMessage : MenuMessage -> Cmd msg
 
 
-port isApp : (String -> msg) -> Sub msg
-
-
 port toggleConsent : Bool -> Cmd msg
 
 
@@ -31,9 +28,6 @@ port addNewPhysician : Maybe String -> Cmd msg
 
 
 port setUnsavedChanges : Bool -> Cmd msg
-
-
-port loadDataSourceComplete : (AddEditDataSource -> msg) -> Sub msg
 
 
 port updateFacility : (DropDownItem -> msg) -> Sub msg
