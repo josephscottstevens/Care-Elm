@@ -13,6 +13,7 @@ import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, int, strin
 type Route
     = None
     | Billing
+    | ClinicalSummary
     | Records RecordType
     | RecordAddNew RecordType
     | Hospitilizations
@@ -64,6 +65,9 @@ routeToString route =
         Billing ->
             "#"
 
+        ClinicalSummary ->
+            "#/people/_clinicalsummary"
+
         Records recordType ->
             "#/people/" ++ (recordTypeToString recordType)
 
@@ -87,7 +91,11 @@ route : Parser (Route -> a) a
 route =
     oneOf
         [ Url.map None (s "")
-        , Url.map Billing (s "login")
+
+        -- Clinical Summary
+        , Url.map ClinicalSummary (s "people" </> s "_clinicalsummary")
+        , Url.map HospitilizationsAdd (s "settings")
+        , Url.map HospitilizationsEdit (s "register" </> int)
 
         -- Records Grid
         , Url.map (Records PrimaryCare) (s "people" </> s "_primarycarerecords")
@@ -113,9 +121,7 @@ route =
         , Url.map (RecordAddNew Enrollment) (s "people" </> s "_enrollmentrecords" </> s "addedit")
         , Url.map (RecordAddNew Misc) (s "people" </> s "_miscrecords" </> s "addedit")
 
-        --
-        , Url.map HospitilizationsAdd (s "settings")
-        , Url.map HospitilizationsEdit (s "register" </> int)
+        -- Other
         , Url.map Error (s "article" </> string)
         ]
 

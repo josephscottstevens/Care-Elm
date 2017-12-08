@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (Html, text, div)
+import ClinicalSummary
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
 import Hospitilizations.Main as Hospitilizations
@@ -29,6 +30,7 @@ type alias Model =
 type Page
     = None
     | Billing
+    | ClinicalSummary ClinicalSummary.Model
     | Records Records.Types.Model
     | RecordAddNew RecordAddNew.Types.Model
     | Hospitilizations Hospitilizations.Types.Model
@@ -74,6 +76,9 @@ view model =
         Billing ->
             div [] []
 
+        ClinicalSummary subModel ->
+            Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel)
+
         Records subModel ->
             Html.map RecordsMsg (Records.view subModel model.addEditDataSource)
 
@@ -99,6 +104,9 @@ pageSubscriptions page =
         Billing ->
             Sub.none
 
+        ClinicalSummary _ ->
+            Sub.none
+
         Records _ ->
             Sub.map RecordsMsg Records.subscriptions
 
@@ -122,6 +130,8 @@ pageSubscriptions page =
 type Msg
     = SetRoute (Maybe Route)
     | BillingMsg Billing.Types.Msg
+    | ClinicalSummaryMsg ClinicalSummary.Msg
+    | ClinicalSummaryLoaded (Result Http.Error ClinicalSummary.Model)
     | RecordsMsg Records.Types.Msg
     | RecordsLoaded (Result Http.Error Records.Types.Model)
     | RecordAddNewMsg RecordAddNew.Types.Msg
@@ -152,6 +162,10 @@ setRoute maybeRoute model =
             Just (Route.RecordAddNew t) ->
                 { model | page = RecordAddNew (RecordAddNew.Types.emptyModel t model.addEditDataSource model.patientId) }
                     ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.addEditDataSource t) ]
+
+            Just Route.ClinicalSummary ->
+                { model | page = ClinicalSummary (ClinicalSummary.emptyModel model.patientId) }
+                    ! transition ClinicalSummaryLoaded (ClinicalSummary.init model.patientId)
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []
@@ -186,6 +200,15 @@ updatePage page msg model =
 
                     Err t ->
                         { model | page = Error (toString t) } ! []
+
+            ( ClinicalSummaryMsg subMsg, ClinicalSummary subModel ) ->
+                toPage ClinicalSummary ClinicalSummaryMsg ClinicalSummary.update subMsg subModel
+
+            ( ClinicalSummaryLoaded (Err err), _ ) ->
+                { model | page = Error (toString err) } ! []
+
+            ( ClinicalSummaryLoaded (Ok subModel), _ ) ->
+                { model | page = ClinicalSummary subModel } ! []
 
             ( RecordsLoaded (Ok subModel), _ ) ->
                 { model | page = Records subModel } ! []

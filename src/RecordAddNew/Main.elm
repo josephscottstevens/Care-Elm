@@ -110,7 +110,7 @@ view model =
                 div [ class "form-horizontal" ]
                     [ h4 [] [ text (getDesc model.recordType) ]
                     , validationErrorsDiv
-                    , makeControls (formInputs model model.recordType)
+                    , makeControls defaultConfig (formInputs model model.recordType)
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
                             [ button [ type_ "button", id "Save", value "Addmodel", onClick (Save model.recordType), saveBtnClass ] [ text "Save" ]
@@ -264,105 +264,96 @@ update msg model =
                 updateAddNew { model | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }
 
 
-formInputs : Model -> RecordType -> List ( String, RequiredType, InputControlType Msg )
+formInputs : Model -> RecordType -> List (InputControlType Msg)
 formInputs model recordType =
-    let
-        firstColumns =
-            [ ( "Facility", Required, DropInput model.facilityId "FacilityId" )
-            , ( "Category", Required, DropInput model.recordTypeId "CategoryId" )
-            ]
+    -- let
+    -- firstColumns =
+    --     [ ( "Facility", Required, DropInput model.facilityId "FacilityId" )
+    --     , ( "Category", Required, DropInput model.recordTypeId "CategoryId" )
+    --     ]
+    -- lastColumns =
+    --     [ ( "Comments", Required, AreaInput model.comments UpdateComments )
+    --     , ( "Upload Record File", Required, FileInput model.fileName )
+    --     ]
+    -- defaultFields =
+    --     firstColumns
+    --         ++ [ ( "Date of Visit", Required, DateInput (defaultString model.timeVisit) "TimeVisitId" )
+    --            , ( "Doctor of Visit", Optional, TextInput model.provider UpdateProvider )
+    --            , ( "Specialty of Visit", Optional, TextInput model.specialty UpdateSpecialty )
+    --            ]
+    --         ++ lastColumns
+    -- columns =
+    --     case recordType of
+    --         PrimaryCare ->
+    --             defaultFields
+    --         Specialty ->
+    --             defaultFields
+    --         Labs ->
+    --             firstColumns
+    --                 ++ [ ( "Date/Time of Labs Collected", Required, DateInput (defaultString model.timeVisit) "TimeVisitId" )
+    --                    , ( "Date/Time of Labs Accessioned", Required, DateInput (defaultString model.timeAcc) "TimeAccId" )
+    --                    , ( "Name of Lab", Optional, TextInput model.title UpdateTitle )
+    --                    , ( "Provider of Lab", Optional, TextInput model.provider UpdateProvider )
+    --                    ]
+    --                 ++ lastColumns
+    --         Radiology ->
+    --             firstColumns
+    --                 ++ [ ( "Date/Time of Study was done", Required, DateInput (defaultString model.timeVisit) "TimeVisitId" )
+    --                    , ( "Date/Time of Study Accessioned", Required, DateInput (defaultString model.timeAcc) "TimeAccId" )
+    --                    , ( "Name of Study", Optional, TextInput model.title UpdateTitle )
+    --                    , ( "Provider of Study", Optional, TextInput model.provider UpdateProvider )
+    --                    ]
+    --                 ++ lastColumns
+    --         Misc ->
+    --             defaultFields
+    --         Legal ->
+    --             firstColumns
+    --                 ++ ( "Title", Optional, TextInput model.title UpdateTitle )
+    --                 :: lastColumns
+    --         Hospitalizations ->
+    --             ( "Existing Hospitilization", Optional, CheckInput model.isExistingHospitilization UpdateIsExistingHospitilization )
+    --                 :: case model.isExistingHospitilization of
+    --                     True ->
+    --                         ( "Select Hospitalization", Required, DropInput model.hospitalizationId "HospitalizationsId" )
+    --                             :: lastColumns
+    --                     False ->
+    --                         [ ( "Patient Reported", Optional, CheckInput model.patientReported UpdatePatientReported )
+    --                         , ( "Facility", Optional, DropInputWithButton model.facilityId "FacilityId" "Add New Facility" )
+    --                         , ( "Category", Required, DropInput model.recordTypeId "CategoryId" )
+    --                         , ( "Date of Admission", Required, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId" )
+    --                         , ( "Date of Discharge", Required, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId" )
+    --                         , ( "Hospital Service Type", Required, DropInput model.hospitalServiceTypeId "HospitalServiceTypeId" )
+    --                         , ( "Chief Complaint", Required, AreaInput model.comments UpdateComments )
+    --                         , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
+    --                         , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
+    --                         , ( "Discharge Recommendations", Required, TextInput model.dischargeRecommendations UpdateDischargeRecommendations )
+    --                         , ( "Discharge Physician", Optional, DropInputWithButton model.dischargePhysicianId "DischargePhysicianId" "New Provider" )
+    --                         , ( "Secondary Facility Name", Optional, DropInputWithButton model.facilityId2 "FacilityId2" "Add New Facility" )
+    --                         , ( "Secondary Date of Admission", Optional, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId2" )
+    --                         , ( "Secondary Date of Discharge", Optional, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId2" )
+    --                         , ( "Upload Record File", Required, FileInput model.fileName )
+    --                         ]
+    --         CallRecordings ->
+    --             firstColumns
+    --                 ++ [ ( "Call Sid", Required, TextInput model.callSid UpdateCallSid )
+    --                    , ( "Recording Sid", Required, TextInput model.recording UpdateRecordingSid )
+    --                    , ( "Duration", Required, NumrInput model.duration UpdateDuration )
+    --                    , ( "Recording Date", Required, DateInput (defaultString model.recordingDate) "RecordingDateId" )
+    --                    , ( "User", Required, DropInput model.userId "UserId" )
+    --                    , ( "Task", Optional, DropInput model.taskId "TaskId" )
+    --                    ]
+    --         PreviousHistories ->
+    --             firstColumns
+    --                 ++ [ ( "Report Date", Required, DateInput (defaultString model.reportDate) "ReportDateId" )
+    --                    , ( "Upload Record File", Required, FileInput model.fileName )
+    --                    ]
+    --         Enrollment ->
+    --             firstColumns
+    --                 ++ ( "Title", Optional, TextInput model.title UpdateTitle )
+    --                 :: lastColumns
+    -- in
+    []
 
-        lastColumns =
-            [ ( "Comments", Required, AreaInput model.comments UpdateComments )
-            , ( "Upload Record File", Required, FileInput model.fileName )
-            ]
 
-        defaultFields =
-            firstColumns
-                ++ [ ( "Date of Visit", Required, DateInput (defaultString model.timeVisit) "TimeVisitId" )
-                   , ( "Doctor of Visit", Optional, TextInput model.provider UpdateProvider )
-                   , ( "Specialty of Visit", Optional, TextInput model.specialty UpdateSpecialty )
-                   ]
-                ++ lastColumns
 
-        columns =
-            case recordType of
-                PrimaryCare ->
-                    defaultFields
-
-                Specialty ->
-                    defaultFields
-
-                Labs ->
-                    firstColumns
-                        ++ [ ( "Date/Time of Labs Collected", Required, DateInput (defaultString model.timeVisit) "TimeVisitId" )
-                           , ( "Date/Time of Labs Accessioned", Required, DateInput (defaultString model.timeAcc) "TimeAccId" )
-                           , ( "Name of Lab", Optional, TextInput model.title UpdateTitle )
-                           , ( "Provider of Lab", Optional, TextInput model.provider UpdateProvider )
-                           ]
-                        ++ lastColumns
-
-                Radiology ->
-                    firstColumns
-                        ++ [ ( "Date/Time of Study was done", Required, DateInput (defaultString model.timeVisit) "TimeVisitId" )
-                           , ( "Date/Time of Study Accessioned", Required, DateInput (defaultString model.timeAcc) "TimeAccId" )
-                           , ( "Name of Study", Optional, TextInput model.title UpdateTitle )
-                           , ( "Provider of Study", Optional, TextInput model.provider UpdateProvider )
-                           ]
-                        ++ lastColumns
-
-                Misc ->
-                    defaultFields
-
-                Legal ->
-                    firstColumns
-                        ++ ( "Title", Optional, TextInput model.title UpdateTitle )
-                        :: lastColumns
-
-                Hospitalizations ->
-                    ( "Existing Hospitilization", Optional, CheckInput model.isExistingHospitilization UpdateIsExistingHospitilization )
-                        :: case model.isExistingHospitilization of
-                            True ->
-                                ( "Select Hospitalization", Required, DropInput model.hospitalizationId "HospitalizationsId" )
-                                    :: lastColumns
-
-                            False ->
-                                [ ( "Patient Reported", Optional, CheckInput model.patientReported UpdatePatientReported )
-                                , ( "Facility", Optional, DropInputWithButton model.facilityId "FacilityId" "Add New Facility" )
-                                , ( "Category", Required, DropInput model.recordTypeId "CategoryId" )
-                                , ( "Date of Admission", Required, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId" )
-                                , ( "Date of Discharge", Required, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId" )
-                                , ( "Hospital Service Type", Required, DropInput model.hospitalServiceTypeId "HospitalServiceTypeId" )
-                                , ( "Chief Complaint", Required, AreaInput model.comments UpdateComments )
-                                , ( "Admit Diagnosis", Required, KnockInput "HospitalizationAdmitProblemSelection" )
-                                , ( "Discharge Diagnosis", Required, KnockInput "HospitalizationDischargeProblemSelection" )
-                                , ( "Discharge Recommendations", Required, TextInput model.dischargeRecommendations UpdateDischargeRecommendations )
-                                , ( "Discharge Physician", Optional, DropInputWithButton model.dischargePhysicianId "DischargePhysicianId" "New Provider" )
-                                , ( "Secondary Facility Name", Optional, DropInputWithButton model.facilityId2 "FacilityId2" "Add New Facility" )
-                                , ( "Secondary Date of Admission", Optional, DateInput (defaultString model.dateOfAdmission) "DateOfAdmissionId2" )
-                                , ( "Secondary Date of Discharge", Optional, DateInput (defaultString model.dateOfDischarge) "DateOfDischargeId2" )
-                                , ( "Upload Record File", Required, FileInput model.fileName )
-                                ]
-
-                CallRecordings ->
-                    firstColumns
-                        ++ [ ( "Call Sid", Required, TextInput model.callSid UpdateCallSid )
-                           , ( "Recording Sid", Required, TextInput model.recording UpdateRecordingSid )
-                           , ( "Duration", Required, NumrInput model.duration UpdateDuration )
-                           , ( "Recording Date", Required, DateInput (defaultString model.recordingDate) "RecordingDateId" )
-                           , ( "User", Required, DropInput model.userId "UserId" )
-                           , ( "Task", Optional, DropInput model.taskId "TaskId" )
-                           ]
-
-                PreviousHistories ->
-                    firstColumns
-                        ++ [ ( "Report Date", Required, DateInput (defaultString model.reportDate) "ReportDateId" )
-                           , ( "Upload Record File", Required, FileInput model.fileName )
-                           ]
-
-                Enrollment ->
-                    firstColumns
-                        ++ ( "Title", Optional, TextInput model.title UpdateTitle )
-                        :: lastColumns
-    in
-        columns
+--columns

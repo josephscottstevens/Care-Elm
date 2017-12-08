@@ -1,4 +1,4 @@
-module Common.Html exposing (fullWidth, labelWidth, controlWidth, InputControlType(..), makeControls, getValidationErrors)
+module Common.Html exposing (fullWidth, labelWidth, controlWidth, InputControlType(..), makeControls, getValidationErrors, defaultConfig)
 
 import Html exposing (Html, text, div, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, readonly, style, checked)
@@ -42,34 +42,110 @@ checkStyle =
     style [ ( "height", "20px" ), ( "width", "20px" ), ( "margin-top", "2px" ) ]
 
 
+type alias Config msg =
+    { labelAttributes : List (Html.Attribute msg)
+    }
+
+
+defaultConfig : Config msg
+defaultConfig =
+    { labelAttributes = [ class controlWidth ]
+    }
+
+
 type InputControlType msg
-    = TextInput String (String -> msg)
-    | NumrInput Int (String -> msg)
-    | CheckInput Bool (Bool -> msg)
-    | AreaInput String (String -> msg)
-    | KnockInput String
-    | DropInput (Maybe Int) String
-    | DropInputWithButton (Maybe Int) String String
-    | DateInput String String
-    | FileInput String
+    = TextInput String RequiredType String (String -> msg)
+    | NumrInput String RequiredType Int (String -> msg)
+    | CheckInput String RequiredType Bool (Bool -> msg)
+    | AreaInput String RequiredType String (String -> msg)
+    | KnockInput String RequiredType String
+    | DropInput String RequiredType (Maybe Int) String
+    | DropInputWithButton String RequiredType (Maybe Int) String String
+    | DateInput String RequiredType String String
+    | FileInput String RequiredType String
 
 
-makeControls : List ( String, RequiredType, InputControlType msg ) -> Html msg
-makeControls controls =
-    div [] (List.map common controls)
+makeControls : Config msg -> List (InputControlType msg) -> Html msg
+makeControls config controls =
+    let
+        common controlType =
+            case controlType of
+                TextInput labelText requiredType displayValue event ->
+                    div [ class "form-group" ]
+                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
+                        , div config.labelAttributes
+                            [ input [ type_ "textbox", class "e-textbox", nameAttr labelText, onInput event, value displayValue ] []
+                            ]
+                        ]
+
+                NumrInput labelText requiredType displayValue event ->
+                    div [ class "form-group" ]
+                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
+                        , div config.labelAttributes
+                            [ input [ type_ "number", class "e-textbox", nameAttr labelText, onInput event, value <| toString displayValue ] []
+                            ]
+                        ]
+
+                CheckInput labelText requiredType displayValue event ->
+                    div [ class "form-group" ]
+                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
+                        , div config.labelAttributes
+                            [ input [ type_ "checkbox", class "e-textbox", nameAttr labelText, onCheck event, checked displayValue ] []
+                            ]
+                        ]
+
+                AreaInput labelText requiredType displayValue event ->
+                    div [ class "form-group" ]
+                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
+                        , div config.labelAttributes
+                            [ textarea [ idAttr labelText, class "e-textbox", onInput event, value displayValue ] []
+                            ]
+                        ]
+
+                DropInput labelText requiredType _ syncfusionId ->
+                    div [ class controlWidth ]
+                        [ input [ type_ "text", id syncfusionId ] []
+                        ]
+
+                KnockInput labelText requiredType syncfusionId ->
+                    div [ id syncfusionId ] []
+
+                DropInputWithButton labelText requiredType _ syncfusionId buttonText ->
+                    div [ class "form-group" ]
+                        [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
+                        , div [ class controlWidth ] [ input [ type_ "text", id syncfusionId ] [] ]
+                        , div [ class labelWidth ] [ button [ class "btn btn-sm btn-default" ] [ text buttonText ] ]
+                        ]
+
+                DateInput labelText requiredType displayValue syncfusionId ->
+                    div [ class controlWidth ]
+                        [ input [ type_ "text", id syncfusionId, value displayValue, value displayValue ] []
+                        ]
+
+                FileInput labelText requiredType displayValue ->
+                    div [ class "form-group" ]
+                        [ label [ class (labelWidth ++ "control-label " ++ isRequiredStr requiredType), for "fileName" ] [ text labelText ]
+                        , div [ class controlWidth ] [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] [] ]
+                        , div [ class labelWidth ] [ div [ id "fileBtn" ] [] ]
+                        ]
+    in
+        div [] (controls |> List.map common)
 
 
-isRequired : ( String, RequiredType, InputControlType msg ) -> Bool
-isRequired ( _, requiredType, _ ) =
-    case requiredType of
-        Required ->
-            True
-
-        Optional ->
-            False
+isRequired : InputControlType msg -> Bool
+isRequired controlType =
+    False
 
 
-getValidationErrors : List ( String, RequiredType, InputControlType msg ) -> List String
+
+-- case requiredType of
+--     Required ->
+--         True
+--     Optional ->
+--         False
+
+
+getValidationErrors : List (InputControlType msg) -> List String
 getValidationErrors controls =
     controls
         |> List.filter isRequired
@@ -77,16 +153,16 @@ getValidationErrors controls =
         |> List.filterMap identity
 
 
-commonValidation : ( String, RequiredType, InputControlType msg ) -> Maybe String
-commonValidation ( labelText, _, controlType ) =
+commonValidation : InputControlType msg -> Maybe String
+commonValidation controlType =
     case controlType of
-        TextInput displayValue _ ->
+        TextInput labelText requiredType displayValue _ ->
             requiredStr labelText displayValue
 
-        AreaInput displayValue _ ->
+        AreaInput labelText requiredType displayValue _ ->
             requiredStr labelText displayValue
 
-        DropInput displayValue _ ->
+        DropInput labelText requiredType displayValue _ ->
             case displayValue of
                 Just _ ->
                     Nothing
@@ -94,10 +170,10 @@ commonValidation ( labelText, _, controlType ) =
                 Nothing ->
                     Just (labelText ++ " is required")
 
-        DateInput displayValue _ ->
+        DateInput labelText requiredType displayValue _ ->
             requiredStr labelText displayValue
 
-        FileInput displayValue ->
+        FileInput labelText requiredType displayValue ->
             requiredStr labelText displayValue
 
         _ ->
@@ -130,58 +206,3 @@ inputCommonFormat displayText requiredType t =
     in
         div [ class "form-group" ]
             (firstItem :: t)
-
-
-common : ( String, RequiredType, InputControlType msg ) -> Html msg
-common ( labelText, requiredType, controlType ) =
-    let
-        commonStructure t =
-            inputCommonFormat labelText requiredType [ div [ class controlWidth ] t ]
-    in
-        case controlType of
-            TextInput displayValue event ->
-                commonStructure
-                    [ input [ type_ "textbox", class "e-textbox", nameAttr labelText, onInput event, value displayValue ] []
-                    ]
-
-            NumrInput displayValue event ->
-                commonStructure
-                    [ input [ type_ "number", class "e-textbox", nameAttr labelText, onInput event, value (toString displayValue) ] []
-                    ]
-
-            CheckInput displayValue event ->
-                commonStructure
-                    [ input [ type_ "checkbox", onCheck event, checkStyle, checked displayValue ] []
-                    ]
-
-            AreaInput displayValue event ->
-                commonStructure
-                    [ textarea [ idAttr labelText, class "e-textarea", onInput event, value displayValue ] []
-                    ]
-
-            DropInput _ syncfusionId ->
-                commonStructure
-                    [ input [ type_ "text", id syncfusionId ] []
-                    ]
-
-            KnockInput syncfusionId ->
-                div [ id syncfusionId ] []
-
-            DropInputWithButton _ syncfusionId buttonText ->
-                div [ class "form-group" ]
-                    [ label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId labelText ] [ text labelText ]
-                    , div [ class controlWidth ] [ input [ type_ "text", id syncfusionId ] [] ]
-                    , div [ class labelWidth ] [ button [ class "btn btn-sm btn-default" ] [ text buttonText ] ]
-                    ]
-
-            DateInput displayValue syncfusionId ->
-                commonStructure
-                    [ input [ type_ "text", id syncfusionId, value displayValue, value displayValue ] []
-                    ]
-
-            FileInput displayValue ->
-                div [ class "form-group" ]
-                    [ label [ class (labelWidth ++ "control-label " ++ isRequiredStr requiredType), for "fileName" ] [ text labelText ]
-                    , div [ class controlWidth ] [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] [] ]
-                    , div [ class labelWidth ] [ div [ id "fileBtn" ] [] ]
-                    ]
