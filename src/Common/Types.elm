@@ -233,3 +233,32 @@ type alias HospitilizationsRow =
     , dateOfAdmission2 : Maybe String
     , dateOfDischarge2 : Maybe String
     }
+
+
+type alias SomeDropDowns =
+    { months : List DropDownItem
+    , years : List DropDownItem
+    }
+
+
+monthDropdown : List DropDownItem
+monthDropdown =
+    [ DropDownItem Nothing ""
+    , DropDownItem (Just 0) "January"
+    , DropDownItem (Just 1) "February"
+    , DropDownItem (Just 2) "March"
+    , DropDownItem (Just 10) "October"
+    , DropDownItem (Just 11) "November"
+    , DropDownItem (Just 12) "December"
+    ]
+
+
+yearDropdown : List DropDownItem
+yearDropdown =
+    [ DropDownItem Nothing ""
+    , DropDownItem (Just 2011) "2011"
+    , DropDownItem (Just 2012) "2012"
+    , DropDownItem (Just 2016) "2016"
+    , DropDownItem (Just 2017) "2017"
+    , DropDownItem (Just 2018) "2018"
+    ]

@@ -3,6 +3,9 @@ port module Ports exposing (..)
 import Common.Types exposing (..)
 
 
+port clinicalSummaryInit : SomeDropDowns -> Cmd msg
+
+
 port sendMenuMessage : MenuMessage -> Cmd msg
 
 
@@ -58,7 +61,3 @@ port updateUser : (DropDownItem -> msg) -> Sub msg
 
 
 port updateTask : (DropDownItem -> msg) -> Sub msg
-
-
-
--- Hospitilizations

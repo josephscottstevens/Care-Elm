@@ -1,7 +1,7 @@
 module ClinicalSummary exposing (..)
 
-import Html exposing (Html, text, div, button, h4)
-import Html.Attributes exposing (class, type_)
+import Html exposing (Html, text, div, button, h4, span, input)
+import Html.Attributes exposing (class, type_, id, style)
 import Html.Events exposing (onClick)
 import Common.Html exposing (..)
 import Common.Types exposing (RequiredType(..))
@@ -64,10 +64,25 @@ update msg model =
             { model | comments = str } ! []
 
 
+generateSummaryDiv : Html msg
+generateSummaryDiv =
+    let
+        inline =
+            style [ ( "display", "inline-block" ) ]
+    in
+        div []
+            [ div [ inline ] [ text "Generate Summary" ]
+            , div [ inline ] [ input [ id "MonthId" ] [] ]
+            , div [ inline ] [ input [ id "YearId" ] [] ]
+            , button [] [ text "sub" ]
+            ]
+
+
 formInputs : Model -> List (InputControlType Msg)
 formInputs { summary, carePlan, codeLegalStatus, impairment, comments } =
     [ HtmlElement <| button [ class "btn btn-sm btn-default" ] [ text "Generate Care Plan Letter" ]
     , AreaInput "Clinical Summary" Optional summary UpdateSummary
+    , HtmlElement generateSummaryDiv
     , AreaInput "Instructions and Care Plan" Optional carePlan UpdateCarePlan
     , AreaInput "Code/Legal Status" Optional codeLegalStatus UpdateCodeLegalStatus
     , AreaInput "Impairment" Optional impairment UpdateImpairment

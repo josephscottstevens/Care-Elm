@@ -18,6 +18,7 @@ import Navigation exposing (Location)
 import Route exposing (Route)
 import Http exposing (Error)
 import Task
+import Ports exposing (clinicalSummaryInit)
 
 
 type alias Model =
@@ -152,12 +153,12 @@ setRoute maybeRoute model =
                     getDropDowns model.patientId AddEditDataSourceLoaded
 
         transition toMsg task =
-            [ Task.attempt toMsg task, setLoadingStatus False, extraCmd ]
+            Cmd.batch [ Task.attempt toMsg task, setLoadingStatus False, extraCmd ]
     in
         case maybeRoute of
             Just (Route.Records t) ->
                 { model | page = Records (Records.Types.emptyModel t model.patientId) }
-                    ! transition RecordsLoaded (Records.init t model.patientId)
+                    ! [ transition RecordsLoaded (Records.init t model.patientId) ]
 
             Just (Route.RecordAddNew t) ->
                 { model | page = RecordAddNew (RecordAddNew.Types.emptyModel t model.addEditDataSource model.patientId) }
@@ -165,7 +166,9 @@ setRoute maybeRoute model =
 
             Just Route.ClinicalSummary ->
                 { model | page = ClinicalSummary (ClinicalSummary.emptyModel model.patientId) }
-                    ! transition ClinicalSummaryLoaded (ClinicalSummary.init model.patientId)
+                    ! [ transition ClinicalSummaryLoaded (ClinicalSummary.init model.patientId)
+                      , clinicalSummaryInit (SomeDropDowns monthDropdown yearDropdown)
+                      ]
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []

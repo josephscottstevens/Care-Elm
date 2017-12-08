@@ -99,14 +99,14 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ textarea [ idAttr labelText, class "e-textbox", onInput event, value displayValue ] []
-                            ]
+                            [ textarea [ idAttr labelText, class "e-textbox", onInput event, value displayValue ] [] ]
                         ]
 
                 DropInput labelText requiredType _ syncfusionId ->
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
-                        , input [ type_ "text", id syncfusionId ] []
+                        , div config.controlAttributes
+                            [ input [ type_ "text", id syncfusionId ] [] ]
                         ]
 
                 KnockInput labelText requiredType syncfusionId ->
@@ -122,7 +122,8 @@ makeControls config controls =
                 DateInput labelText requiredType displayValue syncfusionId ->
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
-                        , input [ type_ "text", id syncfusionId, value displayValue, value displayValue ] []
+                        , div config.controlAttributes
+                            [ input [ type_ "text", id syncfusionId, value displayValue, value displayValue ] [] ]
                         ]
 
                 FileInput labelText requiredType displayValue ->
@@ -135,7 +136,8 @@ makeControls config controls =
                 HtmlElement htmlElement ->
                     div [ class "form-group" ]
                         [ commonLabel "" Optional
-                        , div [ class controlWidth ] [ htmlElement ]
+                        , div config.controlAttributes
+                            [ htmlElement ]
                         ]
     in
         div [] (controls |> List.map common)
