@@ -4,9 +4,12 @@ import Char exposing (isLower, isUpper)
 import Date
 import Date.Extra
 import Json.Encode as Encode
-import Json.Decode exposing (..)
+import Json.Decode as Decode exposing (Decoder, maybe, string, int, field, decodeString)
 import Http
 import Route exposing (Route)
+import Json.Decode.Pipeline exposing (required, decode)
+import Http
+import Common.Types exposing (DropDownItem, AddEditDataSource)
 
 
 port setLoadingStatus : Bool -> Cmd msg
@@ -166,3 +169,10 @@ getResponseError str =
 
         Err _ ->
             Nothing
+
+
+decodeDropDownItem : Decoder DropDownItem
+decodeDropDownItem =
+    decode DropDownItem
+        |> required "Id" (maybe Decode.int)
+        |> required "Name" Decode.string

@@ -11,12 +11,13 @@ import Hospitilizations.Types
 import HospitilizationsAddEdit.Types
 import Records.Types
 import RecordAddNew.Types
-import Common.Functions exposing (..)
-import Common.Types exposing (..)
-import Functions exposing (..)
+import Common.Functions as Functions
+import Common.Types exposing (AddEditDataSource)
 import Navigation exposing (Location)
 import Route exposing (Route)
 import Http exposing (Error)
+import Json.Decode exposing (maybe, int, list)
+import Json.Decode.Pipeline exposing (required, decode)
 
 
 type alias Model =
@@ -56,7 +57,7 @@ init location =
                 , page = Error "Cannot load page without patientId"
                 , addEditDataSource = Nothing
                 }
-                    ! [ setLoadingStatus False ]
+                    ! [ Functions.setLoadingStatus False ]
 
 
 subscriptions : Model -> Sub Msg
@@ -131,7 +132,6 @@ type Msg
     | BillingMsg Billing.Types.Msg
     | ClinicalSummaryMsg ClinicalSummary.Msg
     | RecordsMsg Records.Types.Msg
-    | RecordsLoaded (Result Http.Error Records.Types.Model)
     | RecordAddNewMsg RecordAddNew.Types.Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | HospitilizationsMsg Hospitilizations.Types.Msg
@@ -150,7 +150,7 @@ setRoute maybeRoute model =
                     getDropDowns model.patientId AddEditDataSourceLoaded
 
         cmds t =
-            [ getDropdownsCmd, setLoadingStatus False ] ++ t
+            [ getDropdownsCmd, Functions.setLoadingStatus False ] ++ t
     in
         case maybeRoute of
             Just Route.ClinicalSummary ->
@@ -226,12 +226,6 @@ updatePage page msg model =
             ( ClinicalSummaryMsg subMsg, ClinicalSummary subModel ) ->
                 toPage ClinicalSummary ClinicalSummaryMsg ClinicalSummary.update subMsg subModel
 
-            ( RecordsLoaded (Ok subModel), _ ) ->
-                { model | page = Records subModel } ! []
-
-            ( RecordsLoaded (Err err), _ ) ->
-                { model | page = Error (toString err) } ! []
-
             ( RecordsMsg subMsg, Records subModel ) ->
                 toPage Records RecordsMsg Records.update subMsg subModel
 
@@ -240,6 +234,22 @@ updatePage page msg model =
 
             _ ->
                 { model | page = Error <| "Missing Page Message" ++ toString msg ++ " - " ++ (toString page) } ! []
+
+
+getDropDowns : Int -> (Result Http.Error AddEditDataSource -> msg) -> Cmd msg
+getDropDowns patientId t =
+    decode AddEditDataSource
+        |> required "facilityId" (maybe int)
+        |> required "patientId" int
+        |> required "facilityDropdown" (list Functions.decodeDropDownItem)
+        |> required "recordTypeDropdown" (list Functions.decodeDropDownItem)
+        |> required "userDropDown" (list Functions.decodeDropDownItem)
+        |> required "taskDropDown" (list Functions.decodeDropDownItem)
+        |> required "hospitilizationServiceTypeDropdown" (list Functions.decodeDropDownItem)
+        |> required "hospitalizationDischargePhysicianDropdown" (list Functions.decodeDropDownItem)
+        |> required "hospitilizations" (list Functions.decodeDropDownItem)
+        |> Http.get ("/People/PatientRecordsDropdowns?patientId=" ++ toString patientId)
+        |> Http.send t
 
 
 main : Program Never Model Msg
