@@ -7,7 +7,7 @@ import Html exposing (Attribute)
 import Html.Attributes as Attr
 import Regex exposing (..)
 import Navigation exposing (Location)
-import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, int, string, custom)
+import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, int, string)
 
 
 type Route

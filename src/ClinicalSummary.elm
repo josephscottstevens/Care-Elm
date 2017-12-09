@@ -1,7 +1,7 @@
 module ClinicalSummary exposing (..)
 
-import Html exposing (Html, text, div, button, h4, span, input)
-import Html.Attributes exposing (class, type_, id, style)
+import Html exposing (Html, text, div, button, h4, input)
+import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
 import Common.Html exposing (..)
 import Common.Types exposing (RequiredType(..))
@@ -37,8 +37,8 @@ type Msg
     | UpdateComments String
 
 
-view : Model -> Html Msg
-view model =
+view : Model -> Int -> Html Msg
+view model patientId =
     div [ class "form-horizontal" ]
         [ h4 [] [ text "Clinical Summary" ]
         , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs model)
@@ -103,8 +103,8 @@ decodeClinicalSummary =
         |> required "RnReviewedCarePlan" Decode.bool
 
 
-emptyModel : Int -> Model
-emptyModel patientId =
+emptyModel : Model
+emptyModel =
     { id = Nothing
     , comments = ""
     , carePlan = ""

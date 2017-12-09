@@ -78,7 +78,7 @@ view model =
             div [] []
 
         ClinicalSummary subModel ->
-            Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel)
+            Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel model.patientId)
 
         Records subModel ->
             Html.map RecordsMsg (Records.view subModel model.addEditDataSource)
@@ -157,7 +157,7 @@ setRoute maybeRoute model =
     in
         case maybeRoute of
             Just Route.ClinicalSummary ->
-                { model | page = ClinicalSummary (ClinicalSummary.emptyModel model.patientId) }
+                { model | page = ClinicalSummary ClinicalSummary.emptyModel }
                     ! (clinicalSummaryInit (SomeDropDowns monthDropdown yearDropdown)
                         :: transition ClinicalSummaryLoaded (ClinicalSummary.init model.patientId)
                       )
