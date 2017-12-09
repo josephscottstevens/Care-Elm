@@ -161,43 +161,66 @@ commonLabel labelText requiredType =
         label [ class (labelWidth ++ " " ++ isRequiredStr requiredType), forId labelText ] [ text formattedLabelText ]
 
 
-isRequired : InputControlType msg -> Bool
-isRequired controlType =
-    False
-
-
 getValidationErrors : List (InputControlType msg) -> List String
 getValidationErrors controls =
     controls
-        |> List.filter isRequired
         |> List.map commonValidation
         |> List.filterMap identity
+
+
+is : RequiredType -> Maybe a -> Maybe a
+is requiredType t =
+    case requiredType of
+        Required ->
+            t
+
+        Optional ->
+            Nothing
 
 
 commonValidation : InputControlType msg -> Maybe String
 commonValidation controlType =
     case controlType of
-        TextInput labelText _ displayValue _ ->
-            requiredStr labelText displayValue
+        TextInput labelText requiredType displayValue _ ->
+            is requiredType <| requiredStr labelText displayValue
 
-        AreaInput labelText _ displayValue _ ->
-            requiredStr labelText displayValue
+        AreaInput labelText requiredType displayValue _ ->
+            is requiredType <| requiredStr labelText displayValue
 
-        DropInput labelText _ displayValue _ ->
-            case displayValue of
-                Just _ ->
-                    Nothing
+        DropInput labelText requiredType displayValue _ ->
+            is requiredType <|
+                case displayValue of
+                    Just _ ->
+                        Nothing
 
-                Nothing ->
-                    Just (labelText ++ " is required")
+                    Nothing ->
+                        Just (labelText ++ " is required")
 
-        DateInput labelText _ displayValue _ ->
-            requiredStr labelText displayValue
+        DateInput labelText requiredType displayValue _ ->
+            is requiredType <| requiredStr labelText displayValue
 
-        FileInput labelText _ displayValue ->
-            requiredStr labelText displayValue
+        FileInput labelText requiredType displayValue ->
+            is requiredType <| requiredStr labelText displayValue
 
-        _ ->
+        NumrInput labelText requiredType displayValue _ ->
+            is requiredType (requiredStr labelText (toString displayValue))
+
+        CheckInput _ _ _ _ ->
+            Nothing
+
+        KnockInput labelText requiredType displayValue ->
+            is requiredType <| requiredStr labelText displayValue
+
+        DropInputWithButton labelText requiredType displayValue _ _ ->
+            is requiredType <|
+                case displayValue of
+                    Just _ ->
+                        Nothing
+
+                    Nothing ->
+                        Just (labelText ++ " is required")
+
+        HtmlElement _ ->
             Nothing
 
 

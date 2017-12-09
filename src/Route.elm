@@ -147,7 +147,7 @@ modifyUrl =
     routeToString >> Navigation.newUrl
 
 
-fromLocation : Location -> Maybe Route
+fromLocation : Navigation.Location -> Maybe Route
 fromLocation location =
     if String.isEmpty location.hash then
         Just None
