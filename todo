@@ -14,6 +14,8 @@ QUESTIONS:
 TODO:
 Fix are you sure you want to leave
 
+validation looks like it has missing stuff
+
 go to the real hospitilizations page, add text in just for the debugger
 
 in main.js //get the current view from left nav

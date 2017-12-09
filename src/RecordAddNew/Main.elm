@@ -8,7 +8,7 @@ import Html.Events exposing (onClick)
 import Common.Html exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
-import Route exposing (Route)
+import Route
 import Ports exposing (..)
 
 
@@ -231,7 +231,7 @@ formInputs model recordType =
                     CheckInput "Existing Hospitilization" Optional model.isExistingHospitilization UpdateIsExistingHospitilization
                         :: case model.isExistingHospitilization of
                             True ->
-                                (DropInput "Select Hospitalization" Required model.recordAddNewInitData.hospitalizationId "HospitalizationsId")
+                                DropInput "Select Hospitalization" Required model.recordAddNewInitData.hospitalizationId "HospitalizationsId"
                                     :: lastColumns
 
                             False ->

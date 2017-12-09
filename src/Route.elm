@@ -5,8 +5,7 @@ import Common.Types exposing (..)
 import Char exposing (isDigit)
 import Html exposing (Attribute)
 import Html.Attributes as Attr
-import Regex exposing (..)
-import Navigation exposing (Location)
+import Regex
 import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, int, string)
 
 
@@ -130,7 +129,7 @@ route =
 getPatientId : String -> Maybe Int
 getPatientId urlSearch =
     urlSearch
-        |> find (AtMost 1) (regex "patientId=(\\d+)")
+        |> Regex.find (Regex.AtMost 1) (Regex.regex "patientId=(\\d+)")
         |> List.map .match
         |> List.head
         |> Maybe.map (String.filter isDigit)

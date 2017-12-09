@@ -109,7 +109,7 @@ makeControls config controls =
                             [ input [ type_ "text", id syncfusionId ] [] ]
                         ]
 
-                KnockInput labelText requiredType syncfusionId ->
+                KnockInput labelText _ syncfusionId ->
                     div [ id syncfusionId ] []
 
                 DropInputWithButton labelText requiredType _ syncfusionId buttonText ->
@@ -177,13 +177,13 @@ getValidationErrors controls =
 commonValidation : InputControlType msg -> Maybe String
 commonValidation controlType =
     case controlType of
-        TextInput labelText requiredType displayValue _ ->
+        TextInput labelText _ displayValue _ ->
             requiredStr labelText displayValue
 
-        AreaInput labelText requiredType displayValue _ ->
+        AreaInput labelText _ displayValue _ ->
             requiredStr labelText displayValue
 
-        DropInput labelText requiredType displayValue _ ->
+        DropInput labelText _ displayValue _ ->
             case displayValue of
                 Just _ ->
                     Nothing
@@ -191,10 +191,10 @@ commonValidation controlType =
                 Nothing ->
                     Just (labelText ++ " is required")
 
-        DateInput labelText requiredType displayValue _ ->
+        DateInput labelText _ displayValue _ ->
             requiredStr labelText displayValue
 
-        FileInput labelText requiredType displayValue ->
+        FileInput labelText _ displayValue ->
             requiredStr labelText displayValue
 
         _ ->

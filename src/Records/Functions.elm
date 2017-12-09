@@ -1,19 +1,9 @@
-module Records.Functions
-    exposing
-        ( getRecords
-        , deleteRequest
-        , getTaskId
-        , flipDropDownOpen
-        , filteredRecords
-        , getMenuMessage
-        , flipConsent
-        , filterFields
-        )
+module Records.Functions exposing (getRecords, deleteRequest, flipDropDownOpen, filteredRecords, getMenuMessage, flipConsent, filterFields)
 
 import Json.Decode as Decode exposing (Decoder, maybe)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Http
-import Records.Types exposing (RecordRow, Model, Msg(..), Filters)
+import Records.Types exposing (RecordRow, Msg(..), Filters)
 import Common.Types exposing (getId, RecordType(..), MenuMessage, FilterState)
 import Common.Functions as Functions
 import String exposing (toLower)
@@ -76,18 +66,6 @@ deleteRequest rowId =
 
 
 -- update helper functions
-
-
-getTaskId : Model -> Maybe Int
-getTaskId model =
-    let
-        records =
-            model.records
-                |> List.filter (\t -> t.id == model.dropDownState)
-                |> List.head
-                |> Maybe.map (\t -> t.taskId)
-    in
-        Maybe.withDefault Nothing records
 
 
 getMenuMessage : List RecordRow -> RecordType -> Int -> String -> MenuMessage

@@ -10,7 +10,7 @@ import Common.Grid exposing (checkColumn, standardTableAttrs, standardThead, row
 import Common.Types exposing (MenuMessage, FilterState, AddEditDataSource, HospitilizationsRow)
 import Common.Functions exposing (setLoadingStatus, displayErrorMessage, getResponseError, displaySuccessMessage, defaultString, defaultDate)
 import Ports exposing (dropDownToggle, sendMenuMessage)
-import Route exposing (Route)
+import Route
 
 
 port deleteHospitilizationConfirmed : (Int -> msg) -> Sub msg

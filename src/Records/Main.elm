@@ -3,7 +3,7 @@ module Records.Main exposing (..)
 import Records.Functions exposing (..)
 import Records.Types exposing (..)
 import Html exposing (Html, text, div, button, h4)
-import Html.Attributes exposing (class, type_, href)
+import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Table exposing (stringColumn, defaultCustomizations)
 import Common.Grid exposing (hrefColumn, checkColumn)
@@ -11,7 +11,7 @@ import Common.Types exposing (RecordType(..), AddEditDataSource, getDesc, Filter
 import Common.Functions as Functions exposing (displaySuccessMessage, displayErrorMessage)
 import Http
 import Ports exposing (dropDownToggle, deleteConfirmed, sendMenuMessage, editTask)
-import Route exposing (Route)
+import Route
 
 
 subscriptions : Sub Msg
@@ -86,12 +86,12 @@ view model addEditDataSource =
             Nothing ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
         , div [ class "e-grid e-js e-waitingpopup" ]
-            [ Table.view (config SetFilter model.recordType (getTaskId model)) model.tableState (filteredRecords model.records model.filterFields model.recordType) ]
+            [ Table.view (config SetFilter model.recordType) model.tableState (filteredRecords model.records model.filterFields model.recordType) ]
         ]
 
 
-getColumns : RecordType -> Maybe Int -> List (Table.Column RecordRow Msg)
-getColumns recordType taskId =
+getColumns : RecordType -> List (Table.Column RecordRow Msg)
+getColumns recordType =
     let
         commonColumns =
             [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
@@ -180,12 +180,12 @@ rowDropDownColumn recordType =
         }
 
 
-config : (FilterState -> Msg) -> RecordType -> Maybe Int -> Table.Config RecordRow Msg
-config event recordType taskId =
+config : (FilterState -> Msg) -> RecordType -> Table.Config RecordRow Msg
+config event recordType =
     Table.customConfig
         { toId = \t -> toString t.id
         , toMsg = SetTableState
-        , columns = getColumns recordType taskId
+        , columns = getColumns recordType
         , customizations =
             { defaultCustomizations
                 | tableAttrs = Common.Grid.standardTableAttrs "RecordTable"

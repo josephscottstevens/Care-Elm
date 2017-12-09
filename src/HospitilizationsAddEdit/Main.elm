@@ -8,7 +8,7 @@ import Html.Events exposing (onClick)
 import Common.Html exposing (..)
 import Common.Types exposing (..)
 import Common.Functions exposing (..)
-import Route exposing (Route)
+import Route
 import Ports exposing (setUnsavedChanges)
 
 
@@ -18,8 +18,8 @@ port initHospitilizations : HospitilizationsInitData -> Cmd msg
 port updateHospitilizations : (HospitilizationsInitData -> msg) -> Sub msg
 
 
-init : AddEditDataSource -> Maybe HospitilizationsRow -> Int -> Cmd Msg
-init addEditDataSource hospitilizationsRow patientId =
+init : AddEditDataSource -> Maybe HospitilizationsRow -> Cmd Msg
+init addEditDataSource hospitilizationsRow =
     initHospitilizations (getHospitilizationsInitData addEditDataSource hospitilizationsRow)
 
 

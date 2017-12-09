@@ -165,7 +165,7 @@ setRoute maybeRoute model =
                 case model.addEditDataSource of
                     Just t ->
                         { model | page = HospitilizationsAddEdit (HospitilizationsAddEdit.Types.emptyModel model.patientId HospitilizationsAddEdit.Types.emptyHospitilizationsInitData) }
-                            ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing model.patientId) ]
+                            ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing) ]
 
                     Nothing ->
                         model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
@@ -185,7 +185,7 @@ setRoute maybeRoute model =
                     case model.addEditDataSource of
                         Just t ->
                             { model | page = HospitilizationsAddEdit (HospitilizationsAddEdit.Types.emptyModel model.patientId HospitilizationsAddEdit.Types.emptyHospitilizationsInitData) }
-                                ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t x model.patientId) ]
+                                ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t x) ]
 
                         Nothing ->
                             model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
@@ -253,7 +253,7 @@ updatePage page msg model =
                 toPage RecordAddNew RecordAddNewMsg RecordAddNew.update subMsg subModel
 
             _ ->
-                { model | page = Error <| "Missing Page Message" ++ toString msg ++ " - " ++ (toString page) } ! []
+                { model | page = Error <| "Missing Page Message" ++ toString msg ++ " - " ++ toString page } ! []
 
 
 getDropDowns : Int -> (Result Http.Error AddEditDataSource -> msg) -> Cmd msg
