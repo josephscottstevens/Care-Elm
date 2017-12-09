@@ -153,7 +153,7 @@ setRoute maybeRoute model =
                     getDropDowns model.patientId AddEditDataSourceLoaded
 
         transition toMsg task extraCommands =
-            [ Task.attempt toMsg task, setLoadingStatus False, getDropdownsCmd ] ++ extraCommands
+            [ getDropdownsCmd, Task.attempt toMsg task, setLoadingStatus False ] ++ extraCommands
     in
         case maybeRoute of
             Just Route.ClinicalSummary ->
