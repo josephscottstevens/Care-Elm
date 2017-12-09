@@ -6,7 +6,7 @@ import Common.Types exposing (RecordType, FilterState)
 
 
 type Msg
-    = Load (Result Http.Error WebResponse)
+    = Load (Result Http.Error (List RecordRow))
     | SetTableState Table.State
     | NewRecord
     | DropDownToggle Int
@@ -23,17 +23,10 @@ type SortMode
     | SortDesc
 
 
-type alias WebResponse =
-    { facilityId : Maybe Int
-    , records : List RecordRow
-    }
-
-
 type alias Model =
     { recordType : RecordType
     , records : List RecordRow
     , patientId : Int
-    , facilityId : Maybe Int
     , tableState : Table.State
     , query : String
     , filterFields : Filters
@@ -46,7 +39,6 @@ emptyModel recordType patientId =
     { recordType = recordType
     , records = []
     , patientId = patientId
-    , facilityId = Nothing
     , tableState = Table.initialSort "Date"
     , query = ""
     , filterFields = emptyFilters
@@ -59,7 +51,6 @@ loadModel recordType patientId recordRows =
     { recordType = recordType
     , records = recordRows
     , patientId = patientId
-    , facilityId = Nothing
     , tableState = Table.initialSort "Date"
     , query = ""
     , filterFields = emptyFilters

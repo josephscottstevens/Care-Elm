@@ -1,6 +1,6 @@
 module Records.Functions
     exposing
-        ( rows
+        ( getRecords
         , deleteRequest
         , getTaskId
         , flipDropDownOpen
@@ -8,13 +8,12 @@ module Records.Functions
         , getMenuMessage
         , flipConsent
         , filterFields
-        , getLoadedState
         )
 
 import Json.Decode as Decode exposing (Decoder, maybe)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Http
-import Records.Types exposing (RecordRow, Model, Msg(..), WebResponse, Filters)
+import Records.Types exposing (RecordRow, Model, Msg(..), Filters)
 import Common.Types exposing (getId, RecordType(..), MenuMessage, FilterState)
 import Common.Functions as Functions
 import String exposing (toLower)
@@ -57,8 +56,8 @@ decodeRecordRow =
         |> hardcoded False
 
 
-rows : RecordType -> Int -> Http.Request (List RecordRow)
-rows recordType patientId =
+getRecords : RecordType -> Int -> Http.Request (List RecordRow)
+getRecords recordType patientId =
     let
         recordTypeId =
             getId recordType
@@ -133,14 +132,6 @@ flipDropDownOpen records recordId =
                 else
                     { t | dropDownOpen = False }
             )
-
-
-getLoadedState : Model -> WebResponse -> Model
-getLoadedState model t =
-    { model
-        | facilityId = t.facilityId
-        , records = t.records
-    }
 
 
 

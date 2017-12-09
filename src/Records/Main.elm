@@ -12,7 +12,6 @@ import Common.Functions as Functions exposing (displaySuccessMessage, displayErr
 import Http
 import Ports exposing (dropDownToggle, deleteConfirmed, sendMenuMessage, editTask)
 import Route exposing (Route)
-import Task exposing (Task)
 
 
 subscriptions : Sub Msg
@@ -23,21 +22,17 @@ subscriptions =
         ]
 
 
-init : RecordType -> Int -> Task Http.Error Model
+init : RecordType -> Int -> Cmd Msg
 init recordType patientId =
-    let
-        loadRecordRows =
-            rows recordType patientId
-                |> Http.toTask
-    in
-        Task.map (loadModel recordType patientId) loadRecordRows
+    getRecords recordType patientId
+        |> Http.send Load
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Load (Ok t) ->
-            getLoadedState model t ! [ Functions.setLoadingStatus False ]
+            { model | records = t } ! [ Functions.setLoadingStatus False ]
 
         Load (Err t) ->
             model ! [ displayErrorMessage (toString t) ]

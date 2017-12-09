@@ -17,8 +17,6 @@ import Functions exposing (..)
 import Navigation exposing (Location)
 import Route exposing (Route)
 import Http exposing (Error)
-import Task
-import Ports exposing (clinicalSummaryInit)
 
 
 type alias Model =
@@ -132,7 +130,6 @@ type Msg
     = SetRoute (Maybe Route)
     | BillingMsg Billing.Types.Msg
     | ClinicalSummaryMsg ClinicalSummary.Msg
-    | ClinicalSummaryLoaded (Result Http.Error ClinicalSummary.Model)
     | RecordsMsg Records.Types.Msg
     | RecordsLoaded (Result Http.Error Records.Types.Model)
     | RecordAddNewMsg RecordAddNew.Types.Msg
@@ -152,38 +149,36 @@ setRoute maybeRoute model =
                 Nothing ->
                     getDropDowns model.patientId AddEditDataSourceLoaded
 
-        transition toMsg task extraCommands =
-            [ getDropdownsCmd, Task.attempt toMsg task, setLoadingStatus False ] ++ extraCommands
+        cmds t =
+            [ getDropdownsCmd, setLoadingStatus False ] ++ t
     in
         case maybeRoute of
             Just Route.ClinicalSummary ->
                 { model | page = ClinicalSummary ClinicalSummary.emptyModel }
-                    ! transition ClinicalSummaryLoaded
-                        (ClinicalSummary.init model.patientId)
-                        [ clinicalSummaryInit (SomeDropDowns monthDropdown yearDropdown) ]
+                    ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
 
             Just Route.Hospitilizations ->
                 { model | page = Hospitilizations (Hospitilizations.Types.emptyModel model.patientId) }
-                    ! [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
+                    ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
             Just Route.HospitilizationsAdd ->
                 case model.addEditDataSource of
                     Just t ->
                         { model | page = HospitilizationsAddEdit (HospitilizationsAddEdit.Types.emptyModel model.patientId HospitilizationsAddEdit.Types.emptyHospitilizationsInitData) }
-                            ! [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing model.patientId) ]
+                            ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing model.patientId) ]
 
                     Nothing ->
                         model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
 
             Just (Route.Records t) ->
                 { model | page = Records (Records.Types.emptyModel t model.patientId) }
-                    ! transition RecordsLoaded (Records.init t model.patientId) []
+                    ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
 
             Just (Route.RecordAddNew t) ->
                 { model | page = RecordAddNew (RecordAddNew.Types.emptyModel t model.addEditDataSource model.patientId) }
                     ! case model.addEditDataSource of
                         Just addEditDataSource ->
-                            [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource t) ]
+                            cmds [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource t) ]
 
                         Nothing ->
                             [ getDropDowns model.patientId AddEditDataSourceLoaded ]
@@ -230,12 +225,6 @@ updatePage page msg model =
 
             ( ClinicalSummaryMsg subMsg, ClinicalSummary subModel ) ->
                 toPage ClinicalSummary ClinicalSummaryMsg ClinicalSummary.update subMsg subModel
-
-            ( ClinicalSummaryLoaded (Err err), _ ) ->
-                { model | page = Error (toString err) } ! []
-
-            ( ClinicalSummaryLoaded (Ok subModel), _ ) ->
-                { model | page = ClinicalSummary subModel } ! []
 
             ( RecordsLoaded (Ok subModel), _ ) ->
                 { model | page = Records subModel } ! []

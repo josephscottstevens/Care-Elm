@@ -2,10 +2,9 @@ module ClinicalSummary exposing (..)
 
 import Html exposing (Html, text, div, button, h4, input)
 import Html.Attributes exposing (class, id, style)
-import Html.Events exposing (onClick)
 import Common.Html exposing (..)
 import Common.Types exposing (RequiredType(..))
-import Task exposing (Task)
+import Common.Functions exposing (displayErrorMessage)
 import Http
 import Json.Decode as Decode exposing (maybe)
 import Json.Decode.Pipeline exposing (..)
@@ -22,15 +21,16 @@ type alias Model =
     }
 
 
-init : Int -> Task Http.Error Model
+init : Int -> Cmd Msg
 init patientId =
     decodeClinicalSummary
         |> Http.get ("/People/ClinicalSummary?patientId=" ++ toString patientId)
-        |> Http.toTask
+        |> Http.send LoadData
 
 
 type Msg
-    = UpdateSummary String
+    = LoadData (Result Http.Error Model)
+    | UpdateSummary String
     | UpdateCarePlan String
     | UpdateCodeLegalStatus String
     | UpdateImpairment String
@@ -48,6 +48,12 @@ view model patientId =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        LoadData (Ok newModel) ->
+            newModel ! []
+
+        LoadData (Err t) ->
+            model ! [ displayErrorMessage (toString t) ]
+
         UpdateSummary str ->
             { model | summary = str } ! []
 
