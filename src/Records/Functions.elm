@@ -1,12 +1,22 @@
-module Records.Functions exposing (..)
+module Records.Functions
+    exposing
+        ( rows
+        , deleteRequest
+        , getTaskId
+        , flipDropDownOpen
+        , filteredRecords
+        , getMenuMessage
+        , flipConsent
+        , filterFields
+        , getLoadedState
+        )
 
-import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (..)
+import Json.Decode as Decode exposing (Decoder, maybe)
+import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Http
-import Table
-import Records.Types exposing (..)
-import Common.Types exposing (..)
-import Common.Functions exposing (..)
+import Records.Types exposing (RecordRow, Model, Msg(..), WebResponse, Filters)
+import Common.Types exposing (getId, RecordType(..), MenuMessage, FilterState)
+import Common.Functions as Functions
 import String exposing (toLower)
 
 
@@ -203,29 +213,29 @@ filteredRecords records filterFields recordType =
     case recordType of
         Hospitalizations ->
             records
-                |> List.filter (\t -> String.contains filterFields.date (defaultLowerDateTime t.date))
-                |> List.filter (\t -> String.contains filterFields.hospitalizationId (defaultIntToString t.hospitalizationId))
-                |> List.filter (\t -> String.contains filterFields.dateOfAdmission (defaultDateTime t.dateOfAdmission))
-                |> List.filter (\t -> String.contains filterFields.dateOfDischarge (defaultDateTime t.dateOfDischarge))
-                |> List.filter (\t -> String.contains filterFields.hospitalizationServiceType (defaultLower t.hospitalizationServiceType))
-                |> List.filter (\t -> String.contains filterFields.recommendations (defaultLower t.recommendations))
-                |> List.filter (\t -> String.contains filterFields.dischargePhysician (defaultLower t.dischargePhysician))
-                |> List.filter (\t -> String.contains filterFields.comments (defaultLower t.comments))
+                |> List.filter (\t -> String.contains filterFields.date (Functions.defaultLowerDateTime t.date))
+                |> List.filter (\t -> String.contains filterFields.hospitalizationId (Functions.defaultIntToString t.hospitalizationId))
+                |> List.filter (\t -> String.contains filterFields.dateOfAdmission (Functions.defaultDateTime t.dateOfAdmission))
+                |> List.filter (\t -> String.contains filterFields.dateOfDischarge (Functions.defaultDateTime t.dateOfDischarge))
+                |> List.filter (\t -> String.contains filterFields.hospitalizationServiceType (Functions.defaultLower t.hospitalizationServiceType))
+                |> List.filter (\t -> String.contains filterFields.recommendations (Functions.defaultLower t.recommendations))
+                |> List.filter (\t -> String.contains filterFields.dischargePhysician (Functions.defaultLower t.dischargePhysician))
+                |> List.filter (\t -> String.contains filterFields.comments (Functions.defaultLower t.comments))
 
         _ ->
             records
-                |> List.filter (\t -> String.contains filterFields.date (defaultLowerDateTime t.date))
-                |> List.filter (\t -> String.contains filterFields.provider (defaultLower t.provider))
-                |> List.filter (\t -> String.contains filterFields.specialty (defaultLower t.specialty))
-                |> List.filter (\t -> String.contains filterFields.comments (defaultLower t.comments))
-                |> List.filter (\t -> String.contains filterFields.dateAccessioned (defaultLowerDateTime t.dateAccessed))
-                |> List.filter (\t -> String.contains filterFields.provider (defaultLower t.provider))
-                |> List.filter (\t -> String.contains filterFields.title (defaultLower t.title))
-                |> List.filter (\t -> String.contains filterFields.recordingDate (toLower (dateTime t.recordingDate)))
-                |> List.filter (\t -> String.contains filterFields.recording (defaultLower t.recording))
-                |> List.filter (\t -> String.contains filterFields.taskTitle (defaultLower t.taskTitle))
+                |> List.filter (\t -> String.contains filterFields.date (Functions.defaultLowerDateTime t.date))
+                |> List.filter (\t -> String.contains filterFields.provider (Functions.defaultLower t.provider))
+                |> List.filter (\t -> String.contains filterFields.specialty (Functions.defaultLower t.specialty))
+                |> List.filter (\t -> String.contains filterFields.comments (Functions.defaultLower t.comments))
+                |> List.filter (\t -> String.contains filterFields.dateAccessioned (Functions.defaultLowerDateTime t.dateAccessed))
+                |> List.filter (\t -> String.contains filterFields.provider (Functions.defaultLower t.provider))
+                |> List.filter (\t -> String.contains filterFields.title (Functions.defaultLower t.title))
+                |> List.filter (\t -> String.contains filterFields.recordingDate (toLower (Functions.dateTime t.recordingDate)))
+                |> List.filter (\t -> String.contains filterFields.recording (Functions.defaultLower t.recording))
+                |> List.filter (\t -> String.contains filterFields.taskTitle (Functions.defaultLower t.taskTitle))
                 |> List.filter (\t -> String.contains filterFields.enrollment (toLower (toString t.enrollment)))
                 |> List.filter (\t -> String.contains filterFields.hasVerbalConsent (toLower (toString t.hasVerbalConsent)))
-                |> List.filter (\t -> String.contains filterFields.staffName (defaultLower t.staffName))
-                |> List.filter (\t -> String.contains filterFields.fileName (defaultLower t.fileName))
-                |> List.filter (\t -> String.contains filterFields.reportDate (defaultLowerDate t.reportDate))
+                |> List.filter (\t -> String.contains filterFields.staffName (Functions.defaultLower t.staffName))
+                |> List.filter (\t -> String.contains filterFields.fileName (Functions.defaultLower t.fileName))
+                |> List.filter (\t -> String.contains filterFields.reportDate (Functions.defaultLowerDate t.reportDate))

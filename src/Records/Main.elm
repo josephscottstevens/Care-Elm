@@ -2,11 +2,11 @@ module Records.Main exposing (..)
 
 import Records.Functions exposing (..)
 import Records.Types exposing (..)
-import Html exposing (Html, text, div, button, h4, a)
+import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_, href)
 import Html.Events exposing (onClick)
-import Table exposing (..)
-import Common.Grid exposing (..)
+import Table exposing (stringColumn, defaultCustomizations)
+import Common.Grid exposing (hrefColumn, checkColumn)
 import Common.Types exposing (RecordType(..), AddEditDataSource, getDesc, FilterState)
 import Common.Functions as Functions exposing (displaySuccessMessage, displayErrorMessage)
 import Http
@@ -95,7 +95,7 @@ view model addEditDataSource =
         ]
 
 
-getColumns : RecordType -> Maybe Int -> List (Column RecordRow Msg)
+getColumns : RecordType -> Maybe Int -> List (Table.Column RecordRow Msg)
 getColumns recordType taskId =
     let
         commonColumns =
@@ -180,19 +180,22 @@ rowDropDownColumn : RecordType -> Table.Column RecordRow Msg
 rowDropDownColumn recordType =
     Table.veryCustomColumn
         { name = ""
-        , viewData = \t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropDownItems recordType t.id)
+        , viewData = \t -> Common.Grid.rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropDownItems recordType t.id)
         , sorter = Table.unsortable
         }
 
 
-config : (FilterState -> Msg) -> RecordType -> Maybe Int -> Config RecordRow Msg
+config : (FilterState -> Msg) -> RecordType -> Maybe Int -> Table.Config RecordRow Msg
 config event recordType taskId =
-    customConfig
+    Table.customConfig
         { toId = \t -> toString t.id
         , toMsg = SetTableState
         , columns = getColumns recordType taskId
         , customizations =
-            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = standardThead event }
+            { defaultCustomizations
+                | tableAttrs = Common.Grid.standardTableAttrs "RecordTable"
+                , thead = Common.Grid.standardThead event
+            }
         }
 
 

@@ -69,10 +69,10 @@ routeToString route =
             "#/people/_clinicalsummary"
 
         Records recordType ->
-            "#/people/" ++ (recordTypeToString recordType)
+            "#/people/" ++ recordTypeToString recordType
 
         RecordAddNew recordType ->
-            "#/people/" ++ (recordTypeToString recordType) ++ "/addedit"
+            "#/people/" ++ recordTypeToString recordType ++ "/addedit"
 
         Hospitilizations ->
             "#/people/_hospitalizations"
@@ -145,7 +145,7 @@ href route =
 
 modifyUrl : Route -> Cmd msg
 modifyUrl =
-    routeToString >> Navigation.modifyUrl
+    routeToString >> Navigation.newUrl
 
 
 fromLocation : Location -> Maybe Route

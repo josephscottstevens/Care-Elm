@@ -14,6 +14,10 @@ QUESTIONS:
 TODO:
 Fix are you sure you want to leave
 
+consolidate save changes \ are you sures?
+
+hospitilizations addedit isn't working
+
 who should have RecordType, the model, or pass to view?
 I dont want the models aware of patientId, because then they both have a copy, and sync bug right?
 
