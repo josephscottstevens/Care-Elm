@@ -63,22 +63,17 @@ saveForm model =
     Http.send SaveCompleted (saveFormRequest model)
 
 
-getAddEditMsg : Maybe AddEditDataSource -> Maybe Int -> Bool -> Bool -> InitRecordAddNew
+getAddEditMsg : AddEditDataSource -> Maybe Int -> Bool -> Bool -> InitRecordAddNew
 getAddEditMsg addEditDataSource recordTypeId setFocus isExistingHospitilization =
-    case addEditDataSource of
-        Just t ->
-            { facilityId = t.facilityId
-            , facilities = t.facilities
-            , recordTypes = t.recordTypes
-            , users = t.users
-            , tasks = t.tasks
-            , hospitilizationServiceTypes = t.hospitilizationServiceTypes
-            , hospitalizationDischargePhysicians = t.hospitalizationDischargePhysicians
-            , hospitilizations = t.hospitilizations
-            , recordTypeId = recordTypeId
-            , setFocus = setFocus
-            , isExistingHospitilization = isExistingHospitilization
-            }
-
-        Nothing ->
-            Debug.crash "Datasource is required for records addedit"
+    { facilityId = addEditDataSource.facilityId
+    , facilities = addEditDataSource.facilities
+    , recordTypes = addEditDataSource.recordTypes
+    , users = addEditDataSource.users
+    , tasks = addEditDataSource.tasks
+    , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
+    , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
+    , hospitilizations = addEditDataSource.hospitilizations
+    , recordTypeId = recordTypeId
+    , setFocus = setFocus
+    , isExistingHospitilization = isExistingHospitilization
+    }

@@ -172,7 +172,12 @@ setRoute maybeRoute model =
 
             Just (Route.RecordAddNew t) ->
                 { model | page = RecordAddNew (RecordAddNew.Types.emptyModel t model.addEditDataSource model.patientId) }
-                    ! [ Cmd.map RecordAddNewMsg (RecordAddNew.init model.addEditDataSource t) ]
+                    ! case model.addEditDataSource of
+                        Just addEditDataSource ->
+                            [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource t) ]
+
+                        Nothing ->
+                            [ getDropDowns model.patientId AddEditDataSourceLoaded ]
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []

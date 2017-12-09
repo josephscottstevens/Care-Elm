@@ -57,7 +57,7 @@ port resetUpdate : Maybe Int -> Cmd msg
 port resetUpdateComplete : (Maybe Int -> msg) -> Sub msg
 
 
-init : Maybe AddEditDataSource -> RecordType -> Cmd Msg
+init : AddEditDataSource -> RecordType -> Cmd Msg
 init addEditDataSource recordType =
     initRecords (getAddEditMsg addEditDataSource (Just <| getId recordType) False False)
 
@@ -157,7 +157,12 @@ update msg model =
                 model ! [ setUnsavedChanges False, Route.modifyUrl (Route.Records recordType) ]
 
             PresetPageComplete recordTypeId ->
-                { model | state = Edit } ! [ initRecords (getAddEditMsg model.addEditDataSource recordTypeId True False) ]
+                case model.addEditDataSource of
+                    Just t ->
+                        { model | state = Edit } ! [ initRecords (getAddEditMsg t recordTypeId True False) ]
+
+                    Nothing ->
+                        model ! [ Route.modifyUrl (Route.Records PrimaryCare) ]
 
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then
