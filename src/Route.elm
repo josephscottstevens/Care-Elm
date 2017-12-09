@@ -80,8 +80,8 @@ routeToString route =
         HospitilizationsAdd ->
             "#/people/_hospitalizations/add"
 
-        HospitilizationsEdit id ->
-            "#/people/_hospitalizations/edit" ++ toString id
+        HospitilizationsEdit rowId ->
+            "#/people/_hospitalizations/edit/" ++ toString rowId
 
         Error t ->
             "#/Error" ++ t
@@ -95,8 +95,8 @@ route =
         -- Clinical Summary
         , Url.map ClinicalSummary (s "people" </> s "_clinicalsummary")
         , Url.map Hospitilizations (s "people" </> s "_hospitalizations")
-        , Url.map HospitilizationsAdd (s "settings")
-        , Url.map HospitilizationsEdit (s "register" </> int)
+        , Url.map HospitilizationsAdd (s "people" </> s "_hospitalizations" </> s "add")
+        , Url.map HospitilizationsEdit (s "people" </> s "_hospitalizations" </> s "edit" </> int)
 
         -- Records Grid
         , Url.map (Records PrimaryCare) (s "people" </> s "_primarycarerecords")

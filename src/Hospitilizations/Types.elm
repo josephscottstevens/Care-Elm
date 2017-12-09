@@ -12,6 +12,8 @@ type Msg
     | DropDownToggle Int
     | DeleteHospitilizationConfirmed Int
     | DeleteCompleted (Result Http.Error String)
+    | HospitilizationsAdd
+    | HospitilizationsEdit Int
     | SendMenuMessage Int String
 
 

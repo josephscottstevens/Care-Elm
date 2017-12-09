@@ -170,6 +170,26 @@ setRoute maybeRoute model =
                     Nothing ->
                         model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
 
+            Just (Route.HospitilizationsEdit rowId) ->
+                let
+                    x =
+                        case model.page of
+                            Hospitilizations mdl ->
+                                mdl.hospitilizations
+                                    |> List.filter (\t -> t.id == rowId)
+                                    |> List.head
+
+                            _ ->
+                                Debug.crash "invalid hosptilization edit state"
+                in
+                    case model.addEditDataSource of
+                        Just t ->
+                            { model | page = HospitilizationsAddEdit (HospitilizationsAddEdit.Types.emptyModel model.patientId HospitilizationsAddEdit.Types.emptyHospitilizationsInitData) }
+                                ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t x model.patientId) ]
+
+                        Nothing ->
+                            model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
+
             Just (Route.Records t) ->
                 { model | page = Records (Records.Types.emptyModel t model.patientId) }
                     ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]

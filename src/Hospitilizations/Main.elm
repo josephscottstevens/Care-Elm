@@ -68,13 +68,19 @@ update msg model =
         SetFilter filterState ->
             { model | filterFields = filterFields model.filterFields filterState } ! []
 
+        HospitilizationsAdd ->
+            model ! [ Route.modifyUrl Route.HospitilizationsAdd ]
+
+        HospitilizationsEdit rowId ->
+            model ! [ Route.modifyUrl (Route.HospitilizationsEdit rowId) ]
+
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
     div []
         [ case addEditDataSource of
             Just _ ->
-                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", Route.href Route.Hospitilizations ] [ text "New Record" ]
+                button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick HospitilizationsAdd ] [ text "New Record" ]
 
             Nothing ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
@@ -130,7 +136,7 @@ rowDropDownColumn =
 
 dropDownItems : Int -> List ( String, String, Html.Attribute Msg )
 dropDownItems rowId =
-    [ ( "e-edit", "Edit", Route.href (Route.HospitilizationsEdit rowId) )
+    [ ( "e-edit", "Edit", onClick (HospitilizationsEdit rowId) )
     , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "HospitilizationDelete") )
     ]
 
