@@ -12,39 +12,6 @@ import Route exposing (Route)
 import Ports exposing (..)
 
 
-port initRecords : InitRecordAddNew -> Cmd msg
-
-
-port updateHospitilization : (DropDownItem -> msg) -> Sub msg
-
-
-port updateFacility2 : (DropDownItem -> msg) -> Sub msg
-
-
-port updateDateOfAdmission : (Maybe String -> msg) -> Sub msg
-
-
-port updateDateOfDischarge : (Maybe String -> msg) -> Sub msg
-
-
-port updateDateOfAdmission2 : (Maybe String -> msg) -> Sub msg
-
-
-port updateDateOfDischarge2 : (Maybe String -> msg) -> Sub msg
-
-
-port updateHospitalServiceType : (DropDownItem -> msg) -> Sub msg
-
-
-port updateAdmitDiagnosis : (Maybe Int -> msg) -> Sub msg
-
-
-port updateDischargeDiagnosis : (Maybe Int -> msg) -> Sub msg
-
-
-port updateDischargePhysician : (DropDownItem -> msg) -> Sub msg
-
-
 port presetPage : Maybe Int -> Cmd msg
 
 
@@ -57,36 +24,23 @@ port resetUpdate : Maybe Int -> Cmd msg
 port resetUpdateComplete : (Maybe Int -> msg) -> Sub msg
 
 
+port initRecordAddNew : RecordAddNewInitData -> Cmd msg
+
+
+port updateRecordAddNew : (RecordAddNewInitData -> msg) -> Sub msg
+
+
 init : AddEditDataSource -> RecordType -> Cmd Msg
 init addEditDataSource recordType =
-    initRecords (getAddEditMsg addEditDataSource (Just <| getId recordType) False False)
+    initRecordAddNew (getAddEditMsg addEditDataSource recordType False False)
 
 
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
         [ presetPageComplete PresetPageComplete
-        , updateFacility UpdateFacility
         , updateCategory UpdateRecordType
-        , updateTimeVisit UpdateTimeVisit
-        , updateTimeAcc UpdateTimeAcc
-        , updateFileName UpdateFileName
-        , updateReportDate UpdateReportDate
-        , updateRecordingDate UpdateRecordingDate
-        , updateUser UpdateUser
-        , updateTask UpdateTask
-
-        -- Hospitilizations
-        , updateHospitilization UpdateHospitilization
-        , updateFacility2 UpdateFacility2
-        , updateDateOfAdmission UpdateDateOfAdmission
-        , updateDateOfDischarge UpdateDateOfDischarge
-        , updateHospitalServiceType UpdateHospitalServiceType
-        , updateAdmitDiagnosis UpdateAdmitDiagnosis
-        , updateDischargeDiagnosis UpdateDischargeDiagnosis
-        , updateDischargePhysician UpdateDischargePhysician
-        , updateDateOfAdmission2 UpdateDateOfAdmission2
-        , updateDateOfDischarge2 UpdateDateOfDischarge2
+        , updateRecordAddNew UpdateRecordAddNew
         ]
 
 
@@ -157,12 +111,15 @@ update msg model =
                 model ! [ setUnsavedChanges False, Route.modifyUrl (Route.Records recordType) ]
 
             PresetPageComplete recordTypeId ->
-                case model.addEditDataSource of
+                case getRecordTypeById recordTypeId of
                     Just t ->
-                        { model | state = Edit } ! [ initRecords (getAddEditMsg t recordTypeId True False) ]
+                        { model | state = Edit } ! [ initRecordAddNew (getAddEditMsg model.addEditDataSource t True False) ]
 
                     Nothing ->
                         model ! [ Route.modifyUrl (Route.Records PrimaryCare) ]
+
+            UpdateRecordAddNew recordAddNew ->
+                model ! []
 
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then
@@ -189,23 +146,8 @@ update msg model =
             UpdateProvider str ->
                 updateAddNew { model | provider = str }
 
-            UpdateTimeVisit str ->
-                updateAddNew { model | timeVisit = str }
-
-            UpdateTimeAcc str ->
-                updateAddNew { model | timeAcc = str }
-
-            UpdateFileName str ->
-                updateAddNew { model | fileName = str }
-
             UpdateComments str ->
                 updateAddNew { model | comments = str }
-
-            UpdateFacility dropDownItem ->
-                updateAddNew { model | facilityId = dropDownItem.id, facilityText = dropDownItem.name }
-
-            UpdateReportDate str ->
-                updateAddNew { model | reportDate = str }
 
             UpdateCallSid str ->
                 updateAddNew { model | callSid = str }
@@ -216,15 +158,6 @@ update msg model =
             UpdateDuration str ->
                 updateAddNew { model | duration = defaultIntStr str }
 
-            UpdateRecordingDate str ->
-                updateAddNew { model | recordingDate = str }
-
-            UpdateUser dropDownItem ->
-                updateAddNew { model | userId = dropDownItem.id, userText = dropDownItem.name }
-
-            UpdateTask dropDownItem ->
-                updateAddNew { model | taskId = dropDownItem.id, taskText = dropDownItem.name }
-
             -- Hospitilizations
             UpdateIsExistingHospitilization bool ->
                 if model.isExistingHospitilization == bool then
@@ -232,59 +165,29 @@ update msg model =
                 else
                     { model | isExistingHospitilization = bool, state = Limbo } ! [ presetPage model.recordTypeId, setLoadingStatus True ]
 
-            UpdateHospitilization dropDownItem ->
-                updateAddNew { model | hospitalizationId = dropDownItem.id, hospitalizationText = dropDownItem.name }
-
             UpdatePatientReported bool ->
                 updateAddNew { model | patientReported = bool }
 
-            UpdateFacility2 dropDownItem ->
-                updateAddNew { model | facilityId2 = dropDownItem.id, facilityText2 = dropDownItem.name }
-
-            UpdateDateOfAdmission str ->
-                updateAddNew { model | dateOfAdmission = str }
-
-            UpdateDateOfDischarge str ->
-                updateAddNew { model | dateOfDischarge = str }
-
-            UpdateDateOfAdmission2 str ->
-                updateAddNew { model | dateOfAdmission2 = str }
-
-            UpdateDateOfDischarge2 str ->
-                updateAddNew { model | dateOfDischarge2 = str }
-
-            UpdateHospitalServiceType dropDownItem ->
-                updateAddNew { model | hospitalServiceTypeId = dropDownItem.id, hospitalServiceTypeText = dropDownItem.name }
-
-            UpdateAdmitDiagnosis admitDiagnosisId ->
-                updateAddNew { model | admitDiagnosisId = admitDiagnosisId }
-
-            UpdateDischargeDiagnosis dischargeDiagnosisId ->
-                updateAddNew { model | dischargeDiagnosisId = dischargeDiagnosisId }
-
             UpdateDischargeRecommendations str ->
                 updateAddNew { model | dischargeRecommendations = str }
-
-            UpdateDischargePhysician dropDownItem ->
-                updateAddNew { model | dischargePhysicianId = dropDownItem.id, dischargePhysicianText = dropDownItem.name }
 
 
 formInputs : Model -> RecordType -> List (InputControlType Msg)
 formInputs model recordType =
     let
         firstColumns =
-            [ DropInput "Facility" Required model.facilityId "FacilityId"
+            [ DropInput "Facility" Required model.recordAddNewInitData.facilityId "FacilityId"
             , DropInput "Category" Required model.recordTypeId "CategoryId"
             ]
 
         lastColumns =
             [ AreaInput "Comments" Required model.comments UpdateComments
-            , FileInput "Upload Record File" Required model.fileName
+            , FileInput "Upload Record File" Required model.recordAddNewInitData.fileName
             ]
 
         defaultFields =
             firstColumns
-                ++ [ DateInput "Date of Visit" Required (defaultString model.timeVisit) "TimeVisitId"
+                ++ [ DateInput "Date of Visit" Required (defaultString model.recordAddNewInitData.timeVisit) "TimeVisitId"
                    , TextInput "Doctor of Visit" Optional model.provider UpdateProvider
                    , TextInput "Specialty of Visit" Optional model.specialty UpdateSpecialty
                    ]
@@ -300,8 +203,8 @@ formInputs model recordType =
 
                 Labs ->
                     firstColumns
-                        ++ [ DateInput "Date/Time of Labs Collected" Required (defaultString model.timeVisit) "TimeVisitId"
-                           , DateInput "Date/Time of Labs Accessioned" Required (defaultString model.timeAcc) "TimeAccId"
+                        ++ [ DateInput "Date/Time of Labs Collected" Required (defaultString model.recordAddNewInitData.timeVisit) "TimeVisitId"
+                           , DateInput "Date/Time of Labs Accessioned" Required (defaultString model.recordAddNewInitData.timeAcc) "TimeAccId"
                            , TextInput "Name of Lab" Optional model.title UpdateTitle
                            , TextInput "Provider of Lab" Optional model.provider UpdateProvider
                            ]
@@ -309,8 +212,8 @@ formInputs model recordType =
 
                 Radiology ->
                     firstColumns
-                        ++ [ DateInput "Date/Time of Study was done" Required (defaultString model.timeVisit) "TimeVisitId"
-                           , DateInput "Date/Time of Study Accessioned" Required (defaultString model.timeAcc) "TimeAccId"
+                        ++ [ DateInput "Date/Time of Study was done" Required (defaultString model.recordAddNewInitData.timeVisit) "TimeVisitId"
+                           , DateInput "Date/Time of Study Accessioned" Required (defaultString model.recordAddNewInitData.timeAcc) "TimeAccId"
                            , TextInput "Name of Study" Optional model.title UpdateTitle
                            , TextInput "Provider of Study" Optional model.provider UpdateProvider
                            ]
@@ -328,25 +231,25 @@ formInputs model recordType =
                     CheckInput "Existing Hospitilization" Optional model.isExistingHospitilization UpdateIsExistingHospitilization
                         :: case model.isExistingHospitilization of
                             True ->
-                                (DropInput "Select Hospitalization" Required model.hospitalizationId "HospitalizationsId")
+                                (DropInput "Select Hospitalization" Required model.recordAddNewInitData.hospitalizationId "HospitalizationsId")
                                     :: lastColumns
 
                             False ->
                                 [ CheckInput "Patient Reported" Optional model.patientReported UpdatePatientReported
-                                , DropInputWithButton "Facility" Optional model.facilityId "FacilityId" "Add New Facility"
+                                , DropInputWithButton "Facility" Optional model.recordAddNewInitData.facilityId "FacilityId" "Add New Facility"
                                 , DropInput "Category" Required model.recordTypeId "CategoryId"
-                                , DateInput "Date of Admission" Required (defaultString model.dateOfAdmission) "DateOfAdmissionId"
-                                , DateInput "Date of Discharge" Required (defaultString model.dateOfDischarge) "DateOfDischargeId"
-                                , DropInput "Hospital Service Type" Required model.hospitalServiceTypeId "HospitalServiceTypeId"
+                                , DateInput "Date of Admission" Required (defaultString model.recordAddNewInitData.dateOfAdmission) "DateOfAdmissionId"
+                                , DateInput "Date of Discharge" Required (defaultString model.recordAddNewInitData.dateOfDischarge) "DateOfDischargeId"
+                                , DropInput "Hospital Service Type" Required model.recordAddNewInitData.hospitalServiceTypeId "HospitalServiceTypeId"
                                 , AreaInput "Chief Complaint" Required model.comments UpdateComments
                                 , KnockInput "Admit Diagnosis" Required "HospitalizationAdmitProblemSelection"
                                 , KnockInput "Discharge Diagnosis" Required "HospitalizationDischargeProblemSelection"
                                 , TextInput "Discharge Recommendations" Required model.dischargeRecommendations UpdateDischargeRecommendations
-                                , DropInputWithButton "Discharge Physician" Optional model.dischargePhysicianId "DischargePhysicianId" "New Provider"
-                                , DropInputWithButton "Secondary Facility Name" Optional model.facilityId2 "FacilityId2" "Add New Facility"
-                                , DateInput "Secondary Date of Admission" Optional (defaultString model.dateOfAdmission) "DateOfAdmissionId2"
-                                , DateInput "Secondary Date of Discharge" Optional (defaultString model.dateOfDischarge) "DateOfDischargeId2"
-                                , FileInput "Upload Record File" Required model.fileName
+                                , DropInputWithButton "Discharge Physician" Optional model.recordAddNewInitData.dischargePhysicianId "DischargePhysicianId" "New Provider"
+                                , DropInputWithButton "Secondary Facility Name" Optional model.recordAddNewInitData.facilityId2 "FacilityId2" "Add New Facility"
+                                , DateInput "Secondary Date of Admission" Optional (defaultString model.recordAddNewInitData.dateOfAdmission) "DateOfAdmissionId2"
+                                , DateInput "Secondary Date of Discharge" Optional (defaultString model.recordAddNewInitData.dateOfDischarge) "DateOfDischargeId2"
+                                , FileInput "Upload Record File" Required model.recordAddNewInitData.fileName
                                 ]
 
                 CallRecordings ->
@@ -354,15 +257,15 @@ formInputs model recordType =
                         ++ [ TextInput "Call Sid" Required model.callSid UpdateCallSid
                            , TextInput "Recording Sid" Required model.recording UpdateRecordingSid
                            , NumrInput "Duration" Required model.duration UpdateDuration
-                           , DateInput "Recording Date" Required (defaultString model.recordingDate) "RecordingDateId"
-                           , DropInput "User" Required model.userId "UserId"
-                           , DropInput "Task" Optional model.taskId "TaskId"
+                           , DateInput "Recording Date" Required (defaultString model.recordAddNewInitData.recordingDate) "RecordingDateId"
+                           , DropInput "User" Required model.recordAddNewInitData.userId "UserId"
+                           , DropInput "Task" Optional model.recordAddNewInitData.taskId "TaskId"
                            ]
 
                 PreviousHistories ->
                     firstColumns
-                        ++ [ DateInput "Report Date" Required (defaultString model.reportDate) "ReportDateId"
-                           , FileInput "Upload Record File" Required model.fileName
+                        ++ [ DateInput "Report Date" Required (defaultString model.recordAddNewInitData.reportDate) "ReportDateId"
+                           , FileInput "Upload Record File" Required model.recordAddNewInitData.fileName
                            ]
 
                 Enrollment ->

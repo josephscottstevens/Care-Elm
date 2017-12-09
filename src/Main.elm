@@ -175,13 +175,13 @@ setRoute maybeRoute model =
                     ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
 
             Just (Route.RecordAddNew t) ->
-                { model | page = RecordAddNew (RecordAddNew.Types.emptyModel t model.addEditDataSource model.patientId) }
-                    ! case model.addEditDataSource of
-                        Just addEditDataSource ->
-                            cmds [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource t) ]
+                case model.addEditDataSource of
+                    Just addEditDataSource ->
+                        { model | page = RecordAddNew (RecordAddNew.Types.emptyModel t addEditDataSource model.patientId) }
+                            ! cmds [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource t) ]
 
-                        Nothing ->
-                            [ getDropDowns model.patientId AddEditDataSourceLoaded ]
+                    Nothing ->
+                        model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []

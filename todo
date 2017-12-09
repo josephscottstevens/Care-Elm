@@ -14,7 +14,13 @@ QUESTIONS:
 TODO:
 Fix are you sure you want to leave
 
+go to the real hospitilizations page, add text in just for the debugger
+
+in main.js //get the current view from left nav
+	when there is no view, crash
+
 consolidate save changes \ are you sures?
+implement clinical summary save
 
 hospitilizations addedit isn't working
 

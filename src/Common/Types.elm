@@ -163,22 +163,86 @@ type alias AddEditDataSource =
 
 
 type alias RecordAddNewInitData =
-    { id : Maybe Int
-    , patientId : Int
+    { facilityId : Maybe Int
+    , facilities : List DropDownItem
+    , recordTypes : List DropDownItem
+    , users : List DropDownItem
+    , tasks : List DropDownItem
+    , hospitilizationServiceTypes : List DropDownItem
+    , hospitalizationDischargePhysicians : List DropDownItem
+    , hospitilizations : List DropDownItem
+    , recordTypeId : Maybe Int
+    , setFocus : Bool
+    , isExistingHospitilization : Bool
+
+    -- tt
+    , timeVisit : Maybe String
+    , timeAcc : Maybe String
+    , fileName : String
     , facilityId : Maybe Int
-    , patientReported : Bool
+    , facilityText : String
+    , reportDate : Maybe String
+    , recordingDate : Maybe String
+    , userId : Maybe Int
+    , userText : String
+    , taskId : Maybe Int
+    , taskText : String
     , hospitalizationId : Maybe Int
+    , hospitalizationText : String
+    , facilityId2 : Maybe Int
+    , facilityText2 : String
     , dateOfAdmission : Maybe String
     , dateOfDischarge : Maybe String
-    , hospitalServiceTypeId : Maybe Int
-    , chiefComplaint : String
-    , admitDiagnosisId : Maybe Int
-    , dischargeDiagnosisId : Maybe Int
-    , dischargeRecommendations : String
-    , dischargePhysicianId : Maybe Int
-    , facilityId2 : Maybe Int
     , dateOfAdmission2 : Maybe String
     , dateOfDischarge2 : Maybe String
+    , hospitalServiceTypeId : Maybe Int
+    , hospitalServiceTypeText : String
+    , admitDiagnosisId : Maybe Int
+    , dischargeDiagnosisId : Maybe Int
+    , dischargePhysicianId : Maybe Int
+    , dischargePhysicianText : String
+    }
+
+
+getAddEditMsg : AddEditDataSource -> RecordType -> Bool -> Bool -> RecordAddNewInitData
+getAddEditMsg addEditDataSource recordType setFocus isExistingHospitilization =
+    { facilityId = addEditDataSource.facilityId
+    , facilities = addEditDataSource.facilities
+    , recordTypes = addEditDataSource.recordTypes
+    , users = addEditDataSource.users
+    , tasks = addEditDataSource.tasks
+    , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
+    , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
+    , hospitilizations = addEditDataSource.hospitilizations
+    , recordTypeId = Just (getId recordType)
+    , setFocus = setFocus
+    , isExistingHospitilization = isExistingHospitilization
+
+    -- no data from server, just filler data
+    , timeVisit = Nothing
+    , timeAcc = Nothing
+    , fileName = ""
+    , facilityText = ""
+    , reportDate = Nothing
+    , recordingDate = Nothing
+    , userId = Nothing
+    , userText = ""
+    , taskId = Nothing
+    , taskText = ""
+    , hospitalizationId = Nothing
+    , hospitalizationText = ""
+    , facilityId2 = Nothing
+    , facilityText2 = ""
+    , dateOfAdmission = Nothing
+    , dateOfDischarge = Nothing
+    , dateOfAdmission2 = Nothing
+    , dateOfDischarge2 = Nothing
+    , hospitalServiceTypeId = Nothing
+    , hospitalServiceTypeText = ""
+    , admitDiagnosisId = Nothing
+    , dischargeDiagnosisId = Nothing
+    , dischargePhysicianId = Nothing
+    , dischargePhysicianText = ""
     }
 
 

@@ -158,7 +158,7 @@ commonLabel labelText requiredType =
             else
                 labelText ++ ":"
     in
-        label [ class (labelWidth ++ " control-label " ++ isRequiredStr requiredType), forId labelText ] [ text formattedLabelText ]
+        label [ class (labelWidth ++ " " ++ isRequiredStr requiredType), forId labelText ] [ text formattedLabelText ]
 
 
 isRequired : InputControlType msg -> Bool
@@ -223,7 +223,7 @@ inputCommonFormat : String -> RequiredType -> List (Html msg) -> Html msg
 inputCommonFormat displayText requiredType t =
     let
         firstItem =
-            label [ class (labelWidth ++ "control-label" ++ isRequiredStr requiredType), forId displayText ] [ text displayText ]
+            label [ class (labelWidth ++ " " ++ isRequiredStr requiredType), forId displayText ] [ text displayText ]
     in
         div [ class "form-group" ]
             (firstItem :: t)
