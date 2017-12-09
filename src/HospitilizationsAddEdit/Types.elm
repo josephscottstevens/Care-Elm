@@ -24,10 +24,10 @@ type alias Model =
     }
 
 
-emptyModel : Int -> Model
-emptyModel patientId =
+emptyModel : Int -> HospitilizationsInitData -> Model
+emptyModel patientId hospitilizationsInitData =
     { patientId = patientId
-    , initData = emptyHospitilizationsInitData
+    , initData = hospitilizationsInitData
     , patientReported = False
     , chiefComplaint = ""
     , dischargeRecommendations = ""

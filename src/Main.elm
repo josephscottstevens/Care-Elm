@@ -144,7 +144,7 @@ type Msg
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
 setRoute maybeRoute model =
     let
-        extraCmd =
+        getDropdownsCmd =
             case model.addEditDataSource of
                 Just _ ->
                     Cmd.none
@@ -152,23 +152,32 @@ setRoute maybeRoute model =
                 Nothing ->
                     getDropDowns model.patientId AddEditDataSourceLoaded
 
-        transition toMsg task =
-            [ Task.attempt toMsg task, setLoadingStatus False, extraCmd ]
+        transition toMsg task extraCommands =
+            [ Task.attempt toMsg task, setLoadingStatus False, getDropdownsCmd ] ++ extraCommands
     in
         case maybeRoute of
             Just Route.ClinicalSummary ->
                 { model | page = ClinicalSummary ClinicalSummary.emptyModel }
-                    ! (clinicalSummaryInit (SomeDropDowns monthDropdown yearDropdown)
-                        :: transition ClinicalSummaryLoaded (ClinicalSummary.init model.patientId)
-                      )
+                    ! transition ClinicalSummaryLoaded
+                        (ClinicalSummary.init model.patientId)
+                        [ clinicalSummaryInit (SomeDropDowns monthDropdown yearDropdown) ]
 
             Just Route.Hospitilizations ->
                 { model | page = Hospitilizations (Hospitilizations.Types.emptyModel model.patientId) }
                     ! [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
+            Just Route.HospitilizationsAdd ->
+                case model.addEditDataSource of
+                    Just t ->
+                        { model | page = HospitilizationsAddEdit (HospitilizationsAddEdit.Types.emptyModel model.patientId HospitilizationsAddEdit.Types.emptyHospitilizationsInitData) }
+                            ! [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing model.patientId) ]
+
+                    Nothing ->
+                        model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
+
             Just (Route.Records t) ->
                 { model | page = Records (Records.Types.emptyModel t model.patientId) }
-                    ! transition RecordsLoaded (Records.init t model.patientId)
+                    ! transition RecordsLoaded (Records.init t model.patientId) []
 
             Just (Route.RecordAddNew t) ->
                 { model | page = RecordAddNew (RecordAddNew.Types.emptyModel t model.addEditDataSource model.patientId) }

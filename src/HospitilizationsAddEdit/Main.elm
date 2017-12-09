@@ -18,18 +18,9 @@ port initHospitilizations : HospitilizationsInitData -> Cmd msg
 port updateHospitilizations : (HospitilizationsInitData -> msg) -> Sub msg
 
 
-init : Maybe AddEditDataSource -> Maybe HospitilizationsRow -> Int -> ( Model, Cmd Msg )
+init : AddEditDataSource -> Maybe HospitilizationsRow -> Int -> Cmd Msg
 init addEditDataSource hospitilizationsRow patientId =
-    let
-        model =
-            emptyModel patientId
-    in
-        case addEditDataSource of
-            Just t ->
-                updateModel model hospitilizationsRow ! [ initHospitilizations (getHospitilizationsInitData t hospitilizationsRow) ]
-
-            Nothing ->
-                model ! [ displayErrorMessage "Cannot load Hospitilizations without a datasource!" ]
+    initHospitilizations (getHospitilizationsInitData addEditDataSource hospitilizationsRow)
 
 
 subscriptions : Sub Msg
