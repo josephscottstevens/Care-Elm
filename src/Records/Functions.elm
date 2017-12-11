@@ -4,7 +4,7 @@ import Json.Decode as Decode exposing (Decoder, maybe)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Http
 import Records.Types exposing (RecordRow, Msg(..), Filters)
-import Common.Types exposing (getId, RecordType(..), MenuMessage, FilterState)
+import Common.Types exposing (RecordType(..), MenuMessage, FilterState)
 import Common.Functions as Functions
 import String exposing (toLower)
 
@@ -50,7 +50,7 @@ getRecords : RecordType -> Int -> Http.Request (List RecordRow)
 getRecords recordType patientId =
     let
         recordTypeId =
-            getId recordType
+            Functions.getId recordType
 
         url =
             "/People/PatientRecordsGrid?patientId=" ++ toString patientId ++ "&recordTypeId=" ++ toString recordTypeId
@@ -78,7 +78,7 @@ getMenuMessage records recordType recordId messageType =
                 |> Maybe.map (\t -> not t.hasVerbalConsent)
 
         recordTypeId =
-            Just <| getId recordType
+            Just <| Functions.getId recordType
     in
         MenuMessage messageType recordId recordTypeId maybeVerbalConsent
 

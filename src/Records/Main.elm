@@ -7,7 +7,7 @@ import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Table exposing (stringColumn, defaultCustomizations)
 import Common.Grid exposing (hrefColumn, checkColumn)
-import Common.Types exposing (RecordType(..), AddEditDataSource, getDesc, FilterState)
+import Common.Types exposing (RecordType(..), AddEditDataSource, FilterState)
 import Common.Functions as Functions exposing (displaySuccessMessage, displayErrorMessage)
 import Http
 import Ports exposing (dropDownToggle, deleteConfirmed, sendMenuMessage, editTask)
@@ -78,7 +78,7 @@ update msg model patientId =
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
     div []
-        [ h4 [] [ text (getDesc model.recordType) ]
+        [ h4 [] [ text (Functions.getDesc model.recordType) ]
         , case addEditDataSource of
             Just _ ->
                 button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick NewRecord ] [ text "New Record" ]

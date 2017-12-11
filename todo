@@ -12,7 +12,9 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO:
-Fix are you sure you want to leave
+test are you sure you want to leave
+
+check out displayErrorMessage (might should be used more?)
 
 validation looks like it has missing stuff
 

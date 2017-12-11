@@ -9,7 +9,7 @@ import Http
 import Route exposing (Route)
 import Json.Decode.Pipeline exposing (required, decode)
 import Http
-import Common.Types exposing (DropDownItem, AddEditDataSource)
+import Common.Types exposing (DropDownItem, AddEditDataSource, RecordType(..))
 
 
 port setLoadingStatus : Bool -> Cmd msg
@@ -189,3 +189,113 @@ postRequest body url =
         , url = url
         , withCredentials = False
         }
+
+
+getDesc : RecordType -> String
+getDesc recordType =
+    case recordType of
+        PrimaryCare ->
+            "Primary Care Records"
+
+        Specialty ->
+            "Specialty Records"
+
+        Labs ->
+            "Lab Records"
+
+        Radiology ->
+            "Radiology Records"
+
+        Hospitalizations ->
+            "Hospitalization Records"
+
+        Legal ->
+            "Legal Records"
+
+        CallRecordings ->
+            "Call Recording Records"
+
+        PreviousHistories ->
+            "Previous History Records"
+
+        Enrollment ->
+            "Enrollment Records"
+
+        Misc ->
+            "Miscellaneous Records"
+
+
+getRecordTypeById : Maybe Int -> Maybe RecordType
+getRecordTypeById maybeInt =
+    case maybeInt of
+        Just int ->
+            case int of
+                1 ->
+                    Just PrimaryCare
+
+                2 ->
+                    Just Specialty
+
+                3 ->
+                    Just Labs
+
+                4 ->
+                    Just Radiology
+
+                9 ->
+                    Just Hospitalizations
+
+                6 ->
+                    Just Legal
+
+                10 ->
+                    Just CallRecordings
+
+                11 ->
+                    Just PreviousHistories
+
+                12 ->
+                    Just Enrollment
+
+                5 ->
+                    Just Misc
+
+                _ ->
+                    Nothing
+
+        Nothing ->
+            Nothing
+
+
+getId : RecordType -> Int
+getId recordType =
+    case recordType of
+        PrimaryCare ->
+            1
+
+        Specialty ->
+            2
+
+        Labs ->
+            3
+
+        Radiology ->
+            4
+
+        Hospitalizations ->
+            9
+
+        Legal ->
+            6
+
+        CallRecordings ->
+            10
+
+        PreviousHistories ->
+            11
+
+        Enrollment ->
+            12
+
+        Misc ->
+            5

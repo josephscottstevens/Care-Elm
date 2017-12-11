@@ -1,9 +1,9 @@
-module RecordAddNew.Functions exposing (..)
+module RecordAddNew.Functions exposing (saveForm)
 
-import Json.Encode as Encode exposing (..)
+import Json.Encode as Encode
 import Http
-import RecordAddNew.Types exposing (..)
-import Common.Functions exposing (..)
+import RecordAddNew.Types exposing (Model, Msg(..))
+import Common.Functions as Functions exposing (maybeVal, maybeToDateString)
 
 
 encodeRecord : Model -> Int -> Encode.Value
@@ -12,7 +12,7 @@ encodeRecord newRecord patientId =
         [ ( "RecordId", Encode.int <| newRecord.recordId )
         , ( "PatientId", Encode.int <| patientId )
         , ( "Title", Encode.string <| newRecord.title )
-        , ( "RecordTypeId", maybeVal Encode.int <| newRecord.recordTypeId )
+        , ( "RecordTypeId", Encode.int <| Functions.getId newRecord.recordType )
         , ( "Specialty", Encode.string <| newRecord.specialty )
         , ( "Provider", Encode.string <| newRecord.provider )
         , ( "TimeVisit", maybeVal Encode.string <| maybeToDateString <| newRecord.recordAddNewInitData.timeVisit )

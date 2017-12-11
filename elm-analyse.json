@@ -1,9 +1,5 @@
 {
     "excludedPaths" : [
             "src/Billing"
-        ],
-    "checks" : {
-        "ExposeAll": false,
-        "ImportAll": false
-    }
+        ]
 }

@@ -1,15 +1,15 @@
 port module RecordAddNew.Main exposing (..)
 
-import RecordAddNew.Functions exposing (..)
-import RecordAddNew.Types exposing (..)
+import RecordAddNew.Functions exposing (saveForm)
+import RecordAddNew.Types exposing (Msg(..), State(..), Model, RecordAddNewInitData, getAddEditMsg)
 import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, id, type_)
 import Html.Events exposing (onClick)
-import Common.Html exposing (..)
-import Common.Types exposing (..)
-import Common.Functions exposing (..)
+import Common.Html exposing (getValidationErrors, defaultConfig, makeControls, fullWidth, InputControlType(..))
+import Common.Types exposing (RecordType(..), DropDownItem, RequiredType(..), AddEditDataSource)
+import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, defaultString)
 import Route
-import Ports exposing (..)
+import Ports exposing (setUnsavedChanges)
 
 
 port presetPage : Maybe Int -> Cmd msg
@@ -28,6 +28,15 @@ port initRecordAddNew : RecordAddNewInitData -> Cmd msg
 
 
 port updateRecordAddNew : (RecordAddNewInitData -> msg) -> Sub msg
+
+
+port updateCategory : (DropDownItem -> msg) -> Sub msg
+
+
+port addNewFacility : Maybe String -> Cmd msg
+
+
+port addNewPhysician : Maybe String -> Cmd msg
 
 
 init : AddEditDataSource -> RecordType -> Cmd Msg
@@ -65,7 +74,7 @@ view model =
                     class "btn btn-sm btn-default pull-right"
             in
                 div [ class "form-horizontal" ]
-                    [ h4 [] [ text (getDesc model.recordType) ]
+                    [ h4 [] [ text (Functions.getDesc model.recordType) ]
                     , validationErrorsDiv
                     , makeControls defaultConfig (formInputs model model.recordType)
                     , div [ class "form-group" ]
@@ -100,7 +109,7 @@ update msg model patientId =
                     model ! [ saveForm model patientId, setUnsavedChanges False, Route.modifyUrl (Route.Records recordType) ]
 
             SaveCompleted (Ok responseMsg) ->
-                case getResponseError responseMsg of
+                case Functions.getResponseError responseMsg of
                     Just t ->
                         model ! [ displayErrorMessage t ]
 
@@ -114,7 +123,7 @@ update msg model patientId =
                 model ! [ setUnsavedChanges False, Route.modifyUrl (Route.Records recordType) ]
 
             PresetPageComplete recordTypeId ->
-                case getRecordTypeById recordTypeId of
+                case Functions.getRecordTypeById recordTypeId of
                     Just t ->
                         { model | state = Edit } ! [ initRecordAddNew (getAddEditMsg model.addEditDataSource t True False) ]
 
@@ -125,16 +134,12 @@ update msg model patientId =
                 { model | recordAddNewInitData = recordAddNew } ! []
 
             UpdateRecordType dropDownItem ->
-                if model.recordTypeId == dropDownItem.id then
+                if model.recordAddNewInitData.categoryId == dropDownItem.id then
                     model ! []
                 else
-                    case getRecordTypeById dropDownItem.id of
+                    case Functions.getRecordTypeById dropDownItem.id of
                         Just t ->
-                            { model
-                                | recordTypeId = dropDownItem.id
-                                , recordType = t
-                                , state = Limbo
-                            }
+                            { model | recordType = t, state = Limbo }
                                 ! [ presetPage dropDownItem.id ]
 
                         Nothing ->
@@ -159,14 +164,15 @@ update msg model patientId =
                 updateAddNew { model | recording = str }
 
             UpdateDuration str ->
-                updateAddNew { model | duration = defaultIntStr str }
+                updateAddNew { model | duration = Functions.defaultIntStr str }
 
             -- Hospitilizations
             UpdateIsExistingHospitilization bool ->
                 if model.isExistingHospitilization == bool then
                     model ! []
                 else
-                    { model | isExistingHospitilization = bool, state = Limbo } ! [ presetPage model.recordTypeId, setLoadingStatus True ]
+                    { model | isExistingHospitilization = bool, state = Limbo }
+                        ! [ presetPage (Just (Functions.getId model.recordType)), Functions.setLoadingStatus True ]
 
             UpdatePatientReported bool ->
                 updateAddNew { model | patientReported = bool }
@@ -180,7 +186,7 @@ formInputs model recordType =
     let
         firstColumns =
             [ DropInput "Facility" Required model.recordAddNewInitData.facilityId "FacilityId"
-            , DropInput "Category" Required model.recordTypeId "CategoryId"
+            , DropInput "Category" Required model.recordAddNewInitData.categoryId "CategoryId"
             ]
 
         lastColumns =
@@ -240,7 +246,7 @@ formInputs model recordType =
                             False ->
                                 [ CheckInput "Patient Reported" Optional model.patientReported UpdatePatientReported
                                 , DropInputWithButton "Facility" Optional model.recordAddNewInitData.facilityId "FacilityId" "Add New Facility"
-                                , DropInput "Category" Required model.recordTypeId "CategoryId"
+                                , DropInput "Category" Required model.recordAddNewInitData.categoryId "CategoryId"
                                 , DateInput "Date of Admission" Required (defaultString model.recordAddNewInitData.dateOfAdmission) "DateOfAdmissionId"
                                 , DateInput "Date of Discharge" Required (defaultString model.recordAddNewInitData.dateOfDischarge) "DateOfDischargeId"
                                 , DropInput "Hospital Service Type" Required model.recordAddNewInitData.hospitalServiceTypeId "HospitalServiceTypeId"

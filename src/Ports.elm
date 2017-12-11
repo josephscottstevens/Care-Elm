@@ -18,19 +18,10 @@ port dropDownToggle : (Int -> msg) -> Sub msg
 port deleteConfirmed : (Int -> msg) -> Sub msg
 
 
-port addNewFacility : Maybe String -> Cmd msg
-
-
-port addNewPhysician : Maybe String -> Cmd msg
-
-
 port setUnsavedChanges : Bool -> Cmd msg
 
 
 port updateFacility : (DropDownItem -> msg) -> Sub msg
-
-
-port updateCategory : (DropDownItem -> msg) -> Sub msg
 
 
 port updateTimeVisit : (Maybe String -> msg) -> Sub msg
