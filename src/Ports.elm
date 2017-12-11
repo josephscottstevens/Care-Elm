@@ -3,9 +3,6 @@ port module Ports exposing (..)
 import Common.Types exposing (..)
 
 
-port clinicalSummaryInit : ClinicalSummaryInitData -> Cmd msg
-
-
 port sendMenuMessage : MenuMessage -> Cmd msg
 
 

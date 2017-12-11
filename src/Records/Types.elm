@@ -26,7 +26,6 @@ type SortMode
 type alias Model =
     { recordType : RecordType
     , records : List RecordRow
-    , patientId : Int
     , tableState : Table.State
     , query : String
     , filterFields : Filters
@@ -34,11 +33,10 @@ type alias Model =
     }
 
 
-emptyModel : RecordType -> Int -> Model
-emptyModel recordType patientId =
+emptyModel : RecordType -> Model
+emptyModel recordType =
     { recordType = recordType
     , records = []
-    , patientId = patientId
     , tableState = Table.initialSort "Date"
     , query = ""
     , filterFields = emptyFilters
@@ -46,11 +44,10 @@ emptyModel recordType patientId =
     }
 
 
-loadModel : RecordType -> Int -> List RecordRow -> Model
-loadModel recordType patientId recordRows =
+loadModel : RecordType -> List RecordRow -> Model
+loadModel recordType recordRows =
     { recordType = recordType
     , records = recordRows
-    , patientId = patientId
     , tableState = Table.initialSort "Date"
     , query = ""
     , filterFields = emptyFilters

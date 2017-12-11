@@ -7,11 +7,11 @@ import Common.Functions exposing (..)
 import Common.Types exposing (AddEditDataSource, HospitilizationsRow, HospitilizationsInitData)
 
 
-encodeRecord : Model -> Encode.Value
-encodeRecord newRecord =
+encodeRecord : Model -> Int -> Encode.Value
+encodeRecord newRecord patientId =
     Encode.object
         [ ( "Id", maybeVal Encode.int <| newRecord.initData.id )
-        , ( "PatientId", Encode.int <| newRecord.patientId )
+        , ( "PatientId", Encode.int <| patientId )
         , ( "FacilityId", maybeVal Encode.int <| newRecord.initData.facilityId )
         , ( "PatientReported", Encode.bool <| newRecord.patientReported )
         , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfAdmission )
@@ -28,10 +28,10 @@ encodeRecord newRecord =
         ]
 
 
-saveFormRequest : Model -> Http.Request String
-saveFormRequest model =
+saveFormRequest : Model -> Int -> Http.Request String
+saveFormRequest model patientId =
     Http.request
-        { body = encodeRecord model |> Http.jsonBody
+        { body = encodeRecord model patientId |> Http.jsonBody
         , expect = Http.expectString
         , headers = []
         , method = "POST"
@@ -41,9 +41,9 @@ saveFormRequest model =
         }
 
 
-saveForm : Model -> Cmd Msg
-saveForm model =
-    Http.send SaveCompleted (saveFormRequest model)
+saveForm : Model -> Int -> Cmd Msg
+saveForm model patientId =
+    Http.send SaveCompleted (saveFormRequest model patientId)
 
 
 getHospitilizationsInitData : AddEditDataSource -> Maybe HospitilizationsRow -> HospitilizationsInitData

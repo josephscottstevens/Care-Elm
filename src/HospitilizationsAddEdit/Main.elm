@@ -55,8 +55,8 @@ view model =
             ]
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> Int -> ( Model, Cmd Msg )
+update msg model patientId =
     let
         updateAddNew t =
             t ! [ setUnsavedChanges True ]
@@ -66,7 +66,7 @@ update msg model =
                 if List.length (getValidationErrors (formInputs model)) > 0 then
                     { model | showValidationErrors = True } ! []
                 else
-                    model ! [ saveForm model, setUnsavedChanges False ]
+                    model ! [ saveForm model patientId, setUnsavedChanges False ]
 
             SaveCompleted (Ok responseMsg) ->
                 case getResponseError responseMsg of

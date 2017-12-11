@@ -29,8 +29,8 @@ init patientId =
     getHospitilizations patientId Load
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> Int -> ( Model, Cmd Msg )
+update msg model patientId =
     case msg of
         Load (Ok t) ->
             getLoadedState model t ! [ setLoadingStatus False ]
@@ -52,7 +52,7 @@ update msg model =
                 updatedRecords =
                     model.hospitilizations |> List.filter (\t -> t.id /= rowId)
             in
-                { model | hospitilizations = updatedRecords, patientId = 7000 } ! [ deleteHospitilization rowId ]
+                { model | hospitilizations = updatedRecords } ! [ deleteHospitilization rowId ]
 
         DeleteCompleted (Ok responseMsg) ->
             case getResponseError responseMsg of

@@ -16,7 +16,6 @@ type Msg
 
 type alias Model =
     { initData : HospitilizationsInitData
-    , patientId : Int
     , patientReported : Bool
     , chiefComplaint : String
     , dischargeRecommendations : String
@@ -24,10 +23,9 @@ type alias Model =
     }
 
 
-emptyModel : Int -> HospitilizationsInitData -> Model
-emptyModel patientId hospitilizationsInitData =
-    { patientId = patientId
-    , initData = hospitilizationsInitData
+emptyModel : HospitilizationsInitData -> Model
+emptyModel hospitilizationsInitData =
+    { initData = hospitilizationsInitData
     , patientReported = False
     , chiefComplaint = ""
     , dischargeRecommendations = ""

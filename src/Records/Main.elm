@@ -28,8 +28,8 @@ init recordType patientId =
         |> Http.send Load
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> Int -> ( Model, Cmd Msg )
+update msg model patientId =
     case msg of
         Load (Ok t) ->
             { model | records = t } ! [ Functions.setLoadingStatus False ]

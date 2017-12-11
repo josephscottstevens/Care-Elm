@@ -38,7 +38,6 @@ type alias Model =
     , recordType : RecordType
     , recordId : Int
     , title : String
-    , patientId : Int
     , recordTypeId : Maybe Int
     , recordTypeText : String
     , specialty : String
@@ -56,15 +55,14 @@ type alias Model =
     }
 
 
-emptyModel : RecordType -> AddEditDataSource -> Int -> Model
-emptyModel recordType addEditDataSource patientId =
+emptyModel : RecordType -> AddEditDataSource -> Model
+emptyModel recordType addEditDataSource =
     { state = Edit
     , addEditDataSource = addEditDataSource
     , recordAddNewInitData = getAddEditMsg addEditDataSource recordType False False
     , recordType = recordType
     , recordId = 0
     , title = ""
-    , patientId = patientId
     , recordTypeId = Just (getId recordType)
     , recordTypeText = ""
     , specialty = ""

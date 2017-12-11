@@ -101,7 +101,7 @@ pageSubscriptions page =
             Sub.none
 
         ClinicalSummary _ ->
-            Sub.none
+            Sub.map ClinicalSummaryMsg ClinicalSummary.subscriptions
 
         Records _ ->
             Sub.map RecordsMsg Records.subscriptions
@@ -154,13 +154,13 @@ setRoute maybeRoute model =
                     ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
 
             Just Route.Hospitilizations ->
-                { model | page = Hospitilizations (Hospitilizations.Types.emptyModel model.patientId) }
+                { model | page = Hospitilizations (Hospitilizations.Types.emptyModel) }
                     ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
             Just Route.HospitilizationsAdd ->
                 let
                     newModel =
-                        HospitilizationsAddEdit.Types.emptyModel model.patientId HospitilizationsAddEdit.Types.initData
+                        HospitilizationsAddEdit.Types.emptyModel HospitilizationsAddEdit.Types.initData
                 in
                     case model.addEditDataSource of
                         Just t ->
@@ -183,7 +183,7 @@ setRoute maybeRoute model =
                                 Debug.crash "invalid hosptilization edit state"
 
                     newModel =
-                        HospitilizationsAddEdit.Types.emptyModel model.patientId HospitilizationsAddEdit.Types.initData
+                        HospitilizationsAddEdit.Types.emptyModel HospitilizationsAddEdit.Types.initData
                 in
                     case model.addEditDataSource of
                         Just t ->
@@ -196,13 +196,13 @@ setRoute maybeRoute model =
                             model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
 
             Just (Route.Records t) ->
-                { model | page = Records (Records.Types.emptyModel t model.patientId) }
+                { model | page = Records (Records.Types.emptyModel t) }
                     ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
 
             Just (Route.RecordAddNew t) ->
                 case model.addEditDataSource of
                     Just addEditDataSource ->
-                        { model | page = RecordAddNew (RecordAddNew.Types.emptyModel t addEditDataSource model.patientId) }
+                        { model | page = RecordAddNew (RecordAddNew.Types.emptyModel t addEditDataSource) }
                             ! cmds [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource t) ]
 
                     Nothing ->
@@ -226,7 +226,7 @@ updatePage page msg model =
         toPage toModel toMsg subUpdate subMsg subModel =
             let
                 ( newModel, newCmd ) =
-                    subUpdate subMsg subModel
+                    subUpdate subMsg subModel model.patientId
             in
                 { model | page = toModel newModel } ! [ Cmd.map toMsg newCmd ]
     in

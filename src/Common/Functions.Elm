@@ -176,3 +176,16 @@ decodeDropDownItem =
     decode DropDownItem
         |> required "Id" (maybe Decode.int)
         |> required "Name" Decode.string
+
+
+postRequest : Encode.Value -> String -> Http.Request String
+postRequest body url =
+    Http.request
+        { body = body |> Http.jsonBody
+        , expect = Http.expectString
+        , headers = []
+        , method = "POST"
+        , timeout = Nothing
+        , url = url
+        , withCredentials = False
+        }

@@ -30,7 +30,6 @@ type alias WebResponse =
 
 type alias Model =
     { hospitilizations : List HospitilizationsRow
-    , patientId : Int
     , facilityId : Maybe Int
     , tableState : Table.State
     , query : String
@@ -38,10 +37,9 @@ type alias Model =
     }
 
 
-emptyModel : Int -> Model
-emptyModel patientId =
+emptyModel : Model
+emptyModel =
     { hospitilizations = []
-    , patientId = patientId
     , facilityId = Nothing
     , tableState = Table.initialSort "Date"
     , query = ""

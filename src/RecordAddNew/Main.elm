@@ -80,8 +80,8 @@ view model =
             div [] []
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> Int -> ( Model, Cmd Msg )
+update msg model patientId =
     let
         updateAddNew t =
             t ! [ setUnsavedChanges True ]
@@ -97,7 +97,7 @@ update msg model =
                 if List.length (getValidationErrors (formInputs model recordType)) > 0 then
                     { model | showValidationErrors = True } ! []
                 else
-                    model ! [ saveForm model, setUnsavedChanges False, Route.modifyUrl (Route.Records recordType) ]
+                    model ! [ saveForm model patientId, setUnsavedChanges False, Route.modifyUrl (Route.Records recordType) ]
 
             SaveCompleted (Ok responseMsg) ->
                 case getResponseError responseMsg of

@@ -292,12 +292,6 @@ type alias HospitilizationsRow =
     }
 
 
-type alias ClinicalSummaryInitData =
-    { months : List DropDownItem
-    , years : List DropDownItem
-    }
-
-
 monthDropdown : List DropDownItem
 monthDropdown =
     [ DropDownItem Nothing ""

@@ -3,15 +3,14 @@ module RecordAddNew.Functions exposing (..)
 import Json.Encode as Encode exposing (..)
 import Http
 import RecordAddNew.Types exposing (..)
-import Common.Types exposing (..)
 import Common.Functions exposing (..)
 
 
-encodeRecord : Model -> Encode.Value
-encodeRecord newRecord =
+encodeRecord : Model -> Int -> Encode.Value
+encodeRecord newRecord patientId =
     Encode.object
         [ ( "RecordId", Encode.int <| newRecord.recordId )
-        , ( "PatientId", Encode.int <| newRecord.patientId )
+        , ( "PatientId", Encode.int <| patientId )
         , ( "Title", Encode.string <| newRecord.title )
         , ( "RecordTypeId", maybeVal Encode.int <| newRecord.recordTypeId )
         , ( "Specialty", Encode.string <| newRecord.specialty )
@@ -45,10 +44,10 @@ encodeRecord newRecord =
         ]
 
 
-saveFormRequest : Model -> Http.Request String
-saveFormRequest model =
+saveFormRequest : Model -> Int -> Http.Request String
+saveFormRequest model patientId =
     Http.request
-        { body = encodeRecord model |> Http.jsonBody
+        { body = encodeRecord model patientId |> Http.jsonBody
         , expect = Http.expectString
         , headers = []
         , method = "POST"
@@ -58,6 +57,6 @@ saveFormRequest model =
         }
 
 
-saveForm : Model -> Cmd Msg
-saveForm model =
-    Http.send SaveCompleted (saveFormRequest model)
+saveForm : Model -> Int -> Cmd Msg
+saveForm model patientId =
+    Http.send SaveCompleted (saveFormRequest model patientId)

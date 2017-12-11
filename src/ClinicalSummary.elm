@@ -1,14 +1,29 @@
-module ClinicalSummary exposing (..)
+port module ClinicalSummary exposing (..)
 
 import Html exposing (Html, text, div, button, h4, input)
 import Html.Attributes exposing (class, id, style)
+import Html.Events exposing (onClick)
 import Common.Html exposing (InputControlType(..), makeControls)
-import Common.Types exposing (RequiredType(..), ClinicalSummaryInitData, monthDropdown, yearDropdown)
-import Common.Functions exposing (displayErrorMessage)
+import Common.Types exposing (RequiredType(..), monthDropdown, yearDropdown, DropDownItem)
+import Common.Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, postRequest)
 import Http
-import Json.Decode as Decode exposing (maybe)
-import Json.Decode.Pipeline exposing (decode, required)
-import Ports exposing (clinicalSummaryInit)
+import Json.Decode as Decode
+import Json.Encode as Encode
+import Json.Decode.Pipeline exposing (decode, required, hardcoded)
+
+
+port clinicalSummaryUpdate : (SyncfusionData -> msg) -> Sub msg
+
+
+port clinicalSummaryInit : SyncfusionData -> Cmd msg
+
+
+port generateInstructions : SyncfusionData -> Cmd msg
+
+
+subscriptions : Sub Msg
+subscriptions =
+    Sub.batch [ clinicalSummaryUpdate UpdateClinicalSummary ]
 
 
 type alias Model =
@@ -19,6 +34,7 @@ type alias Model =
     , impairment : String
     , comments : String
     , rnReviewedCarePlan : Bool
+    , syncfusionData : SyncfusionData
     }
 
 
@@ -31,18 +47,22 @@ init patientId =
                 |> Http.send LoadData
 
         loadDropdowns =
-            clinicalSummaryInit (ClinicalSummaryInitData monthDropdown yearDropdown)
+            clinicalSummaryInit (SyncfusionData monthDropdown yearDropdown 0 0 "")
     in
         Cmd.batch [ getInitData, loadDropdowns ]
 
 
 type Msg
-    = LoadData (Result Http.Error Model)
+    = LoadData (Result Http.Error ClinicalSummaryResponseData)
     | UpdateSummary String
     | UpdateCarePlan String
     | UpdateCodeLegalStatus String
     | UpdateImpairment String
     | UpdateComments String
+    | UpdateClinicalSummary SyncfusionData
+    | GenerateInstructions
+    | Save
+    | SaveCompleted (Result Http.Error String)
 
 
 view : Model -> Int -> Html Msg
@@ -53,13 +73,41 @@ view model patientId =
         ]
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> Int -> ( Model, Cmd Msg )
+update msg model patientId =
     case msg of
-        LoadData (Ok newModel) ->
-            newModel ! []
+        LoadData (Ok newData) ->
+            { model
+                | id = newData.id
+                , comments = newData.comments
+                , carePlan = newData.carePlan
+                , codeLegalStatus = newData.codeLegalStatus
+                , impairment = newData.impairment
+                , summary = newData.summary
+                , rnReviewedCarePlan = False
+            }
+                ! []
 
         LoadData (Err t) ->
+            model ! [ displayErrorMessage (toString t) ]
+
+        UpdateClinicalSummary t ->
+            { model | syncfusionData = t, summary = t.summaryText } ! []
+
+        GenerateInstructions ->
+            model ! [ generateInstructions model.syncfusionData ]
+
+        Save ->
+            model
+                ! [ "People/UpdateClinicalSummary"
+                        |> postRequest (encodeClinicalSummary model patientId)
+                        |> Http.send SaveCompleted
+                  ]
+
+        SaveCompleted (Ok _) ->
+            model ! [ displaySuccessMessage "Clinical Summary Saved Successfully!" ]
+
+        SaveCompleted (Err t) ->
             model ! [ displayErrorMessage (toString t) ]
 
         UpdateSummary str ->
@@ -78,7 +126,7 @@ update msg model =
             { model | comments = str } ! []
 
 
-generateSummaryDiv : Html msg
+generateSummaryDiv : Html Msg
 generateSummaryDiv =
     let
         inline widthPercent topPadding =
@@ -94,7 +142,7 @@ generateSummaryDiv =
             [ div (inline "34%" "5px") [ text "Generate Summary from Tasks Outcome:" ]
             , div (inline "18%" "") [ input [ id "MonthId" ] [] ]
             , div (inline "18%" "") [ input [ id "YearId" ] [] ]
-            , div (inline "20%" "") [ button [ class "btn btn-sm btn-default" ] [ text "Generate" ] ]
+            , div (inline "20%" "") [ button [ class "btn btn-sm btn-default", onClick GenerateInstructions ] [ text "Generate" ] ]
             ]
 
 
@@ -107,20 +155,54 @@ formInputs { summary, carePlan, codeLegalStatus, impairment, comments } =
     , AreaInput "Code/Legal Status" Optional codeLegalStatus UpdateCodeLegalStatus
     , AreaInput "Impairment" Optional impairment UpdateImpairment
     , AreaInput "Comments" Optional comments UpdateComments
-    , HtmlElement <| button [ class "btn btn-sm btn-primary" ] [ text "Update" ]
+    , HtmlElement <| button [ class "btn btn-sm btn-primary", onClick Save ] [ text "Update" ]
     ]
 
 
-decodeClinicalSummary : Decode.Decoder Model
+decodeClinicalSummary : Decode.Decoder ClinicalSummaryResponseData
 decodeClinicalSummary =
-    decode Model
-        |> required "Id" (maybe Decode.int)
+    decode ClinicalSummaryResponseData
+        |> required "Id" (Decode.maybe Decode.int)
         |> required "Summary" Decode.string
         |> required "CarePlan" Decode.string
         |> required "CodeLegalStatus" Decode.string
         |> required "Impairment" Decode.string
         |> required "Comments" Decode.string
         |> required "RnReviewedCarePlan" Decode.bool
+
+
+encodeClinicalSummary : Model -> Int -> Encode.Value
+encodeClinicalSummary model patientId =
+    Encode.object
+        [ ( "Id", maybeVal Encode.int <| model.id )
+        , ( "PatientId", Encode.int <| patientId )
+        , ( "Summary", Encode.string <| model.summary )
+        , ( "CarePlan", Encode.string <| model.carePlan )
+        , ( "Impairment", Encode.string <| model.impairment )
+        , ( "CodeLegalStatus", Encode.string <| model.codeLegalStatus )
+        , ( "Comments", Encode.string <| model.comments )
+        , ( "RnReviewedCarePlan", Encode.bool <| model.rnReviewedCarePlan )
+        ]
+
+
+type alias ClinicalSummaryResponseData =
+    { id : Maybe Int
+    , summary : String
+    , carePlan : String
+    , codeLegalStatus : String
+    , impairment : String
+    , comments : String
+    , rnReviewedCarePlan : Bool
+    }
+
+
+type alias SyncfusionData =
+    { months : List DropDownItem
+    , years : List DropDownItem
+    , currentMonth : Int
+    , currentYear : Int
+    , summaryText : String
+    }
 
 
 emptyModel : Model
@@ -132,4 +214,5 @@ emptyModel =
     , impairment = ""
     , summary = ""
     , rnReviewedCarePlan = False
+    , syncfusionData = SyncfusionData monthDropdown yearDropdown 0 0 ""
     }
