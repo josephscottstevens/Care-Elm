@@ -3,7 +3,7 @@ port module RecordAddNew.Main exposing (..)
 import RecordAddNew.Functions exposing (..)
 import RecordAddNew.Types exposing (..)
 import Html exposing (Html, text, div, button, h4)
-import Html.Attributes exposing (class, id, value, type_)
+import Html.Attributes exposing (class, id, type_)
 import Html.Events exposing (onClick)
 import Common.Html exposing (..)
 import Common.Types exposing (..)
@@ -60,6 +60,9 @@ view model =
 
                 saveBtnClass =
                     class "btn btn-sm btn-success margin-left-5 pull-right"
+
+                cancelBtnClass =
+                    class "btn btn-sm btn-default pull-right"
             in
                 div [ class "form-horizontal" ]
                     [ h4 [] [ text (getDesc model.recordType) ]
@@ -67,8 +70,8 @@ view model =
                     , makeControls defaultConfig (formInputs model model.recordType)
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
-                            [ button [ type_ "button", id "Save", value "Addmodel", onClick (Save model.recordType), saveBtnClass ] [ text "Save" ]
-                            , button [ type_ "button", onClick (Cancel model.recordType), class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                            [ button [ type_ "button", onClick (Save model.recordType), saveBtnClass ] [ text "Save" ]
+                            , button [ type_ "button", onClick (Cancel model.recordType), cancelBtnClass ] [ text "Cancel" ]
                             ]
                         ]
                     ]
@@ -119,7 +122,7 @@ update msg model =
                         model ! [ Route.modifyUrl (Route.Records PrimaryCare) ]
 
             UpdateRecordAddNew recordAddNew ->
-                model ! []
+                { model | recordAddNewInitData = recordAddNew } ! []
 
             UpdateRecordType dropDownItem ->
                 if model.recordTypeId == dropDownItem.id then

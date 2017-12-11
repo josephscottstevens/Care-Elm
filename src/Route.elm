@@ -2,11 +2,9 @@ module Route exposing (Route(..), getPatientId, fromLocation, href, modifyUrl)
 
 import Navigation
 import Common.Types exposing (..)
-import Char exposing (isDigit)
 import Html exposing (Attribute)
 import Html.Attributes as Attr
-import Regex
-import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, int, string)
+import UrlParser as Url exposing ((</>), (<?>), Parser, oneOf, parseHash, s, int, string, parsePath, intParam)
 
 
 type Route
@@ -126,15 +124,11 @@ route =
         ]
 
 
-getPatientId : String -> Maybe Int
-getPatientId urlSearch =
-    urlSearch
-        |> Regex.find (Regex.AtMost 1) (Regex.regex "patientId=(\\d+)")
-        |> List.map .match
-        |> List.head
-        |> Maybe.map (String.filter isDigit)
-        |> Maybe.map String.toInt
-        |> Maybe.andThen Result.toMaybe
+getPatientId : Navigation.Location -> Maybe Int
+getPatientId location =
+    location
+        |> parsePath (s "people" <?> intParam "patientId")
+        |> Maybe.andThen identity
 
 
 href : Route -> Attribute msg

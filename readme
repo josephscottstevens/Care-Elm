@@ -1,23 +1,27 @@
 install NPM
     https://www.npmjs.com/get-npm
 
-install elm runtime, format and analyse
-    open powershell
-    type: npm install -g elm
-    type: npm install -g elm-format
-    type: npm install -g elm-install
-    close powershell
+install elm 
+    http://install.elm-lang.org/Elm-Platform-0.18.exe
 
 install Visual Studio Code
     https://code.visualstudio.com/download
 
+install elm runtime, format and analyse
+    open powershell
+    type: npm install -g elm
+    type: npm install -g elm-format
+    close powershell
+
 install Elm extension for vscode
+    Open Vs Code
     Press Control + Shift + X
     search for "elm"
     select elm Language support for visual studio code
     press green install button
+    press blue reload butter (after installing)
 
 install missing packages \ build project
-    open Integrated terminal (View -> Integrated Terminal)
+    open Integrated terminal (View -> Integrated Terminal) [Note, the integrated terminal be already open] {Note, make sure it is set to powershell not command prompt}
     type: elm-make
     type: y

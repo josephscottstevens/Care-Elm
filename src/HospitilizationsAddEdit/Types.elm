@@ -41,8 +41,8 @@ type alias HospitilizationsData =
     }
 
 
-emptyHospitilizationsInitData : HospitilizationsInitData
-emptyHospitilizationsInitData =
+initData : HospitilizationsInitData
+initData =
     { id = Nothing
     , facilities = []
     , hospitilizationServiceTypes = []

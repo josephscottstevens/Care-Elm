@@ -40,24 +40,20 @@ type Page
 
 init : Location -> ( Model, Cmd Msg )
 init location =
-    let
-        patientId =
-            Route.getPatientId location.search
-    in
-        case patientId of
-            Just t ->
-                setRoute (Route.fromLocation location)
-                    { patientId = t
-                    , page = None
-                    , addEditDataSource = Nothing
-                    }
-
-            Nothing ->
-                { patientId = 0
-                , page = Error "Cannot load page without patientId"
+    case Route.getPatientId location of
+        Just patientId ->
+            setRoute (Route.fromLocation location)
+                { patientId = patientId
+                , page = None
                 , addEditDataSource = Nothing
                 }
-                    ! [ Functions.setLoadingStatus False ]
+
+        Nothing ->
+            { patientId = 0
+            , page = Error "Cannot load page without patientId"
+            , addEditDataSource = Nothing
+            }
+                ! [ Functions.setLoadingStatus False ]
 
 
 subscriptions : Model -> Sub Msg
@@ -119,7 +115,7 @@ pageSubscriptions page =
         HospitilizationsAddEdit _ ->
             Sub.map HospitilizationsAddEditMsg HospitilizationsAddEdit.subscriptions
 
-        Error t ->
+        Error _ ->
             Sub.none
 
 
@@ -162,13 +158,17 @@ setRoute maybeRoute model =
                     ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
             Just Route.HospitilizationsAdd ->
-                case model.addEditDataSource of
-                    Just t ->
-                        { model | page = HospitilizationsAddEdit (HospitilizationsAddEdit.Types.emptyModel model.patientId HospitilizationsAddEdit.Types.emptyHospitilizationsInitData) }
-                            ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing) ]
+                let
+                    newModel =
+                        HospitilizationsAddEdit.Types.emptyModel model.patientId HospitilizationsAddEdit.Types.initData
+                in
+                    case model.addEditDataSource of
+                        Just t ->
+                            { model | page = HospitilizationsAddEdit newModel }
+                                ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing) ]
 
-                    Nothing ->
-                        model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
+                        Nothing ->
+                            model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
 
             Just (Route.HospitilizationsEdit rowId) ->
                 let
@@ -181,10 +181,15 @@ setRoute maybeRoute model =
 
                             _ ->
                                 Debug.crash "invalid hosptilization edit state"
+
+                    newModel =
+                        HospitilizationsAddEdit.Types.emptyModel model.patientId HospitilizationsAddEdit.Types.initData
                 in
                     case model.addEditDataSource of
                         Just t ->
-                            { model | page = HospitilizationsAddEdit (HospitilizationsAddEdit.Types.emptyModel model.patientId HospitilizationsAddEdit.Types.emptyHospitilizationsInitData) }
+                            { model
+                                | page = HospitilizationsAddEdit newModel
+                            }
                                 ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t x) ]
 
                         Nothing ->

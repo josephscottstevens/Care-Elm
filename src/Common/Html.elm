@@ -109,7 +109,7 @@ makeControls config controls =
                             [ input [ type_ "text", id syncfusionId ] [] ]
                         ]
 
-                KnockInput labelText _ syncfusionId ->
+                KnockInput _ _ syncfusionId ->
                     div [ id syncfusionId ] []
 
                 DropInputWithButton labelText requiredType _ syncfusionId buttonText ->
@@ -240,13 +240,3 @@ isRequiredStr requiredType =
 
         Optional ->
             ""
-
-
-inputCommonFormat : String -> RequiredType -> List (Html msg) -> Html msg
-inputCommonFormat displayText requiredType t =
-    let
-        firstItem =
-            label [ class (labelWidth ++ " " ++ isRequiredStr requiredType), forId displayText ] [ text displayText ]
-    in
-        div [ class "form-group" ]
-            (firstItem :: t)
