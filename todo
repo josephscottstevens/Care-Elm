@@ -72,6 +72,7 @@ how to clear sort?
 Clean up un-used fields (in models)
 Can I fix navigation for everyone else as well?
 getPatientId function in Route is a hack, better to display an error
+change validation from passing Required Option, to have moreso how the validation library does it (withRequiredValidation or something)
 
 REALLY LOW TODO:
 Standardize Records ports to be like hospitilizations ( 1 in, 1 out), SF manages some, Elm manages other

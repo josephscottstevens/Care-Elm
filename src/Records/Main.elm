@@ -1,7 +1,7 @@
 module Records.Main exposing (..)
 
-import Records.Functions exposing (..)
-import Records.Types exposing (..)
+import Records.Functions exposing (getRecords, flipConsent, flipDropDownOpen, deleteRequest, getMenuMessage, filterFields, filteredRecords)
+import Records.Types exposing (Msg(..), Model, RecordRow)
 import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)

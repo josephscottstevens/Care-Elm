@@ -1,6 +1,6 @@
 module RecordAddNew.Types exposing (..)
 
-import Common.Types exposing (..)
+import Common.Types exposing (AddEditDataSource, RecordType, RecordAddNewInitData, DropDownItem, getAddEditMsg, getId)
 import Http
 
 

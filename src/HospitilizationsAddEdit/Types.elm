@@ -1,6 +1,6 @@
 module HospitilizationsAddEdit.Types exposing (..)
 
-import Common.Types exposing (..)
+import Common.Types exposing (HospitilizationsInitData, AddEditDataSource, HospitilizationsRow)
 import Http
 
 
