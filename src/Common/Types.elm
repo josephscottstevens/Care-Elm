@@ -292,7 +292,7 @@ type alias HospitilizationsRow =
     }
 
 
-type alias SomeDropDowns =
+type alias ClinicalSummaryInitData =
     { months : List DropDownItem
     , years : List DropDownItem
     }
@@ -304,9 +304,15 @@ monthDropdown =
     , DropDownItem (Just 0) "January"
     , DropDownItem (Just 1) "February"
     , DropDownItem (Just 2) "March"
-    , DropDownItem (Just 10) "October"
-    , DropDownItem (Just 11) "November"
-    , DropDownItem (Just 12) "December"
+    , DropDownItem (Just 3) "April"
+    , DropDownItem (Just 4) "May"
+    , DropDownItem (Just 5) "June"
+    , DropDownItem (Just 6) "July"
+    , DropDownItem (Just 7) "August"
+    , DropDownItem (Just 8) "May"
+    , DropDownItem (Just 9) "October"
+    , DropDownItem (Just 10) "November"
+    , DropDownItem (Just 11) "December"
     ]
 
 
@@ -315,7 +321,17 @@ yearDropdown =
     [ DropDownItem Nothing ""
     , DropDownItem (Just 2011) "2011"
     , DropDownItem (Just 2012) "2012"
+    , DropDownItem (Just 2013) "2013"
+    , DropDownItem (Just 2014) "2014"
+    , DropDownItem (Just 2015) "2015"
     , DropDownItem (Just 2016) "2016"
     , DropDownItem (Just 2017) "2017"
     , DropDownItem (Just 2018) "2018"
+    , DropDownItem (Just 2019) "2019"
+    , DropDownItem (Just 2020) "2020"
+    , DropDownItem (Just 2021) "2021"
+    , DropDownItem (Just 2022) "2022"
+    , DropDownItem (Just 2023) "2023"
+    , DropDownItem (Just 2024) "2024"
+    , DropDownItem (Just 2025) "2025"
     ]

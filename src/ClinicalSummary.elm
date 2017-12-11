@@ -2,12 +2,13 @@ module ClinicalSummary exposing (..)
 
 import Html exposing (Html, text, div, button, h4, input)
 import Html.Attributes exposing (class, id, style)
-import Common.Html exposing (..)
-import Common.Types exposing (RequiredType(..))
+import Common.Html exposing (InputControlType(..), makeControls)
+import Common.Types exposing (RequiredType(..), ClinicalSummaryInitData, monthDropdown, yearDropdown)
 import Common.Functions exposing (displayErrorMessage)
 import Http
 import Json.Decode as Decode exposing (maybe)
-import Json.Decode.Pipeline exposing (..)
+import Json.Decode.Pipeline exposing (decode, required)
+import Ports exposing (clinicalSummaryInit)
 
 
 type alias Model =
@@ -23,9 +24,16 @@ type alias Model =
 
 init : Int -> Cmd Msg
 init patientId =
-    decodeClinicalSummary
-        |> Http.get ("/People/ClinicalSummary?patientId=" ++ toString patientId)
-        |> Http.send LoadData
+    let
+        getInitData =
+            decodeClinicalSummary
+                |> Http.get ("/People/ClinicalSummary?patientId=" ++ toString patientId)
+                |> Http.send LoadData
+
+        loadDropdowns =
+            clinicalSummaryInit (ClinicalSummaryInitData monthDropdown yearDropdown)
+    in
+        Cmd.batch [ getInitData, loadDropdowns ]
 
 
 type Msg
@@ -73,14 +81,20 @@ update msg model =
 generateSummaryDiv : Html msg
 generateSummaryDiv =
     let
-        inline =
-            style [ ( "display", "inline-block" ) ]
+        inline widthPercent topPadding =
+            [ style
+                [ ( "display", "inline-block" )
+                , ( "width", widthPercent )
+                , ( "padding-top", topPadding )
+                ]
+            , class "col-md-2 padding-h-0"
+            ]
     in
         div []
-            [ div [ inline ] [ text "Generate Summary" ]
-            , div [ inline ] [ input [ id "MonthId" ] [] ]
-            , div [ inline ] [ input [ id "YearId" ] [] ]
-            , button [] [ text "sub" ]
+            [ div (inline "34%" "5px") [ text "Generate Summary from Tasks Outcome:" ]
+            , div (inline "18%" "") [ input [ id "MonthId" ] [] ]
+            , div (inline "18%" "") [ input [ id "YearId" ] [] ]
+            , div (inline "20%" "") [ button [ class "btn btn-sm btn-default" ] [ text "Generate" ] ]
             ]
 
 
