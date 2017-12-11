@@ -6,6 +6,12 @@ import Html.Events
 import Table
 import Utils.CommonTypes exposing (DropDownState, FilterState)
 import Json.Decode as Json
+import Utils.CommonFunctions exposing (isAlpha)
+
+
+idAttr : String -> Html.Attribute msg
+idAttr str =
+    id (String.filter isAlpha str)
 
 
 onInput : String -> (FilterState -> msg) -> Html.Attribute msg
@@ -53,6 +59,10 @@ standardTheadHelp event ( name, status, onClick ) =
         filterContent =
             if name == "" then
                 div [] []
+            else if String.contains "date" (String.toLower name) then
+                div [ style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ) ] ]
+                    [ input [ type_ "text", idAttr ("filter" ++ name), onInput name event ] []
+                    ]
             else
                 div [ class "e-filterdiv e-fltrinputdiv" ]
                     [ input [ class "e-ejinputtext e-filtertext", style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ) ], onInput name event ] []

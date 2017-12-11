@@ -159,7 +159,7 @@ common ( labelText, requiredType, controlType ) =
 
             FileInput displayValue ->
                 div [ class "form-group" ]
-                    [ label [ class (labelWidth ++ isRequiredStr requiredType), for "fileName" ] [ text labelText ]
+                    [ label [ class (labelWidth ++ isRequiredStr requiredType), for "fileName" ] [ text (labelText ++ ":") ]
                     , div [ class controlWidth ] [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] [] ]
                     , div [ class labelWidth ] [ div [ id "fileBtn" ] [] ]
                     ]

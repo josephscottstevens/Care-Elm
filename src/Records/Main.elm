@@ -102,7 +102,10 @@ subscriptions model =
 
 init : Flags -> Cmd Msg
 init flag =
-    getRecords flag.patientId flag.recordType Load
+    Cmd.batch
+        [ getRecords flag.patientId flag.recordType Load
+        , sendMenuMessage (MenuMessage "Filter" 0 Nothing Nothing)
+        ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -142,7 +145,11 @@ update msg model =
                     model ! [ getRecords model.patientId model.recordTypeId Load, displayErrorMessage t ]
 
                 Nothing ->
-                    model ! [ getRecords model.patientId model.recordTypeId Load, displaySuccessMessage "Save completed successfully!" ]
+                    model
+                        ! [ getRecords model.patientId model.recordTypeId Load
+                          , displaySuccessMessage "Save completed successfully!"
+                          , sendMenuMessage (MenuMessage "Filter" 0 Nothing Nothing)
+                          ]
 
         SaveCompleted (Err httpError) ->
             { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
