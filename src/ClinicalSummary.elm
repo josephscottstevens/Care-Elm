@@ -21,6 +21,9 @@ port clinicalSummaryInit : SyncfusionData -> Cmd msg
 port generateInstructions : SyncfusionData -> Cmd msg
 
 
+port generateCarePlanLetter : Maybe Int -> Cmd msg
+
+
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch [ clinicalSummaryUpdate UpdateClinicalSummary ]
@@ -28,12 +31,12 @@ subscriptions =
 
 type alias Model =
     { id : Maybe Int
+    , facilityId : Maybe Int
     , summary : String
     , carePlan : String
     , codeLegalStatus : String
     , impairment : String
     , comments : String
-    , rnReviewedCarePlan : Bool
     , syncfusionData : SyncfusionData
     }
 
@@ -63,6 +66,7 @@ type Msg
     | GenerateInstructions
     | Save
     | SaveCompleted (Result Http.Error String)
+    | GenerateCarePlanLetter
 
 
 view : Model -> Int -> Html Msg
@@ -84,7 +88,7 @@ update msg model patientId =
                 , codeLegalStatus = newData.codeLegalStatus
                 , impairment = newData.impairment
                 , summary = newData.summary
-                , rnReviewedCarePlan = False
+                , facilityId = newData.facilityId
             }
                 ! []
 
@@ -96,6 +100,9 @@ update msg model patientId =
 
         GenerateInstructions ->
             model ! [ generateInstructions model.syncfusionData ]
+
+        GenerateCarePlanLetter ->
+            model ! [ generateCarePlanLetter model.facilityId ]
 
         Save ->
             model
@@ -148,7 +155,7 @@ generateSummaryDiv =
 
 formInputs : Model -> List (InputControlType Msg)
 formInputs { summary, carePlan, codeLegalStatus, impairment, comments } =
-    [ HtmlElement <| button [ class "btn btn-sm btn-default" ] [ text "Generate Care Plan Letter" ]
+    [ HtmlElement <| button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate Care Plan Letter" ]
     , AreaInput "Clinical Summary" Optional summary UpdateSummary
     , HtmlElement generateSummaryDiv
     , AreaInput "Instructions and Care Plan" Optional carePlan UpdateCarePlan
@@ -163,12 +170,12 @@ decodeClinicalSummary : Decode.Decoder ClinicalSummaryResponseData
 decodeClinicalSummary =
     decode ClinicalSummaryResponseData
         |> required "Id" (Decode.maybe Decode.int)
+        |> required "FacilityId" (Decode.maybe Decode.int)
         |> required "Summary" Decode.string
         |> required "CarePlan" Decode.string
         |> required "CodeLegalStatus" Decode.string
         |> required "Impairment" Decode.string
         |> required "Comments" Decode.string
-        |> required "RnReviewedCarePlan" Decode.bool
 
 
 encodeClinicalSummary : Model -> Int -> Encode.Value
@@ -181,18 +188,17 @@ encodeClinicalSummary model patientId =
         , ( "Impairment", Encode.string <| model.impairment )
         , ( "CodeLegalStatus", Encode.string <| model.codeLegalStatus )
         , ( "Comments", Encode.string <| model.comments )
-        , ( "RnReviewedCarePlan", Encode.bool <| model.rnReviewedCarePlan )
         ]
 
 
 type alias ClinicalSummaryResponseData =
     { id : Maybe Int
+    , facilityId : Maybe Int
     , summary : String
     , carePlan : String
     , codeLegalStatus : String
     , impairment : String
     , comments : String
-    , rnReviewedCarePlan : Bool
     }
 
 
@@ -208,11 +214,11 @@ type alias SyncfusionData =
 emptyModel : Model
 emptyModel =
     { id = Nothing
+    , facilityId = Nothing
     , comments = ""
     , carePlan = ""
     , codeLegalStatus = ""
     , impairment = ""
     , summary = ""
-    , rnReviewedCarePlan = False
     , syncfusionData = SyncfusionData monthDropdown yearDropdown 0 0 ""
     }
