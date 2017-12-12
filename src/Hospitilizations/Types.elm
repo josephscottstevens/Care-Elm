@@ -1,14 +1,7 @@
-module Hospitilizations.Types exposing (..)
+module Hospitilizations.Types exposing (Model, Filters, emptyModel)
 
 import Table
-import Http
-import Common.Types exposing (FilterState, HospitilizationsRow)
-
-
-type SortMode
-    = SortNone
-    | SortAsc
-    | SortDesc
+import Common.Types exposing (HospitilizationsRow)
 
 
 type alias WebResponse =
@@ -51,9 +44,3 @@ type alias Filters =
 emptyFilters : Filters
 emptyFilters =
     Filters "" "" "" "" "" "" "" "" ""
-
-
-type alias FilterField =
-    { fieldName : String
-    , fieldText : String
-    }

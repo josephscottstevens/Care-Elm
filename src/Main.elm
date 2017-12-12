@@ -1,4 +1,4 @@
-module Main exposing (..)
+module Main exposing (main)
 
 import Html exposing (Html, text, div)
 import ClinicalSummary
@@ -154,7 +154,7 @@ setRoute maybeRoute model =
                     ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
 
             Just Route.Hospitilizations ->
-                { model | page = Hospitilizations (Hospitilizations.Types.emptyModel) }
+                { model | page = Hospitilizations Hospitilizations.Types.emptyModel }
                     ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
             Just Route.HospitilizationsAdd ->

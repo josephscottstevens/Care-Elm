@@ -1,7 +1,6 @@
-module HospitilizationsAddEdit.Types exposing (..)
+module HospitilizationsAddEdit.Types exposing (Model, emptyHospitilizationRow, emptyModel, initData)
 
-import Common.Types exposing (HospitilizationsInitData, AddEditDataSource, HospitilizationsRow)
-import Http
+import Common.Types exposing (HospitilizationsInitData, HospitilizationsRow)
 
 
 type alias Model =
@@ -20,12 +19,6 @@ emptyModel hospitilizationsInitData =
     , chiefComplaint = ""
     , dischargeRecommendations = ""
     , showValidationErrors = False
-    }
-
-
-type alias HospitilizationsData =
-    { addEditDataSource : Maybe AddEditDataSource
-    , hospitilizationsRow : HospitilizationsRow
     }
 
 

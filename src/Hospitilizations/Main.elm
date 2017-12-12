@@ -1,7 +1,7 @@
-port module Hospitilizations.Main exposing (..)
+port module Hospitilizations.Main exposing (Msg, subscriptions, init, update, view)
 
 import Hospitilizations.Functions exposing (getHospitilizations, getLoadedState, flipDropDownOpen, deleteHospitilization, filterFields, filteredRecords)
-import Hospitilizations.Types exposing (Model, WebResponse)
+import Hospitilizations.Types exposing (Model)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
@@ -31,7 +31,7 @@ init patientId =
 
 
 type Msg
-    = Load (Result Http.Error WebResponse)
+    = Load (Result Http.Error (List HospitilizationsRow))
     | SetTableState Table.State
     | SetFilter FilterState
     | DropDownToggle Int

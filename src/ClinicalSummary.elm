@@ -9,7 +9,7 @@ import Common.Functions exposing (displayErrorMessage, displaySuccessMessage, ma
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
-import Json.Decode.Pipeline exposing (decode, required, hardcoded)
+import Json.Decode.Pipeline exposing (decode, required)
 
 
 port clinicalSummaryUpdate : (SyncfusionData -> msg) -> Sub msg

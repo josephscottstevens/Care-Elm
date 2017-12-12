@@ -1,4 +1,4 @@
-module Records.Main exposing (..)
+module Records.Main exposing (Msg, subscriptions, init, update, view)
 
 import Records.Functions exposing (getRecords, flipConsent, flipDropDownOpen, deleteRequest, getMenuMessage, filterFields, filteredRecords)
 import Records.Types exposing (Model, RecordRow)
@@ -41,7 +41,7 @@ type Msg
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
-update msg model patientId =
+update msg model _ =
     case msg of
         Load (Ok t) ->
             { model | records = t } ! [ Functions.setLoadingStatus False ]

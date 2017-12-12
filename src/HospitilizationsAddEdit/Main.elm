@@ -1,4 +1,4 @@
-port module HospitilizationsAddEdit.Main exposing (..)
+port module HospitilizationsAddEdit.Main exposing (Msg, subscriptions, init, update, view)
 
 import HospitilizationsAddEdit.Functions exposing (getHospitilizationsInitData, saveForm)
 import HospitilizationsAddEdit.Types exposing (Model)

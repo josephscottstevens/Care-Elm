@@ -1,4 +1,4 @@
-port module RecordAddNew.Main exposing (..)
+port module RecordAddNew.Main exposing (Msg, subscriptions, init, update, view)
 
 import RecordAddNew.Functions exposing (saveForm)
 import RecordAddNew.Types exposing (State(Edit, Limbo), Model, RecordAddNewInitData, getAddEditMsg)
@@ -17,12 +17,6 @@ port presetPage : Maybe Int -> Cmd msg
 
 
 port presetPageComplete : (Maybe Int -> msg) -> Sub msg
-
-
-port resetUpdate : Maybe Int -> Cmd msg
-
-
-port resetUpdateComplete : (Maybe Int -> msg) -> Sub msg
 
 
 port initRecordAddNew : RecordAddNewInitData -> Cmd msg

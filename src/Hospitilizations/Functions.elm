@@ -1,9 +1,9 @@
-module Hospitilizations.Functions exposing (..)
+module Hospitilizations.Functions exposing (getHospitilizations, getLoadedState, flipDropDownOpen, deleteHospitilization, filterFields, filteredRecords)
 
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Http
-import Hospitilizations.Types exposing (..)
+import Hospitilizations.Types exposing (Model, Filters)
 import Common.Types exposing (FilterState, HospitilizationsRow)
 import Common.Functions exposing (defaultLower, defaultDate)
 
@@ -11,8 +11,8 @@ import Common.Functions exposing (defaultLower, defaultDate)
 -- Http helper functions
 
 
-decodeRecordRow : Decode.Decoder HospitilizationsRow
-decodeRecordRow =
+decodeHospitilizationsRow : Decode.Decoder HospitilizationsRow
+decodeHospitilizationsRow =
     Pipeline.decode HospitilizationsRow
         |> Pipeline.required "Id" Decode.int
         |> Pipeline.required "FacilityName" (Decode.maybe Decode.string)
@@ -39,18 +39,13 @@ decodeRecordRow =
         |> Pipeline.required "DateOfDischarge2" (Decode.maybe Decode.string)
 
 
-decodeModel : Decode.Decoder WebResponse
-decodeModel =
-    Pipeline.decode WebResponse
-        |> Pipeline.required "list" (Decode.list decodeRecordRow)
-
-
-request : Int -> Http.Request WebResponse
+request : Int -> Http.Request (List HospitilizationsRow)
 request patientId =
-    Http.get ("/People/HospitilizationsGrid?patientId=" ++ toString patientId) decodeModel
+    Decode.list decodeHospitilizationsRow
+        |> Http.get ("/People/HospitilizationsGrid?patientId=" ++ toString patientId)
 
 
-getHospitilizations : Int -> (Result Http.Error WebResponse -> msg) -> Cmd msg
+getHospitilizations : Int -> (Result Http.Error (List HospitilizationsRow) -> msg) -> Cmd msg
 getHospitilizations patientId t =
     Http.send t (request patientId)
 
@@ -72,11 +67,9 @@ flipDropDownOpen hospitilizations recordId =
             )
 
 
-getLoadedState : Model -> WebResponse -> Model
-getLoadedState model t =
-    { model
-        | hospitilizations = t.hospitilizations
-    }
+getLoadedState : Model -> List HospitilizationsRow -> Model
+getLoadedState model hospitilizationsRow =
+    { model | hospitilizations = hospitilizationsRow }
 
 
 

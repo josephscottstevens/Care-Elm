@@ -1,8 +1,7 @@
-module RecordAddNew.Types exposing (..)
+module RecordAddNew.Types exposing (State(Edit, Limbo), Model, RecordAddNewInitData, getAddEditMsg, emptyModel)
 
 import Common.Types exposing (AddEditDataSource, RecordType, DropDownItem)
 import Common.Functions as Functions
-import Http
 
 
 type State

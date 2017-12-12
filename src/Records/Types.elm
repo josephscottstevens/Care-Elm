@@ -1,14 +1,7 @@
-module Records.Types exposing (..)
+module Records.Types exposing (Model, RecordRow, Filters, emptyModel)
 
 import Table
-import Http
-import Common.Types exposing (RecordType, FilterState)
-
-
-type SortMode
-    = SortNone
-    | SortAsc
-    | SortDesc
+import Common.Types exposing (RecordType)
 
 
 type alias Model =
@@ -25,17 +18,6 @@ emptyModel : RecordType -> Model
 emptyModel recordType =
     { recordType = recordType
     , records = []
-    , tableState = Table.initialSort "Date"
-    , query = ""
-    , filterFields = emptyFilters
-    , dropDownState = -1
-    }
-
-
-loadModel : RecordType -> List RecordRow -> Model
-loadModel recordType recordRows =
-    { recordType = recordType
-    , records = recordRows
     , tableState = Table.initialSort "Date"
     , query = ""
     , filterFields = emptyFilters
@@ -93,12 +75,6 @@ emptyFilters =
     , hospitalizationServiceType = ""
     , recommendations = ""
     , dischargePhysician = ""
-    }
-
-
-type alias FilterField =
-    { fieldName : String
-    , fieldText : String
     }
 
 

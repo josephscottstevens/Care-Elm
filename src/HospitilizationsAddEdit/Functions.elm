@@ -67,17 +67,3 @@ getHospitilizationsInitData addEditDataSource maybeHospitilizationsRow =
         , dateOfAdmission2 = hospitilizationsRow.dateOfAdmission2
         , dateOfDischarge2 = hospitilizationsRow.dateOfDischarge2
         }
-
-
-updateModel : Model -> Maybe HospitilizationsRow -> Model
-updateModel model maybeHospitilizationsRow =
-    case maybeHospitilizationsRow of
-        Just hospitilizationsRow ->
-            { model
-                | patientReported = hospitilizationsRow.patientReported
-                , chiefComplaint = hospitilizationsRow.chiefComplaint
-                , dischargeRecommendations = hospitilizationsRow.dischargeRecommendations
-            }
-
-        Nothing ->
-            model
