@@ -1,4 +1,4 @@
-module Records.Main exposing (Msg, subscriptions, init, update, view)
+port module Records.Main exposing (Msg, subscriptions, init, update, view)
 
 import Records.Functions exposing (getRecords, flipConsent, flipDropDownOpen, deleteRequest, getMenuMessage, filterFields, filteredRecords)
 import Records.Types exposing (Model, RecordRow)
@@ -9,9 +9,15 @@ import Table exposing (stringColumn, defaultCustomizations)
 import Common.Grid exposing (hrefColumn, checkColumn)
 import Common.Types exposing (RecordType(..), AddEditDataSource, FilterState)
 import Common.Functions as Functions exposing (displaySuccessMessage, displayErrorMessage)
+import Common.Ports exposing (dropDownToggle, sendMenuMessage)
 import Http
-import Ports exposing (dropDownToggle, deleteConfirmed, sendMenuMessage, editTask)
 import Route
+
+
+port deleteConfirmed : (Int -> msg) -> Sub msg
+
+
+port editTask : Int -> Cmd msg
 
 
 subscriptions : Sub Msg

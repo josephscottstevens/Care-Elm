@@ -9,7 +9,7 @@ import Table exposing (defaultCustomizations)
 import Common.Grid exposing (checkColumn, standardTableAttrs, standardThead, rowDropDownDiv)
 import Common.Types exposing (MenuMessage, FilterState, AddEditDataSource, HospitilizationsRow)
 import Common.Functions exposing (setLoadingStatus, displayErrorMessage, getResponseError, displaySuccessMessage, defaultString, defaultDate)
-import Ports exposing (dropDownToggle, sendMenuMessage)
+import Common.Ports exposing (dropDownToggle, sendMenuMessage)
 import Route
 import Http
 
