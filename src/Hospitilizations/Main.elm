@@ -1,7 +1,7 @@
 port module Hospitilizations.Main exposing (..)
 
 import Hospitilizations.Functions exposing (getHospitilizations, getLoadedState, flipDropDownOpen, deleteHospitilization, filterFields, filteredRecords)
-import Hospitilizations.Types exposing (..)
+import Hospitilizations.Types exposing (Model, WebResponse)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
@@ -11,6 +11,7 @@ import Common.Types exposing (MenuMessage, FilterState, AddEditDataSource, Hospi
 import Common.Functions exposing (setLoadingStatus, displayErrorMessage, getResponseError, displaySuccessMessage, defaultString, defaultDate)
 import Ports exposing (dropDownToggle, sendMenuMessage)
 import Route
+import Http
 
 
 port deleteHospitilizationConfirmed : (Int -> msg) -> Sub msg
@@ -27,6 +28,18 @@ subscriptions =
 init : Int -> Cmd Msg
 init patientId =
     getHospitilizations patientId Load
+
+
+type Msg
+    = Load (Result Http.Error WebResponse)
+    | SetTableState Table.State
+    | SetFilter FilterState
+    | DropDownToggle Int
+    | DeleteHospitilizationConfirmed Int
+    | DeleteCompleted (Result Http.Error String)
+    | HospitilizationsAdd
+    | HospitilizationsEdit Int
+    | SendMenuMessage Int String
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -52,7 +65,7 @@ update msg model patientId =
                 updatedRecords =
                     model.hospitilizations |> List.filter (\t -> t.id /= rowId)
             in
-                { model | hospitilizations = updatedRecords } ! [ deleteHospitilization rowId ]
+                { model | hospitilizations = updatedRecords } ! [ deleteHospitilization rowId DeleteCompleted ]
 
         DeleteCompleted (Ok responseMsg) ->
             case getResponseError responseMsg of

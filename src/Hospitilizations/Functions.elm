@@ -55,9 +55,9 @@ getHospitilizations patientId t =
     Http.send t (request patientId)
 
 
-deleteHospitilization : Int -> Cmd Msg
-deleteHospitilization rowId =
-    Http.send DeleteCompleted <| Http.getString ("/People/DeleteHospitilization?id=" ++ toString rowId)
+deleteHospitilization : a -> (Result Http.Error String -> msg) -> Cmd msg
+deleteHospitilization rowId deleteCompleted =
+    Http.send deleteCompleted <| Http.getString ("/People/DeleteHospitilization?id=" ++ toString rowId)
 
 
 flipDropDownOpen : List HospitilizationsRow -> Int -> List HospitilizationsRow

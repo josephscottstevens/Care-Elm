@@ -5,18 +5,6 @@ import Http
 import Common.Types exposing (RecordType, FilterState)
 
 
-type Msg
-    = Load (Result Http.Error (List RecordRow))
-    | SetTableState Table.State
-    | NewRecord
-    | DropDownToggle Int
-    | SendMenuMessage Int RecordType String
-    | SetFilter FilterState
-    | EditTask Int
-    | DeleteConfirmed Int
-    | DeleteCompleted (Result Http.Error String)
-
-
 type SortMode
     = SortNone
     | SortAsc

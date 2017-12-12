@@ -3,7 +3,7 @@ module Records.Functions exposing (getRecords, deleteRequest, flipDropDownOpen, 
 import Json.Decode as Decode exposing (Decoder, maybe)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Http
-import Records.Types exposing (RecordRow, Msg(..), Filters)
+import Records.Types exposing (RecordRow, Filters)
 import Common.Types exposing (RecordType(..), MenuMessage, FilterState)
 import Common.Functions as Functions
 import String exposing (toLower)
@@ -59,9 +59,9 @@ getRecords recordType patientId =
             |> Http.get url
 
 
-deleteRequest : Int -> Cmd Msg
-deleteRequest rowId =
-    Http.send DeleteCompleted <| Http.getString ("/People/DeleteRecord?recordId=" ++ toString rowId)
+deleteRequest : a -> (Result Http.Error String -> msg) -> Cmd msg
+deleteRequest rowId deleteCompleted =
+    Http.send deleteCompleted <| Http.getString ("/People/DeleteRecord?recordId=" ++ toString rowId)
 
 
 

@@ -4,16 +4,6 @@ import Common.Types exposing (HospitilizationsInitData, AddEditDataSource, Hospi
 import Http
 
 
-type Msg
-    = Save
-    | SaveCompleted (Result Http.Error String)
-    | Cancel
-    | UpdateHospitilizationsInitData HospitilizationsInitData
-    | UpdatePatientReported Bool
-    | UpdateChiefComplaint String
-    | UpdateDischargeRecommendations String
-
-
 type alias Model =
     { initData : HospitilizationsInitData
     , patientReported : Bool

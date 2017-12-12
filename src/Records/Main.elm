@@ -1,7 +1,7 @@
 module Records.Main exposing (..)
 
 import Records.Functions exposing (getRecords, flipConsent, flipDropDownOpen, deleteRequest, getMenuMessage, filterFields, filteredRecords)
-import Records.Types exposing (Msg(..), Model, RecordRow)
+import Records.Types exposing (Model, RecordRow)
 import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
@@ -26,6 +26,18 @@ init : RecordType -> Int -> Cmd Msg
 init recordType patientId =
     getRecords recordType patientId
         |> Http.send Load
+
+
+type Msg
+    = Load (Result Http.Error (List RecordRow))
+    | SetTableState Table.State
+    | NewRecord
+    | DropDownToggle Int
+    | SendMenuMessage Int RecordType String
+    | SetFilter FilterState
+    | EditTask Int
+    | DeleteConfirmed Int
+    | DeleteCompleted (Result Http.Error String)
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -55,7 +67,7 @@ update msg model patientId =
                 updatedRecords =
                     model.records |> List.filter (\t -> t.id /= rowId)
             in
-                { model | records = updatedRecords } ! [ deleteRequest rowId ]
+                { model | records = updatedRecords } ! [ deleteRequest rowId DeleteCompleted ]
 
         DeleteCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of

@@ -1,14 +1,15 @@
 port module RecordAddNew.Main exposing (..)
 
 import RecordAddNew.Functions exposing (saveForm)
-import RecordAddNew.Types exposing (Msg(..), State(..), Model, RecordAddNewInitData, getAddEditMsg)
+import RecordAddNew.Types exposing (State(Edit, Limbo), Model, RecordAddNewInitData, getAddEditMsg)
 import Html exposing (Html, text, div, button, h4)
-import Html.Attributes exposing (class, id, type_)
+import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Common.Html exposing (getValidationErrors, defaultConfig, makeControls, fullWidth, InputControlType(..))
 import Common.Types exposing (RecordType(..), DropDownItem, RequiredType(..), AddEditDataSource)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, defaultString)
 import Route
+import Http
 import Ports exposing (setUnsavedChanges)
 
 
@@ -39,11 +40,6 @@ port addNewFacility : Maybe String -> Cmd msg
 port addNewPhysician : Maybe String -> Cmd msg
 
 
-init : AddEditDataSource -> RecordType -> Cmd Msg
-init addEditDataSource recordType =
-    initRecordAddNew (getAddEditMsg addEditDataSource recordType False False)
-
-
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
@@ -53,40 +49,31 @@ subscriptions =
         ]
 
 
-view : Model -> Html Msg
-view model =
-    case model.state of
-        Edit ->
-            let
-                errors =
-                    getValidationErrors (formInputs model model.recordType)
+init : AddEditDataSource -> RecordType -> Cmd Msg
+init addEditDataSource recordType =
+    initRecordAddNew (getAddEditMsg addEditDataSource recordType False False)
 
-                validationErrorsDiv =
-                    if model.showValidationErrors == True && List.length errors > 0 then
-                        div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
-                    else
-                        div [] []
 
-                saveBtnClass =
-                    class "btn btn-sm btn-success margin-left-5 pull-right"
-
-                cancelBtnClass =
-                    class "btn btn-sm btn-default pull-right"
-            in
-                div [ class "form-horizontal" ]
-                    [ h4 [] [ text (Functions.getDesc model.recordType) ]
-                    , validationErrorsDiv
-                    , makeControls defaultConfig (formInputs model model.recordType)
-                    , div [ class "form-group" ]
-                        [ div [ class fullWidth ]
-                            [ button [ type_ "button", onClick (Save model.recordType), saveBtnClass ] [ text "Save" ]
-                            , button [ type_ "button", onClick (Cancel model.recordType), cancelBtnClass ] [ text "Cancel" ]
-                            ]
-                        ]
-                    ]
-
-        Limbo ->
-            div [] []
+type Msg
+    = AddNewFacility
+    | AddNewPhysician
+    | Save RecordType
+    | SaveCompleted (Result Http.Error String)
+    | Cancel RecordType
+    | PresetPageComplete (Maybe Int)
+    | UpdateRecordAddNew RecordAddNewInitData
+    | UpdateTitle String
+    | UpdateRecordType DropDownItem
+    | UpdateSpecialty String
+    | UpdateProvider String
+    | UpdateComments String
+    | UpdateCallSid String
+    | UpdateRecordingSid String
+    | UpdateDuration String
+      -- Hospitilizations
+    | UpdateIsExistingHospitilization Bool
+    | UpdatePatientReported Bool
+    | UpdateDischargeRecommendations String
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -106,7 +93,7 @@ update msg model patientId =
                 if List.length (getValidationErrors (formInputs model recordType)) > 0 then
                     { model | showValidationErrors = True } ! []
                 else
-                    model ! [ saveForm model patientId, setUnsavedChanges False, Route.modifyUrl (Route.Records recordType) ]
+                    model ! [ saveForm model patientId SaveCompleted, setUnsavedChanges False, Route.modifyUrl (Route.Records recordType) ]
 
             SaveCompleted (Ok responseMsg) ->
                 case Functions.getResponseError responseMsg of
@@ -179,6 +166,42 @@ update msg model patientId =
 
             UpdateDischargeRecommendations str ->
                 updateAddNew { model | dischargeRecommendations = str }
+
+
+view : Model -> Html Msg
+view model =
+    case model.state of
+        Edit ->
+            let
+                errors =
+                    getValidationErrors (formInputs model model.recordType)
+
+                validationErrorsDiv =
+                    if model.showValidationErrors == True && List.length errors > 0 then
+                        div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
+                    else
+                        div [] []
+
+                saveBtnClass =
+                    class "btn btn-sm btn-success margin-left-5 pull-right"
+
+                cancelBtnClass =
+                    class "btn btn-sm btn-default pull-right"
+            in
+                div [ class "form-horizontal" ]
+                    [ h4 [] [ text (Functions.getDesc model.recordType) ]
+                    , validationErrorsDiv
+                    , makeControls defaultConfig (formInputs model model.recordType)
+                    , div [ class "form-group" ]
+                        [ div [ class fullWidth ]
+                            [ button [ type_ "button", onClick (Save model.recordType), saveBtnClass ] [ text "Save" ]
+                            , button [ type_ "button", onClick (Cancel model.recordType), cancelBtnClass ] [ text "Cancel" ]
+                            ]
+                        ]
+                    ]
+
+        Limbo ->
+            div [] []
 
 
 formInputs : Model -> RecordType -> List (InputControlType Msg)

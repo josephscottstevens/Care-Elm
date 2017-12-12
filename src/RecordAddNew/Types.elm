@@ -5,28 +5,6 @@ import Common.Functions as Functions
 import Http
 
 
-type Msg
-    = AddNewFacility
-    | AddNewPhysician
-    | Save RecordType
-    | SaveCompleted (Result Http.Error String)
-    | Cancel RecordType
-    | PresetPageComplete (Maybe Int)
-    | UpdateRecordAddNew RecordAddNewInitData
-    | UpdateTitle String
-    | UpdateRecordType DropDownItem
-    | UpdateSpecialty String
-    | UpdateProvider String
-    | UpdateComments String
-    | UpdateCallSid String
-    | UpdateRecordingSid String
-    | UpdateDuration String
-      -- Hospitilizations
-    | UpdateIsExistingHospitilization Bool
-    | UpdatePatientReported Bool
-    | UpdateDischargeRecommendations String
-
-
 type State
     = Edit
     | Limbo

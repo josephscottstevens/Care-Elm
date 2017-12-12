@@ -2,7 +2,7 @@ module RecordAddNew.Functions exposing (saveForm)
 
 import Json.Encode as Encode
 import Http
-import RecordAddNew.Types exposing (Model, Msg(..))
+import RecordAddNew.Types exposing (Model)
 import Common.Functions as Functions exposing (maybeVal, maybeToDateString)
 
 
@@ -57,6 +57,6 @@ saveFormRequest model patientId =
         }
 
 
-saveForm : Model -> Int -> Cmd Msg
-saveForm model patientId =
-    Http.send SaveCompleted (saveFormRequest model patientId)
+saveForm : Model -> Int -> (Result Http.Error String -> msg) -> Cmd msg
+saveForm model patientId saveCompleted =
+    Http.send saveCompleted (saveFormRequest model patientId)

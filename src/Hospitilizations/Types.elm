@@ -5,18 +5,6 @@ import Http
 import Common.Types exposing (FilterState, HospitilizationsRow)
 
 
-type Msg
-    = Load (Result Http.Error WebResponse)
-    | SetTableState Table.State
-    | SetFilter FilterState
-    | DropDownToggle Int
-    | DeleteHospitilizationConfirmed Int
-    | DeleteCompleted (Result Http.Error String)
-    | HospitilizationsAdd
-    | HospitilizationsEdit Int
-    | SendMenuMessage Int String
-
-
 type SortMode
     = SortNone
     | SortAsc

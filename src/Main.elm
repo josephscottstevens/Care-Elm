@@ -127,11 +127,11 @@ type Msg
     = SetRoute (Maybe Route)
     | BillingMsg Billing.Types.Msg
     | ClinicalSummaryMsg ClinicalSummary.Msg
-    | RecordsMsg Records.Types.Msg
-    | RecordAddNewMsg RecordAddNew.Types.Msg
+    | RecordsMsg Records.Msg
+    | RecordAddNewMsg RecordAddNew.Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
-    | HospitilizationsMsg Hospitilizations.Types.Msg
-    | HospitilizationsAddEditMsg HospitilizationsAddEdit.Types.Msg
+    | HospitilizationsMsg Hospitilizations.Msg
+    | HospitilizationsAddEditMsg HospitilizationsAddEdit.Msg
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )

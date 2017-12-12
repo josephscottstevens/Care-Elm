@@ -1,7 +1,7 @@
 port module HospitilizationsAddEdit.Main exposing (..)
 
-import HospitilizationsAddEdit.Functions exposing (..)
-import HospitilizationsAddEdit.Types exposing (..)
+import HospitilizationsAddEdit.Functions exposing (getHospitilizationsInitData, saveForm)
+import HospitilizationsAddEdit.Types exposing (Model)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, id, value, type_)
 import Html.Events exposing (onClick)
@@ -10,6 +10,7 @@ import Common.Types exposing (..)
 import Common.Functions exposing (..)
 import Route
 import Ports exposing (setUnsavedChanges)
+import Http
 
 
 port initHospitilizations : HospitilizationsInitData -> Cmd msg
@@ -18,14 +19,64 @@ port initHospitilizations : HospitilizationsInitData -> Cmd msg
 port updateHospitilizations : (HospitilizationsInitData -> msg) -> Sub msg
 
 
+subscriptions : Sub Msg
+subscriptions =
+    updateHospitilizations UpdateHospitilizationsInitData
+
+
 init : AddEditDataSource -> Maybe HospitilizationsRow -> Cmd Msg
 init addEditDataSource hospitilizationsRow =
     initHospitilizations (getHospitilizationsInitData addEditDataSource hospitilizationsRow)
 
 
-subscriptions : Sub Msg
-subscriptions =
-    updateHospitilizations UpdateHospitilizationsInitData
+type Msg
+    = Save
+    | SaveCompleted (Result Http.Error String)
+    | Cancel
+    | UpdateHospitilizationsInitData HospitilizationsInitData
+    | UpdatePatientReported Bool
+    | UpdateChiefComplaint String
+    | UpdateDischargeRecommendations String
+
+
+update : Msg -> Model -> Int -> ( Model, Cmd Msg )
+update msg model patientId =
+    let
+        updateAddNew t =
+            t ! [ setUnsavedChanges True ]
+    in
+        case msg of
+            Save ->
+                if List.length (getValidationErrors (formInputs model)) > 0 then
+                    { model | showValidationErrors = True } ! []
+                else
+                    model ! [ saveForm model patientId SaveCompleted, setUnsavedChanges False ]
+
+            SaveCompleted (Ok responseMsg) ->
+                case getResponseError responseMsg of
+                    Just t ->
+                        model ! [ displayErrorMessage t ]
+
+                    Nothing ->
+                        model ! [ displaySuccessMessage "Save completed successfully!", Route.modifyUrl Route.Hospitilizations ]
+
+            SaveCompleted (Err t) ->
+                model ! [ displayErrorMessage (toString t) ]
+
+            Cancel ->
+                model ! [ setUnsavedChanges False, Route.modifyUrl Route.Hospitilizations ]
+
+            UpdateHospitilizationsInitData hospitilizationsInitData ->
+                { model | initData = hospitilizationsInitData } ! []
+
+            UpdatePatientReported bool ->
+                updateAddNew { model | patientReported = bool }
+
+            UpdateChiefComplaint str ->
+                updateAddNew { model | chiefComplaint = str }
+
+            UpdateDischargeRecommendations str ->
+                updateAddNew { model | dischargeRecommendations = str }
 
 
 view : Model -> Html Msg
@@ -53,46 +104,6 @@ view model =
                     ]
                 ]
             ]
-
-
-update : Msg -> Model -> Int -> ( Model, Cmd Msg )
-update msg model patientId =
-    let
-        updateAddNew t =
-            t ! [ setUnsavedChanges True ]
-    in
-        case msg of
-            Save ->
-                if List.length (getValidationErrors (formInputs model)) > 0 then
-                    { model | showValidationErrors = True } ! []
-                else
-                    model ! [ saveForm model patientId, setUnsavedChanges False ]
-
-            SaveCompleted (Ok responseMsg) ->
-                case getResponseError responseMsg of
-                    Just t ->
-                        model ! [ displayErrorMessage t ]
-
-                    Nothing ->
-                        model ! [ displaySuccessMessage "Save completed successfully!", Route.modifyUrl Route.Hospitilizations ]
-
-            SaveCompleted (Err t) ->
-                model ! [ displayErrorMessage (toString t) ]
-
-            Cancel ->
-                model ! [ setUnsavedChanges False, Route.modifyUrl Route.Hospitilizations ]
-
-            UpdateHospitilizationsInitData hospitilizationsInitData ->
-                { model | initData = hospitilizationsInitData } ! []
-
-            UpdatePatientReported bool ->
-                updateAddNew { model | patientReported = bool }
-
-            UpdateChiefComplaint str ->
-                updateAddNew { model | chiefComplaint = str }
-
-            UpdateDischargeRecommendations str ->
-                updateAddNew { model | dischargeRecommendations = str }
 
 
 formInputs : Model -> List (InputControlType Msg)
