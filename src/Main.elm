@@ -13,8 +13,8 @@ import Records.Types
 import RecordAddNew.Types
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
+import Common.Route as Route exposing (Route)
 import Navigation exposing (Location)
-import Route exposing (Route)
 import Http exposing (Error)
 import Json.Decode exposing (maybe, int, list)
 import Json.Decode.Pipeline exposing (required, decode)

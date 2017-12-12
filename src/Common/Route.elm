@@ -1,4 +1,4 @@
-module Route exposing (Route(..), getPatientId, fromLocation, href, modifyUrl)
+module Common.Route exposing (Route(..), getPatientId, fromLocation, href, modifyUrl)
 
 import Navigation
 import Common.Types exposing (..)

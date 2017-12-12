@@ -10,8 +10,8 @@ import Common.Grid exposing (hrefColumn, checkColumn)
 import Common.Types exposing (RecordType(..), AddEditDataSource, FilterState)
 import Common.Functions as Functions exposing (displaySuccessMessage, displayErrorMessage)
 import Common.Ports exposing (dropDownToggle, sendMenuMessage)
+import Common.Route as Route
 import Http
-import Route
 
 
 port deleteConfirmed : (Int -> msg) -> Sub msg

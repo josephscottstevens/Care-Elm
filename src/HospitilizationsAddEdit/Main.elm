@@ -5,11 +5,18 @@ import HospitilizationsAddEdit.Types exposing (Model, SyncfusionData)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, id, value, type_)
 import Html.Events exposing (onClick)
-import Common.Html exposing (..)
-import Common.Types exposing (..)
-import Common.Functions exposing (..)
+import Common.Html
+    exposing
+        ( InputControlType(CheckInput, DropInputWithButton, AreaInput, TextInput, DateInput, KnockInput, DropInput)
+        , getValidationErrors
+        , defaultConfig
+        , fullWidth
+        , makeControls
+        )
+import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, HospitilizationsRow)
+import Common.Functions as Functions exposing (defaultString)
 import Common.Ports exposing (setUnsavedChanges)
-import Route
+import Common.Route as Route
 import Http
 
 
@@ -53,15 +60,18 @@ update msg model patientId =
                     model ! [ saveForm model patientId SaveCompleted, setUnsavedChanges False ]
 
             SaveCompleted (Ok responseMsg) ->
-                case getResponseError responseMsg of
+                case Functions.getResponseError responseMsg of
                     Just t ->
-                        model ! [ displayErrorMessage t ]
+                        model ! [ Functions.displayErrorMessage t ]
 
                     Nothing ->
-                        model ! [ displaySuccessMessage "Save completed successfully!", Route.modifyUrl Route.Hospitilizations ]
+                        model
+                            ! [ Functions.displaySuccessMessage "Save completed successfully!"
+                              , Route.modifyUrl Route.Hospitilizations
+                              ]
 
             SaveCompleted (Err t) ->
-                model ! [ displayErrorMessage (toString t) ]
+                model ! [ Functions.displayErrorMessage (toString t) ]
 
             Cancel ->
                 model ! [ setUnsavedChanges False, Route.modifyUrl Route.Hospitilizations ]

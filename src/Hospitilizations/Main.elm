@@ -10,7 +10,7 @@ import Common.Grid exposing (checkColumn, standardTableAttrs, standardThead, row
 import Common.Types exposing (MenuMessage, FilterState, AddEditDataSource, HospitilizationsRow)
 import Common.Functions exposing (setLoadingStatus, displayErrorMessage, getResponseError, displaySuccessMessage, defaultString, defaultDate)
 import Common.Ports exposing (dropDownToggle, sendMenuMessage)
-import Route
+import Common.Route as Route
 import Http
 
 
@@ -43,7 +43,7 @@ type Msg
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
-update msg model patientId =
+update msg model _ =
     case msg of
         Load (Ok t) ->
             getLoadedState model t ! [ setLoadingStatus False ]

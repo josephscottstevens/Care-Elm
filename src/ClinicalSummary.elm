@@ -3,8 +3,8 @@ port module ClinicalSummary exposing (Msg, Model, subscriptions, init, update, v
 import Html exposing (Html, text, div, button, h4, input)
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
-import Common.Html exposing (InputControlType(..), makeControls)
-import Common.Types exposing (RequiredType(..), monthDropdown, yearDropdown, DropDownItem)
+import Common.Html exposing (InputControlType(HtmlElement, AreaInput), makeControls)
+import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown, DropDownItem)
 import Common.Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, postRequest)
 import Http
 import Json.Decode as Decode
@@ -70,7 +70,7 @@ type Msg
 
 
 view : Model -> Int -> Html Msg
-view model patientId =
+view model _ =
     div [ class "form-horizontal" ]
         [ h4 [] [ text "Clinical Summary" ]
         , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs model)

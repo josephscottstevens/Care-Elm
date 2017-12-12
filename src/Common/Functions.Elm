@@ -6,10 +6,10 @@ import Date.Extra
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Decoder, maybe, string, int, field, decodeString)
 import Http
-import Route exposing (Route)
 import Json.Decode.Pipeline exposing (required, decode)
 import Http
 import Common.Types exposing (DropDownItem, AddEditDataSource, RecordType(..))
+import Common.Route as Route exposing (Route)
 
 
 port setLoadingStatus : Bool -> Cmd msg

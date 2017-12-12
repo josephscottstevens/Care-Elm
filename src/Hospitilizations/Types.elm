@@ -4,11 +4,6 @@ import Table
 import Common.Types exposing (HospitilizationsRow)
 
 
-type alias WebResponse =
-    { hospitilizations : List HospitilizationsRow
-    }
-
-
 type alias Model =
     { hospitilizations : List HospitilizationsRow
     , facilityId : Maybe Int
