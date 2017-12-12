@@ -2,29 +2,29 @@ module HospitilizationsAddEdit.Functions exposing (getHospitilizationsInitData, 
 
 import Json.Encode as Encode
 import Http
-import HospitilizationsAddEdit.Types exposing (Model, emptyHospitilizationRow)
+import HospitilizationsAddEdit.Types exposing (Model, SyncfusionData, emptyHospitilizationRow)
 import Common.Functions exposing (maybeVal, maybeToDateString)
-import Common.Types exposing (AddEditDataSource, HospitilizationsRow, HospitilizationsInitData)
+import Common.Types exposing (AddEditDataSource, HospitilizationsRow)
 
 
 encodeRecord : Model -> Int -> Encode.Value
 encodeRecord newRecord patientId =
     Encode.object
-        [ ( "Id", maybeVal Encode.int <| newRecord.initData.id )
+        [ ( "Id", maybeVal Encode.int <| newRecord.sfData.id )
         , ( "PatientId", Encode.int <| patientId )
-        , ( "FacilityId", maybeVal Encode.int <| newRecord.initData.facilityId )
+        , ( "FacilityId", maybeVal Encode.int <| newRecord.sfData.facilityId )
         , ( "PatientReported", Encode.bool <| newRecord.patientReported )
-        , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfAdmission )
-        , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfDischarge )
-        , ( "HospitalServiceTypeId", maybeVal Encode.int <| newRecord.initData.hospitalServiceTypeId )
+        , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfAdmission )
+        , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfDischarge )
+        , ( "HospitalServiceTypeId", maybeVal Encode.int <| newRecord.sfData.hospitalServiceTypeId )
         , ( "ChiefComplaint", Encode.string <| newRecord.chiefComplaint )
-        , ( "AdmitDiagnosisId", maybeVal Encode.int <| newRecord.initData.admitDiagnosisId )
-        , ( "DischargeDiagnosisId", maybeVal Encode.int <| newRecord.initData.dischargeDiagnosisId )
+        , ( "AdmitDiagnosisId", maybeVal Encode.int <| newRecord.sfData.admitDiagnosisId )
+        , ( "DischargeDiagnosisId", maybeVal Encode.int <| newRecord.sfData.dischargeDiagnosisId )
         , ( "DischargeRecommendations", Encode.string <| newRecord.dischargeRecommendations )
-        , ( "DischargePhysicianId", maybeVal Encode.int <| newRecord.initData.dischargePhysicianId )
-        , ( "FacilityId2", maybeVal Encode.int <| newRecord.initData.facilityId2 )
-        , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfAdmission2 )
-        , ( "DateOfDischarge2", maybeVal Encode.string <| maybeToDateString <| newRecord.initData.dateOfDischarge2 )
+        , ( "DischargePhysicianId", maybeVal Encode.int <| newRecord.sfData.dischargePhysicianId )
+        , ( "FacilityId2", maybeVal Encode.int <| newRecord.sfData.facilityId2 )
+        , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfAdmission2 )
+        , ( "DateOfDischarge2", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfDischarge2 )
         ]
 
 
@@ -46,7 +46,7 @@ saveForm model patientId saveCompleted =
     Http.send saveCompleted (saveFormRequest model patientId)
 
 
-getHospitilizationsInitData : AddEditDataSource -> Maybe HospitilizationsRow -> HospitilizationsInitData
+getHospitilizationsInitData : AddEditDataSource -> Maybe HospitilizationsRow -> SyncfusionData
 getHospitilizationsInitData addEditDataSource maybeHospitilizationsRow =
     let
         hospitilizationsRow =

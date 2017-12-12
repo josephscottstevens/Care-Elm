@@ -1,10 +1,10 @@
-module HospitilizationsAddEdit.Types exposing (Model, emptyHospitilizationRow, emptyModel, initData)
+module HospitilizationsAddEdit.Types exposing (Model, SyncfusionData, emptyHospitilizationRow, emptyModel)
 
-import Common.Types exposing (HospitilizationsInitData, HospitilizationsRow)
+import Common.Types exposing (HospitilizationsRow, DropDownItem)
 
 
 type alias Model =
-    { initData : HospitilizationsInitData
+    { sfData : SyncfusionData
     , patientReported : Bool
     , chiefComplaint : String
     , dischargeRecommendations : String
@@ -12,9 +12,9 @@ type alias Model =
     }
 
 
-emptyModel : HospitilizationsInitData -> Model
-emptyModel hospitilizationsInitData =
-    { initData = hospitilizationsInitData
+emptyModel : Model
+emptyModel =
+    { sfData = emptySfData
     , patientReported = False
     , chiefComplaint = ""
     , dischargeRecommendations = ""
@@ -22,8 +22,8 @@ emptyModel hospitilizationsInitData =
     }
 
 
-initData : HospitilizationsInitData
-initData =
+emptySfData : SyncfusionData
+emptySfData =
     { id = Nothing
     , facilities = []
     , hospitilizationServiceTypes = []
@@ -67,4 +67,22 @@ emptyHospitilizationRow =
     , facilityId2 = Nothing
     , dateOfAdmission2 = Nothing
     , dateOfDischarge2 = Nothing
+    }
+
+
+type alias SyncfusionData =
+    { id : Maybe Int
+    , facilities : List DropDownItem
+    , hospitilizationServiceTypes : List DropDownItem
+    , hospitalizationDischargePhysicians : List DropDownItem
+    , facilityId : Maybe Int
+    , admitDiagnosisId : Maybe Int
+    , dischargeDiagnosisId : Maybe Int
+    , facilityId2 : Maybe Int
+    , hospitalServiceTypeId : Maybe Int
+    , dischargePhysicianId : Maybe Int
+    , dateOfAdmission : Maybe String
+    , dateOfDischarge : Maybe String
+    , dateOfAdmission2 : Maybe String
+    , dateOfDischarge2 : Maybe String
     }

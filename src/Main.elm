@@ -158,17 +158,13 @@ setRoute maybeRoute model =
                     ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
             Just Route.HospitilizationsAdd ->
-                let
-                    newModel =
-                        HospitilizationsAddEdit.Types.emptyModel HospitilizationsAddEdit.Types.initData
-                in
-                    case model.addEditDataSource of
-                        Just t ->
-                            { model | page = HospitilizationsAddEdit newModel }
-                                ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing) ]
+                case model.addEditDataSource of
+                    Just t ->
+                        { model | page = HospitilizationsAddEdit HospitilizationsAddEdit.Types.emptyModel }
+                            ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing) ]
 
-                        Nothing ->
-                            model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
+                    Nothing ->
+                        model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
 
             Just (Route.HospitilizationsEdit rowId) ->
                 let
@@ -181,14 +177,11 @@ setRoute maybeRoute model =
 
                             _ ->
                                 Debug.crash "invalid hosptilization edit state"
-
-                    newModel =
-                        HospitilizationsAddEdit.Types.emptyModel HospitilizationsAddEdit.Types.initData
                 in
                     case model.addEditDataSource of
                         Just t ->
                             { model
-                                | page = HospitilizationsAddEdit newModel
+                                | page = HospitilizationsAddEdit HospitilizationsAddEdit.Types.emptyModel
                             }
                                 ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t x) ]
 

@@ -1,4 +1,4 @@
-port module ClinicalSummary exposing (..)
+port module ClinicalSummary exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
 
 import Html exposing (Html, text, div, button, h4, input)
 import Html.Attributes exposing (class, id, style)
