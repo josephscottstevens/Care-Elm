@@ -10,6 +10,7 @@ import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required)
+import Common.Dropdown as Dropdown
 
 
 port clinicalSummaryUpdate : (SyncfusionData -> msg) -> Sub msg
@@ -38,6 +39,7 @@ type alias Model =
     , impairment : String
     , comments : String
     , syncfusionData : SyncfusionData
+    , country : Dropdown.Model
     }
 
 
@@ -67,19 +69,40 @@ type Msg
     | Save
     | SaveCompleted (Result Http.Error String)
     | GenerateCarePlanLetter
+    | CountryMsg Dropdown.Msg
+
+
+countries : List String
+countries =
+    [ "a", "b" ]
 
 
 view : Model -> Int -> Html Msg
 view model _ =
-    div [ class "form-horizontal" ]
-        [ h4 [] [ text "Clinical Summary" ]
-        , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs model)
-        ]
+    let
+        countryText =
+            Dropdown.selectedFrom model.country
+                |> Maybe.withDefault "-- pick a country --"
+    in
+        div [ class "form-horizontal" ]
+            [ h4 [] [ text "Clinical Summary" ]
+            , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs model)
+            , div [ style Dropdown.mainContainer ]
+                [ Html.map CountryMsg <| Dropdown.view countryText model.country countries
+                ]
+            ]
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
+        CountryMsg countryMsg ->
+            let
+                ( newCountry, newSelectedCountry ) =
+                    Dropdown.update countryMsg model.country
+            in
+                { model | country = newCountry } ! []
+
         LoadData (Ok newData) ->
             { model
                 | id = newData.id
@@ -155,14 +178,15 @@ generateSummaryDiv =
 
 formInputs : Model -> List (InputControlType Msg)
 formInputs { summary, carePlan, codeLegalStatus, impairment, comments } =
-    [ HtmlElement <| button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate Care Plan Letter" ]
-    , AreaInput "Clinical Summary" Optional summary UpdateSummary
-    , HtmlElement generateSummaryDiv
-    , AreaInput "Instructions and Care Plan" Optional carePlan UpdateCarePlan
-    , AreaInput "Code/Legal Status" Optional codeLegalStatus UpdateCodeLegalStatus
-    , AreaInput "Impairment" Optional impairment UpdateImpairment
-    , AreaInput "Comments" Optional comments UpdateComments
-    , HtmlElement <| button [ class "btn btn-sm btn-primary", onClick Save ] [ text "Update" ]
+    [ --HtmlElement <| button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate Care Plan Letter" ]
+      --, AreaInput "Clinical Summary" Optional summary UpdateSummary
+      HtmlElement generateSummaryDiv
+
+    -- , AreaInput "Instructions and Care Plan" Optional carePlan UpdateCarePlan
+    -- , AreaInput "Code/Legal Status" Optional codeLegalStatus UpdateCodeLegalStatus
+    -- , AreaInput "Impairment" Optional impairment UpdateImpairment
+    -- , AreaInput "Comments" Optional comments UpdateComments
+    -- , HtmlElement <| button [ class "btn btn-sm btn-primary", onClick Save ] [ text "Update" ]
     ]
 
 
@@ -221,4 +245,5 @@ emptyModel =
     , impairment = ""
     , summary = ""
     , syncfusionData = SyncfusionData monthDropdown yearDropdown 0 0 ""
+    , country = Dropdown.init
     }
