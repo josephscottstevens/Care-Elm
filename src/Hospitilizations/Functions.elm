@@ -1,4 +1,4 @@
-module Hospitilizations.Functions exposing (getHospitilizations, getLoadedState, flipDropDownOpen, deleteHospitilization, filterFields, filteredRecords)
+module Hospitilizations.Functions exposing (getHospitilizations, getLoadedState, deleteHospitilization, filterFields, filteredRecords)
 
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
@@ -53,18 +53,6 @@ getHospitilizations patientId t =
 deleteHospitilization : a -> (Result Http.Error String -> msg) -> Cmd msg
 deleteHospitilization rowId deleteCompleted =
     Http.send deleteCompleted <| Http.getString ("/People/DeleteHospitilization?id=" ++ toString rowId)
-
-
-flipDropDownOpen : List HospitilizationsRow -> Int -> List HospitilizationsRow
-flipDropDownOpen hospitilizations recordId =
-    hospitilizations
-        |> List.map
-            (\t ->
-                if t.id == recordId then
-                    { t | dropDownOpen = not t.dropDownOpen }
-                else
-                    { t | dropDownOpen = False }
-            )
 
 
 getLoadedState : Model -> List HospitilizationsRow -> Model

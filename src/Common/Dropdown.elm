@@ -1,17 +1,10 @@
 module Common.Dropdown exposing (Context, Model, init, selectedFrom, openState, Msg(..), update, view, mainContainer)
 
-{- a Dropdown component that manages its own state
- -}
-
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onWithOptions)
 import Json.Decode as Json
-
-
--- MODEL
-{- main model, opaque to ensure it can only be updated thru Msg and Update
- -}
+import Common.Types exposing (DropDownItem)
 
 
 type Model
@@ -29,20 +22,8 @@ init =
         }
 
 
-
-{- Context type alias
-   (this is stuff not managed by the dropdown, but passed in from parent)
-   kind of like props (including callbacks) in react
-   in our dropdown context is the default text, displayed if no item is selected
--}
-
-
 type alias Context =
     String
-
-
-
--- helpers to enable reading from Model
 
 
 selectedFrom : Model -> Maybe String
@@ -53,10 +34,6 @@ selectedFrom (Model { selectedItem }) =
 openState : Model -> Bool
 openState (Model { isOpen }) =
     isOpen
-
-
-
--- UPDATE
 
 
 type Msg
@@ -83,10 +60,6 @@ update msg (Model model) =
                 }
             , Nothing
             )
-
-
-
--- VIEW
 
 
 view : Context -> Model -> List String -> Html Msg
@@ -142,10 +115,6 @@ viewItem item =
         , class "dropdown-li"
         ]
         [ text item ]
-
-
-
--- helper to cancel click anywhere
 
 
 onClick : msg -> Attribute msg

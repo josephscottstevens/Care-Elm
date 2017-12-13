@@ -115,6 +115,7 @@ decodePastMedicalHistoryRow =
         |> required "Notes" Decode.string
         |> required "ProviderId" (Decode.maybe Decode.int)
         |> required "ProblemId" (Decode.maybe Decode.int)
+        |> hardcoded False
 
 
 
@@ -141,6 +142,7 @@ type alias PastMedicalHistoryRow =
     , notes : String
     , providerId : Maybe Int
     , problemId : Maybe Int
+    , dropdownOpen : Bool
     }
 
 

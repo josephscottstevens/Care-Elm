@@ -171,11 +171,53 @@ getResponseError str =
             Nothing
 
 
+
+-- Dropdown Helpers
+
+
 decodeDropDownItem : Decoder DropDownItem
 decodeDropDownItem =
     decode DropDownItem
         |> required "Id" (maybe Decode.int)
         |> required "Name" Decode.string
+
+
+closeDropdowns : List { b | dropDownOpen : Bool } -> String -> List { b | dropDownOpen : Bool }
+closeDropdowns rows eventTarget =
+    if shouldBlur eventTarget then
+        rows |> List.map (\t -> { t | dropDownOpen = False })
+    else
+        rows
+
+
+flipDropDownOpen : List { b | id : a, dropDownOpen : Bool } -> a -> List { b | dropDownOpen : Bool, id : a }
+flipDropDownOpen rows id =
+    rows
+        |> List.map
+            (\t ->
+                if t.id == id then
+                    { t | dropDownOpen = not t.dropDownOpen }
+                else
+                    { t | dropDownOpen = False }
+            )
+
+
+anyDropDownOpon : List { a | dropDownOpen : Bool } -> Bool
+anyDropDownOpon rows =
+    rows
+        |> List.filter (\t -> t.dropDownOpen == True)
+        |> List.map .dropDownOpen
+        |> List.head
+        |> Maybe.withDefault False
+
+
+shouldBlur : String -> Bool
+shouldBlur eventTarget =
+    String.contains "editDropDown" eventTarget |> not
+
+
+
+-- Http helpers
 
 
 postRequest : Encode.Value -> String -> Http.Request String
@@ -189,6 +231,10 @@ postRequest body url =
         , url = url
         , withCredentials = False
         }
+
+
+
+-- Record helpers
 
 
 getDesc : RecordType -> String

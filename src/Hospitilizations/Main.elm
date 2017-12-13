@@ -1,6 +1,6 @@
 port module Hospitilizations.Main exposing (Msg, subscriptions, init, update, view)
 
-import Hospitilizations.Functions exposing (getHospitilizations, getLoadedState, flipDropDownOpen, deleteHospitilization, filterFields, filteredRecords)
+import Hospitilizations.Functions exposing (getHospitilizations, getLoadedState, deleteHospitilization, filterFields, filteredRecords)
 import Hospitilizations.Types exposing (Model)
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, type_)
@@ -8,20 +8,24 @@ import Html.Events exposing (onClick)
 import Table exposing (defaultCustomizations)
 import Common.Grid exposing (checkColumn, standardTableAttrs, standardThead, rowDropDownDiv)
 import Common.Types exposing (MenuMessage, FilterState, AddEditDataSource, HospitilizationsRow)
-import Common.Functions exposing (setLoadingStatus, displayErrorMessage, getResponseError, displaySuccessMessage, defaultString, defaultDate)
-import Common.Ports exposing (dropDownToggle, sendMenuMessage)
+import Common.Functions as Functions exposing (defaultString, defaultDate)
+import Common.Ports exposing (sendMenuMessage)
 import Common.Route as Route
+import Common.Mouse as Mouse
 import Http
 
 
 port deleteHospitilizationConfirmed : (Int -> msg) -> Sub msg
 
 
-subscriptions : Sub Msg
-subscriptions =
+subscriptions : List HospitilizationsRow -> Sub Msg
+subscriptions rows =
     Sub.batch
         [ deleteHospitilizationConfirmed DeleteHospitilizationConfirmed
-        , dropDownToggle DropDownToggle
+        , if Functions.anyDropDownOpon rows then
+            Mouse.clicks Blur
+          else
+            Sub.none
         ]
 
 
@@ -32,6 +36,7 @@ init patientId =
 
 type Msg
     = Load (Result Http.Error (List HospitilizationsRow))
+    | Blur Mouse.Position
     | SetTableState Table.State
     | SetFilter FilterState
     | DropDownToggle Int
@@ -46,16 +51,16 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model _ =
     case msg of
         Load (Ok t) ->
-            getLoadedState model t ! [ setLoadingStatus False ]
+            getLoadedState model t ! [ Functions.setLoadingStatus False ]
 
         Load (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            model ! [ Functions.displayErrorMessage (toString t) ]
 
         SetTableState newState ->
             { model | tableState = newState } ! []
 
         DropDownToggle recordId ->
-            { model | hospitilizations = flipDropDownOpen model.hospitilizations recordId } ! []
+            { model | hospitilizations = Functions.flipDropDownOpen model.hospitilizations recordId } ! []
 
         SendMenuMessage recordId messageType ->
             model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
@@ -68,15 +73,15 @@ update msg model _ =
                 { model | hospitilizations = updatedRecords } ! [ deleteHospitilization rowId DeleteCompleted ]
 
         DeleteCompleted (Ok responseMsg) ->
-            case getResponseError responseMsg of
+            case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ displayErrorMessage t ]
+                    model ! [ Functions.displayErrorMessage t ]
 
                 Nothing ->
-                    model ! [ displaySuccessMessage "Record deleted successfully!" ]
+                    model ! [ Functions.displaySuccessMessage "Record deleted successfully!" ]
 
         DeleteCompleted (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            model ! [ Functions.displayErrorMessage (toString t) ]
 
         SetFilter filterState ->
             { model | filterFields = filterFields model.filterFields filterState } ! []
@@ -86,6 +91,12 @@ update msg model _ =
 
         HospitilizationsEdit rowId ->
             model ! [ Route.modifyUrl (Route.HospitilizationsEdit rowId) ]
+
+        Blur position ->
+            { model
+                | hospitilizations = Functions.closeDropdowns model.hospitilizations position.target
+            }
+                ! []
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg

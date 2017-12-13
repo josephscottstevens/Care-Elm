@@ -109,8 +109,8 @@ pageSubscriptions page =
         RecordAddNew _ ->
             Sub.map RecordAddNewMsg RecordAddNew.subscriptions
 
-        Hospitilizations _ ->
-            Sub.map HospitilizationsMsg Hospitilizations.subscriptions
+        Hospitilizations t ->
+            Sub.map HospitilizationsMsg (Hospitilizations.subscriptions t.hospitilizations)
 
         HospitilizationsAddEdit _ ->
             Sub.map HospitilizationsAddEditMsg HospitilizationsAddEdit.subscriptions
