@@ -102,6 +102,12 @@ view context (Model model) data =
             else
                 ( "display", "none" )
 
+        activeClass =
+            if model.isOpen then
+                "e-focus e-popactive"
+            else
+                ""
+
         mainAttr =
             case data of
                 [] ->
@@ -113,24 +119,27 @@ view context (Model model) data =
                     , onClick <| SetOpenState <| not model.isOpen
                     ]
     in
-        div
-            [ style dropdownContainer ]
-            [ p
-                mainAttr
-                [ span [ style dropdownText ] [ text mainText ]
-                , span [] [ text "▾" ]
+        div [ style dropdownContainer ]
+            [ span
+                [ onClick <| SetOpenState <| not model.isOpen, class ("e-ddl e-widget " ++ activeClass), style [ ( "width", "152px" ) ] ]
+                [ span [ class "e-in-wrap e-box" ]
+                    [ input [ class "e-input", readonly True ] [ text mainText ]
+                    , span [ class "e-select" ]
+                        [ span [ class "e-icon e-arrow-sans-down" ] []
+                        ]
+                    ]
                 ]
-            , ul
-                [ style <| displayStyle :: dropdownList ]
-                (List.map viewItem data)
+            , div []
+                [ ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (List.map viewItem data)
+                ]
             ]
 
 
 viewItem : String -> Html Msg
 viewItem item =
     li
-        [ style dropdownListItem
-        , onClick <| ItemPicked <| Just item
+        [ onClick <| ItemPicked <| Just item
+        , class "dropdown-li"
         ]
         [ text item ]
 
@@ -169,7 +178,7 @@ dropdownContainer : List ( String, String )
 dropdownContainer =
     [ ( "position", "relative" )
     , ( "margin", "16px" )
-    , ( "width", "216px" )
+    , ( "width", "152px" )
     , ( "display", "inline-block" )
     , ( "fontFamily", "sans-serif" )
     , ( "fontSize", "16px" )
@@ -217,22 +226,14 @@ dropdownText =
 dropdownList : List ( String, String )
 dropdownList =
     [ ( "position", "absolute" )
-    , ( "top", "36px" )
+    , ( "top", "32px" )
     , ( "border-radius", "4px" )
     , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
-    , ( "padding", "4px 8px" )
+    , ( "padding", "0" )
     , ( "margin", "0" )
-    , ( "width", "200px" )
+    , ( "width", "150px" )
     , ( "background-color", "white" )
-    ]
-
-
-
--- styles for list items
-
-
-dropdownListItem : List ( String, String )
-dropdownListItem =
-    [ ( "display", "block" )
-    , ( "padding", "8px 8px" )
+    , ( "max-height", "152px" )
+    , ( "overflow-x", "hidden" )
+    , ( "overflow-y", "scroll" )
     ]

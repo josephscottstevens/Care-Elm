@@ -27,7 +27,8 @@ port generateCarePlanLetter : Maybe Int -> Cmd msg
 
 subscriptions : Sub Msg
 subscriptions =
-    Sub.batch [ clinicalSummaryUpdate UpdateClinicalSummary ]
+    Sub.batch
+        [ clinicalSummaryUpdate UpdateClinicalSummary ]
 
 
 type alias Model =
@@ -74,7 +75,7 @@ type Msg
 
 countries : List String
 countries =
-    [ "a", "b" ]
+    [ "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k" ]
 
 
 view : Model -> Int -> Html Msg
