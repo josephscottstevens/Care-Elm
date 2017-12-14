@@ -14,6 +14,7 @@ type Route
     | Records RecordType
     | RecordAddNew RecordType
     | Hospitilizations
+    | PastMedicalHistory
     | HospitilizationsAdd
     | HospitilizationsEdit Int
     | Error String
@@ -71,6 +72,9 @@ routeToString route =
         RecordAddNew recordType ->
             "#/people/" ++ recordTypeToString recordType ++ "/addedit"
 
+        PastMedicalHistory ->
+            "#/people/_pastmedicalhistory"
+
         Hospitilizations ->
             "#/people/_hospitalizations"
 
@@ -91,6 +95,7 @@ route =
 
         -- Clinical Summary
         , Url.map ClinicalSummary (s "people" </> s "_clinicalsummary")
+        , Url.map PastMedicalHistory (s "people" </> s "_pastmedicalhistory")
         , Url.map Hospitilizations (s "people" </> s "_hospitalizations")
         , Url.map HospitilizationsAdd (s "people" </> s "_hospitalizations" </> s "add")
         , Url.map HospitilizationsEdit (s "people" </> s "_hospitalizations" </> s "edit" </> int)

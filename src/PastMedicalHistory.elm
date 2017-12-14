@@ -65,7 +65,7 @@ type Msg
     | UpdateYear NewRecord String
     | UpdateFacility NewRecord String
     | UpdateProvider NewRecord Dropdown.Msg
-    | Notes NewRecord String
+    | UpdateNotes NewRecord String
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -143,7 +143,7 @@ update msg model patientId =
         UpdateProvider newRecord t ->
             model ! []
 
-        Notes newRecord str ->
+        UpdateNotes newRecord str ->
             { model | state = AddEdit { newRecord | notes = str } } ! []
 
 
@@ -203,7 +203,9 @@ formInputs : NewRecord -> List (InputControlType Msg)
 formInputs newRecord =
     [ AreaInput "Description" Required newRecord.description (UpdateDescription newRecord)
     , TextInput "Year" Required newRecord.year (UpdateYear newRecord)
-    , Dropdown "Hospital Service Type" Required newRecord.providerDropdown (UpdateProvider newRecord)
+    , Dropdown "Provider" Required newRecord.providerDropdown (UpdateProvider newRecord)
+    , TextInput "Facility" Required newRecord.facility (UpdateFacility newRecord)
+    , TextInput "Notes" Required newRecord.notes (UpdateNotes newRecord)
     ]
 
 

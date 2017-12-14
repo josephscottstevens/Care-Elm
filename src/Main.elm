@@ -4,6 +4,7 @@ import Html exposing (Html, text, div)
 import ClinicalSummary
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
+import PastMedicalHistory
 import Hospitilizations.Main as Hospitilizations
 import HospitilizationsAddEdit.Main as HospitilizationsAddEdit
 import Billing.Types
@@ -33,6 +34,7 @@ type Page
     | ClinicalSummary ClinicalSummary.Model
     | Records Records.Types.Model
     | RecordAddNew RecordAddNew.Types.Model
+    | PastMedicalHistory PastMedicalHistory.Model
     | Hospitilizations Hospitilizations.Types.Model
     | HospitilizationsAddEdit HospitilizationsAddEdit.Types.Model
     | Error String
@@ -81,6 +83,9 @@ view model =
         RecordAddNew subModel ->
             Html.map RecordAddNewMsg (RecordAddNew.view subModel)
 
+        PastMedicalHistory subModel ->
+            Html.map PastMedicalHistoryMsg (PastMedicalHistory.view subModel model.addEditDataSource)
+
         Hospitilizations subModel ->
             Html.map HospitilizationsMsg (Hospitilizations.view subModel model.addEditDataSource)
 
@@ -109,6 +114,9 @@ pageSubscriptions page =
         RecordAddNew _ ->
             Sub.map RecordAddNewMsg RecordAddNew.subscriptions
 
+        PastMedicalHistory _ ->
+            Sub.none
+
         Hospitilizations t ->
             Sub.map HospitilizationsMsg (Hospitilizations.subscriptions t.hospitilizations)
 
@@ -130,6 +138,7 @@ type Msg
     | RecordsMsg Records.Msg
     | RecordAddNewMsg RecordAddNew.Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
+    | PastMedicalHistoryMsg PastMedicalHistory.Msg
     | HospitilizationsMsg Hospitilizations.Msg
     | HospitilizationsAddEditMsg HospitilizationsAddEdit.Msg
 
@@ -156,6 +165,10 @@ setRoute maybeRoute model =
             Just Route.Hospitilizations ->
                 { model | page = Hospitilizations Hospitilizations.Types.emptyModel }
                     ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
+
+            Just Route.PastMedicalHistory ->
+                { model | page = PastMedicalHistory PastMedicalHistory.emptyModel }
+                    ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
 
             Just Route.HospitilizationsAdd ->
                 case model.addEditDataSource of
@@ -234,6 +247,9 @@ updatePage page msg model =
 
                     Err t ->
                         { model | page = Error (toString t) } ! []
+
+            ( PastMedicalHistoryMsg subMsg, PastMedicalHistory subModel ) ->
+                toPage PastMedicalHistory PastMedicalHistoryMsg PastMedicalHistory.update subMsg subModel
 
             ( HospitilizationsMsg subMsg, Hospitilizations subModel ) ->
                 toPage Hospitilizations HospitilizationsMsg Hospitilizations.update subMsg subModel
