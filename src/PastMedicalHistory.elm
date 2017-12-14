@@ -203,7 +203,7 @@ formInputs : NewRecord -> List (InputControlType Msg)
 formInputs newRecord =
     [ AreaInput "Description" Required newRecord.description (UpdateDescription newRecord)
     , TextInput "Year" Required newRecord.year (UpdateYear newRecord)
-    , Dropdown "Hospital Service Type" Required newRecord.facilityDropdown newRecord.facilities (UpdateProvider newRecord)
+    , Dropdown "Hospital Service Type" Required newRecord.providerDropdown (UpdateProvider newRecord)
     ]
 
 
@@ -263,9 +263,9 @@ encodeNewRow newRecord patientId =
         , ( "Year", Encode.string <| newRecord.year )
         , ( "Treatment", Encode.string <| newRecord.treatment )
         , ( "Facility", Encode.string <| newRecord.facility )
-        , ( "Provider", Encode.string <| newRecord.facilityDropdown )
+        , ( "Provider", Encode.string <| newRecord.providerDropdown.dropDownItem.name )
         , ( "Notes", Encode.string <| newRecord.notes )
-        , ( "ProviderId", maybeVal Encode.int <| newRecord.provider.id )
+        , ( "ProviderId", maybeVal Encode.int <| newRecord.providerDropdown.dropDownItem.id )
         , ( "ProblemId", maybeVal Encode.int <| newRecord.problemId )
         ]
 
@@ -296,8 +296,7 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , notes = row.notes
             , treatment = row.treatment
             , problemId = row.problemId
-            , facilities = addEditDataSource.facilities
-            , providerDropdown = Dropdown.init --( False, DropdownItem row.providerId row.provider )
+            , providerDropdown = Dropdown.init addEditDataSource.facilities
             }
 
         Nothing ->
@@ -309,8 +308,7 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , notes = ""
             , treatment = ""
             , problemId = Nothing
-            , facilities = addEditDataSource.facilities
-            , providerDropdown = Dropdown.init
+            , providerDropdown = Dropdown.init addEditDataSource.facilities
             }
 
 
@@ -323,7 +321,6 @@ type alias NewRecord =
     , notes : String
     , treatment : String
     , problemId : Maybe Int
-    , facilities : List DropdownItem
     , providerDropdown : Dropdown.Dropdown
     }
 
