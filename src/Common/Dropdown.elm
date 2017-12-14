@@ -1,4 +1,4 @@
-module Common.Dropdown exposing (Model, init, Msg(..), update, view, mainContainer)
+module Common.Dropdown exposing (Dropdown, init, Msg(..), update, view, mainContainer)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -7,16 +7,15 @@ import Json.Decode as Json
 import Common.Types exposing (DropdownItem)
 
 
-type Model
-    = Model
-        { selectedItem : DropdownItem
-        , isOpen : Bool
-        }
+type alias Dropdown =
+    { isOpen : Bool
+    , dropDownItem : DropdownItem
+    }
 
 
-init : ( Bool, DropdownItem )
+init : Dropdown
 init =
-    ( False, DropdownItem Nothing "" )
+    Dropdown False (DropdownItem Nothing "")
 
 
 type Msg
@@ -24,27 +23,27 @@ type Msg
     | SetOpenState Bool
 
 
-update : Msg -> ( Bool, DropdownItem ) -> ( Bool, DropdownItem )
-update msg ( isOpen, dropdownItem ) =
+update : Msg -> Dropdown -> Dropdown
+update msg dropdownItem =
     case msg of
         ItemPicked item ->
-            ( False, item )
+            Dropdown False item
 
         SetOpenState newState ->
-            ( newState, DropdownItem Nothing "" )
+            Dropdown newState (DropdownItem Nothing "")
 
 
-view : ( Bool, DropdownItem ) -> List DropdownItem -> Html Msg
-view ( isOpen, dropdownItem ) data =
+view : Dropdown -> List DropdownItem -> Html Msg
+view dropdown data =
     let
         displayStyle =
-            if isOpen then
+            if dropdown.isOpen then
                 ( "display", "block" )
             else
                 ( "display", "none" )
 
         activeClass =
-            if isOpen then
+            if dropdown.isOpen then
                 "e-focus e-popactive"
             else
                 ""
@@ -57,14 +56,14 @@ view ( isOpen, dropdownItem ) data =
 
                 _ ->
                     [ style dropdownInput
-                    , onClick <| SetOpenState <| not isOpen
+                    , onClick <| SetOpenState <| not dropdown.isOpen
                     ]
     in
         div [ style dropdownContainer ]
             [ span
-                [ onClick <| SetOpenState <| not isOpen, class ("e-ddl e-widget " ++ activeClass), style [ ( "width", "152px" ) ] ]
+                [ onClick <| SetOpenState <| not dropdown.isOpen, class ("e-ddl e-widget " ++ activeClass), style [ ( "width", "152px" ) ] ]
                 [ span [ class "e-in-wrap e-box" ]
-                    [ input [ class "e-input", readonly True, value dropdownItem.name ] []
+                    [ input [ class "e-input", readonly True, value dropdown.dropDownItem.name ] []
                     , span [ class "e-select" ]
                         [ span [ class "e-icon e-arrow-sans-down" ] []
                         ]

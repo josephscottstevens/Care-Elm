@@ -203,8 +203,7 @@ formInputs : NewRecord -> List (InputControlType Msg)
 formInputs newRecord =
     [ AreaInput "Description" Required newRecord.description (UpdateDescription newRecord)
     , TextInput "Year" Required newRecord.year (UpdateYear newRecord)
-
-    -- , Dropdown "Hospital Service Type" Required newRecord.provider (UpdateProvider newRecord)
+    , Dropdown "Hospital Service Type" Required newRecord.facilityDropdown newRecord.facilities (UpdateProvider newRecord)
     ]
 
 
@@ -264,7 +263,7 @@ encodeNewRow newRecord patientId =
         , ( "Year", Encode.string <| newRecord.year )
         , ( "Treatment", Encode.string <| newRecord.treatment )
         , ( "Facility", Encode.string <| newRecord.facility )
-        , ( "Provider", Encode.string <| newRecord.provider.name )
+        , ( "Provider", Encode.string <| newRecord.facilityDropdown )
         , ( "Notes", Encode.string <| newRecord.notes )
         , ( "ProviderId", maybeVal Encode.int <| newRecord.provider.id )
         , ( "ProblemId", maybeVal Encode.int <| newRecord.problemId )
@@ -294,12 +293,11 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , description = row.description
             , year = row.year
             , facility = row.facility
-            , provider = DropdownItem row.providerId row.provider
             , notes = row.notes
             , treatment = row.treatment
             , problemId = row.problemId
             , facilities = addEditDataSource.facilities
-            , facilityDropdown = Dropdown.init
+            , providerDropdown = Dropdown.init --( False, DropdownItem row.providerId row.provider )
             }
 
         Nothing ->
@@ -308,12 +306,11 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , description = ""
             , year = ""
             , facility = ""
-            , provider = DropdownItem Nothing ""
             , notes = ""
             , treatment = ""
             , problemId = Nothing
             , facilities = addEditDataSource.facilities
-            , facilityDropdown = Dropdown.init
+            , providerDropdown = Dropdown.init
             }
 
 
@@ -323,12 +320,11 @@ type alias NewRecord =
     , description : String
     , year : String
     , facility : String
-    , provider : DropdownItem
     , notes : String
     , treatment : String
     , problemId : Maybe Int
     , facilities : List DropdownItem
-    , facilityDropdown : Dropdown.Model
+    , providerDropdown : Dropdown.Dropdown
     }
 
 
