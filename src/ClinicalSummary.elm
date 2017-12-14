@@ -41,7 +41,7 @@ type alias Model =
     , impairment : String
     , comments : String
     , syncfusionData : SyncfusionData
-    , country : ( Dropdown.Model, DropdownItem )
+    , country : ( Bool, DropdownItem )
     }
 
 
