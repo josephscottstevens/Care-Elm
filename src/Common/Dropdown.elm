@@ -10,12 +10,13 @@ import Common.Types exposing (DropdownItem)
 type alias Dropdown =
     { isOpen : Bool
     , dropDownItem : DropdownItem
+    , dropdownSource : List DropdownItem
     }
 
 
-init : Dropdown
-init =
-    Dropdown False (DropdownItem Nothing "")
+init : List DropdownItem -> Dropdown
+init list =
+    Dropdown False (DropdownItem Nothing "") list
 
 
 type Msg
@@ -27,14 +28,14 @@ update : Msg -> Dropdown -> Dropdown
 update msg dropdownItem =
     case msg of
         ItemPicked item ->
-            Dropdown False item
+            Dropdown False item dropdownItem.dropdownSource
 
         SetOpenState newState ->
-            Dropdown newState (DropdownItem Nothing "")
+            Dropdown newState (DropdownItem Nothing "") dropdownItem.dropdownSource
 
 
-view : Dropdown -> List DropdownItem -> Html Msg
-view dropdown data =
+view : Dropdown -> Html Msg
+view dropdown =
     let
         displayStyle =
             if dropdown.isOpen then
@@ -49,7 +50,7 @@ view dropdown data =
                 ""
 
         mainAttr =
-            case data of
+            case dropdown.dropdownSource of
                 [] ->
                     [ style <| dropdownDisabled ++ dropdownInput
                     ]
@@ -70,7 +71,7 @@ view dropdown data =
                     ]
                 ]
             , div []
-                [ ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (List.map viewItem data)
+                [ ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (List.map viewItem dropdown.dropdownSource)
                 ]
             ]
 

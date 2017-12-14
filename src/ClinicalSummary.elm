@@ -80,7 +80,7 @@ view model _ =
         [ h4 [] [ text "Clinical Summary" ]
         , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs model)
         , div [ style Dropdown.mainContainer ]
-            [ Html.map CountryMsg <| Dropdown.view model.country monthDropdown
+            [ Html.map CountryMsg <| Dropdown.view model.country
             ]
         ]
 
@@ -233,5 +233,5 @@ emptyModel =
     , impairment = ""
     , summary = ""
     , syncfusionData = SyncfusionData monthDropdown yearDropdown 0 0 ""
-    , country = Dropdown.init
+    , country = Dropdown.init monthDropdown
     }

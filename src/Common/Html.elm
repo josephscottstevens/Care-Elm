@@ -65,7 +65,7 @@ type InputControlType msg
     | DateInput String RequiredType String String
     | FileInput String RequiredType String
     | HtmlElement (Html msg)
-    | Dropdown String RequiredType Dropdown.Dropdown (List DropdownItem) (Dropdown.Msg -> msg)
+    | Dropdown String RequiredType Dropdown.Dropdown (Dropdown.Msg -> msg)
 
 
 makeControls : Config msg -> List (InputControlType msg) -> Html msg
@@ -143,7 +143,7 @@ makeControls config controls =
                             [ htmlElement ]
                         ]
 
-                Dropdown labelText requiredType displayValue dropdownItems event ->
+                Dropdown labelText requiredType displayValue event ->
                     div [ class "form-group" ] []
 
         -- [ commonLabel labelText requiredType
@@ -236,7 +236,7 @@ commonValidation controlType =
         HtmlElement _ ->
             Nothing
 
-        Dropdown labelText requiredType displayValue _ _ ->
+        Dropdown labelText requiredType displayValue _ ->
             is requiredType <| requiredStr labelText displayValue.dropDownItem.name
 
 
