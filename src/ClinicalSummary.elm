@@ -41,7 +41,7 @@ type alias Model =
     , impairment : String
     , comments : String
     , syncfusionData : SyncfusionData
-    , country : Dropdown.Model
+    , country : ( Dropdown.Model, DropdownItem )
     }
 
 
@@ -76,28 +76,20 @@ type Msg
 
 view : Model -> Int -> Html Msg
 view model _ =
-    let
-        countryText =
-            Dropdown.selectedFrom model.country
-    in
-        div [ class "form-horizontal" ]
-            [ h4 [] [ text "Clinical Summary" ]
-            , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs model)
-            , div [ style Dropdown.mainContainer ]
-                [ Html.map CountryMsg <| Dropdown.view countryText model.country monthDropdown
-                ]
+    div [ class "form-horizontal" ]
+        [ h4 [] [ text "Clinical Summary" ]
+        , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs model)
+        , div [ style Dropdown.mainContainer ]
+            [ Html.map CountryMsg <| Dropdown.view model.country monthDropdown
             ]
+        ]
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
         CountryMsg countryMsg ->
-            let
-                ( newCountry, newSelectedCountry ) =
-                    Dropdown.update countryMsg model.country
-            in
-                { model | country = newCountry } ! []
+            { model | country = Dropdown.update countryMsg model.country } ! []
 
         LoadData (Ok newData) ->
             { model

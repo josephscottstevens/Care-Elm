@@ -1,4 +1,4 @@
-module Common.Dropdown exposing (Model, init, selectedFrom, openState, Msg(..), update, view, mainContainer)
+module Common.Dropdown exposing (Model, init, openState, Msg(..), update, view, mainContainer)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -14,17 +14,14 @@ type Model
         }
 
 
-init : Model
+init : ( Model, DropdownItem )
 init =
-    Model
+    ( Model
         { selectedItem = DropdownItem Nothing ""
         , isOpen = False
         }
-
-
-selectedFrom : Model -> DropdownItem
-selectedFrom (Model { selectedItem }) =
-    selectedItem
+    , DropdownItem Nothing ""
+    )
 
 
 openState : Model -> Bool
@@ -37,8 +34,8 @@ type Msg
     | SetOpenState Bool
 
 
-update : Msg -> Model -> ( Model, DropdownItem )
-update msg (Model model) =
+update : Msg -> ( Model, DropdownItem ) -> ( Model, DropdownItem )
+update msg ( Model model, _ ) =
     case msg of
         ItemPicked item ->
             ( Model
@@ -58,8 +55,8 @@ update msg (Model model) =
             )
 
 
-view : DropdownItem -> Model -> List DropdownItem -> Html Msg
-view dropdownItem (Model model) data =
+view : ( Model, DropdownItem ) -> List DropdownItem -> Html Msg
+view ( Model model, dropdownItem ) data =
     let
         displayStyle =
             if model.isOpen then
