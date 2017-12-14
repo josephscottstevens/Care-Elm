@@ -4,7 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onWithOptions)
 import Json.Decode as Json
-import Common.Types exposing (DropDownItem)
+import Common.Types exposing (DropdownItem)
 
 
 type Model

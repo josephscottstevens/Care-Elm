@@ -1,6 +1,6 @@
 module RecordAddNew.Types exposing (State(Edit, Limbo), Model, RecordAddNewInitData, getAddEditMsg, emptyModel)
 
-import Common.Types exposing (AddEditDataSource, RecordType, DropDownItem)
+import Common.Types exposing (AddEditDataSource, RecordType, DropdownItem)
 import Common.Functions as Functions
 
 
@@ -58,15 +58,15 @@ emptyModel recordType addEditDataSource =
 
 type alias RecordAddNewInitData =
     { facilityId : Maybe Int
-    , facilities : List DropDownItem
-    , recordTypes : List DropDownItem
+    , facilities : List DropdownItem
+    , recordTypes : List DropdownItem
     , categoryId : Maybe Int
     , categoryText : String
-    , users : List DropDownItem
-    , tasks : List DropDownItem
-    , hospitilizationServiceTypes : List DropDownItem
-    , hospitalizationDischargePhysicians : List DropDownItem
-    , hospitilizations : List DropDownItem
+    , users : List DropdownItem
+    , tasks : List DropdownItem
+    , hospitilizationServiceTypes : List DropdownItem
+    , hospitalizationDischargePhysicians : List DropdownItem
+    , hospitilizations : List DropdownItem
     , setFocus : Bool
     , isExistingHospitilization : Bool
 

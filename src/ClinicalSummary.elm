@@ -4,7 +4,7 @@ import Html exposing (Html, text, div, button, h4, input)
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
 import Common.Html exposing (InputControlType(HtmlElement, AreaInput), makeControls)
-import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown, DropDownItem)
+import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown, DropdownItem)
 import Common.Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, postRequest)
 import Http
 import Json.Decode as Decode
@@ -228,8 +228,8 @@ type alias ClinicalSummaryResponseData =
 
 
 type alias SyncfusionData =
-    { months : List DropDownItem
-    , years : List DropDownItem
+    { months : List DropdownItem
+    , years : List DropdownItem
     , currentMonth : Int
     , currentYear : Int
     , summaryText : String

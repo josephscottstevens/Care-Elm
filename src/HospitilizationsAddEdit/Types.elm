@@ -1,6 +1,6 @@
 module HospitilizationsAddEdit.Types exposing (Model, SyncfusionData, emptyHospitilizationRow, emptyModel)
 
-import Common.Types exposing (HospitilizationsRow, DropDownItem)
+import Common.Types exposing (HospitilizationsRow, DropdownItem)
 
 
 type alias Model =
@@ -52,7 +52,7 @@ emptyHospitilizationRow =
     , serviceType = Nothing
     , fromTcm = False
     , recordId = Nothing
-    , dropDownOpen = False
+    , dropdownOpen = False
 
     -- for edit
     , patientId = 0
@@ -72,9 +72,9 @@ emptyHospitilizationRow =
 
 type alias SyncfusionData =
     { id : Maybe Int
-    , facilities : List DropDownItem
-    , hospitilizationServiceTypes : List DropDownItem
-    , hospitalizationDischargePhysicians : List DropDownItem
+    , facilities : List DropdownItem
+    , hospitilizationServiceTypes : List DropdownItem
+    , hospitalizationDischargePhysicians : List DropdownItem
     , facilityId : Maybe Int
     , admitDiagnosisId : Maybe Int
     , dischargeDiagnosisId : Maybe Int

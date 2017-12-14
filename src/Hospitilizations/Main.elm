@@ -12,6 +12,14 @@ import Common.Functions as Functions exposing (defaultString, defaultDate)
 import Common.Ports exposing (sendMenuMessage)
 import Common.Route as Route
 import Common.Mouse as Mouse
+import Common.Html
+    exposing
+        ( InputControlType(CheckInput, DropInputWithButton, AreaInput, TextInput, DateInput, KnockInput, DropInput)
+        , getValidationErrors
+        , defaultConfig
+        , fullWidth
+        , makeControls
+        )
 import Http
 
 
@@ -22,7 +30,7 @@ subscriptions : List HospitilizationsRow -> Sub Msg
 subscriptions rows =
     Sub.batch
         [ deleteHospitilizationConfirmed DeleteHospitilizationConfirmed
-        , if Functions.anyDropDownOpon rows then
+        , if Functions.anyDropdownOpon rows then
             Mouse.clicks Blur
           else
             Sub.none
@@ -60,7 +68,7 @@ update msg model _ =
             { model | tableState = newState } ! []
 
         DropDownToggle recordId ->
-            { model | hospitilizations = Functions.flipDropDownOpen model.hospitilizations recordId } ! []
+            { model | hospitilizations = Functions.flipDropdownOpen model.hospitilizations recordId } ! []
 
         SendMenuMessage recordId messageType ->
             model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
@@ -153,7 +161,7 @@ rowDropDownColumn : Table.Column HospitilizationsRow Msg
 rowDropDownColumn =
     Table.veryCustomColumn
         { name = ""
-        , viewData = \t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropDownItems t.id)
+        , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle t.id)) (dropDownItems t.id)
         , sorter = Table.unsortable
         }
 

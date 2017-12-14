@@ -259,13 +259,13 @@ getDropDowns patientId t =
     decode AddEditDataSource
         |> required "facilityId" (maybe int)
         |> required "patientId" int
-        |> required "facilityDropdown" (list Functions.decodeDropDownItem)
-        |> required "recordTypeDropdown" (list Functions.decodeDropDownItem)
-        |> required "userDropDown" (list Functions.decodeDropDownItem)
-        |> required "taskDropDown" (list Functions.decodeDropDownItem)
-        |> required "hospitilizationServiceTypeDropdown" (list Functions.decodeDropDownItem)
-        |> required "hospitalizationDischargePhysicianDropdown" (list Functions.decodeDropDownItem)
-        |> required "hospitilizations" (list Functions.decodeDropDownItem)
+        |> required "facilityDropdown" (list Functions.decodeDropdownItem)
+        |> required "recordTypeDropdown" (list Functions.decodeDropdownItem)
+        |> required "userDropDown" (list Functions.decodeDropdownItem)
+        |> required "taskDropDown" (list Functions.decodeDropdownItem)
+        |> required "hospitilizationServiceTypeDropdown" (list Functions.decodeDropdownItem)
+        |> required "hospitalizationDischargePhysicianDropdown" (list Functions.decodeDropdownItem)
+        |> required "hospitilizations" (list Functions.decodeDropdownItem)
         |> Http.get ("/People/PatientRecordsDropdowns?patientId=" ++ toString patientId)
         |> Http.send t
 

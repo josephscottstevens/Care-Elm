@@ -52,6 +52,9 @@ un-used taskId in records main getColumns
 Go through all bugs in google sheet, make sure they are applied in master branch
 
 LOW TODO:
+consolidate SaveCompleted (ok and error, I mean... totally doable right?)
+consolidate HandleSuccessResponse \ ErroResponse with json parse
+consolidate delete Row port \ subscription
 remove dropDownToggle port
 scroll to top when displaying validation errors
 AddNewHospitilization Server side isn't returning an error message if it fails

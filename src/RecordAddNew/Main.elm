@@ -6,7 +6,7 @@ import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Common.Html exposing (getValidationErrors, defaultConfig, makeControls, fullWidth, InputControlType(..))
-import Common.Types exposing (RecordType(..), DropDownItem, RequiredType(..), AddEditDataSource)
+import Common.Types exposing (RecordType(..), DropdownItem, RequiredType(..), AddEditDataSource)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, defaultString)
 import Common.Ports exposing (setUnsavedChanges)
 import Common.Route as Route
@@ -25,7 +25,7 @@ port initRecordAddNew : RecordAddNewInitData -> Cmd msg
 port updateRecordAddNew : (RecordAddNewInitData -> msg) -> Sub msg
 
 
-port updateCategory : (DropDownItem -> msg) -> Sub msg
+port updateCategory : (DropdownItem -> msg) -> Sub msg
 
 
 port addNewFacility : Maybe String -> Cmd msg
@@ -57,7 +57,7 @@ type Msg
     | PresetPageComplete (Maybe Int)
     | UpdateRecordAddNew RecordAddNewInitData
     | UpdateTitle String
-    | UpdateRecordType DropDownItem
+    | UpdateRecordType DropdownItem
     | UpdateSpecialty String
     | UpdateProvider String
     | UpdateComments String
@@ -114,17 +114,17 @@ update msg model patientId =
             UpdateRecordAddNew recordAddNew ->
                 { model | recordAddNewInitData = recordAddNew } ! []
 
-            UpdateRecordType dropDownItem ->
-                if model.recordAddNewInitData.categoryId == dropDownItem.id then
+            UpdateRecordType dropdownItem ->
+                if model.recordAddNewInitData.categoryId == dropdownItem.id then
                     model ! []
                 else
-                    case Functions.getRecordTypeById dropDownItem.id of
+                    case Functions.getRecordTypeById dropdownItem.id of
                         Just t ->
                             { model | recordType = t, state = Limbo }
-                                ! [ presetPage dropDownItem.id ]
+                                ! [ presetPage dropdownItem.id ]
 
                         Nothing ->
-                            model ! [ displayErrorMessage ("Cannot load invalid record type: " ++ toString dropDownItem.id) ]
+                            model ! [ displayErrorMessage ("Cannot load invalid record type: " ++ toString dropdownItem.id) ]
 
             UpdateTitle str ->
                 updateAddNew { model | title = str }

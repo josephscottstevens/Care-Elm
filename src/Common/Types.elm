@@ -12,7 +12,7 @@ type RequiredType
     | Optional
 
 
-type alias DropDownItem =
+type alias DropdownItem =
     { id : Maybe Int
     , name : String
     }
@@ -42,13 +42,13 @@ type RecordType
 type alias AddEditDataSource =
     { facilityId : Maybe Int
     , patientId : Int
-    , facilities : List DropDownItem
-    , recordTypes : List DropDownItem
-    , users : List DropDownItem
-    , tasks : List DropDownItem
-    , hospitilizationServiceTypes : List DropDownItem
-    , hospitalizationDischargePhysicians : List DropDownItem
-    , hospitilizations : List DropDownItem
+    , facilities : List DropdownItem
+    , recordTypes : List DropdownItem
+    , users : List DropdownItem
+    , tasks : List DropdownItem
+    , hospitilizationServiceTypes : List DropdownItem
+    , hospitalizationDischargePhysicians : List DropdownItem
+    , hospitilizations : List DropdownItem
     }
 
 
@@ -62,7 +62,7 @@ type alias HospitilizationsRow =
     , serviceType : Maybe String
     , fromTcm : Bool
     , recordId : Maybe Int
-    , dropDownOpen : Bool
+    , dropdownOpen : Bool
 
     -- for edit
     , patientId : Int
@@ -80,40 +80,40 @@ type alias HospitilizationsRow =
     }
 
 
-monthDropdown : List DropDownItem
+monthDropdown : List DropdownItem
 monthDropdown =
-    [ DropDownItem Nothing ""
-    , DropDownItem (Just 0) "January"
-    , DropDownItem (Just 1) "February"
-    , DropDownItem (Just 2) "March"
-    , DropDownItem (Just 3) "April"
-    , DropDownItem (Just 4) "May"
-    , DropDownItem (Just 5) "June"
-    , DropDownItem (Just 6) "July"
-    , DropDownItem (Just 7) "August"
-    , DropDownItem (Just 8) "May"
-    , DropDownItem (Just 9) "October"
-    , DropDownItem (Just 10) "November"
-    , DropDownItem (Just 11) "December"
+    [ DropdownItem Nothing ""
+    , DropdownItem (Just 0) "January"
+    , DropdownItem (Just 1) "February"
+    , DropdownItem (Just 2) "March"
+    , DropdownItem (Just 3) "April"
+    , DropdownItem (Just 4) "May"
+    , DropdownItem (Just 5) "June"
+    , DropdownItem (Just 6) "July"
+    , DropdownItem (Just 7) "August"
+    , DropdownItem (Just 8) "May"
+    , DropdownItem (Just 9) "October"
+    , DropdownItem (Just 10) "November"
+    , DropdownItem (Just 11) "December"
     ]
 
 
-yearDropdown : List DropDownItem
+yearDropdown : List DropdownItem
 yearDropdown =
-    [ DropDownItem Nothing ""
-    , DropDownItem (Just 2011) "2011"
-    , DropDownItem (Just 2012) "2012"
-    , DropDownItem (Just 2013) "2013"
-    , DropDownItem (Just 2014) "2014"
-    , DropDownItem (Just 2015) "2015"
-    , DropDownItem (Just 2016) "2016"
-    , DropDownItem (Just 2017) "2017"
-    , DropDownItem (Just 2018) "2018"
-    , DropDownItem (Just 2019) "2019"
-    , DropDownItem (Just 2020) "2020"
-    , DropDownItem (Just 2021) "2021"
-    , DropDownItem (Just 2022) "2022"
-    , DropDownItem (Just 2023) "2023"
-    , DropDownItem (Just 2024) "2024"
-    , DropDownItem (Just 2025) "2025"
+    [ DropdownItem Nothing ""
+    , DropdownItem (Just 2011) "2011"
+    , DropdownItem (Just 2012) "2012"
+    , DropdownItem (Just 2013) "2013"
+    , DropdownItem (Just 2014) "2014"
+    , DropdownItem (Just 2015) "2015"
+    , DropdownItem (Just 2016) "2016"
+    , DropdownItem (Just 2017) "2017"
+    , DropdownItem (Just 2018) "2018"
+    , DropdownItem (Just 2019) "2019"
+    , DropdownItem (Just 2020) "2020"
+    , DropdownItem (Just 2021) "2021"
+    , DropdownItem (Just 2022) "2022"
+    , DropdownItem (Just 2023) "2023"
+    , DropdownItem (Just 2024) "2024"
+    , DropdownItem (Just 2025) "2025"
     ]

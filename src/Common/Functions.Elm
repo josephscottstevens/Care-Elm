@@ -8,7 +8,7 @@ import Json.Decode as Decode exposing (Decoder, maybe, string, int, field, decod
 import Http
 import Json.Decode.Pipeline exposing (required, decode)
 import Http
-import Common.Types exposing (DropDownItem, AddEditDataSource, RecordType(..))
+import Common.Types exposing (DropdownItem, AddEditDataSource, RecordType(..))
 import Common.Route as Route exposing (Route)
 
 
@@ -175,38 +175,38 @@ getResponseError str =
 -- Dropdown Helpers
 
 
-decodeDropDownItem : Decoder DropDownItem
-decodeDropDownItem =
-    decode DropDownItem
+decodeDropdownItem : Decoder DropdownItem
+decodeDropdownItem =
+    decode DropdownItem
         |> required "Id" (maybe Decode.int)
         |> required "Name" Decode.string
 
 
-closeDropdowns : List { b | dropDownOpen : Bool } -> String -> List { b | dropDownOpen : Bool }
+closeDropdowns : List { b | dropdownOpen : Bool } -> String -> List { b | dropdownOpen : Bool }
 closeDropdowns rows eventTarget =
     if shouldBlur eventTarget then
-        rows |> List.map (\t -> { t | dropDownOpen = False })
+        rows |> List.map (\t -> { t | dropdownOpen = False })
     else
         rows
 
 
-flipDropDownOpen : List { b | id : a, dropDownOpen : Bool } -> a -> List { b | dropDownOpen : Bool, id : a }
-flipDropDownOpen rows id =
+flipDropdownOpen : List { b | id : a, dropdownOpen : Bool } -> a -> List { b | dropdownOpen : Bool, id : a }
+flipDropdownOpen rows id =
     rows
         |> List.map
             (\t ->
                 if t.id == id then
-                    { t | dropDownOpen = not t.dropDownOpen }
+                    { t | dropdownOpen = not t.dropdownOpen }
                 else
-                    { t | dropDownOpen = False }
+                    { t | dropdownOpen = False }
             )
 
 
-anyDropDownOpon : List { a | dropDownOpen : Bool } -> Bool
-anyDropDownOpon rows =
+anyDropdownOpon : List { a | dropdownOpen : Bool } -> Bool
+anyDropdownOpon rows =
     rows
-        |> List.filter (\t -> t.dropDownOpen == True)
-        |> List.map .dropDownOpen
+        |> List.filter (\t -> t.dropdownOpen == True)
+        |> List.map .dropdownOpen
         |> List.head
         |> Maybe.withDefault False
 

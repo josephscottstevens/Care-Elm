@@ -64,6 +64,7 @@ type InputControlType msg
     | DateInput String RequiredType String String
     | FileInput String RequiredType String
     | HtmlElement (Html msg)
+    | Dropdown String RequiredType DropdownItem (DropdownItem -> msg)
 
 
 makeControls : Config msg -> List (InputControlType msg) -> Html msg
@@ -140,6 +141,9 @@ makeControls config controls =
                         , div config.controlAttributes
                             [ htmlElement ]
                         ]
+
+                Dropdown labelText requiredType displayValue _ ->
+                    div [] []
     in
         div [] (controls |> List.map common)
 
@@ -221,6 +225,9 @@ commonValidation controlType =
                         Just (labelText ++ " is required")
 
         HtmlElement _ ->
+            Nothing
+
+        Dropdown _ _ _ _ ->
             Nothing
 
 
