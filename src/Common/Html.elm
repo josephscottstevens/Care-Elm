@@ -5,6 +5,7 @@ import Html.Attributes exposing (class, type_, id, value, for, name, readonly, s
 import Html.Events exposing (onInput, onCheck)
 import Common.Functions exposing (..)
 import Common.Types exposing (..)
+import Common.Dropdown as Dropdown
 
 
 forId : String -> Html.Attribute msg
@@ -64,7 +65,7 @@ type InputControlType msg
     | DateInput String RequiredType String String
     | FileInput String RequiredType String
     | HtmlElement (Html msg)
-    | Dropdown String RequiredType DropdownItem (DropdownItem -> msg)
+    | Dropdown String RequiredType DropdownItem Dropdown.Model (List DropdownItem) (Dropdown.Msg -> msg)
 
 
 makeControls : Config msg -> List (InputControlType msg) -> Html msg
@@ -142,8 +143,15 @@ makeControls config controls =
                             [ htmlElement ]
                         ]
 
-                Dropdown labelText requiredType displayValue _ ->
-                    div [] []
+                Dropdown labelText requiredType displayValue model dropdownItems event ->
+                    div [ class "form-group" ]
+                        [ commonLabel labelText requiredType
+                        , div config.controlAttributes
+                            [ div [ style Dropdown.mainContainer ]
+                                [ Html.map event <| Dropdown.view (Dropdown.selectedFrom model) model dropdownItems
+                                ]
+                            ]
+                        ]
     in
         div [] (controls |> List.map common)
 
@@ -227,8 +235,8 @@ commonValidation controlType =
         HtmlElement _ ->
             Nothing
 
-        Dropdown _ _ _ _ ->
-            Nothing
+        Dropdown labelText requiredType displayValue _ _ _ ->
+            is requiredType <| requiredStr labelText displayValue.name
 
 
 requiredStr : String -> String -> Maybe String

@@ -1,4 +1,4 @@
-module Common.Dropdown exposing (Context, Model, init, selectedFrom, openState, Msg(..), update, view, mainContainer)
+module Common.Dropdown exposing (Model, init, selectedFrom, openState, Msg(..), update, view, mainContainer)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -9,7 +9,7 @@ import Common.Types exposing (DropdownItem)
 
 type Model
     = Model
-        { selectedItem : Maybe String
+        { selectedItem : DropdownItem
         , isOpen : Bool
         }
 
@@ -17,16 +17,12 @@ type Model
 init : Model
 init =
     Model
-        { selectedItem = Nothing
+        { selectedItem = DropdownItem Nothing ""
         , isOpen = False
         }
 
 
-type alias Context =
-    String
-
-
-selectedFrom : Model -> Maybe String
+selectedFrom : Model -> DropdownItem
 selectedFrom (Model { selectedItem }) =
     selectedItem
 
@@ -37,11 +33,11 @@ openState (Model { isOpen }) =
 
 
 type Msg
-    = ItemPicked (Maybe String)
+    = ItemPicked DropdownItem
     | SetOpenState Bool
 
 
-update : Msg -> Model -> ( Model, Maybe String )
+update : Msg -> Model -> ( Model, DropdownItem )
 update msg (Model model) =
     case msg of
         ItemPicked item ->
@@ -58,17 +54,13 @@ update msg (Model model) =
                 { model
                     | isOpen = newState
                 }
-            , Nothing
+            , DropdownItem Nothing ""
             )
 
 
-view : Context -> Model -> List String -> Html Msg
-view context (Model model) data =
+view : DropdownItem -> Model -> List DropdownItem -> Html Msg
+view dropdownItem (Model model) data =
     let
-        mainText =
-            model.selectedItem
-                |> Maybe.withDefault context
-
         displayStyle =
             if model.isOpen then
                 ( "display", "block" )
@@ -96,7 +88,7 @@ view context (Model model) data =
             [ span
                 [ onClick <| SetOpenState <| not model.isOpen, class ("e-ddl e-widget " ++ activeClass), style [ ( "width", "152px" ) ] ]
                 [ span [ class "e-in-wrap e-box" ]
-                    [ input [ class "e-input", readonly True ] [ text mainText ]
+                    [ input [ class "e-input", readonly True, value dropdownItem.name ] []
                     , span [ class "e-select" ]
                         [ span [ class "e-icon e-arrow-sans-down" ] []
                         ]
@@ -108,22 +100,16 @@ view context (Model model) data =
             ]
 
 
-viewItem : String -> Html Msg
+viewItem : DropdownItem -> Html Msg
 viewItem item =
-    li
-        [ onClick <| ItemPicked <| Just item
-        , class "dropdown-li"
-        ]
-        [ text item ]
+    li [ onClick (ItemPicked item), class "dropdown-li" ]
+        [ text item.name ]
 
 
 onClick : msg -> Attribute msg
 onClick message =
-    onWithOptions
-        "click"
-        { stopPropagation = True
-        , preventDefault = False
-        }
+    onWithOptions "click"
+        { stopPropagation = True, preventDefault = False }
         (Json.succeed message)
 
 

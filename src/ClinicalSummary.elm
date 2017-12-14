@@ -6,6 +6,7 @@ import Html.Events exposing (onClick)
 import Common.Html exposing (InputControlType(HtmlElement, AreaInput), makeControls)
 import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown, DropdownItem)
 import Common.Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, postRequest)
+import Common.Types exposing (monthDropdown)
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
@@ -73,23 +74,17 @@ type Msg
     | CountryMsg Dropdown.Msg
 
 
-countries : List String
-countries =
-    [ "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k" ]
-
-
 view : Model -> Int -> Html Msg
 view model _ =
     let
         countryText =
             Dropdown.selectedFrom model.country
-                |> Maybe.withDefault "-- pick a country --"
     in
         div [ class "form-horizontal" ]
             [ h4 [] [ text "Clinical Summary" ]
             , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs model)
             , div [ style Dropdown.mainContainer ]
-                [ Html.map CountryMsg <| Dropdown.view countryText model.country countries
+                [ Html.map CountryMsg <| Dropdown.view countryText model.country monthDropdown
                 ]
             ]
 

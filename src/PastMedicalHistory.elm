@@ -8,6 +8,7 @@ import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSourc
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
 import Common.Grid exposing (checkColumn, standardTableAttrs, standardThead, rowDropDownDiv)
 import Common.Ports exposing (sendMenuMessage)
+import Common.Dropdown as Dropdown
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
@@ -63,7 +64,7 @@ type Msg
     | UpdateDescription NewRecord String
     | UpdateYear NewRecord String
     | UpdateFacility NewRecord String
-    | UpdateProvider NewRecord DropdownItem
+    | UpdateProvider NewRecord Dropdown.Msg
     | Notes NewRecord String
 
 
@@ -202,7 +203,8 @@ formInputs : NewRecord -> List (InputControlType Msg)
 formInputs newRecord =
     [ AreaInput "Description" Required newRecord.description (UpdateDescription newRecord)
     , TextInput "Year" Required newRecord.year (UpdateYear newRecord)
-    , Dropdown "Hospital Service Type" Required newRecord.provider (UpdateProvider newRecord)
+
+    -- , Dropdown "Hospital Service Type" Required newRecord.provider (UpdateProvider newRecord)
     ]
 
 
@@ -297,6 +299,7 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , treatment = row.treatment
             , problemId = row.problemId
             , facilities = addEditDataSource.facilities
+            , facilityDropdown = Dropdown.init
             }
 
         Nothing ->
@@ -310,6 +313,7 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , treatment = ""
             , problemId = Nothing
             , facilities = addEditDataSource.facilities
+            , facilityDropdown = Dropdown.init
             }
 
 
@@ -324,6 +328,7 @@ type alias NewRecord =
     , treatment : String
     , problemId : Maybe Int
     , facilities : List DropdownItem
+    , facilityDropdown : Dropdown.Model
     }
 
 
