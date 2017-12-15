@@ -299,19 +299,19 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , notes = row.notes
             , treatment = row.treatment
             , problemId = row.problemId
-            , providerDropdown = Dropdown.init addEditDataSource.facilities
+            , providerDropdown = Dropdown.init addEditDataSource.providers
             }
 
         Nothing ->
             { showValidationErrors = False
-            , id = 0
+            , id = -1
             , description = ""
             , year = ""
             , facility = ""
             , notes = ""
             , treatment = ""
             , problemId = Nothing
-            , providerDropdown = Dropdown.init addEditDataSource.facilities
+            , providerDropdown = Dropdown.init addEditDataSource.providers
             }
 
 

@@ -115,7 +115,7 @@ pageSubscriptions page =
             Sub.map RecordAddNewMsg RecordAddNew.subscriptions
 
         PastMedicalHistory _ ->
-            Sub.none
+            Sub.map PastMedicalHistoryMsg PastMedicalHistory.subscriptions
 
         Hospitilizations t ->
             Sub.map HospitilizationsMsg (Hospitilizations.subscriptions t.hospitilizations)
@@ -276,6 +276,7 @@ getDropDowns patientId t =
         |> required "facilityId" (maybe int)
         |> required "patientId" int
         |> required "facilityDropdown" (list Functions.decodeDropdownItem)
+        |> required "providersDropdown" (list Functions.decodeDropdownItem)
         |> required "recordTypeDropdown" (list Functions.decodeDropdownItem)
         |> required "userDropDown" (list Functions.decodeDropdownItem)
         |> required "taskDropDown" (list Functions.decodeDropdownItem)

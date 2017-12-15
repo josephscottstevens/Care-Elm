@@ -43,6 +43,7 @@ type alias AddEditDataSource =
     { facilityId : Maybe Int
     , patientId : Int
     , facilities : List DropdownItem
+    , providers : List DropdownItem
     , recordTypes : List DropdownItem
     , users : List DropdownItem
     , tasks : List DropdownItem
