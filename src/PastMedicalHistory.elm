@@ -346,4 +346,4 @@ emptyModel =
 
 deletePastMedicalHistoryRequest : Int -> Cmd Msg
 deletePastMedicalHistoryRequest rowId =
-    Http.send DeleteCompleted <| Http.getString ("/People/DeleteHospitilization?id=" ++ toString rowId)
+    Http.send DeleteCompleted <| Http.getString ("/People/DeletePastMedicalHistory?id=" ++ toString rowId)
