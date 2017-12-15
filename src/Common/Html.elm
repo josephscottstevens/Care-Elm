@@ -64,7 +64,7 @@ type InputControlType msg
     | DropInputWithButton String RequiredType (Maybe Int) String String
     | DateInput String RequiredType String String
     | FileInput String RequiredType String
-    | HtmlElement (Html msg)
+    | HtmlElement String (Html msg)
     | Dropdown String RequiredType Dropdown.Dropdown (Dropdown.Msg -> msg)
 
 
@@ -136,9 +136,9 @@ makeControls config controls =
                         , div [ class labelWidth ] [ div [ id "fileBtn" ] [] ]
                         ]
 
-                HtmlElement htmlElement ->
+                HtmlElement labelText htmlElement ->
                     div [ class "form-group" ]
-                        [ commonLabel "" Optional
+                        [ commonLabel labelText Optional
                         , div config.controlAttributes
                             [ htmlElement ]
                         ]
@@ -229,7 +229,7 @@ commonValidation controlType =
                     Nothing ->
                         Just (labelText ++ " is required")
 
-        HtmlElement _ ->
+        HtmlElement _ _ ->
             Nothing
 
         Dropdown labelText requiredType displayValue _ ->

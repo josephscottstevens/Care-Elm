@@ -1,9 +1,9 @@
 port module PastMedicalHistory exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
 
 import Html exposing (Html, text, div, button, h4, input)
-import Html.Attributes exposing (class, id, style, type_)
+import Html.Attributes exposing (class, id, style, type_, disabled, value)
 import Html.Events exposing (onClick)
-import Common.Html exposing (InputControlType(TextInput, AreaInput, Dropdown), makeControls, defaultConfig, getValidationErrors, fullWidth)
+import Common.Html exposing (InputControlType(TextInput, AreaInput, Dropdown, HtmlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
 import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage, DropdownItem)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
 import Common.Grid exposing (checkColumn, standardTableAttrs, standardThead, rowDropDownDiv)
@@ -91,10 +91,10 @@ update msg model patientId =
                   ]
 
         SaveCompleted (Ok _) ->
-            model ! [ displaySuccessMessage "Clinical Summary Saved Successfully!" ]
+            { model | state = Grid } ! [ displaySuccessMessage "Clinical Summary Saved Successfully!", init patientId ]
 
         SaveCompleted (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            { model | state = Grid } ! [ displayErrorMessage (toString t) ]
 
         Add addEditDataSource ->
             { model | state = AddEdit (newRecord addEditDataSource Nothing) } ! []
@@ -214,6 +214,8 @@ formInputs newRecord =
     , Dropdown "Provider" Required newRecord.providerDropdown (UpdateProvider newRecord)
     , TextInput "Facility" Required newRecord.facility (UpdateFacility newRecord)
     , TextInput "Notes" Required newRecord.notes (UpdateNotes newRecord)
+    , HtmlElement "Treatment" (input [ type_ "textbox", class "e-textbox", disabled True, value newRecord.treatment ] [])
+    , HtmlElement "" (div [ style [ ( "color", "#969696" ), ( "font-size", "12px" ) ] ] [ text "*Treatment is deprecated." ])
     ]
 
 

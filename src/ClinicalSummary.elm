@@ -166,7 +166,7 @@ formInputs : Model -> List (InputControlType Msg)
 formInputs { summary, carePlan, codeLegalStatus, impairment, comments } =
     [ --HtmlElement <| button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate Care Plan Letter" ]
       --, AreaInput "Clinical Summary" Optional summary UpdateSummary
-      HtmlElement generateSummaryDiv
+      HtmlElement "" generateSummaryDiv
 
     -- , AreaInput "Instructions and Care Plan" Optional carePlan UpdateCarePlan
     -- , AreaInput "Code/Legal Status" Optional codeLegalStatus UpdateCodeLegalStatus

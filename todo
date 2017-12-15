@@ -13,7 +13,9 @@ QUESTIONS:
 
 TODO:
 Testing branch... if they get a copy of ports with no ports... bam crash until hard-refresh
-not showing treatment column
+un-bork Clinical Summary
+re-implement bug fixes reported
+set widths to custom instead of bootstrap ( see test4 bug)
 delete is firing too soon, should show up after success
 wrong save message sent
 not actually saving
