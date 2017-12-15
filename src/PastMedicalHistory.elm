@@ -82,7 +82,7 @@ update msg model patientId =
 
         Save row ->
             model
-                ! [ "People/UpdateClinicalSummary"
+                ! [ "People/AddUpdatePastMedicalHistories"
                         |> Functions.postRequest (encodeNewRow row patientId)
                         |> Http.send SaveCompleted
                   ]
@@ -140,8 +140,8 @@ update msg model patientId =
         UpdateFacility newRecord str ->
             { model | state = AddEdit { newRecord | facility = str } } ! []
 
-        UpdateProvider newRecord t ->
-            model ! []
+        UpdateProvider newRecord dropdownMsg ->
+            { model | state = AddEdit { newRecord | providerDropdown = Dropdown.update dropdownMsg newRecord.providerDropdown } } ! []
 
         UpdateNotes newRecord str ->
             { model | state = AddEdit { newRecord | notes = str } } ! []
@@ -191,7 +191,7 @@ view model addEditDataSource =
 getColumns : Maybe AddEditDataSource -> List (Table.Column PastMedicalHistoryRow Msg)
 getColumns addEditDataSource =
     [ Table.stringColumn "Description" (\t -> t.description)
-    , Table.stringColumn "Year" (\t -> toString t.year)
+    , Table.stringColumn "Year" (\t -> t.year)
     , Table.stringColumn "Facility" (\t -> t.facility)
     , Table.stringColumn "Provider" (\t -> t.provider)
     , Table.stringColumn "Notes" (\t -> t.notes)
@@ -265,7 +265,8 @@ encodeNewRow newRecord patientId =
         , ( "Year", Encode.string <| newRecord.year )
         , ( "Treatment", Encode.string <| newRecord.treatment )
         , ( "Facility", Encode.string <| newRecord.facility )
-        , ( "Provider", Encode.string <| newRecord.providerDropdown.dropDownItem.name )
+
+        -- , ( "Provider", Encode.string <| newRecord.providerDropdown.dropDownItem.name )
         , ( "Notes", Encode.string <| newRecord.notes )
         , ( "ProviderId", maybeVal Encode.int <| newRecord.providerDropdown.dropDownItem.id )
         , ( "ProblemId", maybeVal Encode.int <| newRecord.problemId )

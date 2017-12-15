@@ -144,15 +144,14 @@ makeControls config controls =
                         ]
 
                 Dropdown labelText requiredType displayValue event ->
-                    div [ class "form-group" ] []
-
-        -- [ commonLabel labelText requiredType
-        -- , div config.controlAttributes
-        --     [ div [ style Dropdown.mainContainer ]
-        --         [ Html.map event <| Dropdown.view (Dropdown.selectedFrom model) model dropdownItems
-        --         ]
-        --     ]
-        -- ]
+                    div [ class "form-group" ]
+                        [ commonLabel labelText requiredType
+                        , div config.controlAttributes
+                            [ div [ style Dropdown.mainContainer ]
+                                [ Html.map event <| Dropdown.view displayValue
+                                ]
+                            ]
+                        ]
     in
         div [] (controls |> List.map common)
 
