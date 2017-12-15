@@ -25,7 +25,10 @@ port deletePastMedicalHistoryConfirmed : (Int -> msg) -> Sub msg
 
 subscriptions : Sub Msg
 subscriptions =
-    deletePastMedicalHistoryConfirmed DeletePastMedicalHistoryConfirmed
+    Sub.batch
+        [ deletePastMedicalHistoryConfirmed DeletePastMedicalHistoryConfirmed
+        , Mouse.clicks Blur
+        ]
 
 
 type State
@@ -104,7 +107,12 @@ update msg model patientId =
                 { model | state = AddEdit (newRecord addEditDataSource row) } ! []
 
         Blur position ->
-            { model | rows = Functions.closeDropdowns model.rows position.target } ! []
+            case model.state of
+                Grid ->
+                    { model | rows = Functions.closeDropdowns model.rows position.target } ! []
+
+                AddEdit newRecord ->
+                    { model | state = AddEdit { newRecord | providerDropdown = Dropdown.close newRecord.providerDropdown } } ! []
 
         SetTableState newState ->
             { model | tableState = newState } ! []

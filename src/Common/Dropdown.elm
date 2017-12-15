@@ -1,4 +1,4 @@
-module Common.Dropdown exposing (Dropdown, init, Msg(..), update, view)
+module Common.Dropdown exposing (Dropdown, init, Msg(..), update, view, close)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -22,6 +22,11 @@ init list dropId dropVal =
 type Msg
     = ItemPicked DropdownItem
     | SetOpenState Bool
+
+
+close : Dropdown -> Dropdown
+close dropdown =
+    { dropdown | isOpen = False }
 
 
 update : Msg -> Dropdown -> Dropdown

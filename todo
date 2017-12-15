@@ -13,8 +13,8 @@ QUESTIONS:
 
 TODO:
 Testing branch... if they get a copy of ports with no ports... bam crash until hard-refresh
-Fix dropdown (on clicking dropdown, it clears input) (also needs focus)
-
+not showing treatment column
+delete is firing too soon, should show up after success
 wrong save message sent
 not actually saving
 crapola... so uh... dropdown doesn't respond to keyboard
