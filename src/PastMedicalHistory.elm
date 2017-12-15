@@ -1,12 +1,12 @@
 port module PastMedicalHistory exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
 
-import Html exposing (Html, text, div, button, h4, input)
+import Html exposing (Html, text, div, button, input)
 import Html.Attributes exposing (class, id, style, type_, disabled, value)
 import Html.Events exposing (onClick)
 import Common.Html exposing (InputControlType(TextInput, AreaInput, Dropdown, HtmlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
-import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage, DropdownItem)
+import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
-import Common.Grid exposing (checkColumn, standardTableAttrs, standardTheadNoFilters, rowDropDownDiv)
+import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters, rowDropDownDiv)
 import Common.Ports exposing (sendMenuMessage)
 import Common.Dropdown as Dropdown
 import Json.Decode as Decode
@@ -15,9 +15,6 @@ import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Table exposing (defaultCustomizations)
 import Common.Mouse as Mouse
 import Http
-
-
-port deletePastMedicalHistory : Int -> Cmd msg
 
 
 port deletePastMedicalHistoryConfirmed : (Int -> msg) -> Sub msg
@@ -210,10 +207,10 @@ getColumns addEditDataSource =
 formInputs : NewRecord -> List (InputControlType Msg)
 formInputs newRecord =
     [ AreaInput "Description" Required newRecord.description (UpdateDescription newRecord)
-    , TextInput "Year" Required newRecord.year (UpdateYear newRecord)
-    , Dropdown "Provider" Required newRecord.providerDropdown (UpdateProvider newRecord)
-    , TextInput "Facility" Required newRecord.facility (UpdateFacility newRecord)
-    , TextInput "Notes" Required newRecord.notes (UpdateNotes newRecord)
+    , TextInput "Year" Optional newRecord.year (UpdateYear newRecord)
+    , Dropdown "Provider" Optional newRecord.providerDropdown (UpdateProvider newRecord)
+    , TextInput "Facility" Optional newRecord.facility (UpdateFacility newRecord)
+    , TextInput "Notes" Optional newRecord.notes (UpdateNotes newRecord)
     , HtmlElement "Treatment" (input [ type_ "textbox", class "e-textbox", disabled True, value newRecord.treatment ] [])
     , HtmlElement "" (div [ style [ ( "color", "#969696" ), ( "font-size", "12px" ) ] ] [ text "*Treatment is deprecated." ])
     ]

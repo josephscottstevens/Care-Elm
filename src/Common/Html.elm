@@ -4,7 +4,7 @@ import Html exposing (Html, text, div, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, readonly, style, checked)
 import Html.Events exposing (onInput, onCheck)
 import Common.Functions exposing (..)
-import Common.Types exposing (..)
+import Common.Types as Common
 import Common.Dropdown as Dropdown
 
 
@@ -55,17 +55,17 @@ defaultConfig =
 
 
 type InputControlType msg
-    = TextInput String RequiredType String (String -> msg)
-    | NumrInput String RequiredType Int (String -> msg)
-    | CheckInput String RequiredType Bool (Bool -> msg)
-    | AreaInput String RequiredType String (String -> msg)
-    | KnockInput String RequiredType String
-    | DropInput String RequiredType (Maybe Int) String
-    | DropInputWithButton String RequiredType (Maybe Int) String String
-    | DateInput String RequiredType String String
-    | FileInput String RequiredType String
+    = TextInput String Common.RequiredType String (String -> msg)
+    | NumrInput String Common.RequiredType Int (String -> msg)
+    | CheckInput String Common.RequiredType Bool (Bool -> msg)
+    | AreaInput String Common.RequiredType String (String -> msg)
+    | KnockInput String Common.RequiredType String
+    | DropInput String Common.RequiredType (Maybe Int) String
+    | DropInputWithButton String Common.RequiredType (Maybe Int) String String
+    | DateInput String Common.RequiredType String String
+    | FileInput String Common.RequiredType String
     | HtmlElement String (Html msg)
-    | Dropdown String RequiredType Dropdown.Dropdown (Dropdown.Msg -> msg)
+    | Dropdown String Common.RequiredType Dropdown.Dropdown (Dropdown.Msg -> msg)
 
 
 makeControls : Config msg -> List (InputControlType msg) -> Html msg
@@ -138,7 +138,7 @@ makeControls config controls =
 
                 HtmlElement labelText htmlElement ->
                     div [ class "form-group" ]
-                        [ commonLabel labelText Optional
+                        [ commonLabel labelText Common.Optional
                         , div config.controlAttributes
                             [ htmlElement ]
                         ]
@@ -153,7 +153,7 @@ makeControls config controls =
         div [] (controls |> List.map common)
 
 
-commonLabel : String -> RequiredType -> Html msg
+commonLabel : String -> Common.RequiredType -> Html msg
 commonLabel labelText requiredType =
     let
         lastChar =
@@ -177,13 +177,13 @@ getValidationErrors controls =
         |> List.filterMap identity
 
 
-is : RequiredType -> Maybe a -> Maybe a
+is : Common.RequiredType -> Maybe a -> Maybe a
 is requiredType t =
     case requiredType of
-        Required ->
+        Common.Required ->
             t
 
-        Optional ->
+        Common.Optional ->
             Nothing
 
 
@@ -244,11 +244,11 @@ requiredStr labelText str =
         Nothing
 
 
-isRequiredStr : RequiredType -> String
+isRequiredStr : Common.RequiredType -> String
 isRequiredStr requiredType =
     case requiredType of
-        Required ->
+        Common.Required ->
             " required"
 
-        Optional ->
+        Common.Optional ->
             ""

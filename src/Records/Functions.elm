@@ -4,7 +4,7 @@ import Json.Decode as Decode exposing (Decoder, maybe)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Http
 import Records.Types exposing (RecordRow, Filters)
-import Common.Types exposing (RecordType(..), MenuMessage, FilterState)
+import Common.Types as Common
 import Common.Functions as Functions
 import String exposing (toLower)
 
@@ -46,7 +46,7 @@ decodeRecordRow =
         |> hardcoded False
 
 
-getRecords : RecordType -> Int -> Http.Request (List RecordRow)
+getRecords : Common.RecordType -> Int -> Http.Request (List RecordRow)
 getRecords recordType patientId =
     let
         recordTypeId =
@@ -68,7 +68,7 @@ deleteRequest rowId deleteCompleted =
 -- update helper functions
 
 
-getMenuMessage : List RecordRow -> RecordType -> Int -> String -> MenuMessage
+getMenuMessage : List RecordRow -> Common.RecordType -> Int -> String -> Common.MenuMessage
 getMenuMessage records recordType recordId messageType =
     let
         maybeVerbalConsent =
@@ -80,13 +80,13 @@ getMenuMessage records recordType recordId messageType =
         recordTypeId =
             Just <| Functions.getId recordType
     in
-        MenuMessage messageType recordId recordTypeId maybeVerbalConsent
+        Common.MenuMessage messageType recordId recordTypeId maybeVerbalConsent
 
 
-flipConsent : List RecordRow -> Int -> RecordType -> List RecordRow
+flipConsent : List RecordRow -> Int -> Common.RecordType -> List RecordRow
 flipConsent records recordId recordType =
     case recordType of
-        CallRecordings ->
+        Common.CallRecordings ->
             records
                 |> List.map
                     (\t ->
@@ -116,7 +116,7 @@ flipDropDownOpen records recordId =
 -- Filtering update helpers
 
 
-filterFields : Filters -> FilterState -> Filters
+filterFields : Filters -> Common.FilterState -> Filters
 filterFields flds filterState =
     let
         fieldName =
@@ -177,10 +177,10 @@ filterFields flds filterState =
             flds
 
 
-filteredRecords : List RecordRow -> Filters -> RecordType -> List RecordRow
+filteredRecords : List RecordRow -> Filters -> Common.RecordType -> List RecordRow
 filteredRecords records filterFields recordType =
     case recordType of
-        Hospitalizations ->
+        Common.Hospitalizations ->
             records
                 |> List.filter (\t -> String.contains filterFields.date (Functions.defaultLowerDateTime t.date))
                 |> List.filter (\t -> String.contains filterFields.hospitalizationId (Functions.defaultIntToString t.hospitalizationId))

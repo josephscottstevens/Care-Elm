@@ -1,7 +1,7 @@
 module Common.Route exposing (Route(..), getPatientId, fromLocation, href, modifyUrl)
 
 import Navigation
-import Common.Types exposing (..)
+import Common.Types as Common
 import Html exposing (Attribute)
 import Html.Attributes as Attr
 import UrlParser as Url exposing ((</>), (<?>), Parser, oneOf, parseHash, s, int, string, parsePath, intParam)
@@ -11,8 +11,8 @@ type Route
     = None
     | Billing
     | ClinicalSummary
-    | Records RecordType
-    | RecordAddNew RecordType
+    | Records Common.RecordType
+    | RecordAddNew Common.RecordType
     | Hospitilizations
     | PastMedicalHistory
     | HospitilizationsAdd
@@ -20,37 +20,37 @@ type Route
     | Error String
 
 
-recordTypeToString : RecordType -> String
+recordTypeToString : Common.RecordType -> String
 recordTypeToString recordType =
     case recordType of
-        PrimaryCare ->
+        Common.PrimaryCare ->
             "_primarycarerecords"
 
-        Specialty ->
+        Common.Specialty ->
             "_specialtyrecords"
 
-        Labs ->
+        Common.Labs ->
             "_labrecords"
 
-        Radiology ->
+        Common.Radiology ->
             "_radiologyrecords"
 
-        Hospitalizations ->
+        Common.Hospitalizations ->
             "_hospitalizationrecords"
 
-        Legal ->
+        Common.Legal ->
             "_legalrecords"
 
-        CallRecordings ->
+        Common.CallRecordings ->
             "_callrecordingrecords"
 
-        PreviousHistories ->
+        Common.PreviousHistories ->
             "_previoushistoryrecords"
 
-        Enrollment ->
+        Common.Enrollment ->
             "_enrollmentrecords"
 
-        Misc ->
+        Common.Misc ->
             "_miscrecords"
 
 
@@ -101,28 +101,28 @@ route =
         , Url.map HospitilizationsEdit (s "people" </> s "_hospitalizations" </> s "edit" </> int)
 
         -- Records Grid
-        , Url.map (Records PrimaryCare) (s "people" </> s "_primarycarerecords")
-        , Url.map (Records Specialty) (s "people" </> s "_specialtyrecords")
-        , Url.map (Records Labs) (s "people" </> s "_labrecords")
-        , Url.map (Records Radiology) (s "people" </> s "_radiologyrecords")
-        , Url.map (Records Hospitalizations) (s "people" </> s "_hospitalizationrecords")
-        , Url.map (Records Legal) (s "people" </> s "_legalrecords")
-        , Url.map (Records CallRecordings) (s "people" </> s "_callrecordingrecords")
-        , Url.map (Records PreviousHistories) (s "people" </> s "_previoushistoryrecords")
-        , Url.map (Records Enrollment) (s "people" </> s "_enrollmentrecords")
-        , Url.map (Records Misc) (s "people" </> s "_miscrecords")
+        , Url.map (Records Common.PrimaryCare) (s "people" </> s "_primarycarerecords")
+        , Url.map (Records Common.Specialty) (s "people" </> s "_specialtyrecords")
+        , Url.map (Records Common.Labs) (s "people" </> s "_labrecords")
+        , Url.map (Records Common.Radiology) (s "people" </> s "_radiologyrecords")
+        , Url.map (Records Common.Hospitalizations) (s "people" </> s "_hospitalizationrecords")
+        , Url.map (Records Common.Legal) (s "people" </> s "_legalrecords")
+        , Url.map (Records Common.CallRecordings) (s "people" </> s "_callrecordingrecords")
+        , Url.map (Records Common.PreviousHistories) (s "people" </> s "_previoushistoryrecords")
+        , Url.map (Records Common.Enrollment) (s "people" </> s "_enrollmentrecords")
+        , Url.map (Records Common.Misc) (s "people" </> s "_miscrecords")
 
         -- Records Edit
-        , Url.map (RecordAddNew PrimaryCare) (s "people" </> s "_primarycarerecords" </> s "addedit")
-        , Url.map (RecordAddNew Specialty) (s "people" </> s "_specialtyrecords" </> s "addedit")
-        , Url.map (RecordAddNew Labs) (s "people" </> s "_labrecords" </> s "addedit")
-        , Url.map (RecordAddNew Radiology) (s "people" </> s "_radiologyrecords" </> s "addedit")
-        , Url.map (RecordAddNew Hospitalizations) (s "people" </> s "_hospitalizationrecords" </> s "addedit")
-        , Url.map (RecordAddNew Legal) (s "people" </> s "_legalrecords" </> s "addedit")
-        , Url.map (RecordAddNew CallRecordings) (s "people" </> s "_callrecordingrecords" </> s "addedit")
-        , Url.map (RecordAddNew PreviousHistories) (s "people" </> s "_previoushistoryrecords" </> s "addedit")
-        , Url.map (RecordAddNew Enrollment) (s "people" </> s "_enrollmentrecords" </> s "addedit")
-        , Url.map (RecordAddNew Misc) (s "people" </> s "_miscrecords" </> s "addedit")
+        , Url.map (RecordAddNew Common.PrimaryCare) (s "people" </> s "_primarycarerecords" </> s "addedit")
+        , Url.map (RecordAddNew Common.Specialty) (s "people" </> s "_specialtyrecords" </> s "addedit")
+        , Url.map (RecordAddNew Common.Labs) (s "people" </> s "_labrecords" </> s "addedit")
+        , Url.map (RecordAddNew Common.Radiology) (s "people" </> s "_radiologyrecords" </> s "addedit")
+        , Url.map (RecordAddNew Common.Hospitalizations) (s "people" </> s "_hospitalizationrecords" </> s "addedit")
+        , Url.map (RecordAddNew Common.Legal) (s "people" </> s "_legalrecords" </> s "addedit")
+        , Url.map (RecordAddNew Common.CallRecordings) (s "people" </> s "_callrecordingrecords" </> s "addedit")
+        , Url.map (RecordAddNew Common.PreviousHistories) (s "people" </> s "_previoushistoryrecords" </> s "addedit")
+        , Url.map (RecordAddNew Common.Enrollment) (s "people" </> s "_enrollmentrecords" </> s "addedit")
+        , Url.map (RecordAddNew Common.Misc) (s "people" </> s "_miscrecords" </> s "addedit")
 
         -- Other
         , Url.map Error (s "article" </> string)

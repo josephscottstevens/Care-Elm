@@ -1,7 +1,7 @@
-module Common.Dropdown exposing (Dropdown, init, Msg(..), update, view, close)
+module Common.Dropdown exposing (Dropdown, init, Msg(ItemPicked, SetOpenState), update, view, close)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, Attribute, div, span, text, li, ul, input)
+import Html.Attributes exposing (style, value, class, readonly)
 import Html.Events exposing (onWithOptions)
 import Json.Decode as Json
 import Common.Types exposing (DropdownItem)
@@ -54,17 +54,6 @@ view dropdown =
             else
                 ""
 
-        mainAttr =
-            case dropdown.dropdownSource of
-                [] ->
-                    [ style <| dropdownDisabled ++ dropdownInput
-                    ]
-
-                _ ->
-                    [ style dropdownInput
-                    , onClick <| SetOpenState <| not dropdown.isOpen
-                    ]
-
         numItems =
             dropdown.dropdownSource
                 |> List.map (\t -> String.length t.name)
@@ -111,22 +100,6 @@ onClick message =
 
 
 
--- styles for dropdown container
-
-
-dropdownContainer : List ( String, String )
-dropdownContainer =
-    [ ( "position", "relative" )
-    , ( "margin", "16px" )
-
-    -- , ( "width", "152px" )
-    , ( "display", "inline-block" )
-    , ( "fontFamily", "sans-serif" )
-    , ( "fontSize", "16px" )
-    ]
-
-
-
 -- styles for main input field
 
 
@@ -149,15 +122,6 @@ dropdownInput =
 dropdownDisabled : List ( String, String )
 dropdownDisabled =
     [ ( "color", "rgba(0,0,0,.54" ) ]
-
-
-
--- styles for the text of selected item
-
-
-dropdownText : List ( String, String )
-dropdownText =
-    [ ( "flex", "1 0 auto" ) ]
 
 
 

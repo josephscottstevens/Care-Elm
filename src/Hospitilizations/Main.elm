@@ -12,14 +12,6 @@ import Common.Functions as Functions exposing (defaultString, defaultDate)
 import Common.Ports exposing (sendMenuMessage)
 import Common.Route as Route
 import Common.Mouse as Mouse
-import Common.Html
-    exposing
-        ( InputControlType(CheckInput, DropInputWithButton, AreaInput, TextInput, DateInput, KnockInput, DropInput)
-        , getValidationErrors
-        , defaultConfig
-        , fullWidth
-        , makeControls
-        )
 import Http
 
 

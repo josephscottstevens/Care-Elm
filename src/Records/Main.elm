@@ -7,7 +7,7 @@ import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Table exposing (stringColumn, defaultCustomizations)
 import Common.Grid exposing (hrefColumn, checkColumn)
-import Common.Types exposing (RecordType(..), AddEditDataSource, FilterState)
+import Common.Types as Common
 import Common.Functions as Functions exposing (displaySuccessMessage, displayErrorMessage)
 import Common.Ports exposing (dropDownToggle, sendMenuMessage)
 import Common.Route as Route
@@ -28,7 +28,7 @@ subscriptions =
         ]
 
 
-init : RecordType -> Int -> Cmd Msg
+init : Common.RecordType -> Int -> Cmd Msg
 init recordType patientId =
     getRecords recordType patientId
         |> Http.send Load
@@ -39,8 +39,8 @@ type Msg
     | SetTableState Table.State
     | NewRecord
     | DropDownToggle Int
-    | SendMenuMessage Int RecordType String
-    | SetFilter FilterState
+    | SendMenuMessage Int Common.RecordType String
+    | SetFilter Common.FilterState
     | EditTask Int
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
@@ -93,7 +93,7 @@ update msg model _ =
             { model | filterFields = filterFields model.filterFields filterState } ! []
 
 
-view : Model -> Maybe AddEditDataSource -> Html Msg
+view : Model -> Maybe Common.AddEditDataSource -> Html Msg
 view model addEditDataSource =
     div []
         [ h4 [] [ text (Functions.getDesc model.recordType) ]
@@ -108,7 +108,7 @@ view model addEditDataSource =
         ]
 
 
-getColumns : RecordType -> List (Table.Column RecordRow Msg)
+getColumns : Common.RecordType -> List (Table.Column RecordRow Msg)
 getColumns recordType =
     let
         commonColumns =
@@ -120,13 +120,13 @@ getColumns recordType =
 
         firstColumns =
             case recordType of
-                PrimaryCare ->
+                Common.PrimaryCare ->
                     commonColumns
 
-                Specialty ->
+                Common.Specialty ->
                     commonColumns
 
-                Labs ->
+                Common.Labs ->
                     [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
                     , stringColumn "Date Accessioned" (\t -> Functions.defaultDateTime t.dateAccessed)
                     , stringColumn "Name of Lab" (\t -> Functions.defaultString t.title)
@@ -134,7 +134,7 @@ getColumns recordType =
                     , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
-                Radiology ->
+                Common.Radiology ->
                     [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
                     , stringColumn "Date Accessioned" (\t -> Functions.defaultDateTime t.dateAccessed)
                     , stringColumn "Name of Study" (\t -> Functions.defaultString t.title)
@@ -142,7 +142,7 @@ getColumns recordType =
                     , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
-                Hospitalizations ->
+                Common.Hospitalizations ->
                     [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
                     , stringColumn "Hospitalization ID" (\t -> Functions.defaultIntToString t.hospitalizationId)
                     , stringColumn "Admin Date" (\t -> Functions.defaultDateTime t.dateOfAdmission)
@@ -153,12 +153,12 @@ getColumns recordType =
                     , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
-                Legal ->
+                Common.Legal ->
                     [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
                     , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
-                CallRecordings ->
+                Common.CallRecordings ->
                     [ stringColumn "Date" (\t -> Functions.dateTime t.recordingDate)
                     , hrefColumn "Recording" "Open" (\t -> Functions.defaultString t.recording)
                     , hrefCustom
@@ -167,19 +167,19 @@ getColumns recordType =
                     , stringColumn "User" (\t -> Functions.defaultString t.staffName)
                     ]
 
-                PreviousHistories ->
+                Common.PreviousHistories ->
                     [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
                     , stringColumn "File Name" (\t -> Functions.defaultString t.fileName)
                     , stringColumn "Report Date" (\t -> Functions.defaultDate t.reportDate)
                     , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
-                Enrollment ->
+                Common.Enrollment ->
                     [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
                     , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
-                Misc ->
+                Common.Misc ->
                     commonColumns
 
         lastColumns =
@@ -189,7 +189,7 @@ getColumns recordType =
         List.append firstColumns lastColumns
 
 
-rowDropDownColumn : RecordType -> Table.Column RecordRow Msg
+rowDropDownColumn : Common.RecordType -> Table.Column RecordRow Msg
 rowDropDownColumn recordType =
     Table.veryCustomColumn
         { name = ""
@@ -198,7 +198,7 @@ rowDropDownColumn recordType =
         }
 
 
-config : (FilterState -> Msg) -> RecordType -> Table.Config RecordRow Msg
+config : (Common.FilterState -> Msg) -> Common.RecordType -> Table.Config RecordRow Msg
 config event recordType =
     Table.customConfig
         { toId = \t -> toString t.id
@@ -233,10 +233,10 @@ hrefCustomDetails taskId taskTitle =
         ]
 
 
-dropDownItems : RecordType -> Int -> List ( String, String, Html.Attribute Msg )
+dropDownItems : Common.RecordType -> Int -> List ( String, String, Html.Attribute Msg )
 dropDownItems recordType rowId =
     case recordType of
-        CallRecordings ->
+        Common.CallRecordings ->
             [ ( "e-edit", "Mark As Consent", onClick (SendMenuMessage rowId recordType "MarkAsConsent") ) ]
 
         _ ->

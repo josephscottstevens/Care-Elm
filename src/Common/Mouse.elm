@@ -177,7 +177,7 @@ type alias Msg =
 onEffects : Platform.Router msg Msg -> List (MySub msg) -> State msg -> Task Never (State msg)
 onEffects router newSubs oldState =
     let
-        leftStep category { pid } task =
+        leftStep _ { pid } task =
             Process.kill pid &> task
 
         bothStep category { pid } taggers task =

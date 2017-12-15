@@ -12,7 +12,7 @@ type State
 type alias Model =
     { state : State
     , addEditDataSource : AddEditDataSource
-    , recordAddNewInitData : RecordAddNewInitData
+    , newRecord : RecordAddNewInitData
     , recordType : RecordType
     , recordId : Int
     , title : String
@@ -28,7 +28,7 @@ type alias Model =
     -- Hospitilizations
     , isExistingHospitilization : Bool
     , patientReported : Bool
-    , dischargeRecommendations : String
+    , dischargeDiagnosis : String
     }
 
 
@@ -36,7 +36,7 @@ emptyModel : RecordType -> AddEditDataSource -> Model
 emptyModel recordType addEditDataSource =
     { state = Edit
     , addEditDataSource = addEditDataSource
-    , recordAddNewInitData = getAddEditMsg addEditDataSource recordType False False
+    , newRecord = getAddEditMsg addEditDataSource recordType False False
     , recordType = recordType
     , recordId = 0
     , title = ""
@@ -52,7 +52,7 @@ emptyModel recordType addEditDataSource =
     -- Hospitilizations
     , isExistingHospitilization = False
     , patientReported = False
-    , dischargeRecommendations = ""
+    , dischargeDiagnosis = ""
     }
 
 
