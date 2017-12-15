@@ -12,7 +12,11 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO:
+Testing branch... if they get a copy of ports with no ports... bam crash until hard-refresh
+
 Implement PastMedicalHistory Save
+Fix dropdown (outselect mouse msg should close dropdown)
+Fix dropdown (on clicking dropdown, it clears input)
 Fix PastMedicalHistory grid header
 PastMedicalHistory Year column is to string twice
 test are you sure you want to leave

@@ -79,9 +79,7 @@ view model _ =
     div [ class "form-horizontal" ]
         [ h4 [] [ text "Clinical Summary" ]
         , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs model)
-        , div [ style Dropdown.mainContainer ]
-            [ Html.map CountryMsg <| Dropdown.view model.country
-            ]
+        , Html.map CountryMsg <| Dropdown.view model.country
         ]
 
 

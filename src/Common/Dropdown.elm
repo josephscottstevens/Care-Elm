@@ -1,4 +1,4 @@
-module Common.Dropdown exposing (Dropdown, init, Msg(..), update, view, mainContainer)
+module Common.Dropdown exposing (Dropdown, init, Msg(..), update, view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -59,27 +59,43 @@ view dropdown =
                     [ style dropdownInput
                     , onClick <| SetOpenState <| not dropdown.isOpen
                     ]
+
+        numItems =
+            dropdown.dropdownSource
+                |> List.map (\t -> String.length t.name)
+                |> List.sortBy identity
+                |> List.reverse
+                |> List.head
+                |> Maybe.withDefault 150
+
+        dropInputWidth =
+            style [ ( "width", "100%" ) ]
     in
-        div [ style dropdownContainer ]
-            [ span
-                [ onClick <| SetOpenState <| not dropdown.isOpen, class ("e-ddl e-widget " ++ activeClass), style [ ( "width", "152px" ) ] ]
-                [ span [ class "e-in-wrap e-box" ]
+        div []
+            [ span [ onClick <| SetOpenState <| not dropdown.isOpen, class ("e-ddl e-widget " ++ activeClass), dropInputWidth ]
+                [ span
+                    [ class "e-in-wrap e-box" ]
                     [ input [ class "e-input", readonly True, value dropdown.dropDownItem.name ] []
                     , span [ class "e-select" ]
                         [ span [ class "e-icon e-arrow-sans-down" ] []
                         ]
                     ]
                 ]
-            , div []
-                [ ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (List.map viewItem dropdown.dropdownSource)
-                ]
+            , ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (List.map (viewItem numItems) dropdown.dropdownSource)
             ]
 
 
-viewItem : DropdownItem -> Html Msg
-viewItem item =
-    li [ onClick (ItemPicked item), class "dropdown-li" ]
-        [ text item.name ]
+viewItem : Int -> DropdownItem -> Html Msg
+viewItem numItems item =
+    let
+        width =
+            numItems * 6
+
+        dropLiStyle =
+            style [ ( "width", toString width ++ "px" ) ]
+    in
+        li [ onClick (ItemPicked item), class "dropdown-li", dropLiStyle ]
+            [ text item.name ]
 
 
 onClick : msg -> Attribute msg
@@ -90,18 +106,6 @@ onClick message =
 
 
 
--- styles
-
-
-mainContainer : List ( String, String )
-mainContainer =
-    [ ( "height", "100%" )
-    , ( "background-color", "#fafafa" )
-    , ( "padding", "16px" )
-    ]
-
-
-
 -- styles for dropdown container
 
 
@@ -109,7 +113,8 @@ dropdownContainer : List ( String, String )
 dropdownContainer =
     [ ( "position", "relative" )
     , ( "margin", "16px" )
-    , ( "width", "152px" )
+
+    -- , ( "width", "152px" )
     , ( "display", "inline-block" )
     , ( "fontFamily", "sans-serif" )
     , ( "fontSize", "16px" )
@@ -162,9 +167,11 @@ dropdownList =
     , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
     , ( "padding", "0" )
     , ( "margin", "0" )
-    , ( "width", "150px" )
+
+    -- , ( "width", "150px" )
     , ( "background-color", "white" )
     , ( "max-height", "152px" )
     , ( "overflow-x", "hidden" )
     , ( "overflow-y", "scroll" )
+    , ( "z-index", "100" )
     ]
