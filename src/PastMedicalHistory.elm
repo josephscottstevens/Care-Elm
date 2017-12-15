@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Common.Html exposing (InputControlType(TextInput, AreaInput, Dropdown, HtmlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
 import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage, DropdownItem)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
-import Common.Grid exposing (checkColumn, standardTableAttrs, standardThead, rowDropDownDiv)
+import Common.Grid exposing (checkColumn, standardTableAttrs, standardTheadNoFilters, rowDropDownDiv)
 import Common.Ports exposing (sendMenuMessage)
 import Common.Dropdown as Dropdown
 import Json.Decode as Decode
@@ -247,7 +247,7 @@ config addEditDataSource =
         , toMsg = SetTableState
         , columns = getColumns addEditDataSource
         , customizations =
-            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable" }
+            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = standardTheadNoFilters }
         }
 
 
@@ -275,8 +275,6 @@ encodeNewRow newRecord patientId =
         , ( "Year", Encode.string <| newRecord.year )
         , ( "Treatment", Encode.string <| newRecord.treatment )
         , ( "Facility", Encode.string <| newRecord.facility )
-
-        -- , ( "Provider", Encode.string <| newRecord.providerDropdown.dropDownItem.name )
         , ( "Notes", Encode.string <| newRecord.notes )
         , ( "ProviderId", maybeVal Encode.int <| newRecord.providerDropdown.dropdownItem.id )
         , ( "ProblemId", maybeVal Encode.int <| newRecord.problemId )

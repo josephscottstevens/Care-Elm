@@ -28,6 +28,44 @@ dataTarget val =
     attribute "data-target" val
 
 
+standardTheadHelpNoFilter : ( String, Table.Status, Html.Attribute msg ) -> Html msg
+standardTheadHelpNoFilter ( name, status, onClick ) =
+    let
+        headerDivClass =
+            class "e-headercelldiv e-gridtooltip headerColumn"
+
+        headerDivStyle =
+            style [ ( "margin-top", "5px" ) ]
+
+        headerDiv =
+            div [ headerDivClass, headerDivStyle, onClick ]
+
+        headerClassName =
+            String.filter isAlpha name
+
+        headerColumnClass =
+            class ("e-columnheader e-default e-filterbarcell " ++ headerClassName ++ "-Column")
+
+        headerContent =
+            case status of
+                Table.Unsortable ->
+                    headerDiv [ text name ]
+
+                Table.Sortable selected ->
+                    headerDiv [ text name ]
+
+                Table.Reversible Nothing ->
+                    headerDiv [ text name ]
+
+                Table.Reversible (Just isReversed) ->
+                    if isReversed then
+                        headerDiv [ text name, span [ class "glyphicon glyphicon-menu-up" ] [] ]
+                    else
+                        headerDiv [ text name, span [ class "glyphicon glyphicon-menu-down" ] [] ]
+    in
+        th [ headerColumnClass ] [ headerContent ]
+
+
 standardTheadHelp : (FilterState -> msg) -> ( String, Table.Status, Html.Attribute msg ) -> Html msg
 standardTheadHelp event ( name, status, onClick ) =
     let
@@ -84,6 +122,11 @@ standardTheadHelp event ( name, status, onClick ) =
 standardThead : (FilterState -> msg) -> List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
 standardThead event headers =
     Table.HtmlDetails [ class "e-gridheader e-columnheader e-hidelines" ] (List.map (standardTheadHelp event) headers)
+
+
+standardTheadNoFilters : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
+standardTheadNoFilters headers =
+    Table.HtmlDetails [ class "e-gridheader e-columnheader e-hidelines" ] (List.map standardTheadHelpNoFilter headers)
 
 
 standardTableAttrs : String -> List (Html.Attribute msg)
