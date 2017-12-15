@@ -13,17 +13,18 @@ QUESTIONS:
 
 TODO:
 Testing branch... if they get a copy of ports with no ports... bam crash until hard-refresh
+Fix dropdown (on clicking dropdown, it clears input) (also needs focus)
+
 wrong save message sent
 not actually saving
 crapola... so uh... dropdown doesn't respond to keyboard
 probably want a max width on dropdown li
 currently save is ignoring errors
-selected provider isn't being selected on it
 all fields aren't required... only 1 is I think
 description doesn't look like it's saving
 After PastMedicalHistory Save, change back to grid and refresh
 Fix dropdown (outselect mouse msg should close dropdown)
-Fix dropdown (on clicking dropdown, it clears input)
+
 Fix PastMedicalHistory grid header
 PastMedicalHistory Year column is to string twice
 test are you sure you want to leave

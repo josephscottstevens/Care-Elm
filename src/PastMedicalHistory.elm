@@ -268,7 +268,7 @@ encodeNewRow newRecord patientId =
 
         -- , ( "Provider", Encode.string <| newRecord.providerDropdown.dropDownItem.name )
         , ( "Notes", Encode.string <| newRecord.notes )
-        , ( "ProviderId", maybeVal Encode.int <| newRecord.providerDropdown.dropDownItem.id )
+        , ( "ProviderId", maybeVal Encode.int <| newRecord.providerDropdown.dropdownItem.id )
         , ( "ProblemId", maybeVal Encode.int <| newRecord.problemId )
         ]
 
@@ -299,7 +299,7 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , notes = row.notes
             , treatment = row.treatment
             , problemId = row.problemId
-            , providerDropdown = Dropdown.init addEditDataSource.providers
+            , providerDropdown = Dropdown.init addEditDataSource.providers row.providerId row.provider
             }
 
         Nothing ->
@@ -311,7 +311,7 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , notes = ""
             , treatment = ""
             , problemId = Nothing
-            , providerDropdown = Dropdown.init addEditDataSource.providers
+            , providerDropdown = Dropdown.init addEditDataSource.providers Nothing ""
             }
 
 

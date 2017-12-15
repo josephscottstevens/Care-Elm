@@ -231,5 +231,5 @@ emptyModel =
     , impairment = ""
     , summary = ""
     , syncfusionData = SyncfusionData monthDropdown yearDropdown 0 0 ""
-    , country = Dropdown.init monthDropdown
+    , country = Dropdown.init monthDropdown Nothing ""
     }

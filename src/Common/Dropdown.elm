@@ -9,14 +9,14 @@ import Common.Types exposing (DropdownItem)
 
 type alias Dropdown =
     { isOpen : Bool
-    , dropDownItem : DropdownItem
+    , dropdownItem : DropdownItem
     , dropdownSource : List DropdownItem
     }
 
 
-init : List DropdownItem -> Dropdown
-init list =
-    Dropdown False (DropdownItem Nothing "") list
+init : List DropdownItem -> Maybe Int -> String -> Dropdown
+init list dropId dropVal =
+    Dropdown False (DropdownItem dropId dropVal) list
 
 
 type Msg
@@ -25,13 +25,13 @@ type Msg
 
 
 update : Msg -> Dropdown -> Dropdown
-update msg dropdownItem =
+update msg dropdown =
     case msg of
         ItemPicked item ->
-            Dropdown False item dropdownItem.dropdownSource
+            Dropdown False item dropdown.dropdownSource
 
         SetOpenState newState ->
-            Dropdown newState (DropdownItem Nothing "") dropdownItem.dropdownSource
+            Dropdown newState dropdown.dropdownItem dropdown.dropdownSource
 
 
 view : Dropdown -> Html Msg
@@ -75,7 +75,7 @@ view dropdown =
             [ span [ onClick <| SetOpenState <| not dropdown.isOpen, class ("e-ddl e-widget " ++ activeClass), dropInputWidth ]
                 [ span
                     [ class "e-in-wrap e-box" ]
-                    [ input [ class "e-input", readonly True, value dropdown.dropDownItem.name ] []
+                    [ input [ class "e-input", readonly True, value dropdown.dropdownItem.name ] []
                     , span [ class "e-select" ]
                         [ span [ class "e-icon e-arrow-sans-down" ] []
                         ]
