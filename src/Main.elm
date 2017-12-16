@@ -25,6 +25,7 @@ type alias Model =
     { patientId : Int
     , page : Page
     , addEditDataSource : Maybe AddEditDataSource
+    , location : Location
     }
 
 
@@ -48,12 +49,14 @@ init location =
                 { patientId = patientId
                 , page = None
                 , addEditDataSource = Nothing
+                , location = location
                 }
 
         Nothing ->
             { patientId = 0
             , page = Error "Cannot load page without patientId"
             , addEditDataSource = Nothing
+            , location = location
             }
                 ! [ Functions.setLoadingStatus False ]
 
@@ -177,7 +180,9 @@ setRoute maybeRoute model =
                             ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing) ]
 
                     Nothing ->
-                        model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
+                        -- aka, if user refreshes on the add screen, can't do much since there is no data source for dropdowns
+                        { model | page = Hospitilizations Hospitilizations.Types.emptyModel }
+                            ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
 
             Just (Route.HospitilizationsEdit rowId) ->
                 let
@@ -212,7 +217,9 @@ setRoute maybeRoute model =
                             ! cmds [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource t) ]
 
                     Nothing ->
-                        model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
+                        -- aka, if user refreshes on the add\edit screen, can't do much since there is no data source for dropdowns
+                        { model | page = Records (Records.Types.emptyModel t) }
+                            ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []

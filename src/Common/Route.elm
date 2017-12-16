@@ -91,10 +91,8 @@ routeToString route =
 route : Parser (Route -> a) a
 route =
     oneOf
-        [ Url.map None (s "")
-
-        -- Clinical Summary
-        , Url.map ClinicalSummary (s "people" </> s "_clinicalsummary")
+        [ -- Clinical Summary
+          Url.map ClinicalSummary (s "people" </> s "_clinicalsummary")
         , Url.map PastMedicalHistory (s "people" </> s "_pastmedicalhistory")
         , Url.map Hospitilizations (s "people" </> s "_hospitalizations")
         , Url.map HospitilizationsAdd (s "people" </> s "_hospitalizations" </> s "add")
@@ -123,9 +121,6 @@ route =
         , Url.map (RecordAddNew Common.PreviousHistories) (s "people" </> s "_previoushistoryrecords" </> s "addedit")
         , Url.map (RecordAddNew Common.Enrollment) (s "people" </> s "_enrollmentrecords" </> s "addedit")
         , Url.map (RecordAddNew Common.Misc) (s "people" </> s "_miscrecords" </> s "addedit")
-
-        -- Other
-        , Url.map Error (s "article" </> string)
         ]
 
 

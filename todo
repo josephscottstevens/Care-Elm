@@ -9,68 +9,36 @@ QUESTIONS:
 	
 ===========================================================================================================
 	in tasks... there is a another hospitilizations????
+	Testing branch... if they get a copy of ports with no ports... bam crash until hard-refresh
 ===========================================================================================================
 
 TODO:
-allow grid to take list of ... buttons, for the header (html with msg?)
-change over new record button to + button
-url change for hospitilizations is missing... good or bad thing?
-Testing branch... if they get a copy of ports with no ports... bam crash until hard-refresh
 un-bork Clinical Summary
+	Test two buttons
+set widths to custom instead of bootstrap ( see test4 bug)	
+change over new record button to + button
 re-implement bug fixes reported
-set widths to custom instead of bootstrap ( see test4 bug)
 delete is firing too soon, should show up after success
-wrong save message sent
-crapola... so uh... dropdown doesn't respond to keyboard
-probably want a max width on dropdown li
+wrong save message sent in past medical histories
+implement validation logic for past emdical history
 currently save is ignoring errors
-all fields aren't required... only 1 is I think
 description doesn't look like it's saving
-After PastMedicalHistory Save, change back to grid and refresh
-Fix dropdown (outselect mouse msg should close dropdown)
-
-Fix PastMedicalHistory grid header
-PastMedicalHistory Year column is to string twice
-test are you sure you want to leave
-
-check out displayErrorMessage (might should be used more?)
-remove filters for now?
-
+Fix PastMedicalHistory grid header (too tall)
+check out displayErrorMessage function (might should be used more?) [can I make it generic to handle success\error cases?)
 validation looks like it has missing stuff
 
-go to the real hospitilizations page, add text in just for the debugger
-
-in main.js //get the current view from left nav
-	when there is no view, crash
-
-consolidate save changes \ are you sures?
-implement clinical summary save
-
-hospitilizations addedit isn't working
-
-who should have RecordType, the model, or pass to view?
-I dont want the models aware of patientId, because then they both have a copy, and sync bug right?
-
-getDropDowns no longer being called now
-still have patientId EVERYWHERE
-
-not listneing to KnockoutUrl Change I dont think... and everything seems fine?
-how does app handle crash crash?
-
-url change isn't firing my stuff anymore (back foward buttons)
-
-..somehow make controlWidth apart of config :/
-
-required validation logic is gone
-
-verify noone else is calling deleted methods
-why rnReviewedCarePlan?
-
-un-used taskId in records main getColumns
+test hospitilizations addedit
+test validation logic records
+test validation logic hospitilizations
+test if taskId in records main getColumns is un-used
 
 Go through all bugs in google sheet, make sure they are applied in master branch
+test are you sure you want to leave
+remove filters
 
 LOW TODO:
+crapola... so uh... dropdown doesn't respond to keyboard
+allow grid to take list of html elements with a msg, for the header (aka, the add new row icon, or export to excel icon)
 consolidate SaveCompleted (ok and error, I mean... totally doable right?)
 consolidate HandleSuccessResponse \ ErroResponse with json parse
 consolidate delete Row port \ subscription
