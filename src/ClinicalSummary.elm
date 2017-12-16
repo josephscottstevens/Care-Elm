@@ -41,7 +41,6 @@ type alias Model =
     , impairment : String
     , comments : String
     , syncfusionData : SyncfusionData
-    , country : Dropdown.Dropdown
     }
 
 
@@ -71,7 +70,6 @@ type Msg
     | Save
     | SaveCompleted (Result Http.Error String)
     | GenerateCarePlanLetter
-    | CountryMsg Dropdown.Msg
 
 
 view : Model -> Int -> Html Msg
@@ -79,16 +77,12 @@ view model _ =
     div [ class "form-horizontal" ]
         [ h4 [] [ text "Clinical Summary" ]
         , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs model)
-        , Html.map CountryMsg <| Dropdown.view model.country
         ]
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
-        CountryMsg countryMsg ->
-            { model | country = Dropdown.update countryMsg model.country } ! []
-
         LoadData (Ok newData) ->
             { model
                 | id = newData.id
@@ -164,15 +158,14 @@ generateSummaryDiv =
 
 formInputs : Model -> List (InputControlType Msg)
 formInputs { summary, carePlan, codeLegalStatus, impairment, comments } =
-    [ --HtmlElement <| button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate Care Plan Letter" ]
-      --, AreaInput "Clinical Summary" Optional summary UpdateSummary
-      HtmlElement "" generateSummaryDiv
-
-    -- , AreaInput "Instructions and Care Plan" Optional carePlan UpdateCarePlan
-    -- , AreaInput "Code/Legal Status" Optional codeLegalStatus UpdateCodeLegalStatus
-    -- , AreaInput "Impairment" Optional impairment UpdateImpairment
-    -- , AreaInput "Comments" Optional comments UpdateComments
-    -- , HtmlElement <| button [ class "btn btn-sm btn-primary", onClick Save ] [ text "Update" ]
+    [ HtmlElement "" (button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate Care Plan Letter" ])
+    , AreaInput "Clinical Summary" Optional summary UpdateSummary
+    , HtmlElement "" generateSummaryDiv
+    , AreaInput "Instructions and Care Plan" Optional carePlan UpdateCarePlan
+    , AreaInput "Code/Legal Status" Optional codeLegalStatus UpdateCodeLegalStatus
+    , AreaInput "Impairment" Optional impairment UpdateImpairment
+    , AreaInput "Comments" Optional comments UpdateComments
+    , HtmlElement "" (button [ class "btn btn-sm btn-primary", onClick Save ] [ text "Update" ])
     ]
 
 
@@ -231,5 +224,4 @@ emptyModel =
     , impairment = ""
     , summary = ""
     , syncfusionData = SyncfusionData monthDropdown yearDropdown 0 0 ""
-    , country = Dropdown.init monthDropdown Nothing ""
     }

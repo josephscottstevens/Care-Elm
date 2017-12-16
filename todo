@@ -12,6 +12,8 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO:
+allow grid to take list of ... buttons, for the header (html with msg?)
+change over new record button to + button
 url change for hospitilizations is missing... good or bad thing?
 Testing branch... if they get a copy of ports with no ports... bam crash until hard-refresh
 un-bork Clinical Summary
@@ -19,7 +21,6 @@ re-implement bug fixes reported
 set widths to custom instead of bootstrap ( see test4 bug)
 delete is firing too soon, should show up after success
 wrong save message sent
-not actually saving
 crapola... so uh... dropdown doesn't respond to keyboard
 probably want a max width on dropdown li
 currently save is ignoring errors
