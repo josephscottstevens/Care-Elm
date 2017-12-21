@@ -34,11 +34,8 @@ standardTheadHelpNoFilter ( name, status, onClick ) =
         headerDivClass =
             class "e-headercelldiv e-gridtooltip headerColumn"
 
-        headerDivStyle =
-            style [ ( "margin-top", "5px" ) ]
-
         headerDiv =
-            div [ headerDivClass, headerDivStyle, onClick ]
+            div [ headerDivClass, onClick ]
 
         headerClassName =
             String.filter isAlpha name

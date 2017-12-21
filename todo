@@ -15,7 +15,6 @@ QUESTIONS:
 TODO:
 change over new record button to + button
 currently save is ignoring errors
-description doesn't look like it's saving
 Fix PastMedicalHistory grid header (too tall)
 check out displayErrorMessage function (might should be used more?) [can I make it generic to handle success\error cases?)
 validation looks like it has missing stuff
