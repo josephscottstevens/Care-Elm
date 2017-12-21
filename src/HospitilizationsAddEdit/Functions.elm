@@ -36,7 +36,7 @@ saveFormRequest model patientId =
         , headers = []
         , method = "POST"
         , timeout = Nothing
-        , url = "/People/AddNewHospitilization"
+        , url = "/People/AddEditHospitilization"
         , withCredentials = False
         }
 

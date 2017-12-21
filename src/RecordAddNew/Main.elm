@@ -94,15 +94,15 @@ update msg model patientId =
                 if List.length (getValidationErrors (formInputs model recordType)) > 0 then
                     { model | showValidationErrors = True } ! []
                 else
-                    model ! [ saveForm model patientId SaveCompleted, setUnsavedChanges False, Route.modifyUrl (Route.Records recordType) ]
+                    model ! [ saveForm model patientId SaveCompleted, setUnsavedChanges False ]
 
             SaveCompleted (Ok responseMsg) ->
                 case Functions.getResponseError responseMsg of
                     Just t ->
-                        model ! [ displayErrorMessage t ]
+                        model ! [ displayErrorMessage t, Route.back ]
 
                     Nothing ->
-                        model ! [ displaySuccessMessage "Save completed successfully!" ]
+                        model ! [ displaySuccessMessage "Save completed successfully!", Route.back ]
 
             SaveCompleted (Err t) ->
                 (model ! [ displayErrorMessage (toString t) ])

@@ -13,8 +13,7 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO:
-un-bork Clinical Summary
-	Test two buttons
+past medical history is missing header
 set widths to custom instead of bootstrap ( see test4 bug)	
 change over new record button to + button
 re-implement bug fixes reported

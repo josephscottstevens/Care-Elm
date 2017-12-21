@@ -1,4 +1,4 @@
-module Common.Route exposing (Route(..), getPatientId, fromLocation, href, modifyUrl)
+module Common.Route exposing (Route(..), getPatientId, fromLocation, href, modifyUrl, back)
 
 import Navigation
 import Common.Types as Common
@@ -139,6 +139,11 @@ href route =
 modifyUrl : Route -> Cmd msg
 modifyUrl =
     routeToString >> Navigation.newUrl
+
+
+back : Cmd msg
+back =
+    Navigation.back 1
 
 
 fromLocation : Navigation.Location -> Maybe Route

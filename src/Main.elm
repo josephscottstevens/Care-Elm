@@ -274,7 +274,7 @@ updatePage page msg model =
                 toPage RecordAddNew RecordAddNewMsg RecordAddNew.update subMsg subModel
 
             _ ->
-                { model | page = Error <| "Missing Page Message" ++ toString msg ++ " - " ++ toString page } ! []
+                { model | page = Error <| "Missing Page\\Message " ++ toString page ++ " !!!__-__!!! " ++ toString msg } ! []
 
 
 getDropDowns : Int -> (Result Http.Error AddEditDataSource -> msg) -> Cmd msg
