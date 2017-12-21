@@ -3,9 +3,9 @@ module Common.Grid exposing (..)
 import Html exposing (Html, text, div, button, input, span, th, li, ul, a)
 import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked, hidden, id, disabled)
 import Html.Events as Events
-import Table
 import Common.Types exposing (FilterState)
 import Common.Functions exposing (isAlpha)
+import Common.Table as Table
 import Json.Decode as Json
 
 

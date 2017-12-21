@@ -1,6 +1,6 @@
 module Billing.Types exposing (..)
 
-import Table
+import Common.Table as Table
 import Http
 
 

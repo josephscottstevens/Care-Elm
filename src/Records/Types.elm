@@ -1,6 +1,6 @@
 module Records.Types exposing (Model, RecordRow, Filters, emptyModel)
 
-import Table
+import Common.Table as Table
 import Common.Types exposing (RecordType)
 
 

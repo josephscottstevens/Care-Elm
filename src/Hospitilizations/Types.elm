@@ -1,6 +1,6 @@
 module Hospitilizations.Types exposing (Model, Filters, emptyModel)
 
-import Table
+import Common.Table as Table
 import Common.Types exposing (HospitilizationsRow)
 
 

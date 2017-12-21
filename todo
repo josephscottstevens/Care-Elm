@@ -13,6 +13,7 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO:
+change the default content block to be what is active (on loading)
 change over new record button to + button
 currently save is ignoring errors
 Fix PastMedicalHistory grid header (too tall)

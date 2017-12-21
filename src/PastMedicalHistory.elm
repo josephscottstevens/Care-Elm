@@ -14,7 +14,7 @@ import Common.Ports exposing (setUnsavedChanges)
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
-import Table exposing (defaultCustomizations)
+import Common.Table as Table exposing (defaultCustomizations)
 import Common.Mouse as Mouse
 import Http
 
@@ -165,12 +165,6 @@ view model addEditDataSource =
         Grid ->
             div []
                 [ h4 [] [ text "Past Medical History" ]
-                , case addEditDataSource of
-                    Just t ->
-                        button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick <| Add t ] [ text "New Record" ]
-
-                    Nothing ->
-                        button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5 disabled" ] [ text "New Record" ]
                 , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view (config addEditDataSource) model.tableState model.rows ]
                 ]
@@ -251,13 +245,26 @@ dropdownItems rowId addEditDataSource =
 
 config : Maybe AddEditDataSource -> Table.Config PastMedicalHistoryRow Msg
 config addEditDataSource =
-    Table.customConfig
-        { toId = \t -> toString t.id
-        , toMsg = SetTableState
-        , columns = getColumns addEditDataSource
-        , customizations =
-            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = standardTheadNoFilters }
-        }
+    let
+        buttons =
+            case addEditDataSource of
+                Just t ->
+                    [ ( "e-addnew", onClick (Add t) ) ]
+
+                Nothing ->
+                    []
+    in
+        Table.customConfig
+            { toId = \t -> toString t.id
+            , toMsg = SetTableState
+            , columns = getColumns addEditDataSource
+            , customizations =
+                { defaultCustomizations
+                    | tableAttrs = standardTableAttrs "RecordTable"
+                    , thead = standardTheadNoFilters
+                    , theadButtons = buttons
+                }
+            }
 
 
 decodePastMedicalHistoryRow : Decode.Decoder PastMedicalHistoryRow

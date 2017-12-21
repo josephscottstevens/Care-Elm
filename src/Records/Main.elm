@@ -5,7 +5,7 @@ import Records.Types exposing (Model, RecordRow)
 import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
-import Table exposing (stringColumn, defaultCustomizations)
+import Common.Table as Table exposing (stringColumn, defaultCustomizations)
 import Common.Grid exposing (hrefColumn, checkColumn)
 import Common.Types as Common
 import Common.Functions as Functions exposing (displaySuccessMessage, displayErrorMessage)

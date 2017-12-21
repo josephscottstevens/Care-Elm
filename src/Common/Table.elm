@@ -164,6 +164,28 @@ You provide the following information in your table configuration:
 [??]: ?? "??"
 [??]: ?? "??"
 [??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
 
 -}
 config :
@@ -450,6 +472,9 @@ that.
 view : Config data msg -> State -> List data -> Html msg
 view (Config { toId, toMsg, columns, customizations }) state data =
     let
+        cols =
+            List.length columns
+
         sortedData =
             sort state columns data
 
@@ -459,12 +484,24 @@ view (Config { toId, toMsg, columns, customizations }) state data =
         thead =
             Html.thead theadDetails.attributes theadDetails.children
 
+        aClass t =
+            Attr.class ("e-addnewitem e-toolbaricons e-icon " ++ t)
+
+        thClass =
+            Attr.class "e-columnheader e-default e-filterbarcell Description-Column"
+
+        aStyle =
+            Attr.style [ ( "cursor", "pointer" ) ]
+
+        thStyle =
+            Attr.style [ ( "width", "100%" ) ]
+
         theadbuttonsDetails =
             customizations.theadButtons
-                |> List.map (\( t, attr ) -> Html.a [ Attr.class ("e-addnewitem e-toolbaricons e-icon " ++ t), attr, Attr.style [ ( "cursor", "pointer" ) ] ] [])
+                |> List.map (\( t, event ) -> Html.a [ aClass t, aStyle, event ] [])
 
         theadbuttons =
-            Html.thead theadDetails.attributes [ Html.tr [] theadbuttonsDetails ]
+            Html.thead theadDetails.attributes [ Html.th [ thClass, thStyle, Attr.colspan cols ] theadbuttonsDetails ]
 
         tbody =
             Keyed.node "tbody" customizations.tbodyAttrs <|
@@ -481,10 +518,10 @@ view (Config { toId, toMsg, columns, customizations }) state data =
         Html.table customizations.tableAttrs <|
             case customizations.caption of
                 Nothing ->
-                    thead :: withFoot
+                    theadbuttons :: thead :: withFoot
 
                 Just { attributes, children } ->
-                    Html.caption attributes children :: thead :: withFoot
+                    Html.caption attributes children :: theadbuttons :: thead :: withFoot
 
 
 toHeaderInfo : State -> (State -> msg) -> ColumnData data msg -> ( String, Status, Attribute msg )
