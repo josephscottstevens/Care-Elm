@@ -92,7 +92,7 @@ monthDropdown =
     , DropdownItem (Just 5) "June"
     , DropdownItem (Just 6) "July"
     , DropdownItem (Just 7) "August"
-    , DropdownItem (Just 8) "May"
+    , DropdownItem (Just 8) "September"
     , DropdownItem (Just 9) "October"
     , DropdownItem (Just 10) "November"
     , DropdownItem (Just 11) "December"

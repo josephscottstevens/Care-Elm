@@ -7,15 +7,16 @@ import Common.Html exposing (InputControlType(HtmlElement, AreaInput, Dropdown),
 import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown, DropdownItem)
 import Common.Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, postRequest)
 import Common.Types exposing (monthDropdown)
-import Common.Dropdown as Dropdown
-import Common.Mouse as Mouse
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required)
 
 
-port clinicalSummaryUpdate : (SyncfusionData -> msg) -> Sub msg
+port updateSyncfusionData : (SyncfusionData -> msg) -> Sub msg
+
+
+port clinicalSummaryUpdate : (String -> msg) -> Sub msg
 
 
 port clinicalSummaryInit : SyncfusionData -> Cmd msg
@@ -30,7 +31,9 @@ port generateCarePlanLetter : Maybe Int -> Cmd msg
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
-        [ clinicalSummaryUpdate UpdateClinicalSummary ]
+        [ updateSyncfusionData UpdateSyncfusionData
+        , clinicalSummaryUpdate UpdateClinicalSummary
+        ]
 
 
 type alias Model =
@@ -54,7 +57,7 @@ init patientId =
                 |> Http.send LoadData
 
         loadDropdowns =
-            clinicalSummaryInit (SyncfusionData monthDropdown yearDropdown 0 0 "")
+            clinicalSummaryInit (SyncfusionData monthDropdown yearDropdown 0 0)
     in
         Cmd.batch [ getInitData, loadDropdowns ]
 
@@ -66,7 +69,8 @@ type Msg
     | UpdateCodeLegalStatus String
     | UpdateImpairment String
     | UpdateComments String
-    | UpdateClinicalSummary SyncfusionData
+    | UpdateClinicalSummary String
+    | UpdateSyncfusionData SyncfusionData
     | GenerateInstructions
     | Save
     | SaveCompleted (Result Http.Error String)
@@ -99,8 +103,11 @@ update msg model patientId =
         LoadData (Err t) ->
             model ! [ displayErrorMessage (toString t) ]
 
+        UpdateSyncfusionData t ->
+            { model | syncfusionData = t } ! []
+
         UpdateClinicalSummary t ->
-            { model | syncfusionData = t, summary = t.summaryText } ! []
+            { model | summary = t } ! []
 
         GenerateInstructions ->
             model ! [ generateInstructions model.syncfusionData ]
@@ -211,7 +218,6 @@ type alias SyncfusionData =
     , years : List DropdownItem
     , currentMonth : Int
     , currentYear : Int
-    , summaryText : String
     }
 
 
@@ -224,5 +230,5 @@ emptyModel =
     , codeLegalStatus = ""
     , impairment = ""
     , summary = ""
-    , syncfusionData = SyncfusionData monthDropdown yearDropdown 0 0 ""
+    , syncfusionData = SyncfusionData monthDropdown yearDropdown 0 0
     }
