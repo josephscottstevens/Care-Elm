@@ -182,12 +182,6 @@ view model =
                         div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
                     else
                         div [] []
-
-                saveBtnClass =
-                    class "btn btn-sm btn-success margin-left-5 pull-right"
-
-                cancelBtnClass =
-                    class "btn btn-sm btn-default pull-right"
             in
                 div [ class "form-horizontal" ]
                     [ h4 [] [ text (Functions.getDesc model.recordType) ]
@@ -195,8 +189,8 @@ view model =
                     , makeControls defaultConfig (formInputs model model.recordType)
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
-                            [ button [ type_ "button", onClick (Save model.recordType), saveBtnClass ] [ text "Save" ]
-                            , button [ type_ "button", onClick (Cancel model.recordType), cancelBtnClass ] [ text "Cancel" ]
+                            [ button [ type_ "button", onClick (Save model.recordType), class "btn btn-sm btn-success" ] [ text "Save" ]
+                            , button [ type_ "button", onClick (Cancel model.recordType), class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
                             ]
                         ]
                     ]

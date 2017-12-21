@@ -10,6 +10,7 @@ import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters, rowDrop
 import Common.Ports exposing (sendMenuMessage)
 import Common.Dropdown as Dropdown
 import Common.Route as Route
+import Common.Ports exposing (setUnsavedChanges)
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
@@ -38,6 +39,7 @@ type alias Model =
     { rows : List PastMedicalHistoryRow
     , tableState : Table.State
     , state : State
+    , showValidationErrors : Bool
     }
 
 
@@ -82,14 +84,18 @@ update msg model patientId =
             { model | state = Grid } ! []
 
         Save row ->
-            model
-                ! [ "People/AddUpdatePastMedicalHistories"
-                        |> Functions.postRequest (encodeNewRow row patientId)
-                        |> Http.send SaveCompleted
-                  ]
+            if List.length (getValidationErrors (formInputs row)) > 0 then
+                { model | showValidationErrors = True } ! []
+            else
+                model
+                    ! [ "People/AddUpdatePastMedicalHistories"
+                            |> Functions.postRequest (encodeNewRow row patientId)
+                            |> Http.send SaveCompleted
+                      , setUnsavedChanges False
+                      ]
 
         SaveCompleted (Ok _) ->
-            { model | state = Grid } ! [ displaySuccessMessage "Clinical Summary Saved Successfully!", init patientId ]
+            { model | state = Grid } ! [ displaySuccessMessage "Past Medical History Saved Successfully!", init patientId ]
 
         SaveCompleted (Err t) ->
             { model | state = Grid } ! [ displayErrorMessage (toString t) ]
@@ -158,7 +164,8 @@ view model addEditDataSource =
     case model.state of
         Grid ->
             div []
-                [ case addEditDataSource of
+                [ h4 [] [ text "Past Medical History" ]
+                , case addEditDataSource of
                     Just t ->
                         button [ type_ "button", class "btn btn-sm btn-default margin-bottom-5", onClick <| Add t ] [ text "New Record" ]
 
@@ -174,13 +181,10 @@ view model addEditDataSource =
                     getValidationErrors (formInputs newRecord)
 
                 validationErrorsDiv =
-                    if newRecord.showValidationErrors == True && List.length errors > 0 then
+                    if model.showValidationErrors == True && List.length errors > 0 then
                         div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
                     else
                         div [] []
-
-                saveBtnClass =
-                    class "btn btn-sm btn-success margin-left-5 pull-right"
             in
                 div [ class "form-horizontal" ]
                     [ validationErrorsDiv
@@ -188,8 +192,8 @@ view model addEditDataSource =
                     , makeControls defaultConfig (formInputs newRecord)
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
-                            [ button [ type_ "button", id "Save", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
-                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                            [ button [ type_ "button", onClick (Save newRecord), class "btn btn-sm btn-success" ] [ text "Save" ]
+                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
                             ]
                         ]
                     ]
@@ -304,8 +308,7 @@ newRecord : AddEditDataSource -> Maybe PastMedicalHistoryRow -> NewRecord
 newRecord addEditDataSource pastMedicalHistoryRow =
     case pastMedicalHistoryRow of
         Just row ->
-            { showValidationErrors = False
-            , id = row.id
+            { id = row.id
             , description = row.description
             , year = row.year
             , facility = row.facility
@@ -316,8 +319,7 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             }
 
         Nothing ->
-            { showValidationErrors = False
-            , id = -1
+            { id = -1
             , description = ""
             , year = ""
             , facility = ""
@@ -329,8 +331,7 @@ newRecord addEditDataSource pastMedicalHistoryRow =
 
 
 type alias NewRecord =
-    { showValidationErrors : Bool
-    , id : Int
+    { id : Int
     , description : String
     , year : String
     , facility : String
@@ -346,6 +347,7 @@ emptyModel =
     { rows = []
     , tableState = Table.initialSort ""
     , state = Grid
+    , showValidationErrors = False
     }
 
 

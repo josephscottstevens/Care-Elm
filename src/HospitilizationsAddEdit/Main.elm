@@ -109,8 +109,8 @@ view model =
             , makeControls defaultConfig (formInputs model)
             , div [ class "form-group" ]
                 [ div [ class fullWidth ]
-                    [ button [ type_ "button", id "Save", value "AddNewRecord", onClick Save, saveBtnClass ] [ text "Save" ]
-                    , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default pull-right" ] [ text "Cancel" ]
+                    [ button [ type_ "button", onClick Save, class "btn btn-sm btn-success" ] [ text "Save" ]
+                    , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
                     ]
                 ]
             ]
