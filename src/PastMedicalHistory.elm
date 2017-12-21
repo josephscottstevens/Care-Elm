@@ -1,6 +1,6 @@
 port module PastMedicalHistory exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
 
-import Html exposing (Html, text, div, button, input)
+import Html exposing (Html, text, div, button, input, h4)
 import Html.Attributes exposing (class, id, style, type_, disabled, value)
 import Html.Events exposing (onClick)
 import Common.Html exposing (InputControlType(TextInput, AreaInput, Dropdown, HtmlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
@@ -9,6 +9,7 @@ import Common.Functions as Functions exposing (displayErrorMessage, displaySucce
 import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters, rowDropDownDiv)
 import Common.Ports exposing (sendMenuMessage)
 import Common.Dropdown as Dropdown
+import Common.Route as Route
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
@@ -124,7 +125,7 @@ update msg model patientId =
         DeleteCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ Functions.displayErrorMessage t ]
+                    model ! [ Functions.displayErrorMessage t, Route.refresh ]
 
                 Nothing ->
                     model ! [ Functions.displaySuccessMessage "Record deleted successfully!" ]
@@ -183,6 +184,7 @@ view model addEditDataSource =
             in
                 div [ class "form-horizontal" ]
                     [ validationErrorsDiv
+                    , h4 [] [ text "Past Medical History" ]
                     , makeControls defaultConfig (formInputs newRecord)
                     , div [ class "form-group" ]
                         [ div [ class fullWidth ]
@@ -204,15 +206,21 @@ getColumns addEditDataSource =
     ]
 
 
+noteStyle : Html.Attribute msg
+noteStyle =
+    style [ ( "color", "#969696" ), ( "font-size", "12px" ) ]
+
+
 formInputs : NewRecord -> List (InputControlType Msg)
 formInputs newRecord =
-    [ AreaInput "Description" Required newRecord.description (UpdateDescription newRecord)
+    [ HtmlElement "" (div [ noteStyle ] [ text "*Records added from the problem list cannot be edited." ])
+    , AreaInput "Description" Required newRecord.description (UpdateDescription newRecord)
     , TextInput "Year" Optional newRecord.year (UpdateYear newRecord)
     , Dropdown "Provider" Optional newRecord.providerDropdown (UpdateProvider newRecord)
     , TextInput "Facility" Optional newRecord.facility (UpdateFacility newRecord)
     , TextInput "Notes" Optional newRecord.notes (UpdateNotes newRecord)
     , HtmlElement "Treatment" (input [ type_ "textbox", class "e-textbox", disabled True, value newRecord.treatment ] [])
-    , HtmlElement "" (div [ style [ ( "color", "#969696" ), ( "font-size", "12px" ) ] ] [ text "*Treatment is deprecated." ])
+    , HtmlElement "" (div [ noteStyle ] [ text "*Treatment is deprecated." ])
     ]
 
 

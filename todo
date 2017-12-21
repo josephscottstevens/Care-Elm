@@ -13,7 +13,7 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO:
-past medical history is missing header
+left align save\cancel buttons
 set widths to custom instead of bootstrap ( see test4 bug)	
 change over new record button to + button
 re-implement bug fixes reported
