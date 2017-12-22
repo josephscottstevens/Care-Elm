@@ -3,10 +3,9 @@ port module ClinicalSummary exposing (Msg, Model, subscriptions, init, update, v
 import Html exposing (Html, text, div, button, h4, input)
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
-import Common.Html exposing (InputControlType(HtmlElement, AreaInput, Dropdown), makeControls)
+import Common.Html exposing (InputControlType(HtmlElement, AreaInput), makeControls)
 import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown, DropdownItem)
 import Common.Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, postRequest)
-import Common.Types exposing (monthDropdown)
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode

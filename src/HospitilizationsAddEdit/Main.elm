@@ -3,7 +3,7 @@ port module HospitilizationsAddEdit.Main exposing (Msg, subscriptions, init, upd
 import HospitilizationsAddEdit.Functions exposing (getHospitilizationsInitData, saveForm)
 import HospitilizationsAddEdit.Types exposing (Model, SyncfusionData)
 import Html exposing (Html, text, div, button)
-import Html.Attributes exposing (class, id, value, type_)
+import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Common.Html
     exposing
@@ -100,9 +100,6 @@ view model =
                 div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
             else
                 div [] []
-
-        saveBtnClass =
-            class "btn btn-sm btn-success margin-left-5 pull-right"
     in
         div [ class "form-horizontal" ]
             [ validationErrorsDiv

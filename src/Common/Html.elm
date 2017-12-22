@@ -1,11 +1,46 @@
-module Common.Html exposing (fullWidth, labelWidth, controlWidth, InputControlType(..), makeControls, getValidationErrors, defaultConfig)
+module Common.Html
+    exposing
+        ( fullWidth
+        , labelWidth
+        , controlWidth
+        , InputControlType
+            ( TextInput
+            , NumrInput
+            , CheckInput
+            , AreaInput
+            , KnockInput
+            , DropInput
+            , DropInputWithButton
+            , DateInput
+            , FileInput
+            , HtmlElement
+            , Dropdown
+            )
+        , makeControls
+        , getValidationErrors
+        , defaultConfig
+        )
 
 import Html exposing (Html, text, div, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, readonly, style, checked)
 import Html.Events exposing (onInput, onCheck)
-import Common.Functions exposing (..)
+import Common.Functions exposing (isAlpha)
 import Common.Types as Common
 import Common.Dropdown as Dropdown
+
+
+type InputControlType msg
+    = TextInput String Common.RequiredType String (String -> msg)
+    | NumrInput String Common.RequiredType Int (String -> msg)
+    | CheckInput String Common.RequiredType Bool (Bool -> msg)
+    | AreaInput String Common.RequiredType String (String -> msg)
+    | KnockInput String Common.RequiredType String
+    | DropInput String Common.RequiredType (Maybe Int) String
+    | DropInputWithButton String Common.RequiredType (Maybe Int) String String
+    | DateInput String Common.RequiredType String String
+    | FileInput String Common.RequiredType String
+    | HtmlElement String (Html msg)
+    | Dropdown String Common.RequiredType Dropdown.Dropdown (Dropdown.Msg -> msg)
 
 
 forId : String -> Html.Attribute msg
@@ -52,20 +87,6 @@ defaultConfig : Config msg
 defaultConfig =
     { controlAttributes = [ class controlWidth ]
     }
-
-
-type InputControlType msg
-    = TextInput String Common.RequiredType String (String -> msg)
-    | NumrInput String Common.RequiredType Int (String -> msg)
-    | CheckInput String Common.RequiredType Bool (Bool -> msg)
-    | AreaInput String Common.RequiredType String (String -> msg)
-    | KnockInput String Common.RequiredType String
-    | DropInput String Common.RequiredType (Maybe Int) String
-    | DropInputWithButton String Common.RequiredType (Maybe Int) String String
-    | DateInput String Common.RequiredType String String
-    | FileInput String Common.RequiredType String
-    | HtmlElement String (Html msg)
-    | Dropdown String Common.RequiredType Dropdown.Dropdown (Dropdown.Msg -> msg)
 
 
 makeControls : Config msg -> List (InputControlType msg) -> Html msg

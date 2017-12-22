@@ -1,16 +1,15 @@
 port module PastMedicalHistory exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
 
 import Html exposing (Html, text, div, button, input, h4)
-import Html.Attributes exposing (class, id, style, type_, disabled, value)
+import Html.Attributes exposing (class, style, type_, disabled, value)
 import Html.Events exposing (onClick)
 import Common.Html exposing (InputControlType(TextInput, AreaInput, Dropdown, HtmlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
 import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
 import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters, rowDropDownDiv)
-import Common.Ports exposing (sendMenuMessage)
+import Common.Ports exposing (sendMenuMessage, setUnsavedChanges)
 import Common.Dropdown as Dropdown
 import Common.Route as Route
-import Common.Ports exposing (setUnsavedChanges)
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)

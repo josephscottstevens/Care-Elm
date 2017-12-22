@@ -100,31 +100,6 @@ onClick message =
 
 
 
--- styles for main input field
-
-
-dropdownInput : List ( String, String )
-dropdownInput =
-    [ ( "padding", "6px 12px 8px 15px" )
-    , ( "margin", "0" )
-    , ( "border", "1px solid rgba(0,0,0,.17)" )
-    , ( "border-radius", "4px" )
-    , ( "background-color", "white" )
-    , ( "display", "flex" )
-    , ( "alignItems", "center" )
-    ]
-
-
-
--- disabled style
-
-
-dropdownDisabled : List ( String, String )
-dropdownDisabled =
-    [ ( "color", "rgba(0,0,0,.54" ) ]
-
-
-
 -- styles for list container
 
 

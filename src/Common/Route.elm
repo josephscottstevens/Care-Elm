@@ -4,7 +4,7 @@ import Navigation
 import Common.Types as Common
 import Html exposing (Attribute)
 import Html.Attributes as Attr
-import UrlParser as Url exposing ((</>), (<?>), Parser, oneOf, parseHash, s, int, string, parsePath, intParam)
+import UrlParser as Url exposing ((</>), (<?>), Parser, oneOf, parseHash, s, int, parsePath, intParam)
 
 
 type Route

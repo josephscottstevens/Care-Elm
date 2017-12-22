@@ -1,4 +1,39 @@
-port module Common.Functions exposing (..)
+port module Common.Functions
+    exposing
+        ( setLoadingStatus
+        , displaySuccessMessage
+        , displayErrorMessage
+        , error
+        , isAlpha
+        , defaultMaybeMsg
+        , defaultString
+        , defaultLower
+        , defaultBool
+        , defaultInt
+        , defaultIntToString
+        , dateTimeToString
+        , dateToString
+        , dateTime
+        , date
+        , defaultDateTime
+        , defaultDate
+        , defaultLowerDate
+        , defaultLowerDateTime
+        , defaultIntStr
+        , maybeVal
+        , maybeToDateString
+        , maybeStringToInt
+        , getResponseError
+        , decodeDropdownItem
+        , closeDropdowns
+        , flipDropdownOpen
+        , anyDropdownOpon
+        , shouldBlur
+        , postRequest
+        , getDesc
+        , getRecordTypeById
+        , getId
+        )
 
 import Char exposing (isLower, isUpper)
 import Date
@@ -8,7 +43,23 @@ import Json.Decode as Decode exposing (Decoder, maybe, string, int, field, decod
 import Http
 import Json.Decode.Pipeline exposing (required, decode)
 import Http
-import Common.Types exposing (DropdownItem, AddEditDataSource, RecordType(..))
+import Common.Types
+    exposing
+        ( DropdownItem
+        , AddEditDataSource
+        , RecordType
+            ( PrimaryCare
+            , Specialty
+            , Labs
+            , Radiology
+            , Hospitalizations
+            , Legal
+            , CallRecordings
+            , PreviousHistories
+            , Enrollment
+            , Misc
+            )
+        )
 import Common.Route as Route exposing (Route)
 
 
