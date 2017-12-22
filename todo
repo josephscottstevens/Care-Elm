@@ -132,3 +132,28 @@ select * from ptn.Records order by ReceivedAt desc
 --UPDATE dbo.NavigationItems SET [Href] = '/people/records/_enrollment' WHERE [Id] = 64
 --UPDATE dbo.NavigationItems SET [Href] = '/people/records/_misc' WHERE [Id] = 65
 --GO
+----------------------------------------------
+
+
+
+update NavigationItemRoles 
+set RoleId = 5
+where Id = 707
+
+GO
+
+update NavigationItemRoles 
+set RoleId = 5
+where Id = 680
+
+GO
+
+update prefixes 
+set [Description] ='Single or Married Woman'
+where id = 22
+
+GO
+
+INSERT INTO NavigationItemRoles VALUES(9, 43)
+
+GO
