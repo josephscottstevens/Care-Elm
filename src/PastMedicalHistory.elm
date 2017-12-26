@@ -13,7 +13,6 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Common.Table as Table exposing (defaultCustomizations)
-import Common.Mouse as Mouse
 import Http
 
 
@@ -24,7 +23,6 @@ subscriptions : Sub Msg
 subscriptions =
     Sub.batch
         [ deletePastMedicalHistoryConfirmed DeletePastMedicalHistoryConfirmed
-        , Mouse.clicks Blur
         ]
 
 
@@ -55,7 +53,6 @@ type Msg
     | SaveCompleted (Result Http.Error String)
     | Add AddEditDataSource
     | Edit AddEditDataSource Int
-    | Blur Mouse.Position
     | SetTableState Table.State
     | DropDownToggle Int
     | DeletePastMedicalHistoryConfirmed Int
@@ -107,14 +104,6 @@ update msg model patientId =
                     model.rows |> List.filter (\t -> t.id == rowId) |> List.head
             in
                 { model | state = AddEdit (newRecord addEditDataSource row) } ! []
-
-        Blur position ->
-            case model.state of
-                Grid ->
-                    { model | rows = Functions.closeDropdowns model.rows position.target } ! []
-
-                AddEdit newRecord ->
-                    { model | state = AddEdit { newRecord | providerDropdown = Dropdown.close newRecord.providerDropdown } } ! []
 
         SetTableState newState ->
             { model | tableState = newState } ! []

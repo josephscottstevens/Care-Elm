@@ -1,8 +1,8 @@
-module Common.Dropdown exposing (Dropdown, init, Msg(ItemPicked, SetOpenState), update, view, close)
+module Common.Dropdown exposing (Dropdown, Msg, init, update, view)
 
 import Html exposing (Html, Attribute, div, span, text, li, ul, input)
 import Html.Attributes exposing (style, value, class, readonly)
-import Html.Events exposing (onWithOptions)
+import Html.Events exposing (onWithOptions, onBlur, onMouseEnter)
 import Json.Decode as Json
 import Common.Types exposing (DropdownItem)
 
@@ -16,27 +16,33 @@ type alias Dropdown =
 
 init : List DropdownItem -> Maybe Int -> String -> Dropdown
 init list dropId dropVal =
-    Dropdown False (DropdownItem dropId dropVal) list
+    { isOpen = False
+    , dropdownItem = DropdownItem dropId dropVal
+    , dropdownSource = list
+    }
 
 
 type Msg
     = ItemPicked DropdownItem
+    | ItemEntered DropdownItem
     | SetOpenState Bool
-
-
-close : Dropdown -> Dropdown
-close dropdown =
-    { dropdown | isOpen = False }
+    | OnBlur
 
 
 update : Msg -> Dropdown -> Dropdown
 update msg dropdown =
     case msg of
         ItemPicked item ->
-            Dropdown False item dropdown.dropdownSource
+            { dropdown | dropdownItem = item, isOpen = False }
+
+        ItemEntered item ->
+            { dropdown | dropdownItem = item }
 
         SetOpenState newState ->
-            Dropdown newState dropdown.dropdownItem dropdown.dropdownSource
+            { dropdown | isOpen = newState }
+
+        OnBlur ->
+            { dropdown | isOpen = False }
 
 
 view : Dropdown -> Html Msg
@@ -66,10 +72,14 @@ view dropdown =
             style [ ( "width", "100%" ) ]
     in
         div []
-            [ span [ onClick <| SetOpenState <| not dropdown.isOpen, class ("e-ddl e-widget " ++ activeClass), dropInputWidth ]
+            [ span
+                [ onClick (SetOpenState (not dropdown.isOpen))
+                , class ("e-ddl e-widget " ++ activeClass)
+                , dropInputWidth
+                ]
                 [ span
                     [ class "e-in-wrap e-box" ]
-                    [ input [ class "e-input", readonly True, value dropdown.dropdownItem.name ] []
+                    [ input [ class "e-input", readonly True, value dropdown.dropdownItem.name, onBlur OnBlur ] []
                     , span [ class "e-select" ]
                         [ span [ class "e-icon e-arrow-sans-down" ] []
                         ]
@@ -88,7 +98,12 @@ viewItem numItems item =
         dropLiStyle =
             style [ ( "width", toString width ++ "px" ) ]
     in
-        li [ onClick (ItemPicked item), class "dropdown-li", dropLiStyle ]
+        li
+            [ onClick (ItemPicked item)
+            , onMouseEnter (ItemEntered item)
+            , class "dropdown-li"
+            , dropLiStyle
+            ]
             [ text item.name ]
 
 
