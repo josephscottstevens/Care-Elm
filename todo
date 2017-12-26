@@ -13,19 +13,11 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO:
-change the default content block to be what is active (on loading)
 change over new record button to + button
-currently save is ignoring errors
-Fix PastMedicalHistory grid header (too tall)
-validation looks like it has missing stuff
 
-test hospitilizations addedit
-test validation logic records
-test validation logic hospitilizations
-
-hospitilizations loading not showing 
 scroll to top if validation fails?
 loading \ refresh looks wonky now :/
+records > Hospitalizations is broken again :'(
 
 try refreshing this url
 	https://localhost:44336/people?patientId=1#/people/_hospitalizations/add

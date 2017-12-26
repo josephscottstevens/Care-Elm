@@ -181,7 +181,7 @@ setRoute maybeRoute model =
                     Nothing ->
                         -- aka, if user refreshes on the add screen, can't do much since there is no data source for dropdowns
                         { model | page = Hospitilizations Hospitilizations.emptyModel }
-                            ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
+                            ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
             Just (Route.HospitilizationsEdit rowId) ->
                 let
@@ -218,7 +218,7 @@ setRoute maybeRoute model =
                     Nothing ->
                         -- aka, if user refreshes on the add\edit screen, can't do much since there is no data source for dropdowns
                         { model | page = Records (Records.Types.emptyModel t) }
-                            ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
+                            ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []
