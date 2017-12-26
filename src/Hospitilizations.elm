@@ -1,12 +1,12 @@
 port module Hospitilizations exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
-import Html exposing (Html, text, div, button)
-import Html.Attributes exposing (class, type_)
+import Html exposing (Html, text, div)
+import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Common.Table as Table exposing (defaultCustomizations)
-import Common.Grid exposing (checkColumn, standardTableAttrs, standardThead, rowDropDownDiv, standardTheadNoFilters)
-import Common.Types exposing (MenuMessage, FilterState, AddEditDataSource, HospitilizationsRow)
-import Common.Functions as Functions exposing (defaultString, defaultDate, defaultLower)
+import Common.Grid exposing (checkColumn, standardTableAttrs, rowDropDownDiv, standardTheadNoFilters)
+import Common.Types exposing (MenuMessage, AddEditDataSource, HospitilizationsRow)
+import Common.Functions as Functions exposing (defaultString, defaultDate)
 import Common.Ports exposing (sendMenuMessage)
 import Common.Route as Route
 import Common.Mouse as Mouse
@@ -168,7 +168,7 @@ config addEditDataSource =
     let
         buttons =
             case addEditDataSource of
-                Just t ->
+                Just _ ->
                     [ ( "e-addnew", onClick Add ) ]
 
                 Nothing ->
