@@ -5,9 +5,8 @@ import Html.Attributes exposing (class, style, type_, disabled, value)
 import Html.Events exposing (onClick)
 import Common.Html exposing (InputControlType(TextInput, AreaInput, Dropdown, HtmlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
 import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage)
-import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
+import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
 import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters, rowDropDownDiv)
-import Common.Ports exposing (sendMenuMessage, setUnsavedChanges)
 import Common.Dropdown as Dropdown
 import Common.Route as Route
 import Json.Decode as Decode

@@ -30,10 +30,6 @@ consolidate HandleSuccessResponse \ ErroResponse with json parse
 consolidate delete Row port \ subscription
 remove dropDownToggle port
 scroll to top when displaying validation errors
-Move ports file to Common
-trim down ports (find out which ones are un-used)
-Change record ports over to the single port pair
-common ports are fine, but not everything should go there
 Perhaps try to connect hospitilizations into the other one
 Change all import \ export to be explicit
 clean up Filters... recordId vs id?

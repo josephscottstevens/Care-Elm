@@ -14,8 +14,7 @@ import Common.Html
         , makeControls
         )
 import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, HospitilizationsRow)
-import Common.Functions as Functions exposing (defaultString)
-import Common.Ports exposing (setUnsavedChanges)
+import Common.Functions as Functions exposing (setUnsavedChanges, defaultString)
 import Common.Route as Route
 import Http
 

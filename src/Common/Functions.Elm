@@ -33,6 +33,8 @@ port module Common.Functions
         , getDesc
         , getRecordTypeById
         , getId
+        , sendMenuMessage
+        , setUnsavedChanges
         )
 
 import Char exposing (isLower, isUpper)
@@ -47,6 +49,7 @@ import Common.Types
     exposing
         ( DropdownItem
         , AddEditDataSource
+        , MenuMessage
         , RecordType
             ( PrimaryCare
             , Specialty
@@ -70,6 +73,12 @@ port displaySuccessMessage : String -> Cmd msg
 
 
 port displayErrorMessage : String -> Cmd msg
+
+
+port sendMenuMessage : MenuMessage -> Cmd msg
+
+
+port setUnsavedChanges : Bool -> Cmd msg
 
 
 error : Http.Error -> Maybe Route

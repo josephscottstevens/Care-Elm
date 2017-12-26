@@ -14,8 +14,7 @@ import Common.Html
         , InputControlType(DropInput, TextInput, AreaInput, DateInput, FileInput, DropInputWithButton, KnockInput, CheckInput, NumrInput)
         )
 import Common.Types as Common exposing (RequiredType(Required, Optional))
-import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, defaultString)
-import Common.Ports exposing (setUnsavedChanges)
+import Common.Functions as Functions exposing (setUnsavedChanges, displayErrorMessage, displaySuccessMessage, defaultString)
 import Common.Route as Route
 import Http
 

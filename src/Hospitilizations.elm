@@ -6,8 +6,7 @@ import Html.Events exposing (onClick)
 import Common.Table as Table exposing (defaultCustomizations)
 import Common.Grid exposing (checkColumn, standardTableAttrs, rowDropDownDiv, standardTheadNoFilters)
 import Common.Types exposing (MenuMessage, AddEditDataSource, HospitilizationsRow)
-import Common.Functions as Functions exposing (defaultString, defaultDate)
-import Common.Ports exposing (sendMenuMessage)
+import Common.Functions as Functions exposing (defaultString, defaultDate, sendMenuMessage)
 import Common.Route as Route
 import Common.Mouse as Mouse
 import Http

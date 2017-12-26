@@ -6,8 +6,7 @@ import Html.Events exposing (onClick)
 import Common.Table as Table exposing (stringColumn, defaultCustomizations)
 import Common.Grid exposing (hrefColumn, checkColumn, rowDropDownDiv)
 import Common.Types as Common
-import Common.Functions as Functions exposing (displaySuccessMessage, displayErrorMessage)
-import Common.Ports exposing (sendMenuMessage)
+import Common.Functions as Functions exposing (sendMenuMessage, displaySuccessMessage, displayErrorMessage)
 import Common.Route as Route
 import Common.Mouse as Mouse
 import Http
