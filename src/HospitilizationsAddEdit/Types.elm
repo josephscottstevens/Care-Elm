@@ -12,14 +12,24 @@ type alias Model =
     }
 
 
-emptyModel : Model
-emptyModel =
-    { sfData = emptySfData
-    , patientReported = False
-    , chiefComplaint = ""
-    , dischargeRecommendations = ""
-    , showValidationErrors = False
-    }
+emptyModel : Maybe HospitilizationsRow -> Model
+emptyModel hospitilizationRow =
+    case hospitilizationRow of
+        Just t ->
+            { sfData = emptySfData
+            , patientReported = t.patientReported
+            , chiefComplaint = t.chiefComplaint
+            , dischargeRecommendations = t.dischargeRecommendations
+            , showValidationErrors = False
+            }
+
+        Nothing ->
+            { sfData = emptySfData
+            , patientReported = False
+            , chiefComplaint = ""
+            , dischargeRecommendations = ""
+            , showValidationErrors = False
+            }
 
 
 emptySfData : SyncfusionData

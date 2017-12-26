@@ -176,7 +176,7 @@ setRoute maybeRoute model =
             Just Route.HospitilizationsAdd ->
                 case model.addEditDataSource of
                     Just t ->
-                        { model | page = HospitilizationsAddEdit HospitilizationsAddEdit.Types.emptyModel }
+                        { model | page = HospitilizationsAddEdit (HospitilizationsAddEdit.Types.emptyModel Nothing) }
                             ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing) ]
 
                     Nothing ->
@@ -199,7 +199,7 @@ setRoute maybeRoute model =
                     case model.addEditDataSource of
                         Just t ->
                             { model
-                                | page = HospitilizationsAddEdit HospitilizationsAddEdit.Types.emptyModel
+                                | page = HospitilizationsAddEdit (HospitilizationsAddEdit.Types.emptyModel x)
                             }
                                 ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t x) ]
 
