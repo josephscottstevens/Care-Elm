@@ -13,7 +13,8 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO:
-change over new record button to + button
+records global dropdown toggle not closing
+	remove window.onclick
 
 scroll to top if validation fails?
 loading \ refresh looks wonky now :/

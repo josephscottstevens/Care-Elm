@@ -109,8 +109,8 @@ pageSubscriptions page =
         ClinicalSummary _ ->
             Sub.map ClinicalSummaryMsg ClinicalSummary.subscriptions
 
-        Records _ ->
-            Sub.map RecordsMsg Records.subscriptions
+        Records t ->
+            Sub.map RecordsMsg (Records.subscriptions t.rows)
 
         RecordAddNew _ ->
             Sub.map RecordAddNewMsg RecordAddNew.subscriptions

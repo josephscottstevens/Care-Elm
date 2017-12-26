@@ -4,11 +4,12 @@ import Html exposing (Html, text, div, h4)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Common.Table as Table exposing (stringColumn, defaultCustomizations)
-import Common.Grid exposing (hrefColumn, checkColumn)
+import Common.Grid exposing (hrefColumn, checkColumn, rowDropDownDiv)
 import Common.Types as Common
 import Common.Functions as Functions exposing (displaySuccessMessage, displayErrorMessage)
-import Common.Ports exposing (dropDownToggle, sendMenuMessage)
+import Common.Ports exposing (sendMenuMessage)
 import Common.Route as Route
+import Common.Mouse as Mouse
 import Http
 import Json.Decode as Decode exposing (Decoder, maybe)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
@@ -20,11 +21,14 @@ port deleteConfirmed : (Int -> msg) -> Sub msg
 port editTask : Int -> Cmd msg
 
 
-subscriptions : Sub Msg
-subscriptions =
+subscriptions : List RecordRow -> Sub Msg
+subscriptions rows =
     Sub.batch
-        [ dropDownToggle DropDownToggle
-        , deleteConfirmed DeleteConfirmed
+        [ deleteConfirmed DeleteConfirmed
+        , if Functions.anyDropdownOpon rows then
+            Mouse.clicks Blur
+          else
+            Sub.none
         ]
 
 
@@ -42,15 +46,6 @@ type alias Model =
     }
 
 
-emptyModel : Common.RecordType -> Model
-emptyModel recordType =
-    { recordType = recordType
-    , rows = []
-    , tableState = Table.initialSort "Date"
-    , dropDownState = -1
-    }
-
-
 view : Model -> Maybe Common.AddEditDataSource -> Html Msg
 view model addEditDataSource =
     div []
@@ -62,9 +57,10 @@ view model addEditDataSource =
 
 type Msg
     = Load (Result Http.Error (List RecordRow))
+    | Blur Mouse.Position
     | SetTableState Table.State
+    | DropDownToggle (Maybe Int)
     | Add
-    | DropDownToggle Int
     | SendMenuMessage Int Common.RecordType String
     | EditTask Int
     | DeleteConfirmed Int
@@ -86,17 +82,17 @@ update msg model _ =
         SetTableState newState ->
             { model | tableState = newState } ! []
 
+        DropDownToggle recordId ->
+            { model | rows = Functions.flipDropdownOpen model.rows recordId } ! []
+
         SendMenuMessage recordId recordType messageType ->
             { model | rows = flipConsent model.rows recordId recordType }
                 ! [ sendMenuMessage (getMenuMessage model.rows recordType recordId messageType) ]
 
-        DropDownToggle recordId ->
-            { model | rows = flipDropDownOpen model.rows recordId } ! []
-
         DeleteConfirmed rowId ->
             let
                 updatedRecords =
-                    model.rows |> List.filter (\t -> t.id /= rowId)
+                    model.rows |> List.filter (\t -> Functions.defaultInt t.id /= rowId)
             in
                 { model | rows = updatedRecords } ! [ deleteRequest rowId DeleteCompleted ]
 
@@ -113,6 +109,12 @@ update msg model _ =
 
         EditTask taskId ->
             model ! [ editTask taskId ]
+
+        Blur position ->
+            { model
+                | rows = Functions.closeDropdowns model.rows position.target
+            }
+                ! []
 
 
 getColumns : Common.RecordType -> List (Table.Column RecordRow Msg)
@@ -200,7 +202,7 @@ rowDropDownColumn : Common.RecordType -> Table.Column RecordRow Msg
 rowDropDownColumn recordType =
     Table.veryCustomColumn
         { name = ""
-        , viewData = \t -> Common.Grid.rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropDownItems recordType t.id)
+        , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle t.id)) (dropDownItems recordType <| Functions.defaultInt t.id)
         , sorter = Table.unsortable
         }
 
@@ -269,7 +271,7 @@ dropDownItems recordType rowId =
 decodeRecordRow : Decoder RecordRow
 decodeRecordRow =
     decode RecordRow
-        |> required "Id" Decode.int
+        |> required "Id" (maybe Decode.int)
         |> required "Date" (maybe Decode.string)
         |> required "Specialty" (maybe Decode.string)
         |> required "Comments" (maybe Decode.string)
@@ -319,7 +321,7 @@ deleteRequest rowId deleteCompleted =
 
 
 type alias RecordRow =
-    { id : Int
+    { id : Maybe Int
     , date : Maybe String
     , specialty : Maybe String
     , comments : Maybe String
@@ -347,7 +349,7 @@ type alias RecordRow =
     , staffId : Int
     , staffName : Maybe String
     , hasVerbalConsent : Bool
-    , dropDownOpen : Bool
+    , dropdownOpen : Bool
     }
 
 
@@ -356,7 +358,7 @@ getMenuMessage rows recordType recordId messageType =
     let
         maybeVerbalConsent =
             rows
-                |> List.filter (\t -> t.id == recordId)
+                |> List.filter (\t -> Functions.defaultInt t.id == recordId)
                 |> List.head
                 |> Maybe.map (\t -> not t.hasVerbalConsent)
 
@@ -373,7 +375,7 @@ flipConsent rows recordId recordType =
             rows
                 |> List.map
                     (\t ->
-                        if t.id == recordId then
+                        if Functions.defaultInt t.id == recordId then
                             { t | hasVerbalConsent = not t.hasVerbalConsent }
                         else
                             t
@@ -383,13 +385,10 @@ flipConsent rows recordId recordType =
             rows
 
 
-flipDropDownOpen : List RecordRow -> Int -> List RecordRow
-flipDropDownOpen rows recordId =
-    rows
-        |> List.map
-            (\t ->
-                if t.id == recordId then
-                    { t | dropDownOpen = not t.dropDownOpen }
-                else
-                    { t | dropDownOpen = False }
-            )
+emptyModel : Common.RecordType -> Model
+emptyModel recordType =
+    { recordType = recordType
+    , rows = []
+    , tableState = Table.initialSort "Date"
+    , dropDownState = -1
+    }
