@@ -2,14 +2,13 @@ module Main exposing (main)
 
 import Html exposing (Html, text, div)
 import ClinicalSummary
-import Records.Main as Records
+import Records
 import RecordAddNew.Main as RecordAddNew
 import PastMedicalHistory
 import Hospitilizations
 import HospitilizationsAddEdit.Main as HospitilizationsAddEdit
 import Billing.Types
 import HospitilizationsAddEdit.Types
-import Records.Types
 import RecordAddNew.Types
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
@@ -32,7 +31,7 @@ type Page
     = None
     | Billing
     | ClinicalSummary ClinicalSummary.Model
-    | Records Records.Types.Model
+    | Records Records.Model
     | RecordAddNew RecordAddNew.Types.Model
     | PastMedicalHistory PastMedicalHistory.Model
     | Hospitilizations Hospitilizations.Model
@@ -206,7 +205,7 @@ setRoute maybeRoute model =
                             model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
 
             Just (Route.Records t) ->
-                { model | page = Records (Records.Types.emptyModel t) }
+                { model | page = Records (Records.emptyModel t) }
                     ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
 
             Just (Route.RecordAddNew t) ->
@@ -217,7 +216,7 @@ setRoute maybeRoute model =
 
                     Nothing ->
                         -- aka, if user refreshes on the add\edit screen, can't do much since there is no data source for dropdowns
-                        { model | page = Records (Records.Types.emptyModel t) }
+                        { model | page = Records (Records.emptyModel t) }
                             ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
 
             Nothing ->
