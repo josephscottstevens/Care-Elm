@@ -1,25 +1,51 @@
-module Common.Dropdown exposing (Dropdown, Msg, init, update, view)
+port module Common.Dropdown exposing (Dropdown, Msg, init, update, view)
 
 import Html exposing (Html, Attribute, div, span, text, li, ul, input)
 import Html.Attributes exposing (style, value, class, readonly)
 import Html.Events exposing (onWithOptions, onBlur, onMouseEnter)
-import Json.Decode as Json
+import Json.Decode
 import Common.Types exposing (DropdownItem)
+import Common.Functions as Functions
+import Char
+
+
+port dropdownMenuScroll : String -> Cmd msg
+
+
+scrollToDomId : String -> Cmd msg
+scrollToDomId =
+    dropdownMenuScroll
 
 
 type alias Dropdown =
     { isOpen : Bool
-    , dropdownItem : DropdownItem
+    , selectedItem : DropdownItem
     , dropdownSource : List DropdownItem
+    , searchString : String
+    , id : String
     }
 
 
-init : List DropdownItem -> Maybe Int -> String -> Dropdown
-init list dropId dropVal =
+init : String -> List DropdownItem -> Maybe Int -> String -> Dropdown
+init id list dropId dropVal =
     { isOpen = False
-    , dropdownItem = DropdownItem dropId dropVal
+    , selectedItem = DropdownItem dropId dropVal
     , dropdownSource = list
+    , searchString = ""
+    , id = id
     }
+
+
+type Key
+    = Esc
+    | Enter
+    | ArrowUp
+    | ArrowDown
+    | PageUp
+    | PageDown
+    | Home
+    | End
+    | Searchable Char
 
 
 type Msg
@@ -27,22 +53,69 @@ type Msg
     | ItemEntered DropdownItem
     | SetOpenState Bool
     | OnBlur
+    | OnKey Key
 
 
-update : Msg -> Dropdown -> Dropdown
+update : Msg -> Dropdown -> ( Dropdown, Cmd msg )
 update msg dropdown =
-    case msg of
-        ItemPicked item ->
-            { dropdown | dropdownItem = item, isOpen = False }
+    let
+        pickHighlight selectedItem =
+            case selectedItem of
+                Just t ->
+                    { dropdown | selectedItem = t }
 
-        ItemEntered item ->
-            { dropdown | dropdownItem = item }
+                Nothing ->
+                    dropdown
+    in
+        case msg of
+            ItemPicked item ->
+                { dropdown | selectedItem = item, isOpen = False } ! []
 
-        SetOpenState newState ->
-            { dropdown | isOpen = newState }
+            ItemEntered item ->
+                { dropdown | selectedItem = item } ! []
 
-        OnBlur ->
-            { dropdown | isOpen = False }
+            SetOpenState newState ->
+                { dropdown | isOpen = newState } ! []
+
+            OnBlur ->
+                { dropdown | isOpen = False } ! []
+
+            OnKey Esc ->
+                { dropdown | isOpen = False } ! []
+
+            OnKey Enter ->
+                -- case maybeOpenState config model of
+                --     Nothing ->
+                --         maybeSelectionId config model |> updateHighlight
+                --     Just openState ->
+                --         updateSelect openState.maybeHighlightId
+                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+
+            OnKey ArrowUp ->
+                --pickHighlight (Tuple.mapSecond List.reverse >> pickerNext)
+                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+
+            OnKey ArrowDown ->
+                --pickHighlight pickerNext
+                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+
+            OnKey PageUp ->
+                --pickHighlight (Tuple.mapSecond List.reverse >> (pickerSkip 9))
+                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+
+            OnKey PageDown ->
+                --pickHighlight (pickerSkip 9)
+                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+
+            OnKey Home ->
+                --pickHighlight (Tuple.second >> List.head)
+                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+
+            OnKey End ->
+                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+
+            OnKey (Searchable char) ->
+                updateSearchString char dropdown
 
 
 view : Dropdown -> Html Msg
@@ -70,8 +143,13 @@ view dropdown =
 
         dropInputWidth =
             style [ ( "width", "100%" ) ]
+
+        keyMsgDecoder =
+            Html.Events.keyCode
+                |> Json.Decode.andThen (keyDecoder dropdown)
+                |> Json.Decode.map OnKey
     in
-        div []
+        div [ Html.Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder ]
             [ span
                 [ onClick (SetOpenState (not dropdown.isOpen))
                 , class ("e-ddl e-widget " ++ activeClass)
@@ -79,18 +157,18 @@ view dropdown =
                 ]
                 [ span
                     [ class "e-in-wrap e-box" ]
-                    [ input [ class "e-input", readonly True, value dropdown.dropdownItem.name, onBlur OnBlur ] []
+                    [ input [ class "e-input", readonly True, value dropdown.selectedItem.name, onBlur OnBlur ] []
                     , span [ class "e-select" ]
                         [ span [ class "e-icon e-arrow-sans-down" ] []
                         ]
                     ]
                 ]
-            , ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (List.map (viewItem numItems) dropdown.dropdownSource)
+            , ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (List.map (viewItem dropdown.id numItems) dropdown.dropdownSource)
             ]
 
 
-viewItem : Int -> DropdownItem -> Html Msg
-viewItem numItems item =
+viewItem : String -> Int -> DropdownItem -> Html Msg
+viewItem id numItems item =
     let
         width =
             numItems * 6
@@ -103,6 +181,7 @@ viewItem numItems item =
             , onMouseEnter (ItemEntered item)
             , class "dropdown-li"
             , dropLiStyle
+            , Html.Attributes.id (id ++ "-" ++ (Functions.defaultIntToString item.id))
             ]
             [ text item.name ]
 
@@ -111,7 +190,7 @@ onClick : msg -> Attribute msg
 onClick message =
     onWithOptions "click"
         { stopPropagation = True, preventDefault = False }
-        (Json.succeed message)
+        (Json.Decode.succeed message)
 
 
 
@@ -134,3 +213,98 @@ dropdownList =
     , ( "overflow-y", "scroll" )
     , ( "z-index", "100" )
     ]
+
+
+maybeFallback : Maybe a -> Maybe a -> Maybe a
+maybeFallback replacement original =
+    case original of
+        Just _ ->
+            original
+
+        Nothing ->
+            replacement
+
+
+updateSearchString : Char -> Dropdown -> ( Dropdown, Cmd msg )
+updateSearchString searchChar dropdown =
+    let
+        searchString =
+            -- Manage backspace character
+            if searchChar == '\x08' then
+                String.dropRight 1 dropdown.searchString
+            else
+                dropdown.searchString ++ String.toLower (String.fromChar searchChar)
+
+        maybeSelectedItem =
+            dropdown.dropdownSource
+                |> List.filter (\t -> String.startsWith searchString (String.toLower t.name))
+                |> List.head
+    in
+        case maybeSelectedItem of
+            Just t ->
+                { dropdown
+                    | selectedItem = t
+                    , searchString = searchString
+                }
+                    ! [ scrollToDomId (dropdown.id ++ "-" ++ Functions.defaultIntToString t.id) ]
+
+            Nothing ->
+                dropdown ! [ Cmd.none ]
+
+
+keyDecoder : Dropdown -> Int -> Json.Decode.Decoder Key
+keyDecoder dropdown keyCode =
+    let
+        -- This is necessary to ensure that the key is not consumed and can propagate to the parent
+        pass =
+            Json.Decode.fail ""
+
+        key =
+            Json.Decode.succeed
+    in
+        case keyCode of
+            13 ->
+                key Enter
+
+            27 ->
+                -- Consume Esc only if the Menu is open
+                if dropdown.isOpen then
+                    pass
+                else
+                    key Esc
+
+            -- 32 ->
+            --     key Space
+            33 ->
+                key PageUp
+
+            34 ->
+                key PageDown
+
+            35 ->
+                key End
+
+            36 ->
+                key Home
+
+            38 ->
+                key ArrowUp
+
+            40 ->
+                key ArrowDown
+
+            _ ->
+                let
+                    char =
+                        Char.fromCode keyCode
+
+                    -- TODO should the user be able to search non-alphanum chars?
+                    -- TODO add support for non-ascii alphas
+                    isAlpha char =
+                        (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
+                in
+                    -- Backspace is "searchable" because it can be used to modify the search string
+                    if isAlpha char || Char.isDigit char || char == '\x08' then
+                        key (Searchable char)
+                    else
+                        pass

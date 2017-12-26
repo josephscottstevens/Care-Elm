@@ -140,7 +140,11 @@ update msg model patientId =
             { model | state = AddEdit { newRecord | facility = str } } ! []
 
         UpdateProvider newRecord dropdownMsg ->
-            { model | state = AddEdit { newRecord | providerDropdown = Dropdown.update dropdownMsg newRecord.providerDropdown } } ! []
+            let
+                ( newDrop, newMsg ) =
+                    Dropdown.update dropdownMsg newRecord.providerDropdown
+            in
+                { model | state = AddEdit { newRecord | providerDropdown = newDrop } } ! [ newMsg ]
 
         UpdateNotes newRecord str ->
             { model | state = AddEdit { newRecord | notes = str } } ! []
@@ -279,7 +283,7 @@ encodeNewRow newRecord patientId =
         , ( "Treatment", Encode.string <| newRecord.treatment )
         , ( "Facility", Encode.string <| newRecord.facility )
         , ( "Notes", Encode.string <| newRecord.notes )
-        , ( "ProviderId", maybeVal Encode.int <| newRecord.providerDropdown.dropdownItem.id )
+        , ( "ProviderId", maybeVal Encode.int <| newRecord.providerDropdown.selectedItem.id )
         , ( "ProblemId", maybeVal Encode.int <| newRecord.problemId )
         ]
 
@@ -309,7 +313,7 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , notes = row.notes
             , treatment = row.treatment
             , problemId = row.problemId
-            , providerDropdown = Dropdown.init addEditDataSource.providers row.providerId row.provider
+            , providerDropdown = Dropdown.init "providerDropdown" addEditDataSource.providers row.providerId row.provider
             }
 
         Nothing ->
@@ -320,7 +324,7 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , notes = ""
             , treatment = ""
             , problemId = Nothing
-            , providerDropdown = Dropdown.init addEditDataSource.providers Nothing ""
+            , providerDropdown = Dropdown.init "providerDropdown" addEditDataSource.providers Nothing ""
             }
 
 

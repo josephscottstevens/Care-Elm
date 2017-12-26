@@ -254,7 +254,7 @@ commonValidation controlType =
             Nothing
 
         Dropdown labelText requiredType displayValue _ ->
-            is requiredType <| requiredStr labelText displayValue.dropdownItem.name
+            is requiredType <| requiredStr labelText displayValue.selectedItem.name
 
 
 requiredStr : String -> String -> Maybe String
