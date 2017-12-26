@@ -52,7 +52,7 @@ getHospitilizationsInitData addEditDataSource maybeHospitilizationsRow =
         hospitilizationsRow =
             Maybe.withDefault emptyHospitilizationRow maybeHospitilizationsRow
     in
-        { id = Just hospitilizationsRow.id
+        { id = hospitilizationsRow.id
         , facilities = addEditDataSource.facilities
         , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
         , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians

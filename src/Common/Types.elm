@@ -54,7 +54,7 @@ type alias AddEditDataSource =
 
 
 type alias HospitilizationsRow =
-    { id : Int
+    { id : Maybe Int
     , facilityName : Maybe String
     , dateOfAdmission : Maybe String
     , admitProblem : Maybe String

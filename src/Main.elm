@@ -188,9 +188,9 @@ setRoute maybeRoute model =
                 let
                     x =
                         case model.page of
-                            Hospitilizations mdl ->
-                                mdl.hospitilizations
-                                    |> List.filter (\t -> t.id == rowId)
+                            Hospitilizations hospModel ->
+                                hospModel.hospitilizations
+                                    |> List.filter (\t -> Functions.defaultInt t.id == rowId)
                                     |> List.head
 
                             _ ->

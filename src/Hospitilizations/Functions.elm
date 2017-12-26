@@ -14,7 +14,7 @@ import Common.Functions exposing (defaultLower, defaultDate)
 decodeHospitilizationsRow : Decode.Decoder HospitilizationsRow
 decodeHospitilizationsRow =
     Pipeline.decode HospitilizationsRow
-        |> Pipeline.required "Id" Decode.int
+        |> Pipeline.required "Id" (Decode.maybe Decode.int)
         |> Pipeline.required "FacilityName" (Decode.maybe Decode.string)
         |> Pipeline.required "DateOfAdmission" (Decode.maybe Decode.string)
         |> Pipeline.required "AdmitProblem" (Decode.maybe Decode.string)

@@ -39,7 +39,7 @@ type Msg
     | Blur Mouse.Position
     | SetTableState Table.State
     | SetFilter FilterState
-    | DropDownToggle Int
+    | DropDownToggle (Maybe Int)
     | DeleteHospitilizationConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | HospitilizationsAdd
@@ -66,11 +66,7 @@ update msg model _ =
             model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
         DeleteHospitilizationConfirmed rowId ->
-            let
-                updatedRecords =
-                    model.hospitilizations |> List.filter (\t -> t.id /= rowId)
-            in
-                { model | hospitilizations = updatedRecords } ! [ deleteHospitilization rowId DeleteCompleted ]
+            model ! [ deleteHospitilization rowId DeleteCompleted ]
 
         DeleteCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
@@ -115,7 +111,7 @@ view model addEditDataSource =
 
 getColumns : List (Table.Column HospitilizationsRow Msg)
 getColumns =
-    [ Table.stringColumn "ID" (\t -> toString t.id)
+    [ Table.stringColumn "ID" (\t -> Functions.defaultIntToString t.id)
     , Table.stringColumn "Facility Name" (\t -> defaultString t.facilityName)
     , Table.stringColumn "Date Of Admission" (\t -> defaultDate t.dateOfAdmission)
     , Table.stringColumn "Admit Problem" (\t -> defaultString t.admitProblem)
@@ -153,7 +149,7 @@ rowDropDownColumn : Table.Column HospitilizationsRow Msg
 rowDropDownColumn =
     Table.veryCustomColumn
         { name = ""
-        , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle t.id)) (dropDownItems t.id)
+        , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle t.id)) (dropDownItems <| Functions.defaultInt t.id)
         , sorter = Table.unsortable
         }
 

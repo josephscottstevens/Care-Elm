@@ -43,7 +43,7 @@ emptySfData =
 
 emptyHospitilizationRow : HospitilizationsRow
 emptyHospitilizationRow =
-    { id = 0
+    { id = Nothing
     , facilityName = Nothing
     , dateOfAdmission = Nothing
     , admitProblem = Nothing
