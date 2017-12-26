@@ -24,8 +24,8 @@ test validation logic records
 test validation logic hospitilizations
 
 hospitilizations loading not showing 
-hospitilizations complaint \ discharge reccomnadations not set
 scroll to top if validation fails?
+loading \ refresh looks wonky now :/
 
 try refreshing this url
 	https://localhost:44336/people?patientId=1#/people/_hospitalizations/add

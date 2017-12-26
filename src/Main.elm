@@ -5,10 +5,9 @@ import ClinicalSummary
 import Records.Main as Records
 import RecordAddNew.Main as RecordAddNew
 import PastMedicalHistory
-import Hospitilizations.Main as Hospitilizations
+import Hospitilizations
 import HospitilizationsAddEdit.Main as HospitilizationsAddEdit
 import Billing.Types
-import Hospitilizations.Types
 import HospitilizationsAddEdit.Types
 import Records.Types
 import RecordAddNew.Types
@@ -36,7 +35,7 @@ type Page
     | Records Records.Types.Model
     | RecordAddNew RecordAddNew.Types.Model
     | PastMedicalHistory PastMedicalHistory.Model
-    | Hospitilizations Hospitilizations.Types.Model
+    | Hospitilizations Hospitilizations.Model
     | HospitilizationsAddEdit HospitilizationsAddEdit.Types.Model
     | Error String
 
@@ -121,7 +120,7 @@ pageSubscriptions page =
             Sub.map PastMedicalHistoryMsg PastMedicalHistory.subscriptions
 
         Hospitilizations t ->
-            Sub.map HospitilizationsMsg (Hospitilizations.subscriptions t.hospitilizations)
+            Sub.map HospitilizationsMsg (Hospitilizations.subscriptions t.rows)
 
         HospitilizationsAddEdit _ ->
             Sub.map HospitilizationsAddEditMsg HospitilizationsAddEdit.subscriptions
@@ -166,7 +165,7 @@ setRoute maybeRoute model =
                     ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
 
             Just Route.Hospitilizations ->
-                { model | page = Hospitilizations Hospitilizations.Types.emptyModel }
+                { model | page = Hospitilizations Hospitilizations.emptyModel }
                     ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
             Just Route.PastMedicalHistory ->
@@ -181,7 +180,7 @@ setRoute maybeRoute model =
 
                     Nothing ->
                         -- aka, if user refreshes on the add screen, can't do much since there is no data source for dropdowns
-                        { model | page = Hospitilizations Hospitilizations.Types.emptyModel }
+                        { model | page = Hospitilizations Hospitilizations.emptyModel }
                             ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
 
             Just (Route.HospitilizationsEdit rowId) ->
@@ -189,7 +188,7 @@ setRoute maybeRoute model =
                     x =
                         case model.page of
                             Hospitilizations hospModel ->
-                                hospModel.hospitilizations
+                                hospModel.rows
                                     |> List.filter (\t -> Functions.defaultInt t.id == rowId)
                                     |> List.head
 
