@@ -20,20 +20,39 @@ scrollToDomId =
 type alias Dropdown =
     { isOpen : Bool
     , selectedItem : DropdownItem
+    , highlightedItemMouse : Maybe DropdownItem
+    , highlightedItemKeyboard : Maybe DropdownItem
+    , selectedIndex : Int
     , dropdownSource : List DropdownItem
     , searchString : String
     , id : String
     }
 
 
-init : String -> List DropdownItem -> Maybe Int -> String -> Dropdown
-init id list dropId dropVal =
-    { isOpen = False
-    , selectedItem = DropdownItem dropId dropVal
-    , dropdownSource = list
-    , searchString = ""
-    , id = id
-    }
+init : String -> List DropdownItem -> Maybe DropdownItem -> Dropdown
+init id list selectedItem =
+    case selectedItem of
+        Just t ->
+            { isOpen = False
+            , selectedItem = t
+            , highlightedItemMouse = Nothing
+            , highlightedItemKeyboard = Nothing
+            , dropdownSource = list
+            , searchString = ""
+            , id = id
+            , selectedIndex = 0
+            }
+
+        Nothing ->
+            { isOpen = False
+            , selectedItem = DropdownItem Nothing ""
+            , highlightedItemMouse = Nothing
+            , highlightedItemKeyboard = Nothing
+            , dropdownSource = list
+            , searchString = ""
+            , id = id
+            , selectedIndex = 0
+            }
 
 
 type Key
@@ -62,23 +81,27 @@ update msg dropdown =
         pickHighlight selectedItem =
             case selectedItem of
                 Just t ->
-                    { dropdown | selectedItem = t }
+                    t
 
                 Nothing ->
-                    dropdown
+                    DropdownItem Nothing ""
     in
         case msg of
             ItemPicked item ->
                 { dropdown | selectedItem = item, isOpen = False } ! []
 
             ItemEntered item ->
-                { dropdown | selectedItem = item } ! []
+                { dropdown | highlightedItemMouse = Just item } ! []
 
             SetOpenState newState ->
                 { dropdown | isOpen = newState } ! []
 
             OnBlur ->
-                { dropdown | isOpen = False } ! []
+                { dropdown
+                    | isOpen = False
+                    , selectedItem = pickHighlight dropdown.highlightedItemMouse
+                }
+                    ! []
 
             OnKey Esc ->
                 { dropdown | isOpen = False } ! []
@@ -89,30 +112,37 @@ update msg dropdown =
                 --         maybeSelectionId config model |> updateHighlight
                 --     Just openState ->
                 --         updateSelect openState.maybeHighlightId
-                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+                { dropdown
+                    | selectedItem =
+                        pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head)
+                }
+                    ! []
 
             OnKey ArrowUp ->
-                --pickHighlight (Tuple.mapSecond List.reverse >> pickerNext)
-                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+                pickerSkip 1 (dropdown.dropdownSource |> List.reverse) dropdown
 
             OnKey ArrowDown ->
-                --pickHighlight pickerNext
-                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+                pickerSkip 1 dropdown.dropdownSource dropdown
 
             OnKey PageUp ->
-                --pickHighlight (Tuple.mapSecond List.reverse >> (pickerSkip 9))
-                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+                pickerSkip 9 (dropdown.dropdownSource |> List.reverse) dropdown
 
             OnKey PageDown ->
-                --pickHighlight (pickerSkip 9)
-                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+                pickerSkip 9 dropdown.dropdownSource dropdown
 
             OnKey Home ->
-                --pickHighlight (Tuple.second >> List.head)
-                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+                { dropdown
+                    | selectedItem =
+                        pickHighlight (dropdown.dropdownSource |> List.head)
+                }
+                    ! []
 
             OnKey End ->
-                pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head) ! []
+                { dropdown
+                    | selectedItem =
+                        pickHighlight (dropdown.dropdownSource |> List.reverse |> List.head)
+                }
+                    ! []
 
             OnKey (Searchable char) ->
                 updateSearchString char dropdown
@@ -163,25 +193,38 @@ view dropdown =
                         ]
                     ]
                 ]
-            , ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (List.map (viewItem dropdown.id numItems) dropdown.dropdownSource)
+            , ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (List.map (viewItem dropdown numItems) dropdown.dropdownSource)
             ]
 
 
-viewItem : String -> Int -> DropdownItem -> Html Msg
-viewItem id numItems item =
+getId : String -> DropdownItem -> String
+getId id item =
+    id ++ "-" ++ Functions.defaultIntToString item.id
+
+
+viewItem : Dropdown -> Int -> DropdownItem -> Html Msg
+viewItem dropdown numItems item =
     let
         width =
             numItems * 6
 
+        commonWidth =
+            ( "width", toString width ++ "px" )
+
         dropLiStyle =
-            style [ ( "width", toString width ++ "px" ) ]
+            if dropdown.highlightedItemKeyboard == Just item then
+                style [ commonWidth, ( "color", "green" ) ]
+            else if dropdown.highlightedItemMouse == Just item then
+                style [ commonWidth, ( "background-color", "red" ) ]
+            else
+                style [ commonWidth ]
     in
         li
             [ onClick (ItemPicked item)
             , onMouseEnter (ItemEntered item)
             , class "dropdown-li"
             , dropLiStyle
-            , Html.Attributes.id (id ++ "-" ++ (Functions.defaultIntToString item.id))
+            , Html.Attributes.id (getId dropdown.id item)
             ]
             [ text item.name ]
 
@@ -215,6 +258,33 @@ dropdownList =
     ]
 
 
+pickerSkip : Int -> List DropdownItem -> Dropdown -> ( Dropdown, Cmd msg )
+pickerSkip skipCount dropdownItems dropdown =
+    case dropdown.highlightedItemKeyboard of
+        Nothing ->
+            case List.head dropdownItems of
+                Just t ->
+                    { dropdown | highlightedItemKeyboard = List.head dropdownItems } ! [ scrollToDomId (getId dropdown.id t) ]
+
+                Nothing ->
+                    Debug.crash "1"
+
+        Just selected ->
+            let
+                selectedItem =
+                    dropdownItems
+                        |> List.filter (\t -> t == selected)
+                        |> List.take skipCount
+                        |> List.head
+            in
+                case selectedItem of
+                    Just t ->
+                        { dropdown | highlightedItemKeyboard = selectedItem } ! [ scrollToDomId (getId dropdown.id t) ]
+
+                    Nothing ->
+                        Debug.crash "2"
+
+
 maybeFallback : Maybe a -> Maybe a -> Maybe a
 maybeFallback replacement original =
     case original of
@@ -246,7 +316,7 @@ updateSearchString searchChar dropdown =
                     | selectedItem = t
                     , searchString = searchString
                 }
-                    ! [ scrollToDomId (dropdown.id ++ "-" ++ Functions.defaultIntToString t.id) ]
+                    ! [ scrollToDomId (getId dropdown.id t) ]
 
             Nothing ->
                 dropdown ! [ Cmd.none ]

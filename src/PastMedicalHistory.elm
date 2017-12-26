@@ -4,7 +4,7 @@ import Html exposing (Html, text, div, button, input, h4)
 import Html.Attributes exposing (class, style, type_, disabled, value)
 import Html.Events exposing (onClick)
 import Common.Html exposing (InputControlType(TextInput, AreaInput, Dropdown, HtmlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
-import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage)
+import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage, DropdownItem)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
 import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters, rowDropDownDiv)
 import Common.Dropdown as Dropdown
@@ -313,7 +313,7 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , notes = row.notes
             , treatment = row.treatment
             , problemId = row.problemId
-            , providerDropdown = Dropdown.init "providerDropdown" addEditDataSource.providers row.providerId row.provider
+            , providerDropdown = Dropdown.init "providerDropdown" addEditDataSource.providers (Just (DropdownItem row.providerId row.provider))
             }
 
         Nothing ->
@@ -324,7 +324,7 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , notes = ""
             , treatment = ""
             , problemId = Nothing
-            , providerDropdown = Dropdown.init "providerDropdown" addEditDataSource.providers Nothing ""
+            , providerDropdown = Dropdown.init "providerDropdown" addEditDataSource.providers (Just (DropdownItem Nothing ""))
             }
 
 
