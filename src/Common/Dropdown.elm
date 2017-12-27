@@ -114,11 +114,14 @@ update msg dropdown =
             { dropdown | isOpen = False } ! []
 
         OnKey Enter ->
-            { dropdown
-                | isOpen = False
-                , selectedItem = byId dropdown.highlightedIndex dropdown.dropdownSource
-            }
-                ! []
+            if dropdown.isOpen then
+                { dropdown
+                    | isOpen = False
+                    , selectedItem = byId dropdown.highlightedIndex dropdown.dropdownSource
+                }
+                    ! []
+            else
+                dropdown ! []
 
         OnKey ArrowUp ->
             pickerSkip dropdown (Exact -1)
@@ -169,10 +172,13 @@ pickerSkip dropdown skipAmount =
         newIndex =
             boundedIndex dropdown.dropdownSource newIndexCalc
 
-        scrollDropdown =
+        selectedItem =
             byId newIndex dropdown.dropdownSource
     in
-        { dropdown | highlightedIndex = newIndex } ! [ scrollToDomId (getId dropdown.id scrollDropdown) ]
+        if dropdown.isOpen then
+            { dropdown | highlightedIndex = newIndex } ! [ scrollToDomId (getId dropdown.id selectedItem) ]
+        else
+            { dropdown | highlightedIndex = newIndex, selectedItem = selectedItem } ! []
 
 
 view : Dropdown -> Html Msg
@@ -206,7 +212,16 @@ view dropdown =
                 ]
                 [ span
                     [ class "e-in-wrap e-box" ]
-                    [ input [ class "e-input", readonly True, value dropdown.selectedItem.name, Events.onBlur OnBlur ] []
+                    [ input
+                        [ class "e-input"
+                        , readonly True
+                        , value dropdown.selectedItem.name
+                        , if dropdown.isOpen then
+                            Events.onBlur OnBlur
+                          else
+                            style []
+                        ]
+                        []
                     , span [ class "e-select" ]
                         [ span [ class "e-icon e-arrow-sans-down" ] []
                         ]
@@ -240,7 +255,13 @@ viewItem dropdown =
             numItems * 6
 
         commonWidth =
-            ( "width", toString width ++ "px" )
+            [ ( "width", toString width ++ "px" ) ]
+
+        mouseActive =
+            [ ( "background-color", "" ), ( "color", "#808080" ) ] ++ commonWidth
+
+        keyActive =
+            [ ( "background-color", "#f4f4f4" ), ( "color", "#333" ) ] ++ commonWidth
     in
         dropdown.dropdownSource
             |> Array.indexedMap
@@ -251,11 +272,11 @@ viewItem dropdown =
                         , Events.onMouseLeave (ItemLeft item)
                         , class "dropdown-li"
                         , if dropdown.highlightedItem == Just item then
-                            style [ commonWidth, ( "color", "green" ) ]
-                          else if dropdown.highlightedIndex == index then
-                            style [ commonWidth, ( "background-color", "red" ) ]
+                            style mouseActive
+                          else if dropdown.highlightedIndex == index && index > 0 then
+                            style keyActive
                           else
-                            style [ commonWidth ]
+                            style commonWidth
                         , Html.Attributes.id (getId dropdown.id item)
                         ]
                         [ text item.name ]
