@@ -8,6 +8,7 @@ import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSourc
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
 import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters, rowDropDownDiv)
 import Common.Dropdown as Dropdown
+import Common.GridDropdown as GridDropdown
 import Common.Route as Route
 import Json.Decode as Decode
 import Json.Encode as Encode
@@ -63,7 +64,7 @@ type Msg
     | UpdateFacility NewRecord String
     | UpdateProvider NewRecord Dropdown.Msg
     | UpdateNotes NewRecord String
-    | UpdateDropdown PastMedicalHistoryRow Dropdown.GridMsg
+    | UpdateDropdown PastMedicalHistoryRow GridDropdown.Msg
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -150,19 +151,9 @@ update msg model patientId =
         UpdateDropdown row dropdownMsg ->
             let
                 ( newDrop, newMsg ) =
-                    Dropdown.updateGrid dropdownMsg row.dropdown
-
-                rows =
-                    model.rows
-                        |> List.map
-                            (\t ->
-                                if t.id == row.id then
-                                    { t | dropdown = newDrop }
-                                else
-                                    t
-                            )
+                    GridDropdown.update model.rows row dropdownMsg
             in
-                { model | rows = rows } ! [ newMsg ]
+                { model | rows = newDrop } ! [ newMsg ]
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
@@ -216,7 +207,7 @@ myView row =
         menuItems =
             [ ( "e-contextdelete", "Delete", MenuMessage "" row.id Nothing Nothing ) ]
     in
-        Html.map (UpdateDropdown row) (Dropdown.viewGrid row.dropdown menuItems)
+        Html.map (UpdateDropdown row) (GridDropdown.view row.isOpen menuItems)
 
 
 noteStyle : Html.Attribute msg
@@ -295,7 +286,7 @@ decodePastMedicalHistoryRow addEditDataSource =
         |> required "Notes" Decode.string
         |> required "ProviderId" (Decode.maybe Decode.int)
         |> required "ProblemId" (Decode.maybe Decode.int)
-        |> hardcoded (Dropdown.init "gridDropdown" addEditDataSource.providers (Just (DropdownItem Nothing "")))
+        |> hardcoded False
 
 
 encodeNewRow : NewRecord -> Int -> Encode.Value
@@ -323,7 +314,7 @@ type alias PastMedicalHistoryRow =
     , notes : String
     , providerId : Maybe Int
     , problemId : Maybe Int
-    , dropdown : Dropdown.Dropdown
+    , isOpen : Bool
     }
 
 

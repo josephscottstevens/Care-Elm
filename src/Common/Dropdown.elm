@@ -13,7 +13,7 @@ import Array exposing (Array)
 port dropdownMenuScroll : String -> Cmd msg
 
 
-port sendMenuMessageNew : MenuMessage -> Cmd msg
+port sendMenuMessageNew2 : MenuMessage -> Cmd msg
 
 
 scrollToDomId : String -> Cmd msg
@@ -241,31 +241,65 @@ type GridMsg
     | MenuItemSelected MenuMessage
 
 
-updateGrid : GridMsg -> Dropdown -> ( Dropdown, Cmd msg )
-updateGrid msg dropdown =
-    let
-        isOpen =
-            dropdown.isOpen
-    in
-        case msg of
-            GridSetOpenState ->
-                { dropdown | isOpen = not isOpen } ! []
 
-            GridOnBlur ->
-                { dropdown | isOpen = False } ! []
-
-            MenuItemSelected menuItem ->
-                { dropdown | isOpen = not dropdown.isOpen } ! [ sendMenuMessageNew menuItem ]
-
-            NoOp ->
-                dropdown ! []
+-- updateGrid : List { c | isOpen : Bool, dropdown : a } -> { b | dropdown : a } -> GridMsg -> ( List { c | isOpen : Bool, dropdown : a }, Cmd GridMsg )
+-- List { c | isOpen : Bool }
+--     -> ( List { c | isOpen : Bool } -> List { c | isOpen : Bool }, Cmd msg )
+-- But the right side is:
+--     ( List { c | isOpen : Bool } -> List { c | isOpen : Bool }, Cmd msg )
+-- updateGrid : List { c | isOpen : Bool } -> { c | isOpen : Bool } -> GridMsg -> ( List { c | isOpen : Bool }, Cmd msg )
+-- a -> ( List { c | isOpen : b } -> List { c | isOpen : Bool }, Cmd msg )
+--      ( List { c | isOpen : b } -> List { c | isOpen : Bool }, Cmd msg )
+-- updateGrid : List { c | isOpen : Bool, dropdown : a } -> { b | dropdown : a } -> GridMsg -> ( List { c | isOpen : Bool, dropdown : a }, Cmd GridMsg )
+-- updateGrid : List Bool -> Bool -> GridMsg -> ( List Bool, Cmd GridMsg )
 
 
-viewGrid : Dropdown -> List ( String, String, MenuMessage ) -> Html GridMsg
-viewGrid dropdown dropDownItems =
+updateGrid : List { a | isOpen : Bool } -> { a | isOpen : Bool } -> GridMsg -> ( List { a | isOpen : Bool }, GridMsg )
+updateGrid dropRows row msg =
+    case msg of
+        GridSetOpenState ->
+            ( dropRows
+                |> List.map
+                    (\t ->
+                        if t == row then
+                            { row | isOpen = not t.isOpen }
+                        else
+                            t
+                    )
+            , NoOp
+            )
+
+        GridOnBlur ->
+            ( dropRows, NoOp )
+
+        --t { dropdown | isOpen = False } ! []
+        MenuItemSelected menuItem ->
+            ( dropRows, MenuItemSelected menuItem )
+
+        --t { dropdown | isOpen = not dropdown.isOpen } ! [ sendMenuMessageNew menuItem ]
+        NoOp ->
+            ( dropRows, NoOp )
+
+
+
+-- rows : List { c | isOpen : Bool, dropdown : a } -> { c | isOpen : Bool, dropdown : a } -> { c | isOpen : Bool, dropdown : a } -> List { c | isOpen : Bool, dropdown : a }
+-- rows : List { c | isOpen : Bool, dropdown : a } -> { b | dropdown : a }
+-- rows dropRows row newDrop =
+--     dropRows
+--         |> List.map
+--             (\t ->
+--                 if t == row then
+--                     { t | dropdown = newDrop }
+--                 else
+--                     t
+--             )
+
+
+viewGrid : Bool -> List ( String, String, MenuMessage ) -> Html GridMsg
+viewGrid isOpen dropDownItems =
     let
         dropMenu =
-            case dropdown.isOpen of
+            case isOpen of
                 True ->
                     [ ul
                         [ class "e-menu e-js e-widget e-box e-separator"
@@ -290,7 +324,7 @@ viewGrid dropdown dropDownItems =
                 [ type_ "button"
                 , btnClass
                 , btnStyle
-                , if dropdown.isOpen then
+                , if isOpen then
                     Events.onBlur GridOnBlur
                   else
                     Events.onBlur NoOp
