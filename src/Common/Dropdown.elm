@@ -74,6 +74,7 @@ type Msg
     | OnBlur
     | OnKey Key
     | MenuItemSelected MenuMessage
+    | NoOp
 
 
 type SkipAmount
@@ -150,6 +151,9 @@ update msg dropdown =
 
         MenuItemSelected menuItem ->
             { dropdown | isOpen = not dropdown.isOpen } ! [ sendMenuMessageNew menuItem ]
+
+        NoOp ->
+            dropdown ! []
 
 
 boundedIndex : Array DropdownItem -> Int -> Int
@@ -238,17 +242,18 @@ view dropdown =
             ]
 
 
+updateGrid : List { a | highlightedItem : Maybe DropdownItem, isOpen : Bool, selectedItem : DropdownItem } -> Msg -> { a | highlightedItem : Maybe DropdownItem, isOpen : Bool, selectedItem : DropdownItem } -> ( List { a | highlightedItem : Maybe DropdownItem, isOpen : Bool, selectedItem : DropdownItem }, Cmd msg )
 updateGrid items msg dropdown =
     let
         isOpen =
             dropdown.isOpen
 
-        newList bool =
+        newList newItem =
             items
                 |> List.map
                     (\oldItem ->
                         if oldItem == dropdown then
-                            { dropdown | isOpen = bool }
+                            newItem
                         else
                             oldItem
                     )
@@ -258,28 +263,24 @@ updateGrid items msg dropdown =
                 items ! []
 
             ItemEntered item ->
-                -- { dropdown | highlightedItem = Just item } ! []
-                items ! []
+                newList { dropdown | highlightedItem = Just item } ! []
 
             ItemLeft item ->
-                -- { dropdown | highlightedItem = Nothing } ! []
-                items ! []
+                newList { dropdown | highlightedItem = Nothing } ! []
 
             SetOpenState newState ->
-                newList newState ! []
+                newList { dropdown | isOpen = newState } ! []
 
-            -- { dropdown | isOpen = newState } ! []
             OnBlur ->
-                items ! []
+                newList
+                    { dropdown
+                        | isOpen = False
+                        , selectedItem = defaultSelectedItem dropdown.highlightedItem
+                    }
+                    ! []
 
-            -- { dropdown
-            --     | isOpen = False
-            --     , selectedItem = defaultSelectedItem dropdown.highlightedItem
-            -- }
-            --     ! []
             OnKey Esc ->
-                -- { dropdown | isOpen = False } ! []
-                items ! []
+                newList { dropdown | isOpen = False } ! []
 
             OnKey Enter ->
                 items ! []
@@ -306,7 +307,9 @@ updateGrid items msg dropdown =
                 items ! []
 
             MenuItemSelected menuItem ->
-                -- { dropdown | isOpen = not dropdown.isOpen } ! [ sendMenuMessageNew menuItem ]
+                newList { dropdown | isOpen = not dropdown.isOpen } ! [ sendMenuMessageNew menuItem ]
+
+            NoOp ->
                 items ! []
 
 
@@ -316,7 +319,9 @@ viewGrid dropdown dropDownItems =
         dropMenu =
             case dropdown.isOpen of
                 True ->
-                    [ ul [ class "e-menu e-js e-widget e-box e-separator" ]
+                    [ ul
+                        [ class "e-menu e-js e-widget e-box e-separator"
+                        ]
                         (List.map dropDownMenuItem dropDownItems)
                     ]
 
@@ -333,7 +338,15 @@ viewGrid dropdown dropDownItems =
             [ style [ ( "text-align", "right" ) ]
             , onClick (SetOpenState (not dropdown.isOpen))
             ]
-            [ button [ type_ "button", btnClass, btnStyle ]
+            [ button
+                [ type_ "button"
+                , btnClass
+                , btnStyle
+                , if dropdown.isOpen then
+                    Events.onBlur OnBlur
+                  else
+                    Events.onBlur NoOp
+                ]
                 [ div [ dropDownMenuStyle ]
                     dropMenu
                 ]
@@ -538,3 +551,8 @@ keyDecoder dropdown keyCode =
                         key (Searchable char)
                     else
                         pass
+
+
+htmlNeverToHtmlMsg : Html Never -> Html Msg
+htmlNeverToHtmlMsg =
+    Html.map (always NoOp)
