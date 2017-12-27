@@ -63,7 +63,7 @@ type Msg
     | UpdateFacility NewRecord String
     | UpdateProvider NewRecord Dropdown.Msg
     | UpdateNotes NewRecord String
-    | UpdateDropdown Dropdown.Msg
+    | UpdateDropdown PastMedicalHistoryRow Dropdown.Msg
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -147,8 +147,22 @@ update msg model patientId =
         UpdateNotes newRecord str ->
             { model | state = AddEdit { newRecord | notes = str } } ! []
 
-        UpdateDropdown dropdownMsg ->
-            model ! []
+        UpdateDropdown row dropdownMsg ->
+            let
+                ( newDrop, newMsg ) =
+                    Dropdown.update dropdownMsg row.dropdown
+
+                rows =
+                    model.rows
+                        |> List.map
+                            (\t ->
+                                if t.id == row.id then
+                                    { t | dropdown = newDrop }
+                                else
+                                    t
+                            )
+            in
+                { model | rows = rows } ! [ newMsg ]
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
@@ -192,28 +206,17 @@ getColumns addEditDataSource =
     , Table.stringColumn "Facility" (\t -> t.facility)
     , Table.stringColumn "Provider" (\t -> t.provider)
     , Table.stringColumn "Notes" (\t -> t.notes)
-    , testColumn
+    , Common.Grid.testColumn myView
     ]
 
 
-testColumn : Table.Column PastMedicalHistoryRow Msg
-testColumn =
-    Table.veryCustomColumn
-        { name = ""
-        , viewData = myView
-        , sorter = Table.unsortable
-        }
-
-
-myView : PastMedicalHistoryRow -> Table.HtmlDetails Msg
+myView : PastMedicalHistoryRow -> Html Msg
 myView row =
     let
         menuItems =
             [ ( "e-contextdelete", "Delete", MenuMessage "" row.id Nothing Nothing ) ]
     in
-        Table.HtmlDetails []
-            [ Html.map UpdateDropdown (Dropdown.viewGrid row.dropdown menuItems)
-            ]
+        Html.map (UpdateDropdown row) (Dropdown.viewGrid row.dropdown menuItems)
 
 
 noteStyle : Html.Attribute msg

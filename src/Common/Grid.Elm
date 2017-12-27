@@ -3,9 +3,10 @@ module Common.Grid exposing (..)
 import Html exposing (Html, text, div, button, input, span, th, li, ul, a)
 import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked, hidden, id, disabled)
 import Html.Events as Events
-import Common.Types exposing (FilterState)
+import Common.Types exposing (FilterState, MenuMessage)
 import Common.Functions exposing (isAlpha)
 import Common.Table as Table
+import Common.Dropdown as Dropdown
 import Json.Decode as Json
 
 
@@ -190,6 +191,15 @@ hrefColumnCell displayText url =
         Table.HtmlDetails []
             [ a [ href url, target "_blank" ] [ text newDisplayText ]
             ]
+
+
+testColumn : (a -> Html msg) -> Table.Column a msg
+testColumn details =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData = \t -> Table.HtmlDetails [] [ details t ]
+        , sorter = Table.unsortable
+        }
 
 
 rowDropDownDiv : Bool -> Html.Attribute msg -> List ( String, String, Html.Attribute msg ) -> Table.HtmlDetails msg
