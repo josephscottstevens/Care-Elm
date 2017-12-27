@@ -1,16 +1,19 @@
-port module Common.Dropdown exposing (Dropdown, Msg, init, update, view)
+port module Common.Dropdown exposing (Dropdown, Msg, init, update, view, viewGrid)
 
-import Html exposing (Html, Attribute, div, span, text, li, ul, input)
-import Html.Attributes exposing (style, value, class, readonly)
+import Html exposing (Html, Attribute, div, span, text, li, ul, input, button, a)
+import Html.Attributes exposing (style, value, class, readonly, type_, target)
 import Html.Events as Events
 import Json.Decode
-import Common.Types exposing (DropdownItem)
+import Common.Types exposing (DropdownItem, MenuMessage)
 import Common.Functions as Functions
 import Char
 import Array exposing (Array)
 
 
 port dropdownMenuScroll : String -> Cmd msg
+
+
+port sendMenuMessageNew : MenuMessage -> Cmd msg
 
 
 scrollToDomId : String -> Cmd msg
@@ -70,6 +73,7 @@ type Msg
     | SetOpenState Bool
     | OnBlur
     | OnKey Key
+    | MenuItemSelected MenuMessage
 
 
 type SkipAmount
@@ -143,6 +147,9 @@ update msg dropdown =
 
         OnKey (Searchable char) ->
             updateSearchString char dropdown
+
+        MenuItemSelected menuItem ->
+            { dropdown | isOpen = not dropdown.isOpen } ! [ sendMenuMessageNew menuItem ]
 
 
 boundedIndex : Array DropdownItem -> Int -> Int
@@ -229,6 +236,57 @@ view dropdown =
                 ]
             , ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (viewItem dropdown)
             ]
+
+
+viewGrid : Dropdown -> List ( String, String, MenuMessage ) -> Html Msg
+viewGrid dropdown dropDownItems =
+    let
+        dropMenu =
+            case dropdown.isOpen of
+                True ->
+                    [ ul [ class "e-menu e-js e-widget e-box e-separator" ]
+                        (List.map dropDownMenuItem dropDownItems)
+                    ]
+
+                False ->
+                    []
+
+        btnClass =
+            class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
+
+        btnStyle =
+            style [ ( "position", "relative" ) ]
+    in
+        div
+            [ style [ ( "text-align", "right" ) ]
+            , onClick (SetOpenState (not dropdown.isOpen))
+            ]
+            [ button [ type_ "button", btnClass, btnStyle ]
+                [ div [ dropDownMenuStyle ]
+                    dropMenu
+                ]
+            ]
+
+
+dropDownMenuStyle : Html.Attribute msg
+dropDownMenuStyle =
+    style
+        [ ( "z-index", "5000" )
+        , ( "position", "absolute" )
+        , ( "display", "block" )
+        , ( "left", "-173px" )
+        , ( "width", "178.74px" )
+        ]
+
+
+dropDownMenuItem : ( String, String, MenuMessage ) -> Html Msg
+dropDownMenuItem ( iconClass, displayText, menuMessage ) =
+    li [ class "e-content e-list" ]
+        [ a [ class "e-menulink", Events.onClick (MenuItemSelected menuMessage), target "_blank" ]
+            [ text displayText
+            , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
+            ]
+        ]
 
 
 getId : String -> DropdownItem -> String

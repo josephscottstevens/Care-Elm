@@ -39,9 +39,9 @@ type alias Model =
     }
 
 
-init : Int -> Cmd Msg
-init patientId =
-    Decode.list decodePastMedicalHistoryRow
+init : AddEditDataSource -> Int -> Cmd Msg
+init addEditDataSource patientId =
+    Decode.list (decodePastMedicalHistoryRow addEditDataSource)
         |> Http.get ("/People/PastMedicalHistoriesGrid?patientId=" ++ toString patientId)
         |> Http.send LoadData
 
@@ -54,7 +54,6 @@ type Msg
     | Add AddEditDataSource
     | Edit AddEditDataSource Int
     | SetTableState Table.State
-    | DropDownToggle Int
     | DeletePastMedicalHistoryConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | SendMenuMessage Int
@@ -64,6 +63,7 @@ type Msg
     | UpdateFacility NewRecord String
     | UpdateProvider NewRecord Dropdown.Msg
     | UpdateNotes NewRecord String
+    | UpdateDropdown Dropdown.Msg
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -90,8 +90,9 @@ update msg model patientId =
                       ]
 
         SaveCompleted (Ok _) ->
-            { model | state = Grid } ! [ displaySuccessMessage "Past Medical History Saved Successfully!", init patientId ]
+            { model | state = Grid } ! [ displaySuccessMessage "Past Medical History Saved Successfully!" ]
 
+        --todo
         SaveCompleted (Err t) ->
             { model | state = Grid } ! [ displayErrorMessage (toString t) ]
 
@@ -107,9 +108,6 @@ update msg model patientId =
 
         SetTableState newState ->
             { model | tableState = newState } ! []
-
-        DropDownToggle recordId ->
-            { model | rows = Functions.flipDropdownOpen model.rows recordId } ! []
 
         DeletePastMedicalHistoryConfirmed rowId ->
             { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
@@ -148,6 +146,9 @@ update msg model patientId =
 
         UpdateNotes newRecord str ->
             { model | state = AddEdit { newRecord | notes = str } } ! []
+
+        UpdateDropdown dropdownMsg ->
+            model ! []
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
@@ -191,8 +192,28 @@ getColumns addEditDataSource =
     , Table.stringColumn "Facility" (\t -> t.facility)
     , Table.stringColumn "Provider" (\t -> t.provider)
     , Table.stringColumn "Notes" (\t -> t.notes)
-    , rowDropDownColumn addEditDataSource
+    , testColumn
     ]
+
+
+testColumn : Table.Column PastMedicalHistoryRow Msg
+testColumn =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData = myView
+        , sorter = Table.unsortable
+        }
+
+
+myView : PastMedicalHistoryRow -> Table.HtmlDetails Msg
+myView row =
+    let
+        menuItems =
+            [ ( "e-contextdelete", "Delete", MenuMessage "" row.id Nothing Nothing ) ]
+    in
+        Table.HtmlDetails []
+            [ Html.map UpdateDropdown (Dropdown.viewGrid row.dropdown menuItems)
+            ]
 
 
 noteStyle : Html.Attribute msg
@@ -213,13 +234,14 @@ formInputs newRecord =
     ]
 
 
-rowDropDownColumn : Maybe AddEditDataSource -> Table.Column PastMedicalHistoryRow Msg
-rowDropDownColumn addEditDataSource =
-    Table.veryCustomColumn
-        { name = ""
-        , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle t.id)) (dropdownItems t.id addEditDataSource)
-        , sorter = Table.unsortable
-        }
+
+-- rowDropDownColumn : Maybe AddEditDataSource -> Table.Column PastMedicalHistoryRow Msg
+-- rowDropDownColumn addEditDataSource =
+--     Table.veryCustomColumn
+--         { name = ""
+--         , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle t.id)) (dropdownItems t.id addEditDataSource)
+--         , sorter = Table.unsortable
+--         }
 
 
 dropdownItems : Int -> Maybe AddEditDataSource -> List ( String, String, Html.Attribute Msg )
@@ -258,8 +280,8 @@ config addEditDataSource =
             }
 
 
-decodePastMedicalHistoryRow : Decode.Decoder PastMedicalHistoryRow
-decodePastMedicalHistoryRow =
+decodePastMedicalHistoryRow : AddEditDataSource -> Decode.Decoder PastMedicalHistoryRow
+decodePastMedicalHistoryRow addEditDataSource =
     decode PastMedicalHistoryRow
         |> required "Id" Decode.int
         |> required "Description" Decode.string
@@ -270,7 +292,7 @@ decodePastMedicalHistoryRow =
         |> required "Notes" Decode.string
         |> required "ProviderId" (Decode.maybe Decode.int)
         |> required "ProblemId" (Decode.maybe Decode.int)
-        |> hardcoded False
+        |> hardcoded (Dropdown.init "gridDropdown" addEditDataSource.providers (Just (DropdownItem Nothing "")))
 
 
 encodeNewRow : NewRecord -> Int -> Encode.Value
@@ -298,7 +320,7 @@ type alias PastMedicalHistoryRow =
     , notes : String
     , providerId : Maybe Int
     , problemId : Maybe Int
-    , dropdownOpen : Bool
+    , dropdown : Dropdown.Dropdown
     }
 
 

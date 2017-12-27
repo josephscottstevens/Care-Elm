@@ -168,8 +168,13 @@ setRoute maybeRoute model =
                     ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
             Just Route.PastMedicalHistory ->
-                { model | page = PastMedicalHistory PastMedicalHistory.emptyModel }
-                    ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
+                case model.addEditDataSource of
+                    Just addEditDataSource ->
+                        { model | page = PastMedicalHistory PastMedicalHistory.emptyModel }
+                            ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init addEditDataSource model.patientId) ]
+
+                    Nothing ->
+                        Debug.crash "yikes"
 
             Just Route.HospitilizationsAdd ->
                 case model.addEditDataSource of
