@@ -238,15 +238,17 @@ view dropdown =
             ]
 
 
-updateGrid : List { b | isOpen : a, t : Bool } -> Msg -> { b | isOpen : a, t : c } -> ( List { b | isOpen : a, t : Bool }, Cmd msg )
 updateGrid items msg dropdown =
     let
-        newList newItem =
+        isOpen =
+            dropdown.isOpen
+
+        newList bool =
             items
                 |> List.map
                     (\oldItem ->
-                        if oldItem == newItem then
-                            newItem
+                        if oldItem == dropdown then
+                            { dropdown | isOpen = bool }
                         else
                             oldItem
                     )
@@ -264,11 +266,7 @@ updateGrid items msg dropdown =
                 items ! []
 
             SetOpenState newState ->
-                let
-                    t =
-                        dropdown.isOpen
-                in
-                    newList { dropdown | t = newState } ! []
+                newList newState ! []
 
             -- { dropdown | isOpen = newState } ! []
             OnBlur ->
