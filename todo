@@ -13,9 +13,7 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO:
-records global dropdown toggle not closing
-	remove window.onclick
-
+fix dropdown closing (grids)
 scroll to top if validation fails?
 loading \ refresh looks wonky now :/
 records > Hospitalizations is broken again :'(
@@ -23,6 +21,7 @@ test are you sure you want to leave
 remove filters from records
 
 LOW TODO:
+how does updateSearchString handle when dropdown is closed?
 crapola... so uh... dropdown doesn't respond to keyboard
 allow grid to take list of html elements with a msg, for the header (aka, the add new row icon, or export to excel icon)
 consolidate SaveCompleted (ok and error, I mean... totally doable right?)

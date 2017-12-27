@@ -273,7 +273,7 @@ viewItem dropdown =
                         , class "dropdown-li"
                         , if dropdown.highlightedItem == Just item then
                             style mouseActive
-                          else if dropdown.highlightedIndex == index && index > 0 then
+                          else if dropdown.highlightedIndex == index && (index > 0 || dropdown.isOpen) then
                             style keyActive
                           else
                             style commonWidth
