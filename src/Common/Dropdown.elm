@@ -238,6 +238,80 @@ view dropdown =
             ]
 
 
+updateGrid : List { b | isOpen : a, t : Bool } -> Msg -> { b | isOpen : a, t : c } -> ( List { b | isOpen : a, t : Bool }, Cmd msg )
+updateGrid items msg dropdown =
+    let
+        newList newItem =
+            items
+                |> List.map
+                    (\oldItem ->
+                        if oldItem == newItem then
+                            newItem
+                        else
+                            oldItem
+                    )
+    in
+        case msg of
+            ItemPicked item ->
+                items ! []
+
+            ItemEntered item ->
+                -- { dropdown | highlightedItem = Just item } ! []
+                items ! []
+
+            ItemLeft item ->
+                -- { dropdown | highlightedItem = Nothing } ! []
+                items ! []
+
+            SetOpenState newState ->
+                let
+                    t =
+                        dropdown.isOpen
+                in
+                    newList { dropdown | t = newState } ! []
+
+            -- { dropdown | isOpen = newState } ! []
+            OnBlur ->
+                items ! []
+
+            -- { dropdown
+            --     | isOpen = False
+            --     , selectedItem = defaultSelectedItem dropdown.highlightedItem
+            -- }
+            --     ! []
+            OnKey Esc ->
+                -- { dropdown | isOpen = False } ! []
+                items ! []
+
+            OnKey Enter ->
+                items ! []
+
+            OnKey ArrowUp ->
+                items ! []
+
+            OnKey ArrowDown ->
+                items ! []
+
+            OnKey PageUp ->
+                items ! []
+
+            OnKey PageDown ->
+                items ! []
+
+            OnKey Home ->
+                items ! []
+
+            OnKey End ->
+                items ! []
+
+            OnKey (Searchable char) ->
+                items ! []
+
+            MenuItemSelected menuItem ->
+                -- { dropdown | isOpen = not dropdown.isOpen } ! [ sendMenuMessageNew menuItem ]
+                items ! []
+
+
 viewGrid : Dropdown -> List ( String, String, MenuMessage ) -> Html Msg
 viewGrid dropdown dropDownItems =
     let
