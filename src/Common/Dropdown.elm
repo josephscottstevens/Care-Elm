@@ -1,6 +1,6 @@
-port module Common.Dropdown exposing (Dropdown, Msg, init, update, view, viewGrid)
+port module Common.Dropdown exposing (Dropdown, Msg, GridMsg, init, update, updateGrid, view, viewGrid)
 
-import Html exposing (Html, Attribute, div, span, text, li, ul, input, button, a)
+import Html exposing (Html, Attribute, div, span, text, li, ul, input, button)
 import Html.Attributes exposing (style, value, class, readonly, type_, target)
 import Html.Events as Events
 import Json.Decode
@@ -73,8 +73,6 @@ type Msg
     | SetOpenState Bool
     | OnBlur
     | OnKey Key
-    | MenuItemSelected MenuMessage
-    | NoOp
 
 
 type SkipAmount
@@ -148,12 +146,6 @@ update msg dropdown =
 
         OnKey (Searchable char) ->
             updateSearchString char dropdown
-
-        MenuItemSelected menuItem ->
-            { dropdown | isOpen = not dropdown.isOpen } ! [ sendMenuMessageNew menuItem ]
-
-        NoOp ->
-            dropdown ! []
 
 
 boundedIndex : Array DropdownItem -> Int -> Int
@@ -242,78 +234,34 @@ view dropdown =
             ]
 
 
-updateGrid : List { a | highlightedItem : Maybe DropdownItem, isOpen : Bool, selectedItem : DropdownItem } -> Msg -> { a | highlightedItem : Maybe DropdownItem, isOpen : Bool, selectedItem : DropdownItem } -> ( List { a | highlightedItem : Maybe DropdownItem, isOpen : Bool, selectedItem : DropdownItem }, Cmd msg )
-updateGrid items msg dropdown =
+type GridMsg
+    = GridSetOpenState
+    | GridOnBlur
+    | NoOp
+    | MenuItemSelected MenuMessage
+
+
+updateGrid : GridMsg -> Dropdown -> ( Dropdown, Cmd msg )
+updateGrid msg dropdown =
     let
         isOpen =
             dropdown.isOpen
-
-        newList newItem =
-            items
-                |> List.map
-                    (\oldItem ->
-                        if oldItem == dropdown then
-                            newItem
-                        else
-                            oldItem
-                    )
     in
         case msg of
-            ItemPicked item ->
-                items ! []
+            GridSetOpenState ->
+                { dropdown | isOpen = not isOpen } ! []
 
-            ItemEntered item ->
-                newList { dropdown | highlightedItem = Just item } ! []
-
-            ItemLeft item ->
-                newList { dropdown | highlightedItem = Nothing } ! []
-
-            SetOpenState newState ->
-                newList { dropdown | isOpen = newState } ! []
-
-            OnBlur ->
-                newList
-                    { dropdown
-                        | isOpen = False
-                        , selectedItem = defaultSelectedItem dropdown.highlightedItem
-                    }
-                    ! []
-
-            OnKey Esc ->
-                newList { dropdown | isOpen = False } ! []
-
-            OnKey Enter ->
-                items ! []
-
-            OnKey ArrowUp ->
-                items ! []
-
-            OnKey ArrowDown ->
-                items ! []
-
-            OnKey PageUp ->
-                items ! []
-
-            OnKey PageDown ->
-                items ! []
-
-            OnKey Home ->
-                items ! []
-
-            OnKey End ->
-                items ! []
-
-            OnKey (Searchable char) ->
-                items ! []
+            GridOnBlur ->
+                { dropdown | isOpen = False } ! []
 
             MenuItemSelected menuItem ->
-                newList { dropdown | isOpen = not dropdown.isOpen } ! [ sendMenuMessageNew menuItem ]
+                { dropdown | isOpen = not dropdown.isOpen } ! [ sendMenuMessageNew menuItem ]
 
             NoOp ->
-                items ! []
+                dropdown ! []
 
 
-viewGrid : Dropdown -> List ( String, String, MenuMessage ) -> Html Msg
+viewGrid : Dropdown -> List ( String, String, MenuMessage ) -> Html GridMsg
 viewGrid dropdown dropDownItems =
     let
         dropMenu =
@@ -336,14 +284,14 @@ viewGrid dropdown dropDownItems =
     in
         div
             [ style [ ( "text-align", "right" ) ]
-            , onClick (SetOpenState (not dropdown.isOpen))
+            , onClick GridSetOpenState
             ]
             [ button
                 [ type_ "button"
                 , btnClass
                 , btnStyle
                 , if dropdown.isOpen then
-                    Events.onBlur OnBlur
+                    Events.onBlur GridOnBlur
                   else
                     Events.onBlur NoOp
                 ]
@@ -364,10 +312,10 @@ dropDownMenuStyle =
         ]
 
 
-dropDownMenuItem : ( String, String, MenuMessage ) -> Html Msg
+dropDownMenuItem : ( String, String, MenuMessage ) -> Html GridMsg
 dropDownMenuItem ( iconClass, displayText, menuMessage ) =
     li [ class "e-content e-list" ]
-        [ a [ class "e-menulink", Events.onClick (MenuItemSelected menuMessage), target "_blank" ]
+        [ Html.a [ class "e-menulink", Events.onClick (MenuItemSelected menuMessage), target "_blank" ]
             [ text displayText
             , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
             ]
@@ -553,6 +501,6 @@ keyDecoder dropdown keyCode =
                         pass
 
 
-htmlNeverToHtmlMsg : Html Never -> Html Msg
+htmlNeverToHtmlMsg : Html Never -> Html GridMsg
 htmlNeverToHtmlMsg =
     Html.map (always NoOp)

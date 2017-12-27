@@ -63,7 +63,7 @@ type Msg
     | UpdateFacility NewRecord String
     | UpdateProvider NewRecord Dropdown.Msg
     | UpdateNotes NewRecord String
-    | UpdateDropdown PastMedicalHistoryRow Dropdown.Msg
+    | UpdateDropdown PastMedicalHistoryRow Dropdown.GridMsg
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -150,7 +150,7 @@ update msg model patientId =
         UpdateDropdown row dropdownMsg ->
             let
                 ( newDrop, newMsg ) =
-                    Dropdown.update dropdownMsg row.dropdown
+                    Dropdown.updateGrid dropdownMsg row.dropdown
 
                 rows =
                     model.rows
