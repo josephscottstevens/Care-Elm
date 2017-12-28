@@ -258,17 +258,7 @@ view (Config { toId, toMsg, columns, customizations }) state data =
             List.length columns
 
         newColumns =
-            if List.length customizations.dropdownItems > 0 then
-                let
-                    x =
-                        0
-
-                    newColumn =
-                        ColumnData "dropdown" (\t -> HtmlDetails [] [ Html.text <| toString t.dropdownOpen ]) unsortable
-                in
-                    columns ++ [ newColumn ]
-            else
-                columns
+            columns
 
         sortedData =
             sort state columns data
@@ -463,65 +453,82 @@ increasingOrDecreasingBy toComparable =
 
 
 -- extra for dropdown
--- view : Bool -> (Bool -> msg) -> List ( String, String, msg ) -> Html msg
--- view dropdownOpen toMsg dropDownItems =
---     let
---         dropMenu =
---             case dropdownOpen of
---                 True ->
---                     [ ul
---                         [ class "e-menu e-js e-widget e-box e-separator"
---                         ]
---                         (List.map dropDownMenuItem dropDownItems)
---                     ]
---                 False ->
---                     []
---         btnClass =
---             class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
---         btnStyle =
---             style [ ( "position", "relative" ) ]
---     in
---         div
---             [ style [ ( "text-align", "right" ) ]
---             , onClick True toMsg
---             ]
---             [ button
---                 [ type_ "button"
---                 , btnClass
---                 , btnStyle
---                 -- , if dropdownOpen then
---                 --     Events.onBlur GridOnBlur
---                 --   else
---                 --     Events.onBlur NoOp
---                 ]
---                 [ div [ dropDownMenuStyle ]
---                     dropMenu
---                 ]
---             ]
--- dropDownMenuStyle : Html.Attribute msg
--- dropDownMenuStyle =
---     style
---         [ ( "z-index", "5000" )
---         , ( "position", "absolute" )
---         , ( "display", "block" )
---         , ( "left", "-173px" )
---         , ( "width", "178.74px" )
---         ]
--- dropDownMenuItem : ( String, String, msg ) -> Html msg
--- dropDownMenuItem ( iconClass, displayText, menuMessage ) =
---     li [ class "e-content e-list" ]
---         [ Html.a
---             [ class "e-menulink"
---             -- , onClick menuMessage
---             , target "_blank"
---             ]
---             [ text displayText
---             , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
---             ]
---         ]
--- getId : String -> DropdownItem -> String
--- getId id item =
---     id ++ "-" ++ Functions.defaultIntToString item.id
+
+
+testColumn : ({ a | dropdownOpen : Bool } -> Html msg) -> ColumnData { a | dropdownOpen : Bool } msg
+testColumn details =
+    ColumnData "" (\t -> HtmlDetails [] [ details t ]) unsortable
+
+
+dropdownDetails : List ( String, String, Attribute msg ) -> State -> HtmlDetails msg
+dropdownDetails dropDownItems (State sortName isReversed dropdownState) =
+    -- let
+    --     dropMenu =
+    --         case dropdownState of
+    --             True ->
+    --                 [ Html.ul
+    --                     [ Attr.class "e-menu e-js e-widget e-box e-separator"
+    --                     ]
+    --                     (List.map dropDownMenuItem dropDownItems)
+    --                 ]
+    --             False ->
+    --                 []
+    --     btnClass =
+    --         Attr.class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
+    --     btnStyle =
+    --         Attr.style [ ( "position", "relative" ) ]
+    -- in
+    HtmlDetails []
+        [ Html.div [] []
+        ]
+
+
+
+-- [ Attr.style [ ( "text-align", "right" ) ]
+-- -- , onClick sortName isReversed dropdownState toMsg
+-- ]
+-- [ Html.button
+--     [ Attr.type_ "button"
+--     , btnClass
+--     , btnStyle
+--     -- , if dropdownOpen then
+--     --     Events.onBlur GridOnBlur
+--     --   else
+--     --     Events.onBlur NoOp
+--     ]
+--     [ Html.div [ dropDownMenuStyle ]
+--         dropMenu
+--     ]
+-- ]
+
+
+dropDownMenuStyle : Html.Attribute msg
+dropDownMenuStyle =
+    Attr.style
+        [ ( "z-index", "5000" )
+        , ( "position", "absolute" )
+        , ( "display", "block" )
+        , ( "left", "-173px" )
+        , ( "width", "178.74px" )
+        ]
+
+
+dropDownMenuItem : ( String, String, msg ) -> Html msg
+dropDownMenuItem ( iconClass, displayText, menuMessage ) =
+    Html.li [ Attr.class "e-content e-list" ]
+        [ Html.a
+            [ Attr.class "e-menulink"
+
+            -- , onClick menuMessage
+            , Attr.target "_blank"
+            ]
+            [ Html.text displayText
+            , Html.span [ Attr.class ("e-gridcontext e-icon " ++ iconClass) ] []
+            ]
+        ]
+
+
+
 -- onClick : Bool -> (Bool -> msg) -> Attribute msg
 -- onClick message toMsg =
 --     (Events.onWithOptions "click"
@@ -530,23 +537,23 @@ increasingOrDecreasingBy toComparable =
 --     <|
 --         Json.Decode.map toMsg <|
 --             Json.Decode.map (Json.Decode.succeed message)
--- --(Json.Decode.succeed message)
--- -- styles for list container
--- dropdownList : List ( String, String )
--- dropdownList =
---     [ ( "position", "absolute" )
---     , ( "top", "32px" )
---     , ( "border-radius", "4px" )
---     , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
---     , ( "padding", "0" )
---     , ( "margin", "0" )
---     -- , ( "width", "150px" )
---     , ( "background-color", "white" )
---     , ( "max-height", "152px" )
---     , ( "overflow-x", "hidden" )
---     , ( "overflow-y", "scroll" )
---     , ( "z-index", "100" )
---     ]
--- htmlNeverToHtmlMsg : Html Never -> Html Msg
--- htmlNeverToHtmlMsg =
---     Html.map (always NoOp)
+--(Json.Decode.succeed message)
+-- styles for list container
+
+
+dropdownList : List ( String, String )
+dropdownList =
+    [ ( "position", "absolute" )
+    , ( "top", "32px" )
+    , ( "border-radius", "4px" )
+    , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
+    , ( "padding", "0" )
+    , ( "margin", "0" )
+
+    -- , ( "width", "150px" )
+    , ( "background-color", "white" )
+    , ( "max-height", "152px" )
+    , ( "overflow-x", "hidden" )
+    , ( "overflow-y", "scroll" )
+    , ( "z-index", "100" )
+    ]
