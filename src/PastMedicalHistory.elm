@@ -200,12 +200,11 @@ getColumns addEditDataSource state toMsg =
         menuItems row =
             [ case addEditDataSource of
                 Just t ->
-                    ( "e-edit", "Edit", onClick (Edit t 0) )
+                    ( "e-edit", "Edit", onClick (Edit t row.id) )
 
-                -- TODO row.id
                 Nothing ->
                     ( "", "No Datasrc", class "disabled" )
-            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage 0) ) --row.id
+            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage row.id) )
             ]
     in
         [ Table.stringColumn "Description" (\t -> t.description)
@@ -213,7 +212,7 @@ getColumns addEditDataSource state toMsg =
         , Table.stringColumn "Facility" (\t -> t.facility)
         , Table.stringColumn "Provider" (\t -> t.provider)
         , Table.stringColumn "Notes" (\t -> t.notes)
-        , Table.testColumn [] state toMsg
+        , Table.dropdownColumn (\t -> Table.dropdownDetails (menuItems t) state toMsg)
         ]
 
 

@@ -5,12 +5,13 @@ module Common.Table
         , stringColumn
         , intColumn
         , floatColumn
-        , testColumn
+        , dropdownColumn
         , State
         , initialSort
         , Column
         , customColumn
         , veryCustomColumn
+        , dropdownDetails
         , Sorter
         , unsortable
         , increasingBy
@@ -456,11 +457,11 @@ increasingOrDecreasingBy toComparable =
 -- extra for dropdown
 
 
-testColumn : List ( String, String, Attribute msg ) -> State -> (State -> msg) -> Column data msg
-testColumn dropDownItems state toMsg =
+dropdownColumn : (data -> HtmlDetails msg) -> Column data msg
+dropdownColumn t =
     veryCustomColumn
         { name = ""
-        , viewData = \t -> (dropdownDetails dropDownItems state toMsg)
+        , viewData = t
         , sorter = unsortable
         }
 
