@@ -95,7 +95,6 @@ type alias Customizations data msg =
     , caption : Maybe (HtmlDetails msg)
     , thead : List ( String, Status, Attribute msg ) -> HtmlDetails msg
     , theadButtons : List ( String, Attribute msg )
-    , dropdownItems : List ( String, String, Attribute msg )
     , tfoot : Maybe (HtmlDetails msg)
     , tbodyAttrs : List (Attribute msg)
     , rowAttrs : data -> List (Attribute msg)
@@ -114,7 +113,6 @@ defaultCustomizations =
     , caption = Nothing
     , thead = simpleThead
     , theadButtons = []
-    , dropdownItems = []
     , tfoot = Nothing
     , tbodyAttrs = []
     , rowAttrs = simpleRowAttrs
