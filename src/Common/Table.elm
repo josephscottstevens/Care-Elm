@@ -461,8 +461,8 @@ dropdownColumn t =
         }
 
 
-dropdownDetails : Int -> List ( String, String, Attribute msg ) -> State -> (State -> msg) -> HtmlDetails msg
-dropdownDetails id dropDownItems (State sortName isReversed dropdownState) toMsg =
+dropdownDetails : List ( String, String, Attribute msg ) -> Int -> State -> (State -> msg) -> HtmlDetails msg
+dropdownDetails dropDownItems id (State sortName isReversed dropdownState) toMsg =
     let
         btnClass =
             Attr.class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"

@@ -199,7 +199,7 @@ getColumns addEditDataSource state toMsg =
         , Table.stringColumn "Facility" (\t -> t.facility)
         , Table.stringColumn "Provider" (\t -> t.provider)
         , Table.stringColumn "Notes" (\t -> t.notes)
-        , Table.dropdownColumn (\t -> Table.dropdownDetails t.id (menuItems t) state toMsg)
+        , Table.dropdownColumn (\t -> Table.dropdownDetails (menuItems t) t.id state toMsg)
         ]
 
 
