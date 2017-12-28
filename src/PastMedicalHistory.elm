@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Common.Html exposing (InputControlType(TextInput, AreaInput, Dropdown, HtmlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
 import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage, DropdownItem)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
-import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters, rowDropDownDiv)
+import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters)
 import Common.Dropdown as Dropdown
 import Common.GridDropdown as GridDropdown
 import Common.Route as Route
@@ -197,15 +197,22 @@ getColumns addEditDataSource =
     , Table.stringColumn "Facility" (\t -> t.facility)
     , Table.stringColumn "Provider" (\t -> t.provider)
     , Table.stringColumn "Notes" (\t -> t.notes)
-    , Common.Grid.testColumn myView
+    , Common.Grid.testColumn (dropdownItems addEditDataSource)
     ]
 
 
-myView : PastMedicalHistoryRow -> Html Msg
-myView row =
+dropdownItems : Maybe AddEditDataSource -> PastMedicalHistoryRow -> Html Msg
+dropdownItems addEditDataSource row =
     let
         menuItems =
-            [ ( "e-contextdelete", "Delete", MenuMessage "" row.id Nothing Nothing ) ]
+            [ case addEditDataSource of
+                Just t ->
+                    ( "e-edit", "Edit", onClick (Edit t row.id) )
+
+                Nothing ->
+                    ( "", "No Datasrc", class "disabled" )
+            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage row.id) )
+            ]
     in
         Html.map (UpdateDropdown row) (GridDropdown.view row.isOpen menuItems)
 
@@ -225,28 +232,6 @@ formInputs newRecord =
     , TextInput "Notes" Optional newRecord.notes (UpdateNotes newRecord)
     , HtmlElement "Treatment" (input [ type_ "textbox", class "e-textbox", disabled True, value newRecord.treatment ] [])
     , HtmlElement "" (div [ noteStyle ] [ text "*Treatment is deprecated." ])
-    ]
-
-
-
--- rowDropDownColumn : Maybe AddEditDataSource -> Table.Column PastMedicalHistoryRow Msg
--- rowDropDownColumn addEditDataSource =
---     Table.veryCustomColumn
---         { name = ""
---         , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle t.id)) (dropdownItems t.id addEditDataSource)
---         , sorter = Table.unsortable
---         }
-
-
-dropdownItems : Int -> Maybe AddEditDataSource -> List ( String, String, Html.Attribute Msg )
-dropdownItems rowId addEditDataSource =
-    [ case addEditDataSource of
-        Just t ->
-            ( "e-edit", "Edit", onClick (Edit t rowId) )
-
-        Nothing ->
-            ( "", "No Datasrc", class "disabled" )
-    , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId) )
     ]
 
 

@@ -1,19 +1,16 @@
-port module Common.Dropdown exposing (Dropdown, Msg, GridMsg, init, update, updateGrid, view, viewGrid)
+port module Common.Dropdown exposing (Dropdown, Msg, init, update, view)
 
-import Html exposing (Html, Attribute, div, span, text, li, ul, input, button)
-import Html.Attributes exposing (style, value, class, readonly, type_, target)
+import Html exposing (Html, Attribute, div, span, text, li, ul, input)
+import Html.Attributes exposing (style, value, class, readonly)
 import Html.Events as Events
 import Json.Decode
-import Common.Types exposing (DropdownItem, MenuMessage)
+import Common.Types exposing (DropdownItem)
 import Common.Functions as Functions
 import Char
 import Array exposing (Array)
 
 
 port dropdownMenuScroll : String -> Cmd msg
-
-
-port sendMenuMessageNew2 : MenuMessage -> Cmd msg
 
 
 scrollToDomId : String -> Cmd msg
@@ -69,7 +66,7 @@ type Key
 type Msg
     = ItemPicked DropdownItem
     | ItemEntered DropdownItem
-    | ItemLeft DropdownItem
+    | ItemLeft
     | SetOpenState Bool
     | OnBlur
     | OnKey Key
@@ -100,7 +97,7 @@ update msg dropdown =
         ItemEntered item ->
             { dropdown | highlightedItem = Just item } ! []
 
-        ItemLeft item ->
+        ItemLeft ->
             { dropdown | highlightedItem = Nothing } ! []
 
         SetOpenState newState ->
@@ -234,128 +231,6 @@ view dropdown =
             ]
 
 
-type GridMsg
-    = GridSetOpenState
-    | GridOnBlur
-    | NoOp
-    | MenuItemSelected MenuMessage
-
-
-
--- updateGrid : List { c | isOpen : Bool, dropdown : a } -> { b | dropdown : a } -> GridMsg -> ( List { c | isOpen : Bool, dropdown : a }, Cmd GridMsg )
--- List { c | isOpen : Bool }
---     -> ( List { c | isOpen : Bool } -> List { c | isOpen : Bool }, Cmd msg )
--- But the right side is:
---     ( List { c | isOpen : Bool } -> List { c | isOpen : Bool }, Cmd msg )
--- updateGrid : List { c | isOpen : Bool } -> { c | isOpen : Bool } -> GridMsg -> ( List { c | isOpen : Bool }, Cmd msg )
--- a -> ( List { c | isOpen : b } -> List { c | isOpen : Bool }, Cmd msg )
---      ( List { c | isOpen : b } -> List { c | isOpen : Bool }, Cmd msg )
--- updateGrid : List { c | isOpen : Bool, dropdown : a } -> { b | dropdown : a } -> GridMsg -> ( List { c | isOpen : Bool, dropdown : a }, Cmd GridMsg )
--- updateGrid : List Bool -> Bool -> GridMsg -> ( List Bool, Cmd GridMsg )
-
-
-updateGrid : List { a | isOpen : Bool } -> { a | isOpen : Bool } -> GridMsg -> ( List { a | isOpen : Bool }, GridMsg )
-updateGrid dropRows row msg =
-    case msg of
-        GridSetOpenState ->
-            ( dropRows
-                |> List.map
-                    (\t ->
-                        if t == row then
-                            { row | isOpen = not t.isOpen }
-                        else
-                            t
-                    )
-            , NoOp
-            )
-
-        GridOnBlur ->
-            ( dropRows, NoOp )
-
-        --t { dropdown | isOpen = False } ! []
-        MenuItemSelected menuItem ->
-            ( dropRows, MenuItemSelected menuItem )
-
-        --t { dropdown | isOpen = not dropdown.isOpen } ! [ sendMenuMessageNew menuItem ]
-        NoOp ->
-            ( dropRows, NoOp )
-
-
-
--- rows : List { c | isOpen : Bool, dropdown : a } -> { c | isOpen : Bool, dropdown : a } -> { c | isOpen : Bool, dropdown : a } -> List { c | isOpen : Bool, dropdown : a }
--- rows : List { c | isOpen : Bool, dropdown : a } -> { b | dropdown : a }
--- rows dropRows row newDrop =
---     dropRows
---         |> List.map
---             (\t ->
---                 if t == row then
---                     { t | dropdown = newDrop }
---                 else
---                     t
---             )
-
-
-viewGrid : Bool -> List ( String, String, MenuMessage ) -> Html GridMsg
-viewGrid isOpen dropDownItems =
-    let
-        dropMenu =
-            case isOpen of
-                True ->
-                    [ ul
-                        [ class "e-menu e-js e-widget e-box e-separator"
-                        ]
-                        (List.map dropDownMenuItem dropDownItems)
-                    ]
-
-                False ->
-                    []
-
-        btnClass =
-            class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
-
-        btnStyle =
-            style [ ( "position", "relative" ) ]
-    in
-        div
-            [ style [ ( "text-align", "right" ) ]
-            , onClick GridSetOpenState
-            ]
-            [ button
-                [ type_ "button"
-                , btnClass
-                , btnStyle
-                , if isOpen then
-                    Events.onBlur GridOnBlur
-                  else
-                    Events.onBlur NoOp
-                ]
-                [ div [ dropDownMenuStyle ]
-                    dropMenu
-                ]
-            ]
-
-
-dropDownMenuStyle : Html.Attribute msg
-dropDownMenuStyle =
-    style
-        [ ( "z-index", "5000" )
-        , ( "position", "absolute" )
-        , ( "display", "block" )
-        , ( "left", "-173px" )
-        , ( "width", "178.74px" )
-        ]
-
-
-dropDownMenuItem : ( String, String, MenuMessage ) -> Html GridMsg
-dropDownMenuItem ( iconClass, displayText, menuMessage ) =
-    li [ class "e-content e-list" ]
-        [ Html.a [ class "e-menulink", Events.onClick (MenuItemSelected menuMessage), target "_blank" ]
-            [ text displayText
-            , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
-            ]
-        ]
-
-
 getId : String -> DropdownItem -> String
 getId id item =
     id ++ "-" ++ Functions.defaultIntToString item.id
@@ -364,9 +239,6 @@ getId id item =
 viewItem : Dropdown -> List (Html Msg)
 viewItem dropdown =
     let
-        arraySize =
-            Array.length dropdown.dropdownSource
-
         numItems =
             dropdown.dropdownSource
                 |> Array.toList
@@ -391,10 +263,10 @@ viewItem dropdown =
         dropdown.dropdownSource
             |> Array.indexedMap
                 (\index item ->
-                    (li
+                    li
                         [ onClick (ItemPicked item)
                         , Events.onMouseEnter (ItemEntered item)
-                        , Events.onMouseLeave (ItemLeft item)
+                        , Events.onMouseLeave ItemLeft
                         , class "dropdown-li"
                         , if dropdown.highlightedItem == Just item then
                             style mouseActive
@@ -405,7 +277,6 @@ viewItem dropdown =
                         , Html.Attributes.id (getId dropdown.id item)
                         ]
                         [ text item.name ]
-                    )
                 )
             |> Array.toList
 
@@ -437,16 +308,6 @@ dropdownList =
     , ( "overflow-y", "scroll" )
     , ( "z-index", "100" )
     ]
-
-
-maybeFallback : Maybe a -> Maybe a -> Maybe a
-maybeFallback replacement original =
-    case original of
-        Just _ ->
-            original
-
-        Nothing ->
-            replacement
 
 
 updateSearchString : Char -> Dropdown -> ( Dropdown, Cmd msg )
@@ -523,8 +384,6 @@ keyDecoder dropdown keyCode =
                     char =
                         Char.fromCode keyCode
 
-                    -- TODO should the user be able to search non-alphanum chars?
-                    -- TODO add support for non-ascii alphas
                     isAlpha char =
                         (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
                 in
@@ -533,8 +392,3 @@ keyDecoder dropdown keyCode =
                         key (Searchable char)
                     else
                         pass
-
-
-htmlNeverToHtmlMsg : Html Never -> Html GridMsg
-htmlNeverToHtmlMsg =
-    Html.map (always NoOp)

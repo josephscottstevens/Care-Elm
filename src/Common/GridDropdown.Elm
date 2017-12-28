@@ -140,65 +140,6 @@ dropdownList =
     ]
 
 
-maybeFallback : Maybe a -> Maybe a -> Maybe a
-maybeFallback replacement original =
-    case original of
-        Just _ ->
-            original
-
-        Nothing ->
-            replacement
-
-
-
--- keyDecoder : Dropdown -> Int -> Json.Decode.Decoder Key
--- keyDecoder dropdown keyCode =
---     let
---         -- This is necessary to ensure that the key is not consumed and can propagate to the parent
---         pass =
---             Json.Decode.fail ""
---         key =
---             Json.Decode.succeed
---     in
---         case keyCode of
---             13 ->
---                 key Enter
---             27 ->
---                 -- Consume Esc only if the Menu is open
---                 if dropdown.isOpen then
---                     pass
---                 else
---                     key Esc
---             -- 32 ->
---             --     key Space
---             33 ->
---                 key PageUp
---             34 ->
---                 key PageDown
---             35 ->
---                 key End
---             36 ->
---                 key Home
---             38 ->
---                 key ArrowUp
---             40 ->
---                 key ArrowDown
---             _ ->
---                 let
---                     char =
---                         Char.fromCode keyCode
---                     -- TODO should the user be able to search non-alphanum chars?
---                     -- TODO add support for non-ascii alphas
---                     isAlpha char =
---                         (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
---                 in
---                     -- Backspace is "searchable" because it can be used to modify the search string
---                     if isAlpha char || Char.isDigit char || char == '\x08' then
---                         key (Searchable char)
---                     else
---                         pass
-
-
 htmlNeverToHtmlMsg : Html Never -> Html Msg
 htmlNeverToHtmlMsg =
     Html.map (always NoOp)
