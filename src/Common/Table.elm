@@ -58,11 +58,11 @@ type Config data msg
 
 
 config :
-    { toId : data -> String
+    { toId : { a | dropdownOpen : Bool } -> String
     , toMsg : State -> msg
-    , columns : List (Column data msg)
+    , columns : List (Column { a | dropdownOpen : Bool } msg)
     }
-    -> Config data msg
+    -> Config { a | dropdownOpen : Bool } msg
 config { toId, toMsg, columns } =
     Config
         { toId = toId
@@ -106,7 +106,7 @@ type alias HtmlDetails msg =
     }
 
 
-defaultCustomizations : Customizations data msg
+defaultCustomizations : Customizations { a | dropdownOpen : Bool } msg
 defaultCustomizations =
     { tableAttrs = []
     , caption = Nothing
@@ -251,17 +251,30 @@ veryCustomColumn =
 -- VIEW
 
 
-view : Config data msg -> State -> List data -> Html msg
+view : Config { a | dropdownOpen : Bool } msg -> State -> List { a | dropdownOpen : Bool } -> Html msg
 view (Config { toId, toMsg, columns, customizations }) state data =
     let
         cols =
             List.length columns
 
+        newColumns =
+            if List.length customizations.dropdownItems > 0 then
+                let
+                    x =
+                        0
+
+                    newColumn =
+                        ColumnData "dropdown" (\t -> HtmlDetails [] [ Html.text <| toString t.dropdownOpen ]) unsortable
+                in
+                    columns ++ [ newColumn ]
+            else
+                columns
+
         sortedData =
             sort state columns data
 
         theadDetails =
-            customizations.thead (List.map (toHeaderInfo state toMsg) columns)
+            customizations.thead (List.map (toHeaderInfo state toMsg) newColumns)
 
         thead =
             Html.thead theadDetails.attributes theadDetails.children
@@ -287,7 +300,7 @@ view (Config { toId, toMsg, columns, customizations }) state data =
 
         tbody =
             Keyed.node "tbody" customizations.tbodyAttrs <|
-                List.map (viewRow toId columns customizations.rowAttrs) sortedData
+                List.map (viewRow toId newColumns customizations.rowAttrs) sortedData
 
         withFoot =
             case customizations.tfoot of
@@ -306,7 +319,7 @@ view (Config { toId, toMsg, columns, customizations }) state data =
                     Html.caption attributes children :: theadbuttons :: thead :: withFoot
 
 
-toHeaderInfo : State -> (State -> msg) -> ColumnData data msg -> ( String, Status, Attribute msg )
+toHeaderInfo : State -> (State -> msg) -> ColumnData { a | dropdownOpen : Bool } msg -> ( String, Status, Attribute msg )
 toHeaderInfo (State sortName isReversed dropdownState) toMsg { name, sorter } =
     case sorter of
         None ->
@@ -451,10 +464,10 @@ increasingOrDecreasingBy toComparable =
 
 -- extra for dropdown
 -- view : Bool -> (Bool -> msg) -> List ( String, String, msg ) -> Html msg
--- view isOpen toMsg dropDownItems =
+-- view dropdownOpen toMsg dropDownItems =
 --     let
 --         dropMenu =
---             case isOpen of
+--             case dropdownOpen of
 --                 True ->
 --                     [ ul
 --                         [ class "e-menu e-js e-widget e-box e-separator"
@@ -476,7 +489,7 @@ increasingOrDecreasingBy toComparable =
 --                 [ type_ "button"
 --                 , btnClass
 --                 , btnStyle
---                 -- , if isOpen then
+--                 -- , if dropdownOpen then
 --                 --     Events.onBlur GridOnBlur
 --                 --   else
 --                 --     Events.onBlur NoOp

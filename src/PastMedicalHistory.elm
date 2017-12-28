@@ -222,7 +222,7 @@ dropdownItems addEditDataSource row =
 
 
 
---Html.map (UpdateDropdown row) (GridDropdown.view row.isOpen menuItems)
+--Html.map (UpdateDropdown row) (GridDropdown.view row.dropdownOpen menuItems)
 
 
 noteStyle : Html.Attribute msg
@@ -307,7 +307,7 @@ type alias PastMedicalHistoryRow =
     , notes : String
     , providerId : Maybe Int
     , problemId : Maybe Int
-    , isOpen : Bool
+    , dropdownOpen : Bool
     }
 
 
