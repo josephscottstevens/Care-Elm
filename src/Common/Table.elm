@@ -259,14 +259,11 @@ view (Config { toId, toMsg, columns, customizations }) state data =
         cols =
             List.length columns
 
-        newColumns =
-            columns
-
         sortedData =
             sort state columns data
 
         theadDetails =
-            customizations.thead (List.map (toHeaderInfo state toMsg) newColumns)
+            customizations.thead (List.map (toHeaderInfo state toMsg) columns)
 
         thead =
             Html.thead theadDetails.attributes theadDetails.children
@@ -292,7 +289,7 @@ view (Config { toId, toMsg, columns, customizations }) state data =
 
         tbody =
             Keyed.node "tbody" customizations.tbodyAttrs <|
-                List.map (viewRow toId newColumns customizations.rowAttrs) sortedData
+                List.map (viewRow toId columns customizations.rowAttrs) sortedData
 
         withFoot =
             case customizations.tfoot of
