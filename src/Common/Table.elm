@@ -5,6 +5,7 @@ module Common.Table
         , stringColumn
         , intColumn
         , floatColumn
+        , testColumn
         , State
         , initialSort
         , Column
@@ -455,17 +456,17 @@ increasingOrDecreasingBy toComparable =
 -- extra for dropdown
 
 
-testColumn : ({ a | dropdownOpen : Bool } -> Html msg) -> List ( String, String, Attribute msg ) -> Column { a | dropdownOpen : Bool } msg
-testColumn details dropDownItems =
+testColumn : List ( String, String, Attribute msg ) -> State -> (State -> msg) -> Column { a | dropdownOpen : Bool } msg
+testColumn dropDownItems state config =
     veryCustomColumn
         { name = ""
-        , viewData = \t -> HtmlDetails [] [ details t ]
+        , viewData = \t -> (dropdownDetails dropDownItems state config)
         , sorter = unsortable
         }
 
 
-dropdownDetails : List ( String, String, Attribute msg ) -> State -> Config { a | dropdownOpen : Bool } msg -> HtmlDetails msg
-dropdownDetails dropDownItems (State sortName isReversed dropdownState) (Config { toId, toMsg, columns, customizations }) =
+dropdownDetails : List ( String, String, Attribute msg ) -> State -> (State -> msg) -> HtmlDetails msg
+dropdownDetails dropDownItems (State sortName isReversed dropdownState) toMsg =
     -- let
     --     dropMenu =
     --         case dropdownState of
@@ -483,7 +484,7 @@ dropdownDetails dropDownItems (State sortName isReversed dropdownState) (Config 
     --         Attr.style [ ( "position", "relative" ) ]
     -- in
     HtmlDetails []
-        [ Html.div [ onClick "" False False toMsg ] []
+        [ Html.div [ onClick sortName isReversed dropdownState toMsg ] []
         ]
 
 

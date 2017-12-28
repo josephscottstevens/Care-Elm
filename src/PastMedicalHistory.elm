@@ -167,7 +167,7 @@ view model addEditDataSource =
             div []
                 [ h4 [] [ text "Past Medical History" ]
                 , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config addEditDataSource) model.tableState model.rows ]
+                    [ Table.view (config addEditDataSource model.tableState) model.tableState model.rows ]
                 ]
 
         AddEdit newRecord ->
@@ -194,14 +194,15 @@ view model addEditDataSource =
                     ]
 
 
-getColumns : Maybe AddEditDataSource -> List (Table.Column PastMedicalHistoryRow Msg)
-getColumns addEditDataSource =
+getColumns : Maybe AddEditDataSource -> Table.State -> (Table.State -> Msg) -> List (Table.Column PastMedicalHistoryRow Msg)
+getColumns addEditDataSource state toMsg =
     [ Table.stringColumn "Description" (\t -> t.description)
     , Table.stringColumn "Year" (\t -> t.year)
     , Table.stringColumn "Facility" (\t -> t.facility)
     , Table.stringColumn "Provider" (\t -> t.provider)
     , Table.stringColumn "Notes" (\t -> t.notes)
-    , Common.Grid.testColumn (dropdownItems addEditDataSource)
+
+    -- , Table.testColumn
     ]
 
 
@@ -243,8 +244,8 @@ formInputs newRecord =
     ]
 
 
-config : Maybe AddEditDataSource -> Table.Config PastMedicalHistoryRow Msg
-config addEditDataSource =
+config : Maybe AddEditDataSource -> Table.State -> Table.Config PastMedicalHistoryRow Msg
+config addEditDataSource state =
     let
         buttons =
             case addEditDataSource of
@@ -257,7 +258,7 @@ config addEditDataSource =
         Table.customConfig
             { toId = \t -> toString t.id
             , toMsg = SetTableState
-            , columns = getColumns addEditDataSource
+            , columns = getColumns addEditDataSource state SetTableState
             , customizations =
                 { defaultCustomizations
                     | tableAttrs = standardTableAttrs "RecordTable"
