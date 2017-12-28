@@ -38,12 +38,12 @@ import Json.Decode as Json
 
 
 type State
-    = State String Bool Bool
+    = State String Bool (Maybe Int)
 
 
 initialSort : String -> State
 initialSort header =
-    State header False False
+    State header False Nothing
 
 
 
@@ -336,7 +336,7 @@ toHeaderInfo (State sortName isReversed dropdownState) toMsg { name, sorter } =
                 ( name, Reversible Nothing, onClick name False dropdownState toMsg )
 
 
-onClick : String -> Bool -> Bool -> (State -> msg) -> Attribute msg
+onClick : String -> Bool -> Maybe Int -> (State -> msg) -> Attribute msg
 onClick name isReversed dropdownState toMsg =
     E.on "click" <|
         Json.map toMsg <|
@@ -466,28 +466,33 @@ dropdownColumn t =
         }
 
 
-dropdownDetails : List ( String, String, Attribute msg ) -> State -> (State -> msg) -> HtmlDetails msg
-dropdownDetails dropDownItems (State sortName isReversed dropdownState) toMsg =
+dropdownDetails : Int -> List ( String, String, Attribute msg ) -> State -> (State -> msg) -> HtmlDetails msg
+dropdownDetails id dropDownItems (State sortName isReversed dropdownState) toMsg =
     let
         btnClass =
             Attr.class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
 
         btnStyle =
             Attr.style [ ( "position", "relative" ) ]
+
+        newDropdownState =
+            case dropdownState of
+                Just _ ->
+                    Nothing
+
+                Nothing ->
+                    Just id
     in
         HtmlDetails []
             [ Html.div
                 [ Attr.style [ ( "text-align", "right" ) ]
-                , onClick sortName isReversed (not dropdownState) toMsg
+                , onClick sortName isReversed newDropdownState toMsg
                 ]
                 [ Html.button
                     [ Attr.type_ "button"
                     , btnClass
                     , btnStyle
-                    , if dropdownState == True then
-                        onBlur sortName isReversed False toMsg
-                      else
-                        Attr.src ""
+                    , onBlur sortName isReversed Nothing toMsg
                     ]
                     [ Html.div
                         [ Attr.style
@@ -498,24 +503,22 @@ dropdownDetails dropDownItems (State sortName isReversed dropdownState) toMsg =
                             , ( "width", "178.74px" )
                             ]
                         ]
-                        (dropMenu dropdownState dropDownItems)
+                        (dropMenu id dropdownState dropDownItems)
                     ]
                 ]
             ]
 
 
-dropMenu : Bool -> List ( String, String, Attribute msg ) -> List (Html msg)
-dropMenu dropdownState dropDownItems =
-    case dropdownState of
-        True ->
-            [ Html.ul
-                [ Attr.class "e-menu e-js e-widget e-box e-separator"
-                ]
-                (List.map dropDownMenuItem dropDownItems)
+dropMenu : Int -> Maybe Int -> List ( String, String, Attribute msg ) -> List (Html msg)
+dropMenu id dropdownState dropDownItems =
+    if Just id == dropdownState then
+        [ Html.ul
+            [ Attr.class "e-menu e-js e-widget e-box e-separator"
             ]
-
-        False ->
-            []
+            (List.map dropDownMenuItem dropDownItems)
+        ]
+    else
+        []
 
 
 dropDownMenuItem : ( String, String, Attribute msg ) -> Html msg
@@ -550,7 +553,7 @@ dropdownList =
     ]
 
 
-onBlur : String -> Bool -> Bool -> (State -> msg) -> Attribute msg
+onBlur : String -> Bool -> Maybe Int -> (State -> msg) -> Attribute msg
 onBlur name isReversed dropdownState toMsg =
     E.on "blur" <|
         Json.map toMsg <|
