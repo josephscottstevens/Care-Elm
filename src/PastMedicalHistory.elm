@@ -151,15 +151,6 @@ update msg model patientId =
             { model | state = AddEdit { newRecord | notes = str } } ! []
 
 
-
--- UpdateDropdown row dropdownMsg ->
---     let
---         ( newDrop, newMsg ) =
---             GridDropdown.update model.rows row dropdownMsg
---     in
---         { model | rows = newDrop } ! [ newMsg ]
-
-
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
     case model.state of
@@ -212,7 +203,7 @@ getColumns addEditDataSource state toMsg =
         , Table.stringColumn "Facility" (\t -> t.facility)
         , Table.stringColumn "Provider" (\t -> t.provider)
         , Table.stringColumn "Notes" (\t -> t.notes)
-        , Table.dropdownColumn (\t -> Table.dropdownDetails (menuItems t) state toMsg)
+        , Table.dropdownColumn (\t -> Table.dropdownDetails (menuItems t) t.dropdownOpen state toMsg)
         ]
 
 
