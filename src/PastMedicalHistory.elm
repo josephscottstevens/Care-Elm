@@ -91,7 +91,6 @@ update msg model patientId =
         SaveCompleted (Ok _) ->
             { model | state = Grid } ! [ displaySuccessMessage "Past Medical History Saved Successfully!" ]
 
-        --todo
         SaveCompleted (Err t) ->
             { model | state = Grid } ! [ displayErrorMessage (toString t) ]
 
@@ -257,7 +256,6 @@ decodePastMedicalHistoryRow =
         |> required "Notes" Decode.string
         |> required "ProviderId" (Decode.maybe Decode.int)
         |> required "ProblemId" (Decode.maybe Decode.int)
-        |> hardcoded False
 
 
 encodeNewRow : NewRecord -> Int -> Encode.Value
@@ -285,7 +283,6 @@ type alias PastMedicalHistoryRow =
     , notes : String
     , providerId : Maybe Int
     , problemId : Maybe Int
-    , dropdownOpen : Bool
     }
 
 
