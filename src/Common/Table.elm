@@ -455,13 +455,17 @@ increasingOrDecreasingBy toComparable =
 -- extra for dropdown
 
 
-testColumn : ({ a | dropdownOpen : Bool } -> Html msg) -> ColumnData { a | dropdownOpen : Bool } msg
-testColumn details =
-    ColumnData "" (\t -> HtmlDetails [] [ details t ]) unsortable
+testColumn : ({ a | dropdownOpen : Bool } -> Html msg) -> List ( String, String, Attribute msg ) -> Column { a | dropdownOpen : Bool } msg
+testColumn details dropDownItems =
+    veryCustomColumn
+        { name = ""
+        , viewData = \t -> HtmlDetails [] [ details t ]
+        , sorter = unsortable
+        }
 
 
-dropdownDetails : List ( String, String, Attribute msg ) -> State -> HtmlDetails msg
-dropdownDetails dropDownItems (State sortName isReversed dropdownState) =
+dropdownDetails : List ( String, String, Attribute msg ) -> State -> Config { a | dropdownOpen : Bool } msg -> HtmlDetails msg
+dropdownDetails dropDownItems (State sortName isReversed dropdownState) (Config { toId, toMsg, columns, customizations }) =
     -- let
     --     dropMenu =
     --         case dropdownState of
@@ -479,7 +483,7 @@ dropdownDetails dropDownItems (State sortName isReversed dropdownState) =
     --         Attr.style [ ( "position", "relative" ) ]
     -- in
     HtmlDetails []
-        [ Html.div [] []
+        [ Html.div [ onClick "" False False toMsg ] []
         ]
 
 
