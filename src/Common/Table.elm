@@ -60,11 +60,11 @@ type Config data msg
 
 
 config :
-    { toId : { a | dropdownOpen : Bool, id : Int } -> String
+    { toId : data -> String
     , toMsg : State -> msg
-    , columns : List (Column { a | dropdownOpen : Bool, id : Int } msg)
+    , columns : List (Column data msg)
     }
-    -> Config { a | dropdownOpen : Bool, id : Int } msg
+    -> Config data msg
 config { toId, toMsg, columns } =
     Config
         { toId = toId
@@ -108,7 +108,7 @@ type alias HtmlDetails msg =
     }
 
 
-defaultCustomizations : Customizations { a | dropdownOpen : Bool, id : Int } msg
+defaultCustomizations : Customizations data msg
 defaultCustomizations =
     { tableAttrs = []
     , caption = Nothing
@@ -253,7 +253,7 @@ veryCustomColumn =
 -- VIEW
 
 
-view : Config { a | dropdownOpen : Bool, id : Int } msg -> State -> List { a | dropdownOpen : Bool, id : Int } -> Html msg
+view : Config data msg -> State -> List data -> Html msg
 view (Config { toId, toMsg, columns, customizations }) state data =
     let
         cols =
@@ -311,7 +311,7 @@ view (Config { toId, toMsg, columns, customizations }) state data =
                     Html.caption attributes children :: theadbuttons :: thead :: withFoot
 
 
-toHeaderInfo : State -> (State -> msg) -> ColumnData { a | dropdownOpen : Bool, id : Int } msg -> ( String, Status, Attribute msg )
+toHeaderInfo : State -> (State -> msg) -> ColumnData data msg -> ( String, Status, Attribute msg )
 toHeaderInfo (State sortName isReversed dropdownState) toMsg { name, sorter } =
     case sorter of
         None ->
@@ -543,8 +543,6 @@ dropdownList =
     , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
     , ( "padding", "0" )
     , ( "margin", "0" )
-
-    -- , ( "width", "150px" )
     , ( "background-color", "white" )
     , ( "max-height", "152px" )
     , ( "overflow-x", "hidden" )

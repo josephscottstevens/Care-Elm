@@ -65,10 +65,6 @@ type Msg
     | UpdateNotes NewRecord String
 
 
-
--- | UpdateDropdown PastMedicalHistoryRow GridDropdown.Msg
-
-
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
@@ -205,10 +201,6 @@ getColumns addEditDataSource state toMsg =
         , Table.stringColumn "Notes" (\t -> t.notes)
         , Table.dropdownColumn (\t -> Table.dropdownDetails t.id (menuItems t) state toMsg)
         ]
-
-
-
---Html.map (UpdateDropdown row) (GridDropdown.view row.dropdownOpen menuItems)
 
 
 noteStyle : Html.Attribute msg
