@@ -73,15 +73,16 @@ update msg model _ =
             { model | tableState = newState } ! []
 
         DropDownToggle recordId ->
-            { model | rows = Functions.flipDropdownOpen model.rows recordId } ! []
+            model ! []
 
+        -- { model | rows = Functions.flipDropdownOpen model.rows recordId } ! []
         SendMenuMessage recordId messageType ->
             model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
         DeleteHospitilizationConfirmed rowId ->
             let
                 newHospitilizations =
-                    model.rows |> List.filter (\t -> t.id /= Just rowId)
+                    model.rows |> List.filter (\t -> t.id /= rowId)
             in
                 { model | rows = newHospitilizations }
                     ! [ deleteHospitilization rowId DeleteCompleted ]
@@ -112,7 +113,7 @@ update msg model _ =
 
 getColumns : List (Table.Column HospitilizationsRow Msg)
 getColumns =
-    [ Table.stringColumn "ID" (\t -> Functions.defaultIntToString t.id)
+    [ Table.stringColumn "ID" (\t -> toString t.id)
     , Table.stringColumn "Facility Name" (\t -> defaultString t.facilityName)
     , Table.stringColumn "Date Of Admission" (\t -> defaultDate t.dateOfAdmission)
     , Table.stringColumn "Admit Problem" (\t -> defaultString t.admitProblem)
@@ -150,7 +151,7 @@ rowDropDownColumn : Table.Column HospitilizationsRow Msg
 rowDropDownColumn =
     Table.veryCustomColumn
         { name = ""
-        , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle t.id)) (dropDownItems <| Functions.defaultInt t.id)
+        , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle <| Just t.id)) (dropDownItems t.id)
         , sorter = Table.unsortable
         }
 
@@ -189,7 +190,7 @@ config addEditDataSource =
 decodeHospitilizationsRow : Decode.Decoder HospitilizationsRow
 decodeHospitilizationsRow =
     Pipeline.decode HospitilizationsRow
-        |> Pipeline.required "Id" (Decode.maybe Decode.int)
+        |> Pipeline.required "Id" Decode.int
         |> Pipeline.required "FacilityName" (Decode.maybe Decode.string)
         |> Pipeline.required "DateOfAdmission" (Decode.maybe Decode.string)
         |> Pipeline.required "AdmitProblem" (Decode.maybe Decode.string)

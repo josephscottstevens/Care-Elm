@@ -10,7 +10,7 @@ import Common.Types exposing (AddEditDataSource, HospitilizationsRow)
 encodeRecord : Model -> Int -> Encode.Value
 encodeRecord newRecord patientId =
     Encode.object
-        [ ( "Id", maybeVal Encode.int <| newRecord.sfData.id )
+        [ ( "Id", Encode.int <| newRecord.sfData.id )
         , ( "PatientId", Encode.int <| patientId )
         , ( "FacilityId", maybeVal Encode.int <| newRecord.sfData.facilityId )
         , ( "PatientReported", Encode.bool <| newRecord.patientReported )

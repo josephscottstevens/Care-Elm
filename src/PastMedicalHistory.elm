@@ -196,30 +196,25 @@ view model addEditDataSource =
 
 getColumns : Maybe AddEditDataSource -> Table.State -> (Table.State -> Msg) -> List (Table.Column PastMedicalHistoryRow Msg)
 getColumns addEditDataSource state toMsg =
-    [ Table.stringColumn "Description" (\t -> t.description)
-    , Table.stringColumn "Year" (\t -> t.year)
-    , Table.stringColumn "Facility" (\t -> t.facility)
-    , Table.stringColumn "Provider" (\t -> t.provider)
-    , Table.stringColumn "Notes" (\t -> t.notes)
-
-    -- , Table.testColumn
-    ]
-
-
-dropdownItems : Maybe AddEditDataSource -> PastMedicalHistoryRow -> Html Msg
-dropdownItems addEditDataSource row =
     let
-        menuItems =
+        menuItems row =
             [ case addEditDataSource of
                 Just t ->
-                    ( "e-edit", "Edit", onClick (Edit t row.id) )
+                    ( "e-edit", "Edit", onClick (Edit t 0) )
 
+                -- TODO row.id
                 Nothing ->
                     ( "", "No Datasrc", class "disabled" )
-            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage row.id) )
+            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage 0) ) --row.id
             ]
     in
-        div [] []
+        [ Table.stringColumn "Description" (\t -> t.description)
+        , Table.stringColumn "Year" (\t -> t.year)
+        , Table.stringColumn "Facility" (\t -> t.facility)
+        , Table.stringColumn "Provider" (\t -> t.provider)
+        , Table.stringColumn "Notes" (\t -> t.notes)
+        , Table.testColumn [] state toMsg
+        ]
 
 
 

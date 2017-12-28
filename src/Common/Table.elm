@@ -59,11 +59,11 @@ type Config data msg
 
 
 config :
-    { toId : { a | dropdownOpen : Bool } -> String
+    { toId : { a | dropdownOpen : Bool, id : Int } -> String
     , toMsg : State -> msg
-    , columns : List (Column { a | dropdownOpen : Bool } msg)
+    , columns : List (Column { a | dropdownOpen : Bool, id : Int } msg)
     }
-    -> Config { a | dropdownOpen : Bool } msg
+    -> Config { a | dropdownOpen : Bool, id : Int } msg
 config { toId, toMsg, columns } =
     Config
         { toId = toId
@@ -107,7 +107,7 @@ type alias HtmlDetails msg =
     }
 
 
-defaultCustomizations : Customizations { a | dropdownOpen : Bool } msg
+defaultCustomizations : Customizations { a | dropdownOpen : Bool, id : Int } msg
 defaultCustomizations =
     { tableAttrs = []
     , caption = Nothing
@@ -252,7 +252,7 @@ veryCustomColumn =
 -- VIEW
 
 
-view : Config { a | dropdownOpen : Bool } msg -> State -> List { a | dropdownOpen : Bool } -> Html msg
+view : Config { a | dropdownOpen : Bool, id : Int } msg -> State -> List { a | dropdownOpen : Bool, id : Int } -> Html msg
 view (Config { toId, toMsg, columns, customizations }) state data =
     let
         cols =
@@ -310,7 +310,7 @@ view (Config { toId, toMsg, columns, customizations }) state data =
                     Html.caption attributes children :: theadbuttons :: thead :: withFoot
 
 
-toHeaderInfo : State -> (State -> msg) -> ColumnData { a | dropdownOpen : Bool } msg -> ( String, Status, Attribute msg )
+toHeaderInfo : State -> (State -> msg) -> ColumnData { a | dropdownOpen : Bool, id : Int } msg -> ( String, Status, Attribute msg )
 toHeaderInfo (State sortName isReversed dropdownState) toMsg { name, sorter } =
     case sorter of
         None ->
@@ -456,11 +456,11 @@ increasingOrDecreasingBy toComparable =
 -- extra for dropdown
 
 
-testColumn : List ( String, String, Attribute msg ) -> State -> (State -> msg) -> Column { a | dropdownOpen : Bool } msg
-testColumn dropDownItems state config =
+testColumn : List ( String, String, Attribute msg ) -> State -> (State -> msg) -> Column data msg
+testColumn dropDownItems state toMsg =
     veryCustomColumn
         { name = ""
-        , viewData = \t -> (dropdownDetails dropDownItems state config)
+        , viewData = \t -> (dropdownDetails dropDownItems state toMsg)
         , sorter = unsortable
         }
 
@@ -477,18 +477,16 @@ dropdownDetails dropDownItems (State sortName isReversed dropdownState) toMsg =
         HtmlDetails []
             [ Html.div
                 [ Attr.style [ ( "text-align", "right" ) ]
-
-                -- , onClick sortName isReversed dropdownState toMsg
+                , onClick sortName isReversed (not dropdownState) toMsg
                 ]
                 [ Html.button
                     [ Attr.type_ "button"
                     , btnClass
                     , btnStyle
-
-                    -- , if dropdownOpen then
-                    --     Events.onBlur GridOnBlur
-                    --   else
-                    --     Events.onBlur NoOp
+                    , if dropdownState == True then
+                        onBlur sortName isReversed False toMsg
+                      else
+                        Attr.src ""
                     ]
                     [ Html.div
                         [ Attr.style
@@ -524,27 +522,13 @@ dropDownMenuItem ( iconClass, displayText, menuMessage ) =
     Html.li [ Attr.class "e-content e-list" ]
         [ Html.a
             [ Attr.class "e-menulink"
-
-            -- , onClick menuMessage
+            , menuMessage
             , Attr.target "_blank"
             ]
             [ Html.text displayText
             , Html.span [ Attr.class ("e-gridcontext e-icon " ++ iconClass) ] []
             ]
         ]
-
-
-
--- onClick : Bool -> (Bool -> msg) -> Attribute msg
--- onClick message toMsg =
---     (Events.onWithOptions "click"
---         { stopPropagation = True, preventDefault = False }
---     )
---     <|
---         Json.Decode.map toMsg <|
---             Json.Decode.map (Json.Decode.succeed message)
---(Json.Decode.succeed message)
--- styles for list container
 
 
 dropdownList : List ( String, String )
@@ -563,3 +547,10 @@ dropdownList =
     , ( "overflow-y", "scroll" )
     , ( "z-index", "100" )
     ]
+
+
+onBlur : String -> Bool -> Bool -> (State -> msg) -> Attribute msg
+onBlur name isReversed dropdownState toMsg =
+    E.on "blur" <|
+        Json.map toMsg <|
+            Json.map3 State (Json.succeed name) (Json.succeed isReversed) (Json.succeed dropdownState)

@@ -82,8 +82,9 @@ update msg model _ =
             { model | tableState = newState } ! []
 
         DropDownToggle recordId ->
-            { model | rows = Functions.flipDropdownOpen model.rows recordId } ! []
+            model ! []
 
+        -- { model | rows = Functions.flipDropdownOpen model.rows recordId } ! []
         SendMenuMessage recordId recordType messageType ->
             { model | rows = flipConsent model.rows recordId recordType }
                 ! [ sendMenuMessage (getMenuMessage model.rows recordType recordId messageType) ]
@@ -91,7 +92,7 @@ update msg model _ =
         DeleteConfirmed rowId ->
             let
                 updatedRecords =
-                    model.rows |> List.filter (\t -> Functions.defaultInt t.id /= rowId)
+                    model.rows |> List.filter (\t -> t.id /= rowId)
             in
                 { model | rows = updatedRecords } ! [ deleteRequest rowId DeleteCompleted ]
 
@@ -201,7 +202,7 @@ rowDropDownColumn : Common.RecordType -> Table.Column RecordRow Msg
 rowDropDownColumn recordType =
     Table.veryCustomColumn
         { name = ""
-        , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle t.id)) (dropDownItems recordType <| Functions.defaultInt t.id)
+        , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle <| Just t.id)) (dropDownItems recordType t.id)
         , sorter = Table.unsortable
         }
 
@@ -270,7 +271,7 @@ dropDownItems recordType rowId =
 decodeRecordRow : Decoder RecordRow
 decodeRecordRow =
     decode RecordRow
-        |> required "Id" (maybe Decode.int)
+        |> required "Id" Decode.int
         |> required "Date" (maybe Decode.string)
         |> required "Specialty" (maybe Decode.string)
         |> required "Comments" (maybe Decode.string)
@@ -320,7 +321,7 @@ deleteRequest rowId deleteCompleted =
 
 
 type alias RecordRow =
-    { id : Maybe Int
+    { id : Int
     , date : Maybe String
     , specialty : Maybe String
     , comments : Maybe String
@@ -357,7 +358,7 @@ getMenuMessage rows recordType recordId messageType =
     let
         maybeVerbalConsent =
             rows
-                |> List.filter (\t -> Functions.defaultInt t.id == recordId)
+                |> List.filter (\t -> t.id == recordId)
                 |> List.head
                 |> Maybe.map (\t -> not t.hasVerbalConsent)
 
@@ -374,7 +375,7 @@ flipConsent rows recordId recordType =
             rows
                 |> List.map
                     (\t ->
-                        if Functions.defaultInt t.id == recordId then
+                        if t.id == recordId then
                             { t | hasVerbalConsent = not t.hasVerbalConsent }
                         else
                             t
