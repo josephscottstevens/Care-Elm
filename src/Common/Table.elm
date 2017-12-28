@@ -466,8 +466,8 @@ dropdownColumn t =
         }
 
 
-dropdownDetails : List ( String, String, Attribute msg ) -> Bool -> State -> (State -> msg) -> HtmlDetails msg
-dropdownDetails dropDownItems isOpen (State sortName isReversed dropdownState) toMsg =
+dropdownDetails : List ( String, String, Attribute msg ) -> State -> (State -> msg) -> HtmlDetails msg
+dropdownDetails dropDownItems (State sortName isReversed dropdownState) toMsg =
     let
         btnClass =
             Attr.class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
@@ -478,7 +478,7 @@ dropdownDetails dropDownItems isOpen (State sortName isReversed dropdownState) t
         HtmlDetails []
             [ Html.div
                 [ Attr.style [ ( "text-align", "right" ) ]
-                , onClick sortName isReversed (not isOpen) toMsg
+                , onClick sortName isReversed (not dropdownState) toMsg
                 ]
                 [ Html.button
                     [ Attr.type_ "button"
