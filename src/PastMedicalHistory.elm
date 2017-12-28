@@ -8,7 +8,6 @@ import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSourc
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
 import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters)
 import Common.Dropdown as Dropdown
-import Common.GridDropdown as GridDropdown
 import Common.Route as Route
 import Json.Decode as Decode
 import Json.Encode as Encode
@@ -36,6 +35,7 @@ type alias Model =
     { rows : List PastMedicalHistoryRow
     , tableState : Table.State
     , state : State
+    , dropdownState : Table.DropdownState
     , showValidationErrors : Bool
     }
 
@@ -55,6 +55,7 @@ type Msg
     | Add AddEditDataSource
     | Edit AddEditDataSource Int
     | SetTableState Table.State
+    | SetDropState Table.DropdownState
     | DeletePastMedicalHistoryConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | SendMenuMessage Int
@@ -64,7 +65,10 @@ type Msg
     | UpdateFacility NewRecord String
     | UpdateProvider NewRecord Dropdown.Msg
     | UpdateNotes NewRecord String
-    | UpdateDropdown PastMedicalHistoryRow GridDropdown.Msg
+
+
+
+-- | UpdateDropdown PastMedicalHistoryRow GridDropdown.Msg
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -110,6 +114,9 @@ update msg model patientId =
         SetTableState newState ->
             { model | tableState = newState } ! []
 
+        SetDropState dropdownState ->
+            { model | dropdownState = dropdownState } ! []
+
         DeletePastMedicalHistoryConfirmed rowId ->
             { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
                 ! [ deletePastMedicalHistoryRequest rowId ]
@@ -148,12 +155,14 @@ update msg model patientId =
         UpdateNotes newRecord str ->
             { model | state = AddEdit { newRecord | notes = str } } ! []
 
-        UpdateDropdown row dropdownMsg ->
-            let
-                ( newDrop, newMsg ) =
-                    GridDropdown.update model.rows row dropdownMsg
-            in
-                { model | rows = newDrop } ! [ newMsg ]
+
+
+-- UpdateDropdown row dropdownMsg ->
+--     let
+--         ( newDrop, newMsg ) =
+--             GridDropdown.update model.rows row dropdownMsg
+--     in
+--         { model | rows = newDrop } ! [ newMsg ]
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
@@ -214,7 +223,11 @@ dropdownItems addEditDataSource row =
             , ( "e-contextdelete", "Delete", onClick (SendMenuMessage row.id) )
             ]
     in
-        Html.map (UpdateDropdown row) (GridDropdown.view row.isOpen menuItems)
+        div [] []
+
+
+
+--Html.map (UpdateDropdown row) (GridDropdown.view row.isOpen menuItems)
 
 
 noteStyle : Html.Attribute msg
@@ -249,6 +262,7 @@ config addEditDataSource =
         Table.customConfig
             { toId = \t -> toString t.id
             , toMsg = SetTableState
+            , toDropdownMsg = SetDropState
             , columns = getColumns addEditDataSource
             , customizations =
                 { defaultCustomizations
@@ -346,6 +360,7 @@ emptyModel =
     { rows = []
     , tableState = Table.initialSort ""
     , state = Grid
+    , dropdownState = Table.initialDropstate
     , showValidationErrors = False
     }
 

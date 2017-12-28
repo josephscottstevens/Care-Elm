@@ -6,7 +6,9 @@ module Common.Table
         , intColumn
         , floatColumn
         , State
+        , DropdownState
         , initialSort
+        , initialDropstate
         , Column
         , customColumn
         , veryCustomColumn
@@ -35,6 +37,10 @@ import Json.Decode as Json
 -- STATE
 
 
+type DropdownState
+    = DropdownState Bool
+
+
 type State
     = State String Bool
 
@@ -42,6 +48,11 @@ type State
 initialSort : String -> State
 initialSort header =
     State header False
+
+
+initialDropstate : DropdownState
+initialDropstate =
+    DropdownState False
 
 
 
@@ -52,6 +63,7 @@ type Config data msg
     = Config
         { toId : data -> String
         , toMsg : State -> msg
+        , toDropdownMsg : DropdownState -> msg
         , columns : List (ColumnData data msg)
         , customizations : Customizations data msg
         }
@@ -60,13 +72,15 @@ type Config data msg
 config :
     { toId : data -> String
     , toMsg : State -> msg
+    , toDropdownMsg : DropdownState -> msg
     , columns : List (Column data msg)
     }
     -> Config data msg
-config { toId, toMsg, columns } =
+config { toId, toMsg, toDropdownMsg, columns } =
     Config
         { toId = toId
         , toMsg = toMsg
+        , toDropdownMsg = toDropdownMsg
         , columns = List.map (\(Column cData) -> cData) columns
         , customizations = defaultCustomizations
         }
@@ -75,14 +89,16 @@ config { toId, toMsg, columns } =
 customConfig :
     { toId : data -> String
     , toMsg : State -> msg
+    , toDropdownMsg : DropdownState -> msg
     , columns : List (Column data msg)
     , customizations : Customizations data msg
     }
     -> Config data msg
-customConfig { toId, toMsg, columns, customizations } =
+customConfig { toId, toMsg, toDropdownMsg, columns, customizations } =
     Config
         { toId = toId
         , toMsg = toMsg
+        , toDropdownMsg = toDropdownMsg
         , columns = List.map (\(Column cData) -> cData) columns
         , customizations = customizations
         }
@@ -446,3 +462,94 @@ decreasingOrIncreasingBy toComparable =
 increasingOrDecreasingBy : (data -> comparable) -> Sorter data
 increasingOrDecreasingBy toComparable =
     IncOrDec (List.sortBy toComparable)
+
+
+
+-- extra for dropdown
+-- view : Bool -> (Bool -> msg) -> List ( String, String, msg ) -> Html msg
+-- view isOpen toMsg dropDownItems =
+--     let
+--         dropMenu =
+--             case isOpen of
+--                 True ->
+--                     [ ul
+--                         [ class "e-menu e-js e-widget e-box e-separator"
+--                         ]
+--                         (List.map dropDownMenuItem dropDownItems)
+--                     ]
+--                 False ->
+--                     []
+--         btnClass =
+--             class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
+--         btnStyle =
+--             style [ ( "position", "relative" ) ]
+--     in
+--         div
+--             [ style [ ( "text-align", "right" ) ]
+--             , onClick True toMsg
+--             ]
+--             [ button
+--                 [ type_ "button"
+--                 , btnClass
+--                 , btnStyle
+--                 -- , if isOpen then
+--                 --     Events.onBlur GridOnBlur
+--                 --   else
+--                 --     Events.onBlur NoOp
+--                 ]
+--                 [ div [ dropDownMenuStyle ]
+--                     dropMenu
+--                 ]
+--             ]
+-- dropDownMenuStyle : Html.Attribute msg
+-- dropDownMenuStyle =
+--     style
+--         [ ( "z-index", "5000" )
+--         , ( "position", "absolute" )
+--         , ( "display", "block" )
+--         , ( "left", "-173px" )
+--         , ( "width", "178.74px" )
+--         ]
+-- dropDownMenuItem : ( String, String, msg ) -> Html msg
+-- dropDownMenuItem ( iconClass, displayText, menuMessage ) =
+--     li [ class "e-content e-list" ]
+--         [ Html.a
+--             [ class "e-menulink"
+--             -- , onClick menuMessage
+--             , target "_blank"
+--             ]
+--             [ text displayText
+--             , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
+--             ]
+--         ]
+-- getId : String -> DropdownItem -> String
+-- getId id item =
+--     id ++ "-" ++ Functions.defaultIntToString item.id
+-- onClick : Bool -> (Bool -> msg) -> Attribute msg
+-- onClick message toMsg =
+--     (Events.onWithOptions "click"
+--         { stopPropagation = True, preventDefault = False }
+--     )
+--     <|
+--         Json.Decode.map toMsg <|
+--             Json.Decode.map (Json.Decode.succeed message)
+-- --(Json.Decode.succeed message)
+-- -- styles for list container
+-- dropdownList : List ( String, String )
+-- dropdownList =
+--     [ ( "position", "absolute" )
+--     , ( "top", "32px" )
+--     , ( "border-radius", "4px" )
+--     , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
+--     , ( "padding", "0" )
+--     , ( "margin", "0" )
+--     -- , ( "width", "150px" )
+--     , ( "background-color", "white" )
+--     , ( "max-height", "152px" )
+--     , ( "overflow-x", "hidden" )
+--     , ( "overflow-y", "scroll" )
+--     , ( "z-index", "100" )
+--     ]
+-- htmlNeverToHtmlMsg : Html Never -> Html Msg
+-- htmlNeverToHtmlMsg =
+--     Html.map (always NoOp)
