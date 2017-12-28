@@ -6,9 +6,7 @@ module Common.Table
         , intColumn
         , floatColumn
         , State
-        , DropdownState
         , initialSort
-        , initialDropstate
         , Column
         , customColumn
         , veryCustomColumn
@@ -37,22 +35,13 @@ import Json.Decode as Json
 -- STATE
 
 
-type DropdownState
-    = DropdownState Bool
-
-
 type State
-    = State String Bool
+    = State String Bool Bool
 
 
 initialSort : String -> State
 initialSort header =
-    State header False
-
-
-initialDropstate : DropdownState
-initialDropstate =
-    DropdownState False
+    State header False False
 
 
 
@@ -63,7 +52,6 @@ type Config data msg
     = Config
         { toId : data -> String
         , toMsg : State -> msg
-        , toDropdownMsg : DropdownState -> msg
         , columns : List (ColumnData data msg)
         , customizations : Customizations data msg
         }
@@ -72,15 +60,13 @@ type Config data msg
 config :
     { toId : data -> String
     , toMsg : State -> msg
-    , toDropdownMsg : DropdownState -> msg
     , columns : List (Column data msg)
     }
     -> Config data msg
-config { toId, toMsg, toDropdownMsg, columns } =
+config { toId, toMsg, columns } =
     Config
         { toId = toId
         , toMsg = toMsg
-        , toDropdownMsg = toDropdownMsg
         , columns = List.map (\(Column cData) -> cData) columns
         , customizations = defaultCustomizations
         }
@@ -89,16 +75,14 @@ config { toId, toMsg, toDropdownMsg, columns } =
 customConfig :
     { toId : data -> String
     , toMsg : State -> msg
-    , toDropdownMsg : DropdownState -> msg
     , columns : List (Column data msg)
     , customizations : Customizations data msg
     }
     -> Config data msg
-customConfig { toId, toMsg, toDropdownMsg, columns, customizations } =
+customConfig { toId, toMsg, columns, customizations } =
     Config
         { toId = toId
         , toMsg = toMsg
-        , toDropdownMsg = toDropdownMsg
         , columns = List.map (\(Column cData) -> cData) columns
         , customizations = customizations
         }
@@ -323,35 +307,35 @@ view (Config { toId, toMsg, columns, customizations }) state data =
 
 
 toHeaderInfo : State -> (State -> msg) -> ColumnData data msg -> ( String, Status, Attribute msg )
-toHeaderInfo (State sortName isReversed) toMsg { name, sorter } =
+toHeaderInfo (State sortName isReversed dropdownState) toMsg { name, sorter } =
     case sorter of
         None ->
-            ( name, Unsortable, onClick sortName isReversed toMsg )
+            ( name, Unsortable, onClick sortName isReversed dropdownState toMsg )
 
         Increasing _ ->
-            ( name, Sortable (name == sortName), onClick name False toMsg )
+            ( name, Sortable (name == sortName), onClick name False dropdownState toMsg )
 
         Decreasing _ ->
-            ( name, Sortable (name == sortName), onClick name False toMsg )
+            ( name, Sortable (name == sortName), onClick name False dropdownState toMsg )
 
         IncOrDec _ ->
             if name == sortName then
-                ( name, Reversible (Just isReversed), onClick name (not isReversed) toMsg )
+                ( name, Reversible (Just isReversed), onClick name (not isReversed) dropdownState toMsg )
             else
-                ( name, Reversible Nothing, onClick name False toMsg )
+                ( name, Reversible Nothing, onClick name False dropdownState toMsg )
 
         DecOrInc _ ->
             if name == sortName then
-                ( name, Reversible (Just isReversed), onClick name (not isReversed) toMsg )
+                ( name, Reversible (Just isReversed), onClick name (not isReversed) dropdownState toMsg )
             else
-                ( name, Reversible Nothing, onClick name False toMsg )
+                ( name, Reversible Nothing, onClick name False dropdownState toMsg )
 
 
-onClick : String -> Bool -> (State -> msg) -> Attribute msg
-onClick name isReversed toMsg =
+onClick : String -> Bool -> Bool -> (State -> msg) -> Attribute msg
+onClick name isReversed dropdownState toMsg =
     E.on "click" <|
         Json.map toMsg <|
-            Json.map2 State (Json.succeed name) (Json.succeed isReversed)
+            Json.map3 State (Json.succeed name) (Json.succeed isReversed) (Json.succeed dropdownState)
 
 
 viewRow : (data -> String) -> List (ColumnData data msg) -> (data -> List (Attribute msg)) -> data -> ( String, Html msg )
@@ -380,7 +364,7 @@ viewCell data { viewData } =
 
 
 sort : State -> List (ColumnData data msg) -> List data -> List data
-sort (State selectedColumn isReversed) columnData data =
+sort (State selectedColumn isReversed _) columnData data =
     case findSorter selectedColumn columnData of
         Nothing ->
             data

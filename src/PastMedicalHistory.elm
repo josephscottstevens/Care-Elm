@@ -35,7 +35,6 @@ type alias Model =
     { rows : List PastMedicalHistoryRow
     , tableState : Table.State
     , state : State
-    , dropdownState : Table.DropdownState
     , showValidationErrors : Bool
     }
 
@@ -55,7 +54,6 @@ type Msg
     | Add AddEditDataSource
     | Edit AddEditDataSource Int
     | SetTableState Table.State
-    | SetDropState Table.DropdownState
     | DeletePastMedicalHistoryConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | SendMenuMessage Int
@@ -113,9 +111,6 @@ update msg model patientId =
 
         SetTableState newState ->
             { model | tableState = newState } ! []
-
-        SetDropState dropdownState ->
-            { model | dropdownState = dropdownState } ! []
 
         DeletePastMedicalHistoryConfirmed rowId ->
             { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
@@ -262,7 +257,6 @@ config addEditDataSource =
         Table.customConfig
             { toId = \t -> toString t.id
             , toMsg = SetTableState
-            , toDropdownMsg = SetDropState
             , columns = getColumns addEditDataSource
             , customizations =
                 { defaultCustomizations
@@ -360,7 +354,6 @@ emptyModel =
     { rows = []
     , tableState = Table.initialSort ""
     , state = Grid
-    , dropdownState = Table.initialDropstate
     , showValidationErrors = False
     }
 
