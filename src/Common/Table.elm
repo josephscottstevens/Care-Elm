@@ -467,58 +467,59 @@ testColumn dropDownItems state config =
 
 dropdownDetails : List ( String, String, Attribute msg ) -> State -> (State -> msg) -> HtmlDetails msg
 dropdownDetails dropDownItems (State sortName isReversed dropdownState) toMsg =
-    -- let
-    --     dropMenu =
-    --         case dropdownState of
-    --             True ->
-    --                 [ Html.ul
-    --                     [ Attr.class "e-menu e-js e-widget e-box e-separator"
-    --                     ]
-    --                     (List.map dropDownMenuItem dropDownItems)
-    --                 ]
-    --             False ->
-    --                 []
-    --     btnClass =
-    --         Attr.class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
-    --     btnStyle =
-    --         Attr.style [ ( "position", "relative" ) ]
-    -- in
-    HtmlDetails []
-        [ Html.div [ onClick sortName isReversed dropdownState toMsg ] []
-        ]
+    let
+        btnClass =
+            Attr.class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
+
+        btnStyle =
+            Attr.style [ ( "position", "relative" ) ]
+    in
+        HtmlDetails []
+            [ Html.div
+                [ Attr.style [ ( "text-align", "right" ) ]
+
+                -- , onClick sortName isReversed dropdownState toMsg
+                ]
+                [ Html.button
+                    [ Attr.type_ "button"
+                    , btnClass
+                    , btnStyle
+
+                    -- , if dropdownOpen then
+                    --     Events.onBlur GridOnBlur
+                    --   else
+                    --     Events.onBlur NoOp
+                    ]
+                    [ Html.div
+                        [ Attr.style
+                            [ ( "z-index", "5000" )
+                            , ( "position", "absolute" )
+                            , ( "display", "block" )
+                            , ( "left", "-173px" )
+                            , ( "width", "178.74px" )
+                            ]
+                        ]
+                        (dropMenu dropdownState dropDownItems)
+                    ]
+                ]
+            ]
 
 
+dropMenu : Bool -> List ( String, String, Attribute msg ) -> List (Html msg)
+dropMenu dropdownState dropDownItems =
+    case dropdownState of
+        True ->
+            [ Html.ul
+                [ Attr.class "e-menu e-js e-widget e-box e-separator"
+                ]
+                (List.map dropDownMenuItem dropDownItems)
+            ]
 
--- [ Attr.style [ ( "text-align", "right" ) ]
--- -- , onClick sortName isReversed dropdownState toMsg
--- ]
--- [ Html.button
---     [ Attr.type_ "button"
---     , btnClass
---     , btnStyle
---     -- , if dropdownOpen then
---     --     Events.onBlur GridOnBlur
---     --   else
---     --     Events.onBlur NoOp
---     ]
---     [ Html.div [ dropDownMenuStyle ]
---         dropMenu
---     ]
--- ]
+        False ->
+            []
 
 
-dropDownMenuStyle : Html.Attribute msg
-dropDownMenuStyle =
-    Attr.style
-        [ ( "z-index", "5000" )
-        , ( "position", "absolute" )
-        , ( "display", "block" )
-        , ( "left", "-173px" )
-        , ( "width", "178.74px" )
-        ]
-
-
-dropDownMenuItem : ( String, String, msg ) -> Html msg
+dropDownMenuItem : ( String, String, Attribute msg ) -> Html msg
 dropDownMenuItem ( iconClass, displayText, menuMessage ) =
     Html.li [ Attr.class "e-content e-list" ]
         [ Html.a
