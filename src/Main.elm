@@ -3,13 +3,12 @@ module Main exposing (main)
 import Html exposing (Html, text, div)
 import ClinicalSummary
 import Records
-import RecordAddNew.Main as RecordAddNew
+import RecordAddNew
 import PastMedicalHistory
 import Hospitilizations
 import HospitilizationsAddEdit.Main as HospitilizationsAddEdit
 import Billing.Types
 import HospitilizationsAddEdit.Types
-import RecordAddNew.Types
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Common.Route as Route exposing (Route)
@@ -32,7 +31,7 @@ type Page
     | Billing
     | ClinicalSummary ClinicalSummary.Model
     | Records Records.Model
-    | RecordAddNew RecordAddNew.Types.Model
+    | RecordAddNew RecordAddNew.Model
     | PastMedicalHistory PastMedicalHistory.Model
     | Hospitilizations Hospitilizations.Model
     | HospitilizationsAddEdit HospitilizationsAddEdit.Types.Model
@@ -211,7 +210,7 @@ setRoute maybeRoute model =
             Just (Route.RecordAddNew t) ->
                 case model.addEditDataSource of
                     Just addEditDataSource ->
-                        { model | page = RecordAddNew (RecordAddNew.Types.emptyModel t addEditDataSource) }
+                        { model | page = RecordAddNew (RecordAddNew.emptyModel t addEditDataSource) }
                             ! cmds [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource t) ]
 
                     Nothing ->
