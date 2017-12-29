@@ -11,7 +11,7 @@ import Common.Dropdown as Dropdown
 import Common.Route as Route
 import Json.Decode as Decode
 import Json.Encode as Encode
-import Json.Decode.Pipeline exposing (decode, required, hardcoded)
+import Json.Decode.Pipeline exposing (decode, required)
 import Common.Table as Table exposing (defaultCustomizations)
 import Http
 
@@ -180,8 +180,8 @@ view model addEditDataSource =
                     ]
 
 
-getColumns : Maybe AddEditDataSource -> Table.State -> (Table.State -> Msg) -> List (Table.Column PastMedicalHistoryRow Msg)
-getColumns addEditDataSource state toMsg =
+getColumns : Maybe AddEditDataSource -> Table.State -> List (Table.Column PastMedicalHistoryRow Msg)
+getColumns addEditDataSource state =
     let
         menuItems row =
             [ case addEditDataSource of
@@ -198,7 +198,7 @@ getColumns addEditDataSource state toMsg =
         , Table.stringColumn "Facility" (\t -> t.facility)
         , Table.stringColumn "Provider" (\t -> t.provider)
         , Table.stringColumn "Notes" (\t -> t.notes)
-        , Table.dropdownColumn (\t -> Table.dropdownDetails (menuItems t) t.id state toMsg)
+        , Table.dropdownColumn (\t -> Table.dropdownDetails (menuItems t) t.id state SetTableState)
         ]
 
 
@@ -234,7 +234,7 @@ config addEditDataSource state =
         Table.customConfig
             { toId = \t -> toString t.id
             , toMsg = SetTableState
-            , columns = getColumns addEditDataSource state SetTableState
+            , columns = getColumns addEditDataSource state
             , customizations =
                 { defaultCustomizations
                     | tableAttrs = standardTableAttrs "RecordTable"

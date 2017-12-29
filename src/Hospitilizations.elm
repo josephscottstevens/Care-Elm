@@ -8,7 +8,6 @@ import Common.Grid exposing (checkColumn, standardTableAttrs, rowDropDownDiv, st
 import Common.Types exposing (MenuMessage, AddEditDataSource, HospitilizationsRow)
 import Common.Functions as Functions exposing (defaultString, defaultDate, sendMenuMessage)
 import Common.Route as Route
-import Common.Mouse as Mouse
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
@@ -19,13 +18,7 @@ port deleteHospitilizationConfirmed : (Int -> msg) -> Sub msg
 
 subscriptions : List HospitilizationsRow -> Sub Msg
 subscriptions rows =
-    Sub.batch
-        [ deleteHospitilizationConfirmed DeleteHospitilizationConfirmed
-        , if Functions.anyDropdownOpon rows then
-            Mouse.clicks Blur
-          else
-            Sub.none
-        ]
+    deleteHospitilizationConfirmed DeleteHospitilizationConfirmed
 
 
 init : Int -> Cmd Msg
@@ -50,7 +43,6 @@ view model addEditDataSource =
 
 type Msg
     = Load (Result Http.Error (List HospitilizationsRow))
-    | Blur Mouse.Position
     | SetTableState Table.State
     | DropDownToggle (Maybe Int)
     | DeleteHospitilizationConfirmed Int
@@ -103,12 +95,6 @@ update msg model _ =
 
         Edit rowId ->
             model ! [ Route.modifyUrl (Route.HospitilizationsEdit rowId) ]
-
-        Blur position ->
-            { model
-                | rows = Functions.closeDropdowns model.rows position.target
-            }
-                ! []
 
 
 getColumns : List (Table.Column HospitilizationsRow Msg)

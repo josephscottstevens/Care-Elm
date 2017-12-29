@@ -25,10 +25,6 @@ port module Common.Functions
         , maybeStringToInt
         , getResponseError
         , decodeDropdownItem
-        , closeDropdowns
-        , flipDropdownOpen
-        , anyDropdownOpon
-        , shouldBlur
         , postRequest
         , getDesc
         , getRecordTypeById
@@ -240,40 +236,6 @@ decodeDropdownItem =
     decode DropdownItem
         |> required "Id" (maybe Decode.int)
         |> required "Name" Decode.string
-
-
-closeDropdowns : List { b | dropdownOpen : Bool } -> String -> List { b | dropdownOpen : Bool }
-closeDropdowns rows eventTarget =
-    if shouldBlur eventTarget then
-        rows |> List.map (\t -> { t | dropdownOpen = False })
-    else
-        rows
-
-
-flipDropdownOpen : List { b | id : a, dropdownOpen : Bool } -> a -> List { b | dropdownOpen : Bool, id : a }
-flipDropdownOpen rows id =
-    rows
-        |> List.map
-            (\t ->
-                if t.id == id then
-                    { t | dropdownOpen = not t.dropdownOpen }
-                else
-                    { t | dropdownOpen = False }
-            )
-
-
-anyDropdownOpon : List { a | dropdownOpen : Bool } -> Bool
-anyDropdownOpon rows =
-    rows
-        |> List.filter (\t -> t.dropdownOpen == True)
-        |> List.map .dropdownOpen
-        |> List.head
-        |> Maybe.withDefault False
-
-
-shouldBlur : String -> Bool
-shouldBlur eventTarget =
-    String.contains "editDropDown" eventTarget |> not
 
 
 

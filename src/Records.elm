@@ -3,12 +3,11 @@ port module Records exposing (Msg, Model, emptyModel, subscriptions, init, updat
 import Html exposing (Html, text, div, h4)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Common.Table as Table exposing (stringColumn, defaultCustomizations)
+import Common.Table as Table exposing (defaultCustomizations)
 import Common.Grid exposing (hrefColumn, checkColumn, rowDropDownDiv)
 import Common.Types as Common
 import Common.Functions as Functions exposing (sendMenuMessage, displaySuccessMessage, displayErrorMessage)
 import Common.Route as Route
-import Common.Mouse as Mouse
 import Http
 import Json.Decode as Decode exposing (Decoder, maybe)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
@@ -24,10 +23,6 @@ subscriptions : List RecordRow -> Sub Msg
 subscriptions rows =
     Sub.batch
         [ deleteConfirmed DeleteConfirmed
-        , if Functions.anyDropdownOpon rows then
-            Mouse.clicks Blur
-          else
-            Sub.none
         ]
 
 
@@ -50,15 +45,13 @@ view model addEditDataSource =
     div []
         [ h4 [] [ text (Functions.getDesc model.recordType) ]
         , div [ class "e-grid e-js e-waitingpopup" ]
-            [ Table.view (config addEditDataSource model.recordType) model.tableState model.rows ]
+            [ Table.view (config addEditDataSource model.recordType model.tableState) model.tableState model.rows ]
         ]
 
 
 type Msg
     = Load (Result Http.Error (List RecordRow))
-    | Blur Mouse.Position
     | SetTableState Table.State
-    | DropDownToggle (Maybe Int)
     | Add
     | SendMenuMessage Int Common.RecordType String
     | EditTask Int
@@ -81,10 +74,6 @@ update msg model _ =
         SetTableState newState ->
             { model | tableState = newState } ! []
 
-        DropDownToggle recordId ->
-            model ! []
-
-        -- { model | rows = Functions.flipDropdownOpen model.rows recordId } ! []
         SendMenuMessage recordId recordType messageType ->
             { model | rows = flipConsent model.rows recordId recordType }
                 ! [ sendMenuMessage (getMenuMessage model.rows recordType recordId messageType) ]
@@ -110,21 +99,29 @@ update msg model _ =
         EditTask taskId ->
             model ! [ editTask taskId ]
 
-        Blur position ->
-            { model
-                | rows = Functions.closeDropdowns model.rows position.target
-            }
-                ! []
 
-
-getColumns : Common.RecordType -> List (Table.Column RecordRow Msg)
-getColumns recordType =
+getColumns : Common.RecordType -> Table.State -> List (Table.Column RecordRow Msg)
+getColumns recordType state =
     let
+        dropDownItems rowId =
+            case recordType of
+                Common.CallRecordings ->
+                    [ ( "e-edit", "Mark As Consent", onClick (SendMenuMessage rowId recordType "MarkAsConsent") ) ]
+
+                _ ->
+                    [ ( "e-sync", "Transfer", onClick (SendMenuMessage rowId recordType "Transfer") )
+                    , ( "e-download", "View File", onClick (SendMenuMessage rowId recordType "ViewFile") )
+                    , ( "e-mail", "Send By Email", onClick (SendMenuMessage rowId recordType "SendByEmail") )
+                    , ( "e-print_01", "Send By Fax", onClick (SendMenuMessage rowId recordType "SendByFax") )
+                    , ( "e-save", "Save To Client Portal", onClick (SendMenuMessage rowId recordType "SaveToClientPortal") )
+                    , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId recordType "Delete") )
+                    ]
+
         commonColumns =
-            [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
-            , stringColumn "Doctor of Visit" (\t -> Functions.defaultString t.provider)
-            , stringColumn "Specialty" (\t -> Functions.defaultString t.specialty)
-            , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
+            [ Table.stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+            , Table.stringColumn "Doctor of Visit" (\t -> Functions.defaultString t.provider)
+            , Table.stringColumn "Specialty" (\t -> Functions.defaultString t.specialty)
+            , Table.stringColumn "Comments" (\t -> Functions.defaultString t.comments)
             ]
 
         firstColumns =
@@ -136,79 +133,70 @@ getColumns recordType =
                     commonColumns
 
                 Common.Labs ->
-                    [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
-                    , stringColumn "Date Accessioned" (\t -> Functions.defaultDateTime t.dateAccessed)
-                    , stringColumn "Name of Lab" (\t -> Functions.defaultString t.title)
-                    , stringColumn "Provider" (\t -> Functions.defaultString t.provider)
-                    , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
+                    [ Table.stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+                    , Table.stringColumn "Date Accessioned" (\t -> Functions.defaultDateTime t.dateAccessed)
+                    , Table.stringColumn "Name of Lab" (\t -> Functions.defaultString t.title)
+                    , Table.stringColumn "Provider" (\t -> Functions.defaultString t.provider)
+                    , Table.stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
                 Common.Radiology ->
-                    [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
-                    , stringColumn "Date Accessioned" (\t -> Functions.defaultDateTime t.dateAccessed)
-                    , stringColumn "Name of Study" (\t -> Functions.defaultString t.title)
-                    , stringColumn "Provider" (\t -> Functions.defaultString t.provider)
-                    , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
+                    [ Table.stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+                    , Table.stringColumn "Date Accessioned" (\t -> Functions.defaultDateTime t.dateAccessed)
+                    , Table.stringColumn "Name of Study" (\t -> Functions.defaultString t.title)
+                    , Table.stringColumn "Provider" (\t -> Functions.defaultString t.provider)
+                    , Table.stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
                 Common.Hospitalizations ->
-                    [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
-                    , stringColumn "Hospitalization ID" (\t -> Functions.defaultIntToString t.hospitalizationId)
-                    , stringColumn "Admin Date" (\t -> Functions.defaultDateTime t.dateOfAdmission)
-                    , stringColumn "Discharge Date" (\t -> Functions.defaultDateTime t.dateOfDischarge)
-                    , stringColumn "Service Type" (\t -> Functions.defaultString t.hospitalizationServiceType)
-                    , stringColumn "Discharge Recommendations" (\t -> Functions.defaultString t.recommendations)
-                    , stringColumn "Discharge Physician" (\t -> Functions.defaultString t.dischargePhysician)
-                    , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
+                    [ Table.stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+                    , Table.stringColumn "Hospitalization ID" (\t -> Functions.defaultIntToString t.hospitalizationId)
+                    , Table.stringColumn "Admin Date" (\t -> Functions.defaultDateTime t.dateOfAdmission)
+                    , Table.stringColumn "Discharge Date" (\t -> Functions.defaultDateTime t.dateOfDischarge)
+                    , Table.stringColumn "Service Type" (\t -> Functions.defaultString t.hospitalizationServiceType)
+                    , Table.stringColumn "Discharge Recommendations" (\t -> Functions.defaultString t.recommendations)
+                    , Table.stringColumn "Discharge Physician" (\t -> Functions.defaultString t.dischargePhysician)
+                    , Table.stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
                 Common.Legal ->
-                    [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
-                    , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
+                    [ Table.stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+                    , Table.stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
                 Common.CallRecordings ->
-                    [ stringColumn "Date" (\t -> Functions.dateTime t.recordingDate)
+                    [ Table.stringColumn "Date" (\t -> Functions.dateTime t.recordingDate)
                     , hrefColumn "Recording" "Open" (\t -> Functions.defaultString t.recording)
                     , hrefCustom
                     , checkColumn "During Enrollment" (\t -> t.enrollment)
                     , checkColumn "Consent" (\t -> t.hasVerbalConsent)
-                    , stringColumn "User" (\t -> Functions.defaultString t.staffName)
+                    , Table.stringColumn "User" (\t -> Functions.defaultString t.staffName)
                     ]
 
                 Common.PreviousHistories ->
-                    [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
-                    , stringColumn "File Name" (\t -> Functions.defaultString t.fileName)
-                    , stringColumn "Report Date" (\t -> Functions.defaultDate t.reportDate)
-                    , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
+                    [ Table.stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+                    , Table.stringColumn "File Name" (\t -> Functions.defaultString t.fileName)
+                    , Table.stringColumn "Report Date" (\t -> Functions.defaultDate t.reportDate)
+                    , Table.stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
                 Common.Enrollment ->
-                    [ stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
-                    , stringColumn "Comments" (\t -> Functions.defaultString t.comments)
+                    [ Table.stringColumn "Date Collected" (\t -> Functions.defaultDateTime t.date)
+                    , Table.stringColumn "Comments" (\t -> Functions.defaultString t.comments)
                     ]
 
                 Common.Misc ->
                     commonColumns
 
         lastColumns =
-            [ rowDropDownColumn recordType
+            [ Table.dropdownColumn (\t -> Table.dropdownDetails (dropDownItems t.id) t.id state SetTableState)
             ]
     in
         List.append firstColumns lastColumns
 
 
-rowDropDownColumn : Common.RecordType -> Table.Column RecordRow Msg
-rowDropDownColumn recordType =
-    Table.veryCustomColumn
-        { name = ""
-        , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle <| Just t.id)) (dropDownItems recordType t.id)
-        , sorter = Table.unsortable
-        }
-
-
-config : Maybe Common.AddEditDataSource -> Common.RecordType -> Table.Config RecordRow Msg
-config addEditDataSource recordType =
+config : Maybe Common.AddEditDataSource -> Common.RecordType -> Table.State -> Table.Config RecordRow Msg
+config addEditDataSource recordType state =
     let
         buttons =
             case addEditDataSource of
@@ -221,7 +209,7 @@ config addEditDataSource recordType =
         Table.customConfig
             { toId = \t -> toString t.id
             , toMsg = SetTableState
-            , columns = getColumns recordType
+            , columns = getColumns recordType state
             , customizations =
                 { defaultCustomizations
                     | tableAttrs = Common.Grid.standardTableAttrs "RecordTable"
@@ -250,22 +238,6 @@ hrefCustomDetails taskId taskTitle =
             _ ->
                 div [] []
         ]
-
-
-dropDownItems : Common.RecordType -> Int -> List ( String, String, Html.Attribute Msg )
-dropDownItems recordType rowId =
-    case recordType of
-        Common.CallRecordings ->
-            [ ( "e-edit", "Mark As Consent", onClick (SendMenuMessage rowId recordType "MarkAsConsent") ) ]
-
-        _ ->
-            [ ( "e-sync", "Transfer", onClick (SendMenuMessage rowId recordType "Transfer") )
-            , ( "e-download", "View File", onClick (SendMenuMessage rowId recordType "ViewFile") )
-            , ( "e-mail", "Send By Email", onClick (SendMenuMessage rowId recordType "SendByEmail") )
-            , ( "e-print_01", "Send By Fax", onClick (SendMenuMessage rowId recordType "SendByFax") )
-            , ( "e-save", "Save To Client Portal", onClick (SendMenuMessage rowId recordType "SaveToClientPortal") )
-            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId recordType "Delete") )
-            ]
 
 
 decodeRecordRow : Decoder RecordRow
