@@ -212,7 +212,7 @@ formInputs model recordType =
             , DropInput "Category" Required model.newRecord.categoryId "CategoryId"
             ]
 
-        lastColumns =
+        lastControls =
             [ AreaInput "Comments" Required model.comments UpdateComments
             , FileInput "Upload Record File" Required model.newRecord.fileName
             ]
@@ -223,7 +223,7 @@ formInputs model recordType =
                    , TextInput "Doctor of Visit" Optional model.provider UpdateProvider
                    , TextInput "Specialty of Visit" Optional model.specialty UpdateSpecialty
                    ]
-                ++ lastColumns
+                ++ lastControls
 
         columns =
             case recordType of
@@ -240,7 +240,7 @@ formInputs model recordType =
                            , TextInput "Name of Lab" Optional model.title UpdateTitle
                            , TextInput "Provider of Lab" Optional model.provider UpdateProvider
                            ]
-                        ++ lastColumns
+                        ++ lastControls
 
                 Common.Radiology ->
                     firstColumns
@@ -249,7 +249,7 @@ formInputs model recordType =
                            , TextInput "Name of Study" Optional model.title UpdateTitle
                            , TextInput "Provider of Study" Optional model.provider UpdateProvider
                            ]
-                        ++ lastColumns
+                        ++ lastControls
 
                 Common.Misc ->
                     defaultFields
@@ -257,7 +257,7 @@ formInputs model recordType =
                 Common.Legal ->
                     firstColumns
                         ++ TextInput "Title" Optional model.title UpdateTitle
-                        :: lastColumns
+                        :: lastControls
 
                 Common.Hospitalizations ->
                     case model.isExistingHospitilization of
@@ -265,7 +265,7 @@ formInputs model recordType =
                             [ CheckInput "Existing Hospitilization" Common.Optional model.isExistingHospitilization UpdateIsExistingHospitilization
                             , DropInput "Select Hospitalization" Common.Required model.newRecord.hospitalizationId "HospitalizationsId"
                             ]
-                                ++ lastColumns
+                                ++ lastControls
 
                         False ->
                             [ CheckInput "Patient Reported" Common.Optional model.patientReported UpdatePatientReported
@@ -298,7 +298,7 @@ formInputs model recordType =
                             , DateInput "Secondary Date of Discharge" Optional (defaultString model.newRecord.dateOfDischarge) "DateOfDischargeId2"
                             , FileInput "Upload Record File" Required model.newRecord.fileName
                             ]
-                                ++ lastColumns
+                                ++ lastControls
 
                 Common.CallRecordings ->
                     firstColumns
@@ -319,6 +319,6 @@ formInputs model recordType =
                 Common.Enrollment ->
                     firstColumns
                         ++ TextInput "Title" Optional model.title UpdateTitle
-                        :: lastColumns
+                        :: lastControls
     in
         columns

@@ -13,44 +13,25 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO:
-fix dropdown closing (grids)
+records grid dropdown on my small screen looks crazy (primary care)
+updateCategory missing in record add new (no switchee)
 scroll to top if validation fails?
-loading \ refresh looks wonky now :/
+in dropdown, updateSearchString needs to work when closed as well (and has focus)
 records > Hospitalizations is broken again :'(
 test are you sure you want to leave
-remove filters from records
+consolidate HandleSuccessResponse \ ErroResponse with json parse
+remove HospitalizationId server side (check around... seems used a lot)
 
 LOW TODO:
-how does updateSearchString handle when dropdown is closed?
-crapola... so uh... dropdown doesn't respond to keyboard
-allow grid to take list of html elements with a msg, for the header (aka, the add new row icon, or export to excel icon)
-consolidate SaveCompleted (ok and error, I mean... totally doable right?)
-consolidate HandleSuccessResponse \ ErroResponse with json parse
-consolidate delete Row port \ subscription
-remove dropDownToggle port
-scroll to top when displaying validation errors
-Perhaps try to connect hospitilizations into the other one
-Change all import \ export to be explicit
-clean up Filters... recordId vs id?
-remove HospitalizationId server side
-start updating history bar
-Can I remove some stuff? Like am I really doing the whole dropdown (in elm Model) thing anymore?
-Cleanup double select statement in controller for grid source
-Change Model to Types ( the file)
-The abstraction for RecordType was created, but all accross the code, I am still using the id, kinda defeats the purpose
-Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super duplicated stuff?) [no reason to be in same class right?]
-remove un-used fields in MVC list type
-refactor long else if filter in load, to case of instead of if else
-the grid config doesn't really need TaskId, a column could able to get it... but... without knowing the model?
 There is phone number validation, any other hidden validations?
 Perhaps hrefExtra doesn't really belong in grid
 how to clear sort?
-Clean up un-used fields (in models)
-Can I fix navigation for everyone else as well?
+move styles for dropdown into module (including hover) (From Index.css)
 getPatientId function in Route is a hack, better to display an error
-change validation from passing Required Option, to have moreso how the validation library does it (withRequiredValidation or something)
 
 REALLY LOW TODO:
+change validation from passing Required Option, to have moreso how the validation library does it (withRequiredValidation or something)
+Test dropdown on other browsers (https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-scrollbar)
 Standardize Records ports to be like hospitilizations ( 1 in, 1 out), SF manages some, Elm manages other
 fix reload in new urls
 I can optionally listen to DropDownToggle right?
