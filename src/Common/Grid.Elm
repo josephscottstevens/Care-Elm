@@ -6,7 +6,6 @@ import Html.Events as Events
 import Common.Types exposing (FilterState, MenuMessage)
 import Common.Functions exposing (isAlpha)
 import Common.Table as Table
-import Common.Dropdown as Dropdown
 import Json.Decode as Json
 
 
@@ -200,47 +199,3 @@ testColumn details =
         , viewData = \t -> Table.HtmlDetails [] [ details t ]
         , sorter = Table.unsortable
         }
-
-
-rowDropDownDiv : Bool -> Html.Attribute msg -> List ( String, String, Html.Attribute msg ) -> Table.HtmlDetails msg
-rowDropDownDiv isVisible event dropDownItems =
-    let
-        dropMenu =
-            case isVisible of
-                True ->
-                    [ ul [ class "e-menu e-js e-widget e-box e-separator", tabindex 0 ]
-                        (List.map dropDownMenuItem dropDownItems)
-                    ]
-
-                False ->
-                    []
-    in
-        Table.HtmlDetails []
-            [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ type_ "button", class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown", event, style [ ( "position", "relative" ) ] ]
-                    [ div [ id "editButtonMenu", dropDownMenuStyle ]
-                        dropMenu
-                    ]
-                ]
-            ]
-
-
-dropDownMenuStyle : Html.Attribute msg
-dropDownMenuStyle =
-    style
-        [ ( "z-index", "5000" )
-        , ( "position", "absolute" )
-        , ( "display", "block" )
-        , ( "left", "-173px" )
-        , ( "width", "178.74px" )
-        ]
-
-
-dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
-dropDownMenuItem ( iconClass, displayText, event ) =
-    li [ class "e-content e-list" ]
-        [ a [ class "e-menulink", event, target "_blank" ]
-            [ text displayText
-            , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
-            ]
-        ]

@@ -109,8 +109,8 @@ pageSubscriptions page =
         ClinicalSummary _ ->
             Sub.map ClinicalSummaryMsg ClinicalSummary.subscriptions
 
-        Records t ->
-            Sub.map RecordsMsg (Records.subscriptions t.rows)
+        Records _ ->
+            Sub.map RecordsMsg Records.subscriptions
 
         RecordAddNew _ ->
             Sub.map RecordAddNewMsg RecordAddNew.subscriptions
@@ -118,8 +118,8 @@ pageSubscriptions page =
         PastMedicalHistory _ ->
             Sub.map PastMedicalHistoryMsg PastMedicalHistory.subscriptions
 
-        Hospitilizations t ->
-            Sub.map HospitilizationsMsg (Hospitilizations.subscriptions t.rows)
+        Hospitilizations _ ->
+            Sub.map HospitilizationsMsg Hospitilizations.subscriptions
 
         HospitilizationsAddEdit _ ->
             Sub.map HospitilizationsAddEditMsg HospitilizationsAddEdit.subscriptions
@@ -169,7 +169,7 @@ setRoute maybeRoute model =
 
             Just Route.PastMedicalHistory ->
                 { model | page = PastMedicalHistory PastMedicalHistory.emptyModel }
-                    ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.addEditDataSource model.patientId) ]
+                    ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
 
             Just Route.HospitilizationsAdd ->
                 case model.addEditDataSource of

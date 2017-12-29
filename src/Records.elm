@@ -4,7 +4,7 @@ import Html exposing (Html, text, div, h4)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Common.Table as Table exposing (defaultCustomizations)
-import Common.Grid exposing (hrefColumn, checkColumn, rowDropDownDiv)
+import Common.Grid exposing (hrefColumn, checkColumn)
 import Common.Types as Common
 import Common.Functions as Functions exposing (sendMenuMessage, displaySuccessMessage, displayErrorMessage)
 import Common.Route as Route
@@ -19,8 +19,8 @@ port deleteConfirmed : (Int -> msg) -> Sub msg
 port editTask : Int -> Cmd msg
 
 
-subscriptions : List RecordRow -> Sub Msg
-subscriptions rows =
+subscriptions : Sub Msg
+subscriptions =
     Sub.batch
         [ deleteConfirmed DeleteConfirmed
         ]

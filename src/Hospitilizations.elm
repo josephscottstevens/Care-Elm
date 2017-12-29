@@ -4,7 +4,7 @@ import Html exposing (Html, text, div)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Common.Table as Table exposing (defaultCustomizations)
-import Common.Grid exposing (checkColumn, standardTableAttrs, rowDropDownDiv, standardTheadNoFilters)
+import Common.Grid exposing (checkColumn, standardTableAttrs, standardTheadNoFilters)
 import Common.Types exposing (MenuMessage, AddEditDataSource, HospitilizationsRow)
 import Common.Functions as Functions exposing (defaultString, defaultDate, sendMenuMessage)
 import Common.Route as Route
@@ -16,8 +16,8 @@ import Json.Decode.Pipeline as Pipeline
 port deleteHospitilizationConfirmed : (Int -> msg) -> Sub msg
 
 
-subscriptions : List HospitilizationsRow -> Sub Msg
-subscriptions rows =
+subscriptions : Sub Msg
+subscriptions =
     deleteHospitilizationConfirmed DeleteHospitilizationConfirmed
 
 
@@ -37,14 +37,13 @@ view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
     div []
         [ div [ class "e-grid e-js e-waitingpopup" ]
-            [ Table.view (config addEditDataSource) model.tableState model.rows ]
+            [ Table.view (config addEditDataSource model.tableState) model.tableState model.rows ]
         ]
 
 
 type Msg
     = Load (Result Http.Error (List HospitilizationsRow))
     | SetTableState Table.State
-    | DropDownToggle (Maybe Int)
     | DeleteHospitilizationConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | Add
@@ -64,10 +63,6 @@ update msg model _ =
         SetTableState newState ->
             { model | tableState = newState } ! []
 
-        DropDownToggle recordId ->
-            model ! []
-
-        -- { model | rows = Functions.flipDropdownOpen model.rows recordId } ! []
         SendMenuMessage recordId messageType ->
             model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
@@ -97,19 +92,25 @@ update msg model _ =
             model ! [ Route.modifyUrl (Route.HospitilizationsEdit rowId) ]
 
 
-getColumns : List (Table.Column HospitilizationsRow Msg)
-getColumns =
-    [ Table.stringColumn "ID" (\t -> toString t.id)
-    , Table.stringColumn "Facility Name" (\t -> defaultString t.facilityName)
-    , Table.stringColumn "Date Of Admission" (\t -> defaultDate t.dateOfAdmission)
-    , Table.stringColumn "Admit Problem" (\t -> defaultString t.admitProblem)
-    , Table.stringColumn "Date Of Discharge" (\t -> defaultDate t.dateOfDischarge)
-    , Table.stringColumn "Discharge Problem" (\t -> defaultString t.dischargeProblem)
-    , Table.stringColumn "Svc Type" (\t -> defaultString t.serviceType)
-    , checkColumn "Is From TCM" (\t -> t.fromTcm)
-    , customColumn
-    , rowDropDownColumn
-    ]
+getColumns : Table.State -> List (Table.Column HospitilizationsRow Msg)
+getColumns state =
+    let
+        dropDownItems rowId =
+            [ ( "e-edit", "Edit", onClick (Edit rowId) )
+            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "HospitilizationDelete") )
+            ]
+    in
+        [ Table.stringColumn "ID" (\t -> toString t.id)
+        , Table.stringColumn "Facility Name" (\t -> defaultString t.facilityName)
+        , Table.stringColumn "Date Of Admission" (\t -> defaultDate t.dateOfAdmission)
+        , Table.stringColumn "Admit Problem" (\t -> defaultString t.admitProblem)
+        , Table.stringColumn "Date Of Discharge" (\t -> defaultDate t.dateOfDischarge)
+        , Table.stringColumn "Discharge Problem" (\t -> defaultString t.dischargeProblem)
+        , Table.stringColumn "Svc Type" (\t -> defaultString t.serviceType)
+        , checkColumn "Is From TCM" (\t -> t.fromTcm)
+        , customColumn
+        , Table.dropdownColumn (\t -> Table.dropdownDetails (dropDownItems t.id) t.id state SetTableState)
+        ]
 
 
 customColumn : Table.Column HospitilizationsRow Msg
@@ -133,24 +134,8 @@ viewCustomColumn { recordId } =
         ]
 
 
-rowDropDownColumn : Table.Column HospitilizationsRow Msg
-rowDropDownColumn =
-    Table.veryCustomColumn
-        { name = ""
-        , viewData = \t -> rowDropDownDiv t.dropdownOpen (onClick (DropDownToggle <| Just t.id)) (dropDownItems t.id)
-        , sorter = Table.unsortable
-        }
-
-
-dropDownItems : Int -> List ( String, String, Html.Attribute Msg )
-dropDownItems rowId =
-    [ ( "e-edit", "Edit", onClick (Edit rowId) )
-    , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "HospitilizationDelete") )
-    ]
-
-
-config : Maybe AddEditDataSource -> Table.Config HospitilizationsRow Msg
-config addEditDataSource =
+config : Maybe AddEditDataSource -> Table.State -> Table.Config HospitilizationsRow Msg
+config addEditDataSource state =
     let
         buttons =
             case addEditDataSource of
@@ -163,7 +148,7 @@ config addEditDataSource =
         Table.customConfig
             { toId = \t -> toString t.id
             , toMsg = SetTableState
-            , columns = getColumns
+            , columns = getColumns state
             , customizations =
                 { defaultCustomizations
                     | tableAttrs = standardTableAttrs "RecordTable"

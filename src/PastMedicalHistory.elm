@@ -39,8 +39,8 @@ type alias Model =
     }
 
 
-init : Maybe AddEditDataSource -> Int -> Cmd Msg
-init addEditDataSource patientId =
+init : Int -> Cmd Msg
+init patientId =
     Decode.list decodePastMedicalHistoryRow
         |> Http.get ("/People/PastMedicalHistoriesGrid?patientId=" ++ toString patientId)
         |> Http.send LoadData

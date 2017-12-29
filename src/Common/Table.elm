@@ -530,22 +530,6 @@ dropDownMenuItem ( iconClass, displayText, menuMessage ) =
         ]
 
 
-dropdownList : List ( String, String )
-dropdownList =
-    [ ( "position", "absolute" )
-    , ( "top", "32px" )
-    , ( "border-radius", "4px" )
-    , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
-    , ( "padding", "0" )
-    , ( "margin", "0" )
-    , ( "background-color", "white" )
-    , ( "max-height", "152px" )
-    , ( "overflow-x", "hidden" )
-    , ( "overflow-y", "scroll" )
-    , ( "z-index", "100" )
-    ]
-
-
 onBlur : String -> Bool -> Maybe Int -> (State -> msg) -> Attribute msg
 onBlur name isReversed dropdownState toMsg =
     E.on "blur" <|
