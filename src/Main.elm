@@ -6,9 +6,8 @@ import Records
 import RecordAddNew
 import PastMedicalHistory
 import Hospitilizations
-import HospitilizationsAddEdit.Main as HospitilizationsAddEdit
+import HospitilizationsAddEdit
 import Billing.Types
-import HospitilizationsAddEdit.Types
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Common.Route as Route exposing (Route)
@@ -34,7 +33,7 @@ type Page
     | RecordAddNew RecordAddNew.Model
     | PastMedicalHistory PastMedicalHistory.Model
     | Hospitilizations Hospitilizations.Model
-    | HospitilizationsAddEdit HospitilizationsAddEdit.Types.Model
+    | HospitilizationsAddEdit HospitilizationsAddEdit.Model
     | Error String
 
 
@@ -173,7 +172,7 @@ setRoute maybeRoute model =
             Just Route.HospitilizationsAdd ->
                 case model.addEditDataSource of
                     Just t ->
-                        { model | page = HospitilizationsAddEdit (HospitilizationsAddEdit.Types.emptyModel Nothing) }
+                        { model | page = HospitilizationsAddEdit (HospitilizationsAddEdit.emptyModel Nothing) }
                             ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing) ]
 
                     Nothing ->
@@ -196,7 +195,7 @@ setRoute maybeRoute model =
                     case model.addEditDataSource of
                         Just t ->
                             { model
-                                | page = HospitilizationsAddEdit (HospitilizationsAddEdit.Types.emptyModel x)
+                                | page = HospitilizationsAddEdit (HospitilizationsAddEdit.emptyModel x)
                             }
                                 ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t x) ]
 

@@ -15,7 +15,6 @@ QUESTIONS:
 TODO:
 Past Medical History on save\edit isn't reloading with new data
 clicked hospitilizations add too fast? and blamo?
-Hospitalizations insert is weird... like wont save
 scroll to top if validation fails?
 in dropdown, updateSearchString needs to work when closed as well (and has focus)
 records > Hospitalizations is broken again :'(
