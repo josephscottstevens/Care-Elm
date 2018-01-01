@@ -448,25 +448,6 @@ getEditData addEditDataSource maybeRow =
             }
 
 
-emptySfData : SyncfusionData
-emptySfData =
-    { id = Nothing
-    , facilities = []
-    , hospitilizationServiceTypes = []
-    , hospitalizationDischargePhysicians = []
-    , facilityId = Nothing
-    , admitDiagnosisId = Nothing
-    , dischargeDiagnosisId = Nothing
-    , facilityId2 = Nothing
-    , hospitalServiceTypeId = Nothing
-    , dischargePhysicianId = Nothing
-    , dateOfAdmission = Nothing
-    , dateOfDischarge = Nothing
-    , dateOfAdmission2 = Nothing
-    , dateOfDischarge2 = Nothing
-    }
-
-
 getHospitilizationsInitData : AddEditDataSource -> Maybe HospitilizationsRow -> SyncfusionData
 getHospitilizationsInitData addEditDataSource maybeHospitilizationsRow =
     let
