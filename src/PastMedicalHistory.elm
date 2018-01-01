@@ -8,7 +8,6 @@ import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSourc
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
 import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters)
 import Common.Dropdown as Dropdown
-import Common.Route as Route
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required)
@@ -41,9 +40,7 @@ type alias Model =
 
 init : Int -> Cmd Msg
 init patientId =
-    Decode.list decodePastMedicalHistoryRow
-        |> Http.get ("/People/PastMedicalHistoriesGrid?patientId=" ++ toString patientId)
-        |> Http.send LoadData
+    load patientId
 
 
 type Msg
@@ -89,10 +86,10 @@ update msg model patientId =
                       ]
 
         SaveCompleted (Ok _) ->
-            { model | state = Grid } ! [ displaySuccessMessage "Past Medical History Saved Successfully!" ]
+            { model | state = Grid } ! [ displaySuccessMessage "Past Medical History Saved Successfully!", load patientId ]
 
         SaveCompleted (Err t) ->
-            { model | state = Grid } ! [ displayErrorMessage (toString t) ]
+            { model | state = Grid } ! [ displayErrorMessage (toString t), load patientId ]
 
         Add addEditDataSource ->
             { model | state = AddEdit (newRecord addEditDataSource Nothing) } ! []
@@ -114,7 +111,7 @@ update msg model patientId =
         DeleteCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ Functions.displayErrorMessage t, Route.refresh ]
+                    model ! [ Functions.displayErrorMessage t, load patientId ]
 
                 Nothing ->
                     model ! [ Functions.displaySuccessMessage "Record deleted successfully!" ]
@@ -336,3 +333,10 @@ emptyModel =
 deletePastMedicalHistoryRequest : Int -> Cmd Msg
 deletePastMedicalHistoryRequest rowId =
     Http.send DeleteCompleted <| Http.getString ("/People/DeletePastMedicalHistory?id=" ++ toString rowId)
+
+
+load : Int -> Cmd Msg
+load patientId =
+    Decode.list decodePastMedicalHistoryRow
+        |> Http.get ("/People/PastMedicalHistoriesGrid?patientId=" ++ toString patientId)
+        |> Http.send LoadData

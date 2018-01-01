@@ -41,9 +41,7 @@ subscriptions =
 
 init : Int -> Cmd Msg
 init patientId =
-    Decode.list decodeHospitilizationsRow
-        |> Http.get ("/People/HospitilizationsGrid?patientId=" ++ toString patientId)
-        |> Http.send Load
+    load patientId
 
 
 type alias Model =
@@ -206,7 +204,7 @@ update msg model patientId =
             DeleteCompleted (Ok responseMsg) ->
                 case Functions.getResponseError responseMsg of
                     Just t ->
-                        model ! [ Functions.displayErrorMessage t, Route.refresh ]
+                        model ! [ Functions.displayErrorMessage t, load patientId ]
 
                     Nothing ->
                         model ! [ Functions.displaySuccessMessage "Record deleted successfully!" ]
@@ -494,3 +492,10 @@ encodeEditData newRecord patientId =
         , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfAdmission2 )
         , ( "DateOfDischarge2", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfDischarge2 )
         ]
+
+
+load : Int -> Cmd Msg
+load patientId =
+    Decode.list decodeHospitilizationsRow
+        |> Http.get ("/People/HospitilizationsGrid?patientId=" ++ toString patientId)
+        |> Http.send Load
