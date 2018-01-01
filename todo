@@ -13,14 +13,14 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO:
-records grid dropdown on my small screen looks crazy (primary care)
-updateCategory missing in record add new (no switchee)
+Past Medical History on save\edit isn't reloading with new data
+clicked hospitilizations add too fast? and blamo?
+Hospitalizations insert is weird... like wont save
 scroll to top if validation fails?
 in dropdown, updateSearchString needs to work when closed as well (and has focus)
 records > Hospitalizations is broken again :'(
 test are you sure you want to leave
 consolidate HandleSuccessResponse \ ErroResponse with json parse
-remove HospitalizationId server side (check around... seems used a lot)
 
 LOW TODO:
 There is phone number validation, any other hidden validations?

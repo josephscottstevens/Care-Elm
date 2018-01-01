@@ -34,7 +34,7 @@ emptyModel hospitilizationRow =
 
 emptySfData : SyncfusionData
 emptySfData =
-    { id = -1
+    { id = Nothing
     , facilities = []
     , hospitilizationServiceTypes = []
     , hospitalizationDischargePhysicians = []
@@ -81,7 +81,7 @@ emptyHospitilizationRow =
 
 
 type alias SyncfusionData =
-    { id : Int
+    { id : Maybe Int
     , facilities : List DropdownItem
     , hospitilizationServiceTypes : List DropdownItem
     , hospitalizationDischargePhysicians : List DropdownItem

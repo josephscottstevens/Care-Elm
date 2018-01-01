@@ -10,7 +10,7 @@ import Common.Types exposing (AddEditDataSource, HospitilizationsRow)
 encodeRecord : Model -> Int -> Encode.Value
 encodeRecord newRecord patientId =
     Encode.object
-        [ ( "Id", Encode.int <| newRecord.sfData.id )
+        [ ( "Id", maybeVal Encode.int <| newRecord.sfData.id )
         , ( "PatientId", Encode.int <| patientId )
         , ( "FacilityId", maybeVal Encode.int <| newRecord.sfData.facilityId )
         , ( "PatientReported", Encode.bool <| newRecord.patientReported )
@@ -52,7 +52,11 @@ getHospitilizationsInitData addEditDataSource maybeHospitilizationsRow =
         hospitilizationsRow =
             Maybe.withDefault emptyHospitilizationRow maybeHospitilizationsRow
     in
-        { id = hospitilizationsRow.id
+        { id =
+            if hospitilizationsRow.id == -1 then
+                Nothing
+            else
+                Just hospitilizationsRow.id
         , facilities = addEditDataSource.facilities
         , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
         , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
