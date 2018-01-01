@@ -15,8 +15,6 @@ type Route
     | RecordAddNew Common.RecordType
     | Hospitilizations
     | PastMedicalHistory
-    | HospitilizationsAdd
-    | HospitilizationsEdit Int
     | Error String
 
 
@@ -78,12 +76,6 @@ routeToString route =
         Hospitilizations ->
             "#/people/_hospitalizations"
 
-        HospitilizationsAdd ->
-            "#/people/_hospitalizations/add"
-
-        HospitilizationsEdit rowId ->
-            "#/people/_hospitalizations/edit/" ++ toString rowId
-
         Error t ->
             "#/Error" ++ t
 
@@ -95,8 +87,6 @@ route =
           Url.map ClinicalSummary (s "people" </> s "_clinicalsummary")
         , Url.map PastMedicalHistory (s "people" </> s "_pastmedicalhistory")
         , Url.map Hospitilizations (s "people" </> s "_hospitalizations")
-        , Url.map HospitilizationsAdd (s "people" </> s "_hospitalizations" </> s "add")
-        , Url.map HospitilizationsEdit (s "people" </> s "_hospitalizations" </> s "edit" </> int)
 
         -- Records Grid
         , Url.map (Records Common.PrimaryCare) (s "people" </> s "_primarycarerecords")

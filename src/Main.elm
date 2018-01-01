@@ -6,7 +6,6 @@ import Records
 import RecordAddNew
 import PastMedicalHistory
 import Hospitilizations
-import HospitilizationsAddEdit
 import Billing.Types
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
@@ -33,7 +32,6 @@ type Page
     | RecordAddNew RecordAddNew.Model
     | PastMedicalHistory PastMedicalHistory.Model
     | Hospitilizations Hospitilizations.Model
-    | HospitilizationsAddEdit HospitilizationsAddEdit.Model
     | Error String
 
 
@@ -88,9 +86,6 @@ view model =
         Hospitilizations subModel ->
             Html.map HospitilizationsMsg (Hospitilizations.view subModel model.addEditDataSource)
 
-        HospitilizationsAddEdit subModel ->
-            Html.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.view subModel)
-
         Error str ->
             div [] [ text str ]
 
@@ -119,9 +114,6 @@ pageSubscriptions page =
         Hospitilizations _ ->
             Sub.map HospitilizationsMsg Hospitilizations.subscriptions
 
-        HospitilizationsAddEdit _ ->
-            Sub.map HospitilizationsAddEditMsg HospitilizationsAddEdit.subscriptions
-
         Error _ ->
             Sub.none
 
@@ -139,7 +131,6 @@ type Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | PastMedicalHistoryMsg PastMedicalHistory.Msg
     | HospitilizationsMsg Hospitilizations.Msg
-    | HospitilizationsAddEditMsg HospitilizationsAddEdit.Msg
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -168,39 +159,6 @@ setRoute maybeRoute model =
             Just Route.PastMedicalHistory ->
                 { model | page = PastMedicalHistory PastMedicalHistory.emptyModel }
                     ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
-
-            Just Route.HospitilizationsAdd ->
-                case model.addEditDataSource of
-                    Just t ->
-                        { model | page = HospitilizationsAddEdit (HospitilizationsAddEdit.emptyModel Nothing) }
-                            ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t Nothing) ]
-
-                    Nothing ->
-                        -- aka, if user refreshes on the add screen, can't do much since there is no data source for dropdowns
-                        { model | page = Hospitilizations Hospitilizations.emptyModel }
-                            ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
-
-            Just (Route.HospitilizationsEdit rowId) ->
-                let
-                    x =
-                        case model.page of
-                            Hospitilizations hospModel ->
-                                hospModel.rows
-                                    |> List.filter (\t -> t.id == rowId)
-                                    |> List.head
-
-                            _ ->
-                                Debug.crash "invalid hosptilization edit state"
-                in
-                    case model.addEditDataSource of
-                        Just t ->
-                            { model
-                                | page = HospitilizationsAddEdit (HospitilizationsAddEdit.emptyModel x)
-                            }
-                                ! cmds [ Cmd.map HospitilizationsAddEditMsg (HospitilizationsAddEdit.init t x) ]
-
-                        Nothing ->
-                            model ! [ getDropDowns model.patientId AddEditDataSourceLoaded ]
 
             Just (Route.Records t) ->
                 { model | page = Records (Records.emptyModel t) }
@@ -256,9 +214,6 @@ updatePage page msg model =
 
             ( HospitilizationsMsg subMsg, Hospitilizations subModel ) ->
                 toPage Hospitilizations HospitilizationsMsg Hospitilizations.update subMsg subModel
-
-            ( HospitilizationsAddEditMsg subMsg, HospitilizationsAddEdit subModel ) ->
-                toPage HospitilizationsAddEdit HospitilizationsAddEditMsg HospitilizationsAddEdit.update subMsg subModel
 
             ( ClinicalSummaryMsg subMsg, ClinicalSummary subModel ) ->
                 toPage ClinicalSummary ClinicalSummaryMsg ClinicalSummary.update subMsg subModel

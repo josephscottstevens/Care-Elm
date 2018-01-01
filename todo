@@ -14,7 +14,6 @@ QUESTIONS:
 
 TODO:
 Past Medical History on save\edit isn't reloading with new data
-clicked hospitilizations add too fast? and blamo?
 scroll to top if validation fails?
 in dropdown, updateSearchString needs to work when closed as well (and has focus)
 records > Hospitalizations is broken again :'(
@@ -22,6 +21,7 @@ test are you sure you want to leave
 consolidate HandleSuccessResponse \ ErroResponse with json parse
 
 LOW TODO:
+hospitilizations addedit move into same file?
 There is phone number validation, any other hidden validations?
 Perhaps hrefExtra doesn't really belong in grid
 how to clear sort?
