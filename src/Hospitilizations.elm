@@ -1,6 +1,6 @@
 port module Hospitilizations exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
-import Html exposing (Html, text, div, button)
+import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Common.Table as Table exposing (defaultCustomizations)
@@ -127,7 +127,8 @@ view model addEditDataSource =
     case model.editData of
         Nothing ->
             div []
-                [ div [ class "e-grid e-js e-waitingpopup" ]
+                [ h4 [] [ text "Hospitilizations" ]
+                , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view (config addEditDataSource model.tableState) model.tableState model.rows ]
                 ]
 

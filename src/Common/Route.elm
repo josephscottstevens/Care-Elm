@@ -1,6 +1,17 @@
 module Common.Route
     exposing
-        ( Route(None, Billing, ClinicalSummary, Records, RecordAddNew, Hospitilizations, PastMedicalHistory, Error, Allergies)
+        ( Route
+            ( None
+            , Billing
+            , ClinicalSummary
+            , Records
+            , RecordAddNew
+            , Hospitilizations
+            , PastMedicalHistory
+            , Error
+            , Allergies
+            , Immunizations
+            )
         , getPatientId
         , fromLocation
         , href
@@ -24,6 +35,7 @@ type Route
     | Hospitilizations
     | PastMedicalHistory
     | Allergies
+    | Immunizations
     | Error String
 
 
@@ -88,6 +100,9 @@ routeToString route =
         Allergies ->
             "#/people/_allergies"
 
+        Immunizations ->
+            "#/people/_immunizations"
+
         Error t ->
             "#/Error" ++ t
 
@@ -100,6 +115,7 @@ route =
         , Url.map PastMedicalHistory (s "people" </> s "_pastmedicalhistory")
         , Url.map Hospitilizations (s "people" </> s "_hospitalizations")
         , Url.map Allergies (s "people" </> s "_allergies")
+        , Url.map Immunizations (s "people" </> s "_immunizations")
 
         -- Records Grid
         , Url.map (Records Common.PrimaryCare) (s "people" </> s "_primarycarerecords")

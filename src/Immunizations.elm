@@ -1,4 +1,4 @@
-module Allergies exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
+module Immunizations exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
 import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
@@ -36,22 +36,28 @@ type alias Model =
 
 type alias EditData =
     { id : Maybe Int
-    , allergy : String
-    , reaction : String
+    , vaccination : String
+    , year : String
+    , facility : String
+    , notes : String
     }
 
 
 type alias Row =
     { id : Int
-    , allergy : String
-    , reaction : Maybe String
+    , vaccination : String
+    , year : Maybe String
+    , facility : Maybe String
+    , notes : Maybe String
     }
 
 
 formInputs : EditData -> List (InputControlType Msg)
 formInputs editData =
-    [ TextInput "Allergy" Required editData.allergy (UpdateAllergy editData)
-    , TextInput "Reaction" Optional editData.reaction (UpdateReaction editData)
+    [ TextInput "Vaccination" Required editData.vaccination (UpdateVaccination editData)
+    , TextInput "Year" Optional editData.year (UpdateYear editData)
+    , TextInput "Facility" Optional editData.facility (UpdateFacility editData)
+    , TextInput "Notes" Optional editData.notes (UpdateNotes editData)
     ]
 
 
@@ -60,7 +66,7 @@ view model _ =
     case model.editData of
         Nothing ->
             div []
-                [ h4 [] [ text "Allergies" ]
+                [ h4 [] [ text "Immunizations & Preventative Screenings" ]
                 , div [ class "e-grid e-js e-waitingpopup" ]
                     [ Table.view (config model.tableState) model.tableState model.rows ]
                 ]
@@ -100,8 +106,10 @@ type Msg
     | Save EditData
     | SaveCompleted (Result Http.Error String)
     | Cancel
-    | UpdateAllergy EditData String
-    | UpdateReaction EditData String
+    | UpdateVaccination EditData String
+    | UpdateYear EditData String
+    | UpdateFacility EditData String
+    | UpdateNotes EditData String
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -132,7 +140,7 @@ update msg model patientId =
                         model.rows |> List.filter (\t -> t.id /= rowId)
                 in
                     { model | rows = rows }
-                        ! [ Http.getString ("/People/AllergiesDelete?id=" ++ toString rowId)
+                        ! [ Http.getString ("/People/ImmunizationsDelete?id=" ++ toString rowId)
                                 |> Http.send DeleteCompleted
                           ]
 
@@ -163,7 +171,7 @@ update msg model patientId =
                             encodeEditData editData patientId
                     in
                         model
-                            ! [ Functions.postRequest body "/People/AllergiesAddEdit"
+                            ! [ Functions.postRequest body "/People/ImmunizationsAddEdit"
                                     |> Http.send SaveCompleted
                               , setUnsavedChanges False
                               ]
@@ -185,11 +193,17 @@ update msg model patientId =
             Cancel ->
                 { model | editData = Nothing } ! [ setUnsavedChanges False ]
 
-            UpdateAllergy editData t ->
-                updateAddNew { model | editData = Just { editData | allergy = t } }
+            UpdateVaccination editData t ->
+                updateAddNew { model | editData = Just { editData | vaccination = t } }
 
-            UpdateReaction editData t ->
-                updateAddNew { model | editData = Just { editData | reaction = t } }
+            UpdateYear editData t ->
+                updateAddNew { model | editData = Just { editData | year = t } }
+
+            UpdateFacility editData t ->
+                updateAddNew { model | editData = Just { editData | facility = t } }
+
+            UpdateNotes editData t ->
+                updateAddNew { model | editData = Just { editData | notes = t } }
 
 
 getColumns : Table.State -> List (Table.Column Row Msg)
@@ -200,8 +214,10 @@ getColumns state =
             , ( "e-contextdelete", "Delete", onClick (DeletePrompt row.id) )
             ]
     in
-        [ Table.stringColumn "Allergy" (\t -> t.allergy)
-        , Table.stringColumn "Reaction" (\t -> defaultString t.reaction)
+        [ Table.stringColumn "Vaccination" (\t -> t.vaccination)
+        , Table.stringColumn "Year" (\t -> defaultString t.year)
+        , Table.stringColumn "Facilit" (\t -> defaultString t.facility)
+        , Table.stringColumn "Notes" (\t -> defaultString t.notes)
         , Table.dropdownColumn (\t -> Table.dropdownDetails (dropDownItems t) t.id state SetTableState)
         ]
 
@@ -239,14 +255,18 @@ getEditData maybeRow =
     case maybeRow of
         Just row ->
             { id = Just row.id
-            , allergy = row.allergy
-            , reaction = defaultString row.reaction
+            , vaccination = row.vaccination
+            , year = defaultString row.year
+            , facility = defaultString row.facility
+            , notes = defaultString row.notes
             }
 
         Nothing ->
             { id = Nothing
-            , allergy = ""
-            , reaction = ""
+            , vaccination = ""
+            , year = ""
+            , facility = ""
+            , notes = ""
             }
 
 
@@ -255,8 +275,10 @@ encodeEditData newRecord patientId =
     Encode.object
         [ ( "Id", maybeVal Encode.int <| newRecord.id )
         , ( "PatientId", Encode.int <| patientId )
-        , ( "Allergy", Encode.string <| newRecord.allergy )
-        , ( "Reaction", Encode.string <| newRecord.reaction )
+        , ( "Vaccination", Encode.string <| newRecord.vaccination )
+        , ( "Year", Encode.string <| newRecord.year )
+        , ( "Facility", Encode.string <| newRecord.facility )
+        , ( "Notes", Encode.string <| newRecord.notes )
         ]
 
 
@@ -264,12 +286,14 @@ decodeHospitilizationsRow : Decode.Decoder Row
 decodeHospitilizationsRow =
     Pipeline.decode Row
         |> Pipeline.required "Id" Decode.int
-        |> Pipeline.required "Allergy" Decode.string
-        |> Pipeline.required "Reaction" (Decode.maybe Decode.string)
+        |> Pipeline.required "Vaccination" Decode.string
+        |> Pipeline.required "Year" (Decode.maybe Decode.string)
+        |> Pipeline.required "Facility" (Decode.maybe Decode.string)
+        |> Pipeline.required "Notes" (Decode.maybe Decode.string)
 
 
 load : Int -> Cmd Msg
 load patientId =
     Decode.list decodeHospitilizationsRow
-        |> Http.get ("/People/AllergiesGrid?patientId=" ++ toString patientId)
+        |> Http.get ("/People/ImmunizationsGrid?patientId=" ++ toString patientId)
         |> Http.send Load
