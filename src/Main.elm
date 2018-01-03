@@ -6,6 +6,7 @@ import Records
 import RecordAddNew
 import PastMedicalHistory
 import Hospitilizations
+import Allergies
 import Billing.Types
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
@@ -32,6 +33,7 @@ type Page
     | RecordAddNew RecordAddNew.Model
     | PastMedicalHistory PastMedicalHistory.Model
     | Hospitilizations Hospitilizations.Model
+    | Allergies Allergies.Model
     | Error String
 
 
@@ -86,6 +88,9 @@ view model =
         Hospitilizations subModel ->
             Html.map HospitilizationsMsg (Hospitilizations.view subModel model.addEditDataSource)
 
+        Allergies subModel ->
+            Html.map AllergiesMsg (Allergies.view subModel model.addEditDataSource)
+
         Error str ->
             div [] [ text str ]
 
@@ -114,6 +119,9 @@ pageSubscriptions page =
         Hospitilizations _ ->
             Sub.map HospitilizationsMsg Hospitilizations.subscriptions
 
+        Allergies _ ->
+            Sub.map AllergiesMsg Allergies.subscriptions
+
         Error _ ->
             Sub.none
 
@@ -131,6 +139,7 @@ type Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | PastMedicalHistoryMsg PastMedicalHistory.Msg
     | HospitilizationsMsg Hospitilizations.Msg
+    | AllergiesMsg Allergies.Msg
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -174,6 +183,10 @@ setRoute maybeRoute model =
                         -- aka, if user refreshes on the add\edit screen, can't do much since there is no data source for dropdowns
                         { model | page = Records (Records.emptyModel t) }
                             ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
+
+            Just Route.Allergies ->
+                { model | page = Allergies Allergies.emptyModel }
+                    ! cmds [ Cmd.map AllergiesMsg (Allergies.init model.patientId) ]
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []
@@ -223,6 +236,9 @@ updatePage page msg model =
 
             ( RecordAddNewMsg subMsg, RecordAddNew subModel ) ->
                 toPage RecordAddNew RecordAddNewMsg RecordAddNew.update subMsg subModel
+
+            ( AllergiesMsg subMsg, Allergies subModel ) ->
+                toPage Allergies AllergiesMsg Allergies.update subMsg subModel
 
             _ ->
                 { model | page = Error <| "Missing Page\\Message " ++ toString page ++ " !!!__-__!!! " ++ toString msg } ! []

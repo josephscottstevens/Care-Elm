@@ -1,4 +1,4 @@
-port module PastMedicalHistory exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
+module PastMedicalHistory exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
 
 import Html exposing (Html, text, div, button, input, h4)
 import Html.Attributes exposing (class, style, type_, disabled, value)
@@ -15,13 +15,10 @@ import Common.Table as Table exposing (defaultCustomizations)
 import Http
 
 
-port deletePastMedicalHistoryConfirmed : (Int -> msg) -> Sub msg
-
-
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
-        [ deletePastMedicalHistoryConfirmed DeletePastMedicalHistoryConfirmed
+        [ Functions.deleteConfirmed DeletePastMedicalHistoryConfirmed
         ]
 
 
@@ -51,6 +48,7 @@ type Msg
     | Add AddEditDataSource
     | Edit AddEditDataSource Int
     | SetTableState Table.State
+    | DeletePrompt Int
     | DeletePastMedicalHistoryConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | SendMenuMessage Int
@@ -103,6 +101,9 @@ update msg model patientId =
 
         SetTableState newState ->
             { model | tableState = newState } ! []
+
+        DeletePrompt rowId ->
+            model ! [ Functions.deletePrompt rowId ]
 
         DeletePastMedicalHistoryConfirmed rowId ->
             { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
@@ -187,7 +188,7 @@ getColumns addEditDataSource state =
 
                 Nothing ->
                     ( "", "No Datasrc", class "disabled" )
-            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage row.id) )
+            , ( "e-contextdelete", "Delete", onClick (DeletePrompt row.id) )
             ]
     in
         [ Table.stringColumn "Description" (\t -> t.description)

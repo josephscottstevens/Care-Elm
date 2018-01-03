@@ -13,16 +13,13 @@ import Json.Decode as Decode exposing (Decoder, maybe)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 
 
-port deleteConfirmed : (Int -> msg) -> Sub msg
-
-
 port editTask : Int -> Cmd msg
 
 
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
-        [ deleteConfirmed DeleteConfirmed
+        [ Functions.deleteConfirmed DeleteConfirmed
         ]
 
 
@@ -55,6 +52,7 @@ type Msg
     | Add
     | SendMenuMessage Int Common.RecordType String
     | EditTask Int
+    | DeletePrompt Int
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
 
@@ -77,6 +75,9 @@ update msg model _ =
         SendMenuMessage recordId recordType messageType ->
             { model | rows = flipConsent model.rows recordId recordType }
                 ! [ sendMenuMessage (getMenuMessage model.rows recordType recordId messageType) ]
+
+        DeletePrompt rowId ->
+            model ! [ Functions.deletePrompt rowId ]
 
         DeleteConfirmed rowId ->
             let
@@ -114,7 +115,7 @@ getColumns recordType state =
                     , ( "e-mail", "Send By Email", onClick (SendMenuMessage rowId recordType "SendByEmail") )
                     , ( "e-print_01", "Send By Fax", onClick (SendMenuMessage rowId recordType "SendByFax") )
                     , ( "e-save", "Save To Client Portal", onClick (SendMenuMessage rowId recordType "SaveToClientPortal") )
-                    , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId recordType "Delete") )
+                    , ( "e-contextdelete", "Delete", onClick (DeletePrompt rowId) )
                     ]
 
         commonColumns =

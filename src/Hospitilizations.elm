@@ -22,9 +22,6 @@ import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 
 
-port deleteHospitilizationConfirmed : (Int -> msg) -> Sub msg
-
-
 port initHospitilizations : SyncfusionData -> Cmd msg
 
 
@@ -34,7 +31,7 @@ port updateHospitilizations : (SyncfusionData -> msg) -> Sub msg
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
-        [ deleteHospitilizationConfirmed DeleteHospitilizationConfirmed
+        [ Functions.deleteConfirmed DeleteHospitilizationConfirmed
         , updateHospitilizations UpdateHospitilizationsInitData
         ]
 
@@ -160,6 +157,7 @@ view model addEditDataSource =
 type Msg
     = Load (Result Http.Error (List HospitilizationsRow))
     | SetTableState Table.State
+    | DeletePrompt Int
     | DeleteHospitilizationConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | Add AddEditDataSource
@@ -192,6 +190,9 @@ update msg model patientId =
 
             SendMenuMessage recordId messageType ->
                 model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
+
+            DeletePrompt rowId ->
+                model ! [ Functions.deletePrompt rowId ]
 
             DeleteHospitilizationConfirmed rowId ->
                 let
@@ -287,7 +288,7 @@ getColumns addEditDataSource state =
             case addEditDataSource of
                 Just t ->
                     [ ( "e-edit", "Edit", onClick (Edit row t) )
-                    , ( "e-contextdelete", "Delete", onClick (SendMenuMessage row.id "HospitilizationDelete") )
+                    , ( "e-contextdelete", "Delete", onClick (DeletePrompt row.id) )
                     ]
 
                 Nothing ->

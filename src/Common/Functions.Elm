@@ -31,6 +31,8 @@ port module Common.Functions
         , getId
         , sendMenuMessage
         , setUnsavedChanges
+        , deletePrompt
+        , deleteConfirmed
         )
 
 import Char exposing (isLower, isUpper)
@@ -75,6 +77,12 @@ port sendMenuMessage : MenuMessage -> Cmd msg
 
 
 port setUnsavedChanges : Bool -> Cmd msg
+
+
+port deletePrompt : Int -> Cmd msg
+
+
+port deleteConfirmed : (Int -> msg) -> Sub msg
 
 
 error : Http.Error -> Maybe Route
