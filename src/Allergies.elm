@@ -63,12 +63,12 @@ formInputs editData =
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
-view model addEditDataSource =
+view model _ =
     case model.editData of
         Nothing ->
             div []
                 [ div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config addEditDataSource model.tableState) model.tableState model.rows ]
+                    [ Table.view (config model.tableState) model.tableState model.rows ]
                 ]
 
         Just editData ->
@@ -100,8 +100,8 @@ type Msg
     | DeletePrompt Int
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
-    | Add AddEditDataSource
-    | Edit Row AddEditDataSource
+    | Add
+    | Edit Row
     | SendMenuMessage Int String
     | Save EditData
     | SaveCompleted (Result Http.Error String)
@@ -153,19 +153,11 @@ update msg model patientId =
             DeleteCompleted (Err t) ->
                 model ! [ Functions.displayErrorMessage (toString t) ]
 
-            Add addEditDataSource ->
-                let
-                    editData =
-                        getEditData addEditDataSource Nothing
-                in
-                    { model | editData = Just editData } ! []
+            Add ->
+                { model | editData = Just (getEditData Nothing) } ! []
 
-            Edit row addEditDataSource ->
-                let
-                    editData =
-                        getEditData addEditDataSource (Just row)
-                in
-                    { model | editData = Just editData } ! []
+            Edit row ->
+                { model | editData = Just (getEditData (Just row)) } ! []
 
             -- edit
             Save editData ->
@@ -206,18 +198,13 @@ update msg model patientId =
                 updateAddNew { model | editData = Just { editData | reaction = t } }
 
 
-getColumns : Maybe AddEditDataSource -> Table.State -> List (Table.Column Row Msg)
-getColumns addEditDataSource state =
+getColumns : Table.State -> List (Table.Column Row Msg)
+getColumns state =
     let
         dropDownItems row =
-            case addEditDataSource of
-                Just t ->
-                    [ ( "e-edit", "Edit", onClick (Edit row t) )
-                    , ( "e-contextdelete", "Delete", onClick (DeletePrompt row.id) )
-                    ]
-
-                Nothing ->
-                    []
+            [ ( "e-edit", "Edit", onClick (Edit row) )
+            , ( "e-contextdelete", "Delete", onClick (DeletePrompt row.id) )
+            ]
     in
         [ Table.stringColumn "Allergy" (\t -> t.allergy)
         , Table.stringColumn "Reaction" (\t -> defaultString t.reaction)
@@ -225,21 +212,16 @@ getColumns addEditDataSource state =
         ]
 
 
-config : Maybe AddEditDataSource -> Table.State -> Table.Config Row Msg
-config addEditDataSource state =
+config : Table.State -> Table.Config Row Msg
+config state =
     let
         buttons =
-            case addEditDataSource of
-                Just t ->
-                    [ ( "e-addnew", onClick (Add t) ) ]
-
-                Nothing ->
-                    []
+            [ ( "e-addnew", onClick Add ) ]
     in
         Table.customConfig
             { toId = \t -> toString t.id
             , toMsg = SetTableState
-            , columns = getColumns addEditDataSource state
+            , columns = getColumns state
             , customizations =
                 { defaultCustomizations
                     | tableAttrs = standardTableAttrs "RecordTable"
@@ -271,8 +253,8 @@ emptyModel =
     }
 
 
-getEditData : AddEditDataSource -> Maybe Row -> EditData
-getEditData _ maybeRow =
+getEditData : Maybe Row -> EditData
+getEditData maybeRow =
     case maybeRow of
         Just row ->
             { id = Just row.id
