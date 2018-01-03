@@ -17,6 +17,7 @@ test hospitilizations add
 test hospitilizations edit
 test hospitilizations delete
 test hospitilizations cancel
+create a simple Table.customConfig since it seems identical everywhere
 scroll to top if validation fails?
 in dropdown, updateSearchString needs to work when closed as well (and has focus)
 records > Hospitalizations is broken again :'(

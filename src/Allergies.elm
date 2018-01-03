@@ -7,14 +7,7 @@ import Common.Table as Table exposing (defaultCustomizations)
 import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters)
 import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), AddEditDataSource)
 import Common.Functions as Functions exposing (defaultString, sendMenuMessage, setUnsavedChanges, maybeVal)
-import Common.Html
-    exposing
-        ( InputControlType(TextInput)
-        , getValidationErrors
-        , defaultConfig
-        , fullWidth
-        , makeControls
-        )
+import Common.Html exposing (InputControlType(TextInput), getValidationErrors, defaultConfig, fullWidth, makeControls)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
@@ -118,7 +111,7 @@ update msg model patientId =
     in
         case msg of
             Load (Ok t) ->
-                getLoadedState model t ! [ Functions.setLoadingStatus False ]
+                { model | rows = t } ! [ Functions.setLoadingStatus False ]
 
             Load (Err t) ->
                 model ! [ Functions.displayErrorMessage (toString t) ]
@@ -231,19 +224,6 @@ config state =
             }
 
 
-decodeHospitilizationsRow : Decode.Decoder Row
-decodeHospitilizationsRow =
-    Pipeline.decode Row
-        |> Pipeline.required "Id" Decode.int
-        |> Pipeline.required "Allergy" Decode.string
-        |> Pipeline.required "Reaction" (Decode.maybe Decode.string)
-
-
-getLoadedState : Model -> List Row -> Model
-getLoadedState model hospitilizationsRow =
-    { model | rows = hospitilizationsRow }
-
-
 emptyModel : Model
 emptyModel =
     { editData = Nothing
@@ -277,6 +257,14 @@ encodeEditData newRecord patientId =
         , ( "Allergy", Encode.string <| newRecord.allergy )
         , ( "Reaction", Encode.string <| newRecord.reaction )
         ]
+
+
+decodeHospitilizationsRow : Decode.Decoder Row
+decodeHospitilizationsRow =
+    Pipeline.decode Row
+        |> Pipeline.required "Id" Decode.int
+        |> Pipeline.required "Allergy" Decode.string
+        |> Pipeline.required "Reaction" (Decode.maybe Decode.string)
 
 
 load : Int -> Cmd Msg
