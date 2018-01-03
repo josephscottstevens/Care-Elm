@@ -4,13 +4,12 @@ import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Common.Table as Table exposing (defaultCustomizations)
-import Common.Grid exposing (checkColumn, standardTableAttrs, standardTheadNoFilters)
-import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), DropdownItem, AddEditDataSource)
-import Common.Functions as Functions exposing (defaultString, defaultDate, sendMenuMessage, setUnsavedChanges, maybeVal, maybeToDateString)
-import Common.Route as Route
+import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters)
+import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), AddEditDataSource)
+import Common.Functions as Functions exposing (defaultString, sendMenuMessage, setUnsavedChanges, maybeVal)
 import Common.Html
     exposing
-        ( InputControlType(CheckInput, DropInputWithButton, AreaInput, TextInput, DateInput, KnockInput, DropInput)
+        ( InputControlType(TextInput)
         , getValidationErrors
         , defaultConfig
         , fullWidth
@@ -258,11 +257,6 @@ decodeHospitilizationsRow =
         |> Pipeline.required "Reaction" (Decode.maybe Decode.string)
 
 
-delete : a -> (Result Http.Error String -> msg) -> Cmd msg
-delete rowId deleteCompleted =
-    Http.send deleteCompleted <| Http.getString ("/People/AllergiesDelete?id=" ++ toString rowId)
-
-
 getLoadedState : Model -> List Row -> Model
 getLoadedState model hospitilizationsRow =
     { model | rows = hospitilizationsRow }
@@ -278,7 +272,7 @@ emptyModel =
 
 
 getEditData : AddEditDataSource -> Maybe Row -> EditData
-getEditData addEditDataSource maybeRow =
+getEditData _ maybeRow =
     case maybeRow of
         Just row ->
             { id = Just row.id
