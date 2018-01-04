@@ -11,6 +11,7 @@ module Common.Route
             , Error
             , Allergies
             , Immunizations
+            , LastKnownVitals
             )
         , getPatientId
         , fromLocation
@@ -36,6 +37,7 @@ type Route
     | PastMedicalHistory
     | Allergies
     | Immunizations
+    | LastKnownVitals
     | Error String
 
 
@@ -103,6 +105,9 @@ routeToString route =
         Immunizations ->
             "#/people/_immunizations"
 
+        LastKnownVitals ->
+            "#/people/_vitals"
+
         Error t ->
             "#/Error" ++ t
 
@@ -116,6 +121,7 @@ route =
         , Url.map Hospitilizations (s "people" </> s "_hospitalizations")
         , Url.map Allergies (s "people" </> s "_allergies")
         , Url.map Immunizations (s "people" </> s "_immunizations")
+        , Url.map LastKnownVitals (s "people" </> s "_vitals")
 
         -- Records Grid
         , Url.map (Records Common.PrimaryCare) (s "people" </> s "_primarycarerecords")

@@ -8,6 +8,7 @@ import PastMedicalHistory
 import Hospitilizations
 import Allergies
 import Immunizations
+import LastKnownVitals
 import Billing.Types
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
@@ -36,6 +37,7 @@ type Page
     | Hospitilizations Hospitilizations.Model
     | Allergies Allergies.Model
     | Immunizations Immunizations.Model
+    | LastKnownVitals LastKnownVitals.Model
     | Error String
 
 
@@ -96,6 +98,9 @@ view model =
         Immunizations subModel ->
             Html.map ImmunizationsMsg (Immunizations.view subModel model.addEditDataSource)
 
+        LastKnownVitals subModel ->
+            Html.map LastKnownVitalsMsg (LastKnownVitals.view subModel model.addEditDataSource)
+
         Error str ->
             div [] [ text str ]
 
@@ -130,6 +135,9 @@ pageSubscriptions page =
         Immunizations _ ->
             Sub.map ImmunizationsMsg Immunizations.subscriptions
 
+        LastKnownVitals _ ->
+            Sub.map LastKnownVitalsMsg LastKnownVitals.subscriptions
+
         Error _ ->
             Sub.none
 
@@ -149,6 +157,7 @@ type Msg
     | HospitilizationsMsg Hospitilizations.Msg
     | AllergiesMsg Allergies.Msg
     | ImmunizationsMsg Immunizations.Msg
+    | LastKnownVitalsMsg LastKnownVitals.Msg
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -200,6 +209,10 @@ setRoute maybeRoute model =
             Just Route.Immunizations ->
                 { model | page = Immunizations Immunizations.emptyModel }
                     ! cmds [ Cmd.map ImmunizationsMsg (Immunizations.init model.patientId) ]
+
+            Just Route.LastKnownVitals ->
+                { model | page = LastKnownVitals LastKnownVitals.emptyModel }
+                    ! cmds [ Cmd.map LastKnownVitalsMsg (LastKnownVitals.init model.patientId) ]
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []
@@ -255,6 +268,9 @@ updatePage page msg model =
 
             ( ImmunizationsMsg subMsg, Immunizations subModel ) ->
                 toPage Immunizations ImmunizationsMsg Immunizations.update subMsg subModel
+
+            ( LastKnownVitalsMsg subMsg, LastKnownVitals subModel ) ->
+                toPage LastKnownVitals LastKnownVitalsMsg LastKnownVitals.update subMsg subModel
 
             _ ->
                 { model | page = Error <| "Missing Page\\Message " ++ toString page ++ " !!!__-__!!! " ++ toString msg } ! []
