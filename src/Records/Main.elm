@@ -190,9 +190,6 @@ update msg model =
             else
                 { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
 
-        SetFilter filterState ->
-            { model | filterFields = filterFields model.filterFields filterState } ! []
-
         UpdateSpecialty newRecord str ->
             { model | state = AddNew { newRecord | specialty = str } } ! [ setUnsavedChanges True ]
 
@@ -253,7 +250,7 @@ view model =
         Grid ->
             div [ class "e-grid e-js e-waitingpopup" ]
                 [ toolbar
-                , Table.view (config SetFilter model.recordTypeId (getTaskId model)) model.tableState (filteredRecords model)
+                , Table.view (config model.recordTypeId (getTaskId model)) model.tableState (filteredRecords model)
                 ]
 
         AddNew newRecord ->
@@ -454,14 +451,14 @@ rowDropDown recordTypeId =
         }
 
 
-config : (FilterState -> Msg) -> Maybe Int -> Maybe Int -> Config RecordRow Msg
-config msg recordTypeId taskId =
+config : Maybe Int -> Maybe Int -> Config RecordRow Msg
+config recordTypeId taskId =
     customConfig
         { toId = \t -> toString t.id
         , toMsg = SetTableState
         , columns = getColumns recordTypeId taskId .id
         , customizations =
-            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = (standardThead msg) }
+            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = standardThead }
         }
 
 

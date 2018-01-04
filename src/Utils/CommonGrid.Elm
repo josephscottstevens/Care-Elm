@@ -4,8 +4,6 @@ import Html exposing (Html, text, div, button, input, span, th, li, ul, a)
 import Html.Attributes exposing (style, class, type_, id, tabindex, attribute, href, target, checked, hidden)
 import Html.Events
 import Table
-import Utils.CommonTypes exposing (DropDownState, FilterState)
-import Json.Decode as Json
 import Utils.CommonFunctions exposing (isAlpha)
 
 
@@ -14,18 +12,13 @@ idAttr str =
     id (String.filter isAlpha str)
 
 
-onInput : String -> (FilterState -> msg) -> Html.Attribute msg
-onInput name handler =
-    Html.Events.on "input" <| Json.map handler <| Json.map2 Utils.CommonTypes.FilterState (Json.succeed name) (Json.at [ "target", "value" ] Json.string)
-
-
 dataTarget : String -> Html.Attribute msg
 dataTarget val =
     attribute "data-target" val
 
 
-standardTheadHelp : (FilterState -> msg) -> ( String, Table.Status, Html.Attribute msg ) -> Html msg
-standardTheadHelp event ( name, status, onClick ) =
+standardTheadHelp : ( String, Table.Status, Html.Attribute msg ) -> Html msg
+standardTheadHelp ( name, status, onClick ) =
     let
         headerDivClass =
             class "e-headercelldiv e-gridtooltip headerColumn"
@@ -55,25 +48,13 @@ standardTheadHelp event ( name, status, onClick ) =
                         headerDiv [ text name, span [ class "glyphicon glyphicon-menu-up" ] [] ]
                     else
                         headerDiv [ text name, span [ class "glyphicon glyphicon-menu-down" ] [] ]
-
-        filterContent =
-            if name == "" then
-                div [] []
-            else if String.contains "date" (String.toLower name) then
-                div [ style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ) ] ]
-                    [ input [ type_ "text", idAttr ("filter" ++ name), onInput name event ] []
-                    ]
-            else
-                div [ class "e-filterdiv e-fltrinputdiv" ]
-                    [ input [ class "e-ejinputtext e-filtertext", style [ ( "margin-bottom", "5px" ), ( "margin-top", "15px" ) ], onInput name event ] []
-                    ]
     in
-        th [ headerColumnClass ] [ headerContent, filterContent ]
+        th [ headerColumnClass ] [ headerContent ]
 
 
-standardThead : (FilterState -> msg) -> List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
-standardThead msg headers =
-    Table.HtmlDetails [ class "e-gridheader e-columnheader e-hidelines" ] (List.map (standardTheadHelp msg) headers)
+standardThead : List ( String, Table.Status, Html.Attribute msg ) -> Table.HtmlDetails msg
+standardThead headers =
+    Table.HtmlDetails [ class "e-gridheader e-columnheader e-hidelines" ] (List.map standardTheadHelp headers)
 
 
 standardTableAttrs : String -> List (Html.Attribute msg)

@@ -13,7 +13,6 @@ type Msg
     | DropDownToggle Int
     | Save NewRecord
     | SendMenuMessage Int String
-    | SetFilter FilterState
     | OpenTask Int
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
