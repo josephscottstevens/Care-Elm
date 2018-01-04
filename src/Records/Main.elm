@@ -309,7 +309,6 @@ formInputs newRecord =
 
         firstColumns =
             [ ( "Facility", Required, DropInput newRecord.facilityId "FacilityId" )
-            , ( "Category", Required, DropInput newRecord.recordTypeId "CategoryId" )
             ]
 
         lastColumns =
