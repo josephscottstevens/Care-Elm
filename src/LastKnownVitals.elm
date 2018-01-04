@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Common.Table as Table exposing (defaultCustomizations)
 import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters)
 import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), AddEditDataSource)
-import Common.Functions as Functions exposing (defaultString, sendMenuMessage, setUnsavedChanges, maybeVal, defaultDate)
+import Common.Functions as Functions exposing (sendMenuMessage, setUnsavedChanges, maybeVal, defaultDate)
 import Common.Html exposing (InputControlType(TextInput, DateInput), getValidationErrors, defaultConfig, fullWidth, makeControls)
 import Http
 import Json.Decode as Decode
