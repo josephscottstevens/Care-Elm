@@ -30,9 +30,6 @@ port initRecordAddNew : RecordAddNewInitData -> Cmd msg
 port updateRecordAddNew : (RecordAddNewInitData -> msg) -> Sub msg
 
 
-port updateCategory : (Common.DropdownItem -> msg) -> Sub msg
-
-
 port addNewFacility : Maybe String -> Cmd msg
 
 
@@ -43,7 +40,6 @@ subscriptions : Sub Msg
 subscriptions =
     Sub.batch
         [ presetPageComplete PresetPageComplete
-        , updateCategory UpdateRecordType
         , updateRecordAddNew UpdateRecordAddNew
         ]
 
@@ -90,7 +86,6 @@ type Msg
     | PresetPageComplete (Maybe Int)
     | UpdateRecordAddNew RecordAddNewInitData
     | UpdateTitle String
-    | UpdateRecordType Common.DropdownItem
     | UpdateSpecialty String
     | UpdateProvider String
     | UpdateComments String
@@ -146,18 +141,6 @@ update msg model patientId =
 
             UpdateRecordAddNew recordAddNew ->
                 { model | newRecord = recordAddNew } ! []
-
-            UpdateRecordType dropdownItem ->
-                if model.newRecord.categoryId == dropdownItem.id then
-                    model ! []
-                else
-                    case Functions.getRecordTypeById dropdownItem.id of
-                        Just t ->
-                            { model | recordType = t, state = Limbo }
-                                ! [ presetPage dropdownItem.id ]
-
-                        Nothing ->
-                            model ! [ displayErrorMessage ("Cannot load invalid record type: " ++ toString dropdownItem.id) ]
 
             UpdateTitle str ->
                 updateAddNew { model | title = str }
