@@ -7,7 +7,6 @@ import Common.Table as Table exposing (defaultCustomizations)
 import Common.Grid exposing (hrefColumn, checkColumn)
 import Common.Types as Common exposing (RequiredType(Required, Optional), AddEditDataSource, RecordType, DropdownItem)
 import Common.Functions as Functions exposing (sendMenuMessage, displaySuccessMessage, displayErrorMessage, maybeVal, defaultString, maybeToDateString)
-import Common.Route as Route
 import Common.Html
     exposing
         ( getValidationErrors
@@ -60,8 +59,7 @@ type State
 
 init : Common.RecordType -> Int -> Cmd Msg
 init recordType patientId =
-    getRecords recordType patientId
-        |> Http.send Load
+    loadRecords recordType patientId
 
 
 type alias Model =
@@ -313,10 +311,13 @@ update msg model patientId =
             SaveCompleted (Ok responseMsg) ->
                 case Functions.getResponseError responseMsg of
                     Just t ->
-                        model ! [ displayErrorMessage t, Route.back ]
+                        { model | state = Grid } ! [ displayErrorMessage t ]
 
                     Nothing ->
-                        model ! [ displaySuccessMessage "Save completed successfully!", Route.back ]
+                        { model | state = Grid }
+                            ! [ displaySuccessMessage "Save completed successfully!"
+                              , loadRecords model.recordType patientId
+                              ]
 
             SaveCompleted (Err t) ->
                 (model ! [ displayErrorMessage (toString t) ])
@@ -533,8 +534,8 @@ decodeRecordRow =
         |> hardcoded False
 
 
-getRecords : Common.RecordType -> Int -> Http.Request (List RecordRow)
-getRecords recordType patientId =
+loadRecords : Common.RecordType -> Int -> Cmd Msg
+loadRecords recordType patientId =
     let
         recordTypeId =
             Functions.getId recordType
@@ -544,6 +545,7 @@ getRecords recordType patientId =
     in
         Decode.field "list" (Decode.list decodeRecordRow)
             |> Http.get url
+            |> Http.send Load
 
 
 deleteRequest : a -> (Result Http.Error String -> msg) -> Cmd msg
