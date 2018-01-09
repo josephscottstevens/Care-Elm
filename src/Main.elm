@@ -8,7 +8,7 @@ import Hospitilizations
 import Allergies
 import Immunizations
 import LastKnownVitals
-import Billing.Types
+import Billing
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Common.Route as Route exposing (Route)
@@ -28,7 +28,7 @@ type alias Model =
 
 type Page
     = None
-    | Billing
+    | Billing Billing.Model
     | ClinicalSummary ClinicalSummary.Model
     | Records Records.Model
     | PastMedicalHistory PastMedicalHistory.Model
@@ -72,8 +72,8 @@ view model =
         None ->
             div [] [ text "no view here" ]
 
-        Billing ->
-            div [] []
+        Billing subModel ->
+            Html.map BillingMsg (Billing.view subModel model.addEditDataSource)
 
         ClinicalSummary subModel ->
             Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel model.patientId)
@@ -106,7 +106,7 @@ pageSubscriptions page =
         None ->
             Sub.none
 
-        Billing ->
+        Billing _ ->
             Sub.none
 
         ClinicalSummary _ ->
@@ -140,7 +140,7 @@ pageSubscriptions page =
 
 type Msg
     = SetRoute (Maybe Route)
-    | BillingMsg Billing.Types.Msg
+    | BillingMsg Billing.Msg
     | ClinicalSummaryMsg ClinicalSummary.Msg
     | RecordsMsg Records.Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
@@ -166,6 +166,10 @@ setRoute maybeRoute model =
             [ getDropdownsCmd, Functions.setLoadingStatus False ] ++ t
     in
         case maybeRoute of
+            Just Route.Billing ->
+                { model | page = Billing Billing.emptyModel }
+                    ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
+
             Just Route.ClinicalSummary ->
                 { model | page = ClinicalSummary ClinicalSummary.emptyModel }
                     ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
@@ -194,11 +198,14 @@ setRoute maybeRoute model =
                 { model | page = LastKnownVitals LastKnownVitals.emptyModel }
                     ! cmds [ Cmd.map LastKnownVitalsMsg (LastKnownVitals.init model.patientId) ]
 
+            Just Route.None ->
+                model ! []
+
+            Just (Route.Error str) ->
+                { model | page = Error str } ! []
+
             Nothing ->
                 { model | page = Error "no route provided" } ! []
-
-            _ ->
-                { model | page = Error "unknown page" } ! []
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -230,6 +237,9 @@ updatePage page msg model =
 
             ( PastMedicalHistoryMsg subMsg, PastMedicalHistory subModel ) ->
                 toPage PastMedicalHistory PastMedicalHistoryMsg PastMedicalHistory.update subMsg subModel
+
+            ( BillingMsg subMsg, Billing subModel ) ->
+                toPage Billing BillingMsg Billing.update subMsg subModel
 
             ( HospitilizationsMsg subMsg, Hospitilizations subModel ) ->
                 toPage Hospitilizations HospitilizationsMsg Hospitilizations.update subMsg subModel

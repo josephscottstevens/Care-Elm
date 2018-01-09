@@ -80,7 +80,7 @@ routeToString route =
             "#"
 
         Billing ->
-            "#"
+            "#/people/_insurance"
 
         ClinicalSummary ->
             "#/people/_clinicalsummary"
@@ -117,6 +117,7 @@ route =
         , Url.map Allergies (s "people" </> s "_allergies")
         , Url.map Immunizations (s "people" </> s "_immunizations")
         , Url.map LastKnownVitals (s "people" </> s "_vitals")
+        , Url.map Billing (s "people" </> s "_insurance")
 
         -- Records Grid
         , Url.map (Records Common.PrimaryCare) (s "people" </> s "_primarycarerecords")
