@@ -22,10 +22,10 @@ import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Json.Encode as Encode
 
 
-port presetPage : Maybe Int -> Cmd msg
+port presetPage : AddEditDataSource -> Cmd msg
 
 
-port presetPageComplete : (Maybe Int -> msg) -> Sub msg
+port presetPageComplete : (AddEditDataSource -> msg) -> Sub msg
 
 
 port initRecordAddNew : EditData -> Cmd msg
@@ -214,7 +214,7 @@ view model addEditDataSource =
 type Msg
     = Load (Result Http.Error (List RecordRow))
     | SetTableState Table.State
-    | Add
+    | Add AddEditDataSource
     | SendMenuMessage Int Common.RecordType String
     | EditTask Int
     | DeletePrompt Int
@@ -226,7 +226,7 @@ type Msg
     | Save EditData
     | SaveCompleted (Result Http.Error String)
     | Cancel
-    | PresetPageComplete (Maybe Int)
+    | PresetPageComplete AddEditDataSource
     | UpdateRecordAddNew EditData
     | UpdateTitle String
     | UpdateSpecialty String
@@ -254,8 +254,11 @@ update msg model patientId =
             Load (Err t) ->
                 model ! [ displayErrorMessage (toString t) ]
 
-            Add ->
-                { model | state = Limbo } ! [ presetPage (Just (Functions.getId model.recordType)) ]
+            Add addEditDataSource ->
+                { model | state = Edit, editData = Just (getEditData addEditDataSource model.recordType) } ! [ presetPage addEditDataSource ]
+
+            PresetPageComplete addEditDataSource ->
+                { model | state = Edit } ! [ initRecordAddNew (getEditData addEditDataSource model.recordType) ]
 
             SetTableState newState ->
                 { model | tableState = newState } ! []
@@ -320,14 +323,6 @@ update msg model patientId =
             Cancel ->
                 { model | state = Grid } ! [ Functions.setUnsavedChanges False ]
 
-            PresetPageComplete _ ->
-                case model.addEditDataSource of
-                    Just t ->
-                        { model | state = Edit } ! [ initRecordAddNew (getEditData t model.recordType) ]
-
-                    Nothing ->
-                        model ! [ displayErrorMessage "invalid add edit datasource" ]
-
             UpdateRecordAddNew editData ->
                 { model | editData = Just editData } ! []
 
@@ -354,11 +349,7 @@ update msg model patientId =
 
             -- Hospitilizations
             UpdateIsExistingHospitilization bool ->
-                if model.isExistingHospitilization == bool then
-                    model ! []
-                else
-                    { model | isExistingHospitilization = bool, state = Limbo }
-                        ! [ presetPage (Just (Functions.getId model.recordType)), Functions.setLoadingStatus True ]
+                model ! []
 
             UpdatePatientReported bool ->
                 updateAddNew { model | patientReported = bool }
@@ -467,8 +458,8 @@ config addEditDataSource recordType state =
     let
         buttons =
             case addEditDataSource of
-                Just _ ->
-                    [ ( "e-addnew", onClick Add ) ]
+                Just t ->
+                    [ ( "e-addnew", onClick (Add t) ) ]
 
                 Nothing ->
                     []
