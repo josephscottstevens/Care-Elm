@@ -33,6 +33,8 @@ port module Common.Functions
         , setUnsavedChanges
         , deletePrompt
         , deleteConfirmed
+        , presetPage
+        , presetPageComplete
         )
 
 import Char exposing (isLower, isUpper)
@@ -83,6 +85,12 @@ port deletePrompt : Int -> Cmd msg
 
 
 port deleteConfirmed : (Int -> msg) -> Sub msg
+
+
+port presetPage : String -> Cmd msg
+
+
+port presetPageComplete : (String -> msg) -> Sub msg
 
 
 error : Http.Error -> Maybe Route

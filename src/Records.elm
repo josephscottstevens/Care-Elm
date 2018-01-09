@@ -40,6 +40,7 @@ subscriptions : Sub Msg
 subscriptions =
     Sub.batch
         [ Functions.deleteConfirmed DeleteConfirmed
+        , Functions.presetPageComplete PresetPageComplete
         , updateRecordAddNew UpdateRecordAddNew
         ]
 
@@ -47,6 +48,7 @@ subscriptions =
 type State
     = Grid
     | Edit
+    | Limbo
 
 
 init : Common.RecordType -> Int -> Cmd Msg
@@ -195,7 +197,10 @@ view model addEditDataSource =
                             ]
 
                 Nothing ->
-                    div [] []
+                    div [] [ text "invalid edit state" ]
+
+        Limbo ->
+            div [] []
 
 
 type Msg
@@ -208,6 +213,7 @@ type Msg
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
       -- Edit Messages
+    | PresetPageComplete String
     | AddNewFacility
     | AddNewPhysician
     | Save EditData
@@ -295,10 +301,10 @@ update msg model patientId =
             SaveCompleted (Ok responseMsg) ->
                 case Functions.getResponseError responseMsg of
                     Just t ->
-                        { model | state = Grid } ! [ displayErrorMessage t ]
+                        resetEditData model ! [ displayErrorMessage t ]
 
                     Nothing ->
-                        { model | state = Grid }
+                        resetEditData model
                             ! [ displaySuccessMessage "Save completed successfully!"
                               , loadRecords model.recordType patientId
                               ]
@@ -307,7 +313,7 @@ update msg model patientId =
                 (model ! [ displayErrorMessage (toString t) ])
 
             Cancel ->
-                { model | state = Grid } ! [ Functions.setUnsavedChanges False ]
+                resetEditData model ! [ Functions.setUnsavedChanges False ]
 
             UpdateRecordAddNew editData ->
                 { model | editData = Just editData } ! []
@@ -335,7 +341,15 @@ update msg model patientId =
 
             -- Hospitilizations
             UpdateIsExistingHospitilization bool ->
-                model ! []
+                { model | isExistingHospitilization = bool, state = Limbo } ! [ Functions.presetPage "" ]
+
+            PresetPageComplete _ ->
+                case model.editData of
+                    Just t ->
+                        { model | state = Edit } ! [ initRecordAddNew t ]
+
+                    Nothing ->
+                        model ! [ displayErrorMessage "invalid preset" ]
 
             UpdatePatientReported bool ->
                 updateAddNew { model | patientReported = bool }
@@ -623,7 +637,8 @@ formInputs model editData =
                                 ++ lastControls
 
                         False ->
-                            [ CheckInput "Patient Reported" Common.Optional model.patientReported UpdatePatientReported
+                            [ CheckInput "Existing Hospitilization" Common.Optional model.isExistingHospitilization UpdateIsExistingHospitilization
+                            , CheckInput "Patient Reported" Common.Optional model.patientReported UpdatePatientReported
                             , DropInputWithButton
                                 "Facility"
                                 Common.Optional
@@ -652,7 +667,6 @@ formInputs model editData =
                             , DateInput "Secondary Date of Discharge" Optional (defaultString editData.dateOfDischarge) "DateOfDischargeId2"
                             , FileInput "Upload Record File" Required editData.fileName
                             ]
-                                ++ lastControls
 
                 Common.CallRecordings ->
                     [ DropInput "Facility" Required editData.facilityId "FacilityId"
@@ -780,4 +794,19 @@ getEditData addEditDataSource recordType =
     , dischargeDiagnosisId = Nothing
     , dischargePhysicianId = Nothing
     , dischargePhysicianText = ""
+    }
+
+
+resetEditData : Model -> Model
+resetEditData model =
+    { model
+        | state = Grid
+        , title = ""
+        , specialty = ""
+        , provider = ""
+        , showValidationErrors = False
+        , recording = ""
+        , callSid = ""
+        , duration = 0
+        , comments = ""
     }
