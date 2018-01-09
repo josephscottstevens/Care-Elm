@@ -255,10 +255,11 @@ update msg model patientId =
                 model ! [ displayErrorMessage (toString t) ]
 
             Add addEditDataSource ->
-                { model | state = Edit, editData = Just (getEditData addEditDataSource model.recordType) } ! [ presetPage addEditDataSource ]
+                { model | state = Edit, editData = Just (getEditData addEditDataSource) }
+                    ! [ presetPage addEditDataSource ]
 
             PresetPageComplete addEditDataSource ->
-                { model | state = Edit } ! [ initRecordAddNew (getEditData addEditDataSource model.recordType) ]
+                { model | state = Edit } ! [ initRecordAddNew (getEditData addEditDataSource) ]
 
             SetTableState newState ->
                 { model | tableState = newState } ! []
@@ -764,8 +765,8 @@ emptyModel recordType addEditDataSource =
     }
 
 
-getEditData : AddEditDataSource -> RecordType -> EditData
-getEditData addEditDataSource recordType =
+getEditData : AddEditDataSource -> EditData
+getEditData addEditDataSource =
     { facilityId = addEditDataSource.facilityId
     , facilities = addEditDataSource.facilities
     , recordTypes = addEditDataSource.recordTypes
