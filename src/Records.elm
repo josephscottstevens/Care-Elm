@@ -17,14 +17,8 @@ import Common.Html
         )
 import Http
 import Json.Decode as Decode exposing (Decoder, maybe)
-import Json.Decode.Pipeline exposing (decode, required, hardcoded)
+import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode
-
-
-port presetPage : AddEditDataSource -> Cmd msg
-
-
-port presetPageComplete : (AddEditDataSource -> msg) -> Sub msg
 
 
 port initRecordAddNew : EditData -> Cmd msg
@@ -46,15 +40,13 @@ subscriptions : Sub Msg
 subscriptions =
     Sub.batch
         [ Functions.deleteConfirmed DeleteConfirmed
-        , presetPageComplete PresetPageComplete
         , updateRecordAddNew UpdateRecordAddNew
         ]
 
 
 type State
-    = Edit
-    | Limbo
-    | Grid
+    = Grid
+    | Edit
 
 
 init : Common.RecordType -> Int -> Cmd Msg
@@ -118,7 +110,6 @@ type alias RecordRow =
     , staffId : Int
     , staffName : Maybe String
     , hasVerbalConsent : Bool
-    , dropdownOpen : Bool
     }
 
 
@@ -205,9 +196,6 @@ view model addEditDataSource =
                 Nothing ->
                     div [] []
 
-        Limbo ->
-            div [] []
-
 
 type Msg
     = Load (Result Http.Error (List RecordRow))
@@ -224,7 +212,6 @@ type Msg
     | Save EditData
     | SaveCompleted (Result Http.Error String)
     | Cancel
-    | PresetPageComplete AddEditDataSource
     | UpdateRecordAddNew EditData
     | UpdateTitle String
     | UpdateSpecialty String
@@ -254,10 +241,7 @@ update msg model patientId =
 
             Add addEditDataSource ->
                 { model | state = Edit, editData = Just (getEditData addEditDataSource) }
-                    ! [ presetPage addEditDataSource ]
-
-            PresetPageComplete addEditDataSource ->
-                { model | state = Edit } ! [ initRecordAddNew (getEditData addEditDataSource) ]
+                    ! [ initRecordAddNew (getEditData addEditDataSource) ]
 
             SetTableState newState ->
                 { model | tableState = newState } ! []
@@ -270,11 +254,10 @@ update msg model patientId =
                 model ! [ Functions.deletePrompt rowId ]
 
             DeleteConfirmed rowId ->
-                let
-                    updatedRecords =
-                        model.rows |> List.filter (\t -> t.id /= rowId)
-                in
-                    { model | rows = updatedRecords } ! [ deleteRequest rowId DeleteCompleted ]
+                { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
+                    ! [ Http.getString ("/People/DeleteRecord?recordId=" ++ toString rowId)
+                            |> Http.send DeleteCompleted
+                      ]
 
             DeleteCompleted (Ok responseMsg) ->
                 case Functions.getResponseError responseMsg of
@@ -531,7 +514,6 @@ decodeRecordRow =
         |> required "StaffId" Decode.int
         |> required "StaffName" (maybe Decode.string)
         |> required "HasVerbalConsent" Decode.bool
-        |> hardcoded False
 
 
 loadRecords : Common.RecordType -> Int -> Cmd Msg
@@ -546,11 +528,6 @@ loadRecords recordType patientId =
         Decode.field "list" (Decode.list decodeRecordRow)
             |> Http.get url
             |> Http.send Load
-
-
-deleteRequest : a -> (Result Http.Error String -> msg) -> Cmd msg
-deleteRequest rowId deleteCompleted =
-    Http.send deleteCompleted <| Http.getString ("/People/DeleteRecord?recordId=" ++ toString rowId)
 
 
 getMenuMessage : List RecordRow -> Common.RecordType -> Int -> String -> Common.MenuMessage
