@@ -5,7 +5,6 @@ module Common.Route
             , Billing
             , ClinicalSummary
             , Records
-            , RecordAddNew
             , Hospitilizations
             , PastMedicalHistory
             , Error
@@ -32,7 +31,6 @@ type Route
     | Billing
     | ClinicalSummary
     | Records Common.RecordType
-    | RecordAddNew Common.RecordType
     | Hospitilizations
     | PastMedicalHistory
     | Allergies
@@ -90,9 +88,6 @@ routeToString route =
         Records recordType ->
             "#/people/" ++ recordTypeToString recordType
 
-        RecordAddNew recordType ->
-            "#/people/" ++ recordTypeToString recordType ++ "/addedit"
-
         PastMedicalHistory ->
             "#/people/_pastmedicalhistory"
 
@@ -134,18 +129,6 @@ route =
         , Url.map (Records Common.PreviousHistories) (s "people" </> s "_previoushistoryrecords")
         , Url.map (Records Common.Enrollment) (s "people" </> s "_enrollmentrecords")
         , Url.map (Records Common.Misc) (s "people" </> s "_miscrecords")
-
-        -- Records Edit
-        , Url.map (RecordAddNew Common.PrimaryCare) (s "people" </> s "_primarycarerecords" </> s "addedit")
-        , Url.map (RecordAddNew Common.Specialty) (s "people" </> s "_specialtyrecords" </> s "addedit")
-        , Url.map (RecordAddNew Common.Labs) (s "people" </> s "_labrecords" </> s "addedit")
-        , Url.map (RecordAddNew Common.Radiology) (s "people" </> s "_radiologyrecords" </> s "addedit")
-        , Url.map (RecordAddNew Common.Hospitalizations) (s "people" </> s "_hospitalizationrecords" </> s "addedit")
-        , Url.map (RecordAddNew Common.Legal) (s "people" </> s "_legalrecords" </> s "addedit")
-        , Url.map (RecordAddNew Common.CallRecordings) (s "people" </> s "_callrecordingrecords" </> s "addedit")
-        , Url.map (RecordAddNew Common.PreviousHistories) (s "people" </> s "_previoushistoryrecords" </> s "addedit")
-        , Url.map (RecordAddNew Common.Enrollment) (s "people" </> s "_enrollmentrecords" </> s "addedit")
-        , Url.map (RecordAddNew Common.Misc) (s "people" </> s "_miscrecords" </> s "addedit")
         ]
 
 

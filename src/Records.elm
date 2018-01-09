@@ -1,16 +1,43 @@
 port module Records exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
-import Html exposing (Html, text, div, h4)
-import Html.Attributes exposing (class)
+import Html exposing (Html, text, div, h4, button)
+import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Common.Table as Table exposing (defaultCustomizations)
 import Common.Grid exposing (hrefColumn, checkColumn)
-import Common.Types as Common
-import Common.Functions as Functions exposing (sendMenuMessage, displaySuccessMessage, displayErrorMessage)
+import Common.Types as Common exposing (RequiredType(Required, Optional), AddEditDataSource, RecordType, DropdownItem)
+import Common.Functions as Functions exposing (sendMenuMessage, displaySuccessMessage, displayErrorMessage, maybeVal, defaultString, maybeToDateString)
 import Common.Route as Route
+import Common.Html
+    exposing
+        ( getValidationErrors
+        , defaultConfig
+        , makeControls
+        , fullWidth
+        , InputControlType(DropInput, TextInput, AreaInput, DateInput, FileInput, DropInputWithButton, KnockInput, CheckInput, NumrInput)
+        )
 import Http
 import Json.Decode as Decode exposing (Decoder, maybe)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
+import Json.Encode as Encode
+
+
+port presetPage : Maybe Int -> Cmd msg
+
+
+port presetPageComplete : (Maybe Int -> msg) -> Sub msg
+
+
+port initRecordAddNew : EditData -> Cmd msg
+
+
+port updateRecordAddNew : (EditData -> msg) -> Sub msg
+
+
+port addNewFacility : Maybe String -> Cmd msg
+
+
+port addNewPhysician : Maybe String -> Cmd msg
 
 
 port editTask : Int -> Cmd msg
@@ -20,7 +47,15 @@ subscriptions : Sub Msg
 subscriptions =
     Sub.batch
         [ Functions.deleteConfirmed DeleteConfirmed
+        , presetPageComplete PresetPageComplete
+        , updateRecordAddNew UpdateRecordAddNew
         ]
+
+
+type State
+    = Edit
+    | Limbo
+    | Grid
 
 
 init : Common.RecordType -> Int -> Cmd Msg
@@ -30,20 +65,150 @@ init recordType patientId =
 
 
 type alias Model =
-    { recordType : Common.RecordType
-    , rows : List RecordRow
+    { rows : List RecordRow
     , tableState : Table.State
     , dropDownState : Int
+    , state : State
+    , recordType : RecordType
+
+    -- Hospitilizations
+    , isExistingHospitilization : Bool
+    , patientReported : Bool
+    , dischargeDiagnosis : String
+
+    -- Edit
+    , editData : Maybe EditData
+    , recordId : Maybe Int
+    , addEditDataSource : Maybe AddEditDataSource
+    , title : String
+    , specialty : String
+    , provider : String
+    , comments : String
+    , showValidationErrors : Bool
+    , recording : String
+    , callSid : String
+    , duration : Int
     }
 
 
-view : Model -> Maybe Common.AddEditDataSource -> Html Msg
+type alias RecordRow =
+    { id : Int
+    , date : Maybe String
+    , specialty : Maybe String
+    , comments : Maybe String
+    , transferedTo : Maybe String
+    , patientId : Int
+    , title : Maybe String
+    , dateAccessed : Maybe String
+    , provider : Maybe String
+    , recordType : Maybe String
+    , dateOfAdmission : Maybe String
+    , dateOfDischarge : Maybe String
+    , dischargePhysician : Maybe String
+    , dischargeDiagnosis : Maybe String
+    , hospitalizationServiceType : Maybe String
+    , hospitalizationId : Maybe Int
+    , reportDate : Maybe String
+    , fileName : Maybe String
+    , recommendations : Maybe String
+    , taskId : Maybe Int
+    , taskTitle : Maybe String
+    , recording : Maybe String
+    , recordingDate : String
+    , recordingDuration : Int
+    , enrollment : Bool
+    , staffId : Int
+    , staffName : Maybe String
+    , hasVerbalConsent : Bool
+    , dropdownOpen : Bool
+    }
+
+
+type alias EditData =
+    { facilityId : Maybe Int
+    , facilities : List DropdownItem
+    , recordTypes : List DropdownItem
+    , users : List DropdownItem
+    , tasks : List DropdownItem
+    , hospitilizationServiceTypes : List DropdownItem
+    , hospitalizationDischargePhysicians : List DropdownItem
+    , hospitilizations : List DropdownItem
+
+    -- tt
+    , timeVisit : Maybe String
+    , timeAcc : Maybe String
+    , fileName : String
+    , facilityId : Maybe Int
+    , facilityText : String
+    , reportDate : Maybe String
+    , recordingDate : Maybe String
+    , userId : Maybe Int
+    , userText : String
+    , taskId : Maybe Int
+    , taskText : String
+    , hospitalizationId : Maybe Int
+    , hospitalizationText : String
+    , facilityId2 : Maybe Int
+    , facilityText2 : String
+    , dateOfAdmission : Maybe String
+    , dateOfDischarge : Maybe String
+    , dateOfAdmission2 : Maybe String
+    , dateOfDischarge2 : Maybe String
+    , hospitalServiceTypeId : Maybe Int
+    , hospitalServiceTypeText : String
+    , admitDiagnosisId : Maybe Int
+    , dischargeDiagnosisId : Maybe Int
+    , dischargePhysicianId : Maybe Int
+    , dischargePhysicianText : String
+    }
+
+
+view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
-    div []
-        [ h4 [] [ text (Functions.getDesc model.recordType) ]
-        , div [ class "e-grid e-js e-waitingpopup" ]
-            [ Table.view (config addEditDataSource model.recordType model.tableState) model.tableState model.rows ]
-        ]
+    case model.state of
+        Grid ->
+            div []
+                [ h4 [] [ text (Functions.getDesc model.recordType) ]
+                , div [ class "e-grid e-js e-waitingpopup" ]
+                    [ Table.view (config addEditDataSource model.recordType model.tableState) model.tableState model.rows ]
+                ]
+
+        Edit ->
+            case model.editData of
+                Just editData ->
+                    let
+                        errors =
+                            getValidationErrors (formInputs model editData)
+
+                        validationErrorsDiv =
+                            if model.showValidationErrors == True && List.length errors > 0 then
+                                div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
+                            else
+                                div [] []
+
+                        saveClass =
+                            class "btn btn-sm btn-success"
+
+                        cancelClass =
+                            class "btn btn-sm btn-default margin-left-5"
+                    in
+                        div [ class "form-horizontal" ]
+                            [ h4 [] [ text (Functions.getDesc model.recordType) ]
+                            , validationErrorsDiv
+                            , makeControls defaultConfig (formInputs model editData)
+                            , div [ class "form-group" ]
+                                [ div [ class fullWidth ]
+                                    [ button [ type_ "button", onClick (Save editData), saveClass ] [ text "Save" ]
+                                    , button [ type_ "button", onClick Cancel, cancelClass ] [ text "Cancel" ]
+                                    ]
+                                ]
+                            ]
+
+                Nothing ->
+                    div [] []
+
+        Limbo ->
+            div [] []
 
 
 type Msg
@@ -55,50 +220,151 @@ type Msg
     | DeletePrompt Int
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
+      -- Edit Messages
+    | AddNewFacility
+    | AddNewPhysician
+    | Save EditData
+    | SaveCompleted (Result Http.Error String)
+    | Cancel
+    | PresetPageComplete (Maybe Int)
+    | UpdateRecordAddNew EditData
+    | UpdateTitle String
+    | UpdateSpecialty String
+    | UpdateProvider String
+    | UpdateComments String
+    | UpdateCallSid String
+    | UpdateRecordingSid String
+    | UpdateDuration String
+      -- Hospitilizations
+    | UpdateIsExistingHospitilization Bool
+    | UpdatePatientReported Bool
+    | UpdateDischargeDiagnosis String
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
-update msg model _ =
-    case msg of
-        Load (Ok t) ->
-            { model | rows = t } ! [ Functions.setLoadingStatus False ]
+update msg model patientId =
+    let
+        updateAddNew t =
+            t ! [ Functions.setUnsavedChanges True ]
+    in
+        case msg of
+            Load (Ok t) ->
+                { model | rows = t } ! [ Functions.setLoadingStatus False ]
 
-        Load (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            Load (Err t) ->
+                model ! [ displayErrorMessage (toString t) ]
 
-        Add ->
-            model ! [ Route.modifyUrl (Route.RecordAddNew model.recordType) ]
+            Add ->
+                { model | state = Limbo } ! [ presetPage (Just (Functions.getId model.recordType)) ]
 
-        SetTableState newState ->
-            { model | tableState = newState } ! []
+            SetTableState newState ->
+                { model | tableState = newState } ! []
 
-        SendMenuMessage recordId recordType messageType ->
-            { model | rows = flipConsent model.rows recordId recordType }
-                ! [ sendMenuMessage (getMenuMessage model.rows recordType recordId messageType) ]
+            SendMenuMessage recordId recordType messageType ->
+                { model | rows = flipConsent model.rows recordId recordType }
+                    ! [ sendMenuMessage (getMenuMessage model.rows recordType recordId messageType) ]
 
-        DeletePrompt rowId ->
-            model ! [ Functions.deletePrompt rowId ]
+            DeletePrompt rowId ->
+                model ! [ Functions.deletePrompt rowId ]
 
-        DeleteConfirmed rowId ->
-            let
-                updatedRecords =
-                    model.rows |> List.filter (\t -> t.id /= rowId)
-            in
-                { model | rows = updatedRecords } ! [ deleteRequest rowId DeleteCompleted ]
+            DeleteConfirmed rowId ->
+                let
+                    updatedRecords =
+                        model.rows |> List.filter (\t -> t.id /= rowId)
+                in
+                    { model | rows = updatedRecords } ! [ deleteRequest rowId DeleteCompleted ]
 
-        DeleteCompleted (Ok responseMsg) ->
-            case Functions.getResponseError responseMsg of
-                Just t ->
-                    model ! [ displayErrorMessage t ]
+            DeleteCompleted (Ok responseMsg) ->
+                case Functions.getResponseError responseMsg of
+                    Just t ->
+                        model ! [ displayErrorMessage t ]
 
-                Nothing ->
-                    model ! [ displaySuccessMessage "Record deleted successfully!" ]
+                    Nothing ->
+                        model ! [ displaySuccessMessage "Record deleted successfully!" ]
 
-        DeleteCompleted (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            DeleteCompleted (Err t) ->
+                model ! [ displayErrorMessage (toString t) ]
 
-        EditTask taskId ->
-            model ! [ editTask taskId ]
+            EditTask taskId ->
+                model ! [ editTask taskId ]
+
+            -- Edit
+            AddNewFacility ->
+                model ! [ addNewFacility Nothing ]
+
+            AddNewPhysician ->
+                model ! [ addNewPhysician Nothing ]
+
+            Save editData ->
+                if List.length (getValidationErrors (formInputs model editData)) > 0 then
+                    { model | showValidationErrors = True } ! []
+                else
+                    model
+                        ! [ "/People/AddNewRecord"
+                                |> Functions.postRequest (encodeRecord model editData patientId)
+                                |> Http.send SaveCompleted
+                          , Functions.setUnsavedChanges False
+                          ]
+
+            SaveCompleted (Ok responseMsg) ->
+                case Functions.getResponseError responseMsg of
+                    Just t ->
+                        model ! [ displayErrorMessage t, Route.back ]
+
+                    Nothing ->
+                        model ! [ displaySuccessMessage "Save completed successfully!", Route.back ]
+
+            SaveCompleted (Err t) ->
+                (model ! [ displayErrorMessage (toString t) ])
+
+            Cancel ->
+                { model | state = Grid } ! [ Functions.setUnsavedChanges False ]
+
+            PresetPageComplete _ ->
+                case model.addEditDataSource of
+                    Just t ->
+                        { model | state = Edit } ! [ initRecordAddNew (getEditData t model.recordType) ]
+
+                    Nothing ->
+                        model ! [ displayErrorMessage "invalid add edit datasource" ]
+
+            UpdateRecordAddNew editData ->
+                { model | editData = Just editData } ! []
+
+            UpdateTitle str ->
+                updateAddNew { model | title = str }
+
+            UpdateSpecialty str ->
+                updateAddNew { model | specialty = str }
+
+            UpdateProvider str ->
+                updateAddNew { model | provider = str }
+
+            UpdateComments str ->
+                updateAddNew { model | comments = str }
+
+            UpdateCallSid str ->
+                updateAddNew { model | callSid = str }
+
+            UpdateRecordingSid str ->
+                updateAddNew { model | recording = str }
+
+            UpdateDuration str ->
+                updateAddNew { model | duration = Functions.defaultIntStr str }
+
+            -- Hospitilizations
+            UpdateIsExistingHospitilization bool ->
+                if model.isExistingHospitilization == bool then
+                    model ! []
+                else
+                    { model | isExistingHospitilization = bool, state = Limbo }
+                        ! [ presetPage (Just (Functions.getId model.recordType)), Functions.setLoadingStatus True ]
+
+            UpdatePatientReported bool ->
+                updateAddNew { model | patientReported = bool }
+
+            UpdateDischargeDiagnosis str ->
+                updateAddNew { model | dischargeDiagnosis = str }
 
 
 getColumns : Common.RecordType -> Table.State -> List (Table.Column RecordRow Msg)
@@ -293,39 +559,6 @@ deleteRequest rowId deleteCompleted =
     Http.send deleteCompleted <| Http.getString ("/People/DeleteRecord?recordId=" ++ toString rowId)
 
 
-type alias RecordRow =
-    { id : Int
-    , date : Maybe String
-    , specialty : Maybe String
-    , comments : Maybe String
-    , transferedTo : Maybe String
-    , patientId : Int
-    , title : Maybe String
-    , dateAccessed : Maybe String
-    , provider : Maybe String
-    , recordType : Maybe String
-    , dateOfAdmission : Maybe String
-    , dateOfDischarge : Maybe String
-    , dischargePhysician : Maybe String
-    , dischargeDiagnosis : Maybe String
-    , hospitalizationServiceType : Maybe String
-    , hospitalizationId : Maybe Int
-    , reportDate : Maybe String
-    , fileName : Maybe String
-    , recommendations : Maybe String
-    , taskId : Maybe Int
-    , taskTitle : Maybe String
-    , recording : Maybe String
-    , recordingDate : String
-    , recordingDuration : Int
-    , enrollment : Bool
-    , staffId : Int
-    , staffName : Maybe String
-    , hasVerbalConsent : Bool
-    , dropdownOpen : Bool
-    }
-
-
 getMenuMessage : List RecordRow -> Common.RecordType -> Int -> String -> Common.MenuMessage
 getMenuMessage rows recordType recordId messageType =
     let
@@ -358,10 +591,222 @@ flipConsent rows recordId recordType =
             rows
 
 
-emptyModel : Common.RecordType -> Model
-emptyModel recordType =
-    { recordType = recordType
+formInputs : Model -> EditData -> List (InputControlType Msg)
+formInputs model editData =
+    let
+        firstColumns =
+            [ DropInput "Facility" Required editData.facilityId "FacilityId"
+            ]
+
+        lastControls =
+            [ AreaInput "Comments" Required model.comments UpdateComments
+            , FileInput "Upload Record File" Required editData.fileName
+            ]
+
+        defaultFields =
+            firstColumns
+                ++ [ DateInput "Date of Visit" Required (defaultString editData.timeVisit) "TimeVisitId"
+                   , TextInput "Doctor of Visit" Optional model.provider UpdateProvider
+                   , TextInput "Specialty of Visit" Optional model.specialty UpdateSpecialty
+                   ]
+                ++ lastControls
+
+        columns =
+            case model.recordType of
+                Common.PrimaryCare ->
+                    defaultFields
+
+                Common.Specialty ->
+                    defaultFields
+
+                Common.Labs ->
+                    firstColumns
+                        ++ [ DateInput "Date/Time of Labs Collected" Required (defaultString editData.timeVisit) "TimeVisitId"
+                           , DateInput "Date/Time of Labs Accessioned" Required (defaultString editData.timeAcc) "TimeAccId"
+                           , TextInput "Name of Lab" Optional model.title UpdateTitle
+                           , TextInput "Provider of Lab" Optional model.provider UpdateProvider
+                           ]
+                        ++ lastControls
+
+                Common.Radiology ->
+                    firstColumns
+                        ++ [ DateInput "Date/Time of Study was done" Required (defaultString editData.timeVisit) "TimeVisitId"
+                           , DateInput "Date/Time of Study Accessioned" Required (defaultString editData.timeAcc) "TimeAccId"
+                           , TextInput "Name of Study" Optional model.title UpdateTitle
+                           , TextInput "Provider of Study" Optional model.provider UpdateProvider
+                           ]
+                        ++ lastControls
+
+                Common.Misc ->
+                    defaultFields
+
+                Common.Legal ->
+                    firstColumns
+                        ++ TextInput "Title" Optional model.title UpdateTitle
+                        :: lastControls
+
+                Common.Hospitalizations ->
+                    case model.isExistingHospitilization of
+                        True ->
+                            [ CheckInput "Existing Hospitilization" Common.Optional model.isExistingHospitilization UpdateIsExistingHospitilization
+                            , DropInput "Select Hospitalization" Common.Required editData.hospitalizationId "HospitalizationsId"
+                            ]
+                                ++ lastControls
+
+                        False ->
+                            [ CheckInput "Patient Reported" Common.Optional model.patientReported UpdatePatientReported
+                            , DropInputWithButton
+                                "Facility"
+                                Common.Optional
+                                editData.facilityId
+                                "FacilityId"
+                                "Add New Facility"
+                            , DateInput "Date of Admission" Required (defaultString editData.dateOfAdmission) "DateOfAdmissionId"
+                            , DateInput "Date of Discharge" Required (defaultString editData.dateOfDischarge) "DateOfDischargeId"
+                            , DropInput "Hospital Service Type" Required editData.hospitalServiceTypeId "HospitalServiceTypeId"
+                            , AreaInput "Chief Complaint" Required model.comments UpdateComments
+                            , KnockInput "Admit Diagnosis" Required "HospitalizationAdmitProblemSelection"
+                            , KnockInput "Discharge Diagnosis" Required "HospitalizationDischargeProblemSelection"
+                            , TextInput "Discharge Recommendations" Required model.dischargeDiagnosis UpdateDischargeDiagnosis
+                            , DropInputWithButton "Discharge Physician"
+                                Optional
+                                editData.dischargePhysicianId
+                                "DischargePhysicianId"
+                                "New Provider"
+                            , DropInputWithButton
+                                "Secondary Facility Name"
+                                Optional
+                                editData.facilityId2
+                                "FacilityId2"
+                                "Add New Facility"
+                            , DateInput "Secondary Date of Admission" Optional (defaultString editData.dateOfAdmission) "DateOfAdmissionId2"
+                            , DateInput "Secondary Date of Discharge" Optional (defaultString editData.dateOfDischarge) "DateOfDischargeId2"
+                            , FileInput "Upload Record File" Required editData.fileName
+                            ]
+                                ++ lastControls
+
+                Common.CallRecordings ->
+                    firstColumns
+                        ++ [ TextInput "Call Sid" Required model.callSid UpdateCallSid
+                           , TextInput "Recording Sid" Required model.recording UpdateRecordingSid
+                           , NumrInput "Duration" Required model.duration UpdateDuration
+                           , DateInput "Recording Date" Required (defaultString editData.recordingDate) "RecordingDateId"
+                           , DropInput "User" Required editData.userId "UserId"
+                           , DropInput "Task" Optional editData.taskId "TaskId"
+                           ]
+
+                Common.PreviousHistories ->
+                    firstColumns
+                        ++ [ DateInput "Report Date" Required (defaultString editData.reportDate) "ReportDateId"
+                           , FileInput "Upload Record File" Required editData.fileName
+                           ]
+
+                Common.Enrollment ->
+                    firstColumns
+                        ++ TextInput "Title" Optional model.title UpdateTitle
+                        :: lastControls
+    in
+        columns
+
+
+encodeRecord : Model -> EditData -> Int -> Encode.Value
+encodeRecord newRecord editData patientId =
+    Encode.object
+        [ ( "RecordId", maybeVal Encode.int <| newRecord.recordId )
+        , ( "PatientId", Encode.int <| patientId )
+        , ( "Title", Encode.string <| newRecord.title )
+        , ( "RecordTypeId", Encode.int <| Functions.getId newRecord.recordType )
+        , ( "Specialty", Encode.string <| newRecord.specialty )
+        , ( "Provider", Encode.string <| newRecord.provider )
+        , ( "TimeVisit", maybeVal Encode.string <| maybeToDateString <| editData.timeVisit )
+        , ( "TimeAcc", maybeVal Encode.string <| maybeToDateString <| editData.timeAcc )
+        , ( "RecordFile", Encode.string <| editData.fileName )
+        , ( "Comments", Encode.string <| newRecord.comments )
+        , ( "FacilityId", maybeVal Encode.int <| editData.facilityId )
+        , ( "ReportDate", maybeVal Encode.string <| maybeToDateString <| editData.reportDate )
+        , ( "CallSid", Encode.string <| newRecord.callSid )
+        , ( "RecordingSid", Encode.string <| newRecord.recording )
+        , ( "RecordingDuration", Encode.int <| newRecord.duration )
+        , ( "RecordingDate", maybeVal Encode.string <| maybeToDateString <| editData.recordingDate )
+        , ( "StaffId", maybeVal Encode.int <| editData.userId )
+        , ( "TaskId", maybeVal Encode.int <| editData.taskId )
+
+        -- Hospitilizations
+        , ( "PatientReported", Encode.bool <| newRecord.patientReported )
+        , ( "HospitalizationId", maybeVal Encode.int <| editData.hospitalizationId )
+        , ( "FacilityId2", maybeVal Encode.int <| editData.facilityId2 )
+        , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| editData.dateOfAdmission )
+        , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| editData.dateOfDischarge )
+        , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| editData.dateOfAdmission2 )
+        , ( "DateOfDischarge2", maybeVal Encode.string <| maybeToDateString <| editData.dateOfDischarge2 )
+        , ( "HospitalServiceTypeId", maybeVal Encode.int <| editData.hospitalServiceTypeId )
+        , ( "DischargeRecommendations", Encode.string <| newRecord.dischargeDiagnosis )
+        , ( "DischargePhysicianId", maybeVal Encode.int <| editData.dischargePhysicianId )
+        , ( "AdmitDiagnosisId", maybeVal Encode.int <| editData.admitDiagnosisId )
+        , ( "DischargeDiagnosisId", maybeVal Encode.int <| editData.dischargeDiagnosisId )
+        ]
+
+
+emptyModel : RecordType -> Maybe AddEditDataSource -> Model
+emptyModel recordType addEditDataSource =
+    { state = Grid
+    , addEditDataSource = addEditDataSource
+    , recordType = recordType
+    , title = ""
+    , specialty = ""
+    , provider = ""
+    , comments = ""
+    , showValidationErrors = False
+    , recording = ""
+    , callSid = ""
+    , duration = 0
+
+    -- Hospitilizations
+    , recordId = Nothing
+    , editData = Nothing
+    , isExistingHospitilization = False
+    , patientReported = False
+    , dischargeDiagnosis = ""
     , rows = []
     , tableState = Table.initialSort "Date"
     , dropDownState = -1
+    }
+
+
+getEditData : AddEditDataSource -> RecordType -> EditData
+getEditData addEditDataSource recordType =
+    { facilityId = addEditDataSource.facilityId
+    , facilities = addEditDataSource.facilities
+    , recordTypes = addEditDataSource.recordTypes
+    , users = addEditDataSource.users
+    , tasks = addEditDataSource.tasks
+    , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
+    , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
+    , hospitilizations = addEditDataSource.hospitilizations
+
+    -- no data from server, just filler data
+    , timeVisit = Nothing
+    , timeAcc = Nothing
+    , fileName = ""
+    , facilityText = ""
+    , reportDate = Nothing
+    , recordingDate = Nothing
+    , userId = Nothing
+    , userText = ""
+    , taskId = Nothing
+    , taskText = ""
+    , hospitalizationId = Nothing
+    , hospitalizationText = ""
+    , facilityId2 = Nothing
+    , facilityText2 = ""
+    , dateOfAdmission = Nothing
+    , dateOfDischarge = Nothing
+    , dateOfAdmission2 = Nothing
+    , dateOfDischarge2 = Nothing
+    , hospitalServiceTypeId = Nothing
+    , hospitalServiceTypeText = ""
+    , admitDiagnosisId = Nothing
+    , dischargeDiagnosisId = Nothing
+    , dischargePhysicianId = Nothing
+    , dischargePhysicianText = ""
     }

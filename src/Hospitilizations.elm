@@ -233,15 +233,12 @@ update msg model patientId =
                 if List.length (getValidationErrors (formInputs editData)) > 0 then
                     { model | showValidationErrors = True } ! []
                 else
-                    let
-                        body =
-                            encodeEditData editData patientId
-                    in
-                        model
-                            ! [ Functions.postRequest body "/People/AddEditHospitilization"
-                                    |> Http.send SaveCompleted
-                              , setUnsavedChanges False
-                              ]
+                    model
+                        ! [ "/People/AddEditHospitilization"
+                                |> Functions.postRequest (encodeEditData editData patientId)
+                                |> Http.send SaveCompleted
+                          , setUnsavedChanges False
+                          ]
 
             SaveCompleted (Ok responseMsg) ->
                 case Functions.getResponseError responseMsg of

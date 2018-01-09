@@ -3,7 +3,6 @@ module Main exposing (main)
 import Html exposing (Html, text, div)
 import ClinicalSummary
 import Records
-import RecordAddNew
 import PastMedicalHistory
 import Hospitilizations
 import Allergies
@@ -32,7 +31,6 @@ type Page
     | Billing
     | ClinicalSummary ClinicalSummary.Model
     | Records Records.Model
-    | RecordAddNew RecordAddNew.Model
     | PastMedicalHistory PastMedicalHistory.Model
     | Hospitilizations Hospitilizations.Model
     | Allergies Allergies.Model
@@ -83,9 +81,6 @@ view model =
         Records subModel ->
             Html.map RecordsMsg (Records.view subModel model.addEditDataSource)
 
-        RecordAddNew subModel ->
-            Html.map RecordAddNewMsg (RecordAddNew.view subModel)
-
         PastMedicalHistory subModel ->
             Html.map PastMedicalHistoryMsg (PastMedicalHistory.view subModel model.addEditDataSource)
 
@@ -120,9 +115,6 @@ pageSubscriptions page =
         Records _ ->
             Sub.map RecordsMsg Records.subscriptions
 
-        RecordAddNew _ ->
-            Sub.map RecordAddNewMsg RecordAddNew.subscriptions
-
         PastMedicalHistory _ ->
             Sub.map PastMedicalHistoryMsg PastMedicalHistory.subscriptions
 
@@ -151,7 +143,6 @@ type Msg
     | BillingMsg Billing.Types.Msg
     | ClinicalSummaryMsg ClinicalSummary.Msg
     | RecordsMsg Records.Msg
-    | RecordAddNewMsg RecordAddNew.Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | PastMedicalHistoryMsg PastMedicalHistory.Msg
     | HospitilizationsMsg Hospitilizations.Msg
@@ -188,19 +179,8 @@ setRoute maybeRoute model =
                     ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
 
             Just (Route.Records t) ->
-                { model | page = Records (Records.emptyModel t) }
+                { model | page = Records (Records.emptyModel t model.addEditDataSource) }
                     ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
-
-            Just (Route.RecordAddNew t) ->
-                case model.addEditDataSource of
-                    Just addEditDataSource ->
-                        { model | page = RecordAddNew (RecordAddNew.emptyModel t addEditDataSource) }
-                            ! cmds [ Cmd.map RecordAddNewMsg (RecordAddNew.init addEditDataSource t) ]
-
-                    Nothing ->
-                        -- aka, if user refreshes on the add\edit screen, can't do much since there is no data source for dropdowns
-                        { model | page = Records (Records.emptyModel t) }
-                            ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
 
             Just Route.Allergies ->
                 { model | page = Allergies Allergies.emptyModel }
@@ -259,9 +239,6 @@ updatePage page msg model =
 
             ( RecordsMsg subMsg, Records subModel ) ->
                 toPage Records RecordsMsg Records.update subMsg subModel
-
-            ( RecordAddNewMsg subMsg, RecordAddNew subModel ) ->
-                toPage RecordAddNew RecordAddNewMsg RecordAddNew.update subMsg subModel
 
             ( AllergiesMsg subMsg, Allergies subModel ) ->
                 toPage Allergies AllergiesMsg Allergies.update subMsg subModel
