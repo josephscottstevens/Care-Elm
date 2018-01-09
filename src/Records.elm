@@ -117,6 +117,7 @@ type alias EditData =
     { facilityId : Maybe Int
     , facilities : List DropdownItem
     , recordTypes : List DropdownItem
+    , recordTypeId : Int
     , users : List DropdownItem
     , tasks : List DropdownItem
     , hospitilizationServiceTypes : List DropdownItem
@@ -240,8 +241,8 @@ update msg model patientId =
                 model ! [ displayErrorMessage (toString t) ]
 
             Add addEditDataSource ->
-                { model | state = Edit, editData = Just (getEditData addEditDataSource) }
-                    ! [ initRecordAddNew (getEditData addEditDataSource) ]
+                { model | state = Edit, editData = Just (getEditData addEditDataSource model.recordType) }
+                    ! [ initRecordAddNew (getEditData addEditDataSource model.recordType) ]
 
             SetTableState newState ->
                 { model | tableState = newState } ! []
@@ -565,21 +566,17 @@ flipConsent rows recordId recordType =
 formInputs : Model -> EditData -> List (InputControlType Msg)
 formInputs model editData =
     let
-        firstColumns =
-            [ DropInput "Facility" Required editData.facilityId "FacilityId"
-            ]
-
         lastControls =
             [ AreaInput "Comments" Required model.comments UpdateComments
             , FileInput "Upload Record File" Required editData.fileName
             ]
 
         defaultFields =
-            firstColumns
-                ++ [ DateInput "Date of Visit" Required (defaultString editData.timeVisit) "TimeVisitId"
-                   , TextInput "Doctor of Visit" Optional model.provider UpdateProvider
-                   , TextInput "Specialty of Visit" Optional model.specialty UpdateSpecialty
-                   ]
+            [ DropInput "Facility" Required editData.facilityId "FacilityId"
+            , DateInput "Date of Visit" Required (defaultString editData.timeVisit) "TimeVisitId"
+            , TextInput "Doctor of Visit" Optional model.provider UpdateProvider
+            , TextInput "Specialty of Visit" Optional model.specialty UpdateSpecialty
+            ]
                 ++ lastControls
 
         columns =
@@ -591,30 +588,31 @@ formInputs model editData =
                     defaultFields
 
                 Common.Labs ->
-                    firstColumns
-                        ++ [ DateInput "Date/Time of Labs Collected" Required (defaultString editData.timeVisit) "TimeVisitId"
-                           , DateInput "Date/Time of Labs Accessioned" Required (defaultString editData.timeAcc) "TimeAccId"
-                           , TextInput "Name of Lab" Optional model.title UpdateTitle
-                           , TextInput "Provider of Lab" Optional model.provider UpdateProvider
-                           ]
+                    [ DropInput "Facility" Required editData.facilityId "FacilityId"
+                    , DateInput "Date/Time of Labs Collected" Required (defaultString editData.timeVisit) "TimeVisitId"
+                    , DateInput "Date/Time of Labs Accessioned" Required (defaultString editData.timeAcc) "TimeAccId"
+                    , TextInput "Name of Lab" Optional model.title UpdateTitle
+                    , TextInput "Provider of Lab" Optional model.provider UpdateProvider
+                    ]
                         ++ lastControls
 
                 Common.Radiology ->
-                    firstColumns
-                        ++ [ DateInput "Date/Time of Study was done" Required (defaultString editData.timeVisit) "TimeVisitId"
-                           , DateInput "Date/Time of Study Accessioned" Required (defaultString editData.timeAcc) "TimeAccId"
-                           , TextInput "Name of Study" Optional model.title UpdateTitle
-                           , TextInput "Provider of Study" Optional model.provider UpdateProvider
-                           ]
+                    [ DropInput "Facility" Required editData.facilityId "FacilityId"
+                    , DateInput "Date/Time of Study was done" Required (defaultString editData.timeVisit) "TimeVisitId"
+                    , DateInput "Date/Time of Study Accessioned" Required (defaultString editData.timeAcc) "TimeAccId"
+                    , TextInput "Name of Study" Optional model.title UpdateTitle
+                    , TextInput "Provider of Study" Optional model.provider UpdateProvider
+                    ]
                         ++ lastControls
 
                 Common.Misc ->
                     defaultFields
 
                 Common.Legal ->
-                    firstColumns
-                        ++ TextInput "Title" Optional model.title UpdateTitle
-                        :: lastControls
+                    [ DropInput "Facility" Required editData.facilityId "FacilityId"
+                    , TextInput "Title" Optional model.title UpdateTitle
+                    ]
+                        ++ lastControls
 
                 Common.Hospitalizations ->
                     case model.isExistingHospitilization of
@@ -657,25 +655,26 @@ formInputs model editData =
                                 ++ lastControls
 
                 Common.CallRecordings ->
-                    firstColumns
-                        ++ [ TextInput "Call Sid" Required model.callSid UpdateCallSid
-                           , TextInput "Recording Sid" Required model.recording UpdateRecordingSid
-                           , NumrInput "Duration" Required model.duration UpdateDuration
-                           , DateInput "Recording Date" Required (defaultString editData.recordingDate) "RecordingDateId"
-                           , DropInput "User" Required editData.userId "UserId"
-                           , DropInput "Task" Optional editData.taskId "TaskId"
-                           ]
+                    [ DropInput "Facility" Required editData.facilityId "FacilityId"
+                    , TextInput "Call Sid" Required model.callSid UpdateCallSid
+                    , TextInput "Recording Sid" Required model.recording UpdateRecordingSid
+                    , NumrInput "Duration" Required model.duration UpdateDuration
+                    , DateInput "Recording Date" Required (defaultString editData.recordingDate) "RecordingDateId"
+                    , DropInput "User" Required editData.userId "UserId"
+                    , DropInput "Task" Optional editData.taskId "TaskId"
+                    ]
 
                 Common.PreviousHistories ->
-                    firstColumns
-                        ++ [ DateInput "Report Date" Required (defaultString editData.reportDate) "ReportDateId"
-                           , FileInput "Upload Record File" Required editData.fileName
-                           ]
+                    [ DropInput "Facility" Required editData.facilityId "FacilityId"
+                    , DateInput "Report Date" Required (defaultString editData.reportDate) "ReportDateId"
+                    , FileInput "Upload Record File" Required editData.fileName
+                    ]
 
                 Common.Enrollment ->
-                    firstColumns
-                        ++ TextInput "Title" Optional model.title UpdateTitle
-                        :: lastControls
+                    [ DropInput "Facility" Required editData.facilityId "FacilityId"
+                    , TextInput "Title" Optional model.title UpdateTitle
+                    ]
+                        ++ lastControls
     in
         columns
 
@@ -744,11 +743,12 @@ emptyModel recordType addEditDataSource =
     }
 
 
-getEditData : AddEditDataSource -> EditData
-getEditData addEditDataSource =
+getEditData : AddEditDataSource -> RecordType -> EditData
+getEditData addEditDataSource recordType =
     { facilityId = addEditDataSource.facilityId
     , facilities = addEditDataSource.facilities
     , recordTypes = addEditDataSource.recordTypes
+    , recordTypeId = Functions.getId recordType
     , users = addEditDataSource.users
     , tasks = addEditDataSource.tasks
     , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
