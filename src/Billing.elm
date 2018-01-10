@@ -127,7 +127,7 @@ update msg model patientId =
         SetPagingState page ->
             let
                 newPageIndex =
-                    getNewState page model.currentPage (filteredCcmLength model)
+                    getNewState page model.currentPage model.count
             in
                 { model | currentPage = newPageIndex } ! []
 
@@ -151,11 +151,6 @@ filteredCcm model =
             |> List.filter (String.contains lowerQuery << String.toLower << .facility)
 
 
-filteredCcmLength : Model -> Int
-filteredCcmLength model =
-    List.length (filteredCcm model)
-
-
 
 -- Paging stuff
 
@@ -171,10 +166,10 @@ pagesPerBlock =
 
 
 getNewState : Page -> Int -> Int -> Int
-getNewState page currentPage totalVisiblePages =
+getNewState page currentPage totalRows =
     let
         totalPages =
-            totalVisiblePages // itemsPerPage
+            totalRows // itemsPerPage
     in
         case page of
             First ->
