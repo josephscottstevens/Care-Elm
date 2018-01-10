@@ -1,20 +1,26 @@
-module Billing exposing (..)
+module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
 import Html exposing (Html, text, div, input, program, button, select, option, span, a)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)
-import Common.Table as Table exposing (..)
-import Common.Grid exposing (..)
-import Common.Functions exposing (..)
+import Common.Table as Table exposing (defaultCustomizations)
+import Common.Grid as Grid
+import Common.Functions as Functions exposing (maybeVal, defaultString)
 import Common.Types exposing (AddEditDataSource)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
+import Json.Encode as Encode
 
 
 init : Int -> Cmd Msg
 init patientId =
     load patientId
+
+
+subscriptions : Sub msg
+subscriptions =
+    Sub.none
 
 
 type Page
@@ -42,7 +48,7 @@ type SortMode
 
 
 type alias Row =
-    { iD : Int
+    { id : Int
     , facility : String
     , facilityId : Int
     , practiceLocation : Maybe String
@@ -69,7 +75,6 @@ type alias Row =
     , batchCloseOnInvoiceCompletion : Bool
     , reviewedByStaffName : Maybe String
     , canModifyReviewedStatus : Bool
-    , cPT : String
     , isReviewed : Bool
     , dxPresent : Bool
     , carePlanPresent : Bool
@@ -79,24 +84,30 @@ type alias Row =
     , recordingPresent : Bool
     , chartComplete : Bool
     , status : String
-    , is24HoursSinceBilledString : String
+    , is24HoursSinceBilled : Bool
     }
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
-    div []
-        [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
-        , input [ class "form-control", placeholder "Search by Facility" ] []
-        , div [ class "e-grid e-js e-waitingpopup" ]
-            [ Table.view config model.tableState ((filteredCcm model) |> List.drop (model.currentPage * pagesPerBlock) |> List.take itemsPerPage)
+    let
+        rows =
+            filteredCcm model
+                |> List.drop (model.currentPage * pagesPerBlock)
+                |> List.take itemsPerPage
+    in
+        div []
+            [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
+            , input [ class "form-control", placeholder "Search by Facility" ] []
+            , div [ class "e-grid e-js e-waitingpopup" ]
+                [ Table.view (config addEditDataSource model.tableState) model.tableState rows
+                ]
+            , pagingView model.currentPage (filteredCcmLength model)
             ]
-        , pagingView model.currentPage (filteredCcmLength model)
-        ]
 
 
 type Msg
-    = Load (Result Http.Error (List Row))
+    = Load (Result Http.Error LoadResult)
     | SetPagingState Page
     | SetQuery String
     | SetTableState Table.State
@@ -107,10 +118,10 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
         Load (Ok rows) ->
-            { model | rows = rows |> List.indexedMap (\idx t -> { t | iD = idx }) } ! []
+            { model | rows = rows.result |> List.indexedMap (\idx t -> { t | id = idx }) } ! []
 
         Load (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            model ! [ Functions.displayErrorMessage (toString t) ]
 
         SetPagingState page ->
             let
@@ -142,26 +153,6 @@ filteredCcm model =
 filteredCcmLength : Model -> Int
 filteredCcmLength model =
     List.length (filteredCcm model)
-
-
-config =
-    Table.customConfig
-        { toId = .patientName
-        , toMsg = SetTableState
-        , columns =
-            [ --checkColumn "" ,
-              Table.stringColumn "Facility" .facility
-            , Table.stringColumn "Billing Date" .billingDate
-            , Table.stringColumn "Main Provider" .mainProvider
-            , Table.stringColumn "Patient Name" .patientName
-            , Table.stringColumn "DOB" .dob
-            , Table.stringColumn "Id No" (\t -> defaultString t.patientFacilityIdNo)
-            , Table.stringColumn "AssignedTo" (\t -> defaultString t.assignedTo)
-            ]
-        , customizations = defaultCustomizations
-
-        -- { defaultCustomizations | tableAttrs = [ id "employersTable", class "e-table e-hidelines" ], thead = standardThead }
-        }
 
 
 
@@ -329,7 +320,6 @@ decodeBillingCcm =
         |> Pipeline.required "BatchCloseOnInvoiceCompletion" (Decode.bool)
         |> Pipeline.required "ReviewedByStaffName" (Decode.maybe Decode.string)
         |> Pipeline.required "CanModifyReviewedStatus" (Decode.bool)
-        |> Pipeline.required "CPT" (Decode.string)
         |> Pipeline.required "IsReviewed" (Decode.bool)
         |> Pipeline.required "DxPresent" (Decode.bool)
         |> Pipeline.required "CarePlanPresent" (Decode.bool)
@@ -339,26 +329,54 @@ decodeBillingCcm =
         |> Pipeline.required "RecordingPresent" Decode.bool
         |> Pipeline.required "ChartComplete" (Decode.bool)
         |> Pipeline.required "Status" (Decode.string)
-        |> Pipeline.required "Is24HoursSinceBilledString" (Decode.string)
+        |> Pipeline.required "Is24HoursSinceBilled" (Decode.bool)
+
+
+type alias GridOperations =
+    { skip : Int
+    , pageSize : Int
+    , sortField : Maybe String
+    , sortAscending : Maybe Bool
+    }
+
+
+testGridOperations : GridOperations
+testGridOperations =
+    { skip = 0
+    , pageSize = 10
+    , sortField = Just "DoB"
+    , sortAscending = Just False
+    }
+
+
+testBody : GridOperations -> Encode.Value
+testBody gridOperations =
+    Encode.object
+        [ ( "Skip", Encode.int gridOperations.skip )
+        , ( "PageSize", Encode.int gridOperations.pageSize )
+        , ( "SortField", maybeVal Encode.string gridOperations.sortField )
+        , ( "SortAscending", maybeVal Encode.bool gridOperations.sortAscending )
+        ]
+
+
+type alias LoadResult =
+    { result : List Row
+    , count : Int
+    }
+
+
+jsonDecodeLoad : Decode.Decoder LoadResult
+jsonDecodeLoad =
+    Pipeline.decode LoadResult
+        |> Pipeline.required "result" (Decode.list decodeBillingCcm)
+        |> Pipeline.required "count" Decode.int
 
 
 load : Int -> Cmd Msg
 load patientId =
-    Decode.list decodeBillingCcm
-        |> Http.get ("/People/BillingTest?patientId=" ++ toString patientId)
+    jsonDecodeLoad
+        |> Functions.postJsonRequest (testBody testGridOperations) ("/People/BillingTest?patientId=" ++ toString patientId)
         |> Http.send Load
-
-
-updateEmployers : List Row -> Row -> List Row
-updateEmployers enrollment newEnrollment =
-    enrollment
-        |> List.map
-            (\t ->
-                if t.iD == newEnrollment.iD then
-                    newEnrollment
-                else
-                    t
-            )
 
 
 emptyModel : Model
@@ -368,3 +386,37 @@ emptyModel =
     , query = ""
     , currentPage = 0
     }
+
+
+config : Maybe AddEditDataSource -> Table.State -> Table.Config Row Msg
+config addEditDataSource _ =
+    let
+        buttons =
+            case addEditDataSource of
+                Just _ ->
+                    []
+
+                --[ ( "e-addnew", onClick (Add t) ) ]
+                Nothing ->
+                    []
+    in
+        Table.customConfig
+            { toId = \t -> toString t.id
+            , toMsg = SetTableState
+            , columns =
+                [ --checkColumn "" ,
+                  Table.stringColumn "Facility" .facility
+                , Table.stringColumn "Billing Date" .billingDate
+                , Table.stringColumn "Main Provider" .mainProvider
+                , Table.stringColumn "Patient Name" .patientName
+                , Table.stringColumn "DOB" .dob
+                , Table.stringColumn "Id No" (\t -> defaultString t.patientFacilityIdNo)
+                , Table.stringColumn "AssignedTo" (\t -> defaultString t.assignedTo)
+                ]
+            , customizations =
+                { defaultCustomizations
+                    | tableAttrs = Grid.standardTableAttrs "RecordTable"
+                    , thead = Grid.standardTheadNoFilters
+                    , theadButtons = buttons
+                }
+            }

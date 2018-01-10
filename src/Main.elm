@@ -107,7 +107,7 @@ pageSubscriptions page =
             Sub.none
 
         Billing _ ->
-            Sub.none
+            Sub.map BillingMsg Billing.subscriptions
 
         ClinicalSummary _ ->
             Sub.map ClinicalSummaryMsg ClinicalSummary.subscriptions
