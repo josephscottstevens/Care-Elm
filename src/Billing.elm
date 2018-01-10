@@ -38,6 +38,7 @@ type alias Model =
     , tableState : Table.State
     , query : String
     , currentPage : Int
+    , count : Int
     }
 
 
@@ -102,7 +103,7 @@ view model addEditDataSource =
             , div [ class "e-grid e-js e-waitingpopup" ]
                 [ Table.view (config addEditDataSource model.tableState) model.tableState rows
                 ]
-            , pagingView model.currentPage (filteredCcmLength model)
+            , pagingView model.currentPage model.count
             ]
 
 
@@ -117,8 +118,8 @@ type Msg
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
-        Load (Ok rows) ->
-            { model | rows = rows.result |> List.indexedMap (\idx t -> { t | id = idx }) } ! []
+        Load (Ok t) ->
+            { model | rows = t.result, count = t.count } ! []
 
         Load (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
@@ -385,6 +386,7 @@ emptyModel =
     , tableState = Table.initialSort "Date"
     , query = ""
     , currentPage = 0
+    , count = 10
     }
 
 
