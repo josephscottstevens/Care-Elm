@@ -3,6 +3,9 @@ port module Demographics exposing (..)
 import Html exposing (Html, text, div, button, ul, li, a, input, label, h4)
 import Html.Attributes exposing (class, id, type_, value, style)
 import Utils.CommonTypes exposing (DropDownItem, Flags)
+import Utils.CommonFunctions exposing (decodeDropDownItem)
+import Json.Decode as Decode
+import Json.Decode.Pipeline as Pipeline
 
 
 port initDemographics : Bool -> Cmd msg
@@ -183,3 +186,31 @@ emptySfData =
     , uSVeteranDropdown = []
     , religionDropdown = []
     }
+
+
+decodeSfData : Decode.Decoder SfData
+decodeSfData =
+    Pipeline.decode SfData
+        |> Pipeline.hardcoded Nothing
+        |> Pipeline.hardcoded Nothing
+        |> Pipeline.hardcoded Nothing
+        |> Pipeline.hardcoded Nothing
+        |> Pipeline.hardcoded Nothing
+        |> Pipeline.hardcoded Nothing
+        |> Pipeline.hardcoded Nothing
+        |> Pipeline.hardcoded Nothing
+        |> Pipeline.hardcoded Nothing
+        |> Pipeline.required "PatientLanguageDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "CareCoordinatorDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "EthnicityDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "SexTypeDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "SexualOrientationDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "GenderIdentityDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "FacilityDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "MainProviderDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "RaceDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "SuffixDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "PrefixDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "USVeteranDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "ReligionDropdown" (Decode.list decodeDropDownItem)

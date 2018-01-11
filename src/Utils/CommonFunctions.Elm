@@ -4,6 +4,9 @@ import Char exposing (isLower, isUpper)
 import Date
 import Date.Extra
 import Json.Encode as Encode
+import Json.Decode as Decode
+import Json.Decode.Pipeline as Pipeline
+import Utils.CommonTypes exposing (DropDownItem)
 
 
 isAlpha : Char -> Bool
@@ -124,3 +127,10 @@ maybeToDateString maybeDateStr =
 
         Nothing ->
             Nothing
+
+
+decodeDropDownItem : Decode.Decoder DropDownItem
+decodeDropDownItem =
+    Pipeline.decode DropDownItem
+        |> Pipeline.required "Id" (Decode.maybe Decode.int)
+        |> Pipeline.required "Name" Decode.string

@@ -73,13 +73,6 @@ encodeRecord newRecord =
         ]
 
 
-decodeDropDownItem : Decoder DropDownItem
-decodeDropDownItem =
-    decode DropDownItem
-        |> required "Id" (maybe Decode.int)
-        |> required "Name" Decode.string
-
-
 decodeModel : Decoder WebResponse
 decodeModel =
     decode WebResponse
