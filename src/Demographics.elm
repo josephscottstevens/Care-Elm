@@ -280,21 +280,21 @@ decodeModel =
         |> Pipeline.required "NickName" (Decode.maybe Decode.string)
         |> Pipeline.required "VIP" (Decode.maybe Decode.bool)
         |> Pipeline.required "SSN" (Decode.maybe Decode.string)
-        |> Pipeline.required "lastName" (Decode.maybe Decode.string)
-        |> Pipeline.required "firstName" (Decode.maybe Decode.string)
-        |> Pipeline.required "middle" (Decode.maybe Decode.string)
-        |> Pipeline.required "dateOfBirth" (Decode.maybe Decode.string)
-        |> Pipeline.required "birthPlace" (Decode.maybe Decode.string)
-        |> Pipeline.required "dateOfDeath" (Decode.maybe Decode.string)
-        |> Pipeline.required "mrn" (Decode.maybe Decode.string)
-        |> Pipeline.required "patientAccountNumber" (Decode.maybe Decode.string)
-        |> Pipeline.required "facilityPtID" (Decode.maybe Decode.string)
-        |> Pipeline.required "sexualOrientationNote" (Decode.maybe Decode.string)
-        |> Pipeline.required "genderIdentityNote" (Decode.maybe Decode.string)
-        |> Pipeline.required "email" (Decode.maybe Decode.string)
-        |> Pipeline.required "patientLanguagesMap" (Decode.list decodePatientLanguagesMap)
-        |> Pipeline.required "preferredLanguageIndex" Decode.int
-        |> Pipeline.hardcoded emptySfData
+        |> Pipeline.required "LastName" (Decode.maybe Decode.string)
+        |> Pipeline.required "FirstName" (Decode.maybe Decode.string)
+        |> Pipeline.required "Middle" (Decode.maybe Decode.string)
+        |> Pipeline.required "DateOfBirth" (Decode.maybe Decode.string)
+        |> Pipeline.required "BirthPlace" (Decode.maybe Decode.string)
+        |> Pipeline.required "DateOfDeath" (Decode.maybe Decode.string)
+        |> Pipeline.required "MRN" (Decode.maybe Decode.string)
+        |> Pipeline.required "PatientAccountNumber" (Decode.maybe Decode.string)
+        |> Pipeline.required "FacilityPtID" (Decode.maybe Decode.string)
+        |> Pipeline.required "SexualOrientationNote" (Decode.maybe Decode.string)
+        |> Pipeline.required "GenderIdentityNote" (Decode.maybe Decode.string)
+        |> Pipeline.required "Email" (Decode.maybe Decode.string)
+        |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
+        |> Pipeline.required "PreferredLanguageIndex" Decode.int
+        |> Pipeline.custom decodeSfData
 
 
 decodeSfData : Decode.Decoder SfData
