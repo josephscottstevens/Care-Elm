@@ -8,15 +8,16 @@ import Utils.CommonFunctions exposing (decodeDropDownItem)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Http
+import Task
 
 
 port initDemographics : SfData -> Cmd msg
 
 
-port initLanguagesMap : PatientLanguagesMap -> Cmd msg
+port initLanguagesMap : PatiantLanguageMessage -> Cmd msg
 
 
-port updateLanguagesMap : (PatientLanguagesMap -> msg) -> Sub msg
+port updateLanguagesMap : (PatiantLanguageMessage -> msg) -> Sub msg
 
 
 port updateDemographics : (SfData -> msg) -> Sub msg
@@ -84,6 +85,12 @@ type alias PatientLanguagesMap =
     , languageId : Int
     , isPreferred : Bool
     , index : Int
+    }
+
+
+type alias PatiantLanguageMessage =
+    { patientLanguagesMap : PatientLanguagesMap
+    , patientLanguageDropdown : List DropDownItem
     }
 
 
@@ -237,8 +244,14 @@ viewLanguages lang =
 type Msg
     = Load (Result Http.Error Model)
     | UpdateDemographics SfData
+    | InitLanguages
     | AddNewLanguage
     | RemoveLanguage Int
+
+
+patiantLanguageToMessage : Model -> PatientLanguagesMap -> Cmd Msg
+patiantLanguageToMessage model patientLanguagesMap =
+    initLanguagesMap (PatiantLanguageMessage patientLanguagesMap model.sfData.languageDropdown)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -251,12 +264,17 @@ update msg model =
                         |> List.indexedMap (\t y -> { y | index = t })
             in
                 { newModel | patientLanguagesMap = newPatientLanguagesMap }
-                    ! ([ initDemographics newModel.sfData ]
-                        ++ (List.map initLanguagesMap newPatientLanguagesMap)
-                      )
+                    ! [ Cmd.batch
+                            [ initDemographics newModel.sfData
+                            , Task.perform identity (Task.succeed InitLanguages)
+                            ]
+                      ]
 
         Load (Err t) ->
             model ! [ logError (toString t) ]
+
+        InitLanguages ->
+            model ! (List.map (patiantLanguageToMessage model) model.patientLanguagesMap)
 
         UpdateDemographics sfData ->
             { model | sfData = sfData } ! []
