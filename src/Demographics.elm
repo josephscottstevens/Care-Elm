@@ -33,9 +33,6 @@ type alias Model =
     , sexualOrientationNote : Maybe String
     , genderIdentityNote : Maybe String
     , email : Maybe String
-    , careCoordinatorId : Maybe Int
-    , facilityId : Maybe Int
-    , mainProviderId : Maybe Int
     , patientLanguagesMap : List PatientLanguagesMap
     , preferredLanguageIndex : Int
     , sfData : SfData
@@ -43,7 +40,10 @@ type alias Model =
 
 
 type alias SfData =
-    { prefixId : Maybe Int
+    { facilityId : Maybe Int
+    , mainProviderId : Maybe Int
+    , careCoordinatorId : Maybe Int
+    , prefixId : Maybe Int
     , sexTypeId : Maybe Int
     , sexualOrientationId : Maybe Int
     , suffixId : Maybe Int
@@ -85,41 +85,98 @@ init flag =
         |> Http.send Load
 
 
+rowStyle : List (Html.Attribute msg)
+rowStyle =
+    [ style [ ( "margin-top", "5px" ) ]
+    , class "row"
+    ]
+
+
+labelStyle : Bool -> number -> List (Html.Attribute msg)
+labelStyle isRequired sizePercent =
+    let
+        required =
+            case isRequired of
+                True ->
+                    "required "
+
+                False ->
+                    ""
+    in
+        [ class ("padding-right-10 " ++ required ++ " col-md-1")
+        , style
+            [ ( "font-family", "Segoe UI,Helvetica Neue" )
+            , ( "width", toString sizePercent ++ "%" )
+            ]
+        ]
+
+
+labelStyleRequiredBig : List (Html.Attribute msg)
+labelStyleRequiredBig =
+    labelStyle True 11.0
+
+
+labelStyleOptionalBig : List (Html.Attribute msg)
+labelStyleOptionalBig =
+    labelStyle False 11.0
+
+
+labelStyleRequiredSmall : List (Html.Attribute msg)
+labelStyleRequiredSmall =
+    labelStyle True 11.0
+
+
+labelStyleOptional : List (Html.Attribute msg)
+labelStyleOptional =
+    labelStyle False 11.0
+
+
+divStyle : List (Html.Attribute msg)
+divStyle =
+    [ class "col-md-2 padding-left-5" ]
+
+
+maybeValue : Maybe String -> Html.Attribute msg
+maybeValue str =
+    value (Maybe.withDefault "" str)
+
+
 view : Model -> Html Msg
 view model =
     div []
         [ h4 [] [ text "Assigned To" ]
-        , div [ class "row" ]
-            [ label [ class "col-md-2" ] [ text "Facility" ]
-            , div [ class "col-md-2" ] [ input [ id "FacilityId" ] [] ]
-            , label [ class "col-md-2" ] [ text "Main Provider" ]
-            , input [ class "col-md-6", id "MainProviderId" ] []
+        , div rowStyle
+            [ label labelStyleRequiredBig [ text "Facility:" ]
+            , div divStyle [ input [ id "FacilityId" ] [] ]
+            , label labelStyleRequiredSmall [ text "Main Provider:" ]
+            , div divStyle [ input [ id "MainProviderId" ] [] ]
             ]
-        , div [ class "row" ]
-            [ label [ class "col-md-2" ] [ text "Patient's Facility ID No" ]
-            , input [ class "col-md-2", id "FacilityPtIDId" ] []
-            , label [ class "col-md-2" ] [ text "Care Coordinator" ]
-            , input [ class "col-md-6", id "CareCoordinatorId" ] []
+        , div rowStyle
+            [ label labelStyleOptionalBig [ text "Patient's Facility ID No:" ]
+            , div divStyle [ input [ id "FacilityPtIDId", class "e-textbox", maybeValue model.facilityPtID ] [] ]
+            , label labelStyleRequiredSmall [ text "Care Coordinator:" ]
+            , div divStyle [ input [ id "CareCoordinatorId" ] [] ]
             ]
-        , div [ class "row" ]
-            [ label [ class "col-md-2" ] [ text "Medical Record No" ]
-            , input [ class "col-md-10", id "MRNId" ] []
+        , div rowStyle
+            [ label labelStyleOptionalBig [ text "Medical Record No:" ]
+            , div divStyle [ input [ id "MRNId", class "e-textbox", maybeValue model.mrn ] [] ]
             ]
-        , div [ class "row" ]
-            [ label [ class "col-md-2" ] [ text "Patient Account No" ]
-            , input [ class "col-md-10", id "PatientAccountNumberId" ] []
+        , div rowStyle
+            [ label labelStyleOptionalBig [ text "Patient Account No:" ]
+            , div divStyle [ input [ id "PatientAccountNumberId", class "e-textbox", maybeValue model.patientAccountNumber ] [] ]
             ]
-        , h4 [] [ text "Demographic Information" ]
-        , div [ class "row" ]
-            [ label [ class "col-md-2" ] [ text "aaa" ]
-            , input [ class "col-md-10", id "aaaa" ] []
-            , label [ class "col-md-2" ] [ text "aaa" ]
-            , input [ class "col-md-10", id "aaaa" ] []
-            ]
-        , div [ class "row" ]
-            [ label [ class "col-md-4" ] [ text "comments" ]
-            , input [ class "col-md-8 e-textbox" ] []
-            ]
+
+        -- , h4 [] [ text "Demographic Information" ]
+        -- , div rowStyle
+        --     [ label labelStyleRequiredBig [ text "aaa" ]
+        --     , input [ class "col-md-2", id "aaaa" ] []
+        --     , label [ class "col-md-2" ] [ text "aaa" ]
+        --     , input [ class "col-md-2", id "aaaa" ] []
+        --     ]
+        -- , div rowStyle
+        --     [ label labelStyleRequiredBig [ text "comments" ]
+        --     , input [ class "col-md-2 e-textboxbox" ] []
+        --     ]
         ]
 
 
@@ -164,9 +221,6 @@ emptyModel flags =
     , sexualOrientationNote = Nothing
     , genderIdentityNote = Nothing
     , email = Nothing
-    , careCoordinatorId = Nothing
-    , facilityId = Nothing
-    , mainProviderId = Nothing
     , patientLanguagesMap = []
     , preferredLanguageIndex = 0
     , sfData = emptySfData
@@ -175,7 +229,10 @@ emptyModel flags =
 
 emptySfData : SfData
 emptySfData =
-    { prefixId = Nothing
+    { facilityId = Nothing
+    , careCoordinatorId = Nothing
+    , mainProviderId = Nothing
+    , prefixId = Nothing
     , sexTypeId = Nothing
     , sexualOrientationId = Nothing
     , suffixId = Nothing
@@ -204,15 +261,18 @@ emptySfData =
 decodeSfData : Decode.Decoder SfData
 decodeSfData =
     Pipeline.decode SfData
-        |> Pipeline.hardcoded Nothing
-        |> Pipeline.hardcoded Nothing
-        |> Pipeline.hardcoded Nothing
-        |> Pipeline.hardcoded Nothing
-        |> Pipeline.hardcoded Nothing
-        |> Pipeline.hardcoded Nothing
-        |> Pipeline.hardcoded Nothing
-        |> Pipeline.hardcoded Nothing
-        |> Pipeline.hardcoded Nothing
+        |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
+        |> Pipeline.required "CareCoordinatorId" (Decode.maybe Decode.int)
+        |> Pipeline.required "MainProviderId" (Decode.maybe Decode.int)
+        |> Pipeline.required "PrefixId" (Decode.maybe Decode.int)
+        |> Pipeline.required "SexTypeId" (Decode.maybe Decode.int)
+        |> Pipeline.required "SexualOrientationId" (Decode.maybe Decode.int)
+        |> Pipeline.required "SuffixId" (Decode.maybe Decode.int)
+        |> Pipeline.required "GenderIdentityId" (Decode.maybe Decode.int)
+        |> Pipeline.required "RaceId" (Decode.maybe Decode.int)
+        |> Pipeline.required "EthnicityId" (Decode.maybe Decode.int)
+        |> Pipeline.required "USVeteranId" (Decode.maybe Decode.int)
+        |> Pipeline.required "ReligionId" (Decode.maybe Decode.int)
         |> Pipeline.required "PatientLanguageDropdown" (Decode.list decodeDropDownItem)
         |> Pipeline.required "CareCoordinatorDropdown" (Decode.list decodeDropDownItem)
         |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropDownItem)
