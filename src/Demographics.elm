@@ -15,6 +15,9 @@ port initDemographics : SfData -> Cmd msg
 port updateDemographics : (SfData -> msg) -> Sub msg
 
 
+port logError : String -> Cmd msg
+
+
 type alias Model =
     { patientId : Int
     , demographicsId : Maybe Int
@@ -70,7 +73,10 @@ type alias SfData =
 
 
 type alias PatientLanguagesMap =
-    { bob : String }
+    { id : Maybe Int
+    , languageId : Int
+    , isPreferred : Bool
+    }
 
 
 subscriptions : Sub Msg
@@ -80,7 +86,7 @@ subscriptions =
 
 init : Flags -> Cmd Msg
 init flag =
-    Decode.field "demographicsInformationModel" decodeSfData
+    Decode.field "demographicsInformationModel" decodeModel
         |> Http.get ("/People/GetDemographicsInformation?patientId=" ++ toString flag.patientId)
         |> Http.send Load
 
@@ -181,18 +187,18 @@ view model =
 
 
 type Msg
-    = Load (Result Http.Error SfData)
+    = Load (Result Http.Error Model)
     | UpdateDemographics SfData
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Load (Ok sfData) ->
-            { model | sfData = sfData } ! [ initDemographics sfData ]
+        Load (Ok newModel) ->
+            newModel ! [ initDemographics newModel.sfData ]
 
         Load (Err t) ->
-            model ! []
+            model ! [ logError (toString t) ]
 
         UpdateDemographics sfData ->
             { model | sfData = sfData } ! []
@@ -256,6 +262,39 @@ emptySfData =
     , uSVeteranDropdown = []
     , religionDropdown = []
     }
+
+
+decodePatientLanguagesMap : Decode.Decoder PatientLanguagesMap
+decodePatientLanguagesMap =
+    Pipeline.decode PatientLanguagesMap
+        |> Pipeline.required "Id" (Decode.maybe Decode.int)
+        |> Pipeline.required "LanguageId" Decode.int
+        |> Pipeline.required "IsPreferred" Decode.bool
+
+
+decodeModel : Decode.Decoder Model
+decodeModel =
+    Pipeline.decode Model
+        |> Pipeline.required "PatientId" Decode.int
+        |> Pipeline.required "DemographicsId" (Decode.maybe Decode.int)
+        |> Pipeline.required "NickName" (Decode.maybe Decode.string)
+        |> Pipeline.required "VIP" (Decode.maybe Decode.bool)
+        |> Pipeline.required "SSN" (Decode.maybe Decode.string)
+        |> Pipeline.required "lastName" (Decode.maybe Decode.string)
+        |> Pipeline.required "firstName" (Decode.maybe Decode.string)
+        |> Pipeline.required "middle" (Decode.maybe Decode.string)
+        |> Pipeline.required "dateOfBirth" (Decode.maybe Decode.string)
+        |> Pipeline.required "birthPlace" (Decode.maybe Decode.string)
+        |> Pipeline.required "dateOfDeath" (Decode.maybe Decode.string)
+        |> Pipeline.required "mrn" (Decode.maybe Decode.string)
+        |> Pipeline.required "patientAccountNumber" (Decode.maybe Decode.string)
+        |> Pipeline.required "facilityPtID" (Decode.maybe Decode.string)
+        |> Pipeline.required "sexualOrientationNote" (Decode.maybe Decode.string)
+        |> Pipeline.required "genderIdentityNote" (Decode.maybe Decode.string)
+        |> Pipeline.required "email" (Decode.maybe Decode.string)
+        |> Pipeline.required "patientLanguagesMap" (Decode.list decodePatientLanguagesMap)
+        |> Pipeline.required "preferredLanguageIndex" Decode.int
+        |> Pipeline.hardcoded emptySfData
 
 
 decodeSfData : Decode.Decoder SfData
