@@ -1,12 +1,14 @@
 port module Demographics exposing (..)
 
-import Html exposing (Html, text, div, button, ul, li, a, input, label)
+import Html exposing (Html, text, div, button, ul, li, a, input, label, h4)
 import Html.Attributes exposing (class, id, type_, value, style)
 import Utils.CommonTypes exposing (DropDownItem, Flags)
 
 
--- port setUnsavedChanges : Bool -> Cmd msg
--- port resetUpdateComplete : (String -> msg) -> Sub msg
+port initDemographics : Bool -> Cmd msg
+
+
+port updateDemographics : (String -> msg) -> Sub msg
 
 
 type alias Model =
@@ -28,18 +30,24 @@ type alias Model =
     , genderIdentityNote : Maybe String
     , email : Maybe String
     , careCoordinatorId : Maybe Int
-    , ethnicityId : Maybe Int
-    , sexTypeId : Maybe Int
-    , sexualOrientationId : Maybe Int
-    , genderIdentityId : Maybe Int
     , facilityId : Maybe Int
     , mainProviderId : Maybe Int
-    , raceId : Maybe Int
+    , patientLanguagesMap : List PatientLanguagesMap
+    , preferredLanguageIndex : Int
+    , sfData : SfData
+    }
+
+
+type alias SfData =
+    { prefixId : Maybe Int
+    , sexTypeId : Maybe Int
+    , sexualOrientationId : Maybe Int
     , suffixId : Maybe Int
-    , prefixId : Maybe Int
+    , genderIdentityId : Maybe Int
+    , raceId : Maybe Int
+    , ethnicityId : Maybe Int
     , uSVeteranId : Maybe Int
     , religionId : Maybe Int
-    , patientLanguagesMap : List PatientLanguagesMap
     , patientLanguageDropdown : List DropDownItem
     , careCoordinatorDropdown : List DropDownItem
     , languageDropdown : List DropDownItem
@@ -54,7 +62,6 @@ type alias Model =
     , prefixDropdown : List DropDownItem
     , uSVeteranDropdown : List DropDownItem
     , religionDropdown : List DropDownItem
-    , preferredLanguageIndex : Int
     }
 
 
@@ -75,9 +82,39 @@ init flag =
 
 view : Model -> Html Msg
 view model =
-    div [ class "form-group" ]
-        [ label [ class "col-md-4" ] [ text "comments" ]
-        , input [ class "col-md-8 e-textbox" ] []
+    div []
+        [ h4 [] [ text "Assigned To" ]
+        , div [ class "row" ]
+            [ label [ class "col-md-2" ] [ text "Facility" ]
+            , input [ class "col-md-2", id "FacilityId" ] []
+            , label [ class "col-md-2" ] [ text "Main Provider" ]
+            , input [ class "col-md-6", id "MainProviderId" ] []
+            ]
+        , div [ class "row" ]
+            [ label [ class "col-md-2" ] [ text "Patient's Facility ID No" ]
+            , input [ class "col-md-2", id "FacilityPtIDId" ] []
+            , label [ class "col-md-2" ] [ text "Care Coordinator" ]
+            , input [ class "col-md-6", id "CareCoordinatorId" ] []
+            ]
+        , div [ class "row" ]
+            [ label [ class "col-md-2" ] [ text "Medical Record No" ]
+            , input [ class "col-md-10", id "MRNId" ] []
+            ]
+        , div [ class "row" ]
+            [ label [ class "col-md-2" ] [ text "Patient Account No" ]
+            , input [ class "col-md-10", id "PatientAccountNumberId" ] []
+            ]
+        , h4 [] [ text "Demographic Information" ]
+        , div [ class "row" ]
+            [ label [ class "col-md-2" ] [ text "aaa" ]
+            , input [ class "col-md-10", id "aaaa" ] []
+            , label [ class "col-md-2" ] [ text "aaa" ]
+            , input [ class "col-md-10", id "aaaa" ] []
+            ]
+        , div [ class "row" ]
+            [ label [ class "col-md-4" ] [ text "comments" ]
+            , input [ class "col-md-8 e-textbox" ] []
+            ]
         ]
 
 
@@ -112,18 +149,25 @@ emptyModel flags =
     , genderIdentityNote = Nothing
     , email = Nothing
     , careCoordinatorId = Nothing
-    , ethnicityId = Nothing
-    , sexTypeId = Nothing
-    , sexualOrientationId = Nothing
-    , genderIdentityId = Nothing
     , facilityId = Nothing
     , mainProviderId = Nothing
-    , raceId = Nothing
+    , patientLanguagesMap = []
+    , preferredLanguageIndex = 0
+    , sfData = emptySfData
+    }
+
+
+emptySfData : SfData
+emptySfData =
+    { prefixId = Nothing
+    , sexTypeId = Nothing
+    , sexualOrientationId = Nothing
     , suffixId = Nothing
-    , prefixId = Nothing
+    , genderIdentityId = Nothing
+    , raceId = Nothing
+    , ethnicityId = Nothing
     , uSVeteranId = Nothing
     , religionId = Nothing
-    , patientLanguagesMap = []
     , patientLanguageDropdown = []
     , careCoordinatorDropdown = []
     , languageDropdown = []
@@ -138,5 +182,4 @@ emptyModel flags =
     , prefixDropdown = []
     , uSVeteranDropdown = []
     , religionDropdown = []
-    , preferredLanguageIndex = -1
     }
