@@ -16,6 +16,9 @@ port initDemographics : SfData -> Cmd msg
 port initDemographicsDone : (String -> msg) -> Sub msg
 
 
+port initContactHours : String -> Cmd msg
+
+
 port initLanguagesMap : PatiantLanguageMessage -> Cmd msg
 
 
@@ -266,7 +269,7 @@ update msg model =
             model ! [ logError (toString t) ]
 
         InitDemographicsDone _ ->
-            model ! (List.map (patiantLanguageToMessage model) model.patientLanguagesMap)
+            model ! (initContactHours "" :: List.map (patiantLanguageToMessage model) model.patientLanguagesMap)
 
         UpdateDemographics sfData ->
             { model | sfData = sfData } ! []
