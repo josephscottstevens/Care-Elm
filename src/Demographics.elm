@@ -13,7 +13,10 @@ import Http
 port initDemographics : SfData -> Cmd msg
 
 
-port addNewLanguage : SfData -> Cmd msg
+port initLanguagesMap : PatientLanguagesMap -> Cmd msg
+
+
+port updateLanguagesMap : (PatientLanguagesMap -> msg) -> Sub msg
 
 
 port updateDemographics : (SfData -> msg) -> Sub msg
@@ -59,7 +62,6 @@ type alias SfData =
     , ethnicityId : Maybe Int
     , uSVeteranId : Maybe Int
     , religionId : Maybe Int
-    , patientLanguagesMap : List PatientLanguagesMap
     , patientLanguageDropdown : List DropDownItem
     , careCoordinatorDropdown : List DropDownItem
     , languageDropdown : List DropDownItem
@@ -87,7 +89,9 @@ type alias PatientLanguagesMap =
 
 subscriptions : Sub Msg
 subscriptions =
-    updateDemographics UpdateDemographics
+    Sub.batch
+        [ updateDemographics UpdateDemographics
+        ]
 
 
 init : Flags -> Cmd Msg
@@ -256,7 +260,7 @@ update msg model =
             model ! [ logError (toString t) ]
 
         UpdateDemographics sfData ->
-            { model | sfData = sfData, patientLanguagesMap = sfData.patientLanguagesMap } ! []
+            { model | sfData = sfData } ! []
 
         AddNewLanguage ->
             let
@@ -314,7 +318,6 @@ emptySfData =
     , ethnicityId = Nothing
     , uSVeteranId = Nothing
     , religionId = Nothing
-    , patientLanguagesMap = []
     , patientLanguageDropdown = []
     , careCoordinatorDropdown = []
     , languageDropdown = []
@@ -390,7 +393,6 @@ decodeSfData =
         |> Pipeline.required "EthnicityId" (Decode.maybe Decode.int)
         |> Pipeline.required "USVeteranId" (Decode.maybe Decode.int)
         |> Pipeline.required "ReligionId" (Decode.maybe Decode.int)
-        |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
         |> Pipeline.required "PatientLanguageDropdown" (Decode.list decodeDropDownItem)
         |> Pipeline.required "CareCoordinatorDropdown" (Decode.list decodeDropDownItem)
         |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropDownItem)
