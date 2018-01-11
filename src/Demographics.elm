@@ -6,12 +6,13 @@ import Utils.CommonTypes exposing (DropDownItem, Flags)
 import Utils.CommonFunctions exposing (decodeDropDownItem)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
+import Http
 
 
-port initDemographics : Bool -> Cmd msg
+port initDemographics : SfData -> Cmd msg
 
 
-port updateDemographics : (String -> msg) -> Sub msg
+port updateDemographics : (SfData -> msg) -> Sub msg
 
 
 type alias Model =
@@ -74,13 +75,14 @@ type alias PatientLanguagesMap =
 
 subscriptions : Sub Msg
 subscriptions =
-    Sub.none
+    updateDemographics UpdateDemographics
 
 
 init : Flags -> Cmd Msg
 init flag =
-    Cmd.batch
-        []
+    Decode.field "demographicsInformationModel" decodeSfData
+        |> Http.get ("/People/GetDemographicsInformation?patientId=" ++ toString flag.patientId)
+        |> Http.send Load
 
 
 view : Model -> Html Msg
@@ -89,7 +91,7 @@ view model =
         [ h4 [] [ text "Assigned To" ]
         , div [ class "row" ]
             [ label [ class "col-md-2" ] [ text "Facility" ]
-            , input [ class "col-md-2", id "FacilityId" ] []
+            , div [ class "col-md-2" ] [ input [ id "FacilityId" ] [] ]
             , label [ class "col-md-2" ] [ text "Main Provider" ]
             , input [ class "col-md-6", id "MainProviderId" ] []
             ]
@@ -122,14 +124,25 @@ view model =
 
 
 type Msg
-    = None
+    = Load (Result Http.Error SfData)
+    | UpdateDemographics SfData
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        None ->
+        Load (Ok sfData) ->
+            { model | sfData = sfData } ! [ initDemographics sfData ]
+
+        Load (Err t) ->
             model ! []
+
+        UpdateDemographics sfData ->
+            { model | sfData = sfData } ! []
+
+
+
+--  Functions.displayErrorMessage (toString t)
 
 
 emptyModel : Flags -> Model

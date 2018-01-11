@@ -13,7 +13,7 @@ port openPage : (String -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map RecordsMsg (Records.subscriptions model.recordsState)
+    Sub.map DemographicsMsg Demographics.subscriptions
 
 
 init : Flags -> ( Model, Cmd Msg )
