@@ -8,10 +8,12 @@ import Utils.CommonFunctions exposing (decodeDropDownItem)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Http
-import Task
 
 
 port initDemographics : SfData -> Cmd msg
+
+
+port initDemographicsDone : (String -> msg) -> Sub msg
 
 
 port initLanguagesMap : PatiantLanguageMessage -> Cmd msg
@@ -98,6 +100,7 @@ subscriptions : Sub Msg
 subscriptions =
     Sub.batch
         [ updateDemographics UpdateDemographics
+        , initDemographicsDone InitDemographicsDone
         ]
 
 
@@ -244,7 +247,7 @@ viewLanguages lang =
 type Msg
     = Load (Result Http.Error Model)
     | UpdateDemographics SfData
-    | InitLanguages
+    | InitDemographicsDone String
     | AddNewLanguage
     | RemoveLanguage Int
 
@@ -264,16 +267,12 @@ update msg model =
                         |> List.indexedMap (\t y -> { y | index = t })
             in
                 { newModel | patientLanguagesMap = newPatientLanguagesMap }
-                    ! [ Cmd.batch
-                            [ initDemographics newModel.sfData
-                            , Task.perform identity (Task.succeed InitLanguages)
-                            ]
-                      ]
+                    ! [ initDemographics newModel.sfData ]
 
         Load (Err t) ->
             model ! [ logError (toString t) ]
 
-        InitLanguages ->
+        InitDemographicsDone _ ->
             model ! (List.map (patiantLanguageToMessage model) model.patientLanguagesMap)
 
         UpdateDemographics sfData ->
