@@ -77,6 +77,7 @@ type alias PatientLanguagesMap =
     { id : Maybe Int
     , languageId : Int
     , isPreferred : Bool
+    , index : Int
     }
 
 
@@ -225,7 +226,12 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Load (Ok newModel) ->
-            newModel ! [ initDemographics newModel.sfData ]
+            let
+                patientLanguagesMap =
+                    newModel.patientLanguagesMap
+                        |> List.indexedMap updatePatientLanguagesMap
+            in
+                { newModel | patientLanguagesMap = patientLanguagesMap } ! [ initDemographics newModel.sfData ]
 
         Load (Err t) ->
             model ! [ logError (toString t) ]
@@ -237,8 +243,9 @@ update msg model =
             { model | patientLanguagesMap = emptyPatientLanguagesMap :: model.patientLanguagesMap } ! []
 
 
-
---  Functions.displayErrorMessage (toString t)
+updatePatientLanguagesMap : Int -> PatientLanguagesMap -> PatientLanguagesMap
+updatePatientLanguagesMap t y =
+    { y | index = t }
 
 
 emptyModel : Flags -> Model
@@ -302,6 +309,7 @@ emptyPatientLanguagesMap =
     { id = Nothing
     , languageId = -1
     , isPreferred = False
+    , index = 0
     }
 
 
@@ -311,6 +319,7 @@ decodePatientLanguagesMap =
         |> Pipeline.required "Id" (Decode.maybe Decode.int)
         |> Pipeline.required "LanguageId" Decode.int
         |> Pipeline.required "IsPreferred" Decode.bool
+        |> Pipeline.hardcoded 0
 
 
 decodeModel : Decode.Decoder Model
