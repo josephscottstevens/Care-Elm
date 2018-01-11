@@ -122,8 +122,8 @@ rowStyle =
     ]
 
 
-labelStyle : Bool -> number -> List (Html.Attribute msg)
-labelStyle isRequired sizePercent =
+labelStyle : Bool -> List (Html.Attribute msg)
+labelStyle isRequired =
     let
         required =
             case isRequired of
@@ -136,29 +136,19 @@ labelStyle isRequired sizePercent =
         [ class ("padding-right-10 " ++ required ++ " col-md-1")
         , style
             [ ( "font-family", "Segoe UI,Helvetica Neue" )
-            , ( "width", toString sizePercent ++ "%" )
+            , ( "width", "11%" )
             ]
         ]
 
 
-labelStyleRequiredBig : List (Html.Attribute msg)
-labelStyleRequiredBig =
-    labelStyle True 11.0
-
-
-labelStyleOptionalBig : List (Html.Attribute msg)
-labelStyleOptionalBig =
-    labelStyle False 11.0
-
-
-labelStyleRequiredSmall : List (Html.Attribute msg)
-labelStyleRequiredSmall =
-    labelStyle True 11.0
+labelStyleRequired : List (Html.Attribute msg)
+labelStyleRequired =
+    labelStyle True
 
 
 labelStyleOptional : List (Html.Attribute msg)
 labelStyleOptional =
-    labelStyle False 11.0
+    labelStyle False
 
 
 divStyle : List (Html.Attribute msg)
@@ -176,23 +166,23 @@ view model =
     div []
         [ h4 [] [ text "Assigned To" ]
         , div rowStyle
-            [ label labelStyleRequiredBig [ text "Facility:" ]
+            [ label labelStyleRequired [ text "Facility:" ]
             , div divStyle [ input [ id "FacilityId" ] [] ]
-            , label labelStyleRequiredSmall [ text "Main Provider:" ]
+            , label labelStyleRequired [ text "Main Provider:" ]
             , div divStyle [ input [ id "MainProviderId" ] [] ]
             ]
         , div rowStyle
-            [ label labelStyleOptionalBig [ text "Patient's Facility ID No:" ]
+            [ label labelStyleOptional [ text "Patient's Facility ID No:" ]
             , div divStyle [ input [ id "FacilityPtIDId", class "e-textbox", maybeValue model.facilityPtID ] [] ]
-            , label labelStyleRequiredSmall [ text "Care Coordinator:" ]
+            , label labelStyleRequired [ text "Care Coordinator:" ]
             , div divStyle [ input [ id "CareCoordinatorId" ] [] ]
             ]
         , div rowStyle
-            [ label labelStyleOptionalBig [ text "Medical Record No:" ]
+            [ label labelStyleOptional [ text "Medical Record No:" ]
             , div divStyle [ input [ id "MRNId", class "e-textbox", maybeValue model.mrn ] [] ]
             ]
         , div rowStyle
-            [ label labelStyleOptionalBig [ text "Patient Account No:" ]
+            [ label labelStyleOptional [ text "Patient Account No:" ]
             , div divStyle [ input [ id "PatientAccountNumberId", class "e-textbox", maybeValue model.patientAccountNumber ] [] ]
             ]
         , div []
@@ -204,7 +194,66 @@ view model =
         , div rowStyle
             [ div [] (List.map viewLanguages model.patientLanguagesMap)
             ]
-        , div rowStyle []
+        , h4 [] [ text "Demographic Information" ]
+        , div rowStyle
+            [ label labelStyleOptional [ text "Prefix:" ]
+            , div divStyle [ input [ id "PrefixId" ] [] ]
+            , label labelStyleOptional [ text "Sex at Birth:" ]
+            , div divStyle [ input [ id "SexTypeId" ] [] ]
+            ]
+        , div rowStyle
+            [ label labelStyleOptional [ text "First Name:" ]
+            , div divStyle [ input [ id "FirstId" ] [] ]
+            , label labelStyleOptional [ text "Sexual Orientation:" ]
+            , div divStyle [ input [ id "SexualOrientationId" ] [] ]
+            ]
+        , div rowStyle
+            [ label labelStyleOptional [ text "Middle Name:" ]
+            , div divStyle [ input [ id "MiddleId" ] [] ]
+            , label labelStyleOptional [ text "Sexual Orientation Note:" ]
+            , div divStyle [ input [ class "e-textbox", maybeValue model.sexualOrientationNote ] [] ]
+            ]
+        , div rowStyle
+            [ label labelStyleOptional [ text "Last Name:" ]
+            , div divStyle [ input [ id "LastId" ] [] ]
+            , label labelStyleOptional [ text "Gender Identity:" ]
+            , div divStyle [ input [ id "GenderIdentityId" ] [] ]
+            ]
+        , div rowStyle
+            [ label labelStyleOptional [ text "Suffix:" ]
+            , div divStyle [ input [ id "SuffixId" ] [] ]
+            , label labelStyleOptional [ text "Gender Identity Note:" ]
+            , div divStyle [ input [ class "e-textbox", maybeValue model.genderIdentityNote ] [] ]
+            ]
+        , div rowStyle
+            [ label labelStyleOptional [ text "Nickname:" ]
+            , div divStyle [ input [ id "NickNameId" ] [] ]
+            , label labelStyleOptional [ text "Race:" ]
+            , div divStyle [ input [ id "RaceId" ] [] ]
+            ]
+        , div rowStyle
+            [ label labelStyleOptional [ text "Date of Birth:" ]
+            , div divStyle [ input [ id "DateOfBirthId" ] [] ]
+            , label labelStyleOptional [ text "Ethnicity:" ]
+            , div divStyle [ input [ id "EthnicityId" ] [] ]
+            ]
+        , div rowStyle
+            [ label labelStyleOptional [ text "Date of Death:" ]
+            , div divStyle [ input [ id "DateOfDeathId" ] [] ]
+            , label labelStyleOptional [ text "US Veteran:" ]
+            , div divStyle [ input [ id "USVeteranId" ] [] ]
+            ]
+        , div rowStyle
+            [ label labelStyleOptional [ text "SSN:" ]
+            , div divStyle [ input [ id "SSNId" ] [] ]
+            , label labelStyleOptional [ text "Religion:" ]
+            , div divStyle [ input [ id "ReligionId" ] [] ]
+            ]
+        , div rowStyle
+            [ div [ class "col-md-4" ] []
+            , label labelStyleOptional [ text "Email:" ]
+            , div divStyle [ input [ class "e-textbox", maybeValue model.email ] [] ]
+            ]
         ]
 
 
