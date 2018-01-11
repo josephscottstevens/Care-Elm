@@ -13,6 +13,9 @@ import Http
 port initDemographics : SfData -> Cmd msg
 
 
+port addNewLanguage : SfData -> Cmd msg
+
+
 port updateDemographics : (SfData -> msg) -> Sub msg
 
 
@@ -210,17 +213,20 @@ xButton index =
             ]
 
 
-languageStyle : List (Html.Attribute msg)
+languageStyle : Html.Attribute msg
 languageStyle =
-    [ class "col-md-2", style [ ( "display", "inline-block" ) ] ]
+    style
+        [ ( "display", "inline-block" )
+        , ( "width", "2%" )
+        ]
 
 
 viewLanguages : PatientLanguagesMap -> Html Msg
 viewLanguages lang =
-    div [ class "row" ]
-        [ div languageStyle [ input [ type_ "radio" ] [] ]
-        , div languageStyle [ input [ id ("PatientLanguagesMapId" ++ (toString lang.index)) ] [] ]
-        , div languageStyle [ xButton lang.index ]
+    div [ class "row", style [ ( "margin-left", "5px" ), ( "margin-top", "5px" ) ] ]
+        [ div [ class "col-md-2 ", languageStyle ] [ input [ type_ "radio" ] [] ]
+        , div [ class "col-md-2" ] [ input [ id ("PatientLanguagesMapId" ++ (toString lang.index)) ] [] ]
+        , div [ class "col-md-2", style [ ( "margin-left", "-26px" ), ( "margin-top", "5px" ) ] ] [ xButton lang.index ]
         ]
 
 
@@ -253,7 +259,12 @@ update msg model =
             { model | sfData = sfData, patientLanguagesMap = sfData.patientLanguagesMap } ! []
 
         AddNewLanguage ->
-            { model | patientLanguagesMap = emptyPatientLanguagesMap :: model.patientLanguagesMap } ! []
+            let
+                index =
+                    1 + List.length model.patientLanguagesMap
+            in
+                { model | patientLanguagesMap = (emptyPatientLanguagesMap index) :: model.patientLanguagesMap }
+                    ! []
 
         RemoveLanguage index ->
             let
@@ -321,12 +332,12 @@ emptySfData =
     }
 
 
-emptyPatientLanguagesMap : PatientLanguagesMap
-emptyPatientLanguagesMap =
+emptyPatientLanguagesMap : Int -> PatientLanguagesMap
+emptyPatientLanguagesMap index =
     { id = Nothing
     , languageId = -1
     , isPreferred = False
-    , index = 0
+    , index = index
     }
 
 
