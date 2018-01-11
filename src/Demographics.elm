@@ -1,7 +1,7 @@
 port module Demographics exposing (..)
 
 import Html exposing (Html, text, div, span, button, ul, li, a, input, label, h4)
-import Html.Attributes exposing (class, id, type_, value, style, title)
+import Html.Attributes exposing (class, id, type_, value, style, title, checked)
 import Html.Events exposing (onClick)
 import Utils.CommonTypes exposing (DropDownItem, Flags)
 import Utils.CommonFunctions exposing (decodeDropDownItem)
@@ -49,6 +49,7 @@ type alias Model =
     , preferredLanguageIndex : Int
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
+    , patientLanguagesMapCounter : Int
     }
 
 
@@ -200,17 +201,6 @@ view model =
         , div rowStyle
             [ div [] (List.map viewLanguages model.patientLanguagesMap)
             ]
-
-        -- , div rowStyle
-        --     [ label labelStyleRequiredBig [ text "aaa" ]
-        --     , input [ class "col-md-2", id "aaaa" ] []
-        --     , label [ class "col-md-2" ] [ text "aaa" ]
-        --     , input [ class "col-md-2", id "aaaa" ] []
-        --     ]
-        -- , div rowStyle
-        --     [ label labelStyleRequiredBig [ text "comments" ]
-        --     , input [ class "col-md-2 e-textboxbox" ] []
-        --     ]
         ]
 
 
@@ -238,7 +228,7 @@ languageStyle =
 viewLanguages : PatientLanguagesMap -> Html Msg
 viewLanguages lang =
     div [ class "row", style [ ( "margin-left", "5px" ), ( "margin-top", "5px" ) ] ]
-        [ div [ class "col-md-2 ", languageStyle ] [ input [ type_ "radio" ] [] ]
+        [ div [ class "col-md-2 ", languageStyle ] [ input [ type_ "radio", checked lang.isPreferred ] [] ]
         , div [ class "col-md-2" ] [ input [ id ("PatientLanguagesMapId" ++ (toString lang.index)) ] [] ]
         , div [ class "col-md-2", style [ ( "margin-left", "-26px" ), ( "margin-top", "5px" ) ] ] [ xButton lang.index ]
         ]
@@ -266,7 +256,10 @@ update msg model =
                     newModel.patientLanguagesMap
                         |> List.indexedMap (\t y -> { y | index = t })
             in
-                { newModel | patientLanguagesMap = newPatientLanguagesMap }
+                { newModel
+                    | patientLanguagesMap = newPatientLanguagesMap
+                    , patientLanguagesMapCounter = List.length newPatientLanguagesMap
+                }
                     ! [ initDemographics newModel.sfData ]
 
         Load (Err t) ->
@@ -280,11 +273,14 @@ update msg model =
 
         AddNewLanguage ->
             let
-                index =
-                    1 + List.length model.patientLanguagesMap
+                newPatientLanguagesMap =
+                    emptyPatientLanguagesMap model.patientLanguagesMapCounter
             in
-                { model | patientLanguagesMap = (emptyPatientLanguagesMap index) :: model.patientLanguagesMap }
-                    ! []
+                { model
+                    | patientLanguagesMap = model.patientLanguagesMap ++ [ newPatientLanguagesMap ]
+                    , patientLanguagesMapCounter = model.patientLanguagesMapCounter + 1
+                }
+                    ! [ patiantLanguageToMessage model newPatientLanguagesMap ]
 
         RemoveLanguage index ->
             let
@@ -317,6 +313,7 @@ emptyModel flags =
     , preferredLanguageIndex = 0
     , sfData = emptySfData
     , patientLanguagesMap = []
+    , patientLanguagesMapCounter = 0
     }
 
 
@@ -392,6 +389,7 @@ decodeModel =
         |> Pipeline.required "PreferredLanguageIndex" Decode.int
         |> Pipeline.custom decodeSfData
         |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
+        |> Pipeline.hardcoded 0
 
 
 decodeSfData : Decode.Decoder SfData
