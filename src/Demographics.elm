@@ -37,9 +37,9 @@ type alias Model =
     , sexualOrientationNote : Maybe String
     , genderIdentityNote : Maybe String
     , email : Maybe String
-    , patientLanguagesMap : List PatientLanguagesMap
     , preferredLanguageIndex : Int
     , sfData : SfData
+    , patientLanguagesMap : List PatientLanguagesMap
     }
 
 
@@ -56,6 +56,7 @@ type alias SfData =
     , ethnicityId : Maybe Int
     , uSVeteranId : Maybe Int
     , religionId : Maybe Int
+    , patientLanguagesMap : List PatientLanguagesMap
     , patientLanguageDropdown : List DropDownItem
     , careCoordinatorDropdown : List DropDownItem
     , languageDropdown : List DropDownItem
@@ -180,7 +181,7 @@ view model =
                 ]
             ]
         , div rowStyle
-            [ div [] (List.map viewLanguages model.patientLanguagesMap)
+            [ div [] (List.map viewLanguages model.sfData.patientLanguagesMap)
             ]
 
         -- , div rowStyle
@@ -196,23 +197,25 @@ view model =
         ]
 
 
-xButton =
+xButton : Int -> Html Msg
+xButton index =
     let
         xButtonStyle =
             style
                 [ ( "width", "20px" )
                 ]
     in
-        div [ class "inline-block", xButtonStyle, title "remove" ]
+        div [ class "inline-block", xButtonStyle, title "remove", onClick (RemoveLanguage index) ]
             [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
             ]
 
 
-viewLanguages : PatientLanguagesMap -> Html msg
+viewLanguages : PatientLanguagesMap -> Html Msg
 viewLanguages lang =
     div []
         [ input [ type_ "radio" ] []
-        , div divStyle [ input [ id "FacilityId" ] [] ]
+        , div divStyle [ input [ id ("FacilityId" ++ (toString lang.index)) ] [] ]
+        , xButton lang.index
         ]
 
 
@@ -220,6 +223,7 @@ type Msg
     = Load (Result Http.Error Model)
     | UpdateDemographics SfData
     | AddNewLanguage
+    | RemoveLanguage Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -227,25 +231,29 @@ update msg model =
     case msg of
         Load (Ok newModel) ->
             let
-                patientLanguagesMap =
+                newPatientLanguagesMap =
                     newModel.patientLanguagesMap
-                        |> List.indexedMap updatePatientLanguagesMap
+                        |> List.indexedMap (\t y -> { y | index = t })
             in
-                { newModel | patientLanguagesMap = patientLanguagesMap } ! [ initDemographics newModel.sfData ]
+                { newModel | patientLanguagesMap = newPatientLanguagesMap }
+                    ! [ initDemographics newModel.sfData ]
 
         Load (Err t) ->
             model ! [ logError (toString t) ]
 
         UpdateDemographics sfData ->
-            { model | sfData = sfData } ! []
+            { model | sfData = sfData, patientLanguagesMap = sfData.patientLanguagesMap } ! []
 
         AddNewLanguage ->
             { model | patientLanguagesMap = emptyPatientLanguagesMap :: model.patientLanguagesMap } ! []
 
-
-updatePatientLanguagesMap : Int -> PatientLanguagesMap -> PatientLanguagesMap
-updatePatientLanguagesMap t y =
-    { y | index = t }
+        RemoveLanguage index ->
+            let
+                newPatientLanguagesMap =
+                    model.patientLanguagesMap
+                        |> List.filter (\t -> t.index /= index)
+            in
+                { model | patientLanguagesMap = newPatientLanguagesMap } ! []
 
 
 emptyModel : Flags -> Model
@@ -267,9 +275,9 @@ emptyModel flags =
     , sexualOrientationNote = Nothing
     , genderIdentityNote = Nothing
     , email = Nothing
-    , patientLanguagesMap = []
     , preferredLanguageIndex = 0
     , sfData = emptySfData
+    , patientLanguagesMap = []
     }
 
 
@@ -287,6 +295,7 @@ emptySfData =
     , ethnicityId = Nothing
     , uSVeteranId = Nothing
     , religionId = Nothing
+    , patientLanguagesMap = []
     , patientLanguageDropdown = []
     , careCoordinatorDropdown = []
     , languageDropdown = []
@@ -342,9 +351,9 @@ decodeModel =
         |> Pipeline.required "SexualOrientationNote" (Decode.maybe Decode.string)
         |> Pipeline.required "GenderIdentityNote" (Decode.maybe Decode.string)
         |> Pipeline.required "Email" (Decode.maybe Decode.string)
-        |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
         |> Pipeline.required "PreferredLanguageIndex" Decode.int
         |> Pipeline.custom decodeSfData
+        |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
 
 
 decodeSfData : Decode.Decoder SfData
@@ -362,6 +371,7 @@ decodeSfData =
         |> Pipeline.required "EthnicityId" (Decode.maybe Decode.int)
         |> Pipeline.required "USVeteranId" (Decode.maybe Decode.int)
         |> Pipeline.required "ReligionId" (Decode.maybe Decode.int)
+        |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
         |> Pipeline.required "PatientLanguageDropdown" (Decode.list decodeDropDownItem)
         |> Pipeline.required "CareCoordinatorDropdown" (Decode.list decodeDropDownItem)
         |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropDownItem)
