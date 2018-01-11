@@ -204,6 +204,7 @@ view model =
         , div rowStyle
             [ div [] (List.map viewLanguages model.patientLanguagesMap)
             ]
+        , div rowStyle []
         ]
 
 
@@ -290,8 +291,23 @@ update msg model =
                 newPatientLanguagesMap =
                     model.patientLanguagesMap
                         |> List.filter (\t -> t.index /= index)
+
+                updatedPatientLanguagesMap =
+                    case List.any (\t -> t.isPreferred == True) newPatientLanguagesMap of
+                        True ->
+                            newPatientLanguagesMap
+
+                        False ->
+                            List.indexedMap
+                                (\t y ->
+                                    if t == 0 then
+                                        { y | isPreferred = True }
+                                    else
+                                        y
+                                )
+                                newPatientLanguagesMap
             in
-                { model | patientLanguagesMap = newPatientLanguagesMap } ! []
+                { model | patientLanguagesMap = updatedPatientLanguagesMap } ! []
 
 
 emptyModel : Flags -> Model
