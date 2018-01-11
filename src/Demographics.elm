@@ -77,9 +77,7 @@ view : Model -> Html Msg
 view model =
     div [ class "form-group" ]
         [ label [ class "col-md-4" ] [ text "comments" ]
-        , div [ class "col-md-8" ]
-            [ input [ class "e-textbox" ] []
-            ]
+        , input [ class "col-md-8 e-textbox" ] []
         ]
 
 
