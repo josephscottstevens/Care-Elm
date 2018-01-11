@@ -181,7 +181,7 @@ view model =
                 ]
             ]
         , div rowStyle
-            [ div [] (List.map viewLanguages model.sfData.patientLanguagesMap)
+            [ div [] (List.map viewLanguages model.patientLanguagesMap)
             ]
 
         -- , div rowStyle
@@ -210,12 +210,17 @@ xButton index =
             ]
 
 
+languageStyle : List (Html.Attribute msg)
+languageStyle =
+    [ class "col-md-2", style [ ( "display", "inline-block" ) ] ]
+
+
 viewLanguages : PatientLanguagesMap -> Html Msg
 viewLanguages lang =
-    div []
-        [ input [ type_ "radio" ] []
-        , div divStyle [ input [ id ("FacilityId" ++ (toString lang.index)) ] [] ]
-        , xButton lang.index
+    div [ class "row" ]
+        [ div languageStyle [ input [ type_ "radio" ] [] ]
+        , div languageStyle [ input [ id ("PatientLanguagesMapId" ++ (toString lang.index)) ] [] ]
+        , div languageStyle [ xButton lang.index ]
         ]
 
 
@@ -234,9 +239,12 @@ update msg model =
                 newPatientLanguagesMap =
                     newModel.patientLanguagesMap
                         |> List.indexedMap (\t y -> { y | index = t })
+
+                newModelNested =
+                    { newModel | patientLanguagesMap = newPatientLanguagesMap }
             in
-                { newModel | patientLanguagesMap = newPatientLanguagesMap }
-                    ! [ initDemographics newModel.sfData ]
+                newModelNested
+                    ! [ initDemographics newModelNested.sfData ]
 
         Load (Err t) ->
             model ! [ logError (toString t) ]
