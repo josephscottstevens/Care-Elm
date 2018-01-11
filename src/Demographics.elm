@@ -249,12 +249,11 @@ update msg model =
                 newPatientLanguagesMap =
                     newModel.patientLanguagesMap
                         |> List.indexedMap (\t y -> { y | index = t })
-
-                newModelNested =
-                    { newModel | patientLanguagesMap = newPatientLanguagesMap }
             in
-                newModelNested
-                    ! [ initDemographics newModelNested.sfData ]
+                { newModel | patientLanguagesMap = newPatientLanguagesMap }
+                    ! ([ initDemographics newModel.sfData ]
+                        ++ (List.map initLanguagesMap newPatientLanguagesMap)
+                      )
 
         Load (Err t) ->
             model ! [ logError (toString t) ]
