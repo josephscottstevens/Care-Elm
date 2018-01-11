@@ -1,7 +1,8 @@
 port module Demographics exposing (..)
 
-import Html exposing (Html, text, div, button, ul, li, a, input, label, h4)
-import Html.Attributes exposing (class, id, type_, value, style)
+import Html exposing (Html, text, div, span, button, ul, li, a, input, label, h4)
+import Html.Attributes exposing (class, id, type_, value, style, title)
+import Html.Events exposing (onClick)
 import Utils.CommonTypes exposing (DropDownItem, Flags)
 import Utils.CommonFunctions exposing (decodeDropDownItem)
 import Json.Decode as Decode
@@ -171,8 +172,16 @@ view model =
             [ label labelStyleOptionalBig [ text "Patient Account No:" ]
             , div divStyle [ input [ id "PatientAccountNumberId", class "e-textbox", maybeValue model.patientAccountNumber ] [] ]
             ]
+        , div []
+            [ h4 [ class "inline-block" ] [ text "Languages" ]
+            , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
+                [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
+                ]
+            ]
+        , div rowStyle
+            [ div [] (List.map viewLanguages model.patientLanguagesMap)
+            ]
 
-        -- , h4 [] [ text "Demographic Information" ]
         -- , div rowStyle
         --     [ label labelStyleRequiredBig [ text "aaa" ]
         --     , input [ class "col-md-2", id "aaaa" ] []
@@ -186,9 +195,30 @@ view model =
         ]
 
 
+xButton =
+    let
+        xButtonStyle =
+            style
+                [ ( "width", "20px" )
+                ]
+    in
+        div [ class "inline-block", xButtonStyle, title "remove" ]
+            [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
+            ]
+
+
+viewLanguages : PatientLanguagesMap -> Html msg
+viewLanguages lang =
+    div []
+        [ input [ type_ "radio" ] []
+        , div divStyle [ input [ id "FacilityId" ] [] ]
+        ]
+
+
 type Msg
     = Load (Result Http.Error Model)
     | UpdateDemographics SfData
+    | AddNewLanguage
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -202,6 +232,9 @@ update msg model =
 
         UpdateDemographics sfData ->
             { model | sfData = sfData } ! []
+
+        AddNewLanguage ->
+            { model | patientLanguagesMap = emptyPatientLanguagesMap :: model.patientLanguagesMap } ! []
 
 
 
@@ -264,6 +297,14 @@ emptySfData =
     }
 
 
+emptyPatientLanguagesMap : PatientLanguagesMap
+emptyPatientLanguagesMap =
+    { id = Nothing
+    , languageId = -1
+    , isPreferred = False
+    }
+
+
 decodePatientLanguagesMap : Decode.Decoder PatientLanguagesMap
 decodePatientLanguagesMap =
     Pipeline.decode PatientLanguagesMap
@@ -301,8 +342,8 @@ decodeSfData : Decode.Decoder SfData
 decodeSfData =
     Pipeline.decode SfData
         |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
-        |> Pipeline.required "CareCoordinatorId" (Decode.maybe Decode.int)
         |> Pipeline.required "MainProviderId" (Decode.maybe Decode.int)
+        |> Pipeline.required "CareCoordinatorId" (Decode.maybe Decode.int)
         |> Pipeline.required "PrefixId" (Decode.maybe Decode.int)
         |> Pipeline.required "SexTypeId" (Decode.maybe Decode.int)
         |> Pipeline.required "SexualOrientationId" (Decode.maybe Decode.int)
