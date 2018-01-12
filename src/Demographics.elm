@@ -44,6 +44,25 @@ port updateDemographics : (SfData -> msg) -> Sub msg
 port logError : String -> Cmd msg
 
 
+subscriptions : Sub Msg
+subscriptions =
+    Sub.batch
+        [ updateDemographics UpdateDemographics
+        , initDemographicsDone InitDemographicsDone
+        ]
+
+
+init : Flags -> Cmd Msg
+init flag =
+    decodeModel
+        |> Http.get ("/People/GetDemographicsInformation?patientId=" ++ toString flag.patientId)
+        |> Http.send Load
+
+
+
+-- Types
+
+
 type alias Model =
     { patientPhoneNumbers : List PatientPhoneNumber
     , patientAddresses : List PatientAddress
@@ -71,37 +90,6 @@ type alias Model =
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
     , patientLanguagesMapCounter : Int
-    }
-
-
-type alias DemographicsInformationModel =
-    { patientId : Int
-    , demographicsId : Maybe Int
-    , nickName : Maybe String
-    , ssn : Maybe String
-    , lastName : Maybe String
-    , firstName : Maybe String
-    , middle : Maybe String
-    , birthPlace : Maybe String
-    , mrn : Maybe String
-    , patientAccountNumber : Maybe String
-    , facilityPtID : Maybe String
-    , sexualOrientationNote : Maybe String
-    , genderIdentityNote : Maybe String
-    , email : Maybe String
-    , preferredLanguageIndex : Int
-    , sfData : SfData
-    , patientLanguagesMap : List PatientLanguagesMap
-    }
-
-
-type alias ContactInformationModel =
-    { patientPhoneNumbers : List PatientPhoneNumber
-    , patientAddresses : List PatientAddress
-    , phoneNumberTypeDropdown : List DropDownItem
-    , stateDropdown : List DropDownItem
-    , primaryAddressIndex : Int
-    , preferredPhoneIndex : Int
     }
 
 
@@ -135,12 +123,6 @@ type alias SfData =
     , dateOfBirth : Maybe String
     , dateOfDeath : Maybe String
     , vip : Maybe Bool
-    }
-
-
-type alias ServerResponse =
-    { d : DemographicsInformationModel
-    , c : ContactInformationModel
     }
 
 
@@ -192,12 +174,8 @@ type alias PatientAddressMessage =
     }
 
 
-subscriptions : Sub Msg
-subscriptions =
-    Sub.batch
-        [ updateDemographics UpdateDemographics
-        , initDemographicsDone InitDemographicsDone
-        ]
+
+-- VIEW
 
 
 view : Model -> Html Msg
@@ -362,6 +340,10 @@ viewAddress address =
                 ]
             ]
         ]
+
+
+
+--UPDATE
 
 
 type Msg
@@ -541,6 +523,10 @@ update msg model =
                                 newAddress
             in
                 { model | patientAddresses = updatedAddress } ! []
+
+
+
+-- HELPER Functions
 
 
 maybeValue : Maybe String -> Html.Attribute msg
@@ -748,27 +734,55 @@ updateModelFromServerMessage { d, c } model =
     }
 
 
-init : Flags -> Cmd Msg
-init flag =
-    decodeModel
-        |> Http.get ("/People/GetDemographicsInformation?patientId=" ++ toString flag.patientId)
-        |> Http.send Load
+
+-- JSON Decoding
+
+
+type alias DemographicsInformationModel =
+    { patientId : Int
+    , demographicsId : Maybe Int
+    , nickName : Maybe String
+    , ssn : Maybe String
+    , lastName : Maybe String
+    , firstName : Maybe String
+    , middle : Maybe String
+    , birthPlace : Maybe String
+    , mrn : Maybe String
+    , patientAccountNumber : Maybe String
+    , facilityPtID : Maybe String
+    , sexualOrientationNote : Maybe String
+    , genderIdentityNote : Maybe String
+    , email : Maybe String
+    , preferredLanguageIndex : Int
+    , sfData : SfData
+    , patientLanguagesMap : List PatientLanguagesMap
+    , patientLanguagesMapCounter : Int
+    }
+
+
+type alias ContactInformationModel =
+    { patientPhoneNumbers : List PatientPhoneNumber
+    , patientAddresses : List PatientAddress
+    , phoneNumberTypeDropdown : List DropDownItem
+    , stateDropdown : List DropDownItem
+    , primaryAddressIndex : Int
+    , preferredPhoneIndex : Int
+    , patientPhoneNumbersCounter : Int
+    , patientAddressesCounter : Int
+    }
+
+
+type alias ServerResponse =
+    { d : DemographicsInformationModel
+    , c : ContactInformationModel
+    }
 
 
 decodeModel : Decode.Decoder ServerResponse
 decodeModel =
     Pipeline.decode ServerResponse
-        |> Pipeline.custom decodeDemographicsInformationModel
-        |> Pipeline.custom decodeContactInformationModel
-
-
-decodePatientLanguagesMap : Decode.Decoder PatientLanguagesMap
-decodePatientLanguagesMap =
-    Pipeline.decode PatientLanguagesMap
-        |> Pipeline.required "Id" (Decode.maybe Decode.int)
-        |> Pipeline.required "LanguageId" Decode.int
-        |> Pipeline.required "IsPreferred" Decode.bool
-        |> Pipeline.hardcoded 0
+        |> Pipeline.required "demographicsInformationModel" decodeDemographicsInformationModel
+        |> Pipeline.required "contactInformationModel" decodeContactInformationModel
 
 
 decodeDemographicsInformationModel : Decode.Decoder DemographicsInformationModel
@@ -791,6 +805,7 @@ decodeDemographicsInformationModel =
         |> Pipeline.required "PreferredLanguageIndex" Decode.int
         |> Pipeline.custom decodeSfData
         |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
+        |> Pipeline.hardcoded 0
 
 
 decodeContactInformationModel : Decode.Decoder ContactInformationModel
@@ -802,6 +817,17 @@ decodeContactInformationModel =
         |> Pipeline.required "StateDropdown" (Decode.list decodeDropDownItem)
         |> Pipeline.required "PrimaryAddressIndex" Decode.int
         |> Pipeline.required "PreferredPhoneIndex" Decode.int
+        |> Pipeline.hardcoded 0
+        |> Pipeline.hardcoded 0
+
+
+decodePatientLanguagesMap : Decode.Decoder PatientLanguagesMap
+decodePatientLanguagesMap =
+    Pipeline.decode PatientLanguagesMap
+        |> Pipeline.required "Id" (Decode.maybe Decode.int)
+        |> Pipeline.required "LanguageId" Decode.int
+        |> Pipeline.required "IsPreferred" Decode.bool
+        |> Pipeline.hardcoded 0
 
 
 decodePatientPhoneNumber : Decode.Decoder PatientPhoneNumber
