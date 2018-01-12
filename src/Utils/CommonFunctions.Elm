@@ -1,4 +1,4 @@
-module Utils.CommonFunctions exposing (..)
+port module Utils.CommonFunctions exposing (..)
 
 import Char exposing (isLower, isUpper)
 import Date
@@ -7,6 +7,18 @@ import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Utils.CommonTypes exposing (DropDownItem)
+
+
+port displaySuccessMessage : String -> Cmd msg
+
+
+port displayErrorMessage : String -> Cmd msg
+
+
+port setLoadingStatus : Bool -> Cmd msg
+
+
+port setUnsavedChanges : Bool -> Cmd msg
 
 
 isAlpha : Char -> Bool

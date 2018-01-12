@@ -311,19 +311,19 @@ viewAddress address =
                 [ div []
                     [ label [] [ text "Address Line 1:" ]
                     , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine1 ] []
+                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine1, onInput (UpdateAddressLine1 address) ] []
                         ]
                     ]
                 , div []
                     [ label [] [ text "Address Line 2:" ]
                     , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine2 ] []
+                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine2, onInput (UpdateAddressLine2 address) ] []
                         ]
                     ]
                 , div []
                     [ label [] [ text "Apt./Room No.:" ]
                     , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine3 ] []
+                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine3, onInput (UpdateAddressLine3 address) ] []
                         ]
                     ]
                 ]
@@ -331,7 +331,7 @@ viewAddress address =
                 [ div []
                     [ label [] [ text "City:" ]
                     , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.city ] []
+                        [ input [ class "e-textbox", type_ "text", maybeValue address.city, onInput (UpdateCity address) ] []
                         ]
                     ]
                 , div [ class "margin-bottom-5" ]
@@ -343,7 +343,7 @@ viewAddress address =
                 , div []
                     [ label [] [ text "Zip Code:" ]
                     , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.zipCode ] []
+                        [ input [ class "e-textbox", type_ "text", maybeValue address.zipCode, onInput (UpdateZipcode address) ] []
                         ]
                     ]
                 ]
@@ -365,10 +365,16 @@ type Msg
     | RemovePhone Int
     | AddNewAddress
     | RemoveAddress Int
-      -- Nested Controls
+      -- Nested SF Controls
     | UpdatePatientAddress DropUpdateSf
     | UpdatePatientPhoneNumber DropUpdateSf
     | UpdateLanguagesMap DropUpdateSf
+      -- Nested Controls
+    | UpdateAddressLine1 PatientAddress String
+    | UpdateAddressLine2 PatientAddress String
+    | UpdateAddressLine3 PatientAddress String
+    | UpdateCity PatientAddress String
+    | UpdateZipcode PatientAddress String
       -- Edit
     | UpdateFacilityPtID String
     | UpdateMedicalRecordNo String
@@ -397,6 +403,22 @@ patientPhoneNumberToMsg model patientPhoneNumber =
 patientAddressToMsg : Model -> PatientAddress -> Cmd Msg
 patientAddressToMsg model patientAddress =
     initPatientAddress (PatientAddressMessage patientAddress model.stateDropdown)
+
+
+updateAddress : Model -> PatientAddress -> ( Model, Cmd Msg )
+updateAddress model newPatientAddress =
+    let
+        newAddresses =
+            List.map
+                (\t ->
+                    if t.index == newPatientAddress.index then
+                        newPatientAddress
+                    else
+                        t
+                )
+                model.patientAddresses
+    in
+        { model | patientAddresses = newAddresses } ! []
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -550,7 +572,7 @@ update msg model =
             in
                 { model | patientAddresses = updatedAddress } ! []
 
-        -- Nested Controls
+        -- Nested SF Controls
         UpdatePatientAddress dropUpdateSf ->
             let
                 newAddresses =
@@ -592,6 +614,22 @@ update msg model =
                         model.patientLanguagesMap
             in
                 { model | patientLanguagesMap = newLanguages } ! []
+
+        -- Nested Controls
+        UpdateAddressLine1 patientAddress str ->
+            updateAddress model { patientAddress | addressLine1 = Just str }
+
+        UpdateAddressLine2 patientAddress str ->
+            updateAddress model { patientAddress | addressLine2 = Just str }
+
+        UpdateAddressLine3 patientAddress str ->
+            updateAddress model { patientAddress | addressLine3 = Just str }
+
+        UpdateCity patientAddress str ->
+            updateAddress model { patientAddress | city = Just str }
+
+        UpdateZipcode patientAddress str ->
+            updateAddress model { patientAddress | zipCode = Just str }
 
         -- Edit
         UpdateFacilityPtID str ->

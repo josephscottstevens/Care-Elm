@@ -27,18 +27,6 @@ port editTask : Int -> Cmd msg
 port initSyncfusionControls : SyncFusionMessage -> Cmd msg
 
 
-port displaySuccessMessage : String -> Cmd msg
-
-
-port displayErrorMessage : String -> Cmd msg
-
-
-port setLoadingStatus : Bool -> Cmd msg
-
-
-port setUnsavedChanges : Bool -> Cmd msg
-
-
 port resetUpdateComplete : (String -> msg) -> Sub msg
 
 
