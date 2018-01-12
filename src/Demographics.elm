@@ -156,6 +156,7 @@ nonumberbox displayText isRequired val =
     div [] []
 
 
+dropdown : String -> Bool -> Html msg
 dropdown displayText isRequired =
     div [ class "col-xs-12 padding-h-0" ]
         [ label [ isRequiredClass isRequired ] [ text (displayText ++ ":") ]
