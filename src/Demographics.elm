@@ -33,6 +33,12 @@ port logError : String -> Cmd msg
 
 
 type alias Model =
+    { d : DemographicsInformationModel
+    , c : ContactInformationModel
+    }
+
+
+type alias DemographicsInformationModel =
     { patientId : Int
     , demographicsId : Maybe Int
     , nickName : Maybe String
@@ -51,6 +57,36 @@ type alias Model =
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
     , patientLanguagesMapCounter : Int
+    }
+
+
+type alias ContactInformationModel =
+    { patientPhoneNumbers : List PatientPhoneNumber
+    , patientAddresses : List PatientAddress
+    , phoneNumberTypeDropdown : List DropDownItem
+    , stateDropdown : List DropDownItem
+    , primaryAddressIndex : Int
+    , preferredPhoneIndex : Int
+    }
+
+
+type alias PatientPhoneNumber =
+    { id : Maybe Int
+    , phoneNumber : Maybe String
+    , phoneNumberTypeId : Maybe Int
+    , isPreferred : Bool
+    }
+
+
+type alias PatientAddress =
+    { id : Maybe Int
+    , addressLine1 : Maybe String
+    , addressLine2 : Maybe String
+    , addressLine3 : Maybe String
+    , city : Maybe String
+    , stateId : Int
+    , zipCode : Maybe String
+    , isPrimary : Bool
     }
 
 
@@ -107,13 +143,6 @@ subscriptions =
         [ updateDemographics UpdateDemographics
         , initDemographicsDone InitDemographicsDone
         ]
-
-
-init : Flags -> Cmd Msg
-init flag =
-    Decode.field "demographicsInformationModel" decodeModel
-        |> Http.get ("/People/GetDemographicsInformation?patientId=" ++ toString flag.patientId)
-        |> Http.send Load
 
 
 maybeValue : Maybe String -> Html.Attribute msg
@@ -196,7 +225,7 @@ sfcheckbox displayText isRequired maybeStr =
 
 
 view : Model -> Html Msg
-view model =
+view { d, c } =
     div [ id "demographicInformationForm", class "col-xs-12 padding-h-0" ]
         [ h4 [ class "col-xs-12 padding-h-0" ] [ text "Assigned To" ]
         , div [ class "col-xs-12 padding-h-0" ]
@@ -205,9 +234,9 @@ view model =
             ]
         , div rowStyle
             [ sfbox "Facility" True
-            , textbox "Patient's Facility ID No" True model.facilityPtID
-            , numberbox "Medical Record No" False model.mrn
-            , numberbox "Patient Account No" False model.patientAccountNumber
+            , textbox "Patient's Facility ID No" True d.facilityPtID
+            , numberbox "Medical Record No" False d.mrn
+            , numberbox "Patient Account No" False d.patientAccountNumber
             ]
         , div rowStyle
             [ sfbox "Main Provider" True
@@ -216,28 +245,28 @@ view model =
         , h4 [ class "col-xs-12 padding-h-0 padding-top-10" ] [ text "Demographic Information" ]
         , div rowStyle
             [ sfbox "Prefix" False
-            , nonumberbox "First Name" True model.firstName
-            , nonumberbox "Middle Name" False model.middle
-            , nonumberbox "Last Name" True model.lastName
+            , nonumberbox "First Name" True d.firstName
+            , nonumberbox "Middle Name" False d.middle
+            , nonumberbox "Last Name" True d.lastName
             , sfbox "Suffix" False
-            , textbox "Nickname" False model.nickName
+            , textbox "Nickname" False d.nickName
             , sfbox "Date of Birth" True
-            , textbox "Birth Place" False model.birthPlace
+            , textbox "Birth Place" False d.birthPlace
             , sfbox "Date of Death" False
-            , textbox "SSN" False model.ssn
+            , textbox "SSN" False d.ssn
             ]
         , div rowStyle
             [ sfbox "VIP" False
             , sfbox "Sex at Birth" True
             , sfbox "Sexual Orientation" False
-            , textbox "Sexual Orientation Note" False model.sexualOrientationNote
+            , textbox "Sexual Orientation Note" False d.sexualOrientationNote
             , sfbox "Gender Identity" False
-            , textbox "Gender Identity Note" False model.genderIdentityNote
+            , textbox "Gender Identity Note" False d.genderIdentityNote
             , sfbox "Race" False
             , sfbox "Ethnicity" False
             , sfbox "US Veteran" False
             , sfbox "Religion" False
-            , textbox "Email" False model.email
+            , textbox "Email" False d.email
             ]
         , div [ class "col-xs-12 padding-h-0 padding-top-10" ]
             [ div [ class "col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-h-0" ]
@@ -245,7 +274,7 @@ view model =
                 , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
-                , div [] (List.map viewLanguages model.patientLanguagesMap)
+                , div [] (List.map viewLanguages d.patientLanguagesMap)
                 ]
             ]
         ]
@@ -289,71 +318,87 @@ type Msg
     | RemoveLanguage Int
 
 
-patiantLanguageToMessage : Model -> PatientLanguagesMap -> Cmd Msg
-patiantLanguageToMessage model patientLanguagesMap =
-    initLanguagesMap (PatiantLanguageMessage patientLanguagesMap model.sfData.languageDropdown)
+patiantLanguageToMessage : DemographicsInformationModel -> PatientLanguagesMap -> Cmd Msg
+patiantLanguageToMessage d patientLanguagesMap =
+    initLanguagesMap (PatiantLanguageMessage patientLanguagesMap d.sfData.languageDropdown)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        Load (Ok newModel) ->
-            let
-                newPatientLanguagesMap =
-                    newModel.patientLanguagesMap
-                        |> List.indexedMap (\t y -> { y | index = t })
-            in
-                { newModel
-                    | patientLanguagesMap = newPatientLanguagesMap
-                    , patientLanguagesMapCounter = List.length newPatientLanguagesMap
-                }
-                    ! [ initDemographics newModel.sfData ]
+    let
+        updateDemo t =
+            { model | d = t }
 
-        Load (Err t) ->
-            model ! [ logError (toString t) ]
+        d =
+            model.d
+    in
+        case msg of
+            Load (Ok newModel) ->
+                let
+                    newPatientLanguagesMap =
+                        newModel.d.patientLanguagesMap
+                            |> List.indexedMap (\t y -> { y | index = t })
 
-        InitDemographicsDone _ ->
-            model ! (initContactHours "" :: List.map (patiantLanguageToMessage model) model.patientLanguagesMap)
+                    newD =
+                        newModel.d
+                in
+                    updateDemo
+                        { newD
+                            | patientLanguagesMap = newPatientLanguagesMap
+                            , patientLanguagesMapCounter = List.length newPatientLanguagesMap
+                        }
+                        ! [ initDemographics newModel.d.sfData ]
 
-        UpdateDemographics sfData ->
-            { model | sfData = sfData } ! []
+            Load (Err t) ->
+                model ! [ logError (toString t) ]
 
-        AddNewLanguage ->
-            let
-                newPatientLanguagesMap =
-                    emptyPatientLanguagesMap model.patientLanguagesMapCounter
-            in
-                { model
-                    | patientLanguagesMap = model.patientLanguagesMap ++ [ newPatientLanguagesMap ]
-                    , patientLanguagesMapCounter = model.patientLanguagesMapCounter + 1
-                }
-                    ! [ patiantLanguageToMessage model newPatientLanguagesMap ]
+            InitDemographicsDone _ ->
+                model ! (initContactHours "" :: List.map (patiantLanguageToMessage model.d) model.d.patientLanguagesMap)
 
-        RemoveLanguage index ->
-            let
-                newPatientLanguagesMap =
-                    model.patientLanguagesMap
-                        |> List.filter (\t -> t.index /= index)
+            UpdateDemographics sfData ->
+                let
+                    d =
+                        model.d
+                in
+                    updateDemo { d | sfData = sfData } ! []
 
-                updatedPatientLanguagesMap =
-                    case List.any (\t -> t.isPreferred == True) newPatientLanguagesMap of
-                        True ->
-                            newPatientLanguagesMap
+            AddNewLanguage ->
+                let
+                    newPatientLanguagesMap =
+                        emptyPatientLanguagesMap model.d.patientLanguagesMapCounter
+                in
+                    updateDemo
+                        { d
+                            | patientLanguagesMap = model.d.patientLanguagesMap ++ [ newPatientLanguagesMap ]
+                            , patientLanguagesMapCounter = model.d.patientLanguagesMapCounter + 1
+                        }
+                        ! [ patiantLanguageToMessage model.d newPatientLanguagesMap ]
 
-                        False ->
-                            List.indexedMap
-                                (\t y ->
-                                    if t == 0 then
-                                        { y | isPreferred = True }
-                                    else
-                                        y
-                                )
+            RemoveLanguage index ->
+                let
+                    newPatientLanguagesMap =
+                        model.d.patientLanguagesMap
+                            |> List.filter (\t -> t.index /= index)
+
+                    updatedPatientLanguagesMap =
+                        case List.any (\t -> t.isPreferred == True) newPatientLanguagesMap of
+                            True ->
                                 newPatientLanguagesMap
-            in
-                { model | patientLanguagesMap = updatedPatientLanguagesMap } ! []
+
+                            False ->
+                                List.indexedMap
+                                    (\t y ->
+                                        if t == 0 then
+                                            { y | isPreferred = True }
+                                        else
+                                            y
+                                    )
+                                    newPatientLanguagesMap
+                in
+                    updateDemo { d | patientLanguagesMap = updatedPatientLanguagesMap } ! []
 
 
-emptyModel : Flags -> Model
+emptyModel : Flags -> DemographicsInformationModel
 emptyModel flags =
     { patientId = flags.patientId
     , demographicsId = Nothing
@@ -419,6 +464,24 @@ emptyPatientLanguagesMap index =
     }
 
 
+
+--Decode.field "demographicsInformationModel" decodeModel
+
+
+init : Flags -> Cmd Msg
+init flag =
+    decodeModel
+        |> Http.get ("/People/GetDemographicsInformation?patientId=" ++ toString flag.patientId)
+        |> Http.send Load
+
+
+decodeModel : Decode.Decoder Model
+decodeModel =
+    Pipeline.decode Model
+        |> Pipeline.required "demographicsInformationModel" decodeDemographicsInformationModel
+        |> Pipeline.required "contactInformationModel" decodeContactInformationModel
+
+
 decodePatientLanguagesMap : Decode.Decoder PatientLanguagesMap
 decodePatientLanguagesMap =
     Pipeline.decode PatientLanguagesMap
@@ -428,9 +491,9 @@ decodePatientLanguagesMap =
         |> Pipeline.hardcoded 0
 
 
-decodeModel : Decode.Decoder Model
-decodeModel =
-    Pipeline.decode Model
+decodeDemographicsInformationModel : Decode.Decoder DemographicsInformationModel
+decodeDemographicsInformationModel =
+    Pipeline.decode DemographicsInformationModel
         |> Pipeline.required "PatientId" Decode.int
         |> Pipeline.required "DemographicsId" (Decode.maybe Decode.int)
         |> Pipeline.required "NickName" (Decode.maybe Decode.string)
@@ -449,6 +512,39 @@ decodeModel =
         |> Pipeline.custom decodeSfData
         |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
         |> Pipeline.hardcoded 0
+
+
+decodeContactInformationModel : Decode.Decoder ContactInformationModel
+decodeContactInformationModel =
+    Pipeline.decode ContactInformationModel
+        |> Pipeline.required "PatientPhoneNumbers" (Decode.list decodePatientPhoneNumber)
+        |> Pipeline.required "PatientAddresses" (Decode.list decodePatientAddress)
+        |> Pipeline.required "PhoneNumberTypeDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "StateDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "PrimaryAddressIndex" Decode.int
+        |> Pipeline.required "PreferredPhoneIndex" Decode.int
+
+
+decodePatientPhoneNumber : Decode.Decoder PatientPhoneNumber
+decodePatientPhoneNumber =
+    Pipeline.decode PatientPhoneNumber
+        |> Pipeline.required "Id" (Decode.maybe Decode.int)
+        |> Pipeline.required "PhoneNumber" (Decode.maybe Decode.string)
+        |> Pipeline.required "PhoneNumberTypeId" (Decode.maybe Decode.int)
+        |> Pipeline.required "IsPreferred" Decode.bool
+
+
+decodePatientAddress : Decode.Decoder PatientAddress
+decodePatientAddress =
+    Pipeline.decode PatientAddress
+        |> Pipeline.required "Id" (Decode.maybe Decode.int)
+        |> Pipeline.required "AddressLine1" (Decode.maybe Decode.string)
+        |> Pipeline.required "AddressLine2" (Decode.maybe Decode.string)
+        |> Pipeline.required "AddressLine3" (Decode.maybe Decode.string)
+        |> Pipeline.required "City" (Decode.maybe Decode.string)
+        |> Pipeline.required "StateId" Decode.int
+        |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
+        |> Pipeline.required "IsPrimary" Decode.bool
 
 
 decodeSfData : Decode.Decoder SfData
