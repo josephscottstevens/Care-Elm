@@ -255,7 +255,7 @@ view model =
 
 vertCent : ( String, String )
 vertCent =
-    ( "vertical-align", "center" )
+    ( "vertical-align", "middle" )
 
 
 maybeToInt : Maybe String -> Maybe Int
@@ -276,7 +276,7 @@ maybeToInt maybeStr =
 viewLanguages : PatientLanguagesMap -> Html Msg
 viewLanguages lang =
     div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
-        [ div [ class "inline-block ", style [ ( "width", "20px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
+        [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
             [ input [ type_ "radio", checked lang.isPreferred ] [] ]
         , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ], title "Choose language" ]
             [ input [ id ("PatientLanguagesMapId" ++ (toString lang.index)) ] [] ]
@@ -289,13 +289,13 @@ viewLanguages lang =
 viewPhones : PatientPhoneNumber -> Html Msg
 viewPhones phone =
     div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
-        [ div [ class "inline-block ", style [ ( "width", "20px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
+        [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
             [ input [ type_ "radio", checked phone.isPreferred ] [] ]
         , div [ class "inline-block", style [ ( "width", "100px" ), ( "vertical-align", "middle" ) ], title "Mark as primary" ]
             [ input [ id ("PatientPhoneNumberId" ++ (toString phone.index)) ] [] ]
         , div [ class "inline-block", style [ ( "width", "calc(100% - 155px)" ), ( "vertical-align", "middle" ) ] ]
-            [ MaskedNumber.input (inputOptions phone) [ class "e-textbox" ] phone.state (maybeToInt phone.phoneNumber) ]
-        , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemovePhone phone.index) ]
+            [ MaskedNumber.input (inputOptions phone) [ class "e-textbox", maskStyle ] phone.state (maybeToInt phone.phoneNumber) ]
+        , div [ class "inline-block", style [ ( "width", "32px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemovePhone phone.index) ]
             [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
             ]
         ]
@@ -305,9 +305,9 @@ viewAddress : PatientAddress -> Html Msg
 viewAddress address =
     div [ class "multi-address-template" ]
         [ div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
-            [ div [ class "col-xs-6 padding-h-0 inline-block", title "Mark as primary" ]
+            [ div [ title "Mark as primary", class "col-xs-6 padding-h-0 inline-block" ]
                 [ input [ type_ "radio", checked address.isPrimary, style [ ( "margin-top", "0px" ), vertCent ], checked address.isPrimary ] []
-                , label [ style [ ( "margin-bottom", "0px" ) ] ] [ text "Primary" ]
+                , label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Primary" ]
                 ]
             , div [ class "col-xs-6 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address.index) ]
                 [ span [ style [ ( "padding-right", "20px" ), ( "padding-top", "5px" ) ], class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer pull-right" ] []
@@ -778,6 +778,11 @@ onlyNumbers =
 noNumbers : Html.Attribute msg
 noNumbers =
     attribute "onkeypress" "return event.charCode < 48 || event.charCode > 57"
+
+
+maskStyle : Html.Attribute msg
+maskStyle =
+    style [ ( "margin-left", "5px" ), ( "margin-top", "5px" ) ]
 
 
 textbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
