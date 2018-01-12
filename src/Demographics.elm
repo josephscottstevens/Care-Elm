@@ -121,6 +121,7 @@ maybeValue str =
     value (Maybe.withDefault "" str)
 
 
+rowStyle : List (Html.Attribute msg)
 rowStyle =
     [ class "col-xs-12 col-sm-12 col-md-5 col-lg-4 padding-left-0" ]
 
@@ -238,46 +239,32 @@ view model =
             , sfbox "Religion" False
             , textbox "Email" False model.email
             ]
-
-        -- , div []
-        --     [ h4 [ class "inline-block" ] [ text "Languages" ]
-        --     , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
-        --         [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
-        --         ]
-        --     ]
-        -- , div rowStyle
-        --     [ div [] (List.map viewLanguages model.patientLanguagesMap)
-        --     ]
-        ]
-
-
-xButton : Int -> Html Msg
-xButton index =
-    let
-        xButtonStyle =
-            style
-                [ ( "width", "20px" )
+        , div [ class "col-xs-12 padding-h-0 padding-top-10" ]
+            [ div [ class "col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-h-0" ]
+                [ h4 [ class "inline-block" ] [ text "Languages" ]
+                , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
+                    [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
+                    ]
+                , div [] (List.map viewLanguages model.patientLanguagesMap)
                 ]
-    in
-        div [ class "inline-block", xButtonStyle, title "remove", onClick (RemoveLanguage index) ]
-            [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
             ]
-
-
-languageStyle : Html.Attribute msg
-languageStyle =
-    style
-        [ ( "display", "inline-block" )
-        , ( "width", "2%" )
         ]
+
+
+
+--TODO add  events
 
 
 viewLanguages : PatientLanguagesMap -> Html Msg
 viewLanguages lang =
-    div [ class "row", style [ ( "margin-left", "5px" ), ( "margin-top", "5px" ) ] ]
-        [ div [ class "col-md-2 ", languageStyle ] [ input [ type_ "radio", checked lang.isPreferred ] [] ]
-        , div [ class "col-md-2" ] [ input [ id ("PatientLanguagesMapId" ++ (toString lang.index)) ] [] ]
-        , div [ class "col-md-2", style [ ( "margin-left", "-26px" ), ( "margin-top", "5px" ) ] ] [ xButton lang.index ]
+    div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
+        [ div [ class "inline-block ", style [ ( "width", "20px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
+            [ input [ type_ "radio", checked lang.isPreferred ] [] ]
+        , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ] ]
+            [ input [ id ("PatientLanguagesMapId" ++ (toString lang.index)) ] [] ]
+        , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemoveLanguage lang.index) ]
+            [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
+            ]
         ]
 
 
