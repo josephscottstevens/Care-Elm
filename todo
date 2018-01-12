@@ -14,8 +14,7 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-get filterboxs in for like phone
-put in work rule
+put in work rule for phone
 validations
 
 wtf, when u remove address, state shifts down :/
@@ -34,6 +33,8 @@ zipcode is numberonly?
 maxlength attributes?
 
 phoneNumber mask update event
+
+Phones group is awkward aligned
 
 test Contact Hours still works
 

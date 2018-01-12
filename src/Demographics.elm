@@ -9,6 +9,7 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Http
 import Char
+import MaskedInput.Number as MaskedNumber
 
 
 port initDemographics : SfData -> Cmd msg
@@ -17,13 +18,13 @@ port initDemographics : SfData -> Cmd msg
 port initDemographicsDone : (String -> msg) -> Sub msg
 
 
-port initPatientPhoneNumber : PatientPhoneNumberMessage -> Cmd msg
+port initPatientPhoneNumber : DropInitSf -> Cmd msg
 
 
 port updatePatientPhoneNumber : (DropUpdateSf -> msg) -> Sub msg
 
 
-port initPatientAddress : PatientAddressMessage -> Cmd msg
+port initPatientAddress : DropInitSf -> Cmd msg
 
 
 port updatePatientAddress : (DropUpdateSf -> msg) -> Sub msg
@@ -32,7 +33,7 @@ port updatePatientAddress : (DropUpdateSf -> msg) -> Sub msg
 port initContactHours : String -> Cmd msg
 
 
-port initLanguagesMap : PatientLanguageMessage -> Cmd msg
+port initLanguagesMap : DropInitSf -> Cmd msg
 
 
 port updateLanguagesMap : (DropUpdateSf -> msg) -> Sub msg
@@ -144,6 +145,7 @@ type alias PatientPhoneNumber =
     , phoneNumberTypeId : Maybe Int
     , isPreferred : Bool
     , index : Int
+    , state : MaskedNumber.State
     }
 
 
@@ -160,21 +162,10 @@ type alias PatientAddress =
     }
 
 
-type alias PatientLanguageMessage =
-    { patientLanguagesMap : PatientLanguagesMap
-    , patientLanguageDropdown : List DropDownItem
-    }
-
-
-type alias PatientPhoneNumberMessage =
-    { patientPhoneNumber : PatientPhoneNumber
-    , phoneNumberTypeDropdown : List DropDownItem
-    }
-
-
-type alias PatientAddressMessage =
-    { patientAddress : PatientAddress
-    , stateDropdown : List DropDownItem
+type alias DropInitSf =
+    { newId : Maybe Int
+    , index : Int
+    , items : List DropDownItem
     }
 
 
@@ -267,6 +258,21 @@ vertCent =
     ( "vertical-align", "center" )
 
 
+maybeToInt : Maybe String -> Maybe Int
+maybeToInt maybeStr =
+    case maybeStr of
+        Just str ->
+            case String.filter isNumber str |> String.toInt of
+                Ok t ->
+                    Just t
+
+                Err _ ->
+                    Nothing
+
+        Nothing ->
+            Nothing
+
+
 viewLanguages : PatientLanguagesMap -> Html Msg
 viewLanguages lang =
     div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
@@ -288,7 +294,7 @@ viewPhones phone =
         , div [ class "inline-block", style [ ( "width", "100px" ), ( "vertical-align", "middle" ) ], title "Mark as primary" ]
             [ input [ id ("PatientPhoneNumberId" ++ (toString phone.index)) ] [] ]
         , div [ class "inline-block", style [ ( "width", "calc(100% - 155px)" ), ( "vertical-align", "middle" ) ] ]
-            [ input [ type_ "text", class "e-textbox", style [ ( "width", "100%" ) ], maybeValue phone.phoneNumber ] [] ]
+            [ MaskedNumber.input (inputOptions phone) [ class "e-textbox" ] phone.state (maybeToInt phone.phoneNumber) ]
         , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemovePhone phone.index) ]
             [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
             ]
@@ -389,21 +395,24 @@ type Msg
     | UpdateSexualOrientationNote String
     | UpdateGenderIdentityNote String
     | UpdateEmail String
+      --
+    | InputChanged PatientPhoneNumber (Maybe Int)
+    | InputStateChanged PatientPhoneNumber MaskedNumber.State
 
 
 patientLanguageToMsg : Model -> PatientLanguagesMap -> Cmd Msg
 patientLanguageToMsg model patientLanguagesMap =
-    initLanguagesMap (PatientLanguageMessage patientLanguagesMap model.sfData.languageDropdown)
+    initLanguagesMap (DropInitSf (Just patientLanguagesMap.languageId) patientLanguagesMap.index model.sfData.languageDropdown)
 
 
 patientPhoneNumberToMsg : Model -> PatientPhoneNumber -> Cmd Msg
 patientPhoneNumberToMsg model patientPhoneNumber =
-    initPatientPhoneNumber (PatientPhoneNumberMessage patientPhoneNumber model.phoneNumberTypeDropdown)
+    initPatientPhoneNumber (DropInitSf patientPhoneNumber.phoneNumberTypeId patientPhoneNumber.index model.phoneNumberTypeDropdown)
 
 
 patientAddressToMsg : Model -> PatientAddress -> Cmd Msg
 patientAddressToMsg model patientAddress =
-    initPatientAddress (PatientAddressMessage patientAddress model.stateDropdown)
+    initPatientAddress (DropInitSf (Just patientAddress.stateId) patientAddress.index model.stateDropdown)
 
 
 updateAddress : Model -> PatientAddress -> ( Model, Cmd Msg )
@@ -420,6 +429,22 @@ updateAddress model newPatientAddress =
                 model.patientAddresses
     in
         { model | patientAddresses = newAddresses } ! []
+
+
+updatePhones : Model -> PatientPhoneNumber -> ( Model, Cmd Msg )
+updatePhones model patientPhoneNumber =
+    let
+        newPhoneNumber =
+            List.map
+                (\t ->
+                    if t.index == patientPhoneNumber.index then
+                        patientPhoneNumber
+                    else
+                        t
+                )
+                model.patientPhoneNumbers
+    in
+        { model | patientPhoneNumbers = newPhoneNumber } ! []
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -632,6 +657,12 @@ update msg model =
         UpdateZipcode patientAddress str ->
             updateAddress model { patientAddress | zipCode = Just str }
 
+        InputChanged patientPhoneNumber value ->
+            updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString value }
+
+        InputStateChanged patientPhoneNumber state ->
+            updatePhones model { patientPhoneNumber | state = state }
+
         -- Edit
         UpdateFacilityPtID str ->
             { model | facilityPtID = Just str } ! []
@@ -674,6 +705,22 @@ update msg model =
 -- HELPER Functions
 
 
+inputOptions : PatientPhoneNumber -> MaskedNumber.Options Msg
+inputOptions patientPhoneNumber =
+    let
+        defaultOptions =
+            MaskedNumber.defaultOptions (InputChanged patientPhoneNumber) (InputStateChanged patientPhoneNumber)
+    in
+        if patientPhoneNumber.phoneNumberTypeId == Just 3 then
+            { defaultOptions
+                | pattern = "(###) ###-#### ext.#####"
+            }
+        else
+            { defaultOptions
+                | pattern = "(###) ###-####"
+            }
+
+
 maybeValue : Maybe String -> Html.Attribute msg
 maybeValue str =
     value (Maybe.withDefault "" str)
@@ -692,6 +739,11 @@ idAttr str =
 isAlpha : Char -> Bool
 isAlpha char =
     Char.isLower char || Char.isUpper char
+
+
+isNumber : Char -> Bool
+isNumber char =
+    Char.isDigit char
 
 
 isRequiredClass : Bool -> Html.Attribute msg
@@ -840,6 +892,7 @@ emptyPatientPhoneNumber index =
     , phoneNumberTypeId = Nothing
     , isPreferred = False
     , index = index
+    , state = MaskedNumber.initialState
     }
 
 
@@ -991,6 +1044,7 @@ decodePatientPhoneNumber =
         |> Pipeline.required "PhoneNumberTypeId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
         |> Pipeline.hardcoded 0
+        |> Pipeline.hardcoded MaskedNumber.initialState
 
 
 decodePatientAddress : Decode.Decoder PatientAddress
