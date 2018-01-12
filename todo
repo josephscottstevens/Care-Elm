@@ -14,12 +14,9 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-put in work rule for phone
 validations
 
 wtf, when u remove address, state shifts down :/
-
-phone group looks a bit mis-aligned
 
 implement save
 test save
@@ -32,13 +29,11 @@ stuff like primaryAddressIndex
 zipcode is numberonly?
 maxlength attributes?
 
-phoneNumber mask update event
-
-Phones group is awkward aligned
-
 test Contact Hours still works
 
 Radio button events for the three nested controls
+
+-----------------------------------------------------------------
 
 rounded buttons? 
 and css popup? 

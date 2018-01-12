@@ -42,6 +42,9 @@ port updateLanguagesMap : (DropUpdateSf -> msg) -> Sub msg
 port updateDemographics : (SfData -> msg) -> Sub msg
 
 
+port removeNode : String -> Cmd msg
+
+
 port logError : String -> Cmd msg
 
 
@@ -596,7 +599,7 @@ update msg model =
                                 )
                                 newAddress
             in
-                { model | patientAddresses = updatedAddress } ! []
+                { model | patientAddresses = updatedAddress } ! [ removeNode ("StateId" ++ toString index) ]
 
         -- Nested SF Controls
         UpdatePatientAddress dropUpdateSf ->
