@@ -5,6 +5,7 @@ import Html.Attributes exposing (class, id, type_, value, style, title, checked,
 import Html.Events exposing (onClick, onInput, onCheck)
 import Utils.CommonTypes exposing (DropDownItem, Flags)
 import Utils.CommonFunctions exposing (decodeDropDownItem)
+import Utils.Dropdown as Dropdown
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Http
@@ -162,6 +163,7 @@ type alias PatientAddress =
     , zipCode : Maybe String
     , isPrimary : Bool
     , index : Int
+    , state : Dropdown.Dropdown
     }
 
 
@@ -347,7 +349,9 @@ viewAddress address =
                 , div [ class "margin-bottom-5" ]
                     [ label [ class "required" ] [ text "State:" ]
                     , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", id ("StateId" ++ (toString address.index)) ] []
+                        [ Html.map (UpdateState address) <| Dropdown.view address.state
+
+                        -- input [ class "e-textbox", type_ "text", id ("StateId" ++ (toString address.index)) ] []
                         ]
                     ]
                 , div []
@@ -385,6 +389,7 @@ type Msg
     | UpdateAddressLine3 PatientAddress String
     | UpdateCity PatientAddress String
     | UpdateZipcode PatientAddress String
+    | UpdateState PatientAddress Dropdown.Msg
       -- Edit
     | UpdateFacilityPtID String
     | UpdateMedicalRecordNo String
@@ -418,7 +423,7 @@ patientAddressToMsg model patientAddress =
     initPatientAddress (DropInitSf (Just patientAddress.stateId) patientAddress.index model.stateDropdown)
 
 
-updateAddress : Model -> PatientAddress -> ( Model, Cmd Msg )
+updateAddress : Model -> PatientAddress -> Model
 updateAddress model newPatientAddress =
     let
         newAddresses =
@@ -431,7 +436,7 @@ updateAddress model newPatientAddress =
                 )
                 model.patientAddresses
     in
-        { model | patientAddresses = newAddresses } ! []
+        { model | patientAddresses = newAddresses }
 
 
 updatePhones : Model -> PatientPhoneNumber -> ( Model, Cmd Msg )
@@ -646,19 +651,26 @@ update msg model =
 
         -- Nested Controls
         UpdateAddressLine1 patientAddress str ->
-            updateAddress model { patientAddress | addressLine1 = Just str }
+            updateAddress model { patientAddress | addressLine1 = Just str } ! []
 
         UpdateAddressLine2 patientAddress str ->
-            updateAddress model { patientAddress | addressLine2 = Just str }
+            updateAddress model { patientAddress | addressLine2 = Just str } ! []
 
         UpdateAddressLine3 patientAddress str ->
-            updateAddress model { patientAddress | addressLine3 = Just str }
+            updateAddress model { patientAddress | addressLine3 = Just str } ! []
 
         UpdateCity patientAddress str ->
-            updateAddress model { patientAddress | city = Just str }
+            updateAddress model { patientAddress | city = Just str } ! []
 
         UpdateZipcode patientAddress str ->
-            updateAddress model { patientAddress | zipCode = Just str }
+            updateAddress model { patientAddress | zipCode = Just str } ! []
+
+        UpdateState patientAddress dropdownMsg ->
+            let
+                ( newState, newMsg ) =
+                    Dropdown.update dropdownMsg patientAddress.state
+            in
+                updateAddress model { patientAddress | state = newState } ! [ newMsg ]
 
         InputChanged patientPhoneNumber value ->
             updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString value }
@@ -915,6 +927,7 @@ emptyPatientAddress index =
     , zipCode = Nothing
     , isPrimary = False
     , index = index
+    , state = Dropdown.init "stateDropdown" [] (Just (DropDownItem Nothing ""))
     }
 
 
@@ -1067,6 +1080,7 @@ decodePatientAddress =
         |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
         |> Pipeline.required "IsPrimary" Decode.bool
         |> Pipeline.hardcoded 0
+        |> Pipeline.hardcoded (Dropdown.init "stateDropdown" [] (Just (DropDownItem Nothing "")))
 
 
 decodeSfData : Decode.Decoder SfData
