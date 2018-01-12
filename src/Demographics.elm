@@ -36,14 +36,11 @@ type alias Model =
     { patientId : Int
     , demographicsId : Maybe Int
     , nickName : Maybe String
-    , vip : Maybe Bool
     , ssn : Maybe String
     , lastName : Maybe String
     , firstName : Maybe String
     , middle : Maybe String
-    , dateOfBirth : Maybe String
     , birthPlace : Maybe String
-    , dateOfDeath : Maybe String
     , mrn : Maybe String
     , patientAccountNumber : Maybe String
     , facilityPtID : Maybe String
@@ -84,6 +81,9 @@ type alias SfData =
     , prefixDropdown : List DropDownItem
     , uSVeteranDropdown : List DropDownItem
     , religionDropdown : List DropDownItem
+    , dateOfBirth : Maybe String
+    , dateOfDeath : Maybe String
+    , vip : Maybe Bool
     }
 
 
@@ -167,31 +167,31 @@ noNumbers =
 textbox : String -> Bool -> Maybe String -> Html msg
 textbox displayText isRequired maybeStr =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr ] []
+        input [ type_ "text", idAttr displayText, maybeValue maybeStr, class "e-textbox" ] []
 
 
 numberbox : String -> Bool -> Maybe String -> Html msg
 numberbox displayText isRequired maybeStr =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr, onlyNumbers ] []
+        input [ type_ "text", idAttr displayText, maybeValue maybeStr, onlyNumbers, class "e-textbox" ] []
 
 
 nonumberbox : String -> Bool -> Maybe String -> Html msg
 nonumberbox displayText isRequired maybeStr =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr, noNumbers ] []
+        input [ type_ "text", idAttr displayText, maybeValue maybeStr, noNumbers, class "e-textbox" ] []
 
 
 sfbox : String -> Bool -> Html msg
 sfbox displayText isRequired =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText ] []
+        input [ type_ "text", idAttr displayText, class "e-textbox" ] []
 
 
 sfcheckbox : String -> Bool -> Maybe String -> Html msg
 sfcheckbox displayText isRequired maybeStr =
     commonStructure displayText isRequired <|
-        input [ type_ "checkbox", idAttr displayText ] []
+        input [ type_ "checkbox", idAttr displayText, class "e-checkbox" ] []
 
 
 view : Model -> Html Msg
@@ -212,7 +212,7 @@ view model =
             [ sfbox "Main Provider" True
             , sfbox "Care Coordinator" True
             ]
-        , h4 [] [ text "Demographic Information" ]
+        , h4 [ class "col-xs-12 padding-h-0 padding-top-10" ] [ text "Demographic Information" ]
         , div rowStyle
             [ sfbox "Prefix" False
             , nonumberbox "First Name" True model.firstName
@@ -223,6 +223,7 @@ view model =
             , sfbox "Date of Birth" True
             , textbox "Birth Place" False model.birthPlace
             , sfbox "Date of Death" False
+            , textbox "SSN" False model.ssn
             ]
         , div rowStyle
             [ sfbox "VIP" False
@@ -357,14 +358,11 @@ emptyModel flags =
     { patientId = flags.patientId
     , demographicsId = Nothing
     , nickName = Nothing
-    , vip = Nothing
     , ssn = Nothing
     , lastName = Nothing
     , firstName = Nothing
     , middle = Nothing
-    , dateOfBirth = Nothing
     , birthPlace = Nothing
-    , dateOfDeath = Nothing
     , mrn = Nothing
     , patientAccountNumber = Nothing
     , facilityPtID = Nothing
@@ -406,6 +404,9 @@ emptySfData =
     , prefixDropdown = []
     , uSVeteranDropdown = []
     , religionDropdown = []
+    , dateOfBirth = Nothing
+    , dateOfDeath = Nothing
+    , vip = Nothing
     }
 
 
@@ -433,14 +434,11 @@ decodeModel =
         |> Pipeline.required "PatientId" Decode.int
         |> Pipeline.required "DemographicsId" (Decode.maybe Decode.int)
         |> Pipeline.required "NickName" (Decode.maybe Decode.string)
-        |> Pipeline.required "VIP" (Decode.maybe Decode.bool)
         |> Pipeline.required "SSN" (Decode.maybe Decode.string)
         |> Pipeline.required "LastName" (Decode.maybe Decode.string)
         |> Pipeline.required "FirstName" (Decode.maybe Decode.string)
         |> Pipeline.required "Middle" (Decode.maybe Decode.string)
-        |> Pipeline.required "DateOfBirth" (Decode.maybe Decode.string)
         |> Pipeline.required "BirthPlace" (Decode.maybe Decode.string)
-        |> Pipeline.required "DateOfDeath" (Decode.maybe Decode.string)
         |> Pipeline.required "MRN" (Decode.maybe Decode.string)
         |> Pipeline.required "PatientAccountNumber" (Decode.maybe Decode.string)
         |> Pipeline.required "FacilityPtID" (Decode.maybe Decode.string)
@@ -482,3 +480,6 @@ decodeSfData =
         |> Pipeline.required "PrefixDropdown" (Decode.list decodeDropDownItem)
         |> Pipeline.required "USVeteranDropdown" (Decode.list decodeDropDownItem)
         |> Pipeline.required "ReligionDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "DateOfBirth" (Decode.maybe Decode.string)
+        |> Pipeline.required "DateOfDeath" (Decode.maybe Decode.string)
+        |> Pipeline.required "VIP" (Decode.maybe Decode.bool)
