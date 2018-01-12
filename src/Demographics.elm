@@ -1,13 +1,14 @@
 port module Demographics exposing (..)
 
 import Html exposing (Html, text, div, span, button, ul, li, a, input, label, h4)
-import Html.Attributes exposing (class, id, type_, value, style, title, checked)
+import Html.Attributes exposing (class, id, type_, value, style, title, checked, hidden)
 import Html.Events exposing (onClick)
 import Utils.CommonTypes exposing (DropDownItem, Flags)
 import Utils.CommonFunctions exposing (decodeDropDownItem)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Http
+import Char
 
 
 port initDemographics : SfData -> Cmd msg
@@ -115,135 +116,88 @@ init flag =
         |> Http.send Load
 
 
-rowStyle : List (Html.Attribute msg)
-rowStyle =
-    [ style [ ( "margin-top", "5px" ) ]
-    , class "row"
-    ]
-
-
-labelStyle : Bool -> List (Html.Attribute msg)
-labelStyle isRequired =
-    let
-        required =
-            case isRequired of
-                True ->
-                    "required "
-
-                False ->
-                    ""
-    in
-        [ class ("padding-right-10 " ++ required ++ " col-md-1")
-        , style
-            [ ( "font-family", "Segoe UI,Helvetica Neue" )
-            , ( "width", "11%" )
-            ]
-        ]
-
-
-labelStyleRequired : List (Html.Attribute msg)
-labelStyleRequired =
-    labelStyle True
-
-
-labelStyleOptional : List (Html.Attribute msg)
-labelStyleOptional =
-    labelStyle False
-
-
-divStyle : List (Html.Attribute msg)
-divStyle =
-    [ class "col-md-2 padding-left-5" ]
-
-
 maybeValue : Maybe String -> Html.Attribute msg
 maybeValue str =
     value (Maybe.withDefault "" str)
 
 
+rowStyle =
+    [ class "col-xs-12 col-sm-12 col-md-5 col-lg-4 padding-left-0" ]
+
+
+idAttr : String -> Html.Attribute msg
+idAttr str =
+    id ((String.filter isAlpha str) ++ "Id")
+
+
+isAlpha : Char -> Bool
+isAlpha char =
+    Char.isLower char || Char.isUpper char
+
+
+isRequiredClass isRequired =
+    case isRequired of
+        True ->
+            class "required "
+
+        False ->
+            class ""
+
+
+textbox displayText isRequired val =
+    div [] []
+
+
+numberbox displayText isRequired val =
+    div [] []
+
+
+nonumberbox displayText isRequired val =
+    div [] []
+
+
+dropdown displayText isRequired =
+    div [ class "col-xs-12 padding-h-0" ]
+        [ label [ isRequiredClass isRequired ] [ text (displayText ++ ":") ]
+        , div [ class "DemographicsInputDiv padding-h-0" ]
+            [ input [ type_ "text", idAttr displayText ] []
+            ]
+        ]
+
+
+datetimebox displayText isRequired =
+    div [] []
+
+
 view : Model -> Html Msg
 view model =
-    div []
-        [ h4 [] [ text "Assigned To" ]
-        , div rowStyle
-            [ label labelStyleRequired [ text "Facility:" ]
-            , div divStyle [ input [ id "FacilityId" ] [] ]
-            , label labelStyleRequired [ text "Main Provider:" ]
-            , div divStyle [ input [ id "MainProviderId" ] [] ]
+    div [ id "DemographicsForm" ]
+        [ h4 [ class "col-xs-12 padding-h-0" ] [ text "Assigned To" ]
+        , div [ class "col-xs-12 padding-h-0" ]
+            -- TODO
+            [ div [ class "error", hidden True ] []
             ]
         , div rowStyle
-            [ label labelStyleOptional [ text "Patient's Facility ID No:" ]
-            , div divStyle [ input [ id "FacilityPtIDId", class "e-textbox", maybeValue model.facilityPtID ] [] ]
-            , label labelStyleRequired [ text "Care Coordinator:" ]
-            , div divStyle [ input [ id "CareCoordinatorId" ] [] ]
+            [ dropdown "Facility" True
+            , textbox "Patient's Facility ID No" True (maybeValue model.facilityPtID)
+            , numberbox "Medical Record No" False (maybeValue model.mrn)
+            , numberbox "Patient Account No" False (maybeValue model.patientAccountNumber)
             ]
         , div rowStyle
-            [ label labelStyleOptional [ text "Medical Record No:" ]
-            , div divStyle [ input [ id "MRNId", class "e-textbox", maybeValue model.mrn ] [] ]
-            ]
-        , div rowStyle
-            [ label labelStyleOptional [ text "Patient Account No:" ]
-            , div divStyle [ input [ id "PatientAccountNumberId", class "e-textbox", maybeValue model.patientAccountNumber ] [] ]
+            [ dropdown "Main Provider" True
+            , dropdown "Care Coordinator" True
             ]
         , h4 [] [ text "Demographic Information" ]
         , div rowStyle
-            [ label labelStyleOptional [ text "Prefix:" ]
-            , div divStyle [ input [ id "PrefixId" ] [] ]
-            , label labelStyleOptional [ text "Sex at Birth:" ]
-            , div divStyle [ input [ id "SexTypeId" ] [] ]
-            ]
-        , div rowStyle
-            [ label labelStyleOptional [ text "First Name:" ]
-            , div divStyle [ input [ id "FirstId" ] [] ]
-            , label labelStyleOptional [ text "Sexual Orientation:" ]
-            , div divStyle [ input [ class "e-textbox" ] [] ]
-            ]
-        , div rowStyle
-            [ label labelStyleOptional [ text "Middle Name:" ]
-            , div divStyle [ input [ id "MiddleId" ] [] ]
-            , label labelStyleOptional [ text "Sexual Orientation Note:" ]
-            , div divStyle [ input [ class "e-textbox", maybeValue model.sexualOrientationNote ] [] ]
-            ]
-        , div rowStyle
-            [ label labelStyleOptional [ text "Last Name:" ]
-            , div divStyle [ input [ id "LastId" ] [] ]
-            , label labelStyleOptional [ text "Gender Identity:" ]
-            , div divStyle [ input [ id "GenderIdentityId" ] [] ]
-            ]
-        , div rowStyle
-            [ label labelStyleOptional [ text "Suffix:" ]
-            , div divStyle [ input [ id "SuffixId" ] [] ]
-            , label labelStyleOptional [ text "Gender Identity Note:" ]
-            , div divStyle [ input [ class "e-textbox", maybeValue model.genderIdentityNote ] [] ]
-            ]
-        , div rowStyle
-            [ label labelStyleOptional [ text "Nickname:" ]
-            , div divStyle [ input [ id "NickNameId" ] [] ]
-            , label labelStyleOptional [ text "Race:" ]
-            , div divStyle [ input [ id "RaceId" ] [] ]
-            ]
-        , div rowStyle
-            [ label labelStyleOptional [ text "Date of Birth:" ]
-            , div divStyle [ input [ id "DateOfBirthId" ] [] ]
-            , label labelStyleOptional [ text "Ethnicity:" ]
-            , div divStyle [ input [ id "EthnicityId" ] [] ]
-            ]
-        , div rowStyle
-            [ label labelStyleOptional [ text "Date of Death:" ]
-            , div divStyle [ input [ id "DateOfDeathId" ] [] ]
-            , label labelStyleOptional [ text "US Veteran:" ]
-            , div divStyle [ input [ id "USVeteranId" ] [] ]
-            ]
-        , div rowStyle
-            [ label labelStyleOptional [ text "SSN:" ]
-            , div divStyle [ input [ id "SSNId" ] [] ]
-            , label labelStyleOptional [ text "Religion:" ]
-            , div divStyle [ input [ id "ReligionId" ] [] ]
-            ]
-        , div rowStyle
-            [ div [ class "col-md-4", style [ ( "width", "27.7%" ) ] ] []
-            , label labelStyleOptional [ text "Email:" ]
-            , div divStyle [ input [ class "e-textbox", maybeValue model.email ] [] ]
+            [ dropdown "Prefix" False
+            , nonumberbox "First Name" True model.firstName
+            , nonumberbox "Middle Name" False model.middle
+            , nonumberbox "Last Name" True model.lastName
+            , dropdown "Suffix" False
+            , textbox "Nickname" False model.nickName
+            , datetimebox "Date of Birth" True
+            , textbox "Birth Place" False model.birthPlace
+            , datetimebox "Date of Death" False
             ]
         , div []
             [ h4 [ class "inline-block" ] [ text "Languages" ]
