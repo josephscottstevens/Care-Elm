@@ -185,15 +185,6 @@ view model =
             [ label labelStyleOptional [ text "Patient Account No:" ]
             , div divStyle [ input [ id "PatientAccountNumberId", class "e-textbox", maybeValue model.patientAccountNumber ] [] ]
             ]
-        , div []
-            [ h4 [ class "inline-block" ] [ text "Languages" ]
-            , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
-                [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
-                ]
-            ]
-        , div rowStyle
-            [ div [] (List.map viewLanguages model.patientLanguagesMap)
-            ]
         , h4 [] [ text "Demographic Information" ]
         , div rowStyle
             [ label labelStyleOptional [ text "Prefix:" ]
@@ -205,7 +196,7 @@ view model =
             [ label labelStyleOptional [ text "First Name:" ]
             , div divStyle [ input [ id "FirstId" ] [] ]
             , label labelStyleOptional [ text "Sexual Orientation:" ]
-            , div divStyle [ input [ id "SexualOrientationId" ] [] ]
+            , div divStyle [ input [ class "e-textbox" ] [] ]
             ]
         , div rowStyle
             [ label labelStyleOptional [ text "Middle Name:" ]
@@ -250,9 +241,18 @@ view model =
             , div divStyle [ input [ id "ReligionId" ] [] ]
             ]
         , div rowStyle
-            [ div [ class "col-md-4" ] []
+            [ div [ class "col-md-4", style [ ( "width", "27.7%" ) ] ] []
             , label labelStyleOptional [ text "Email:" ]
             , div divStyle [ input [ class "e-textbox", maybeValue model.email ] [] ]
+            ]
+        , div []
+            [ h4 [ class "inline-block" ] [ text "Languages" ]
+            , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
+                [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
+                ]
+            ]
+        , div rowStyle
+            [ div [] (List.map viewLanguages model.patientLanguagesMap)
             ]
         ]
 
