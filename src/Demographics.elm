@@ -67,6 +67,8 @@ type alias ContactInformationModel =
     , stateDropdown : List DropDownItem
     , primaryAddressIndex : Int
     , preferredPhoneIndex : Int
+    , patientPhoneNumbersCounter : Int
+    , patientAddressesCounter : Int
     }
 
 
@@ -75,6 +77,7 @@ type alias PatientPhoneNumber =
     , phoneNumber : Maybe String
     , phoneNumberTypeId : Maybe Int
     , isPreferred : Bool
+    , index : Int
     }
 
 
@@ -87,6 +90,7 @@ type alias PatientAddress =
     , stateId : Int
     , zipCode : Maybe String
     , isPrimary : Bool
+    , index : Int
     }
 
 
@@ -143,6 +147,231 @@ subscriptions =
         [ updateDemographics UpdateDemographics
         , initDemographicsDone InitDemographicsDone
         ]
+
+
+view : Model -> Html Msg
+view { d, c } =
+    div [ id "demographicInformationForm", class "col-xs-12 padding-h-0" ]
+        [ h4 [ class "col-xs-12 padding-h-0" ] [ text "Assigned To" ]
+        , div [ class "col-xs-12 padding-h-0" ]
+            -- TODO
+            [ div [ class "error", hidden True ] []
+            ]
+        , div rowStyle
+            [ sfbox "Facility" True
+            , textbox "Patient's Facility ID No" True d.facilityPtID
+            , numberbox "Medical Record No" False d.mrn
+            , numberbox "Patient Account No" False d.patientAccountNumber
+            ]
+        , div rowStyle
+            [ sfbox "Main Provider" True
+            , sfbox "Care Coordinator" True
+            ]
+        , h4 [ class "col-xs-12 padding-h-0 padding-top-10" ] [ text "Demographic Information" ]
+        , div rowStyle
+            [ sfbox "Prefix" False
+            , nonumberbox "First Name" True d.firstName
+            , nonumberbox "Middle Name" False d.middle
+            , nonumberbox "Last Name" True d.lastName
+            , sfbox "Suffix" False
+            , textbox "Nickname" False d.nickName
+            , sfbox "Date of Birth" True
+            , textbox "Birth Place" False d.birthPlace
+            , sfbox "Date of Death" False
+            , textbox "SSN" False d.ssn
+            ]
+        , div rowStyle
+            [ sfbox "VIP" False
+            , sfbox "Sex at Birth" True
+            , sfbox "Sexual Orientation" False
+            , textbox "Sexual Orientation Note" False d.sexualOrientationNote
+            , sfbox "Gender Identity" False
+            , textbox "Gender Identity Note" False d.genderIdentityNote
+            , sfbox "Race" False
+            , sfbox "Ethnicity" False
+            , sfbox "US Veteran" False
+            , sfbox "Religion" False
+            , textbox "Email" False d.email
+            ]
+        , div [ class "col-xs-12 padding-h-0 padding-top-10" ]
+            [ div [ class "col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-h-0" ]
+                [ h4 [ class "inline-block" ] [ text "Languages" ]
+                , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
+                    [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
+                    ]
+                , div [] (List.map viewLanguages d.patientLanguagesMap)
+                ]
+            ]
+        ]
+
+
+viewLanguages : PatientLanguagesMap -> Html Msg
+viewLanguages lang =
+    div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
+        [ div [ class "inline-block ", style [ ( "width", "20px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
+            [ input [ type_ "radio", checked lang.isPreferred ] [] ]
+        , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ] ]
+            [ input [ id ("PatientLanguagesMapId" ++ (toString lang.index)) ] [] ]
+        , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemoveLanguage lang.index) ]
+            [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
+            ]
+        ]
+
+
+viewPhones : PatientPhoneNumber -> Html Msg
+viewPhones phone =
+    div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
+        [ div [ class "inline-block ", style [ ( "width", "20px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
+            [ input [ type_ "radio", checked phone.isPreferred ] [] ]
+        , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ] ]
+            [ input [ id ("PatientPhoneNumberId" ++ (toString phone.index)) ] [] ]
+        , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ] ]
+            [ input [ type_ "text", class "e-textbox" ] [] ]
+        , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemovePhone phone.index) ]
+            [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
+            ]
+        ]
+
+
+type Msg
+    = Load (Result Http.Error Model)
+    | UpdateDemographics SfData
+    | InitDemographicsDone String
+    | AddNewLanguage
+    | RemoveLanguage Int
+    | AddNewPhone
+    | RemovePhone Int
+
+
+patiantLanguageToMessage : DemographicsInformationModel -> PatientLanguagesMap -> Cmd Msg
+patiantLanguageToMessage d patientLanguagesMap =
+    initLanguagesMap (PatiantLanguageMessage patientLanguagesMap d.sfData.languageDropdown)
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    let
+        updateDemo t =
+            { model | d = t }
+
+        updateCont t =
+            { model | c = t }
+
+        d =
+            model.d
+
+        c =
+            model.c
+    in
+        case msg of
+            Load (Ok newModel) ->
+                let
+                    newPatientLanguagesMap =
+                        newModel.d.patientLanguagesMap
+                            |> List.indexedMap (\index t -> { t | index = index })
+
+                    newPatientPhoneNumber =
+                        newModel.c.patientPhoneNumbers
+                            |> List.indexedMap (\index t -> { t | index = index })
+
+                    newPatientAddress =
+                        newModel.c.patientAddresses
+                            |> List.indexedMap (\index t -> { t | index = index })
+
+                    newD =
+                        newModel.d
+                in
+                    { d =
+                        { newD
+                            | patientLanguagesMap = newPatientLanguagesMap
+                            , patientLanguagesMapCounter = List.length newPatientLanguagesMap
+                        }
+                    , c = emptyContactInformationModel
+                    }
+                        ! [ initDemographics newModel.d.sfData ]
+
+            Load (Err t) ->
+                model ! [ logError (toString t) ]
+
+            InitDemographicsDone _ ->
+                model ! (initContactHours "" :: List.map (patiantLanguageToMessage model.d) model.d.patientLanguagesMap)
+
+            UpdateDemographics sfData ->
+                let
+                    d =
+                        model.d
+                in
+                    updateDemo { d | sfData = sfData } ! []
+
+            AddNewLanguage ->
+                let
+                    newPatientLanguagesMap =
+                        emptyPatientLanguagesMap model.d.patientLanguagesMapCounter
+                in
+                    updateDemo
+                        { d
+                            | patientLanguagesMap = model.d.patientLanguagesMap ++ [ newPatientLanguagesMap ]
+                            , patientLanguagesMapCounter = model.d.patientLanguagesMapCounter + 1
+                        }
+                        ! [ patiantLanguageToMessage model.d newPatientLanguagesMap ]
+
+            RemoveLanguage index ->
+                let
+                    newPatientLanguagesMap =
+                        model.d.patientLanguagesMap
+                            |> List.filter (\t -> t.index /= index)
+
+                    updatedPatientLanguagesMap =
+                        case List.any (\t -> t.isPreferred == True) newPatientLanguagesMap of
+                            True ->
+                                newPatientLanguagesMap
+
+                            False ->
+                                List.indexedMap
+                                    (\t y ->
+                                        if t == 0 then
+                                            { y | isPreferred = True }
+                                        else
+                                            y
+                                    )
+                                    newPatientLanguagesMap
+                in
+                    updateDemo { d | patientLanguagesMap = updatedPatientLanguagesMap } ! []
+
+            AddNewPhone ->
+                let
+                    newPatientLanguagesMap =
+                        emptyPatientLanguagesMap model.d.patientLanguagesMapCounter
+                in
+                    updateDemo
+                        { d
+                            | patientLanguagesMap = model.d.patientLanguagesMap ++ [ newPatientLanguagesMap ]
+                            , patientLanguagesMapCounter = model.d.patientLanguagesMapCounter + 1
+                        }
+                        ! [ patiantLanguageToMessage model.d newPatientLanguagesMap ]
+
+            RemovePhone index ->
+                let
+                    newPatientPhoneNumber =
+                        model.c.patientPhoneNumbers
+                            |> List.filter (\t -> t.index /= index)
+
+                    updatedPatientPhoneNumber =
+                        case List.any (\t -> t.isPreferred == True) newPatientPhoneNumber of
+                            True ->
+                                newPatientPhoneNumber
+
+                            False ->
+                                List.indexedMap
+                                    (\t y ->
+                                        if t == 0 then
+                                            { y | isPreferred = True }
+                                        else
+                                            y
+                                    )
+                                    newPatientPhoneNumber
+                in
+                    updateCont { c | patientPhoneNumbers = updatedPatientPhoneNumber } ! []
 
 
 maybeValue : Maybe String -> Html.Attribute msg
@@ -224,182 +453,15 @@ sfcheckbox displayText isRequired maybeStr =
         input [ type_ "checkbox", idAttr displayText, class "e-checkbox" ] []
 
 
-view : Model -> Html Msg
-view { d, c } =
-    div [ id "demographicInformationForm", class "col-xs-12 padding-h-0" ]
-        [ h4 [ class "col-xs-12 padding-h-0" ] [ text "Assigned To" ]
-        , div [ class "col-xs-12 padding-h-0" ]
-            -- TODO
-            [ div [ class "error", hidden True ] []
-            ]
-        , div rowStyle
-            [ sfbox "Facility" True
-            , textbox "Patient's Facility ID No" True d.facilityPtID
-            , numberbox "Medical Record No" False d.mrn
-            , numberbox "Patient Account No" False d.patientAccountNumber
-            ]
-        , div rowStyle
-            [ sfbox "Main Provider" True
-            , sfbox "Care Coordinator" True
-            ]
-        , h4 [ class "col-xs-12 padding-h-0 padding-top-10" ] [ text "Demographic Information" ]
-        , div rowStyle
-            [ sfbox "Prefix" False
-            , nonumberbox "First Name" True d.firstName
-            , nonumberbox "Middle Name" False d.middle
-            , nonumberbox "Last Name" True d.lastName
-            , sfbox "Suffix" False
-            , textbox "Nickname" False d.nickName
-            , sfbox "Date of Birth" True
-            , textbox "Birth Place" False d.birthPlace
-            , sfbox "Date of Death" False
-            , textbox "SSN" False d.ssn
-            ]
-        , div rowStyle
-            [ sfbox "VIP" False
-            , sfbox "Sex at Birth" True
-            , sfbox "Sexual Orientation" False
-            , textbox "Sexual Orientation Note" False d.sexualOrientationNote
-            , sfbox "Gender Identity" False
-            , textbox "Gender Identity Note" False d.genderIdentityNote
-            , sfbox "Race" False
-            , sfbox "Ethnicity" False
-            , sfbox "US Veteran" False
-            , sfbox "Religion" False
-            , textbox "Email" False d.email
-            ]
-        , div [ class "col-xs-12 padding-h-0 padding-top-10" ]
-            [ div [ class "col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-h-0" ]
-                [ h4 [ class "inline-block" ] [ text "Languages" ]
-                , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
-                    [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
-                    ]
-                , div [] (List.map viewLanguages d.patientLanguagesMap)
-                ]
-            ]
-        ]
-
-
-
---TODO add  events
-
-
-viewLanguages : PatientLanguagesMap -> Html Msg
-viewLanguages lang =
-    div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
-        [ div [ class "inline-block ", style [ ( "width", "20px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
-            [ input [ type_ "radio", checked lang.isPreferred ] [] ]
-        , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ] ]
-            [ input [ id ("PatientLanguagesMapId" ++ (toString lang.index)) ] [] ]
-        , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemoveLanguage lang.index) ]
-            [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
-            ]
-        ]
-
-
-viewPhones : PatientLanguagesMap -> Html Msg
-viewPhones lang =
-    div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
-        [ div [ class "inline-block ", style [ ( "width", "20px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
-            [ input [ type_ "radio", checked lang.isPreferred ] [] ]
-        , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ] ]
-            [ input [ id ("PatientLanguagesMapId" ++ (toString lang.index)) ] [] ]
-        , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemoveLanguage lang.index) ]
-            [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
-            ]
-        ]
-
-
-type Msg
-    = Load (Result Http.Error Model)
-    | UpdateDemographics SfData
-    | InitDemographicsDone String
-    | AddNewLanguage
-    | RemoveLanguage Int
-
-
-patiantLanguageToMessage : DemographicsInformationModel -> PatientLanguagesMap -> Cmd Msg
-patiantLanguageToMessage d patientLanguagesMap =
-    initLanguagesMap (PatiantLanguageMessage patientLanguagesMap d.sfData.languageDropdown)
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    let
-        updateDemo t =
-            { model | d = t }
-
-        d =
-            model.d
-    in
-        case msg of
-            Load (Ok newModel) ->
-                let
-                    newPatientLanguagesMap =
-                        newModel.d.patientLanguagesMap
-                            |> List.indexedMap (\t y -> { y | index = t })
-
-                    newD =
-                        newModel.d
-                in
-                    updateDemo
-                        { newD
-                            | patientLanguagesMap = newPatientLanguagesMap
-                            , patientLanguagesMapCounter = List.length newPatientLanguagesMap
-                        }
-                        ! [ initDemographics newModel.d.sfData ]
-
-            Load (Err t) ->
-                model ! [ logError (toString t) ]
-
-            InitDemographicsDone _ ->
-                model ! (initContactHours "" :: List.map (patiantLanguageToMessage model.d) model.d.patientLanguagesMap)
-
-            UpdateDemographics sfData ->
-                let
-                    d =
-                        model.d
-                in
-                    updateDemo { d | sfData = sfData } ! []
-
-            AddNewLanguage ->
-                let
-                    newPatientLanguagesMap =
-                        emptyPatientLanguagesMap model.d.patientLanguagesMapCounter
-                in
-                    updateDemo
-                        { d
-                            | patientLanguagesMap = model.d.patientLanguagesMap ++ [ newPatientLanguagesMap ]
-                            , patientLanguagesMapCounter = model.d.patientLanguagesMapCounter + 1
-                        }
-                        ! [ patiantLanguageToMessage model.d newPatientLanguagesMap ]
-
-            RemoveLanguage index ->
-                let
-                    newPatientLanguagesMap =
-                        model.d.patientLanguagesMap
-                            |> List.filter (\t -> t.index /= index)
-
-                    updatedPatientLanguagesMap =
-                        case List.any (\t -> t.isPreferred == True) newPatientLanguagesMap of
-                            True ->
-                                newPatientLanguagesMap
-
-                            False ->
-                                List.indexedMap
-                                    (\t y ->
-                                        if t == 0 then
-                                            { y | isPreferred = True }
-                                        else
-                                            y
-                                    )
-                                    newPatientLanguagesMap
-                in
-                    updateDemo { d | patientLanguagesMap = updatedPatientLanguagesMap } ! []
-
-
-emptyModel : Flags -> DemographicsInformationModel
+emptyModel : Flags -> Model
 emptyModel flags =
+    { d = emptyDemographicsInformationModel flags
+    , c = emptyContactInformationModel
+    }
+
+
+emptyDemographicsInformationModel : Flags -> DemographicsInformationModel
+emptyDemographicsInformationModel flags =
     { patientId = flags.patientId
     , demographicsId = Nothing
     , nickName = Nothing
@@ -418,6 +480,19 @@ emptyModel flags =
     , sfData = emptySfData
     , patientLanguagesMap = []
     , patientLanguagesMapCounter = 0
+    }
+
+
+emptyContactInformationModel : ContactInformationModel
+emptyContactInformationModel =
+    { patientPhoneNumbers = []
+    , patientAddresses = []
+    , phoneNumberTypeDropdown = []
+    , stateDropdown = []
+    , primaryAddressIndex = 0
+    , preferredPhoneIndex = 0
+    , patientPhoneNumbersCounter = 0
+    , patientAddressesCounter = 0
     }
 
 
@@ -462,10 +537,6 @@ emptyPatientLanguagesMap index =
     , isPreferred = False
     , index = index
     }
-
-
-
---Decode.field "demographicsInformationModel" decodeModel
 
 
 init : Flags -> Cmd Msg
@@ -523,6 +594,8 @@ decodeContactInformationModel =
         |> Pipeline.required "StateDropdown" (Decode.list decodeDropDownItem)
         |> Pipeline.required "PrimaryAddressIndex" Decode.int
         |> Pipeline.required "PreferredPhoneIndex" Decode.int
+        |> Pipeline.hardcoded 0
+        |> Pipeline.hardcoded 0
 
 
 decodePatientPhoneNumber : Decode.Decoder PatientPhoneNumber
@@ -532,6 +605,7 @@ decodePatientPhoneNumber =
         |> Pipeline.required "PhoneNumber" (Decode.maybe Decode.string)
         |> Pipeline.required "PhoneNumberTypeId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
+        |> Pipeline.hardcoded 0
 
 
 decodePatientAddress : Decode.Decoder PatientAddress
@@ -545,6 +619,7 @@ decodePatientAddress =
         |> Pipeline.required "StateId" Decode.int
         |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
         |> Pipeline.required "IsPrimary" Decode.bool
+        |> Pipeline.hardcoded 0
 
 
 decodeSfData : Decode.Decoder SfData
