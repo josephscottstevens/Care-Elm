@@ -17,6 +17,12 @@ port initDemographics : SfData -> Cmd msg
 port initDemographicsDone : (String -> msg) -> Sub msg
 
 
+port initPatientPhoneNumber : PatientPhoneNumberMessage -> Cmd msg
+
+
+port updatePatientPhoneNumber : (PatientPhoneNumberMessage -> msg) -> Sub msg
+
+
 port initContactHours : String -> Cmd msg
 
 
@@ -141,6 +147,12 @@ type alias PatiantLanguageMessage =
     }
 
 
+type alias PatientPhoneNumberMessage =
+    { patientPhoneNumber : PatientPhoneNumber
+    , phoneNumberTypeDropdown : List DropDownItem
+    }
+
+
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
@@ -200,6 +212,15 @@ view { d, c } =
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
                 , div [] (List.map viewLanguages d.patientLanguagesMap)
+                ]
+            ]
+        , div [ class "col-xs-12 padding-h-0" ]
+            [ div [ class "col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-h-0" ]
+                [ h4 [ class "inline-block" ] [ text "Phones" ]
+                , div [ class "inline-block e-tooltxt pointer", title "Add new phone number", onClick AddNewPhone ]
+                    [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
+                    ]
+                , div [] (List.map viewPhones c.patientPhoneNumbers)
                 ]
             ]
         ]
@@ -280,13 +301,22 @@ update msg model =
 
                     newD =
                         newModel.d
+
+                    newC =
+                        newModel.c
                 in
                     { d =
                         { newD
                             | patientLanguagesMap = newPatientLanguagesMap
                             , patientLanguagesMapCounter = List.length newPatientLanguagesMap
                         }
-                    , c = emptyContactInformationModel
+                    , c =
+                        { newC
+                            | patientPhoneNumbers = newPatientPhoneNumber
+                            , patientPhoneNumbersCounter = List.length newPatientPhoneNumber
+                            , patientAddresses = newPatientAddress
+                            , patientAddressesCounter = List.length newPatientAddress
+                        }
                     }
                         ! [ initDemographics newModel.d.sfData ]
 
