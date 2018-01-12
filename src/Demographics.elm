@@ -23,6 +23,12 @@ port initPatientPhoneNumber : PatientPhoneNumberMessage -> Cmd msg
 port updatePatientPhoneNumber : (PatientPhoneNumberMessage -> msg) -> Sub msg
 
 
+port initPatientAddress : PatientAddressMessage -> Cmd msg
+
+
+port updatePatientAddress : (PatientAddressMessage -> msg) -> Sub msg
+
+
 port initContactHours : String -> Cmd msg
 
 
@@ -78,28 +84,6 @@ type alias ContactInformationModel =
     }
 
 
-type alias PatientPhoneNumber =
-    { id : Maybe Int
-    , phoneNumber : Maybe String
-    , phoneNumberTypeId : Maybe Int
-    , isPreferred : Bool
-    , index : Int
-    }
-
-
-type alias PatientAddress =
-    { id : Maybe Int
-    , addressLine1 : Maybe String
-    , addressLine2 : Maybe String
-    , addressLine3 : Maybe String
-    , city : Maybe String
-    , stateId : Int
-    , zipCode : Maybe String
-    , isPrimary : Bool
-    , index : Int
-    }
-
-
 type alias SfData =
     { facilityId : Maybe Int
     , mainProviderId : Maybe Int
@@ -141,6 +125,28 @@ type alias PatientLanguagesMap =
     }
 
 
+type alias PatientPhoneNumber =
+    { id : Maybe Int
+    , phoneNumber : Maybe String
+    , phoneNumberTypeId : Maybe Int
+    , isPreferred : Bool
+    , index : Int
+    }
+
+
+type alias PatientAddress =
+    { id : Maybe Int
+    , addressLine1 : Maybe String
+    , addressLine2 : Maybe String
+    , addressLine3 : Maybe String
+    , city : Maybe String
+    , stateId : Int
+    , zipCode : Maybe String
+    , isPrimary : Bool
+    , index : Int
+    }
+
+
 type alias PatientLanguageMessage =
     { patientLanguagesMap : PatientLanguagesMap
     , patientLanguageDropdown : List DropDownItem
@@ -150,6 +156,12 @@ type alias PatientLanguageMessage =
 type alias PatientPhoneNumberMessage =
     { patientPhoneNumber : PatientPhoneNumber
     , phoneNumberTypeDropdown : List DropDownItem
+    }
+
+
+type alias PatientAddressMessage =
+    { patientAddress : PatientAddress
+    , stateDropdown : List DropDownItem
     }
 
 
@@ -216,14 +228,28 @@ view { d, c } =
             ]
         , div [ class "col-xs-12 padding-h-0" ]
             [ div [ class "col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-h-0" ]
-                [ h4 [ class "inline-block" ] [ text "Phones" ]
+                [ h4 [ class "inline-block required" ] [ text "Phones" ]
                 , div [ class "inline-block e-tooltxt pointer", title "Add new phone number", onClick AddNewPhone ]
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
                 , div [] (List.map viewPhones c.patientPhoneNumbers)
                 ]
             ]
+        , div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
+            [ div [ class "col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-h-0" ]
+                [ h4 [ class "inline-block required" ] [ text "Addresses" ]
+                , div [ class "inline-block e-tooltxt pointer", title "Add new address", onClick AddNewAddress ]
+                    [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
+                    ]
+                , div [] (List.map viewAddress c.patientAddresses)
+                ]
+            ]
         ]
+
+
+vertCent : ( String, String )
+vertCent =
+    ( "vertical-align", "center" )
 
 
 viewLanguages : PatientLanguagesMap -> Html Msg
@@ -254,6 +280,63 @@ viewPhones phone =
         ]
 
 
+viewAddress : PatientAddress -> Html Msg
+viewAddress address =
+    div [ class "multi-address-template" ]
+        [ div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
+            [ div [ class "col-xs-6 padding-h-0 inline-block", title "Mark as primary" ]
+                [ input [ type_ "radio", checked address.isPrimary, style [ ( "margin-top", "0px" ), vertCent ], checked address.isPrimary ] []
+                , label [ style [ ( "margin-bottom", "0px" ) ] ] [ text "Primary" ]
+                ]
+            , div [ class "col-xs-6 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address.index) ]
+                [ span [ style [ ( "padding-right", "20px" ), ( "padding-top", "5px" ) ], class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer pull-right" ] []
+                ]
+            ]
+        , div [ class "col-xs-12 padding-h-0", style [ ( "padding-bottom", "20px" ) ] ]
+            [ div [ class "col-xs-12 col-sm-6 padding-h-0" ]
+                [ div []
+                    [ label [] [ text "Address Line 1:" ]
+                    , div [ class "form-column" ]
+                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine1 ] []
+                        ]
+                    ]
+                , div []
+                    [ label [] [ text "Address Line 2:" ]
+                    , div [ class "form-column" ]
+                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine2 ] []
+                        ]
+                    ]
+                , div []
+                    [ label [] [ text "Apt./Room No.:" ]
+                    , div [ class "form-column" ]
+                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine3 ] []
+                        ]
+                    ]
+                ]
+            , div [ class "col-xs-12 col-sm-6 padding-h-0" ]
+                [ div []
+                    [ label [] [ text "City:" ]
+                    , div [ class "form-column" ]
+                        [ input [ class "e-textbox", type_ "text", maybeValue address.city ] []
+                        ]
+                    ]
+                , div [ class "margin-bottom-5" ]
+                    [ label [] [ text "State:" ]
+                    , div [ class "form-column" ]
+                        [ input [ class "e-textbox", type_ "text", id ("StateId" ++ (toString address.index)) ] []
+                        ]
+                    ]
+                , div []
+                    [ label [] [ text "Zip Code:" ]
+                    , div [ class "form-column" ]
+                        [ input [ class "e-textbox", type_ "text", maybeValue address.zipCode ] []
+                        ]
+                    ]
+                ]
+            ]
+        ]
+
+
 type Msg
     = Load (Result Http.Error Model)
     | UpdateDemographics SfData
@@ -262,6 +345,8 @@ type Msg
     | RemoveLanguage Int
     | AddNewPhone
     | RemovePhone Int
+    | AddNewAddress
+    | RemoveAddress Int
 
 
 patientLanguageToMsg : DemographicsInformationModel -> PatientLanguagesMap -> Cmd Msg
@@ -272,6 +357,11 @@ patientLanguageToMsg d patientLanguagesMap =
 patientPhoneNumberToMsg : ContactInformationModel -> PatientPhoneNumber -> Cmd Msg
 patientPhoneNumberToMsg c patientPhoneNumber =
     initPatientPhoneNumber (PatientPhoneNumberMessage patientPhoneNumber c.phoneNumberTypeDropdown)
+
+
+patientAddressToMsg : ContactInformationModel -> PatientAddress -> Cmd Msg
+patientAddressToMsg c patientAddress =
+    initPatientAddress (PatientAddressMessage patientAddress c.stateDropdown)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -331,12 +421,15 @@ update msg model =
             InitDemographicsDone _ ->
                 let
                     pLangMsgs =
-                        List.map (patientLanguageToMsg model.d) model.d.patientLanguagesMap
+                        List.map (patientLanguageToMsg d) d.patientLanguagesMap
 
                     pPhoneMsgs =
-                        List.map (patientPhoneNumberToMsg model.c) model.c.patientPhoneNumbers
+                        List.map (patientPhoneNumberToMsg c) c.patientPhoneNumbers
+
+                    pAddressMsgs =
+                        List.map (patientAddressToMsg c) c.patientAddresses
                 in
-                    model ! (initContactHours "" :: pLangMsgs ++ pPhoneMsgs)
+                    model ! (initContactHours "" :: pLangMsgs ++ pPhoneMsgs ++ pAddressMsgs)
 
             UpdateDemographics sfData ->
                 let
@@ -414,6 +507,41 @@ update msg model =
                                     newPatientPhoneNumber
                 in
                     updateCont { c | patientPhoneNumbers = updatedPatientPhoneNumber } ! []
+
+            AddNewAddress ->
+                let
+                    newAddress =
+                        emptyPatientAddress model.c.patientAddressesCounter
+                in
+                    updateCont
+                        { c
+                            | patientAddresses = model.c.patientAddresses ++ [ newAddress ]
+                            , patientAddressesCounter = model.c.patientAddressesCounter + 1
+                        }
+                        ! [ patientAddressToMsg model.c newAddress ]
+
+            RemoveAddress index ->
+                let
+                    newAddress =
+                        model.c.patientAddresses
+                            |> List.filter (\t -> t.index /= index)
+
+                    updatedAddress =
+                        case List.any (\t -> t.isPrimary == True) newAddress of
+                            True ->
+                                newAddress
+
+                            False ->
+                                List.indexedMap
+                                    (\t y ->
+                                        if t == 0 then
+                                            { y | isPrimary = True }
+                                        else
+                                            y
+                                    )
+                                    newAddress
+                in
+                    updateCont { c | patientAddresses = updatedAddress } ! []
 
 
 maybeValue : Maybe String -> Html.Attribute msg
@@ -587,6 +715,20 @@ emptyPatientPhoneNumber index =
     , phoneNumber = Nothing
     , phoneNumberTypeId = Nothing
     , isPreferred = False
+    , index = index
+    }
+
+
+emptyPatientAddress : Int -> PatientAddress
+emptyPatientAddress index =
+    { id = Nothing
+    , addressLine1 = Nothing
+    , addressLine2 = Nothing
+    , addressLine3 = Nothing
+    , city = Nothing
+    , stateId = -1
+    , zipCode = Nothing
+    , isPrimary = False
     , index = index
     }
 
