@@ -703,13 +703,18 @@ isRequiredClass isRequired =
             class ""
 
 
-commonStructure : String -> Bool -> Html msg -> Html msg
-commonStructure displayText isRequired t =
-    div [ class "col-xs-12 padding-h-0" ]
+commonStructureWithCustomAttr : String -> Bool -> Html.Attribute msg -> Html msg -> Html msg
+commonStructureWithCustomAttr displayText isRequired attr t =
+    div [ class "col-xs-12 padding-h-0", attr ]
         [ label [ isRequiredClass isRequired ] [ text (displayText ++ ":") ]
         , div [ class "DemographicsInputDiv padding-h-0" ]
             [ t ]
         ]
+
+
+commonStructure : String -> Bool -> Html msg -> Html msg
+commonStructure displayText isRequired t =
+    commonStructureWithCustomAttr displayText isRequired (class "") t
 
 
 onlyNumbers : Html.Attribute msg
@@ -748,7 +753,7 @@ sfbox displayText isRequired =
 
 sfcheckbox : String -> Bool -> Maybe String -> Html msg
 sfcheckbox displayText isRequired maybeStr =
-    commonStructure displayText isRequired <|
+    commonStructureWithCustomAttr displayText isRequired (style [ ( "height", "34px" ) ]) <|
         input [ type_ "checkbox", idAttr displayText, class "e-checkbox" ] []
 
 
