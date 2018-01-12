@@ -54,7 +54,7 @@ subscriptions =
 
 init : Flags -> Cmd Msg
 init flag =
-    decodeModel
+    decodeServerResponse
         |> Http.get ("/People/GetDemographicsInformation?patientId=" ++ toString flag.patientId)
         |> Http.send Load
 
@@ -393,7 +393,7 @@ update msg model =
                     newModel.patientAddresses
                         |> List.indexedMap (\index t -> { t | index = index })
             in
-                { model
+                { newModel
                     | patientLanguagesMap = newPatientLanguagesMap
                     , patientLanguagesMapCounter = List.length newPatientLanguagesMap
                     , patientPhoneNumbers = newPatientPhoneNumber
@@ -756,7 +756,6 @@ type alias DemographicsInformationModel =
     , preferredLanguageIndex : Int
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
-    , patientLanguagesMapCounter : Int
     }
 
 
@@ -767,8 +766,6 @@ type alias ContactInformationModel =
     , stateDropdown : List DropDownItem
     , primaryAddressIndex : Int
     , preferredPhoneIndex : Int
-    , patientPhoneNumbersCounter : Int
-    , patientAddressesCounter : Int
     }
 
 
@@ -778,8 +775,8 @@ type alias ServerResponse =
     }
 
 
-decodeModel : Decode.Decoder ServerResponse
-decodeModel =
+decodeServerResponse : Decode.Decoder ServerResponse
+decodeServerResponse =
     Pipeline.decode ServerResponse
         |> Pipeline.required "demographicsInformationModel" decodeDemographicsInformationModel
         |> Pipeline.required "contactInformationModel" decodeContactInformationModel
@@ -805,7 +802,6 @@ decodeDemographicsInformationModel =
         |> Pipeline.required "PreferredLanguageIndex" Decode.int
         |> Pipeline.custom decodeSfData
         |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
-        |> Pipeline.hardcoded 0
 
 
 decodeContactInformationModel : Decode.Decoder ContactInformationModel
@@ -817,8 +813,6 @@ decodeContactInformationModel =
         |> Pipeline.required "StateDropdown" (Decode.list decodeDropDownItem)
         |> Pipeline.required "PrimaryAddressIndex" Decode.int
         |> Pipeline.required "PreferredPhoneIndex" Decode.int
-        |> Pipeline.hardcoded 0
-        |> Pipeline.hardcoded 0
 
 
 decodePatientLanguagesMap : Decode.Decoder PatientLanguagesMap
