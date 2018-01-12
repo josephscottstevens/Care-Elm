@@ -268,6 +268,19 @@ viewLanguages lang =
         ]
 
 
+viewPhones : PatientLanguagesMap -> Html Msg
+viewPhones lang =
+    div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
+        [ div [ class "inline-block ", style [ ( "width", "20px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
+            [ input [ type_ "radio", checked lang.isPreferred ] [] ]
+        , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ] ]
+            [ input [ id ("PatientLanguagesMapId" ++ (toString lang.index)) ] [] ]
+        , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemoveLanguage lang.index) ]
+            [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
+            ]
+        ]
+
+
 type Msg
     = Load (Result Http.Error Model)
     | UpdateDemographics SfData
