@@ -14,6 +14,31 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
+get filterboxs in for like phone
+put in work rule
+validations
+
+wtf, when u remove address, state shifts down :/
+
+phone group looks a bit mis-aligned
+
+implement save
+test save
+
+on load if any language \ phone or address is empty, pre-fill with 1 (test)
+
+server call is happening twice (contacts is still calling it) (send it json value)
+
+stuff like primaryAddressIndex
+zipcode is numberonly?
+maxlength attributes?
+
+phoneNumber mask update event
+
+test Contact Hours still works
+
+Radio button events for the three nested controls
+
 rounded buttons? 
 and css popup? 
 

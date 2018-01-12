@@ -93,6 +93,7 @@ type alias Model =
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
     , patientLanguagesMapCounter : Int
+    , contactHoursModel : Maybe Decode.Value
     }
 
 
@@ -309,7 +310,7 @@ viewAddress address =
         , div [ class "col-xs-12 padding-h-0", style [ ( "padding-bottom", "20px" ) ] ]
             [ div [ class "col-xs-12 col-sm-6 padding-h-0" ]
                 [ div []
-                    [ label [] [ text "Address Line 1:" ]
+                    [ label [ class "required" ] [ text "Address Line 1:" ]
                     , div [ class "form-column" ]
                         [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine1, onInput (UpdateAddressLine1 address) ] []
                         ]
@@ -329,19 +330,19 @@ viewAddress address =
                 ]
             , div [ class "col-xs-12 col-sm-6 padding-h-0" ]
                 [ div []
-                    [ label [] [ text "City:" ]
+                    [ label [ class "required" ] [ text "City:" ]
                     , div [ class "form-column" ]
                         [ input [ class "e-textbox", type_ "text", maybeValue address.city, onInput (UpdateCity address) ] []
                         ]
                     ]
                 , div [ class "margin-bottom-5" ]
-                    [ label [] [ text "State:" ]
+                    [ label [ class "required" ] [ text "State:" ]
                     , div [ class "form-column" ]
                         [ input [ class "e-textbox", type_ "text", id ("StateId" ++ (toString address.index)) ] []
                         ]
                     ]
                 , div []
-                    [ label [] [ text "Zip Code:" ]
+                    [ label [ class "required" ] [ text "Zip Code:" ]
                     , div [ class "form-column" ]
                         [ input [ class "e-textbox", type_ "text", maybeValue address.zipCode, onInput (UpdateZipcode address) ] []
                         ]
@@ -785,6 +786,7 @@ emptyModel flags =
     , preferredPhoneIndex = 0
     , patientPhoneNumbersCounter = 0
     , patientAddressesCounter = 0
+    , contactHoursModel = Nothing
     }
 
 
@@ -856,7 +858,7 @@ emptyPatientAddress index =
 
 
 updateModelFromServerMessage : ServerResponse -> Model -> Model
-updateModelFromServerMessage { d, c } model =
+updateModelFromServerMessage { d, c, h } model =
     { model
         | demographicsId = d.demographicsId
         , nickName = d.nickName
@@ -880,6 +882,7 @@ updateModelFromServerMessage { d, c } model =
         , stateDropdown = c.stateDropdown
         , primaryAddressIndex = c.primaryAddressIndex
         , preferredPhoneIndex = c.preferredPhoneIndex
+        , contactHoursModel = Just h
     }
 
 
@@ -921,6 +924,7 @@ type alias ContactInformationModel =
 type alias ServerResponse =
     { d : DemographicsInformationModel
     , c : ContactInformationModel
+    , h : Decode.Value
     }
 
 
@@ -929,6 +933,12 @@ decodeServerResponse =
     Pipeline.decode ServerResponse
         |> Pipeline.required "demographicsInformationModel" decodeDemographicsInformationModel
         |> Pipeline.required "contactInformationModel" decodeContactInformationModel
+        |> Pipeline.required "contactHoursModel" Decode.value
+
+
+
+--TODO
+-- |> Pipeline.required "contactHoursModel" toString Decode.decodeValue
 
 
 decodeDemographicsInformationModel : Decode.Decoder DemographicsInformationModel
