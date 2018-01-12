@@ -20,13 +20,13 @@ port initDemographicsDone : (String -> msg) -> Sub msg
 port initPatientPhoneNumber : PatientPhoneNumberMessage -> Cmd msg
 
 
-port updatePatientPhoneNumber : (PatientPhoneNumberMessage -> msg) -> Sub msg
+port updatePatientPhoneNumber : (DropUpdateSf -> msg) -> Sub msg
 
 
 port initPatientAddress : PatientAddressMessage -> Cmd msg
 
 
-port updatePatientAddress : (PatientAddressMessage -> msg) -> Sub msg
+port updatePatientAddress : (DropUpdateSf -> msg) -> Sub msg
 
 
 port initContactHours : String -> Cmd msg
@@ -35,7 +35,7 @@ port initContactHours : String -> Cmd msg
 port initLanguagesMap : PatientLanguageMessage -> Cmd msg
 
 
-port updateLanguagesMap : (PatientLanguageMessage -> msg) -> Sub msg
+port updateLanguagesMap : (DropUpdateSf -> msg) -> Sub msg
 
 
 port updateDemographics : (SfData -> msg) -> Sub msg
@@ -49,6 +49,9 @@ subscriptions =
     Sub.batch
         [ updateDemographics UpdateDemographics
         , initDemographicsDone InitDemographicsDone
+        , updatePatientAddress UpdatePatientAddress
+        , updatePatientPhoneNumber UpdatePatientPhoneNumber
+        , updateLanguagesMap UpdateLanguagesMap
         ]
 
 
@@ -171,6 +174,12 @@ type alias PatientPhoneNumberMessage =
 type alias PatientAddressMessage =
     { patientAddress : PatientAddress
     , stateDropdown : List DropDownItem
+    }
+
+
+type alias DropUpdateSf =
+    { newId : Maybe Int
+    , index : Int
     }
 
 
@@ -356,7 +365,11 @@ type Msg
     | RemovePhone Int
     | AddNewAddress
     | RemoveAddress Int
-      --
+      -- Nested Controls
+    | UpdatePatientAddress DropUpdateSf
+    | UpdatePatientPhoneNumber DropUpdateSf
+    | UpdateLanguagesMap DropUpdateSf
+      -- Edit
     | UpdateFacilityPtID String
     | UpdateMedicalRecordNo String
     | UpdatePatientAccountNo String
@@ -536,6 +549,49 @@ update msg model =
                                 newAddress
             in
                 { model | patientAddresses = updatedAddress } ! []
+
+        -- Nested Controls
+        UpdatePatientAddress dropUpdateSf ->
+            let
+                newAddresses =
+                    List.map
+                        (\t ->
+                            if t.index == dropUpdateSf.index then
+                                { t | stateId = Maybe.withDefault -1 dropUpdateSf.newId }
+                            else
+                                t
+                        )
+                        model.patientAddresses
+            in
+                { model | patientAddresses = newAddresses } ! []
+
+        UpdatePatientPhoneNumber dropUpdateSf ->
+            let
+                newPhones =
+                    List.map
+                        (\t ->
+                            if t.index == dropUpdateSf.index then
+                                { t | phoneNumberTypeId = dropUpdateSf.newId }
+                            else
+                                t
+                        )
+                        model.patientPhoneNumbers
+            in
+                { model | patientPhoneNumbers = newPhones } ! []
+
+        UpdateLanguagesMap dropUpdateSf ->
+            let
+                newLanguages =
+                    List.map
+                        (\t ->
+                            if t.index == dropUpdateSf.index then
+                                { t | languageId = Maybe.withDefault -1 dropUpdateSf.newId }
+                            else
+                                t
+                        )
+                        model.patientLanguagesMap
+            in
+                { model | patientLanguagesMap = newLanguages } ! []
 
         -- Edit
         UpdateFacilityPtID str ->
