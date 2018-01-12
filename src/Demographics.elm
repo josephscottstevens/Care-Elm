@@ -1,7 +1,7 @@
 port module Demographics exposing (..)
 
 import Html exposing (Html, text, div, span, button, ul, li, a, input, label, h4)
-import Html.Attributes exposing (class, id, type_, value, style, title, checked, hidden)
+import Html.Attributes exposing (class, id, type_, value, style, title, checked, hidden, attribute)
 import Html.Events exposing (onClick)
 import Utils.CommonTypes exposing (DropDownItem, Flags)
 import Utils.CommonFunctions exposing (decodeDropDownItem)
@@ -135,6 +135,7 @@ isAlpha char =
     Char.isLower char || Char.isUpper char
 
 
+isRequiredClass : Bool -> Html.Attribute msg
 isRequiredClass isRequired =
     case isRequired of
         True ->
@@ -144,71 +145,108 @@ isRequiredClass isRequired =
             class ""
 
 
-textbox displayText isRequired val =
-    div [] []
-
-
-numberbox displayText isRequired val =
-    div [] []
-
-
-nonumberbox displayText isRequired val =
-    div [] []
-
-
-dropdown : String -> Bool -> Html msg
-dropdown displayText isRequired =
+commonStructure : String -> Bool -> Html msg -> Html msg
+commonStructure displayText isRequired t =
     div [ class "col-xs-12 padding-h-0" ]
         [ label [ isRequiredClass isRequired ] [ text (displayText ++ ":") ]
         , div [ class "DemographicsInputDiv padding-h-0" ]
-            [ input [ type_ "text", idAttr displayText ] []
-            ]
+            [ t ]
         ]
 
 
-datetimebox displayText isRequired =
-    div [] []
+onlyNumbers : Html.Attribute msg
+onlyNumbers =
+    attribute "onkeypress" "return event.charCode >= 48 && event.charCode <= 57"
+
+
+noNumbers : Html.Attribute msg
+noNumbers =
+    attribute "onkeypress" "return event.charCode < 48 || event.charCode > 57"
+
+
+textbox : String -> Bool -> Maybe String -> Html msg
+textbox displayText isRequired maybeStr =
+    commonStructure displayText isRequired <|
+        input [ type_ "text", idAttr displayText, maybeValue maybeStr ] []
+
+
+numberbox : String -> Bool -> Maybe String -> Html msg
+numberbox displayText isRequired maybeStr =
+    commonStructure displayText isRequired <|
+        input [ type_ "text", idAttr displayText, maybeValue maybeStr, onlyNumbers ] []
+
+
+nonumberbox : String -> Bool -> Maybe String -> Html msg
+nonumberbox displayText isRequired maybeStr =
+    commonStructure displayText isRequired <|
+        input [ type_ "text", idAttr displayText, maybeValue maybeStr, noNumbers ] []
+
+
+sfbox : String -> Bool -> Html msg
+sfbox displayText isRequired =
+    commonStructure displayText isRequired <|
+        input [ type_ "text", idAttr displayText ] []
+
+
+sfcheckbox : String -> Bool -> Maybe String -> Html msg
+sfcheckbox displayText isRequired maybeStr =
+    commonStructure displayText isRequired <|
+        input [ type_ "checkbox", idAttr displayText ] []
 
 
 view : Model -> Html Msg
 view model =
-    div [ id "DemographicsForm" ]
+    div [ id "demographicInformationForm", class "col-xs-12 padding-h-0" ]
         [ h4 [ class "col-xs-12 padding-h-0" ] [ text "Assigned To" ]
         , div [ class "col-xs-12 padding-h-0" ]
             -- TODO
             [ div [ class "error", hidden True ] []
             ]
         , div rowStyle
-            [ dropdown "Facility" True
-            , textbox "Patient's Facility ID No" True (maybeValue model.facilityPtID)
-            , numberbox "Medical Record No" False (maybeValue model.mrn)
-            , numberbox "Patient Account No" False (maybeValue model.patientAccountNumber)
+            [ sfbox "Facility" True
+            , textbox "Patient's Facility ID No" True model.facilityPtID
+            , numberbox "Medical Record No" False model.mrn
+            , numberbox "Patient Account No" False model.patientAccountNumber
             ]
         , div rowStyle
-            [ dropdown "Main Provider" True
-            , dropdown "Care Coordinator" True
+            [ sfbox "Main Provider" True
+            , sfbox "Care Coordinator" True
             ]
         , h4 [] [ text "Demographic Information" ]
         , div rowStyle
-            [ dropdown "Prefix" False
+            [ sfbox "Prefix" False
             , nonumberbox "First Name" True model.firstName
             , nonumberbox "Middle Name" False model.middle
             , nonumberbox "Last Name" True model.lastName
-            , dropdown "Suffix" False
+            , sfbox "Suffix" False
             , textbox "Nickname" False model.nickName
-            , datetimebox "Date of Birth" True
+            , sfbox "Date of Birth" True
             , textbox "Birth Place" False model.birthPlace
-            , datetimebox "Date of Death" False
-            ]
-        , div []
-            [ h4 [ class "inline-block" ] [ text "Languages" ]
-            , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
-                [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
-                ]
+            , sfbox "Date of Death" False
             ]
         , div rowStyle
-            [ div [] (List.map viewLanguages model.patientLanguagesMap)
+            [ sfbox "VIP" False
+            , sfbox "Sex at Birth" True
+            , sfbox "Sexual Orientation" False
+            , textbox "Sexual Orientation Note" False model.sexualOrientationNote
+            , sfbox "Gender Identity" False
+            , textbox "Gender Identity Note" False model.genderIdentityNote
+            , sfbox "Race" False
+            , sfbox "Ethnicity" False
+            , sfbox "US Veteran" False
+            , sfbox "Religion" False
+            , textbox "Email" False model.email
             ]
+
+        -- , div []
+        --     [ h4 [ class "inline-block" ] [ text "Languages" ]
+        --     , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
+        --         [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
+        --         ]
+        --     ]
+        -- , div rowStyle
+        --     [ div [] (List.map viewLanguages model.patientLanguagesMap)
+        --     ]
         ]
 
 
