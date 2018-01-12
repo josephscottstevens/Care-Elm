@@ -2,7 +2,7 @@ port module Demographics exposing (..)
 
 import Html exposing (Html, text, div, span, button, ul, li, a, input, label, h4)
 import Html.Attributes exposing (class, id, type_, value, style, title, checked, hidden, attribute)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput, onCheck)
 import Utils.CommonTypes exposing (DropDownItem, Flags)
 import Utils.CommonFunctions exposing (decodeDropDownItem)
 import Json.Decode as Decode
@@ -188,9 +188,9 @@ view model =
             ]
         , div rowStyle
             [ sfbox "Facility" True
-            , textbox "Patient's Facility ID No" True model.facilityPtID
-            , numberbox "Medical Record No" False model.mrn
-            , numberbox "Patient Account No" False model.patientAccountNumber
+            , textbox "Patient's Facility ID No" True model.facilityPtID UpdateFacilityPtID
+            , numberbox "Medical Record No" False model.mrn UpdateMedicalRecordNo
+            , numberbox "Patient Account No" False model.patientAccountNumber UpdatePatientAccountNo
             ]
         , div rowStyle
             [ sfbox "Main Provider" True
@@ -199,28 +199,28 @@ view model =
         , h4 [ class "col-xs-12 padding-h-0 padding-top-10" ] [ text "Demographic Information" ]
         , div rowStyle
             [ sfbox "Prefix" False
-            , nonumberbox "First Name" True model.firstName
-            , nonumberbox "Middle Name" False model.middle
-            , nonumberbox "Last Name" True model.lastName
+            , nonumberbox "First Name" True model.firstName UpdateFirstName
+            , nonumberbox "Middle Name" False model.middle UpdateMiddle
+            , nonumberbox "Last Name" True model.lastName UpdateLastName
             , sfbox "Suffix" False
-            , textbox "Nickname" False model.nickName
+            , textbox "Nickname" False model.nickName UpdateNickname
             , sfbox "Date of Birth" True
-            , textbox "Birth Place" False model.birthPlace
+            , textbox "Birth Place" False model.birthPlace UpdateBirthPlace
             , sfbox "Date of Death" False
-            , textbox "SSN" False model.ssn
+            , textbox "SSN" False model.ssn UpdateSSN
             ]
         , div rowStyle
             [ sfbox "VIP" False
             , sfbox "Sex at Birth" True
             , sfbox "Sexual Orientation" False
-            , textbox "Sexual Orientation Note" False model.sexualOrientationNote
+            , textbox "Sexual Orientation Note" False model.sexualOrientationNote UpdateSexualOrientationNote
             , sfbox "Gender Identity" False
-            , textbox "Gender Identity Note" False model.genderIdentityNote
+            , textbox "Gender Identity Note" False model.genderIdentityNote UpdateGenderIdentityNote
             , sfbox "Race" False
             , sfbox "Ethnicity" False
             , sfbox "US Veteran" False
             , sfbox "Religion" False
-            , textbox "Email" False model.email
+            , textbox "Email" False model.email UpdateEmail
             ]
         , div [ class "col-xs-12 padding-h-0 padding-top-10" ]
             [ div [ class "col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-h-0" ]
@@ -356,6 +356,19 @@ type Msg
     | RemovePhone Int
     | AddNewAddress
     | RemoveAddress Int
+      --
+    | UpdateFacilityPtID String
+    | UpdateMedicalRecordNo String
+    | UpdatePatientAccountNo String
+    | UpdateFirstName String
+    | UpdateMiddle String
+    | UpdateLastName String
+    | UpdateNickname String
+    | UpdateBirthPlace String
+    | UpdateSSN String
+    | UpdateSexualOrientationNote String
+    | UpdateGenderIdentityNote String
+    | UpdateEmail String
 
 
 patientLanguageToMsg : Model -> PatientLanguagesMap -> Cmd Msg
@@ -524,6 +537,43 @@ update msg model =
             in
                 { model | patientAddresses = updatedAddress } ! []
 
+        -- Edit
+        UpdateFacilityPtID str ->
+            { model | facilityPtID = Just str } ! []
+
+        UpdateMedicalRecordNo str ->
+            { model | mrn = Just str } ! []
+
+        UpdatePatientAccountNo str ->
+            { model | patientAccountNumber = Just str } ! []
+
+        UpdateFirstName str ->
+            { model | firstName = Just str } ! []
+
+        UpdateMiddle str ->
+            { model | middle = Just str } ! []
+
+        UpdateLastName str ->
+            { model | lastName = Just str } ! []
+
+        UpdateNickname str ->
+            { model | nickName = Just str } ! []
+
+        UpdateBirthPlace str ->
+            { model | birthPlace = Just str } ! []
+
+        UpdateSSN str ->
+            { model | ssn = Just str } ! []
+
+        UpdateSexualOrientationNote str ->
+            { model | sexualOrientationNote = Just str } ! []
+
+        UpdateGenderIdentityNote str ->
+            { model | genderIdentityNote = Just str } ! []
+
+        UpdateEmail str ->
+            { model | email = Just str } ! []
+
 
 
 -- HELPER Functions
@@ -578,22 +628,22 @@ noNumbers =
     attribute "onkeypress" "return event.charCode < 48 || event.charCode > 57"
 
 
-textbox : String -> Bool -> Maybe String -> Html msg
-textbox displayText isRequired maybeStr =
+textbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
+textbox displayText isRequired maybeStr event =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr, class "e-textbox" ] []
+        input [ type_ "text", idAttr displayText, maybeValue maybeStr, class "e-textbox", onInput event ] []
 
 
-numberbox : String -> Bool -> Maybe String -> Html msg
-numberbox displayText isRequired maybeStr =
+numberbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
+numberbox displayText isRequired maybeStr event =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr, onlyNumbers, class "e-textbox" ] []
+        input [ type_ "text", idAttr displayText, maybeValue maybeStr, onlyNumbers, class "e-textbox", onInput event ] []
 
 
-nonumberbox : String -> Bool -> Maybe String -> Html msg
-nonumberbox displayText isRequired maybeStr =
+nonumberbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
+nonumberbox displayText isRequired maybeStr event =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr, noNumbers, class "e-textbox" ] []
+        input [ type_ "text", idAttr displayText, maybeValue maybeStr, noNumbers, class "e-textbox", onInput event ] []
 
 
 sfbox : String -> Bool -> Html msg
