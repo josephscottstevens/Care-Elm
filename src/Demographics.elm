@@ -26,10 +26,10 @@ port updatePatientPhoneNumber : (PatientPhoneNumberMessage -> msg) -> Sub msg
 port initContactHours : String -> Cmd msg
 
 
-port initLanguagesMap : PatiantLanguageMessage -> Cmd msg
+port initLanguagesMap : PatientLanguageMessage -> Cmd msg
 
 
-port updateLanguagesMap : (PatiantLanguageMessage -> msg) -> Sub msg
+port updateLanguagesMap : (PatientLanguageMessage -> msg) -> Sub msg
 
 
 port updateDemographics : (SfData -> msg) -> Sub msg
@@ -141,7 +141,7 @@ type alias PatientLanguagesMap =
     }
 
 
-type alias PatiantLanguageMessage =
+type alias PatientLanguageMessage =
     { patientLanguagesMap : PatientLanguagesMap
     , patientLanguageDropdown : List DropDownItem
     }
@@ -244,10 +244,10 @@ viewPhones phone =
     div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
         [ div [ class "inline-block ", style [ ( "width", "20px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
             [ input [ type_ "radio", checked phone.isPreferred ] [] ]
-        , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ] ]
+        , div [ class "inline-block", style [ ( "width", "100px" ), ( "vertical-align", "middle" ) ] ]
             [ input [ id ("PatientPhoneNumberId" ++ (toString phone.index)) ] [] ]
-        , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ] ]
-            [ input [ type_ "text", class "e-textbox" ] [] ]
+        , div [ class "inline-block", style [ ( "width", "calc(100% - 155px)" ), ( "vertical-align", "middle" ) ] ]
+            [ input [ type_ "text", class "e-textbox", style [ ( "width", "100%" ) ], maybeValue phone.phoneNumber ] [] ]
         , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemovePhone phone.index) ]
             [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
             ]
@@ -264,9 +264,14 @@ type Msg
     | RemovePhone Int
 
 
-patiantLanguageToMessage : DemographicsInformationModel -> PatientLanguagesMap -> Cmd Msg
-patiantLanguageToMessage d patientLanguagesMap =
-    initLanguagesMap (PatiantLanguageMessage patientLanguagesMap d.sfData.languageDropdown)
+patientLanguageToMsg : DemographicsInformationModel -> PatientLanguagesMap -> Cmd Msg
+patientLanguageToMsg d patientLanguagesMap =
+    initLanguagesMap (PatientLanguageMessage patientLanguagesMap d.sfData.languageDropdown)
+
+
+patientPhoneNumberToMsg : ContactInformationModel -> PatientPhoneNumber -> Cmd Msg
+patientPhoneNumberToMsg c patientPhoneNumber =
+    initPatientPhoneNumber (PatientPhoneNumberMessage patientPhoneNumber c.phoneNumberTypeDropdown)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -324,7 +329,14 @@ update msg model =
                 model ! [ logError (toString t) ]
 
             InitDemographicsDone _ ->
-                model ! (initContactHours "" :: List.map (patiantLanguageToMessage model.d) model.d.patientLanguagesMap)
+                let
+                    pLangMsgs =
+                        List.map (patientLanguageToMsg model.d) model.d.patientLanguagesMap
+
+                    pPhoneMsgs =
+                        List.map (patientPhoneNumberToMsg model.c) model.c.patientPhoneNumbers
+                in
+                    model ! (initContactHours "" :: pLangMsgs ++ pPhoneMsgs)
 
             UpdateDemographics sfData ->
                 let
@@ -343,7 +355,7 @@ update msg model =
                             | patientLanguagesMap = model.d.patientLanguagesMap ++ [ newPatientLanguagesMap ]
                             , patientLanguagesMapCounter = model.d.patientLanguagesMapCounter + 1
                         }
-                        ! [ patiantLanguageToMessage model.d newPatientLanguagesMap ]
+                        ! [ patientLanguageToMsg model.d newPatientLanguagesMap ]
 
             RemoveLanguage index ->
                 let
@@ -370,15 +382,15 @@ update msg model =
 
             AddNewPhone ->
                 let
-                    newPatientLanguagesMap =
-                        emptyPatientLanguagesMap model.d.patientLanguagesMapCounter
+                    newPatientPhoneNumber =
+                        emptyPatientPhoneNumber model.c.patientPhoneNumbersCounter
                 in
-                    updateDemo
-                        { d
-                            | patientLanguagesMap = model.d.patientLanguagesMap ++ [ newPatientLanguagesMap ]
-                            , patientLanguagesMapCounter = model.d.patientLanguagesMapCounter + 1
+                    updateCont
+                        { c
+                            | patientPhoneNumbers = model.c.patientPhoneNumbers ++ [ newPatientPhoneNumber ]
+                            , patientPhoneNumbersCounter = model.c.patientPhoneNumbersCounter + 1
                         }
-                        ! [ patiantLanguageToMessage model.d newPatientLanguagesMap ]
+                        ! [ patientPhoneNumberToMsg model.c newPatientPhoneNumber ]
 
             RemovePhone index ->
                 let
@@ -564,6 +576,16 @@ emptyPatientLanguagesMap : Int -> PatientLanguagesMap
 emptyPatientLanguagesMap index =
     { id = Nothing
     , languageId = -1
+    , isPreferred = False
+    , index = index
+    }
+
+
+emptyPatientPhoneNumber : Int -> PatientPhoneNumber
+emptyPatientPhoneNumber index =
+    { id = Nothing
+    , phoneNumber = Nothing
+    , phoneNumberTypeId = Nothing
     , isPreferred = False
     , index = index
     }
