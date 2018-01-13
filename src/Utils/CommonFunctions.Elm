@@ -6,7 +6,7 @@ import Date.Extra
 import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
-import Utils.CommonTypes exposing (DropDownItem)
+import Utils.CommonTypes exposing (DropdownItem)
 
 
 port displaySuccessMessage : String -> Cmd msg
@@ -141,8 +141,8 @@ maybeToDateString maybeDateStr =
             Nothing
 
 
-decodeDropDownItem : Decode.Decoder DropDownItem
-decodeDropDownItem =
-    Pipeline.decode DropDownItem
+decodeDropdownItem : Decode.Decoder DropdownItem
+decodeDropdownItem =
+    Pipeline.decode DropdownItem
         |> Pipeline.required "Id" (Decode.maybe Decode.int)
         |> Pipeline.required "Name" Decode.string

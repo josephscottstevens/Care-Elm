@@ -33,7 +33,20 @@ test Contact Hours still works
 
 Radio button events for the three nested controls
 
+redesign Dropdown to work more like filter function works, right now primary complaints
+	I have to specifiy the text for the dropdown,
+	I need to specific the list data in the load, but I don't know that data yet (Better to send it in the view)
+	The init function is really long, I only really want the initial selected Index
+	(Note, bring over port code)
+
+
 -----------------------------------------------------------------
+
+todo, missing title (see _demographics.cshtml)
+
+test all the little alignments
+
+-----------------------------------------------------------------            
 
 rounded buttons? 
 and css popup? 

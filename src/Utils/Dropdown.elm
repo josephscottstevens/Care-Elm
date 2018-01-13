@@ -4,7 +4,7 @@ import Html exposing (Html, Attribute, div, span, text, li, ul, input)
 import Html.Attributes exposing (style, value, class, readonly)
 import Html.Events as Events
 import Json.Decode
-import Utils.CommonTypes exposing (DropDownItem)
+import Utils.CommonTypes exposing (DropdownItem)
 import Utils.CommonFunctions as Functions
 import Char
 import Array exposing (Array)
@@ -20,26 +20,26 @@ scrollToDomId =
 
 type alias Dropdown =
     { isOpen : Bool
-    , selectedItem : DropDownItem
-    , highlightedItem : Maybe DropDownItem
+    , selectedItem : DropdownItem
+    , highlightedItem : Maybe DropdownItem
     , highlightedIndex : Int
-    , dropdownSource : Array DropDownItem
+    , dropdownSource : Array DropdownItem
     , searchString : String
     , id : String
     }
 
 
-emptyItem : DropDownItem
+emptyItem : DropdownItem
 emptyItem =
-    DropDownItem Nothing ""
+    DropdownItem Nothing ""
 
 
-defaultSelectedItem : Maybe DropDownItem -> DropDownItem
+defaultSelectedItem : Maybe DropdownItem -> DropdownItem
 defaultSelectedItem selectedItem =
     Maybe.withDefault emptyItem selectedItem
 
 
-init : String -> List DropDownItem -> Maybe DropDownItem -> Dropdown
+init : String -> List DropdownItem -> Maybe DropdownItem -> Dropdown
 init id list selectedItem =
     { isOpen = False
     , selectedItem = defaultSelectedItem selectedItem
@@ -64,8 +64,8 @@ type Key
 
 
 type Msg
-    = ItemPicked DropDownItem
-    | ItemEntered DropDownItem
+    = ItemPicked DropdownItem
+    | ItemEntered DropdownItem
     | ItemLeft
     | SetOpenState Bool
     | OnBlur
@@ -78,7 +78,7 @@ type SkipAmount
     | Exact Int
 
 
-byId : Int -> Array DropDownItem -> DropDownItem
+byId : Int -> Array DropdownItem -> DropdownItem
 byId index items =
     case Array.get index items of
         Just t ->
@@ -145,7 +145,7 @@ update msg dropdown =
             updateSearchString char dropdown
 
 
-boundedIndex : Array DropDownItem -> Int -> Int
+boundedIndex : Array DropdownItem -> Int -> Int
 boundedIndex dropdownSource index =
     if index < 0 then
         0
@@ -231,7 +231,7 @@ view dropdown =
             ]
 
 
-getId : String -> DropDownItem -> String
+getId : String -> DropdownItem -> String
 getId id item =
     id ++ "-" ++ Functions.defaultIntToString item.id
 

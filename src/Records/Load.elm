@@ -78,10 +78,10 @@ decodeModel =
     decode WebResponse
         |> required "facilityId" (maybe Decode.int)
         |> required "list" (Decode.list decodeRecordRow)
-        |> required "facilityDropdown" (Decode.list decodeDropDownItem)
-        |> required "recordTypeDropdown" (Decode.list decodeDropDownItem)
-        |> required "userDropDown" (Decode.list decodeDropDownItem)
-        |> required "taskDropDown" (Decode.list decodeDropDownItem)
+        |> required "facilityDropdown" (Decode.list decodeDropdownItem)
+        |> required "recordTypeDropdown" (Decode.list decodeDropdownItem)
+        |> required "userDropDown" (Decode.list decodeDropdownItem)
+        |> required "taskDropDown" (Decode.list decodeDropdownItem)
 
 
 request : Int -> Maybe Int -> Http.Request WebResponse

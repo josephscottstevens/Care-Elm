@@ -30,10 +30,10 @@ port initSyncfusionControls : SyncFusionMessage -> Cmd msg
 port resetUpdateComplete : (String -> msg) -> Sub msg
 
 
-port updateFacility : (DropDownItem -> msg) -> Sub msg
+port updateFacility : (DropdownItem -> msg) -> Sub msg
 
 
-port updateCategory : (DropDownItem -> msg) -> Sub msg
+port updateCategory : (DropdownItem -> msg) -> Sub msg
 
 
 port updateTimeVisit : (Maybe String -> msg) -> Sub msg
@@ -51,10 +51,10 @@ port updateReportDate : (Maybe String -> msg) -> Sub msg
 port updateRecordingDate : (Maybe String -> msg) -> Sub msg
 
 
-port updateUser : (DropDownItem -> msg) -> Sub msg
+port updateUser : (DropdownItem -> msg) -> Sub msg
 
 
-port updateTask : (DropDownItem -> msg) -> Sub msg
+port updateTask : (DropdownItem -> msg) -> Sub msg
 
 
 port dropDownToggle : (Int -> msg) -> Sub msg
@@ -172,11 +172,11 @@ update msg model =
         OpenTask taskId ->
             model ! [ editTask taskId ]
 
-        UpdateRecordType newRecord dropDownItem ->
-            if model.recordTypeId == dropDownItem.id then
+        UpdateRecordType newRecord dropdownItem ->
+            if model.recordTypeId == dropdownItem.id then
                 model ! []
             else
-                { model | state = Limbo, recordTypeId = dropDownItem.id } ! [ resetUpdate dropDownItem.id, setLoadingStatus True ]
+                { model | state = Limbo, recordTypeId = dropdownItem.id } ! [ resetUpdate dropdownItem.id, setLoadingStatus True ]
 
         UpdateSpecialty newRecord str ->
             { model | state = AddNew { newRecord | specialty = str } } ! [ setUnsavedChanges True ]
@@ -196,8 +196,8 @@ update msg model =
         UpdateComments newRecord str ->
             { model | state = AddNew { newRecord | comments = str } } ! [ setUnsavedChanges True ]
 
-        UpdateFacility newRecord dropDownItem ->
-            { model | state = AddNew { newRecord | facilityId = dropDownItem.id, facilityText = dropDownItem.name } } ! [ setUnsavedChanges True ]
+        UpdateFacility newRecord dropdownItem ->
+            { model | state = AddNew { newRecord | facilityId = dropdownItem.id, facilityText = dropdownItem.name } } ! [ setUnsavedChanges True ]
 
         UpdateReportDate newRecord str ->
             { model | state = AddNew { newRecord | reportDate = str } } ! [ setUnsavedChanges True ]
@@ -214,11 +214,11 @@ update msg model =
         UpdateRecordingDate newRecord str ->
             { model | state = AddNew { newRecord | recordingDate = str } } ! [ setUnsavedChanges True ]
 
-        UpdateUser newRecord dropDownItem ->
-            { model | state = AddNew { newRecord | userId = dropDownItem.id, userText = dropDownItem.name } } ! [ setUnsavedChanges True ]
+        UpdateUser newRecord dropdownItem ->
+            { model | state = AddNew { newRecord | userId = dropdownItem.id, userText = dropdownItem.name } } ! [ setUnsavedChanges True ]
 
-        UpdateTask newRecord dropDownItem ->
-            { model | state = AddNew { newRecord | taskId = dropDownItem.id, taskText = dropDownItem.name } } ! [ setUnsavedChanges True ]
+        UpdateTask newRecord dropdownItem ->
+            { model | state = AddNew { newRecord | taskId = dropdownItem.id, taskText = dropdownItem.name } } ! [ setUnsavedChanges True ]
 
 
 toolbar : Html Msg
@@ -434,7 +434,7 @@ rowDropDown : Maybe Int -> Table.Column RecordRow Msg
 rowDropDown recordTypeId =
     Table.veryCustomColumn
         { name = ""
-        , viewData = (\t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropDownItems recordTypeId t.id))
+        , viewData = (\t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropdownItems recordTypeId t.id))
         , sorter = Table.unsortable
         }
 
@@ -450,8 +450,8 @@ config recordTypeId taskId =
         }
 
 
-dropDownItems : Maybe Int -> Int -> List ( String, String, Html.Attribute Msg )
-dropDownItems recordTypeId rowId =
+dropdownItems : Maybe Int -> Int -> List ( String, String, Html.Attribute Msg )
+dropdownItems recordTypeId rowId =
     case getRecordType recordTypeId of
         CallRecordings ->
             [ ( "e-edit", "Mark As Consent", onClick (SendMenuMessage rowId "MarkAsConsent") ) ]

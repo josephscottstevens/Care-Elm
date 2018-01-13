@@ -18,21 +18,21 @@ type Msg
     | DeleteCompleted (Result Http.Error String)
     | SaveCompleted (Result Http.Error String)
     | UpdateTitle NewRecord String
-    | UpdateRecordType NewRecord DropDownItem
+    | UpdateRecordType NewRecord DropdownItem
     | UpdateSpecialty NewRecord String
     | UpdateProvider NewRecord String
     | UpdateTimeVisit NewRecord (Maybe String)
     | UpdateTimeAcc NewRecord (Maybe String)
     | UpdateFileName NewRecord String
     | UpdateComments NewRecord String
-    | UpdateFacility NewRecord DropDownItem
+    | UpdateFacility NewRecord DropdownItem
     | UpdateReportDate NewRecord (Maybe String)
     | UpdateCallSid NewRecord String
     | UpdateRecordingSid NewRecord String
     | UpdateDuration NewRecord String
     | UpdateRecordingDate NewRecord (Maybe String)
-    | UpdateUser NewRecord DropDownItem
-    | UpdateTask NewRecord DropDownItem
+    | UpdateUser NewRecord DropdownItem
+    | UpdateTask NewRecord DropdownItem
     | Cancel
 
 
@@ -52,20 +52,20 @@ type SortMode
 type alias WebResponse =
     { facilityId : Maybe Int
     , records : List RecordRow
-    , facilities : List DropDownItem
-    , recordTypes : List DropDownItem
-    , users : List DropDownItem
-    , tasks : List DropDownItem
+    , facilities : List DropdownItem
+    , recordTypes : List DropdownItem
+    , users : List DropdownItem
+    , tasks : List DropdownItem
     }
 
 
 type alias Model =
     { state : ModelState
     , records : List RecordRow
-    , facilities : List DropDownItem
-    , recordTypes : List DropDownItem
-    , users : List DropDownItem
-    , tasks : List DropDownItem
+    , facilities : List DropdownItem
+    , recordTypes : List DropdownItem
+    , users : List DropdownItem
+    , tasks : List DropdownItem
     , patientId : Int
     , facilityId : Maybe Int
     , recordTypeId : Maybe Int
@@ -243,10 +243,10 @@ emptyDropDownState =
 
 
 type alias SyncFusionMessage =
-    { facilities : List DropDownItem
-    , recordTypes : List DropDownItem
-    , users : List DropDownItem
-    , tasks : List DropDownItem
+    { facilities : List DropdownItem
+    , recordTypes : List DropdownItem
+    , users : List DropdownItem
+    , tasks : List DropdownItem
     , facilityId : Maybe Int
     , recordTypeId : Maybe Int
     , setFocus : Bool

@@ -3,8 +3,8 @@ port module Demographics exposing (..)
 import Html exposing (Html, text, div, span, button, ul, li, a, input, label, h4)
 import Html.Attributes exposing (class, id, type_, value, style, title, checked, hidden, attribute)
 import Html.Events exposing (onClick, onInput, onCheck)
-import Utils.CommonTypes exposing (DropDownItem, Flags)
-import Utils.CommonFunctions exposing (decodeDropDownItem)
+import Utils.CommonTypes exposing (DropdownItem, Flags)
+import Utils.CommonFunctions exposing (decodeDropdownItem)
 import Utils.Dropdown as Dropdown
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
@@ -74,8 +74,8 @@ init flag =
 type alias Model =
     { patientPhoneNumbers : List PatientPhoneNumber
     , patientAddresses : List PatientAddress
-    , phoneNumberTypeDropdown : List DropDownItem
-    , stateDropdown : List DropDownItem
+    , phoneNumberTypeDropdown : List DropdownItem
+    , stateDropdown : List DropdownItem
     , primaryAddressIndex : Int
     , preferredPhoneIndex : Int
     , patientPhoneNumbersCounter : Int
@@ -115,20 +115,20 @@ type alias SfData =
     , ethnicityId : Maybe Int
     , uSVeteranId : Maybe Int
     , religionId : Maybe Int
-    , patientLanguageDropdown : List DropDownItem
-    , careCoordinatorDropdown : List DropDownItem
-    , languageDropdown : List DropDownItem
-    , ethnicityDropdown : List DropDownItem
-    , sexTypeDropdown : List DropDownItem
-    , sexualOrientationDropdown : List DropDownItem
-    , genderIdentityDropdown : List DropDownItem
-    , facilityDropdown : List DropDownItem
-    , mainProviderDropdown : List DropDownItem
-    , raceDropdown : List DropDownItem
-    , suffixDropdown : List DropDownItem
-    , prefixDropdown : List DropDownItem
-    , uSVeteranDropdown : List DropDownItem
-    , religionDropdown : List DropDownItem
+    , patientLanguageDropdown : List DropdownItem
+    , careCoordinatorDropdown : List DropdownItem
+    , languageDropdown : List DropdownItem
+    , ethnicityDropdown : List DropdownItem
+    , sexTypeDropdown : List DropdownItem
+    , sexualOrientationDropdown : List DropdownItem
+    , genderIdentityDropdown : List DropdownItem
+    , facilityDropdown : List DropdownItem
+    , mainProviderDropdown : List DropdownItem
+    , raceDropdown : List DropdownItem
+    , suffixDropdown : List DropdownItem
+    , prefixDropdown : List DropdownItem
+    , uSVeteranDropdown : List DropdownItem
+    , religionDropdown : List DropdownItem
     , dateOfBirth : Maybe String
     , dateOfDeath : Maybe String
     , vip : Maybe Bool
@@ -170,7 +170,7 @@ type alias PatientAddress =
 type alias DropInitSf =
     { newId : Maybe Int
     , index : Int
-    , items : List DropDownItem
+    , items : List DropdownItem
     }
 
 
@@ -927,7 +927,7 @@ emptyPatientAddress index =
     , zipCode = Nothing
     , isPrimary = False
     , index = index
-    , state = Dropdown.init "stateDropdown" [] (Just (DropDownItem Nothing ""))
+    , state = Dropdown.init "stateDropdown" [] (Just (DropdownItem Nothing ""))
     }
 
 
@@ -988,8 +988,8 @@ type alias DemographicsInformationModel =
 type alias ContactInformationModel =
     { patientPhoneNumbers : List PatientPhoneNumber
     , patientAddresses : List PatientAddress
-    , phoneNumberTypeDropdown : List DropDownItem
-    , stateDropdown : List DropDownItem
+    , phoneNumberTypeDropdown : List DropdownItem
+    , stateDropdown : List DropdownItem
     , primaryAddressIndex : Int
     , preferredPhoneIndex : Int
     }
@@ -1042,8 +1042,8 @@ decodeContactInformationModel =
     Pipeline.decode ContactInformationModel
         |> Pipeline.required "PatientPhoneNumbers" (Decode.list decodePatientPhoneNumber)
         |> Pipeline.required "PatientAddresses" (Decode.list decodePatientAddress)
-        |> Pipeline.required "PhoneNumberTypeDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "StateDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "PhoneNumberTypeDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "StateDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "PrimaryAddressIndex" Decode.int
         |> Pipeline.required "PreferredPhoneIndex" Decode.int
 
@@ -1080,7 +1080,7 @@ decodePatientAddress =
         |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
         |> Pipeline.required "IsPrimary" Decode.bool
         |> Pipeline.hardcoded 0
-        |> Pipeline.hardcoded (Dropdown.init "stateDropdown" [] (Just (DropDownItem Nothing "")))
+        |> Pipeline.hardcoded (Dropdown.init "stateDropdown" [] (Just (DropdownItem Nothing "")))
 
 
 decodeSfData : Decode.Decoder SfData
@@ -1098,20 +1098,20 @@ decodeSfData =
         |> Pipeline.required "EthnicityId" (Decode.maybe Decode.int)
         |> Pipeline.required "USVeteranId" (Decode.maybe Decode.int)
         |> Pipeline.required "ReligionId" (Decode.maybe Decode.int)
-        |> Pipeline.required "PatientLanguageDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "CareCoordinatorDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "EthnicityDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "SexTypeDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "SexualOrientationDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "GenderIdentityDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "FacilityDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "MainProviderDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "RaceDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "SuffixDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "PrefixDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "USVeteranDropdown" (Decode.list decodeDropDownItem)
-        |> Pipeline.required "ReligionDropdown" (Decode.list decodeDropDownItem)
+        |> Pipeline.required "PatientLanguageDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "CareCoordinatorDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "EthnicityDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "SexTypeDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "SexualOrientationDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "GenderIdentityDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "FacilityDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "MainProviderDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "RaceDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "SuffixDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "PrefixDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "USVeteranDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "ReligionDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "DateOfBirth" (Decode.maybe Decode.string)
         |> Pipeline.required "DateOfDeath" (Decode.maybe Decode.string)
         |> Pipeline.required "VIP" (Decode.maybe Decode.bool)

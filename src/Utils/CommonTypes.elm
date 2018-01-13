@@ -17,7 +17,7 @@ type alias Flags =
     }
 
 
-type alias DropDownItem =
+type alias DropdownItem =
     { id : Maybe Int
     , name : String
     }
