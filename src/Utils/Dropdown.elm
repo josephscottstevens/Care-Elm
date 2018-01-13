@@ -175,8 +175,8 @@ pickerSkip dropdown skipAmount dropdownItems =
             { dropdown | keyboardSelectedId = Just newIndex, selectedId = selectedItem.id } ! []
 
 
-view : Dropdown -> List DropdownItem -> Html Msg
-view dropdown dropdownItems =
+view : Dropdown -> List DropdownItem -> Msg -> Html msg
+view dropdown dropdownItems event =
     let
         displayStyle =
             if dropdown.isOpen then
@@ -211,7 +211,7 @@ view dropdown dropdownItems =
                         , readonly True
                         , value (getDropdownText dropdown.selectedId dropdownItems)
                         , if dropdown.isOpen then
-                            Events.onBlur OnBlur
+                            Events.onBlur event.OnBlur
                           else
                             style []
                         ]
