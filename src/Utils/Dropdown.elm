@@ -7,7 +7,6 @@ import Json.Decode
 import Utils.CommonTypes exposing (DropdownItem)
 import Utils.CommonFunctions as Functions
 import Char
-import Array exposing (Array)
 
 
 port dropdownMenuScroll : String -> Cmd msg
@@ -20,34 +19,22 @@ scrollToDomId =
 
 type alias Dropdown =
     { isOpen : Bool
-    , selectedItem : DropdownItem
-    , highlightedItem : Maybe DropdownItem
-    , highlightedIndex : Int
-    , dropdownSource : Array DropdownItem
+    , selectedId : Maybe Int
+    , mouseSelectedId : Maybe Int
+    , keyboardSelectedId : Maybe Int
     , searchString : String
-    , id : String
+    , domId : String
     }
 
 
-emptyItem : DropdownItem
-emptyItem =
-    DropdownItem Nothing ""
-
-
-defaultSelectedItem : Maybe DropdownItem -> DropdownItem
-defaultSelectedItem selectedItem =
-    Maybe.withDefault emptyItem selectedItem
-
-
-init : String -> List DropdownItem -> Maybe DropdownItem -> Dropdown
-init id list selectedItem =
+init : String -> Maybe Int -> Dropdown
+init domId selectedId =
     { isOpen = False
-    , selectedItem = defaultSelectedItem selectedItem
-    , highlightedItem = Nothing
-    , highlightedIndex = 0
-    , dropdownSource = Array.fromList list
+    , selectedId = selectedId
+    , mouseSelectedId = Nothing
+    , keyboardSelectedId = Nothing
     , searchString = ""
-    , id = id
+    , domId = domId
     }
 
 
@@ -78,27 +65,34 @@ type SkipAmount
     | Exact Int
 
 
-byId : Int -> Array DropdownItem -> DropdownItem
-byId index items =
-    case Array.get index items of
-        Just t ->
-            t
-
-        Nothing ->
-            emptyItem
+byId : Int -> List DropdownItem -> DropdownItem
+byId id items =
+    items
+        |> List.filter (\t -> t.id == Just id)
+        |> List.head
+        |> Maybe.withDefault (DropdownItem Nothing "")
 
 
-update : Msg -> Dropdown -> ( Dropdown, Cmd msg )
-update msg dropdown =
+getDropdownText : Maybe Int -> List DropdownItem -> String
+getDropdownText id dropdownItems =
+    dropdownItems
+        |> List.filter (\t -> t.id == id)
+        |> List.map (\t -> t.name)
+        |> List.head
+        |> Maybe.withDefault ""
+
+
+update : Msg -> Dropdown -> List DropdownItem -> ( Dropdown, Cmd msg )
+update msg dropdown dropdownItems =
     case msg of
         ItemPicked item ->
-            { dropdown | selectedItem = item, isOpen = False } ! []
+            { dropdown | selectedId = item.id, isOpen = False } ! []
 
         ItemEntered item ->
-            { dropdown | highlightedItem = Just item } ! []
+            { dropdown | mouseSelectedId = item.id } ! []
 
         ItemLeft ->
-            { dropdown | highlightedItem = Nothing } ! []
+            { dropdown | mouseSelectedId = Nothing } ! []
 
         SetOpenState newState ->
             { dropdown | isOpen = newState } ! []
@@ -106,7 +100,7 @@ update msg dropdown =
         OnBlur ->
             { dropdown
                 | isOpen = False
-                , selectedItem = defaultSelectedItem dropdown.highlightedItem
+                , selectedId = dropdown.mouseSelectedId
             }
                 ! []
 
@@ -117,72 +111,72 @@ update msg dropdown =
             if dropdown.isOpen then
                 { dropdown
                     | isOpen = False
-                    , selectedItem = byId dropdown.highlightedIndex dropdown.dropdownSource
+                    , selectedId = dropdown.mouseSelectedId
                 }
                     ! []
             else
                 dropdown ! []
 
         OnKey ArrowUp ->
-            pickerSkip dropdown (Exact -1)
+            pickerSkip dropdown (Exact -1) dropdownItems
 
         OnKey ArrowDown ->
-            pickerSkip dropdown (Exact 1)
+            pickerSkip dropdown (Exact 1) dropdownItems
 
         OnKey PageUp ->
-            pickerSkip dropdown (Exact -9)
+            pickerSkip dropdown (Exact -9) dropdownItems
 
         OnKey PageDown ->
-            pickerSkip dropdown (Exact 9)
+            pickerSkip dropdown (Exact 9) dropdownItems
 
         OnKey Home ->
-            pickerSkip dropdown First
+            pickerSkip dropdown First dropdownItems
 
         OnKey End ->
-            pickerSkip dropdown Last
+            pickerSkip dropdown Last dropdownItems
 
         OnKey (Searchable char) ->
-            updateSearchString char dropdown
+            updateSearchString char dropdown dropdownItems
 
 
-boundedIndex : Array DropdownItem -> Int -> Int
+boundedIndex : List DropdownItem -> Int -> Int
 boundedIndex dropdownSource index =
     if index < 0 then
         0
-    else if index > Array.length dropdownSource then
-        Array.length dropdownSource - 1
+    else if index > List.length dropdownSource then
+        List.length dropdownSource - 1
     else
         index
 
 
-pickerSkip : Dropdown -> SkipAmount -> ( Dropdown, Cmd msg )
-pickerSkip dropdown skipAmount =
+pickerSkip : Dropdown -> SkipAmount -> List DropdownItem -> ( Dropdown, Cmd msg )
+pickerSkip dropdown skipAmount dropdownItems =
     let
         newIndexCalc =
             case skipAmount of
                 Exact skipCount ->
-                    dropdown.highlightedIndex + skipCount
+                    (Functions.defaultInt dropdown.keyboardSelectedId) + skipCount
 
                 First ->
                     0
 
                 Last ->
-                    Array.length dropdown.dropdownSource - 1
+                    List.length dropdownItems - 1
 
         newIndex =
-            boundedIndex dropdown.dropdownSource newIndexCalc
+            boundedIndex dropdownItems newIndexCalc
 
         selectedItem =
-            byId newIndex dropdown.dropdownSource
+            byId newIndex dropdownItems
     in
         if dropdown.isOpen then
-            { dropdown | highlightedIndex = newIndex } ! [ scrollToDomId (getId dropdown.id selectedItem) ]
+            { dropdown | keyboardSelectedId = Just newIndex } ! [ scrollToDomId dropdown.domId ]
         else
-            { dropdown | highlightedIndex = newIndex, selectedItem = selectedItem } ! []
+            { dropdown | keyboardSelectedId = Just newIndex, selectedId = selectedItem.id } ! []
 
 
-view : Dropdown -> Html Msg
-view dropdown =
+view : Dropdown -> List DropdownItem -> Html Msg
+view dropdown dropdownItems =
     let
         displayStyle =
             if dropdown.isOpen then
@@ -215,7 +209,7 @@ view dropdown =
                     [ input
                         [ class "e-input"
                         , readonly True
-                        , value dropdown.selectedItem.name
+                        , value (getDropdownText dropdown.selectedId dropdownItems)
                         , if dropdown.isOpen then
                             Events.onBlur OnBlur
                           else
@@ -227,7 +221,7 @@ view dropdown =
                         ]
                     ]
                 ]
-            , ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (viewItem dropdown)
+            , ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (viewItem dropdown dropdownItems)
             ]
 
 
@@ -236,12 +230,11 @@ getId id item =
     id ++ "-" ++ Functions.defaultIntToString item.id
 
 
-viewItem : Dropdown -> List (Html Msg)
-viewItem dropdown =
+viewItem : Dropdown -> List DropdownItem -> List (Html Msg)
+viewItem dropdown dropdownItems =
     let
         numItems =
-            dropdown.dropdownSource
-                |> Array.toList
+            dropdownItems
                 |> List.map (\t -> String.length t.name)
                 |> List.sortBy identity
                 |> List.reverse
@@ -260,25 +253,24 @@ viewItem dropdown =
         keyActive =
             [ ( "background-color", "#f4f4f4" ), ( "color", "#333" ) ] ++ commonWidth
     in
-        dropdown.dropdownSource
-            |> Array.indexedMap
+        dropdownItems
+            |> List.indexedMap
                 (\index item ->
                     li
                         [ onClick (ItemPicked item)
                         , Events.onMouseEnter (ItemEntered item)
                         , Events.onMouseLeave ItemLeft
                         , class "dropdown-li"
-                        , if dropdown.highlightedItem == Just item then
+                        , if dropdown.mouseSelectedId == item.id then
                             style mouseActive
-                          else if dropdown.highlightedIndex == index && (index > 0 || dropdown.isOpen) then
+                          else if dropdown.keyboardSelectedId == Just index && (index > 0 || dropdown.isOpen) then
                             style keyActive
                           else
                             style commonWidth
-                        , Html.Attributes.id (getId dropdown.id item)
+                        , Html.Attributes.id (getId dropdown.domId item)
                         ]
                         [ text item.name ]
                 )
-            |> Array.toList
 
 
 onClick : msg -> Attribute msg
@@ -310,8 +302,8 @@ dropdownList =
     ]
 
 
-updateSearchString : Char -> Dropdown -> ( Dropdown, Cmd msg )
-updateSearchString searchChar dropdown =
+updateSearchString : Char -> Dropdown -> List DropdownItem -> ( Dropdown, Cmd msg )
+updateSearchString searchChar dropdown dropdownItems =
     let
         searchString =
             -- Manage backspace character
@@ -321,18 +313,17 @@ updateSearchString searchChar dropdown =
                 dropdown.searchString ++ String.toLower (String.fromChar searchChar)
 
         maybeSelectedItem =
-            dropdown.dropdownSource
-                |> Array.toList
+            dropdownItems
                 |> List.filter (\t -> String.startsWith searchString (String.toLower t.name))
                 |> List.head
     in
         case maybeSelectedItem of
             Just t ->
                 { dropdown
-                    | selectedItem = t
+                    | selectedId = t.id
                     , searchString = searchString
                 }
-                    ! [ scrollToDomId (getId dropdown.id t) ]
+                    ! [ scrollToDomId (getId dropdown.domId t) ]
 
             Nothing ->
                 dropdown ! [ Cmd.none ]
