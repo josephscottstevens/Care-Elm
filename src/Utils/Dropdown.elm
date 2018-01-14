@@ -100,7 +100,10 @@ update msg dropdown selectedId dropdownItems =
             ( { dropdown | isOpen = newState, keyboardSelectedId = selectedId }, selectedId, scrollToDomId dropdown.domId selectedId )
 
         OnBlur ->
-            ( { dropdown | isOpen = False }, dropdown.mouseSelectedId, Cmd.none )
+            if selectedId /= Nothing && dropdown.mouseSelectedId == Nothing then
+                ( { dropdown | isOpen = False }, selectedId, Cmd.none )
+            else
+                ( { dropdown | isOpen = False }, dropdown.mouseSelectedId, Cmd.none )
 
         OnKey Esc ->
             ( { dropdown | isOpen = False }, selectedId, Cmd.none )
@@ -166,7 +169,7 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
         if dropdown.isOpen then
             ( { dropdown | keyboardSelectedId = Just newIndex }, selectedId, scrollToDomId dropdown.domId selectedItem.id )
         else
-            ( { dropdown | keyboardSelectedId = Just newIndex }, selectedItem.id, Cmd.none )
+            ( { dropdown | keyboardSelectedId = Just newIndex }, Just newIndex, Cmd.none )
 
 
 view : Dropdown -> List DropdownItem -> Maybe Int -> Html Msg
