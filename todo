@@ -16,8 +16,9 @@ REQUESTED TODO:
 
 validations
 
-dropdown keyboard stuff not working
-re-add missing dropdown css
+don't show highlight for keyboard when mouse is selecting (or vice versa)
+keyboard search not working
+re-add missing dropdown css (scrollbar)
 implement save
 test save
 look for TODO, clean up

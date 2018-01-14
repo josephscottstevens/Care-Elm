@@ -16,7 +16,7 @@ scrollToDomId : String -> Maybe Int -> Cmd msg
 scrollToDomId str id =
     let
         newId =
-            (Maybe.withDefault 0 id) + 1
+            Maybe.withDefault 1 id
     in
         dropdownMenuScroll (str ++ "-" ++ toString newId)
 
