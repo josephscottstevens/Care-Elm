@@ -156,7 +156,7 @@ type alias PatientAddress =
     , addressLine2 : Maybe String
     , addressLine3 : Maybe String
     , city : Maybe String
-    , stateId : Int
+    , stateId : Maybe Int
     , zipCode : Maybe String
     , isPrimary : Bool
     , index : Int
@@ -346,9 +346,7 @@ viewAddress dropdownItems address =
                 , div [ class "margin-bottom-5" ]
                     [ label [ class "required" ] [ text "State:" ]
                     , div [ class "form-column" ]
-                        [ Html.map (UpdateState address) <| Dropdown.view address.state dropdownItems
-
-                        -- input [ class "e-textbox", type_ "text", id ("StateId" ++ (toString address.index)) ] []
+                        [ Html.map (UpdateState address) <| Dropdown.view address.state dropdownItems address.stateId
                         ]
                     ]
                 , div []
@@ -417,7 +415,7 @@ patientPhoneNumberToMsg model patientPhoneNumber =
 
 patientAddressToMsg : Model -> PatientAddress -> Cmd Msg
 patientAddressToMsg model patientAddress =
-    initPatientAddress (DropInitSf (Just patientAddress.stateId) patientAddress.index model.stateDropdown)
+    initPatientAddress (DropInitSf patientAddress.stateId patientAddress.index model.stateDropdown)
 
 
 updateAddress : Model -> PatientAddress -> Model
@@ -610,7 +608,7 @@ update msg model =
                     List.map
                         (\t ->
                             if t.index == dropUpdateSf.index then
-                                { t | stateId = Maybe.withDefault -1 dropUpdateSf.newId }
+                                { t | stateId = dropUpdateSf.newId }
                             else
                                 t
                         )
@@ -664,10 +662,10 @@ update msg model =
 
         UpdateState patientAddress dropdownMsg ->
             let
-                ( newState, newMsg ) =
-                    Dropdown.update dropdownMsg patientAddress.state model.stateDropdown
+                ( newState, newSelectedId, newMsg ) =
+                    Dropdown.update dropdownMsg patientAddress.state patientAddress.stateId model.stateDropdown
             in
-                updateAddress model { patientAddress | state = newState } ! [ newMsg ]
+                updateAddress model { patientAddress | state = newState, stateId = newSelectedId } ! [ newMsg ]
 
         InputChanged patientPhoneNumber value ->
             updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString value }
@@ -920,7 +918,7 @@ emptyPatientAddress index =
     , addressLine2 = Nothing
     , addressLine3 = Nothing
     , city = Nothing
-    , stateId = -1
+    , stateId = Nothing
     , zipCode = Nothing
     , isPrimary = False
     , index = index
@@ -1073,7 +1071,7 @@ decodePatientAddress =
         |> Pipeline.required "AddressLine2" (Decode.maybe Decode.string)
         |> Pipeline.required "AddressLine3" (Decode.maybe Decode.string)
         |> Pipeline.required "City" (Decode.maybe Decode.string)
-        |> Pipeline.required "StateId" Decode.int
+        |> Pipeline.required "StateId" (Decode.maybe Decode.int)
         |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
         |> Pipeline.required "IsPrimary" Decode.bool
         |> Pipeline.hardcoded 0
