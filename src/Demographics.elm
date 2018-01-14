@@ -1077,7 +1077,17 @@ decodePatientAddress =
         |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
         |> Pipeline.required "IsPrimary" Decode.bool
         |> Pipeline.hardcoded 0
-        |> Pipeline.hardcoded (Dropdown.init "stateDropdown" Nothing)
+        |> Pipeline.required "StateId" toDropdown
+
+
+toDropdown : Decode.Decoder Dropdown.Dropdown
+toDropdown =
+    let
+        convert : Int -> Decode.Decoder Dropdown.Dropdown
+        convert raw =
+            Decode.succeed (Dropdown.init "stateDropdown" (Just raw))
+    in
+        Decode.int |> Decode.andThen convert
 
 
 decodeSfData : Decode.Decoder SfData
