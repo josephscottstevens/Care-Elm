@@ -88,7 +88,7 @@ update : Msg -> Dropdown -> Maybe Int -> List DropdownItem -> ( Dropdown, Maybe 
 update msg dropdown selectedId dropdownItems =
     case msg of
         ItemPicked item ->
-            ( { dropdown | isOpen = False }, item.id, Cmd.none )
+            ( { dropdown | isOpen = False }, dropdown.mouseSelectedId, Cmd.none )
 
         ItemEntered item ->
             ( { dropdown | mouseSelectedId = item.id }, selectedId, Cmd.none )
@@ -97,7 +97,7 @@ update msg dropdown selectedId dropdownItems =
             ( { dropdown | mouseSelectedId = Nothing }, selectedId, Cmd.none )
 
         SetOpenState newState ->
-            ( { dropdown | isOpen = newState, keyboardSelectedId = selectedId }, selectedId, Cmd.none )
+            ( { dropdown | isOpen = newState, keyboardSelectedId = selectedId }, selectedId, scrollToDomId dropdown.domId selectedId )
 
         OnBlur ->
             ( { dropdown | isOpen = False }, dropdown.mouseSelectedId, Cmd.none )
@@ -107,7 +107,7 @@ update msg dropdown selectedId dropdownItems =
 
         OnKey Enter ->
             if dropdown.isOpen then
-                ( { dropdown | isOpen = False }, selectedId, Cmd.none )
+                ( { dropdown | isOpen = False }, dropdown.keyboardSelectedId, Cmd.none )
             else
                 ( dropdown, selectedId, Cmd.none )
 
@@ -164,7 +164,7 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
             byId newIndex dropdownItems
     in
         if dropdown.isOpen then
-            ( { dropdown | keyboardSelectedId = Just newIndex }, selectedId, Cmd.batch [ scrollToDomId dropdown.domId selectedItem.id ] )
+            ( { dropdown | keyboardSelectedId = Just newIndex }, selectedId, scrollToDomId dropdown.domId selectedItem.id )
         else
             ( { dropdown | keyboardSelectedId = Just newIndex }, selectedItem.id, Cmd.none )
 
