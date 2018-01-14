@@ -12,9 +12,13 @@ import Char
 port dropdownMenuScroll : String -> Cmd msg
 
 
-scrollToDomId : String -> Cmd msg
-scrollToDomId =
-    dropdownMenuScroll
+scrollToDomId : String -> Maybe Int -> Cmd msg
+scrollToDomId str id =
+    let
+        newId =
+            (Maybe.withDefault 0 id) + 1
+    in
+        dropdownMenuScroll (str ++ "-" ++ toString newId)
 
 
 type alias Dropdown =
@@ -95,7 +99,7 @@ update msg dropdown dropdownItems =
             { dropdown | mouseSelectedId = Nothing } ! []
 
         SetOpenState newState ->
-            { dropdown | isOpen = newState } ! []
+            { dropdown | isOpen = newState, keyboardSelectedId = dropdown.selectedId } ! []
 
         OnBlur ->
             { dropdown
@@ -111,7 +115,7 @@ update msg dropdown dropdownItems =
             if dropdown.isOpen then
                 { dropdown
                     | isOpen = False
-                    , selectedId = dropdown.mouseSelectedId
+                    , selectedId = dropdown.keyboardSelectedId
                 }
                     ! []
             else
@@ -170,13 +174,13 @@ pickerSkip dropdown skipAmount dropdownItems =
             byId newIndex dropdownItems
     in
         if dropdown.isOpen then
-            { dropdown | keyboardSelectedId = Just newIndex } ! [ scrollToDomId dropdown.domId ]
+            { dropdown | keyboardSelectedId = Just newIndex } ! [ scrollToDomId dropdown.domId selectedItem.id ]
         else
             { dropdown | keyboardSelectedId = Just newIndex, selectedId = selectedItem.id } ! []
 
 
-view : Dropdown -> List DropdownItem -> Msg -> Html msg
-view dropdown dropdownItems event =
+view : Dropdown -> List DropdownItem -> Html Msg
+view dropdown dropdownItems =
     let
         displayStyle =
             if dropdown.isOpen then
@@ -211,7 +215,7 @@ view dropdown dropdownItems event =
                         , readonly True
                         , value (getDropdownText dropdown.selectedId dropdownItems)
                         , if dropdown.isOpen then
-                            Events.onBlur event.OnBlur
+                            Events.onBlur OnBlur
                           else
                             style []
                         ]
@@ -254,8 +258,8 @@ viewItem dropdown dropdownItems =
             [ ( "background-color", "#f4f4f4" ), ( "color", "#333" ) ] ++ commonWidth
     in
         dropdownItems
-            |> List.indexedMap
-                (\index item ->
+            |> List.map
+                (\item ->
                     li
                         [ onClick (ItemPicked item)
                         , Events.onMouseEnter (ItemEntered item)
@@ -263,7 +267,7 @@ viewItem dropdown dropdownItems =
                         , class "dropdown-li"
                         , if dropdown.mouseSelectedId == item.id then
                             style mouseActive
-                          else if dropdown.keyboardSelectedId == Just index && (index > 0 || dropdown.isOpen) then
+                          else if dropdown.keyboardSelectedId == item.id && dropdown.isOpen then
                             style keyActive
                           else
                             style commonWidth
@@ -323,8 +327,10 @@ updateSearchString searchChar dropdown dropdownItems =
                     | selectedId = t.id
                     , searchString = searchString
                 }
-                    ! [ scrollToDomId (getId dropdown.domId t) ]
+                    ! []
 
+            --TODO
+            --! [ scrollToDomId (getId dropdown.domId t.id) ]
             Nothing ->
                 dropdown ! [ Cmd.none ]
 

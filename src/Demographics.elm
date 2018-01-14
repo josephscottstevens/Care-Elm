@@ -43,9 +43,6 @@ port updateLanguagesMap : (DropUpdateSf -> msg) -> Sub msg
 port updateDemographics : (SfData -> msg) -> Sub msg
 
 
-port removeNode : String -> Cmd msg
-
-
 port logError : String -> Cmd msg
 
 
@@ -252,7 +249,7 @@ view model =
                 , div [ class "inline-block e-tooltxt pointer", title "Add new address", onClick AddNewAddress ]
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
-                , div [] (List.map viewAddress model.patientAddresses)
+                , div [] (List.map (viewAddress model.stateDropdown) model.patientAddresses)
                 ]
             ]
         ]
@@ -306,8 +303,8 @@ viewPhones phone =
         ]
 
 
-viewAddress : PatientAddress -> Html Msg
-viewAddress address =
+viewAddress : List DropdownItem -> PatientAddress -> Html Msg
+viewAddress dropdownItems address =
     div [ class "multi-address-template" ]
         [ div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
             [ div [ title "Mark as primary", class "col-xs-6 padding-h-0 inline-block" ]
@@ -349,7 +346,7 @@ viewAddress address =
                 , div [ class "margin-bottom-5" ]
                     [ label [ class "required" ] [ text "State:" ]
                     , div [ class "form-column" ]
-                        [ Html.map (UpdateState address) <| Dropdown.view address.state
+                        [ Html.map (UpdateState address) <| Dropdown.view address.state dropdownItems
 
                         -- input [ class "e-textbox", type_ "text", id ("StateId" ++ (toString address.index)) ] []
                         ]
@@ -604,7 +601,7 @@ update msg model =
                                 )
                                 newAddress
             in
-                { model | patientAddresses = updatedAddress } ! [ removeNode ("StateId" ++ toString index) ]
+                { model | patientAddresses = updatedAddress } ! []
 
         -- Nested SF Controls
         UpdatePatientAddress dropUpdateSf ->
@@ -668,7 +665,7 @@ update msg model =
         UpdateState patientAddress dropdownMsg ->
             let
                 ( newState, newMsg ) =
-                    Dropdown.update dropdownMsg patientAddress.state
+                    Dropdown.update dropdownMsg patientAddress.state model.stateDropdown
             in
                 updateAddress model { patientAddress | state = newState } ! [ newMsg ]
 
@@ -927,7 +924,7 @@ emptyPatientAddress index =
     , zipCode = Nothing
     , isPrimary = False
     , index = index
-    , state = Dropdown.init "stateDropdown" [] (Just (DropdownItem Nothing ""))
+    , state = Dropdown.init "stateDropdown" Nothing
     }
 
 
@@ -1080,7 +1077,7 @@ decodePatientAddress =
         |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
         |> Pipeline.required "IsPrimary" Decode.bool
         |> Pipeline.hardcoded 0
-        |> Pipeline.hardcoded (Dropdown.init "stateDropdown" [] (Just (DropdownItem Nothing "")))
+        |> Pipeline.hardcoded (Dropdown.init "stateDropdown" Nothing)
 
 
 decodeSfData : Decode.Decoder SfData

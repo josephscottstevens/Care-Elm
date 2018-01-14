@@ -16,10 +16,11 @@ REQUESTED TODO:
 
 validations
 
-wtf, when u remove address, state shifts down :/
-
+dropdown keyboard stuff not working
+re-add missing dropdown css
 implement save
 test save
+look for TODO, clean up
 
 on load if any language \ phone or address is empty, pre-fill with 1 (test)
 
