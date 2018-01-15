@@ -14,10 +14,12 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-Radio button update events for the three nested controls
-implement save
+
 test save
 
+fix save button being in the middle of the form
+do I still need the weird refresh page?
+oh crap... test new patient as well
 test Contact Hours still works
 delete the uh.... phone hours if it is invalid vefore save?
 look for TODO, clean up	
@@ -26,6 +28,7 @@ re-add missing dropdown css (scrollbar)
 server call is happening twice (contacts is still calling it) (send it json value)
 
 pull state\address\phone out of sf data group
+PreferredLanguageIndex does nothing
 -----------------------------------------------------------------
 don't show highlight for keyboard when mouse is selecting (or vice versa)
 keyboard search not working

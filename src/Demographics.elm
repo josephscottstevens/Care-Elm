@@ -9,6 +9,7 @@ import Utils.Dropdown as Dropdown
 import Utils.CommonFunctions as Functions
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
+import Json.Encode as Encode
 import Http
 import Char
 import MaskedInput.Number as MaskedNumber
@@ -24,6 +25,9 @@ port initContactHours : String -> Cmd msg
 
 
 port updateDemographics : (SfData -> msg) -> Sub msg
+
+
+port save : Encode.Value -> Cmd msg
 
 
 subscriptions : Sub Msg
@@ -339,6 +343,7 @@ type Msg
     | UpdateDemographics SfData
     | InitDemographicsDone String
     | Save
+    | SaveCompleted (Result Http.Error String)
     | Cancel
     | AddNewLanguage
     | RemoveLanguage PatientLanguagesMap
@@ -480,11 +485,31 @@ update msg model =
 
         Save ->
             if List.length (validatationErrors model) > 0 then
-                { model | showValidationErrors = True } ! [ Functions.displayErrorMessage "Validation sad face" ]
+                { model | showValidationErrors = True } ! []
                 -- todo, save
                 --  |> Functions.uniqueBy (\t -> Maybe.withDefault "" t.phoneNumber)
             else
-                model ! [ Functions.displaySuccessMessage "Validation yay!" ]
+                let
+                    newLangs =
+                        model.patientLanguagesMap |> List.filter (\t -> t.languageId /= Nothing)
+
+                    newModel =
+                        { model
+                            | patientLanguagesMap = newLangs
+                        }
+                in
+                    model ! [ save (encodeBody newModel), Functions.setUnsavedChanges False ]
+
+        SaveCompleted (Ok responseMsg) ->
+            case Functions.getResponseError responseMsg of
+                Just t ->
+                    model ! [ Functions.displayErrorMessage t ]
+
+                Nothing ->
+                    model ! [ Functions.displaySuccessMessage "Save completed successfully!" ]
+
+        SaveCompleted (Err t) ->
+            model ! [ Functions.displayErrorMessage (toString t) ]
 
         Cancel ->
             emptyModel model.patientId ! []
@@ -1174,3 +1199,100 @@ decodeSfData =
         |> Pipeline.required "DateOfBirth" (Decode.maybe Decode.string)
         |> Pipeline.required "DateOfDeath" (Decode.maybe Decode.string)
         |> Pipeline.required "VIP" (Decode.maybe Decode.bool)
+
+
+
+-- ENCODING
+
+
+encodePatientLanguagesMap : PatientLanguagesMap -> Encode.Value
+encodePatientLanguagesMap lang =
+    Encode.object
+        [ ( "Id ", (maybeVal Encode.int) lang.id )
+        , ( "LanguageId", (maybeVal Encode.int) lang.languageId )
+        , ( "IsPreferred", Encode.bool lang.isPreferred )
+        ]
+
+
+maybeVal : (a -> Encode.Value) -> Maybe a -> Encode.Value
+maybeVal encoder =
+    Maybe.map encoder >> Maybe.withDefault Encode.null
+
+
+encodeDemographicsInformationModel : Model -> Encode.Value
+encodeDemographicsInformationModel model =
+    Encode.object
+        [ ( "PatientId", Encode.int model.patientId )
+        , ( "DemographicsId", (maybeVal Encode.int) model.demographicsId )
+        , ( "NickName", (maybeVal Encode.string) model.nickName )
+        , ( "SSN", (maybeVal Encode.string) model.ssn )
+        , ( "LastName", (maybeVal Encode.string) model.lastName )
+        , ( "FirstName", (maybeVal Encode.string) model.firstName )
+        , ( "Middle", (maybeVal Encode.string) model.middle )
+        , ( "BirthPlace", (maybeVal Encode.string) model.birthPlace )
+        , ( "MRN", (maybeVal Encode.string) model.mrn )
+        , ( "PatientAccountNumber", (maybeVal Encode.string) model.patientAccountNumber )
+        , ( "FacilityPtID", (maybeVal Encode.string) model.facilityPtID )
+        , ( "SexualOrientationNote", (maybeVal Encode.string) model.sexualOrientationNote )
+        , ( "GenderIdentityNote", (maybeVal Encode.string) model.genderIdentityNote )
+        , ( "Email", (maybeVal Encode.string) model.email )
+        , ( "FacilityId", (maybeVal Encode.int) model.sfData.facilityId )
+        , ( "MainProviderId", (maybeVal Encode.int) model.sfData.mainProviderId )
+        , ( "CareCoordinatorId", (maybeVal Encode.int) model.sfData.careCoordinatorId )
+        , ( "PrefixId", (maybeVal Encode.int) model.sfData.prefixId )
+        , ( "SexTypeId", (maybeVal Encode.int) model.sfData.sexTypeId )
+        , ( "SexualOrientationId", (maybeVal Encode.int) model.sfData.sexualOrientationId )
+        , ( "SuffixId", (maybeVal Encode.int) model.sfData.suffixId )
+        , ( "GenderIdentityId", (maybeVal Encode.int) model.sfData.genderIdentityId )
+        , ( "RaceId", (maybeVal Encode.int) model.sfData.raceId )
+        , ( "EthnicityId", (maybeVal Encode.int) model.sfData.ethnicityId )
+        , ( "USVeteranId", (maybeVal Encode.int) model.sfData.uSVeteranId )
+        , ( "ReligionId", (maybeVal Encode.int) model.sfData.religionId )
+        , ( "DateOfBirth", (maybeVal Encode.string) model.sfData.dateOfBirth )
+        , ( "DateOfDeath", (maybeVal Encode.string) model.sfData.dateOfDeath )
+        , ( "VIP", (maybeVal Encode.bool) model.sfData.vip )
+        , ( "PatientLanguagesMap", Encode.list (List.map encodePatientLanguagesMap model.patientLanguagesMap) )
+        ]
+
+
+encodeContactInformationModel : Model -> Encode.Value
+encodeContactInformationModel model =
+    Encode.object
+        [ ( "PatientAddresses", Encode.list (List.map encodePatientAddress model.patientAddresses) )
+        , ( "PatientPhoneNumbers", Encode.list (List.map encodePatientPhoneNumber model.patientPhoneNumbers) )
+        ]
+
+
+encodePatientAddress : PatientAddress -> Encode.Value
+encodePatientAddress address =
+    Encode.object
+        [ ( "Id ", (maybeVal Encode.int) address.id )
+        , ( "AddressLine1", (maybeVal Encode.string) address.addressLine1 )
+        , ( "AddressLine2", (maybeVal Encode.string) address.addressLine2 )
+        , ( "AddressLine3", (maybeVal Encode.string) address.addressLine3 )
+        , ( "City", (maybeVal Encode.string) address.city )
+        , ( "StateId", (maybeVal Encode.int) address.stateId )
+        , ( "ZipCode", (maybeVal Encode.string) address.zipCode )
+        , ( "IsPrimary", Encode.bool address.isPreferred )
+        ]
+
+
+encodePatientPhoneNumber : PatientPhoneNumber -> Encode.Value
+encodePatientPhoneNumber phone =
+    Encode.object
+        [ ( "Id ", (maybeVal Encode.int) phone.id )
+        , ( "PhoneNumber", (maybeVal Encode.string) phone.phoneNumber )
+        , ( "PhoneNumberTypeId", (maybeVal Encode.int) phone.phoneNumberTypeId )
+        , ( "IsPreferred", Encode.bool phone.isPreferred )
+        ]
+
+
+encodeBody : Model -> Encode.Value
+encodeBody model =
+    Encode.object
+        [ ( "demographicsInformation", encodeDemographicsInformationModel model )
+        , ( "contactInformation", encodeContactInformationModel model )
+        , ( "phones", Encode.list (List.map encodePatientPhoneNumber model.patientPhoneNumbers) )
+        , ( "addresses", Encode.list (List.map encodePatientAddress model.patientAddresses) )
+        , ( "languages", Encode.list (List.map encodePatientLanguagesMap model.patientLanguagesMap) )
+        ]

@@ -9,7 +9,7 @@ import Table exposing (..)
 import Utils.CommonGrid exposing (..)
 import Utils.CommonHtml exposing (..)
 import Utils.CommonTypes exposing (..)
-import Utils.CommonFunctions exposing (..)
+import Utils.CommonFunctions as Functions exposing (..)
 
 
 port resetUpdate : Maybe Int -> Cmd msg
@@ -128,7 +128,7 @@ update msg model =
                 { model | state = AddNew { newRecord | showValidationErrors = True } } ! actions
 
         SaveCompleted (Ok responseMsg) ->
-            case getResponseError responseMsg of
+            case Functions.getResponseError responseMsg of
                 Just t ->
                     model ! [ getRecords model.patientId model.recordTypeId Load, displayErrorMessage t ]
 
@@ -156,7 +156,7 @@ update msg model =
                 { model | records = updatedRecords } ! [ deleteRequest rowId ]
 
         DeleteCompleted (Ok responseMsg) ->
-            case getResponseError responseMsg of
+            case Functions.getResponseError responseMsg of
                 Just t ->
                     model ! [ displayErrorMessage t ]
 

@@ -8,6 +8,7 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Utils.CommonTypes exposing (DropdownItem)
 import Set exposing (Set)
+import Http
 
 
 port displaySuccessMessage : String -> Cmd msg
@@ -169,3 +170,31 @@ uniqueHelp f existing remaining accumulator =
                     uniqueHelp f existing rest accumulator
                 else
                     uniqueHelp f (Set.insert computedFirst existing) rest (first :: accumulator)
+
+
+postRequest : Encode.Value -> String -> Http.Request String
+postRequest body url =
+    Http.request
+        { body = body |> Http.jsonBody
+        , expect = Http.expectString
+        , headers = []
+        , method = "POST"
+        , timeout = Nothing
+        , url = url
+        , withCredentials = False
+        }
+
+
+getResponseError : String -> Maybe String
+getResponseError str =
+    case Decode.decodeString (Decode.field "Error" Decode.int) str of
+        Ok _ ->
+            case Decode.decodeString (Decode.field "Message" Decode.string) str of
+                Ok t ->
+                    Just t
+
+                Err _ ->
+                    Just ""
+
+        Err _ ->
+            Nothing
