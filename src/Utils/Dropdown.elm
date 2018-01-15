@@ -1,4 +1,4 @@
-port module Utils.Dropdown exposing (Dropdown, Msg, init, update, view)
+port module Utils.Dropdown exposing (DropState, Msg, init, update, view)
 
 import Html exposing (Html, Attribute, div, span, text, li, ul, input)
 import Html.Attributes exposing (style, value, class, readonly)
@@ -21,7 +21,7 @@ scrollToDomId str id =
         dropdownMenuScroll (str ++ "-" ++ toString newId)
 
 
-type alias Dropdown =
+type alias DropState =
     { isOpen : Bool
     , mouseSelectedId : Maybe Int
     , keyboardSelectedId : Maybe Int
@@ -30,7 +30,7 @@ type alias Dropdown =
     }
 
 
-init : String -> Maybe Int -> Dropdown
+init : String -> Maybe Int -> DropState
 init domId selectedId =
     { isOpen = False
     , mouseSelectedId = Nothing
@@ -84,7 +84,7 @@ getDropdownText id dropdownItems =
         |> Maybe.withDefault ""
 
 
-update : Msg -> Dropdown -> Maybe Int -> List DropdownItem -> ( Dropdown, Maybe Int, Cmd msg )
+update : Msg -> DropState -> Maybe Int -> List DropdownItem -> ( DropState, Maybe Int, Cmd msg )
 update msg dropdown selectedId dropdownItems =
     case msg of
         ItemPicked item ->
@@ -146,7 +146,7 @@ boundedIndex dropdownSource index =
         index
 
 
-pickerSkip : Dropdown -> SkipAmount -> List DropdownItem -> Maybe Int -> ( Dropdown, Maybe Int, Cmd msg )
+pickerSkip : DropState -> SkipAmount -> List DropdownItem -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
 pickerSkip dropdown skipAmount dropdownItems selectedId =
     let
         newIndexCalc =
@@ -172,7 +172,7 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
             ( { dropdown | keyboardSelectedId = Just newIndex }, Just newIndex, Cmd.none )
 
 
-view : Dropdown -> List DropdownItem -> Maybe Int -> Html Msg
+view : DropState -> List DropdownItem -> Maybe Int -> Html Msg
 view dropdown dropdownItems selectedId =
     let
         displayStyle =
@@ -227,10 +227,10 @@ getId id item =
     id ++ "-" ++ Functions.defaultIntToString item.id
 
 
-viewItem : Dropdown -> List DropdownItem -> List (Html Msg)
+viewItem : DropState -> List DropdownItem -> List (Html Msg)
 viewItem dropdown dropdownItems =
     let
-        numItems =
+        biggestStrLength =
             dropdownItems
                 |> List.map (\t -> String.length t.name)
                 |> List.sortBy identity
@@ -239,7 +239,10 @@ viewItem dropdown dropdownItems =
                 |> Maybe.withDefault 150
 
         width =
-            numItems * 6
+            if biggestStrLength * 6 < 100 then
+                100
+            else
+                biggestStrLength * 6
 
         commonWidth =
             [ ( "width", toString width ++ "px" ) ]
@@ -289,8 +292,6 @@ dropdownList =
     , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
     , ( "padding", "0" )
     , ( "margin", "0" )
-
-    -- , ( "width", "150px" )
     , ( "background-color", "white" )
     , ( "max-height", "152px" )
     , ( "overflow-x", "hidden" )
@@ -299,7 +300,7 @@ dropdownList =
     ]
 
 
-updateSearchString : Char -> Dropdown -> List DropdownItem -> Maybe Int -> ( Dropdown, Maybe Int, Cmd msg )
+updateSearchString : Char -> DropState -> List DropdownItem -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
 updateSearchString searchChar dropdown dropdownItems selectedId =
     let
         searchString =
@@ -325,7 +326,7 @@ updateSearchString searchChar dropdown dropdownItems selectedId =
                 ( dropdown, selectedId, Cmd.none )
 
 
-keyDecoder : Dropdown -> Int -> Json.Decode.Decoder Key
+keyDecoder : DropState -> Int -> Json.Decode.Decoder Key
 keyDecoder dropdown keyCode =
     let
         -- This is necessary to ensure that the key is not consumed and can propagate to the parent

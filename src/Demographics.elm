@@ -20,25 +20,7 @@ port initDemographics : SfData -> Cmd msg
 port initDemographicsDone : (String -> msg) -> Sub msg
 
 
-port initPatientPhoneNumber : DropInitSf -> Cmd msg
-
-
-port updatePatientPhoneNumber : (DropUpdateSf -> msg) -> Sub msg
-
-
-port initPatientAddress : DropInitSf -> Cmd msg
-
-
-port updatePatientAddress : (DropUpdateSf -> msg) -> Sub msg
-
-
 port initContactHours : String -> Cmd msg
-
-
-port initLanguagesMap : DropInitSf -> Cmd msg
-
-
-port updateLanguagesMap : (DropUpdateSf -> msg) -> Sub msg
 
 
 port updateDemographics : (SfData -> msg) -> Sub msg
@@ -49,9 +31,6 @@ subscriptions =
     Sub.batch
         [ updateDemographics UpdateDemographics
         , initDemographicsDone InitDemographicsDone
-        , updatePatientAddress UpdatePatientAddress
-        , updatePatientPhoneNumber UpdatePatientPhoneNumber
-        , updateLanguagesMap UpdateLanguagesMap
         ]
 
 
@@ -136,6 +115,7 @@ type alias PatientLanguagesMap =
     , languageId : Int
     , isPreferred : Bool
     , index : Int
+    , dropState : Dropdown.DropState
     }
 
 
@@ -145,7 +125,8 @@ type alias PatientPhoneNumber =
     , phoneNumberTypeId : Maybe Int
     , isPreferred : Bool
     , index : Int
-    , state : MaskedNumber.State
+    , maskState : MaskedNumber.State
+    , dropState : Dropdown.DropState
     }
 
 
@@ -159,7 +140,7 @@ type alias PatientAddress =
     , zipCode : Maybe String
     , isPrimary : Bool
     , index : Int
-    , state : Dropdown.Dropdown
+    , dropState : Dropdown.DropState
     }
 
 
@@ -239,7 +220,7 @@ view model =
                 , div [ class "inline-block e-tooltxt pointer", title "Add new phone number", onClick AddNewPhone ]
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
-                , div [] (List.map viewPhones model.patientPhoneNumbers)
+                , div [] (List.map (viewPhones model.phoneNumberTypeDropdown) model.patientPhoneNumbers)
                 ]
             ]
         , div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
@@ -293,15 +274,15 @@ viewLanguages lang =
         ]
 
 
-viewPhones : PatientPhoneNumber -> Html Msg
-viewPhones phone =
+viewPhones : List DropdownItem -> PatientPhoneNumber -> Html Msg
+viewPhones dropdownItems phone =
     div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
         [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
             [ input [ type_ "radio", checked phone.isPreferred ] [] ]
         , div [ class "inline-block", style [ ( "width", "100px" ), ( "vertical-align", "middle" ) ], title "Mark as primary" ]
-            [ input [ id ("PatientPhoneNumberId" ++ (toString phone.index)) ] [] ]
+            [ Html.map (UpdatePhoneType phone) <| Dropdown.view phone.dropState dropdownItems phone.phoneNumberTypeId ]
         , div [ class "inline-block", style [ ( "width", "calc(100% - 155px)" ), ( "vertical-align", "middle" ) ] ]
-            [ MaskedNumber.input (inputOptions phone) [ class "e-textbox", maskStyle ] phone.state (maybeToInt phone.phoneNumber) ]
+            [ MaskedNumber.input (inputOptions phone) [ class "e-textbox", maskStyle ] phone.maskState (maybeToInt phone.phoneNumber) ]
         , div [ class "inline-block", style [ ( "width", "32px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemovePhone phone.index) ]
             [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
             ]
@@ -351,7 +332,7 @@ viewAddress dropdownItems address =
                 , div [ class "margin-bottom-5" ]
                     [ label [ class "required" ] [ text "State:" ]
                     , div [ class "form-column" ]
-                        [ Html.map (UpdateState address) <| Dropdown.view address.state dropdownItems address.stateId
+                        [ Html.map (UpdateState address) <| Dropdown.view address.dropState dropdownItems address.stateId
                         ]
                     ]
                 , div []
@@ -392,6 +373,7 @@ type Msg
     | UpdateCity PatientAddress String
     | UpdateZipcode PatientAddress String
     | UpdateState PatientAddress Dropdown.Msg
+    | UpdatePhoneType PatientPhoneNumber Dropdown.Msg
       -- Edit
     | UpdateFacilityPtID String
     | UpdateMedicalRecordNo String
@@ -410,21 +392,6 @@ type Msg
     | InputStateChanged PatientPhoneNumber MaskedNumber.State
 
 
-patientLanguageToMsg : Model -> PatientLanguagesMap -> Cmd Msg
-patientLanguageToMsg model patientLanguagesMap =
-    initLanguagesMap (DropInitSf (Just patientLanguagesMap.languageId) patientLanguagesMap.index model.sfData.languageDropdown)
-
-
-patientPhoneNumberToMsg : Model -> PatientPhoneNumber -> Cmd Msg
-patientPhoneNumberToMsg model patientPhoneNumber =
-    initPatientPhoneNumber (DropInitSf patientPhoneNumber.phoneNumberTypeId patientPhoneNumber.index model.phoneNumberTypeDropdown)
-
-
-patientAddressToMsg : Model -> PatientAddress -> Cmd Msg
-patientAddressToMsg model patientAddress =
-    initPatientAddress (DropInitSf patientAddress.stateId patientAddress.index model.stateDropdown)
-
-
 updateAddress : Model -> PatientAddress -> Model
 updateAddress model newPatientAddress =
     let
@@ -441,7 +408,7 @@ updateAddress model newPatientAddress =
         { model | patientAddresses = newAddresses }
 
 
-updatePhones : Model -> PatientPhoneNumber -> ( Model, Cmd Msg )
+updatePhones : Model -> PatientPhoneNumber -> Model
 updatePhones model patientPhoneNumber =
     let
         newPhoneNumber =
@@ -454,7 +421,7 @@ updatePhones model patientPhoneNumber =
                 )
                 model.patientPhoneNumbers
     in
-        { model | patientPhoneNumbers = newPhoneNumber } ! []
+        { model | patientPhoneNumbers = newPhoneNumber }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -509,17 +476,7 @@ update msg model =
             model ! [ Functions.displayErrorMessage (toString t) ]
 
         InitDemographicsDone _ ->
-            let
-                pLangMsgs =
-                    List.map (patientLanguageToMsg model) model.patientLanguagesMap
-
-                pPhoneMsgs =
-                    List.map (patientPhoneNumberToMsg model) model.patientPhoneNumbers
-
-                pAddressMsgs =
-                    List.map (patientAddressToMsg model) model.patientAddresses
-            in
-                model ! (initContactHours "" :: pLangMsgs ++ pPhoneMsgs ++ pAddressMsgs)
+            model ! [ initContactHours "" ]
 
         UpdateDemographics sfData ->
             { model | sfData = sfData } ! []
@@ -544,7 +501,7 @@ update msg model =
                     | patientLanguagesMap = model.patientLanguagesMap ++ [ newPatientLanguagesMap ]
                     , patientLanguagesMapCounter = model.patientLanguagesMapCounter + 1
                 }
-                    ! [ patientLanguageToMsg model newPatientLanguagesMap ]
+                    ! []
 
         RemoveLanguage index ->
             let
@@ -578,7 +535,7 @@ update msg model =
                     | patientPhoneNumbers = model.patientPhoneNumbers ++ [ newPatientPhoneNumber ]
                     , patientPhoneNumbersCounter = model.patientPhoneNumbersCounter + 1
                 }
-                    ! [ patientPhoneNumberToMsg model newPatientPhoneNumber ]
+                    ! []
 
         RemovePhone index ->
             let
@@ -612,7 +569,7 @@ update msg model =
                     | patientAddresses = model.patientAddresses ++ [ newAddress ]
                     , patientAddressesCounter = model.patientAddressesCounter + 1
                 }
-                    ! [ patientAddressToMsg model newAddress ]
+                    ! []
 
         RemoveAddress index ->
             let
@@ -696,18 +653,25 @@ update msg model =
         UpdateZipcode patientAddress str ->
             updateAddress model { patientAddress | zipCode = Just str } ! []
 
-        UpdateState patientAddress dropdownMsg ->
+        UpdateState t dropdownMsg ->
             let
-                ( newState, newSelectedId, newMsg ) =
-                    Dropdown.update dropdownMsg patientAddress.state patientAddress.stateId model.stateDropdown
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg t.dropState t.stateId model.stateDropdown
             in
-                updateAddress model { patientAddress | state = newState, stateId = newSelectedId } ! [ newMsg ]
+                updateAddress model { t | dropState = newDropState, stateId = newId } ! [ newMsg ]
+
+        UpdatePhoneType t dropdownMsg ->
+            let
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg t.dropState t.phoneNumberTypeId model.phoneNumberTypeDropdown
+            in
+                updatePhones model { t | dropState = newDropState, phoneNumberTypeId = newId } ! [ newMsg ]
 
         InputChanged patientPhoneNumber value ->
-            updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString value }
+            updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString value } ! []
 
-        InputStateChanged patientPhoneNumber state ->
-            updatePhones model { patientPhoneNumber | state = state }
+        InputStateChanged patientPhoneNumber maskState ->
+            updatePhones model { patientPhoneNumber | maskState = maskState } ! []
 
         -- Edit
         UpdateFacilityPtID str ->
@@ -1032,6 +996,7 @@ emptyPatientLanguagesMap index isPreferred =
     , languageId = -1
     , isPreferred = isPreferred
     , index = index
+    , dropState = Dropdown.init "languageDropdown" Nothing
     }
 
 
@@ -1042,7 +1007,8 @@ emptyPatientPhoneNumber index isPreferred =
     , phoneNumberTypeId = Nothing
     , isPreferred = isPreferred
     , index = index
-    , state = MaskedNumber.initialState
+    , maskState = MaskedNumber.initialState
+    , dropState = Dropdown.init "phoneDropdown" Nothing
     }
 
 
@@ -1057,7 +1023,7 @@ emptyPatientAddress index isPrimary =
     , zipCode = Nothing
     , isPrimary = isPrimary
     , index = index
-    , state = Dropdown.init "stateDropdown" Nothing
+    , dropState = Dropdown.init "stateDropdown" Nothing
     }
 
 
@@ -1180,6 +1146,7 @@ decodePatientLanguagesMap =
         |> Pipeline.required "LanguageId" Decode.int
         |> Pipeline.required "IsPreferred" Decode.bool
         |> Pipeline.hardcoded 0
+        |> Pipeline.required "LanguageId" toDropdown
 
 
 decodePatientPhoneNumber : Decode.Decoder PatientPhoneNumber
@@ -1191,6 +1158,7 @@ decodePatientPhoneNumber =
         |> Pipeline.required "IsPreferred" Decode.bool
         |> Pipeline.hardcoded 0
         |> Pipeline.hardcoded MaskedNumber.initialState
+        |> Pipeline.required "PhoneNumberTypeId" toDropdown
 
 
 decodePatientAddress : Decode.Decoder PatientAddress
@@ -1208,10 +1176,10 @@ decodePatientAddress =
         |> Pipeline.required "StateId" toDropdown
 
 
-toDropdown : Decode.Decoder Dropdown.Dropdown
+toDropdown : Decode.Decoder Dropdown.DropState
 toDropdown =
     let
-        convert : Int -> Decode.Decoder Dropdown.Dropdown
+        convert : Int -> Decode.Decoder Dropdown.DropState
         convert raw =
             Decode.succeed (Dropdown.init "stateDropdown" (Just raw))
     in

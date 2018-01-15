@@ -14,6 +14,8 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
+how does the port handle multiple dropdowns? 
+
 Radio button update events for the three nested controls
 implement save
 test save
