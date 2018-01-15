@@ -1,7 +1,7 @@
 port module Demographics exposing (..)
 
 import Html exposing (Html, text, div, span, button, ul, li, a, input, label, h4)
-import Html.Attributes exposing (class, id, type_, value, style, title, checked, hidden, attribute, maxlength)
+import Html.Attributes exposing (class, id, type_, value, style, title, checked, hidden, attribute, maxlength, name)
 import Html.Events exposing (onClick, onInput, onCheck)
 import Utils.CommonTypes exposing (DropdownItem, Flags)
 import Utils.CommonFunctions exposing (decodeDropdownItem)
@@ -136,7 +136,7 @@ type alias PatientAddress =
     , city : Maybe String
     , stateId : Maybe Int
     , zipCode : Maybe String
-    , isPrimary : Bool
+    , isPreferred : Bool
     , dropState : Dropdown.DropState
     , nodeId : Int
     }
@@ -250,7 +250,7 @@ viewLanguages : List DropdownItem -> PatientLanguagesMap -> Html Msg
 viewLanguages dropdownItems lang =
     div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
         [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
-            [ input [ type_ "radio", checked lang.isPreferred ] [] ]
+            [ input [ type_ "radio", checked lang.isPreferred, name "languageGroup", onCheck (UpdatePreferredLanguage lang) ] [] ]
         , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ], title "Choose language" ]
             [ Html.map (UpdateLanguage lang) <| Dropdown.view lang.dropState dropdownItems lang.languageId ]
         , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "Remove", onClick (RemoveLanguage lang) ]
@@ -263,7 +263,7 @@ viewPhones : List DropdownItem -> PatientPhoneNumber -> Html Msg
 viewPhones dropdownItems phone =
     div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
         [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
-            [ input [ type_ "radio", checked phone.isPreferred ] [] ]
+            [ input [ type_ "radio", checked phone.isPreferred, name "phoneGroup", onCheck (UpdatePreferredPhone phone) ] [] ]
         , div [ class "inline-block", style [ ( "width", "100px" ), ( "vertical-align", "middle" ) ], title "Mark as primary" ]
             [ Html.map (UpdatePhoneType phone) <| Dropdown.view phone.dropState dropdownItems phone.phoneNumberTypeId ]
         , div [ class "inline-block", style [ ( "width", "calc(100% - 155px)" ), ( "vertical-align", "middle" ) ] ]
@@ -279,7 +279,7 @@ viewAddress dropdownItems address =
     div [ class "multi-address-template" ]
         [ div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
             [ div [ title "Mark as primary", class "col-xs-6 padding-h-0 inline-block" ]
-                [ input [ type_ "radio", checked address.isPrimary, style [ ( "margin-top", "0px" ), vertCent ], checked address.isPrimary ] []
+                [ input [ type_ "radio", checked address.isPreferred, style [ ( "margin-top", "0px" ), vertCent ], onCheck (UpdatePreferredAddress address), name "addressGroup" ] []
                 , label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Primary" ]
                 ]
             , div [ class "col-xs-6 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address) ]
@@ -353,6 +353,9 @@ type Msg
     | UpdateAddressLine3 PatientAddress String
     | UpdateCity PatientAddress String
     | UpdateZipcode PatientAddress String
+    | UpdatePreferredAddress PatientAddress Bool
+    | UpdatePreferredPhone PatientPhoneNumber Bool
+    | UpdatePreferredLanguage PatientLanguagesMap Bool
     | UpdateState PatientAddress Dropdown.Msg
     | UpdatePhoneType PatientPhoneNumber Dropdown.Msg
     | UpdateLanguage PatientLanguagesMap Dropdown.Msg
@@ -420,6 +423,14 @@ updateLanguage model patientLanguagesMap =
                 model.patientLanguagesMap
     in
         { model | patientLanguagesMap = newPatientLanguagesMap }
+
+
+togglePreferred : Int -> { c | nodeId : Int, isPreferred : a } -> { c | isPreferred : Bool, nodeId : Int }
+togglePreferred nodeId t =
+    if t.nodeId == nodeId then
+        { t | isPreferred = True }
+    else
+        { t | isPreferred = False }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -553,7 +564,7 @@ update msg model =
                         |> List.filter (\t -> t.nodeId /= address.nodeId)
 
                 updatedAddress =
-                    case List.any (\t -> t.isPrimary == True) newAddress of
+                    case List.any (\t -> t.isPreferred == True) newAddress of
                         True ->
                             newAddress
 
@@ -561,7 +572,7 @@ update msg model =
                             List.indexedMap
                                 (\t y ->
                                     if t == 0 then
-                                        { y | isPrimary = True }
+                                        { y | isPreferred = True }
                                     else
                                         y
                                 )
@@ -584,6 +595,15 @@ update msg model =
 
         UpdateZipcode patientAddress str ->
             updateAddress model { patientAddress | zipCode = Just str } ! []
+
+        UpdatePreferredAddress address _ ->
+            { model | patientAddresses = List.map (togglePreferred address.nodeId) model.patientAddresses } ! []
+
+        UpdatePreferredPhone phone _ ->
+            { model | patientPhoneNumbers = List.map (togglePreferred phone.nodeId) model.patientPhoneNumbers } ! []
+
+        UpdatePreferredLanguage language _ ->
+            { model | patientLanguagesMap = List.map (togglePreferred language.nodeId) model.patientLanguagesMap } ! []
 
         UpdateState t dropdownMsg ->
             let
@@ -950,7 +970,7 @@ emptyPatientPhoneNumber nodeCounter isPreferred =
 
 
 emptyPatientAddress : Int -> Bool -> PatientAddress
-emptyPatientAddress nodeCounter isPrimary =
+emptyPatientAddress nodeCounter isPreferred =
     { id = Nothing
     , addressLine1 = Nothing
     , addressLine2 = Nothing
@@ -958,7 +978,7 @@ emptyPatientAddress nodeCounter isPrimary =
     , city = Nothing
     , stateId = Nothing
     , zipCode = Nothing
-    , isPrimary = isPrimary
+    , isPreferred = isPreferred
     , dropState = Dropdown.init "stateDropdown" Nothing
     , nodeId = nodeCounter
     }
