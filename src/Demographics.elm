@@ -916,6 +916,11 @@ phoneValidation phone =
             Nothing
 
 
+addressValidation : PatientAddress -> Maybe String
+addressValidation address =
+    requireString "Address Line 1" address.addressLine1
+
+
 validatationErrors : Model -> List String
 validatationErrors model =
     [ requireInt "Facility" model.sfData.facilityId
@@ -929,6 +934,9 @@ validatationErrors model =
     , model.patientPhoneNumbers
         |> Functions.uniqueBy (\t -> Maybe.withDefault "" t.phoneNumber)
         |> List.filterMap phoneValidation
+        |> List.head
+    , model.patientAddresses
+        |> List.filterMap addressValidation
         |> List.head
     ]
         |> List.filterMap identity
