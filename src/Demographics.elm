@@ -72,6 +72,7 @@ type alias Model =
     , contactHoursModel : Maybe Decode.Value
     , showValidationErrors : Bool
     , nodeCounter : Int
+    , languageDropdown : List DropdownItem
     }
 
 
@@ -88,9 +89,7 @@ type alias SfData =
     , ethnicityId : Maybe Int
     , uSVeteranId : Maybe Int
     , religionId : Maybe Int
-    , patientLanguageDropdown : List DropdownItem
     , careCoordinatorDropdown : List DropdownItem
-    , languageDropdown : List DropdownItem
     , ethnicityDropdown : List DropdownItem
     , sexTypeDropdown : List DropdownItem
     , sexualOrientationDropdown : List DropdownItem
@@ -196,7 +195,7 @@ view model =
                 , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
-                , div [] (List.map (viewLanguages model.sfData.languageDropdown) model.patientLanguagesMap)
+                , div [] (List.map (viewLanguages model.languageDropdown) model.patientLanguagesMap)
                 ]
             ]
         , div [ class "col-xs-12 padding-h-0" ]
@@ -622,7 +621,7 @@ update msg model =
         UpdateLanguage t dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg t.dropState t.languageId model.sfData.languageDropdown
+                    Dropdown.update dropdownMsg t.dropState t.languageId model.languageDropdown
             in
                 updateLanguage model { t | dropState = newDropState, languageId = newId } ! [ newMsg ]
 
@@ -910,6 +909,7 @@ emptyModel patientId =
     , contactHoursModel = Nothing
     , showValidationErrors = False
     , nodeCounter = 0
+    , languageDropdown = []
     }
 
 
@@ -927,9 +927,7 @@ emptySfData =
     , ethnicityId = Nothing
     , uSVeteranId = Nothing
     , religionId = Nothing
-    , patientLanguageDropdown = []
     , careCoordinatorDropdown = []
-    , languageDropdown = []
     , ethnicityDropdown = []
     , sexTypeDropdown = []
     , sexualOrientationDropdown = []
@@ -1010,6 +1008,7 @@ updateModelFromServerMessage { d, c, h } model =
         , primaryAddressIndex = c.primaryAddressIndex
         , preferredPhoneIndex = c.preferredPhoneIndex
         , contactHoursModel = Just h
+        , languageDropdown = d.languageDropdown
     }
 
 
@@ -1035,6 +1034,7 @@ type alias DemographicsInformationModel =
     , preferredLanguageIndex : Int
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
+    , languageDropdown : List DropdownItem
     }
 
 
@@ -1083,6 +1083,7 @@ decodeDemographicsInformationModel =
         |> Pipeline.required "PreferredLanguageIndex" Decode.int
         |> Pipeline.custom decodeSfData
         |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
+        |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropdownItem)
 
 
 decodeContactInformationModel : Decode.Decoder ContactInformationModel
@@ -1158,9 +1159,7 @@ decodeSfData =
         |> Pipeline.required "EthnicityId" (Decode.maybe Decode.int)
         |> Pipeline.required "USVeteranId" (Decode.maybe Decode.int)
         |> Pipeline.required "ReligionId" (Decode.maybe Decode.int)
-        |> Pipeline.required "PatientLanguageDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "CareCoordinatorDropdown" (Decode.list decodeDropdownItem)
-        |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "EthnicityDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "SexTypeDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "SexualOrientationDropdown" (Decode.list decodeDropdownItem)
