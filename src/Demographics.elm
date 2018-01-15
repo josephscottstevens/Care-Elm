@@ -918,7 +918,13 @@ phoneValidation phone =
 
 addressValidation : PatientAddress -> Maybe String
 addressValidation address =
-    requireString "Address Line 1" address.addressLine1
+    [ requireString "Address Line 1" address.addressLine1
+    , requireString "City" address.city
+    , requireInt "State" address.stateId
+    , requireString "Zip Code" address.zipCode
+    ]
+        |> List.filterMap identity
+        |> List.head
 
 
 validatationErrors : Model -> List String

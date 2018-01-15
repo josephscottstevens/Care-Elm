@@ -14,7 +14,6 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-validations
 Radio button update events for the three nested controls
 implement save
 test save
@@ -39,7 +38,7 @@ test all the little alignments
 
 -----------------------------------------------------------------            
 
-how to do Html.Attribute none ? (see maxlength Nothing branch)
+
 rounded buttons? 
 and css popup? 
 
