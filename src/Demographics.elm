@@ -71,6 +71,7 @@ type alias Model =
     , patientLanguagesMap : List PatientLanguagesMap
     , contactHoursModel : Maybe Decode.Value
     , showValidationErrors : Bool
+    , nodeCounter : Int
     }
 
 
@@ -112,6 +113,7 @@ type alias PatientLanguagesMap =
     , languageId : Maybe Int
     , isPreferred : Bool
     , dropState : Dropdown.DropState
+    , nodeId : Int
     }
 
 
@@ -122,6 +124,7 @@ type alias PatientPhoneNumber =
     , isPreferred : Bool
     , maskState : MaskedNumber.State
     , dropState : Dropdown.DropState
+    , nodeId : Int
     }
 
 
@@ -135,6 +138,7 @@ type alias PatientAddress =
     , zipCode : Maybe String
     , isPrimary : Bool
     , dropState : Dropdown.DropState
+    , nodeId : Int
     }
 
 
@@ -376,7 +380,7 @@ updateAddress model newPatientAddress =
         newAddresses =
             List.map
                 (\t ->
-                    if t == newPatientAddress then
+                    if t.nodeId == newPatientAddress.nodeId then
                         newPatientAddress
                     else
                         t
@@ -392,7 +396,7 @@ updatePhones model patientPhoneNumber =
         newPhoneNumber =
             List.map
                 (\t ->
-                    if t == patientPhoneNumber then
+                    if t.nodeId == patientPhoneNumber.nodeId then
                         patientPhoneNumber
                     else
                         t
@@ -408,7 +412,7 @@ updateLanguage model patientLanguagesMap =
         newPatientLanguagesMap =
             List.map
                 (\t ->
-                    if t == patientLanguagesMap then
+                    if t.nodeId == patientLanguagesMap.nodeId then
                         patientLanguagesMap
                     else
                         t
@@ -428,26 +432,30 @@ update msg model =
 
                 newPatientLanguagesMap =
                     if List.length newModel.patientLanguagesMap == 0 then
-                        [ emptyPatientLanguagesMap True ]
+                        [ emptyPatientLanguagesMap 0 True ]
                     else
                         newModel.patientLanguagesMap
+                            |> List.indexedMap (\idx t -> { t | nodeId = idx })
 
                 newPatientPhoneNumber =
                     if List.length newModel.patientPhoneNumbers == 0 then
-                        [ emptyPatientPhoneNumber True ]
+                        [ emptyPatientPhoneNumber 0 True ]
                     else
                         newModel.patientPhoneNumbers
+                            |> List.indexedMap (\idx t -> { t | nodeId = idx })
 
                 newPatientAddress =
                     if List.length newModel.patientAddresses == 0 then
-                        [ emptyPatientAddress True ]
+                        [ emptyPatientAddress 0 True ]
                     else
                         newModel.patientAddresses
+                            |> List.indexedMap (\idx t -> { t | nodeId = idx })
             in
                 { newModel
                     | patientLanguagesMap = newPatientLanguagesMap
                     , patientPhoneNumbers = newPatientPhoneNumber
                     , patientAddresses = newPatientAddress
+                    , nodeCounter = 3
                 }
                     ! [ initDemographics newModel.sfData ]
 
@@ -472,13 +480,17 @@ update msg model =
             emptyModel model.patientId ! []
 
         AddNewLanguage ->
-            { model | patientLanguagesMap = model.patientLanguagesMap ++ [ emptyPatientLanguagesMap False ] } ! []
+            { model
+                | patientLanguagesMap = model.patientLanguagesMap ++ [ emptyPatientLanguagesMap model.nodeCounter False ]
+                , nodeCounter = model.nodeCounter + 1
+            }
+                ! []
 
         RemoveLanguage lang ->
             let
                 newPatientLanguagesMap =
                     model.patientLanguagesMap
-                        |> List.filter (\t -> t /= lang)
+                        |> List.filter (\t -> t.nodeId /= lang.nodeId)
 
                 updatedPatientLanguagesMap =
                     case List.any (\t -> t.isPreferred == True) newPatientLanguagesMap of
@@ -498,13 +510,17 @@ update msg model =
                 { model | patientLanguagesMap = updatedPatientLanguagesMap } ! []
 
         AddNewPhone ->
-            { model | patientPhoneNumbers = model.patientPhoneNumbers ++ [ emptyPatientPhoneNumber False ] } ! []
+            { model
+                | patientPhoneNumbers = model.patientPhoneNumbers ++ [ emptyPatientPhoneNumber model.nodeCounter False ]
+                , nodeCounter = model.nodeCounter + 1
+            }
+                ! []
 
         RemovePhone phone ->
             let
                 newPatientPhoneNumber =
                     model.patientPhoneNumbers
-                        |> List.filter (\t -> t /= phone)
+                        |> List.filter (\t -> t.nodeId /= phone.nodeId)
 
                 updatedPatientPhoneNumber =
                     case List.any (\t -> t.isPreferred == True) newPatientPhoneNumber of
@@ -524,13 +540,17 @@ update msg model =
                 { model | patientPhoneNumbers = updatedPatientPhoneNumber } ! []
 
         AddNewAddress ->
-            { model | patientAddresses = model.patientAddresses ++ [ emptyPatientAddress False ] } ! []
+            { model
+                | patientAddresses = model.patientAddresses ++ [ emptyPatientAddress model.nodeCounter False ]
+                , nodeCounter = model.nodeCounter + 1
+            }
+                ! []
 
         RemoveAddress address ->
             let
                 newAddress =
                     model.patientAddresses
-                        |> List.filter (\t -> t /= address)
+                        |> List.filter (\t -> t.nodeId /= address.nodeId)
 
                 updatedAddress =
                     case List.any (\t -> t.isPrimary == True) newAddress of
@@ -869,6 +889,7 @@ emptyModel patientId =
     , preferredPhoneIndex = 0
     , contactHoursModel = Nothing
     , showValidationErrors = False
+    , nodeCounter = 0
     }
 
 
@@ -906,28 +927,30 @@ emptySfData =
     }
 
 
-emptyPatientLanguagesMap : Bool -> PatientLanguagesMap
-emptyPatientLanguagesMap isPreferred =
+emptyPatientLanguagesMap : Int -> Bool -> PatientLanguagesMap
+emptyPatientLanguagesMap nodeCounter isPreferred =
     { id = Nothing
     , languageId = Nothing
     , isPreferred = isPreferred
     , dropState = Dropdown.init "languageDropdown" Nothing
+    , nodeId = nodeCounter
     }
 
 
-emptyPatientPhoneNumber : Bool -> PatientPhoneNumber
-emptyPatientPhoneNumber isPreferred =
+emptyPatientPhoneNumber : Int -> Bool -> PatientPhoneNumber
+emptyPatientPhoneNumber nodeCounter isPreferred =
     { id = Nothing
     , phoneNumber = Nothing
     , phoneNumberTypeId = Nothing
     , isPreferred = isPreferred
     , maskState = MaskedNumber.initialState
     , dropState = Dropdown.init "phoneDropdown" Nothing
+    , nodeId = nodeCounter
     }
 
 
-emptyPatientAddress : Bool -> PatientAddress
-emptyPatientAddress isPrimary =
+emptyPatientAddress : Int -> Bool -> PatientAddress
+emptyPatientAddress nodeCounter isPrimary =
     { id = Nothing
     , addressLine1 = Nothing
     , addressLine2 = Nothing
@@ -937,6 +960,7 @@ emptyPatientAddress isPrimary =
     , zipCode = Nothing
     , isPrimary = isPrimary
     , dropState = Dropdown.init "stateDropdown" Nothing
+    , nodeId = nodeCounter
     }
 
 
@@ -1059,6 +1083,7 @@ decodePatientLanguagesMap =
         |> Pipeline.required "LanguageId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
         |> Pipeline.required "LanguageId" toDropdown
+        |> Pipeline.hardcoded 0
 
 
 decodePatientPhoneNumber : Decode.Decoder PatientPhoneNumber
@@ -1070,6 +1095,7 @@ decodePatientPhoneNumber =
         |> Pipeline.required "IsPreferred" Decode.bool
         |> Pipeline.hardcoded MaskedNumber.initialState
         |> Pipeline.required "PhoneNumberTypeId" toDropdown
+        |> Pipeline.hardcoded 0
 
 
 decodePatientAddress : Decode.Decoder PatientAddress
@@ -1084,6 +1110,7 @@ decodePatientAddress =
         |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
         |> Pipeline.required "IsPrimary" Decode.bool
         |> Pipeline.required "StateId" toDropdown
+        |> Pipeline.hardcoded 0
 
 
 toDropdown : Decode.Decoder Dropdown.DropState
