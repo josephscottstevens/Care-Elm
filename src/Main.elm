@@ -1,9 +1,8 @@
-port module Main exposing (..)
+port module Main exposing (main)
 
-import Model exposing (..)
-import Html exposing (div)
-import Billing.Main as Billing
-import Records.Main as Records
+import Html exposing (Html, div)
+import Records.Main
+import Records.Model
 import Demographics
 import Utils.CommonTypes exposing (..)
 
@@ -22,14 +21,30 @@ init flags =
         model =
             emptyModel flags
     in
-        if flags.pageFlag == "billing" then
-            ( { model | page = BillingPage }, Cmd.map BillingMsg Billing.init )
-        else if flags.pageFlag == "records" then
-            ( { model | page = RecordsPage }, Cmd.map RecordsMsg (Records.init flags) )
+        if flags.pageFlag == "records" then
+            ( { model | page = RecordsPage }, Cmd.map RecordsMsg (Records.Main.init flags) )
         else if flags.pageFlag == "demographics" then
             ( { model | page = DemographicsPage }, Cmd.map DemographicsMsg (Demographics.init flags) )
         else
             ( model, Cmd.none )
+
+
+type Page
+    = NoPage
+    | RecordsPage
+    | DemographicsPage
+
+
+type alias Model =
+    { page : Page
+    , recordsState : Records.Model.Model
+    , demographicsState : Demographics.Model
+    }
+
+
+type Msg
+    = RecordsMsg Records.Model.Msg
+    | DemographicsMsg Demographics.Msg
 
 
 main : Program Flags Model Msg
@@ -42,36 +57,26 @@ main =
         }
 
 
-view : Model -> Html.Html Msg
+view : Model -> Html Msg
 view model =
     case model.page of
         NoPage ->
             div [] []
 
-        BillingPage ->
-            Html.map BillingMsg (Billing.view model.billingState)
-
         RecordsPage ->
-            Html.map RecordsMsg (Records.view model.recordsState)
+            Html.map RecordsMsg (Records.Main.view model.recordsState)
 
         DemographicsPage ->
             Html.map DemographicsMsg (Demographics.view model.demographicsState)
 
 
-update : Msg -> Model -> ( Model, Cmd Model.Msg )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        BillingMsg billingMsg ->
-            let
-                ( newBillingModel, widgetCmd ) =
-                    Billing.update billingMsg model.billingState
-            in
-                ( { model | billingState = newBillingModel }, Cmd.map BillingMsg widgetCmd )
-
         RecordsMsg recordsMsg ->
             let
                 ( newRecordModel, widgetCmd ) =
-                    Records.update recordsMsg model.recordsState
+                    Records.Main.update recordsMsg model.recordsState
             in
                 ( { model | recordsState = newRecordModel }, Cmd.map RecordsMsg widgetCmd )
 
@@ -81,3 +86,11 @@ update msg model =
                     Demographics.update demographicsMsg model.demographicsState
             in
                 ( { model | demographicsState = newDemographicsModel }, Cmd.map DemographicsMsg widgetCmd )
+
+
+emptyModel : Flags -> Model
+emptyModel flags =
+    { page = NoPage
+    , recordsState = Records.Model.emptyModel flags
+    , demographicsState = Demographics.emptyModel flags.patientId
+    }

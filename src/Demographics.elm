@@ -6,6 +6,7 @@ import Html.Events exposing (onClick, onInput, onCheck)
 import Utils.CommonTypes exposing (DropdownItem, Flags)
 import Utils.CommonFunctions exposing (decodeDropdownItem)
 import Utils.Dropdown as Dropdown
+import Utils.CommonFunctions as Functions
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Http
@@ -41,9 +42,6 @@ port updateLanguagesMap : (DropUpdateSf -> msg) -> Sub msg
 
 
 port updateDemographics : (SfData -> msg) -> Sub msg
-
-
-port logError : String -> Cmd msg
 
 
 subscriptions : Sub Msg
@@ -188,7 +186,7 @@ view model =
         [ h4 [ class "col-xs-12 padding-h-0" ] [ text "Assigned To" ]
         , div [ class "col-xs-12 padding-h-0" ]
             -- TODO
-            [ viewValidationErrors (validatationErrors model)
+            [ viewValidationErrors model
             ]
         , div rowStyle
             [ sfbox "Facility" True
@@ -251,6 +249,12 @@ view model =
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
                 , div [] (List.map (viewAddress model.stateDropdown) model.patientAddresses)
+                ]
+            ]
+        , div [ class "col-xs-12 padding-h-0 padding-top-10 padding-bottom-10" ]
+            [ div [ class "col-xs-12 padding-h-0 padding-top-10" ]
+                [ input [ type_ "button", class "btn btn-sm btn-success", value "Save", onClick Save ] []
+                , input [ type_ "button", class "btn btn-sm btn-default margin-left-5", value "Cancel", onClick Cancel ] []
                 ]
             ]
         ]
@@ -369,6 +373,8 @@ type Msg
     = Load (Result Http.Error ServerResponse)
     | UpdateDemographics SfData
     | InitDemographicsDone String
+    | Save
+    | Cancel
     | AddNewLanguage
     | RemoveLanguage Int
     | AddNewPhone
@@ -500,7 +506,7 @@ update msg model =
                     ! [ initDemographics newModel.sfData ]
 
         Load (Err t) ->
-            model ! [ logError (toString t) ]
+            model ! [ Functions.displayErrorMessage (toString t) ]
 
         InitDemographicsDone _ ->
             let
@@ -517,6 +523,16 @@ update msg model =
 
         UpdateDemographics sfData ->
             { model | sfData = sfData } ! []
+
+        Save ->
+            if List.length (validatationErrors model) > 0 && model.showValidationErrors then
+                { model | showValidationErrors = True } ! [ Functions.displayErrorMessage "Validation sad face" ]
+                -- todo, save
+            else
+                model ! [ Functions.displaySuccessMessage "Validation yay!" ]
+
+        Cancel ->
+            emptyModel model.patientId ! []
 
         AddNewLanguage ->
             let
@@ -814,10 +830,30 @@ maskStyle =
     style [ ( "margin-left", "5px" ), ( "margin-top", "5px" ) ]
 
 
+maxLength : Maybe Int -> Html.Attribute msg
+maxLength maybeMax =
+    case maybeMax of
+        Just t ->
+            maxlength t
+
+        Nothing ->
+            maxlength -1
+
+
+textboxInner : Maybe Int -> String -> Bool -> Maybe String -> (String -> msg) -> Html msg
+textboxInner maybeMax displayText isRequired maybeStr event =
+    commonStructure displayText isRequired <|
+        input [ type_ "text", idAttr displayText, maybeValue maybeStr, class "e-textbox", onInput event, maxLength maybeMax ] []
+
+
 textbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
 textbox displayText isRequired maybeStr event =
-    commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr, class "e-textbox", onInput event ] []
+    textboxInner Nothing displayText isRequired maybeStr event
+
+
+textboxWithMax : Int -> String -> Bool -> Maybe String -> (String -> msg) -> Html msg
+textboxWithMax maxLength displayText isRequired maybeStr event =
+    textboxInner (Just maxLength) displayText isRequired maybeStr event
 
 
 numberbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
@@ -854,19 +890,22 @@ requireField fieldName maybeStr =
             Just (fieldName ++ " is required")
 
 
-lengthIs : Int -> String -> Maybe String
+lengthIs : Int -> Maybe String -> Maybe String
 lengthIs strLength item =
-    if String.length item == strLength then
-        Just item
-    else
-        Nothing
+    case item of
+        Just t ->
+            if String.length t == strLength then
+                Nothing
+            else
+                Just t
+
+        Nothing ->
+            Nothing
 
 
-hasAtleast1 : String -> (String -> Maybe String) -> List (Maybe String) -> Maybe String
-hasAtleast1 fieldName t items =
+hasAtleast1 : String -> List a -> Maybe String
+hasAtleast1 fieldName items =
     items
-        |> List.map (Maybe.withDefault "")
-        |> List.filterMap t
         |> List.head
         |> requireField fieldName
 
@@ -881,19 +920,27 @@ validatationErrors model =
     , requireField "Last Name" model.lastName
     , requireField "Date of Birth" model.sfData.dateOfBirth
     , requireField "Sex at Birth" model.sfData.sexTypeId
-    , hasAtleast1 "Phone Number" (lengthIs 7) (List.map .phoneNumber model.patientPhoneNumbers)
+    , model.patientPhoneNumbers
+        |> List.map .phoneNumber
+        |> List.map (lengthIs 7)
+        |> hasAtleast1 "Phone Number"
     ]
         |> List.filterMap identity
 
 
-viewValidationErrors : List String -> Html msg
-viewValidationErrors errors =
-    div [ class "error", hidden (List.length errors == 0) ] []
+viewValidationErrorsDiv : Model -> List String -> Html msg
+viewValidationErrorsDiv model errors =
+    div [ class "error", hidden (List.length errors == 0 || model.showValidationErrors == False) ] []
 
 
-emptyModel : Flags -> Model
-emptyModel flags =
-    { patientId = flags.patientId
+viewValidationErrors : Model -> Html msg
+viewValidationErrors model =
+    viewValidationErrorsDiv model (validatationErrors model)
+
+
+emptyModel : Int -> Model
+emptyModel patientId =
+    { patientId = patientId
     , demographicsId = Nothing
     , nickName = Nothing
     , ssn = Nothing
