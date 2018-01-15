@@ -14,40 +14,24 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-
-
-dropdown isn't updating on arrow key when scrolling
-dropdown isn't opening to selectedId (scroll)
-don't show highlight for keyboard when mouse is selecting (or vice versa)
-keyboard search not working
-
 validations
-change over phone number to new dropdown 
-re-add missing dropdown css (scrollbar)
+Radio button update events for the three nested controls
 implement save
 test save
-look for TODO, clean up
-
-on load if any language \ phone or address is empty, pre-fill with 1 (test)
-
-server call is happening twice (contacts is still calling it) (send it json value)
-
-stuff like primaryAddressIndex
-zipcode is numberonly?
-maxlength attributes?
 
 test Contact Hours still works
-
-Radio button events for the three nested controls
-
-redesign Dropdown to work more like filter function works, right now primary complaints
-	I have to specifiy the text for the dropdown,
-	I need to specific the list data in the load, but I don't know that data yet (Better to send it in the view)
-	The init function is really long, I only really want the initial selected Index
-	(Note, bring over port code)
-
+delete the uh.... phone hours if it is invalid vefore save?
+look for TODO, clean up	
+change over phone number to new dropdown 
+re-add missing dropdown css (scrollbar)
+server call is happening twice (contacts is still calling it) (send it json value)
 
 -----------------------------------------------------------------
+don't show highlight for keyboard when mouse is selecting (or vice versa)
+keyboard search not working
+you can arrow up on dropdown and get no item selected, even though the dropdown doesn't support that
+
+ideally the scrolltoDomId stays in center like sf does. (on arrow keys when dropdown is open)
 
 todo, missing title (see _demographics.cshtml)
 

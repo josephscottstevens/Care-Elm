@@ -1,7 +1,7 @@
 port module Demographics exposing (..)
 
 import Html exposing (Html, text, div, span, button, ul, li, a, input, label, h4)
-import Html.Attributes exposing (class, id, type_, value, style, title, checked, hidden, attribute)
+import Html.Attributes exposing (class, id, type_, value, style, title, checked, hidden, attribute, maxlength)
 import Html.Events exposing (onClick, onInput, onCheck)
 import Utils.CommonTypes exposing (DropdownItem, Flags)
 import Utils.CommonFunctions exposing (decodeDropdownItem)
@@ -352,7 +352,7 @@ viewAddress dropdownItems address =
                 , div []
                     [ label [ class "required" ] [ text "Zip Code:" ]
                     , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.zipCode, onInput (UpdateZipcode address) ] []
+                        [ input [ class "e-textbox", type_ "text", maybeValue address.zipCode, onInput (UpdateZipcode address), maxlength 5 ] []
                         ]
                     ]
                 ]
@@ -469,14 +469,32 @@ update msg model =
                 newPatientAddress =
                     newModel.patientAddresses
                         |> List.indexedMap (\index t -> { t | index = index })
+
+                newPatientLanguagesMapAtleast1 =
+                    if List.length newPatientLanguagesMap == 0 then
+                        [ emptyPatientLanguagesMap 0 True ]
+                    else
+                        newPatientLanguagesMap
+
+                newPatientPhoneNumberAtleast1 =
+                    if List.length newPatientPhoneNumber == 0 then
+                        [ emptyPatientPhoneNumber 0 True ]
+                    else
+                        newPatientPhoneNumber
+
+                newPatientAddressAtleast1 =
+                    if List.length newPatientAddress == 0 then
+                        [ emptyPatientAddress 0 True ]
+                    else
+                        newPatientAddress
             in
                 { newModel
-                    | patientLanguagesMap = newPatientLanguagesMap
-                    , patientLanguagesMapCounter = List.length newPatientLanguagesMap
-                    , patientPhoneNumbers = newPatientPhoneNumber
-                    , patientPhoneNumbersCounter = List.length newPatientPhoneNumber
-                    , patientAddresses = newPatientAddress
-                    , patientAddressesCounter = List.length newPatientAddress
+                    | patientLanguagesMap = newPatientLanguagesMapAtleast1
+                    , patientLanguagesMapCounter = List.length newPatientLanguagesMapAtleast1
+                    , patientPhoneNumbers = newPatientPhoneNumberAtleast1
+                    , patientPhoneNumbersCounter = List.length newPatientPhoneNumberAtleast1
+                    , patientAddresses = newPatientAddressAtleast1
+                    , patientAddressesCounter = List.length newPatientAddressAtleast1
                 }
                     ! [ initDemographics newModel.sfData ]
 
@@ -502,7 +520,7 @@ update msg model =
         AddNewLanguage ->
             let
                 newPatientLanguagesMap =
-                    emptyPatientLanguagesMap model.patientLanguagesMapCounter
+                    emptyPatientLanguagesMap model.patientLanguagesMapCounter False
             in
                 { model
                     | patientLanguagesMap = model.patientLanguagesMap ++ [ newPatientLanguagesMap ]
@@ -536,7 +554,7 @@ update msg model =
         AddNewPhone ->
             let
                 newPatientPhoneNumber =
-                    emptyPatientPhoneNumber model.patientPhoneNumbersCounter
+                    emptyPatientPhoneNumber model.patientPhoneNumbersCounter False
             in
                 { model
                     | patientPhoneNumbers = model.patientPhoneNumbers ++ [ newPatientPhoneNumber ]
@@ -570,7 +588,7 @@ update msg model =
         AddNewAddress ->
             let
                 newAddress =
-                    emptyPatientAddress model.patientAddressesCounter
+                    emptyPatientAddress model.patientAddressesCounter False
             in
                 { model
                     | patientAddresses = model.patientAddresses ++ [ newAddress ]
@@ -891,28 +909,28 @@ emptySfData =
     }
 
 
-emptyPatientLanguagesMap : Int -> PatientLanguagesMap
-emptyPatientLanguagesMap index =
+emptyPatientLanguagesMap : Int -> Bool -> PatientLanguagesMap
+emptyPatientLanguagesMap index isPreferred =
     { id = Nothing
     , languageId = -1
-    , isPreferred = False
+    , isPreferred = isPreferred
     , index = index
     }
 
 
-emptyPatientPhoneNumber : Int -> PatientPhoneNumber
-emptyPatientPhoneNumber index =
+emptyPatientPhoneNumber : Int -> Bool -> PatientPhoneNumber
+emptyPatientPhoneNumber index isPreferred =
     { id = Nothing
     , phoneNumber = Nothing
     , phoneNumberTypeId = Nothing
-    , isPreferred = False
+    , isPreferred = isPreferred
     , index = index
     , state = MaskedNumber.initialState
     }
 
 
-emptyPatientAddress : Int -> PatientAddress
-emptyPatientAddress index =
+emptyPatientAddress : Int -> Bool -> PatientAddress
+emptyPatientAddress index isPrimary =
     { id = Nothing
     , addressLine1 = Nothing
     , addressLine2 = Nothing
@@ -920,7 +938,7 @@ emptyPatientAddress index =
     , city = Nothing
     , stateId = Nothing
     , zipCode = Nothing
-    , isPrimary = False
+    , isPrimary = isPrimary
     , index = index
     , state = Dropdown.init "stateDropdown" Nothing
     }
