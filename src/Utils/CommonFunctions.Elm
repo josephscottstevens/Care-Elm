@@ -7,6 +7,7 @@ import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Utils.CommonTypes exposing (DropdownItem)
+import Set exposing (Set)
 
 
 port displaySuccessMessage : String -> Cmd msg
@@ -146,3 +147,25 @@ decodeDropdownItem =
     Pipeline.decode DropdownItem
         |> Pipeline.required "Id" (Decode.maybe Decode.int)
         |> Pipeline.required "Name" Decode.string
+
+
+uniqueBy : (a -> comparable) -> List a -> List a
+uniqueBy f list =
+    uniqueHelp f Set.empty list []
+
+
+uniqueHelp : (a -> comparable) -> Set comparable -> List a -> List a -> List a
+uniqueHelp f existing remaining accumulator =
+    case remaining of
+        [] ->
+            List.reverse accumulator
+
+        first :: rest ->
+            let
+                computedFirst =
+                    f first
+            in
+                if Set.member computedFirst existing then
+                    uniqueHelp f existing rest accumulator
+                else
+                    uniqueHelp f (Set.insert computedFirst existing) rest (first :: accumulator)

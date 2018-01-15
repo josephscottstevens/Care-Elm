@@ -184,7 +184,7 @@ view : Model -> Html Msg
 view model =
     div [ id "demographicInformationForm", class "col-xs-12 padding-h-0" ]
         [ h4 [ class "col-xs-12 padding-h-0" ] [ text "Assigned To" ]
-        , div [ class "col-xs-12 padding-h-0" ]
+        , div [ class "col-xs-12 padding-h-0 padding-bottom-10", id "ErrorDiv" ]
             -- TODO
             [ viewValidationErrors model
             ]
@@ -525,9 +525,10 @@ update msg model =
             { model | sfData = sfData } ! []
 
         Save ->
-            if List.length (validatationErrors model) > 0 && model.showValidationErrors then
+            if List.length (validatationErrors model) > 0 then
                 { model | showValidationErrors = True } ! [ Functions.displayErrorMessage "Validation sad face" ]
                 -- todo, save
+                --  |> Functions.uniqueBy (\t -> Maybe.withDefault "" t.phoneNumber)
             else
                 model ! [ Functions.displaySuccessMessage "Validation yay!" ]
 
@@ -880,57 +881,63 @@ sfcheckbox displayText isRequired maybeStr =
         input [ type_ "checkbox", idAttr displayText, class "e-checkbox" ] []
 
 
-requireField : String -> Maybe a -> Maybe String
-requireField fieldName maybeStr =
-    case maybeStr of
-        Just _ ->
-            Nothing
-
+requireInt : String -> Maybe Int -> Maybe String
+requireInt fieldName maybeInt =
+    case maybeInt of
         Nothing ->
             Just (fieldName ++ " is required")
 
-
-lengthIs : Int -> Maybe String -> Maybe String
-lengthIs strLength item =
-    case item of
-        Just t ->
-            if String.length t == strLength then
-                Nothing
-            else
-                Just t
-
-        Nothing ->
+        Just _ ->
             Nothing
 
 
-hasAtleast1 : String -> List a -> Maybe String
-hasAtleast1 fieldName items =
-    items
-        |> List.head
-        |> requireField fieldName
+requireString : String -> Maybe String -> Maybe String
+requireString fieldName maybeStr =
+    if Maybe.withDefault "" maybeStr == "" then
+        Just (fieldName ++ " is required")
+    else
+        Nothing
+
+
+phoneValidation : PatientPhoneNumber -> Maybe String
+phoneValidation phone =
+    let
+        num =
+            Maybe.withDefault "" phone.phoneNumber
+
+        toError str =
+            Just (str ++ " '" ++ num ++ "'")
+    in
+        if String.length num < 10 then
+            toError "Incomplete Phone Number"
+        else if String.length num > 0 && phone.phoneNumberTypeId == Nothing then
+            toError "Missing phone type for"
+        else
+            Nothing
 
 
 validatationErrors : Model -> List String
 validatationErrors model =
-    [ requireField "Facility" model.sfData.facilityId
-    , requireField "Patient's Facility ID No" model.facilityPtID
-    , requireField "Main Provider" model.sfData.mainProviderId
-    , requireField "Care Coordinator" model.sfData.careCoordinatorId
-    , requireField "First Name" model.firstName
-    , requireField "Last Name" model.lastName
-    , requireField "Date of Birth" model.sfData.dateOfBirth
-    , requireField "Sex at Birth" model.sfData.sexTypeId
+    [ requireInt "Facility" model.sfData.facilityId
+    , requireString "Patient's Facility ID No" model.facilityPtID
+    , requireInt "Main Provider" model.sfData.mainProviderId
+    , requireInt "Care Coordinator" model.sfData.careCoordinatorId
+    , requireString "First Name" model.firstName
+    , requireString "Last Name" model.lastName
+    , requireString "Date of Birth" model.sfData.dateOfBirth
+    , requireInt "Sex at Birth" model.sfData.sexTypeId
     , model.patientPhoneNumbers
-        |> List.map .phoneNumber
-        |> List.map (lengthIs 7)
-        |> hasAtleast1 "Phone Number"
+        |> Functions.uniqueBy (\t -> Maybe.withDefault "" t.phoneNumber)
+        |> List.filterMap phoneValidation
+        |> List.head
     ]
         |> List.filterMap identity
 
 
 viewValidationErrorsDiv : Model -> List String -> Html msg
 viewValidationErrorsDiv model errors =
-    div [ class "error", hidden (List.length errors == 0 || model.showValidationErrors == False) ] []
+    div [ class "error", hidden (List.length errors == 0 || model.showValidationErrors == False) ]
+        (List.map (\t -> div [] [ text t ]) errors)
 
 
 viewValidationErrors : Model -> Html msg
@@ -1117,11 +1124,6 @@ decodeServerResponse =
         |> Pipeline.required "demographicsInformationModel" decodeDemographicsInformationModel
         |> Pipeline.required "contactInformationModel" decodeContactInformationModel
         |> Pipeline.required "contactHoursModel" Decode.value
-
-
-
---TODO
--- |> Pipeline.required "contactHoursModel" toString Decode.decodeValue
 
 
 decodeDemographicsInformationModel : Decode.Decoder DemographicsInformationModel
