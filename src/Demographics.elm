@@ -96,6 +96,7 @@ type alias Model =
     , patientLanguagesMap : List PatientLanguagesMap
     , patientLanguagesMapCounter : Int
     , contactHoursModel : Maybe Decode.Value
+    , showValidationErrors : Bool
     }
 
 
@@ -187,7 +188,7 @@ view model =
         [ h4 [ class "col-xs-12 padding-h-0" ] [ text "Assigned To" ]
         , div [ class "col-xs-12 padding-h-0" ]
             -- TODO
-            [ div [ class "error", hidden True ] []
+            [ viewValidationErrors (validatationErrors model)
             ]
         , div rowStyle
             [ sfbox "Facility" True
@@ -843,6 +844,53 @@ sfcheckbox displayText isRequired maybeStr =
         input [ type_ "checkbox", idAttr displayText, class "e-checkbox" ] []
 
 
+requireField : String -> Maybe a -> Maybe String
+requireField fieldName maybeStr =
+    case maybeStr of
+        Just _ ->
+            Nothing
+
+        Nothing ->
+            Just (fieldName ++ " is required")
+
+
+lengthIs : Int -> String -> Maybe String
+lengthIs strLength item =
+    if String.length item == strLength then
+        Just item
+    else
+        Nothing
+
+
+hasAtleast1 : String -> (String -> Maybe String) -> List (Maybe String) -> Maybe String
+hasAtleast1 fieldName t items =
+    items
+        |> List.map (Maybe.withDefault "")
+        |> List.filterMap t
+        |> List.head
+        |> requireField fieldName
+
+
+validatationErrors : Model -> List String
+validatationErrors model =
+    [ requireField "Facility" model.sfData.facilityId
+    , requireField "Patient's Facility ID No" model.facilityPtID
+    , requireField "Main Provider" model.sfData.mainProviderId
+    , requireField "Care Coordinator" model.sfData.careCoordinatorId
+    , requireField "First Name" model.firstName
+    , requireField "Last Name" model.lastName
+    , requireField "Date of Birth" model.sfData.dateOfBirth
+    , requireField "Sex at Birth" model.sfData.sexTypeId
+    , hasAtleast1 "Phone Number" (lengthIs 7) (List.map .phoneNumber model.patientPhoneNumbers)
+    ]
+        |> List.filterMap identity
+
+
+viewValidationErrors : List String -> Html msg
+viewValidationErrors errors =
+    div [ class "error", hidden (List.length errors == 0) ] []
+
+
 emptyModel : Flags -> Model
 emptyModel flags =
     { patientId = flags.patientId
@@ -872,6 +920,7 @@ emptyModel flags =
     , patientPhoneNumbersCounter = 0
     , patientAddressesCounter = 0
     , contactHoursModel = Nothing
+    , showValidationErrors = False
     }
 
 
