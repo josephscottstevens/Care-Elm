@@ -109,7 +109,7 @@ type alias SfData =
 
 type alias PatientLanguagesMap =
     { id : Maybe Int
-    , languageId : Int
+    , languageId : Maybe Int
     , isPreferred : Bool
     , dropState : Dropdown.DropState
     }
@@ -248,7 +248,7 @@ viewLanguages dropdownItems lang =
         [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
             [ input [ type_ "radio", checked lang.isPreferred ] [] ]
         , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ], title "Choose language" ]
-            [ Html.map (UpdateLanguage lang) <| Dropdown.view lang.dropState dropdownItems (Just lang.languageId) ]
+            [ Html.map (UpdateLanguage lang) <| Dropdown.view lang.dropState dropdownItems lang.languageId ]
         , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "Remove", onClick (RemoveLanguage lang) ]
             [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
             ]
@@ -582,9 +582,9 @@ update msg model =
         UpdateLanguage t dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg t.dropState (Just t.languageId) model.sfData.languageDropdown
+                    Dropdown.update dropdownMsg t.dropState t.languageId model.sfData.languageDropdown
             in
-                updateLanguage model { t | dropState = newDropState, languageId = Maybe.withDefault -1 newId } ! [ newMsg ]
+                updateLanguage model { t | dropState = newDropState, languageId = newId } ! [ newMsg ]
 
         InputChanged patientPhoneNumber value ->
             updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString value } ! []
@@ -909,7 +909,7 @@ emptySfData =
 emptyPatientLanguagesMap : Bool -> PatientLanguagesMap
 emptyPatientLanguagesMap isPreferred =
     { id = Nothing
-    , languageId = -1
+    , languageId = Nothing
     , isPreferred = isPreferred
     , dropState = Dropdown.init "languageDropdown" Nothing
     }
@@ -1056,7 +1056,7 @@ decodePatientLanguagesMap : Decode.Decoder PatientLanguagesMap
 decodePatientLanguagesMap =
     Pipeline.decode PatientLanguagesMap
         |> Pipeline.required "Id" (Decode.maybe Decode.int)
-        |> Pipeline.required "LanguageId" Decode.int
+        |> Pipeline.required "LanguageId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
         |> Pipeline.required "LanguageId" toDropdown
 
