@@ -241,44 +241,52 @@ view model =
         Grid ->
             div [ class "e-grid e-js e-waitingpopup" ]
                 [ toolbar
-                , Table.view (List.map getRow model.records) gridConfig (Just ( 1, text "heyyyooooo" ))
+                , Table.view (List.map getRow model.records) gridConfig Nothing
                 ]
 
         AddNew newRecord ->
-            let
-                inputControls =
-                    makeControls (formInputs newRecord)
-
-                errors =
-                    getValidationErrors (formInputs newRecord)
-
-                validationErrorsDiv =
-                    if newRecord.showValidationErrors == True && List.length errors > 0 then
-                        div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
-                    else
-                        div [] []
-
-                saveBtnClass =
-                    class "btn btn-sm btn-default btn-success"
-
-                footerControls =
-                    [ div [ class "form-group" ]
-                        [ div [ class fullWidth ]
-                            [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
-                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
-                            ]
-                        ]
-                    ]
-            in
-                div
-                    [ class "form-horizontal" ]
-                    (validationErrorsDiv :: inputControls ++ footerControls)
+            div [ class "e-grid e-js e-waitingpopup" ]
+                [ toolbar
+                , Table.view (List.map getRow model.records) gridConfig (Just ( 1, viewNewRecord newRecord ))
+                ]
 
         Limbo ->
             div [] []
 
         Error errMessage ->
             div [] [ text errMessage ]
+
+
+viewNewRecord : NewRecord -> Html Msg
+viewNewRecord newRecord =
+    let
+        inputControls =
+            makeControls (formInputs newRecord)
+
+        errors =
+            getValidationErrors (formInputs newRecord)
+
+        validationErrorsDiv =
+            if newRecord.showValidationErrors == True && List.length errors > 0 then
+                div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
+            else
+                div [] []
+
+        saveBtnClass =
+            class "btn btn-sm btn-default btn-success"
+
+        footerControls =
+            [ div [ class "form-group" ]
+                [ div [ class fullWidth ]
+                    [ button [ type_ "button", id "Save", value "AddNewRecord", onClick (Save newRecord), saveBtnClass ] [ text "Save" ]
+                    , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
+                    ]
+                ]
+            ]
+    in
+        div
+            [ class "form-horizontal" ]
+            (validationErrorsDiv :: inputControls ++ footerControls)
 
 
 formInputs : NewRecord -> List ( String, RequiredType, InputControlType Msg )
