@@ -27,9 +27,10 @@ type alias Column msg =
     }
 
 
-type alias Config =
+type alias Config msg =
     { domTableId : String
     , headers : List String
+    , toolbar : List ( String, msg )
     }
 
 
@@ -53,13 +54,29 @@ customColumn name toNode =
 -- VIEW
 
 
-view : List (Row msg) -> Config -> Maybe ( Int, Html msg2 ) -> Html msg
+view : List (Row msg) -> Config msg -> Maybe ( Int, Html msg ) -> Html msg
 view rows config maybeCustomRow =
-    table [ id config.domTableId, style [ ( "width", "100%" ) ] ]
-        [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-            (List.map viewTh config.headers)
-        , tbody []
-            (List.map (\t -> tr [] (List.map viewTd t.columns)) rows)
+    div [ class "e-grid e-js e-waitingpopup" ]
+        [ viewToolbar config.toolbar
+        , table [ id config.domTableId, style [ ( "width", "100%" ) ] ]
+            [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
+                (List.map viewTh config.headers)
+            , tbody []
+                (List.map
+                    (\t ->
+                        case maybeCustomRow of
+                            Just ( rowId, customRow ) ->
+                                if rowId == t.rowId then
+                                    tr [] [ customRow ]
+                                else
+                                    tr [] (List.map viewTd t.columns)
+
+                            Nothing ->
+                                tr [] (List.map viewTd t.columns)
+                    )
+                    rows
+                )
+            ]
         ]
 
 
@@ -122,3 +139,18 @@ rowDropDownDiv isVisible event dropDownItems =
                     ]
                 ]
             ]
+
+
+viewToolbar : List ( String, msg ) -> Html msg
+viewToolbar items =
+    div [ class "e-gridtoolbar e-toolbar e-js e-widget e-box e-toolbarspan e-tooltip" ]
+        [ ul [ class "e-ul e-horizontal" ]
+            [ li [ class "e-tooltxt" ]
+                (List.map toolbarHelper items)
+            ]
+        ]
+
+
+toolbarHelper : ( String, msg ) -> Html msg
+toolbarHelper ( iconStr, event ) =
+    a [ class ("e-addnewitem e-toolbaricons e-icon " ++ iconStr), Events.onClick event, style [ ( "cursor", "pointer" ) ] ] []

@@ -239,16 +239,10 @@ view : Model -> Html Msg
 view model =
     case model.state of
         Grid ->
-            div [ class "e-grid e-js e-waitingpopup" ]
-                [ toolbar
-                , Table.view (List.map getRow model.records) gridConfig Nothing
-                ]
+            Table.view (List.map getRow model.records) gridConfig (Just ( 83, text "heyyyoooo" ))
 
         AddNew newRecord ->
-            div [ class "e-grid e-js e-waitingpopup" ]
-                [ toolbar
-                , Table.view (List.map getRow model.records) gridConfig (Just ( 1, viewNewRecord newRecord ))
-                ]
+            Table.view (List.map getRow model.records) gridConfig (Just ( 83, viewNewRecord newRecord ))
 
         Limbo ->
             div [] []
@@ -368,7 +362,7 @@ formInputs newRecord =
         List.append firstColumns lastColumns
 
 
-gridConfig : Config
+gridConfig : Config Msg
 gridConfig =
     { domTableId = "RecordTable"
     , headers =
@@ -377,6 +371,7 @@ gridConfig =
         , "Specialty"
         , "Comments"
         ]
+    , toolbar = [ ( "e-addnew", AddNewStart ) ]
     }
 
 
