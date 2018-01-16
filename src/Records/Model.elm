@@ -9,7 +9,7 @@ type Msg
     = Load (Result Http.Error WebResponse)
     | AddNewStart
     | ResetAddNew String
-    | SetTableState Table.Row
+    | SetTableState (Table.Row Msg)
     | DropDownToggle Int
     | Save NewRecord
     | SendMenuMessage Int String
@@ -69,7 +69,7 @@ type alias Model =
     , patientId : Int
     , facilityId : Maybe Int
     , recordTypeId : Maybe Int
-    , tableState : Table.Row
+    , tableState : Table.Row Msg
     , dropDownState : DropDownState
     }
 

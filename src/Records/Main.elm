@@ -372,7 +372,7 @@ gridConfig =
     }
 
 
-getRow : RecordRow -> Row
+getRow : RecordRow -> Row Msg
 getRow t =
     Row
         [ stringColumn "Date Collected" (defaultDateTime t.date)

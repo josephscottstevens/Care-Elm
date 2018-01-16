@@ -14,9 +14,9 @@ type alias Row msg =
 
 
 type alias Column msg =
-    { node : Html msg
+    { name : String
     , isReversed : Bool
-    , data : String
+    , node : Html msg
     , isSpecial : Bool
     }
 
@@ -29,9 +29,18 @@ type alias Config =
 
 stringColumn : String -> String -> Column msg
 stringColumn name data =
-    { node = text name
+    { name = name
     , isReversed = False
-    , data = data
+    , node = text data
+    , isSpecial = False
+    }
+
+
+customColumn : String -> Html msg -> Column msg
+customColumn name toNode =
+    { name = name
+    , isReversed = False
+    , node = toNode
     , isSpecial = False
     }
 
@@ -59,4 +68,4 @@ viewTh name =
 
 viewTd : Column msg -> Html msg
 viewTd column =
-    td [] [ text column.data ]
+    td [] [ column.node ]
