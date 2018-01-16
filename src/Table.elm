@@ -11,16 +11,16 @@ import Html.Events as Events
 type alias State =
     { selectedId : Maybe Int
     , isReversed : Bool
-    , reversedId : Maybe Int
+    , sortedColumnName : String
     , openDropdownId : Maybe Int
     }
 
 
-init : State
-init =
+init : String -> State
+init sortedColumnName =
     { selectedId = Nothing
     , isReversed = False
-    , reversedId = Nothing
+    , sortedColumnName = sortedColumnName
     , openDropdownId = Nothing
     }
 
@@ -45,19 +45,6 @@ type alias Config msg =
 
 
 
--- stringColumn : String -> String -> Column msg
--- stringColumn name data =
---     StringColumn name data
--- dropdownColumn : State -> (State -> msg) -> List ( String, String, Html.Attribute msg ) -> Column msg
--- dropdownColumn state toMsg dropDownItems =
---     { name = "dropdownColumn"
---     , node = rowDropDownDiv state toMsg dropDownItems
---     }
--- customColumn : String -> Html msg -> Column msg
--- customColumn name toNode =
---     { name = name
---     , node = toNode
---     }
 -- VIEW
 
 

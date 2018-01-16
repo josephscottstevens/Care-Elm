@@ -85,7 +85,7 @@ emptyModel flags =
     , patientId = flags.patientId
     , facilityId = Nothing
     , recordTypeId = flags.recordType
-    , tableState = Table.init
+    , tableState = Table.init "Date Collected"
     , dropDownState = emptyDropDownState
     }
 
