@@ -24,52 +24,6 @@ module Table
         , defaultCustomizations
         )
 
-{-| This library helps you create sortable tables. The crucial feature is that it
-lets you own your data separately and keep it in whatever format is best for
-you. This way you are free to change your data without worrying about the table
-&ldquo;getting out of sync&rdquo; with the data. Having a single source of
-truth is pretty great!
-I recommend checking out the [examples] to get a feel for how it works.
-[examples]: <https://github.com/evancz/elm-sortable-table/tree/master/examples>
-
-
-# View
-
-@docs view
-
-
-# Configuration
-
-@docs config, stringColumn, intColumn, floatColumn
-
-
-# State
-
-@docs State, initialSort
-
-
-# Crazy Customization
-
-If you are new to this library, you can probably stop reading here. After this
-point are a bunch of ways to customize your table further. If it does not
-provide what you need, you may just want to write a custom table yourself. It
-is not that crazy.
-
-
-## Custom Columns
-
-@docs Column, customColumn, veryCustomColumn,
-Sorter, unsortable, increasingBy, decreasingBy,
-increasingOrDecreasingBy, decreasingOrIncreasingBy
-
-
-## Custom Tables
-
-@docs Config, customConfig, Customizations, HtmlDetails, Status,
-defaultCustomizations
-
--}
-
 import Html exposing (Html, Attribute)
 import Html.Attributes as Attr
 import Html.Events as E
