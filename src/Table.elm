@@ -32,12 +32,62 @@ import Html.Lazy exposing (lazy3)
 import Json.Decode as Json
 
 
--- STATE
+-- Data Types
 
 
 type alias State =
     { columnName : String
     , isReversed : Bool
+    }
+
+
+type Status
+    = Unsortable
+    | Sortable Bool
+    | Reversible (Maybe Bool)
+
+
+type Column data msg
+    = Column (ColumnData data msg)
+
+
+type alias ColumnData data msg =
+    { name : String
+    , viewData : data -> HtmlDetails msg
+    , sorter : Sorter data
+    }
+
+
+type Config data msg
+    = Config
+        { toId : data -> String
+        , toMsg : State -> msg
+        , columns : List (ColumnData data msg)
+        , customizations : Customizations data msg
+        }
+
+
+type Sorter data
+    = None
+    | Increasing (List data -> List data)
+    | Decreasing (List data -> List data)
+    | IncOrDec (List data -> List data)
+    | DecOrInc (List data -> List data)
+
+
+type alias Customizations data msg =
+    { tableAttrs : List (Attribute msg)
+    , caption : Maybe (HtmlDetails msg)
+    , thead : List ( String, Status, Attribute msg ) -> HtmlDetails msg
+    , tfoot : Maybe (HtmlDetails msg)
+    , tbodyAttrs : List (Attribute msg)
+    , rowAttrs : data -> List (Attribute msg)
+    }
+
+
+type alias HtmlDetails msg =
+    { attributes : List (Attribute msg)
+    , children : List (Html msg)
     }
 
 
@@ -48,15 +98,6 @@ initialSort header =
 
 
 -- CONFIG
-
-
-type Config data msg
-    = Config
-        { toId : data -> String
-        , toMsg : State -> msg
-        , columns : List (ColumnData data msg)
-        , customizations : Customizations data msg
-        }
 
 
 config :
@@ -88,22 +129,6 @@ customConfig { toId, toMsg, columns, customizations } =
         , columns = List.map (\(Column cData) -> cData) columns
         , customizations = customizations
         }
-
-
-type alias Customizations data msg =
-    { tableAttrs : List (Attribute msg)
-    , caption : Maybe (HtmlDetails msg)
-    , thead : List ( String, Status, Attribute msg ) -> HtmlDetails msg
-    , tfoot : Maybe (HtmlDetails msg)
-    , tbodyAttrs : List (Attribute msg)
-    , rowAttrs : data -> List (Attribute msg)
-    }
-
-
-type alias HtmlDetails msg =
-    { attributes : List (Attribute msg)
-    , children : List (Html msg)
-    }
 
 
 defaultCustomizations : Customizations data msg
@@ -171,25 +196,8 @@ simpleRowAttrs _ =
     []
 
 
-type Status
-    = Unsortable
-    | Sortable Bool
-    | Reversible (Maybe Bool)
-
-
 
 -- COLUMNS
-
-
-type Column data msg
-    = Column (ColumnData data msg)
-
-
-type alias ColumnData data msg =
-    { name : String
-    , viewData : data -> HtmlDetails msg
-    , sorter : Sorter data
-    }
 
 
 stringColumn : String -> (data -> String) -> Column data msg
@@ -389,14 +397,6 @@ findSorter selectedColumn columnData =
 
 
 -- SORTERS
-
-
-type Sorter data
-    = None
-    | Increasing (List data -> List data)
-    | Decreasing (List data -> List data)
-    | IncOrDec (List data -> List data)
-    | DecOrInc (List data -> List data)
 
 
 unsortable : Sorter data
