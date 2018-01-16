@@ -74,7 +74,7 @@ import Html exposing (Html, Attribute)
 import Html.Attributes as Attr
 import Html.Events as E
 import Html.Keyed as Keyed
-import Html.Lazy exposing (lazy2, lazy3)
+import Html.Lazy exposing (lazy3)
 import Json.Decode as Json
 
 
@@ -143,6 +143,13 @@ You provide the following information in your table configuration:
 
 [keyed]: http://package.elm-lang.org/packages/elm-lang/html/latest/Html-Keyed
 [examples]: https://github.com/evancz/elm-sortable-table/tree/master/examples
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
+[??]: ?? "??"
 [??]: ?? "??"
 [??]: ?? "??"
 

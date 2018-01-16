@@ -439,7 +439,7 @@ rowDropDown recordTypeId =
         }
 
 
-config : Maybe Int -> Maybe Int -> Config RecordRow Msg
+config : Maybe Int -> Maybe Int -> Table.Config RecordRow Msg
 config recordTypeId taskId =
     customConfig
         { toId = \t -> toString t.id
