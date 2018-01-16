@@ -120,24 +120,6 @@ viewTr state rows config maybeCustomRow =
                 List.map standardTr rows
 
 
-
--- case maybeCustomRow of
---     Just ( maybeRowId, customRow ) ->
---         case rowId of
---             Just rowId ->
---                 if rowId == row.rowId then
---                     tr []
---                         [ td [ colspan 4, inlineStyle ]
---                             [ customRow
---                             ]
---                         ]
---             Nothing ->
---         else
---             standardTr
---     Nothing ->
---         standardTr
-
-
 viewTh : String -> Html msg
 viewTh name =
     th [ class ("e-columnheader e-default e-filterbarcell " ++ name) ]
@@ -188,10 +170,16 @@ rowDropDownDiv state toMsg dropDownItems =
 
         btnClass =
             class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
+
+        btnStyle =
+            style [ ( "position", "relative" ) ]
+
+        btnEvent =
+            Events.onClick (toMsg { state | openDropdownId = Just 83 })
     in
         div []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ type_ "button", btnClass, style [ ( "position", "relative" ) ] ]
+                [ button [ type_ "button", btnClass, btnEvent, btnStyle ]
                     [ div [ id "editButtonMenu", dropDownMenuStyle ]
                         dropMenu
                     ]
