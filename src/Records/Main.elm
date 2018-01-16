@@ -6,7 +6,10 @@ import Html exposing (Html, text, div, button, ul, li, a)
 import Html.Attributes exposing (class, id, type_, value, style)
 import Html.Events exposing (onClick, onFocus)
 import Table exposing (..)
-import Utils.CommonGrid exposing (..)
+
+
+-- import Utils.CommonGrid exposing (..)
+
 import Utils.CommonHtml exposing (..)
 import Utils.CommonTypes exposing (..)
 import Utils.CommonFunctions as Functions exposing (..)
@@ -238,7 +241,7 @@ view model =
         Grid ->
             div [ class "e-grid e-js e-waitingpopup" ]
                 [ toolbar
-                , Table.view (config model.recordTypeId (getTaskId model)) model.tableState model.records
+                , Table.view (List.map getRow model.records) gridConfig
                 ]
 
         AddNew newRecord ->
@@ -357,100 +360,106 @@ formInputs newRecord =
         List.append firstColumns lastColumns
 
 
-getColumns : Maybe Int -> Maybe Int -> (data -> Int) -> List (Column RecordRow Msg)
-getColumns recordTypeId taskId rowId =
-    let
-        commonColumns =
-            [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-            , stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
-            , stringColumn "Specialty" (\t -> defaultString t.specialty)
-            , stringColumn "Comments" (\t -> defaultString t.comments)
-            ]
-
-        firstColumns =
-            case getRecordType recordTypeId of
-                PrimaryCare ->
-                    commonColumns
-
-                Specialty ->
-                    commonColumns
-
-                Labs ->
-                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , stringColumn "Date Accessioned" (\t -> defaultDateTime t.dateAccessed)
-                    , stringColumn "Name of Lab" (\t -> defaultString t.title)
-                    , stringColumn "Provider" (\t -> defaultString t.provider)
-                    , stringColumn "Comments" (\t -> defaultString t.comments)
-                    ]
-
-                Radiology ->
-                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , stringColumn "Date Accessioned" (\t -> defaultDateTime t.dateAccessed)
-                    , stringColumn "Name of Study" (\t -> defaultString t.title)
-                    , stringColumn "Provider" (\t -> defaultString t.provider)
-                    , stringColumn "Comments" (\t -> defaultString t.comments)
-                    ]
-
-                Hospitalizations ->
-                    []
-
-                Legal ->
-                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , stringColumn "Comments" (\t -> defaultString t.comments)
-                    ]
-
-                CallRecordings ->
-                    [ stringColumn "Date" (\t -> dateTime t.recordingDate)
-                    , hrefColumn "Recording" "Open" (\t -> defaultString t.recording)
-                    , hrefColumnExtra "Task" (\t -> defaultString t.taskTitle) "#" (OpenTask (defaultInt taskId))
-                    , checkColumn "During Enrollment" (\t -> t.enrollment)
-                    , checkColumn "Consent" (\t -> t.hasVerbalConsent)
-                    , stringColumn "User" (\t -> defaultString t.staffName)
-                    ]
-
-                PreviousHistories ->
-                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , stringColumn "File Name" (\t -> defaultString t.fileName)
-                    , stringColumn "Report Date" (\t -> defaultDate t.reportDate)
-                    , stringColumn "Comments" (\t -> defaultString t.comments)
-                    ]
-
-                Enrollment ->
-                    [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
-                    , stringColumn "Comments" (\t -> defaultString t.comments)
-                    ]
-
-                Misc ->
-                    commonColumns
-
-        lastColumns =
-            [ rowDropDown recordTypeId
-            ]
-    in
-        List.append firstColumns lastColumns
+gridConfig : Config
+gridConfig =
+    { domTableId = "RecordTable"
+    , headers =
+        [ "Date Collected"
+        , "Doctor of Visit"
+        , "Specialty"
+        , "Comments"
+        ]
+    }
 
 
-rowDropDown : Maybe Int -> Table.Column RecordRow Msg
-rowDropDown recordTypeId =
-    Table.veryCustomColumn
-        { name = ""
-        , viewData = (\t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropdownItems recordTypeId t.id))
-        , sorter = Table.unsortable
-        }
+getRow : RecordRow -> Row
+getRow t =
+    Row
+        [ stringColumn "Date Collected" (defaultDateTime t.date)
+        , stringColumn "Doctor of Visit" (defaultString t.provider)
+        , stringColumn "Specialty" (defaultString t.specialty)
+        , stringColumn "Comments" (defaultString t.comments)
+        ]
 
 
-config : Maybe Int -> Maybe Int -> Table.Config RecordRow Msg
-config recordTypeId taskId =
-    customConfig
-        { toId = \t -> toString t.id
-        , toMsg = SetTableState
-        , columns = getColumns recordTypeId taskId .id
-        , customizations =
-            { defaultCustomizations
-                | tableAttrs = standardTableAttrs "RecordTable"
-                , thead = standardThead
-            }
-        }
+
+-- let
+--     commonColumns =
+--         [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+--         , stringColumn "Doctor of Visit" (\t -> defaultString t.provider)
+--         , stringColumn "Specialty" (\t -> defaultString t.specialty)
+--         , stringColumn "Comments" (\t -> defaultString t.comments)
+--         ]
+--     firstColumns =
+--         case getRecordType recordTypeId of
+--             PrimaryCare ->
+--                 commonColumns
+--             Specialty ->
+--                 commonColumns
+--             Labs ->
+--                 [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+--                 , stringColumn "Date Accessioned" (\t -> defaultDateTime t.dateAccessed)
+--                 , stringColumn "Name of Lab" (\t -> defaultString t.title)
+--                 , stringColumn "Provider" (\t -> defaultString t.provider)
+--                 , stringColumn "Comments" (\t -> defaultString t.comments)
+--                 ]
+--             Radiology ->
+--                 [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+--                 , stringColumn "Date Accessioned" (\t -> defaultDateTime t.dateAccessed)
+--                 , stringColumn "Name of Study" (\t -> defaultString t.title)
+--                 , stringColumn "Provider" (\t -> defaultString t.provider)
+--                 , stringColumn "Comments" (\t -> defaultString t.comments)
+--                 ]
+--             Hospitalizations ->
+--                 []
+--             Legal ->
+--                 [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+--                 , stringColumn "Comments" (\t -> defaultString t.comments)
+--                 ]
+--             CallRecordings ->
+--                 [ stringColumn "Date" (\t -> dateTime t.recordingDate)
+--                 , hrefColumn "Recording" "Open" (\t -> defaultString t.recording)
+--                 , hrefColumnExtra "Task" (\t -> defaultString t.taskTitle) "#" (OpenTask (defaultInt taskId))
+--                 , checkColumn "During Enrollment" (\t -> t.enrollment)
+--                 , checkColumn "Consent" (\t -> t.hasVerbalConsent)
+--                 , stringColumn "User" (\t -> defaultString t.staffName)
+--                 ]
+--             PreviousHistories ->
+--                 [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+--                 , stringColumn "File Name" (\t -> defaultString t.fileName)
+--                 , stringColumn "Report Date" (\t -> defaultDate t.reportDate)
+--                 , stringColumn "Comments" (\t -> defaultString t.comments)
+--                 ]
+--             Enrollment ->
+--                 [ stringColumn "Date Collected" (\t -> defaultDateTime t.date)
+--                 , stringColumn "Comments" (\t -> defaultString t.comments)
+--                 ]
+--             Misc ->
+--                 commonColumns
+--     lastColumns =
+--         [ rowDropDown recordTypeId
+--         ]
+-- in
+--     List.append firstColumns lastColumns
+-- rowDropDown : Maybe Int -> Table.Column RecordRow Msg
+-- rowDropDown recordTypeId =
+--     Table.veryCustomColumn
+--         { name = ""
+--         , viewData = (\t -> rowDropDownDiv t.dropDownOpen (onClick (DropDownToggle t.id)) (dropdownItems recordTypeId t.id))
+--         , sorter = Table.unsortable
+--         }
+-- config : Maybe Int -> Maybe Int -> Table.Config RecordRow Msg
+-- config recordTypeId taskId =
+--     customConfig
+--         { toId = \t -> toString t.id
+--         , toMsg = SetTableState
+--         , columns = getColumns recordTypeId taskId .id
+--         , customizations =
+--             { defaultCustomizations
+--                 | tableAttrs = standardTableAttrs "RecordTable"
+--                 , thead = standardThead
+--             }
+--         }
 
 
 dropdownItems : Maybe Int -> Int -> List ( String, String, Html.Attribute Msg )
