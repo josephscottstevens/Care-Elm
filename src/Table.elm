@@ -70,22 +70,26 @@ view rows config maybeCustomRow =
             [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
                 (List.map viewTh config.headers)
             , tbody []
-                (List.map
-                    (\t ->
-                        case maybeCustomRow of
-                            Just ( rowId, customRow ) ->
-                                if rowId == t.rowId then
-                                    tr [] [ customRow ]
-                                else
-                                    tr [] (List.map viewTd t.columns)
-
-                            Nothing ->
-                                tr [] (List.map viewTd t.columns)
-                    )
-                    rows
-                )
+                (List.map (viewTr maybeCustomRow) rows)
             ]
         ]
+
+
+viewTr : Maybe ( Int, Html msg ) -> Row msg -> Html msg
+viewTr maybeCustomRow row =
+    let
+        defaultRow =
+            tr [] (List.map viewTd row.columns)
+    in
+        case maybeCustomRow of
+            Just ( rowId, customRow ) ->
+                if rowId == row.rowId then
+                    tr [] [ customRow ]
+                else
+                    defaultRow
+
+            Nothing ->
+                defaultRow
 
 
 viewTh : String -> Html msg
