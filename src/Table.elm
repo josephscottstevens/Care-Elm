@@ -1,7 +1,7 @@
 module Table exposing (..)
 
-import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text)
-import Html.Attributes exposing (class, id, style)
+import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span)
+import Html.Attributes exposing (class, id, style, type_, target)
 import Html.Events as Events
 
 
@@ -69,3 +69,52 @@ viewTh name =
 viewTd : Column msg -> Html msg
 viewTd column =
     td [] [ column.node ]
+
+
+
+-- Custom
+
+
+rowDropDownDiv : Bool -> Html.Attribute msg -> List ( String, String, Html.Attribute msg ) -> Html msg
+rowDropDownDiv isVisible event dropDownItems =
+    let
+        dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
+        dropDownMenuItem ( iconClass, displayText, event ) =
+            li [ class "e-content e-list" ]
+                [ a [ class "e-menulink", event, target "_blank" ]
+                    [ text displayText
+                    , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
+                    ]
+                ]
+
+        dropDownMenuStyle : Html.Attribute msg
+        dropDownMenuStyle =
+            style
+                [ ( "z-index", "5000" )
+                , ( "position", "absolute" )
+                , ( "display", "block" )
+                , ( "left", "-173px" )
+                , ( "width", "178.74px" )
+                ]
+
+        dropMenu =
+            case isVisible of
+                True ->
+                    [ ul [ class "e-menu e-js e-widget e-box e-separator" ]
+                        (List.map dropDownMenuItem dropDownItems)
+                    ]
+
+                False ->
+                    []
+
+        btnClass =
+            class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
+    in
+        div []
+            [ div [ style [ ( "text-align", "right" ) ] ]
+                [ button [ type_ "button", btnClass, event, style [ ( "position", "relative" ) ] ]
+                    [ div [ id "editButtonMenu", dropDownMenuStyle ]
+                        dropMenu
+                    ]
+                ]
+            ]
