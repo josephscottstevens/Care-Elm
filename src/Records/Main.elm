@@ -382,11 +382,11 @@ gridConfig =
 getRow : State -> Maybe Int -> RecordRow -> Row Msg
 getRow state recordTypeId t =
     Row
-        [ stringColumn "Date Collected" (defaultDateTime t.date)
-        , stringColumn "Doctor of Visit" (defaultString t.provider)
-        , stringColumn "Specialty" (defaultString t.specialty)
-        , stringColumn "Comments" (defaultString t.comments)
-        , dropdownColumn state SetTableState (dropdownItems recordTypeId t.id)
+        [ StringColumn "Date Collected" (defaultDateTime t.date)
+        , StringColumn "Doctor of Visit" (defaultString t.provider)
+        , StringColumn "Specialty" (defaultString t.specialty)
+        , StringColumn "Comments" (defaultString t.comments)
+        , DropdownColumn (dropdownItems recordTypeId t.id)
         ]
         t.id
 

@@ -31,10 +31,9 @@ type alias Row msg =
     }
 
 
-type alias Column msg =
-    { name : String
-    , node : Html msg
-    }
+type Column msg
+    = StringColumn String String
+    | DropdownColumn (List ( String, String, Html.Attribute msg ))
 
 
 type alias Config msg =
@@ -45,28 +44,20 @@ type alias Config msg =
     }
 
 
-stringColumn : String -> String -> Column msg
-stringColumn name data =
-    { name = name
-    , node = text data
-    }
 
-
-dropdownColumn : State -> (State -> msg) -> List ( String, String, Html.Attribute msg ) -> Column msg
-dropdownColumn state toMsg dropDownItems =
-    { name = "dropdownColumn"
-    , node = rowDropDownDiv state toMsg dropDownItems
-    }
-
-
-customColumn : String -> Html msg -> Column msg
-customColumn name toNode =
-    { name = name
-    , node = toNode
-    }
-
-
-
+-- stringColumn : String -> String -> Column msg
+-- stringColumn name data =
+--     StringColumn name data
+-- dropdownColumn : State -> (State -> msg) -> List ( String, String, Html.Attribute msg ) -> Column msg
+-- dropdownColumn state toMsg dropDownItems =
+--     { name = "dropdownColumn"
+--     , node = rowDropDownDiv state toMsg dropDownItems
+--     }
+-- customColumn : String -> Html msg -> Column msg
+-- customColumn name toNode =
+--     { name = name
+--     , node = toNode
+--     }
 -- VIEW
 
 
@@ -97,7 +88,7 @@ viewTr state rows config maybeCustomRow =
                 )
 
         standardTr row =
-            tr [ selectedStyle row ] (List.map viewTd row.columns)
+            tr [ selectedStyle row ] (List.map (viewTd state row config) row.columns)
 
         inlineStyle =
             style
@@ -127,17 +118,24 @@ viewTh name =
         ]
 
 
-viewTd : Column msg -> Html msg
-viewTd column =
-    td [] [ column.node ]
+viewTd : State -> Row msg -> Config msg -> Column msg -> Html msg
+viewTd state row config column =
+    td []
+        [ case column of
+            StringColumn name data ->
+                text data
+
+            DropdownColumn dropDownItems ->
+                rowDropDownDiv state config.toMsg row dropDownItems
+        ]
 
 
 
 -- Custom
 
 
-rowDropDownDiv : State -> (State -> msg) -> List ( String, String, Html.Attribute msg ) -> Html msg
-rowDropDownDiv state toMsg dropDownItems =
+rowDropDownDiv : State -> (State -> msg) -> Row msg -> List ( String, String, Html.Attribute msg ) -> Html msg
+rowDropDownDiv state toMsg row dropDownItems =
     let
         dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
         dropDownMenuItem ( iconClass, displayText, event ) =
@@ -161,9 +159,12 @@ rowDropDownDiv state toMsg dropDownItems =
         dropMenu =
             case state.openDropdownId of
                 Just t ->
-                    [ ul [ class "e-menu e-js e-widget e-box e-separator" ]
-                        (List.map dropDownMenuItem dropDownItems)
-                    ]
+                    if row.rowId == t then
+                        [ ul [ class "e-menu e-js e-widget e-box e-separator" ]
+                            (List.map dropDownMenuItem dropDownItems)
+                        ]
+                    else
+                        []
 
                 Nothing ->
                     []
@@ -174,12 +175,20 @@ rowDropDownDiv state toMsg dropDownItems =
         btnStyle =
             style [ ( "position", "relative" ) ]
 
-        btnEvent =
-            Events.onClick (toMsg { state | openDropdownId = Just 83 })
+        btnClick =
+            case state.openDropdownId of
+                Just _ ->
+                    Events.onClick (toMsg { state | openDropdownId = Nothing })
+
+                Nothing ->
+                    Events.onClick (toMsg { state | openDropdownId = Just row.rowId })
+
+        btnBlur =
+            Events.onBlur (toMsg { state | openDropdownId = Nothing })
     in
         div []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ type_ "button", btnClass, btnEvent, btnStyle ]
+                [ button [ type_ "button", btnClass, btnClick, btnBlur, btnStyle ]
                     [ div [ id "editButtonMenu", dropDownMenuStyle ]
                         dropMenu
                     ]
