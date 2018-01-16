@@ -12,6 +12,7 @@ type alias State =
     { selectedId : Maybe Int
     , isReversed : Bool
     , reversedId : Maybe Int
+    , openDropdownId : Maybe Int
     }
 
 
@@ -20,6 +21,7 @@ init =
     { selectedId = Nothing
     , isReversed = False
     , reversedId = Nothing
+    , openDropdownId = Nothing
     }
 
 
@@ -50,10 +52,10 @@ stringColumn name data =
     }
 
 
-dropdownColumn : Bool -> Html.Attribute msg -> List ( String, String, Html.Attribute msg ) -> Column msg
-dropdownColumn isVisible event dropDownItems =
+dropdownColumn : State -> (State -> msg) -> List ( String, String, Html.Attribute msg ) -> Column msg
+dropdownColumn state toMsg dropDownItems =
     { name = "dropdownColumn"
-    , node = rowDropDownDiv isVisible event dropDownItems
+    , node = rowDropDownDiv state toMsg dropDownItems
     }
 
 
@@ -152,8 +154,8 @@ viewTd column =
 -- Custom
 
 
-rowDropDownDiv : Bool -> Html.Attribute msg -> List ( String, String, Html.Attribute msg ) -> Html msg
-rowDropDownDiv isVisible event dropDownItems =
+rowDropDownDiv : State -> (State -> msg) -> List ( String, String, Html.Attribute msg ) -> Html msg
+rowDropDownDiv state toMsg dropDownItems =
     let
         dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
         dropDownMenuItem ( iconClass, displayText, event ) =
@@ -175,13 +177,13 @@ rowDropDownDiv isVisible event dropDownItems =
                 ]
 
         dropMenu =
-            case isVisible of
-                True ->
+            case state.openDropdownId of
+                Just t ->
                     [ ul [ class "e-menu e-js e-widget e-box e-separator" ]
                         (List.map dropDownMenuItem dropDownItems)
                     ]
 
-                False ->
+                Nothing ->
                     []
 
         btnClass =
@@ -189,7 +191,7 @@ rowDropDownDiv isVisible event dropDownItems =
     in
         div []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ type_ "button", btnClass, event, style [ ( "position", "relative" ) ] ]
+                [ button [ type_ "button", btnClass, style [ ( "position", "relative" ) ] ]
                     [ div [ id "editButtonMenu", dropDownMenuStyle ]
                         dropMenu
                     ]

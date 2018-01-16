@@ -237,7 +237,7 @@ view : Model -> Html Msg
 view model =
     let
         rows =
-            List.map (getRow model.recordTypeId) model.records
+            List.map (getRow model.tableState model.recordTypeId) model.records
     in
         case model.state of
             Grid ->
@@ -379,14 +379,14 @@ gridConfig =
     }
 
 
-getRow : Maybe Int -> RecordRow -> Row Msg
-getRow recordTypeId t =
+getRow : State -> Maybe Int -> RecordRow -> Row Msg
+getRow state recordTypeId t =
     Row
         [ stringColumn "Date Collected" (defaultDateTime t.date)
         , stringColumn "Doctor of Visit" (defaultString t.provider)
         , stringColumn "Specialty" (defaultString t.specialty)
         , stringColumn "Comments" (defaultString t.comments)
-        , dropdownColumn t.dropDownOpen (onClick (DropDownToggle t.id)) (dropdownItems recordTypeId t.id)
+        , dropdownColumn state SetTableState (dropdownItems recordTypeId t.id)
         ]
         t.id
 
