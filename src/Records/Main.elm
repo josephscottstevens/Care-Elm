@@ -237,7 +237,7 @@ view : Model -> Html Msg
 view model =
     let
         rows =
-            List.map (getRow model.tableState model.recordTypeId) model.records
+            List.map (getRow model.recordTypeId) model.records
     in
         case model.state of
             Grid ->
@@ -379,8 +379,8 @@ gridConfig =
     }
 
 
-getRow : State -> Maybe Int -> RecordRow -> Row Msg
-getRow state recordTypeId t =
+getRow : Maybe Int -> RecordRow -> Row Msg
+getRow recordTypeId t =
     Row
         [ StringColumn "Date Collected" (defaultDateTime t.date)
         , StringColumn "Doctor of Visit" (defaultString t.provider)
