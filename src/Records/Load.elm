@@ -7,7 +7,6 @@ import Http
 import Records.Model exposing (..)
 import Utils.CommonTypes exposing (..)
 import Utils.CommonFunctions exposing (..)
-import String exposing (toLower)
 
 
 decodeRecordRow : Decoder RecordRow

@@ -380,6 +380,7 @@ getRow t =
         , stringColumn "Specialty" (defaultString t.specialty)
         , stringColumn "Comments" (defaultString t.comments)
         ]
+        t.id
 
 
 

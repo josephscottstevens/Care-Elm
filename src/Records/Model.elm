@@ -85,7 +85,7 @@ emptyModel flags =
     , patientId = flags.patientId
     , facilityId = Nothing
     , recordTypeId = flags.recordType
-    , tableState = Table.Row []
+    , tableState = Table.Row [] 0
     , dropDownState = emptyDropDownState
     }
 

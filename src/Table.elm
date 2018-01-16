@@ -10,14 +10,20 @@ import Html.Events as Events
 
 type alias Row msg =
     { columns : List (Column msg)
+    , rowId : Int
     }
+
+
+
+-- type AltRow msg
+--     = StandardRow List (Column msg)
+--     | CustomRow (Column msg)
 
 
 type alias Column msg =
     { name : String
     , isReversed : Bool
     , node : Html msg
-    , isSpecial : Bool
     }
 
 
@@ -32,7 +38,6 @@ stringColumn name data =
     { name = name
     , isReversed = False
     , node = text data
-    , isSpecial = False
     }
 
 
@@ -41,7 +46,6 @@ customColumn name toNode =
     { name = name
     , isReversed = False
     , node = toNode
-    , isSpecial = False
     }
 
 
