@@ -238,7 +238,7 @@ view model =
         Grid ->
             div [ class "e-grid e-js e-waitingpopup" ]
                 [ toolbar
-                , Table.view (config model.recordTypeId (getTaskId model)) model.tableState (filteredRecords model)
+                , Table.view (config model.recordTypeId (getTaskId model)) model.tableState model.records
                 ]
 
         AddNew newRecord ->

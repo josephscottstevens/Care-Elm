@@ -70,8 +70,6 @@ type alias Model =
     , facilityId : Maybe Int
     , recordTypeId : Maybe Int
     , tableState : Table.State
-    , query : String
-    , filterFields : Filters
     , dropDownState : DropDownState
     }
 
@@ -88,50 +86,7 @@ emptyModel flags =
     , facilityId = Nothing
     , recordTypeId = flags.recordType
     , tableState = Table.initialSort "Date"
-    , query = ""
-    , filterFields = emptyFilters
     , dropDownState = emptyDropDownState
-    }
-
-
-
--- , stringColumn "Report Date" (\t -> defaultDate t.reportDate)
-
-
-type alias Filters =
-    { date : String
-    , dateAccessioned : String
-    , provider : String
-    , specialty : String
-    , comments : String
-    , title : String
-    , recordingDate : String
-    , recording : String
-    , taskTitle : String
-    , enrollment : String
-    , hasVerbalConsent : String
-    , staffName : String
-    , fileName : String
-    , reportDate : String
-    }
-
-
-emptyFilters : Filters
-emptyFilters =
-    { date = ""
-    , dateAccessioned = ""
-    , provider = ""
-    , specialty = ""
-    , comments = ""
-    , title = ""
-    , recordingDate = ""
-    , recording = ""
-    , taskTitle = ""
-    , enrollment = ""
-    , hasVerbalConsent = ""
-    , staffName = ""
-    , fileName = ""
-    , reportDate = ""
     }
 
 
@@ -187,12 +142,6 @@ type alias NewRecord =
     , userText : String
     , taskId : Maybe Int
     , taskText : String
-    }
-
-
-type alias FilterField =
-    { fieldName : String
-    , fieldText : String
     }
 
 
