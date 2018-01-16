@@ -155,7 +155,6 @@ view model =
     div [ id "demographicInformationForm", class "col-xs-12 padding-h-0" ]
         [ h4 [ class "col-xs-12 padding-h-0" ] [ text "Assigned To" ]
         , div [ class "col-xs-12 padding-h-0 padding-bottom-10", id "ErrorDiv" ]
-            -- TODO
             [ viewValidationErrors model
             ]
         , div rowStyle

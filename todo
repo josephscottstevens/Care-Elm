@@ -13,24 +13,18 @@ REQUESTED TODO:
 	put edit mode inside of grid  (but.. how?)
 	
 ===========================================================================================================
-suffixDropdown's min width is too small
-	re-think dropdown min-width
-test save
+has changes js error when click on checkbox in contacts
 test Contact Hours still works (load and save)
 fix save button being in the middle of the form
 oh crap... test new patient as well
+can I get a non-global copy of vmDemographics? (think I am currently killing contacts page)
+look for TODO, clean up	
 
 convert over other dropdowns ? performance is like.... 1600ms to 80
-do I still need the weird refresh page?
-
-can I get a non-global copy of vmDemographics? (think I am currently killing contacts page)
-
-delete the uh.... phone hours if it is invalid vefore save?
-look for TODO, clean up	
-re-add missing dropdown css (scrollbar)
 server call is happening twice (contacts is still calling it) (send it json value)
-
 PreferredLanguageIndex does nothing
+suffixDropdown's min width is too small
+	re-think dropdown min-width
 
 -----------------------------------------------------------------
 don't show highlight for keyboard when mouse is selecting (or vice versa)
