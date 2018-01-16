@@ -111,10 +111,6 @@ update msg model =
                 , recordTypes = t.recordTypes
                 , tasks = t.tasks
                 , users = t.users
-                , tableState =
-                    { rows = List.map (getRow model.recordTypeId) t.records
-                    , selectedId = Nothing
-                    }
             }
                 ! [ setLoadingStatus False ]
 
@@ -239,18 +235,22 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    case model.state of
-        Grid ->
-            Table.view model.tableState gridConfig Nothing
+    let
+        rows =
+            List.map (getRow model.recordTypeId) model.records
+    in
+        case model.state of
+            Grid ->
+                Table.view model.tableState rows gridConfig Nothing
 
-        AddNew newRecord ->
-            Table.view model.tableState gridConfig (Just <| viewNewRecord newRecord)
+            AddNew newRecord ->
+                Table.view model.tableState rows gridConfig (Just <| viewNewRecord newRecord)
 
-        Limbo ->
-            div [] []
+            Limbo ->
+                div [] []
 
-        Error errMessage ->
-            div [] [ text errMessage ]
+            Error errMessage ->
+                div [] [ text errMessage ]
 
 
 viewNewRecord : NewRecord -> Html Msg

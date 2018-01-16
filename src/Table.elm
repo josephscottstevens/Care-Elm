@@ -8,16 +8,18 @@ import Html.Events as Events
 -- Data Types
 
 
-type alias State msg =
-    { rows : List (Row msg)
-    , selectedId : Maybe Int
+type alias State =
+    { selectedId : Maybe Int
+    , isReversed : Bool
+    , reversedId : Maybe Int
     }
 
 
-init : State msg
+init : State
 init =
-    { rows = []
-    , selectedId = Nothing
+    { selectedId = Nothing
+    , isReversed = False
+    , reversedId = Nothing
     }
 
 
@@ -29,7 +31,6 @@ type alias Row msg =
 
 type alias Column msg =
     { name : String
-    , isReversed : Bool
     , node : Html msg
     }
 
@@ -38,14 +39,13 @@ type alias Config msg =
     { domTableId : String
     , headers : List String
     , toolbar : List ( String, msg )
-    , toMsg : State msg -> msg
+    , toMsg : State -> msg
     }
 
 
 stringColumn : String -> String -> Column msg
 stringColumn name data =
     { name = name
-    , isReversed = False
     , node = text data
     }
 
@@ -53,7 +53,6 @@ stringColumn name data =
 dropdownColumn : Bool -> Html.Attribute msg -> List ( String, String, Html.Attribute msg ) -> Column msg
 dropdownColumn isVisible event dropDownItems =
     { name = "dropdownColumn"
-    , isReversed = False
     , node = rowDropDownDiv isVisible event dropDownItems
     }
 
@@ -61,7 +60,6 @@ dropdownColumn isVisible event dropDownItems =
 customColumn : String -> Html msg -> Column msg
 customColumn name toNode =
     { name = name
-    , isReversed = False
     , node = toNode
     }
 
@@ -70,21 +68,21 @@ customColumn name toNode =
 -- VIEW
 
 
-view : State msg -> Config msg -> Maybe (Html msg) -> Html msg
-view state config maybeCustomRow =
+view : State -> List (Row msg) -> Config msg -> Maybe (Html msg) -> Html msg
+view state rows config maybeCustomRow =
     div [ class "e-grid e-js e-waitingpopup" ]
         [ viewToolbar config.toolbar
         , table [ id config.domTableId, style [ ( "width", "100%" ) ] ]
             [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
                 (List.map viewTh config.headers)
             , tbody []
-                (viewTr state config maybeCustomRow)
+                (viewTr state rows config maybeCustomRow)
             ]
         ]
 
 
-viewTr : State msg -> Config msg -> Maybe (Html msg) -> List (Html msg)
-viewTr state config maybeCustomRow =
+viewTr : State -> List (Row msg) -> Config msg -> Maybe (Html msg) -> List (Html msg)
+viewTr state rows config maybeCustomRow =
     let
         selectedStyle row =
             style
@@ -114,10 +112,10 @@ viewTr state config maybeCustomRow =
                         ]
                     ]
                 )
-                    :: List.map standardTr state.rows
+                    :: List.map standardTr rows
 
             Nothing ->
-                List.map standardTr state.rows
+                List.map standardTr rows
 
 
 
