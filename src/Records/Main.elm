@@ -103,7 +103,20 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Load (Ok t) ->
-            getLoadedState model t ! [ setLoadingStatus False ]
+            { model
+                | state = Grid
+                , facilityId = t.facilityId
+                , records = t.records
+                , facilities = t.facilities
+                , recordTypes = t.recordTypes
+                , tasks = t.tasks
+                , users = t.users
+                , tableState =
+                    { rows = List.map (getRow model.recordTypeId) t.records
+                    , selectedId = Nothing
+                    }
+            }
+                ! [ setLoadingStatus False ]
 
         Load (Err httpError) ->
             { model | state = Error (toString httpError) } ! [ setLoadingStatus False ]
@@ -228,10 +241,10 @@ view : Model -> Html Msg
 view model =
     case model.state of
         Grid ->
-            Table.view (List.map (getRow model.recordTypeId) model.records) gridConfig Nothing
+            Table.view model.tableState gridConfig Nothing
 
         AddNew newRecord ->
-            Table.view (List.map (getRow newRecord.recordTypeId) model.records) gridConfig (Just ( 83, viewNewRecord newRecord ))
+            Table.view model.tableState gridConfig (Just <| viewNewRecord newRecord)
 
         Limbo ->
             div [] []
@@ -362,6 +375,7 @@ gridConfig =
         , ""
         ]
     , toolbar = [ ( "e-addnew", AddNewStart ) ]
+    , toMsg = SetTableState
     }
 
 

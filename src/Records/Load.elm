@@ -200,16 +200,3 @@ getNewRecord model =
 getSyncFusionMessage : Model -> Bool -> SyncFusionMessage
 getSyncFusionMessage model setFocus =
     SyncFusionMessage model.facilities model.recordTypes model.users model.tasks model.facilityId model.recordTypeId setFocus
-
-
-getLoadedState : Model -> WebResponse -> Model
-getLoadedState model t =
-    { model
-        | state = Grid
-        , facilityId = t.facilityId
-        , records = t.records
-        , facilities = t.facilities
-        , recordTypes = t.recordTypes
-        , tasks = t.tasks
-        , users = t.users
-    }

@@ -8,16 +8,23 @@ import Html.Events as Events
 -- Data Types
 
 
+type alias State msg =
+    { rows : List (Row msg)
+    , selectedId : Maybe Int
+    }
+
+
+init : State msg
+init =
+    { rows = []
+    , selectedId = Nothing
+    }
+
+
 type alias Row msg =
     { columns : List (Column msg)
     , rowId : Int
     }
-
-
-
--- type AltRow msg
---     = StandardRow List (Column msg)
---     | CustomRow (Column msg)
 
 
 type alias Column msg =
@@ -31,6 +38,7 @@ type alias Config msg =
     { domTableId : String
     , headers : List String
     , toolbar : List ( String, msg )
+    , toMsg : State msg -> msg
     }
 
 
@@ -62,24 +70,34 @@ customColumn name toNode =
 -- VIEW
 
 
-view : List (Row msg) -> Config msg -> Maybe ( Int, Html msg ) -> Html msg
-view rows config maybeCustomRow =
+view : State msg -> Config msg -> Maybe (Html msg) -> Html msg
+view state config maybeCustomRow =
     div [ class "e-grid e-js e-waitingpopup" ]
         [ viewToolbar config.toolbar
         , table [ id config.domTableId, style [ ( "width", "100%" ) ] ]
             [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
                 (List.map viewTh config.headers)
             , tbody []
-                (List.map (viewTr maybeCustomRow) rows)
+                (viewTr state config maybeCustomRow)
             ]
         ]
 
 
-viewTr : Maybe ( Int, Html msg ) -> Row msg -> Html msg
-viewTr maybeCustomRow row =
+viewTr : State msg -> Config msg -> Maybe (Html msg) -> List (Html msg)
+viewTr state config maybeCustomRow =
     let
-        standardTr =
-            tr [] (List.map viewTd row.columns)
+        selectedStyle row =
+            style
+                (if Just row.rowId == state.selectedId then
+                    [ ( "background-color", "#66aaff" )
+                    , ( "background", "#66aaff" )
+                    ]
+                 else
+                    [ ( "", "" ) ]
+                )
+
+        standardTr row =
+            tr [ selectedStyle row ] (List.map viewTd row.columns)
 
         inlineStyle =
             style
@@ -89,18 +107,35 @@ viewTr maybeCustomRow row =
                 ]
     in
         case maybeCustomRow of
-            Just ( rowId, customRow ) ->
-                if rowId == row.rowId then
-                    tr []
-                        [ td [ colspan 4, inlineStyle ]
-                            [ customRow
-                            ]
+            Just customRow ->
+                (tr []
+                    [ td [ colspan 4, inlineStyle ]
+                        [ customRow
                         ]
-                else
-                    standardTr
+                    ]
+                )
+                    :: List.map standardTr state.rows
 
             Nothing ->
-                standardTr
+                List.map standardTr state.rows
+
+
+
+-- case maybeCustomRow of
+--     Just ( maybeRowId, customRow ) ->
+--         case rowId of
+--             Just rowId ->
+--                 if rowId == row.rowId then
+--                     tr []
+--                         [ td [ colspan 4, inlineStyle ]
+--                             [ customRow
+--                             ]
+--                         ]
+--             Nothing ->
+--         else
+--             standardTr
+--     Nothing ->
+--         standardTr
 
 
 viewTh : String -> Html msg
