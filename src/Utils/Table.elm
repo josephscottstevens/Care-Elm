@@ -143,6 +143,8 @@ You provide the following information in your table configuration:
 
 [keyed]: http://package.elm-lang.org/packages/elm-lang/html/latest/Html-Keyed
 [examples]: https://github.com/evancz/elm-sortable-table/tree/master/examples
+[??]: ?? "??"
+[??]: ?? "??"
 
 -}
 config :

@@ -446,7 +446,10 @@ config recordTypeId taskId =
         , toMsg = SetTableState
         , columns = getColumns recordTypeId taskId .id
         , customizations =
-            { defaultCustomizations | tableAttrs = standardTableAttrs "RecordTable", thead = standardThead }
+            { defaultCustomizations
+                | tableAttrs = standardTableAttrs "RecordTable"
+                , thead = standardThead
+            }
         }
 
 
