@@ -30,8 +30,8 @@ type alias DropState =
     }
 
 
-init : String -> Maybe Int -> DropState
-init domId selectedId =
+init : String -> DropState
+init domId =
     { isOpen = False
     , mouseSelectedId = Nothing
     , keyboardSelectedId = Nothing

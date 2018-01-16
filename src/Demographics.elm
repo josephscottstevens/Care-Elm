@@ -75,8 +75,11 @@ type alias Model =
     , patientLanguagesMap : List PatientLanguagesMap
     , contactHoursModel : Maybe Decode.Value
     , showValidationErrors : Bool
-    , nodeCounter : Int
     , languageDropdown : List DropdownItem
+    , suffixId : Maybe Int
+    , suffixDropdown : List DropdownItem
+    , suffixDropState : Dropdown.DropState
+    , nodeCounter : Int
     }
 
 
@@ -87,7 +90,6 @@ type alias SfData =
     , prefixId : Maybe Int
     , sexTypeId : Maybe Int
     , sexualOrientationId : Maybe Int
-    , suffixId : Maybe Int
     , genderIdentityId : Maybe Int
     , raceId : Maybe Int
     , ethnicityId : Maybe Int
@@ -101,7 +103,6 @@ type alias SfData =
     , facilityDropdown : List DropdownItem
     , mainProviderDropdown : List DropdownItem
     , raceDropdown : List DropdownItem
-    , suffixDropdown : List DropdownItem
     , prefixDropdown : List DropdownItem
     , uSVeteranDropdown : List DropdownItem
     , religionDropdown : List DropdownItem
@@ -173,7 +174,9 @@ view model =
             , nonumberbox "First Name" True model.firstName UpdateFirstName
             , nonumberbox "Middle Name" False model.middle UpdateMiddle
             , nonumberbox "Last Name" True model.lastName UpdateLastName
-            , sfbox "Suffix" False
+            , dropbox "Suffix" False <|
+                Html.map UpdateSuffix <|
+                    Dropdown.view model.suffixDropState model.suffixDropdown model.suffixId
             , textbox "Nickname" False model.nickName UpdateNickname
             , sfbox "Date of Birth" True
             , textbox "Birth Place" False model.birthPlace UpdateBirthPlace
@@ -376,7 +379,7 @@ type Msg
     | UpdateSexualOrientationNote String
     | UpdateGenderIdentityNote String
     | UpdateEmail String
-      --
+    | UpdateSuffix Dropdown.Msg
     | InputChanged PatientPhoneNumber (Maybe Int)
     | InputStateChanged PatientPhoneNumber MaskedNumber.State
 
@@ -693,6 +696,13 @@ update msg model =
         UpdateEmail str ->
             { model | email = Just str } ! []
 
+        UpdateSuffix dropdownMsg ->
+            let
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg model.suffixDropState model.suffixId model.suffixDropdown
+            in
+                { model | suffixDropState = newDropState, suffixId = newId } ! [ newMsg ]
+
 
 
 -- HELPER Functions
@@ -816,6 +826,12 @@ nonumberbox displayText isRequired maybeStr event =
         input [ type_ "text", idAttr displayText, maybeValue maybeStr, noNumbers, class "e-textbox", onInput event ] []
 
 
+dropbox : String -> Bool -> Html msg -> Html msg
+dropbox displayText isRequired t =
+    commonStructure displayText isRequired <|
+        t
+
+
 sfbox : String -> Bool -> Html msg
 sfbox displayText isRequired =
     commonStructure displayText isRequired <|
@@ -933,8 +949,11 @@ emptyModel patientId =
     , preferredPhoneIndex = 0
     , contactHoursModel = Nothing
     , showValidationErrors = False
-    , nodeCounter = 0
     , languageDropdown = []
+    , suffixId = Nothing
+    , suffixDropdown = []
+    , suffixDropState = Dropdown.init "suffixDropdown"
+    , nodeCounter = 0
     }
 
 
@@ -946,7 +965,6 @@ emptySfData =
     , prefixId = Nothing
     , sexTypeId = Nothing
     , sexualOrientationId = Nothing
-    , suffixId = Nothing
     , genderIdentityId = Nothing
     , raceId = Nothing
     , ethnicityId = Nothing
@@ -960,7 +978,6 @@ emptySfData =
     , facilityDropdown = []
     , mainProviderDropdown = []
     , raceDropdown = []
-    , suffixDropdown = []
     , prefixDropdown = []
     , uSVeteranDropdown = []
     , religionDropdown = []
@@ -975,7 +992,7 @@ emptyPatientLanguagesMap nodeCounter isPreferred =
     { id = Nothing
     , languageId = Nothing
     , isPreferred = isPreferred
-    , dropState = Dropdown.init "languageDropdown" Nothing
+    , dropState = Dropdown.init "languageDropdown"
     , nodeId = nodeCounter
     }
 
@@ -987,7 +1004,7 @@ emptyPatientPhoneNumber nodeCounter isPreferred =
     , phoneNumberTypeId = Nothing
     , isPreferred = isPreferred
     , maskState = MaskedNumber.initialState
-    , dropState = Dropdown.init "phoneDropdown" Nothing
+    , dropState = Dropdown.init "phoneDropdown"
     , nodeId = nodeCounter
     }
 
@@ -1002,7 +1019,7 @@ emptyPatientAddress nodeCounter isPreferred =
     , stateId = Nothing
     , zipCode = Nothing
     , isPreferred = isPreferred
-    , dropState = Dropdown.init "stateDropdown" Nothing
+    , dropState = Dropdown.init "stateDropdown"
     , nodeId = nodeCounter
     }
 
@@ -1034,6 +1051,8 @@ updateModelFromServerMessage { d, c, h } model =
         , preferredPhoneIndex = c.preferredPhoneIndex
         , contactHoursModel = Just h
         , languageDropdown = d.languageDropdown
+        , suffixId = d.suffixId
+        , suffixDropdown = d.suffixDropdown
     }
 
 
@@ -1060,6 +1079,8 @@ type alias DemographicsInformationModel =
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
     , languageDropdown : List DropdownItem
+    , suffixId : Maybe Int
+    , suffixDropdown : List DropdownItem
     }
 
 
@@ -1109,6 +1130,8 @@ decodeDemographicsInformationModel =
         |> Pipeline.custom decodeSfData
         |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
         |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "SuffixId" (Decode.maybe Decode.int)
+        |> Pipeline.required "SuffixDropdown" (Decode.list decodeDropdownItem)
 
 
 decodeContactInformationModel : Decode.Decoder ContactInformationModel
@@ -1128,7 +1151,7 @@ decodePatientLanguagesMap =
         |> Pipeline.required "Id" (Decode.maybe Decode.int)
         |> Pipeline.required "LanguageId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
-        |> Pipeline.required "LanguageId" toDropdown
+        |> Pipeline.hardcoded (Dropdown.init "languageDropdown")
         |> Pipeline.hardcoded 0
 
 
@@ -1140,7 +1163,7 @@ decodePatientPhoneNumber =
         |> Pipeline.required "PhoneNumberTypeId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
         |> Pipeline.hardcoded MaskedNumber.initialState
-        |> Pipeline.required "PhoneNumberTypeId" toDropdown
+        |> Pipeline.hardcoded (Dropdown.init "phoneTypeDropdown")
         |> Pipeline.hardcoded 0
 
 
@@ -1155,18 +1178,8 @@ decodePatientAddress =
         |> Pipeline.required "StateId" (Decode.maybe Decode.int)
         |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
         |> Pipeline.required "IsPrimary" Decode.bool
-        |> Pipeline.required "StateId" toDropdown
+        |> Pipeline.hardcoded (Dropdown.init "stateDropdown")
         |> Pipeline.hardcoded 0
-
-
-toDropdown : Decode.Decoder Dropdown.DropState
-toDropdown =
-    let
-        convert : Int -> Decode.Decoder Dropdown.DropState
-        convert raw =
-            Decode.succeed (Dropdown.init "stateDropdown" (Just raw))
-    in
-        Decode.int |> Decode.andThen convert
 
 
 decodeSfData : Decode.Decoder SfData
@@ -1178,7 +1191,6 @@ decodeSfData =
         |> Pipeline.required "PrefixId" (Decode.maybe Decode.int)
         |> Pipeline.required "SexTypeId" (Decode.maybe Decode.int)
         |> Pipeline.required "SexualOrientationId" (Decode.maybe Decode.int)
-        |> Pipeline.required "SuffixId" (Decode.maybe Decode.int)
         |> Pipeline.required "GenderIdentityId" (Decode.maybe Decode.int)
         |> Pipeline.required "RaceId" (Decode.maybe Decode.int)
         |> Pipeline.required "EthnicityId" (Decode.maybe Decode.int)
@@ -1192,7 +1204,6 @@ decodeSfData =
         |> Pipeline.required "FacilityDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "MainProviderDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "RaceDropdown" (Decode.list decodeDropdownItem)
-        |> Pipeline.required "SuffixDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "PrefixDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "USVeteranDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "ReligionDropdown" (Decode.list decodeDropdownItem)
@@ -1242,7 +1253,7 @@ encodeDemographicsInformationModel model =
         , ( "PrefixId", (maybeVal Encode.int) model.sfData.prefixId )
         , ( "SexTypeId", (maybeVal Encode.int) model.sfData.sexTypeId )
         , ( "SexualOrientationId", (maybeVal Encode.int) model.sfData.sexualOrientationId )
-        , ( "SuffixId", (maybeVal Encode.int) model.sfData.suffixId )
+        , ( "SuffixId", (maybeVal Encode.int) model.suffixId )
         , ( "GenderIdentityId", (maybeVal Encode.int) model.sfData.genderIdentityId )
         , ( "RaceId", (maybeVal Encode.int) model.sfData.raceId )
         , ( "EthnicityId", (maybeVal Encode.int) model.sfData.ethnicityId )
