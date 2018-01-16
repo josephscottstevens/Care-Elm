@@ -1,7 +1,7 @@
 module Table exposing (..)
 
 import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span)
-import Html.Attributes exposing (class, id, style, type_, target, colspan)
+import Html.Attributes exposing (class, id, style, type_, target, colspan, classList)
 import Html.Events as Events
 
 
@@ -13,6 +13,7 @@ type alias State =
     , isReversed : Bool
     , sortedColumnName : String
     , openDropdownId : Maybe Int
+    , rowHoverId : Maybe Int
     }
 
 
@@ -22,6 +23,7 @@ init sortedColumnName =
     , isReversed = False
     , sortedColumnName = sortedColumnName
     , openDropdownId = Nothing
+    , rowHoverId = Nothing
     }
 
 
@@ -52,17 +54,25 @@ view : State -> List (Row msg) -> Config msg -> Maybe (Html msg) -> Html msg
 view state rows config maybeCustomRow =
     div [ class "e-grid e-js e-waitingpopup" ]
         [ viewToolbar config.toolbar
-        , table [ id config.domTableId, style [ ( "width", "100%" ) ] ]
-            [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                (case List.head rows of
-                    Just firstRow ->
-                        List.map (viewTh state config) firstRow.columns
+        , div [ class "e-gridheader e-textover e-hidelines" ]
+            [ table [ id config.domTableId, class "e-table" ]
+                [ thead []
+                    [ tr [ class "e-columnheader" ]
+                        (case List.head rows of
+                            Just firstRow ->
+                                List.map (viewTh state config) firstRow.columns
 
-                    Nothing ->
-                        List.map (viewSimpleTh emptyAttr False) config.headers
-                )
-            , tbody []
-                (viewTr state rows config maybeCustomRow)
+                            Nothing ->
+                                List.map (viewSimpleTh emptyAttr False) config.headers
+                        )
+                    ]
+                , tbody [ class "e-hide" ] []
+                ]
+            ]
+        , div [ class "e-gridcontent e-hidelines" ]
+            [ table [ class "e-table" ]
+                [ tbody [] (viewTr state rows config maybeCustomRow)
+                ]
             ]
         , pagingView 0 (List.length rows)
         ]
@@ -81,8 +91,27 @@ viewTr state rows config maybeCustomRow =
                     [ ( "", "" ) ]
                 )
 
-        standardTr row =
-            tr [ selectedStyle row ] (List.map (viewTd state row config) row.columns)
+        rowClass row ctr =
+            classList
+                [ ( "e-row", ctr % 2 == 0 )
+                , ( "e-alt_row", ctr % 2 == 1 )
+                , ( "e-hover", Just row.rowId == state.rowHoverId )
+                ]
+
+        hoverEvent row =
+            Events.onMouseEnter (config.toMsg { state | rowHoverId = Just row.rowId })
+
+        leaveEvent row =
+            Events.onMouseLeave (config.toMsg { state | rowHoverId = Nothing })
+
+        standardTr ctr row =
+            tr
+                [ rowClass row ctr
+                , selectedStyle row
+                , hoverEvent row
+                , leaveEvent row
+                ]
+                (List.map (viewTd state row config) row.columns)
 
         inlineStyle =
             style
@@ -99,10 +128,10 @@ viewTr state rows config maybeCustomRow =
                         ]
                     ]
                 )
-                    :: List.map standardTr rows
+                    :: List.indexedMap standardTr rows
 
             Nothing ->
-                List.map standardTr rows
+                List.indexedMap standardTr rows
 
 
 emptyAttr : Attribute msg
@@ -136,14 +165,14 @@ viewSimpleTh attr isReversed name =
             else
                 [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
     in
-        th [ class ("e-columnheader e-default e-filterbarcell " ++ name), attr ]
-            [ div [ class "e-headercelldiv e-gridtooltip headerColumn" ] headerContent
+        th [ class ("e-headercell e-default " ++ name), attr ]
+            [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
             ]
 
 
 viewTd : State -> Row msg -> Config msg -> Column msg -> Html msg
 viewTd state row config column =
-    td []
+    td [ class "e-rowcell e-gridtooltip" ]
         [ case column of
             StringColumn name data ->
                 text data
