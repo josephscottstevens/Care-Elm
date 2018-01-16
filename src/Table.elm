@@ -54,7 +54,13 @@ view state rows config maybeCustomRow =
         [ viewToolbar config.toolbar
         , table [ id config.domTableId, style [ ( "width", "100%" ) ] ]
             [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                (List.map viewTh config.headers)
+                (case List.head rows of
+                    Just firstRow ->
+                        List.map (viewTh state config) firstRow.columns
+
+                    Nothing ->
+                        List.map (viewSimpleTh emptyAttr False) config.headers
+                )
             , tbody []
                 (viewTr state rows config maybeCustomRow)
             ]
@@ -99,11 +105,40 @@ viewTr state rows config maybeCustomRow =
                 List.map standardTr rows
 
 
-viewTh : String -> Html msg
-viewTh name =
-    th [ class ("e-columnheader e-default e-filterbarcell " ++ name) ]
-        [ div [ class "e-headercelldiv e-gridtooltip headerColumn" ] [ text name ]
-        ]
+emptyAttr : Attribute msg
+emptyAttr =
+    class ""
+
+
+viewTh : State -> Config msg -> Column msg -> Html msg
+viewTh state config column =
+    case column of
+        StringColumn name data ->
+            let
+                thClick =
+                    Events.onClick (config.toMsg { state | sortedColumnName = name, isReversed = not state.isReversed })
+
+                isReversed =
+                    state.sortedColumnName == name
+            in
+                viewSimpleTh thClick isReversed name
+
+        DropdownColumn _ ->
+            viewSimpleTh emptyAttr False "dropdown"
+
+
+viewSimpleTh : Attribute msg -> Bool -> String -> Html msg
+viewSimpleTh attr isReversed name =
+    let
+        headerContent =
+            if isReversed then
+                [ text name, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
+            else
+                [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
+    in
+        th [ class ("e-columnheader e-default e-filterbarcell " ++ name), attr ]
+            [ div [ class "e-headercelldiv e-gridtooltip headerColumn" ] headerContent
+            ]
 
 
 viewTd : State -> Row msg -> Config msg -> Column msg -> Html msg
