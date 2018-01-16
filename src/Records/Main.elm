@@ -224,25 +224,14 @@ update msg model =
             { model | state = AddNew { newRecord | taskId = dropdownItem.id, taskText = dropdownItem.name } } ! [ setUnsavedChanges True ]
 
 
-toolbar : Html Msg
-toolbar =
-    div [ class "e-gridtoolbar e-toolbar e-js e-widget e-box e-toolbarspan e-tooltip" ]
-        [ ul [ class "e-ul e-horizontal" ]
-            [ li [ class "e-tooltxt" ]
-                [ a [ class "e-addnewitem e-toolbaricons e-icon e-addnew", onClick AddNewStart, style [ ( "cursor", "pointer" ) ] ] []
-                ]
-            ]
-        ]
-
-
 view : Model -> Html Msg
 view model =
     case model.state of
         Grid ->
-            Table.view (List.map getRow model.records) gridConfig (Just ( 83, text "heyyyoooo" ))
+            Table.view (List.map (getRow model.recordTypeId) model.records) gridConfig Nothing
 
         AddNew newRecord ->
-            Table.view (List.map getRow model.records) gridConfig (Just ( 83, viewNewRecord newRecord ))
+            Table.view (List.map (getRow newRecord.recordTypeId) model.records) gridConfig (Just ( 83, viewNewRecord newRecord ))
 
         Limbo ->
             div [] []
@@ -370,20 +359,38 @@ gridConfig =
         , "Doctor of Visit"
         , "Specialty"
         , "Comments"
+        , ""
         ]
     , toolbar = [ ( "e-addnew", AddNewStart ) ]
     }
 
 
-getRow : RecordRow -> Row Msg
-getRow t =
+getRow : Maybe Int -> RecordRow -> Row Msg
+getRow recordTypeId t =
     Row
         [ stringColumn "Date Collected" (defaultDateTime t.date)
         , stringColumn "Doctor of Visit" (defaultString t.provider)
         , stringColumn "Specialty" (defaultString t.specialty)
         , stringColumn "Comments" (defaultString t.comments)
+        , dropdownColumn t.dropDownOpen (onClick (DropDownToggle t.id)) (dropdownItems recordTypeId t.id)
         ]
         t.id
+
+
+dropdownItems : Maybe Int -> Int -> List ( String, String, Html.Attribute Msg )
+dropdownItems recordTypeId rowId =
+    case getRecordType recordTypeId of
+        CallRecordings ->
+            [ ( "e-edit", "Mark As Consent", onClick (SendMenuMessage rowId "MarkAsConsent") ) ]
+
+        _ ->
+            [ ( "e-sync", "Transfer", onClick (SendMenuMessage rowId "Transfer") )
+            , ( "e-download", "View File", onClick (SendMenuMessage rowId "ViewFile") )
+            , ( "e-mail", "Send By Email", onClick (SendMenuMessage rowId "SendByEmail") )
+            , ( "e-print_01", "Send By Fax", onClick (SendMenuMessage rowId "SendByFax") )
+            , ( "e-save", "Save To Client Portal", onClick (SendMenuMessage rowId "SaveToClientPortal") )
+            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "Delete") )
+            ]
 
 
 
@@ -464,19 +471,3 @@ getRow t =
 --                 , thead = standardThead
 --             }
 --         }
-
-
-dropdownItems : Maybe Int -> Int -> List ( String, String, Html.Attribute Msg )
-dropdownItems recordTypeId rowId =
-    case getRecordType recordTypeId of
-        CallRecordings ->
-            [ ( "e-edit", "Mark As Consent", onClick (SendMenuMessage rowId "MarkAsConsent") ) ]
-
-        _ ->
-            [ ( "e-sync", "Transfer", onClick (SendMenuMessage rowId "Transfer") )
-            , ( "e-download", "View File", onClick (SendMenuMessage rowId "ViewFile") )
-            , ( "e-mail", "Send By Email", onClick (SendMenuMessage rowId "SendByEmail") )
-            , ( "e-print_01", "Send By Fax", onClick (SendMenuMessage rowId "SendByFax") )
-            , ( "e-save", "Save To Client Portal", onClick (SendMenuMessage rowId "SaveToClientPortal") )
-            , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId "Delete") )
-            ]

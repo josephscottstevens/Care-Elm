@@ -42,6 +42,14 @@ stringColumn name data =
     }
 
 
+dropdownColumn : Bool -> Html.Attribute msg -> List ( String, String, Html.Attribute msg ) -> Column msg
+dropdownColumn isVisible event dropDownItems =
+    { name = "dropdownColumn"
+    , isReversed = False
+    , node = rowDropDownDiv isVisible event dropDownItems
+    }
+
+
 customColumn : String -> Html msg -> Column msg
 customColumn name toNode =
     { name = name
