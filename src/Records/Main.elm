@@ -266,15 +266,9 @@ viewNewRecord newRecord =
                     ]
                 ]
             ]
-
-        headerStyle =
-            style
-                [ ( "background-color", "white" )
-                , ( "", "" )
-                ]
     in
         div
-            [ class "form-horizontal", headerStyle ]
+            [ class "form-horizontal" ]
             (validationErrorsDiv :: inputControls ++ footerControls)
 
 

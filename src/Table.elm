@@ -1,7 +1,7 @@
 module Table exposing (..)
 
 import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span)
-import Html.Attributes exposing (class, id, style, type_, target)
+import Html.Attributes exposing (class, id, style, type_, target, colspan)
 import Html.Events as Events
 
 
@@ -78,18 +78,29 @@ view rows config maybeCustomRow =
 viewTr : Maybe ( Int, Html msg ) -> Row msg -> Html msg
 viewTr maybeCustomRow row =
     let
-        defaultRow =
+        standardTr =
             tr [] (List.map viewTd row.columns)
+
+        inlineStyle =
+            style
+                [ ( "background-color", "white" )
+                , ( "padding-top", "5px" )
+                , ( "margin-left", "5px" )
+                ]
     in
         case maybeCustomRow of
             Just ( rowId, customRow ) ->
                 if rowId == row.rowId then
-                    tr [] [ customRow ]
+                    tr []
+                        [ td [ colspan 4, inlineStyle ]
+                            [ customRow
+                            ]
+                        ]
                 else
-                    defaultRow
+                    standardTr
 
             Nothing ->
-                defaultRow
+                standardTr
 
 
 viewTh : String -> Html msg
