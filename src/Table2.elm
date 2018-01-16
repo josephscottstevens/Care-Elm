@@ -35,8 +35,10 @@ import Json.Decode as Json
 -- STATE
 
 
-type State
-    = State String Bool
+type alias State =
+    { columnName : String
+    , isReversed : Bool
+    }
 
 
 initialSort : String -> State
@@ -281,25 +283,25 @@ view (Config { toId, toMsg, columns, customizations }) state data =
 
 
 toHeaderInfo : State -> (State -> msg) -> ColumnData data msg -> ( String, Status, Attribute msg )
-toHeaderInfo (State sortName isReversed) toMsg { name, sorter } =
+toHeaderInfo { columnName, isReversed } toMsg { name, sorter } =
     case sorter of
         None ->
-            ( name, Unsortable, onClick sortName isReversed toMsg )
+            ( name, Unsortable, onClick columnName isReversed toMsg )
 
         Increasing _ ->
-            ( name, Sortable (name == sortName), onClick name False toMsg )
+            ( name, Sortable (name == columnName), onClick name False toMsg )
 
         Decreasing _ ->
-            ( name, Sortable (name == sortName), onClick name False toMsg )
+            ( name, Sortable (name == columnName), onClick name False toMsg )
 
         IncOrDec _ ->
-            if name == sortName then
+            if name == columnName then
                 ( name, Reversible (Just isReversed), onClick name (not isReversed) toMsg )
             else
                 ( name, Reversible Nothing, onClick name False toMsg )
 
         DecOrInc _ ->
-            if name == sortName then
+            if name == columnName then
                 ( name, Reversible (Just isReversed), onClick name (not isReversed) toMsg )
             else
                 ( name, Reversible Nothing, onClick name False toMsg )
@@ -338,13 +340,13 @@ viewCell data { viewData } =
 
 
 sort : State -> List (ColumnData data msg) -> List data -> List data
-sort (State selectedColumn isReversed) columnData data =
-    case findSorter selectedColumn columnData of
+sort state columnData data =
+    case findSorter state.columnName columnData of
         Nothing ->
             data
 
         Just sorter ->
-            applySorter isReversed sorter data
+            applySorter state.isReversed sorter data
 
 
 applySorter : Bool -> Sorter data -> List data -> List data
