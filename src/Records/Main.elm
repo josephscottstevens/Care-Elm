@@ -241,7 +241,7 @@ view model =
         Grid ->
             div [ class "e-grid e-js e-waitingpopup" ]
                 [ toolbar
-                , Table.view (List.map getRow model.records) gridConfig
+                , Table.view (List.map getRow model.records) gridConfig (Just ( 1, text "heyyyooooo" ))
                 ]
 
         AddNew newRecord ->

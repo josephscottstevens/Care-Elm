@@ -53,8 +53,8 @@ customColumn name toNode =
 -- VIEW
 
 
-view : List (Row msg) -> Config -> Html msg
-view rows config =
+view : List (Row msg) -> Config -> Maybe ( Int, Html msg2 ) -> Html msg
+view rows config maybeCustomRow =
     table [ id config.domTableId, style [ ( "width", "100%" ) ] ]
         [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
             (List.map viewTh config.headers)
