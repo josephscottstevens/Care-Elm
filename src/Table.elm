@@ -28,9 +28,9 @@ init sortedColumnName =
 
 
 type Column data msg
-    = StringColumn String ({ data | id : Int } -> String) (Sorter data)
-    | NullableStringColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
-    | NullableDateTimeColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
+    = StringColumn String ({ data | id : Int } -> String) (Sorter { data | id : Int })
+    | NullableStringColumn String ({ data | id : Int } -> Maybe String) (Sorter { data | id : Int })
+    | NullableDateTimeColumn String ({ data | id : Int } -> Maybe String) (Sorter { data | id : Int })
     | DropdownColumn (List ( String, String, Html.Attribute msg ))
 
 
@@ -39,13 +39,13 @@ type alias Config data msg =
     , headers : List String
     , toolbar : List ( String, msg )
     , toMsg : State -> msg
-    , columns : List (Column data msg)
+    , columns : List (Column { data | id : Int } msg)
     }
 
 
 type Sorter data
     = None
-    | IncOrDec (List data -> List data)
+    | IncOrDec (List { data | id : Int } -> List { data | id : Int })
 
 
 
@@ -56,6 +56,7 @@ view : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Ma
 view state rows config maybeCustomRow =
     let
         sortedRows =
+            --sort config.columns rows
             rows
     in
         div [ class "e-grid e-js e-waitingpopup" ]
@@ -140,7 +141,7 @@ emptyAttr =
     class ""
 
 
-viewTh : State -> Config data msg -> String -> Html msg
+viewTh : State -> Config { data | id : Int } msg -> String -> Html msg
 viewTh state config name =
     let
         headerContent =
@@ -160,7 +161,7 @@ viewTh state config name =
             ]
 
 
-viewTd : State -> { data | id : Int } -> Config data msg -> Column data msg -> Html msg
+viewTd : State -> { data | id : Int } -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
 viewTd state row config column =
     let
         tdClass =
@@ -390,7 +391,7 @@ pagingView currentPage totalVisiblePages =
 --             Nothing
 
 
-sort : State -> List (Column data msg) -> List data -> List data
+sort : State -> List (Column data msg) -> List { data | id : Int } -> List { data | id : Int }
 sort state columnData data =
     case findSorter state.sortedColumnName columnData of
         Nothing ->
@@ -400,7 +401,7 @@ sort state columnData data =
             applySorter state.isReversed sorter data
 
 
-applySorter : Bool -> Sorter data -> List data -> List data
+applySorter : Bool -> Sorter data -> List { data | id : Int } -> List { data | id : Int }
 applySorter isReversed sorter data =
     case sorter of
         None ->
@@ -413,7 +414,7 @@ applySorter isReversed sorter data =
                 sort data
 
 
-findSorter : String -> List (Column data msg) -> Maybe (Sorter data)
+findSorter : String -> List (Column data msg) -> Maybe (Sorter { data | id : Int })
 findSorter selectedColumn columnData =
     case columnData of
         [] ->
@@ -443,16 +444,16 @@ findSorter selectedColumn columnData =
                     Nothing
 
 
-unsortable : Sorter data
+unsortable : Sorter { data | id : Int }
 unsortable =
     None
 
 
-increasingOrDecreasingBy : (data -> comparable) -> Sorter data
+increasingOrDecreasingBy : ({ data | id : Int } -> comparable) -> Sorter data
 increasingOrDecreasingBy toComparable =
     IncOrDec (List.sortBy toComparable)
 
 
-defaultSort : (a -> Maybe String) -> Sorter a
+defaultSort : ({ data | id : Int } -> Maybe String) -> Sorter data
 defaultSort t =
     increasingOrDecreasingBy (defaultString << t)
