@@ -238,14 +238,15 @@ view model =
     let
         rows =
             model.records
+                -- |> sort model.tableState (List.map (getColumns model.recordTypeId) model.records)
                 |> List.map (getRow model.recordTypeId)
     in
         case model.state of
             Grid ->
-                Table.view model.tableState rows gridConfig Nothing
+                Table.view model.tableState rows (gridConfig model.recordTypeId) Nothing
 
             AddNew newRecord ->
-                Table.view model.tableState rows gridConfig (Just <| viewNewRecord newRecord)
+                Table.view model.tableState rows (gridConfig model.recordTypeId) (Just <| viewNewRecord newRecord)
 
             Limbo ->
                 div [] []
@@ -365,8 +366,8 @@ formInputs newRecord =
         List.append firstColumns lastColumns
 
 
-gridConfig : Config Msg
-gridConfig =
+gridConfig : Maybe Int -> Config Msg
+gridConfig recordTypeId =
     { domTableId = "RecordTable"
     , headers =
         [ "Date Collected"
@@ -377,6 +378,7 @@ gridConfig =
         ]
     , toolbar = [ ( "e-addnew", AddNewStart ) ]
     , toMsg = SetTableState
+    , dropdownItems = dropdownItems recordTypeId 0
     }
 
 
@@ -386,7 +388,6 @@ getRow recordTypeId t =
         , NullableStringColumn "Doctor of Visit" t .provider (defaultSort .provider)
         , NullableStringColumn "Specialty" t .specialty (defaultSort .specialty)
         , NullableStringColumn "Comments" t .comments (defaultSort .comments)
-        , DropdownColumn (dropdownItems recordTypeId t.id)
         ]
         t.id
 

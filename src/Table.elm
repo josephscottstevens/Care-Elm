@@ -27,17 +27,16 @@ init sortedColumnName =
     }
 
 
-type alias Row data msg =
-    { columns : List (Column data msg)
+type alias Row data =
+    { columns : List (Column data)
     , rowId : Int
     }
 
 
-type Column data msg
+type Column data
     = StringColumn String data (data -> String) (Sorter data)
     | NullableStringColumn String data (data -> Maybe String) (Sorter data)
     | NullableDateTimeColumn String data (data -> Maybe String) (Sorter data)
-    | DropdownColumn (List ( String, String, Html.Attribute msg ))
 
 
 type alias Config msg =
@@ -45,6 +44,7 @@ type alias Config msg =
     , headers : List String
     , toolbar : List ( String, msg )
     , toMsg : State -> msg
+    , dropdownItems : List ( String, String, Html.Attribute msg )
     }
 
 
@@ -57,20 +57,24 @@ type Sorter data
 -- VIEW
 
 
-view : State -> List (Row data msg) -> Config msg -> Maybe (Html msg) -> Html msg
+view : State -> List (Row data) -> Config msg -> Maybe (Html msg) -> Html msg
 view state rows config maybeCustomRow =
-    div [ class "e-grid e-js e-waitingpopup" ]
-        [ viewToolbar config.toolbar
-        , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
-            [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                [ tr []
-                    (List.map (viewTh state config) config.headers)
+    let
+        sortedRows =
+            rows
+    in
+        div [ class "e-grid e-js e-waitingpopup" ]
+            [ viewToolbar config.toolbar
+            , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
+                [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
+                    [ tr []
+                        (List.map (viewTh state config) config.headers)
+                    ]
+                , tbody []
+                    (viewTr state sortedRows config maybeCustomRow)
                 ]
-            , tbody []
-                (viewTr state rows config maybeCustomRow)
+            , pagingView 0 (List.length rows)
             ]
-        , pagingView 0 (List.length rows)
-        ]
 
 
 onCustomClick : (String -> msg) -> Attribute msg
@@ -79,7 +83,7 @@ onCustomClick tagger =
         (Decode.map tagger (Decode.at [ "target", "id" ] Decode.string))
 
 
-viewTr : State -> List (Row data msg) -> Config msg -> Maybe (Html msg) -> List (Html msg)
+viewTr : State -> List (Row data) -> Config msg -> Maybe (Html msg) -> List (Html msg)
 viewTr state rows config maybeCustomRow =
     let
         selectedStyle row =
@@ -161,7 +165,7 @@ viewTh state config name =
             ]
 
 
-viewTd : State -> Row data msg -> Config msg -> Column data msg -> Html msg
+viewTd : State -> Row data -> Config msg -> Column data -> Html msg
 viewTd state row config column =
     let
         tdClass =
@@ -183,9 +187,6 @@ viewTd state row config column =
 
                 NullableDateTimeColumn name data dataToString _ ->
                     text (defaultDateTime (dataToString data))
-
-                DropdownColumn dropDownItems ->
-                    rowDropDownDiv state config.toMsg row dropDownItems
             ]
 
 
@@ -193,7 +194,7 @@ viewTd state row config column =
 -- Custom
 
 
-rowDropDownDiv : State -> (State -> msg) -> Row data msg -> List ( String, String, Html.Attribute msg ) -> Html msg
+rowDropDownDiv : State -> (State -> msg) -> Row data -> List ( String, String, Html.Attribute msg ) -> Html msg
 rowDropDownDiv state toMsg row dropDownItems =
     let
         dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
@@ -371,18 +372,16 @@ pagingView currentPage totalVisiblePages =
 
 
 -- Sorting
+-- justTheData : List (Row data msg) -> List data
+-- justTheData rows =
+--     rows
+--         |> List.map (\row -> row.columns)
+--         |> List.concat
+--         |> List.map columnData
+--         |> List.filterMap identity
 
 
-justTheData : List (Row data msg) -> List data
-justTheData rows =
-    rows
-        |> List.map (\row -> row.columns)
-        |> List.concat
-        |> List.map columnData
-        |> List.filterMap identity
-
-
-columnData : Column data msg -> Maybe data
+columnData : Column data -> Maybe data
 columnData column =
     case column of
         StringColumn name data dataToString sorter ->
@@ -394,11 +393,8 @@ columnData column =
         NullableDateTimeColumn name data dataToString sorter ->
             Just data
 
-        DropdownColumn dropDownItems ->
-            Nothing
 
-
-sort : State -> List (Column data msg) -> List data -> List data
+sort : State -> List (Column data) -> List data -> List data
 sort state columnData data =
     case findSorter state.sortedColumnName columnData of
         Nothing ->
@@ -421,7 +417,7 @@ applySorter isReversed sorter data =
                 sort data
 
 
-findSorter : String -> List (Column data msg) -> Maybe (Sorter data)
+findSorter : String -> List (Column data) -> Maybe (Sorter data)
 findSorter selectedColumn columnData =
     case columnData of
         [] ->
@@ -446,9 +442,6 @@ findSorter selectedColumn columnData =
                         Just sorter
                     else
                         findSorter selectedColumn remainingColumnData
-
-                DropdownColumn dropDownItems ->
-                    Nothing
 
 
 unsortable : Sorter data
