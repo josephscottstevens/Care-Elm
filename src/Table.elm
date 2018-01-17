@@ -373,6 +373,29 @@ pagingView currentPage totalVisiblePages =
 -- Sorting
 
 
+justTheData : List (Row data msg) -> List data
+justTheData rows =
+    rows
+        |> List.concatMap (\row -> List.map columnData row.columns)
+        |> List.filterMap identity
+
+
+columnData : Column data msg -> Maybe data
+columnData column =
+    case column of
+        StringColumn name data dataToString sorter ->
+            Just data
+
+        NullableStringColumn name data dataToString sorter ->
+            Just data
+
+        NullableDateTimeColumn name data dataToString sorter ->
+            Just data
+
+        DropdownColumn dropDownItems ->
+            Nothing
+
+
 sort : State -> List (Column data msg) -> List data -> List data
 sort state columnData data =
     case findSorter state.sortedColumnName columnData of
