@@ -105,12 +105,10 @@ viewTr state rows config maybeCustomRow =
         clickEvent row =
             onCustomClick
                 (\t ->
-                    --Debug.log ("test: " ++ t ++ "! ")
-                    (if t == "contextMenuButton" then
-                        (config.toMsg { state | openDropdownId = Just row.rowId })
-                     else
-                        (config.toMsg { state | selectedId = Just row.rowId })
-                    )
+                    if t == "contextMenuButton" then
+                        config.toMsg { state | openDropdownId = Just row.rowId }
+                    else
+                        config.toMsg { state | selectedId = Just row.rowId }
                 )
 
         standardTr ctr row =
