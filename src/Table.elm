@@ -53,25 +53,11 @@ view : State -> List (Row msg) -> Config msg -> Maybe (Html msg) -> Html msg
 view state rows config maybeCustomRow =
     div [ class "e-grid e-js e-waitingpopup" ]
         [ viewToolbar config.toolbar
-        , div [ class "e-gridheader e-textover e-hidelines" ]
-            [ table [ id config.domTableId, class "e-table" ]
-                [ thead []
-                    [ tr [ class "e-columnheader" ]
-                        (case List.head rows of
-                            Just firstRow ->
-                                List.map (viewTh state config) firstRow.columns
-
-                            Nothing ->
-                                List.map (viewSimpleTh state emptyAttr False) config.headers
-                        )
-                    ]
-                , tbody [ class "e-hide" ] []
-                ]
-            ]
-        , div [ class "e-gridcontent e-hidelines" ]
-            [ table [ class "e-table" ]
-                [ tbody [] (viewTr state rows config maybeCustomRow)
-                ]
+        , table [ id config.domTableId, class "e-table" ]
+            [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
+                (List.map (viewTh state config) config.headers)
+            , tbody []
+                (viewTr state rows config maybeCustomRow)
             ]
         , pagingView 0 (List.length rows)
         ]
@@ -145,36 +131,19 @@ emptyAttr =
     class ""
 
 
-viewTh : State -> Config msg -> Column msg -> Html msg
-viewTh state config column =
-    case column of
-        StringColumn name data ->
-            let
-                thClick =
-                    Events.onClick (config.toMsg { state | sortedColumnName = name, isReversed = not state.isReversed })
-
-                isReversed =
-                    state.sortedColumnName == name
-            in
-                viewSimpleTh state thClick isReversed name
-
-        DropdownColumn _ ->
-            viewSimpleTh state emptyAttr False "dropdown"
-
-
-viewSimpleTh : State -> Attribute msg -> Bool -> String -> Html msg
-viewSimpleTh state attr isReversed name =
+viewTh : State -> Config msg -> String -> Html msg
+viewTh state config name =
     let
         headerContent =
             if state.sortedColumnName == name then
-                if isReversed then
+                if state.isReversed then
                     [ text name, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
                 else
                     [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
             else
                 [ text name ]
     in
-        th [ class ("e-headercell e-default " ++ name), attr ]
+        th [ class ("e-headercell e-default " ++ name) ]
             [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
             ]
 
