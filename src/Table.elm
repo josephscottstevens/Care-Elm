@@ -253,7 +253,8 @@ rowDropDownDiv state toMsg row dropDownItems =
     in
         div []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ id "contextMenuButton", type_ "button", btnClass, blurEvent, btnStyle ]
+                [ button [ id "contextMenuButton", type_ "button", btnClass, btnStyle ]
+                    --blurEvent
                     [ div [ id "editButtonMenu", dropDownMenuStyle ]
                         dropMenu
                     ]
