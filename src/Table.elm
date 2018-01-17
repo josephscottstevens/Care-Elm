@@ -27,24 +27,19 @@ init sortedColumnName =
     }
 
 
-type alias Row data =
-    { columns : List (Column data)
-    , rowId : Int
-    }
-
-
-type Column data
+type Column data msg
     = StringColumn String data (data -> String) (Sorter data)
     | NullableStringColumn String data (data -> Maybe String) (Sorter data)
     | NullableDateTimeColumn String data (data -> Maybe String) (Sorter data)
+    | DropdownColumn (List ( String, String, Html.Attribute msg ))
 
 
-type alias Config msg =
+type alias Config data msg =
     { domTableId : String
     , headers : List String
     , toolbar : List ( String, msg )
     , toMsg : State -> msg
-    , dropdownItems : List ( String, String, Html.Attribute msg )
+    , columns : List (Column data msg)
     }
 
 
@@ -57,7 +52,7 @@ type Sorter data
 -- VIEW
 
 
-view : State -> List (Row data) -> Config msg -> Maybe (Html msg) -> Html msg
+view : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> Html msg
 view state rows config maybeCustomRow =
     let
         sortedRows =
@@ -83,12 +78,12 @@ onCustomClick tagger =
         (Decode.map tagger (Decode.at [ "target", "id" ] Decode.string))
 
 
-viewTr : State -> List (Row data) -> Config msg -> Maybe (Html msg) -> List (Html msg)
+viewTr : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> List (Html msg)
 viewTr state rows config maybeCustomRow =
     let
         selectedStyle row =
             style
-                (if Just row.rowId == state.selectedId then
+                (if Just row.id == state.selectedId then
                     [ ( "background-color", "#66aaff" )
                     , ( "background", "#66aaff" )
                     ]
@@ -106,9 +101,9 @@ viewTr state rows config maybeCustomRow =
             onCustomClick
                 (\t ->
                     if t == "contextMenuButton" then
-                        config.toMsg { state | openDropdownId = Just row.rowId }
+                        config.toMsg { state | openDropdownId = Just row.id }
                     else
-                        config.toMsg { state | selectedId = Just row.rowId }
+                        config.toMsg { state | selectedId = Just row.id }
                 )
 
         standardTr ctr row =
@@ -117,7 +112,7 @@ viewTr state rows config maybeCustomRow =
                 , selectedStyle row
                 , clickEvent row
                 ]
-                (List.map (viewTd state row config) row.columns)
+                (List.map (viewTd state row config) config.columns)
 
         inlineStyle =
             style
@@ -145,7 +140,7 @@ emptyAttr =
     class ""
 
 
-viewTh : State -> Config msg -> String -> Html msg
+viewTh : State -> Config data msg -> String -> Html msg
 viewTh state config name =
     let
         headerContent =
@@ -165,13 +160,13 @@ viewTh state config name =
             ]
 
 
-viewTd : State -> Row data -> Config msg -> Column data -> Html msg
+viewTd : State -> { data | id : Int } -> Config data msg -> Column data msg -> Html msg
 viewTd state row config column =
     let
         tdClass =
             classList
                 [ ( "e-gridtooltip", True )
-                , ( "e-active", Just row.rowId == state.selectedId )
+                , ( "e-active", Just row.id == state.selectedId )
                 ]
 
         tdStyle =
@@ -187,6 +182,9 @@ viewTd state row config column =
 
                 NullableDateTimeColumn name data dataToString _ ->
                     text (defaultDateTime (dataToString data))
+
+                DropdownColumn dropDownItems ->
+                    rowDropDownDiv state config.toMsg row dropDownItems
             ]
 
 
@@ -194,7 +192,7 @@ viewTd state row config column =
 -- Custom
 
 
-rowDropDownDiv : State -> (State -> msg) -> Row data -> List ( String, String, Html.Attribute msg ) -> Html msg
+rowDropDownDiv : State -> (State -> msg) -> { data | id : Int } -> List ( String, String, Html.Attribute msg ) -> Html msg
 rowDropDownDiv state toMsg row dropDownItems =
     let
         dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
@@ -219,7 +217,7 @@ rowDropDownDiv state toMsg row dropDownItems =
         dropMenu =
             case state.openDropdownId of
                 Just t ->
-                    if row.rowId == t then
+                    if row.id == t then
                         [ ul [ class "e-menu e-js e-widget e-box e-separator" ]
                             (List.map dropDownMenuItem dropDownItems)
                         ]
@@ -381,7 +379,7 @@ pagingView currentPage totalVisiblePages =
 --         |> List.filterMap identity
 
 
-columnData : Column data -> Maybe data
+columnData : Column data msg -> Maybe data
 columnData column =
     case column of
         StringColumn name data dataToString sorter ->
@@ -393,8 +391,11 @@ columnData column =
         NullableDateTimeColumn name data dataToString sorter ->
             Just data
 
+        DropdownColumn dropDownItems ->
+            Nothing
 
-sort : State -> List (Column data) -> List data -> List data
+
+sort : State -> List (Column data msg) -> List data -> List data
 sort state columnData data =
     case findSorter state.sortedColumnName columnData of
         Nothing ->
@@ -417,7 +418,7 @@ applySorter isReversed sorter data =
                 sort data
 
 
-findSorter : String -> List (Column data) -> Maybe (Sorter data)
+findSorter : String -> List (Column data msg) -> Maybe (Sorter data)
 findSorter selectedColumn columnData =
     case columnData of
         [] ->
@@ -442,6 +443,9 @@ findSorter selectedColumn columnData =
                         Just sorter
                     else
                         findSorter selectedColumn remainingColumnData
+
+                DropdownColumn dropDownItems ->
+                    Nothing
 
 
 unsortable : Sorter data

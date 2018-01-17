@@ -243,10 +243,10 @@ view model =
     in
         case model.state of
             Grid ->
-                Table.view model.tableState rows (gridConfig model.recordTypeId) Nothing
+                Table.view model.tableState model.records (gridConfig model.recordTypeId) Nothing
 
             AddNew newRecord ->
-                Table.view model.tableState rows (gridConfig model.recordTypeId) (Just <| viewNewRecord newRecord)
+                Table.view model.tableState model.records (gridConfig model.recordTypeId) (Just <| viewNewRecord newRecord)
 
             Limbo ->
                 div [] []
@@ -366,7 +366,7 @@ formInputs newRecord =
         List.append firstColumns lastColumns
 
 
-gridConfig : Maybe Int -> Config Msg
+gridConfig : Maybe Int -> Config RecordRow Msg
 gridConfig recordTypeId =
     { domTableId = "RecordTable"
     , headers =
@@ -378,18 +378,17 @@ gridConfig recordTypeId =
         ]
     , toolbar = [ ( "e-addnew", AddNewStart ) ]
     , toMsg = SetTableState
-    , dropdownItems = dropdownItems recordTypeId 0
+    , columns = []
     }
 
 
 getRow recordTypeId t =
-    Row
-        [ NullableDateTimeColumn "Date Collected" t .date (defaultSort .date)
-        , NullableStringColumn "Doctor of Visit" t .provider (defaultSort .provider)
-        , NullableStringColumn "Specialty" t .specialty (defaultSort .specialty)
-        , NullableStringColumn "Comments" t .comments (defaultSort .comments)
-        ]
-        t.id
+    [ NullableDateTimeColumn "Date Collected" t .date (defaultSort .date)
+    , NullableStringColumn "Doctor of Visit" t .provider (defaultSort .provider)
+    , NullableStringColumn "Specialty" t .specialty (defaultSort .specialty)
+    , NullableStringColumn "Comments" t .comments (defaultSort .comments)
+    , DropdownColumn (dropdownItems recordTypeId 0)
+    ]
 
 
 dropdownItems : Maybe Int -> Int -> List ( String, String, Html.Attribute Msg )
