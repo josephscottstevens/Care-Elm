@@ -4,6 +4,7 @@ import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, tex
 import Html.Attributes exposing (class, id, style, type_, target, colspan, classList)
 import Html.Events as Events
 import Json.Decode as Decode
+import Utils.CommonFunctions exposing (defaultDateTime)
 
 
 -- Data Types
@@ -26,14 +27,16 @@ init sortedColumnName =
     }
 
 
-type alias Row msg =
-    { columns : List (Column msg)
+type alias Row data msg =
+    { columns : List (Column data msg)
     , rowId : Int
     }
 
 
-type Column msg
-    = StringColumn String String
+type Column data msg
+    = StringColumn String data (data -> String)
+    | NullableStringColumn String data (data -> Maybe String)
+    | NullableDateTimeColumn String data (data -> Maybe String)
     | DropdownColumn (List ( String, String, Html.Attribute msg ))
 
 
@@ -49,7 +52,7 @@ type alias Config msg =
 -- VIEW
 
 
-view : State -> List (Row msg) -> Config msg -> Maybe (Html msg) -> Html msg
+view : State -> List (Row data msg) -> Config msg -> Maybe (Html msg) -> Html msg
 view state rows config maybeCustomRow =
     div [ class "e-grid e-js e-waitingpopup" ]
         [ viewToolbar config.toolbar
@@ -71,7 +74,7 @@ onCustomClick tagger =
         (Decode.map tagger (Decode.at [ "target", "id" ] Decode.string))
 
 
-viewTr : State -> List (Row msg) -> Config msg -> Maybe (Html msg) -> List (Html msg)
+viewTr : State -> List (Row data msg) -> Config msg -> Maybe (Html msg) -> List (Html msg)
 viewTr state rows config maybeCustomRow =
     let
         selectedStyle row =
@@ -153,7 +156,12 @@ viewTh state config name =
             ]
 
 
-viewTd : State -> Row msg -> Config msg -> Column msg -> Html msg
+tester2 : data -> msg -> String
+tester2 data msg =
+    ""
+
+
+viewTd : State -> Row data msg -> Config msg -> Column data msg -> Html msg
 viewTd state row config column =
     let
         tdClass =
@@ -167,8 +175,14 @@ viewTd state row config column =
     in
         td [ tdClass, tdStyle ]
             [ case column of
-                StringColumn name data ->
-                    text data
+                StringColumn name data dataToString ->
+                    text (dataToString data)
+
+                NullableStringColumn name data dataToString ->
+                    text (Maybe.withDefault "" (dataToString data))
+
+                NullableDateTimeColumn name data dataToString ->
+                    text (defaultDateTime (dataToString data))
 
                 DropdownColumn dropDownItems ->
                     rowDropDownDiv state config.toMsg row dropDownItems
@@ -179,7 +193,7 @@ viewTd state row config column =
 -- Custom
 
 
-rowDropDownDiv : State -> (State -> msg) -> Row msg -> List ( String, String, Html.Attribute msg ) -> Html msg
+rowDropDownDiv : State -> (State -> msg) -> Row data msg -> List ( String, String, Html.Attribute msg ) -> Html msg
 rowDropDownDiv state toMsg row dropDownItems =
     let
         dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg

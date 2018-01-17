@@ -379,13 +379,12 @@ gridConfig =
     }
 
 
-getRow : Maybe Int -> RecordRow -> Row Msg
 getRow recordTypeId t =
     Row
-        [ StringColumn "Date Collected" (defaultDateTime t.date)
-        , StringColumn "Doctor of Visit" (defaultString t.provider)
-        , StringColumn "Specialty" (defaultString t.specialty)
-        , StringColumn "Comments" (defaultString t.comments)
+        [ NullableDateTimeColumn "Date Collected" t .date
+        , NullableStringColumn "Doctor of Visit" t .provider
+        , NullableStringColumn "Specialty" t .specialty
+        , NullableStringColumn "Comments" t .comments
         , DropdownColumn (dropdownItems recordTypeId t.id)
         ]
         t.id
