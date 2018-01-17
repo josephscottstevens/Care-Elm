@@ -13,6 +13,18 @@ REQUESTED TODO:
 	put edit mode inside of grid  (but.. how?)
 	
 ===========================================================================================================
+
+from matt 1/16/2018
+
+no records found
+footer is missing
+style is off (highlight)
+click turn blue
+dropdown arrow squished
++ button (not edit template)
+
+-----------------------------------------------------------------
+
 has changes js error when click on checkbox in contacts
 test Contact Hours still works (load and save)
 fix save button being in the middle of the form

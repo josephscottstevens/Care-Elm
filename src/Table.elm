@@ -63,7 +63,7 @@ view state rows config maybeCustomRow =
                                 List.map (viewTh state config) firstRow.columns
 
                             Nothing ->
-                                List.map (viewSimpleTh emptyAttr False) config.headers
+                                List.map (viewSimpleTh state emptyAttr False) config.headers
                         )
                     ]
                 , tbody [ class "e-hide" ] []
@@ -104,12 +104,20 @@ viewTr state rows config maybeCustomRow =
         leaveEvent row =
             Events.onMouseLeave (config.toMsg { state | rowHoverId = Nothing })
 
+        clickEvent row =
+            Events.onClick (config.toMsg { state | selectedId = Just row.rowId })
+
+        blurEvent row =
+            Events.onBlur (config.toMsg { state | selectedId = Nothing })
+
         standardTr ctr row =
             tr
                 [ rowClass row ctr
                 , selectedStyle row
                 , hoverEvent row
                 , leaveEvent row
+                , clickEvent row
+                , blurEvent row
                 ]
                 (List.map (viewTd state row config) row.columns)
 
@@ -150,20 +158,23 @@ viewTh state config column =
                 isReversed =
                     state.sortedColumnName == name
             in
-                viewSimpleTh thClick isReversed name
+                viewSimpleTh state thClick isReversed name
 
         DropdownColumn _ ->
-            viewSimpleTh emptyAttr False "dropdown"
+            viewSimpleTh state emptyAttr False "dropdown"
 
 
-viewSimpleTh : Attribute msg -> Bool -> String -> Html msg
-viewSimpleTh attr isReversed name =
+viewSimpleTh : State -> Attribute msg -> Bool -> String -> Html msg
+viewSimpleTh state attr isReversed name =
     let
         headerContent =
-            if isReversed then
-                [ text name, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
+            if state.sortedColumnName == name then
+                if isReversed then
+                    [ text name, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
+                else
+                    [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
             else
-                [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
+                [ text name ]
     in
         th [ class ("e-headercell e-default " ++ name), attr ]
             [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
@@ -172,14 +183,26 @@ viewSimpleTh attr isReversed name =
 
 viewTd : State -> Row msg -> Config msg -> Column msg -> Html msg
 viewTd state row config column =
-    td [ class "e-rowcell e-gridtooltip" ]
-        [ case column of
-            StringColumn name data ->
-                text data
+    let
+        tdClass =
+            classList
+                [ ( "e-gridtooltip", True )
+                , ( "e-active", Just row.rowId == state.selectedId )
 
-            DropdownColumn dropDownItems ->
-                rowDropDownDiv state config.toMsg row dropDownItems
-        ]
+                --e-rowcell (Removed due to it clipping dropdown menu)
+                ]
+
+        tdStyle =
+            style [ ( "padding-left", "8.4px" ) ]
+    in
+        td [ tdClass, tdStyle ]
+            [ case column of
+                StringColumn name data ->
+                    text data
+
+                DropdownColumn dropDownItems ->
+                    rowDropDownDiv state config.toMsg row dropDownItems
+            ]
 
 
 
@@ -240,7 +263,7 @@ rowDropDownDiv state toMsg row dropDownItems =
     in
         div []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ type_ "button", btnClass, btnClick, btnBlur, btnStyle ]
+                [ button [ id "contextMenuButton", type_ "button", btnClass, btnClick, btnBlur, btnStyle ]
                     [ div [ id "editButtonMenu", dropDownMenuStyle ]
                         dropMenu
                     ]
