@@ -161,30 +161,6 @@ viewTh state config name =
             ]
 
 
-tester2 : data -> msg -> String
-tester2 data msg =
-    ""
-
-
-sortTest : Column data msg -> List (Row data msg) -> List (Row data msg)
-sortTest column rows =
-    case column of
-        StringColumn name data dataToString sorter ->
-            rows
-
-        --                        text (dataToString data)
-        NullableStringColumn name data dataToString sorter ->
-            rows
-
-        --text (Maybe.withDefault "" (dataToString data))
-        NullableDateTimeColumn name data dataToString sorter ->
-            rows
-
-        --text (defaultDateTime (dataToString data))
-        DropdownColumn dropDownItems ->
-            rows
-
-
 viewTd : State -> Row data msg -> Config msg -> Column data msg -> Html msg
 viewTd state row config column =
     let
@@ -391,6 +367,82 @@ pagingView currentPage totalVisiblePages =
                 [ span [ class "e-pagermsg" ] [ text pagerText ]
                 ]
             ]
+
+
+
+-- Sorting
+
+
+sort : State -> List (Column data msg) -> List data -> List data
+sort state columnData data =
+    case findSorter state.sortedColumnName columnData of
+        Nothing ->
+            data
+
+        Just sorter ->
+            applySorter state.isReversed sorter data
+
+
+applySorter : Bool -> Sorter data -> List data -> List data
+applySorter isReversed sorter data =
+    case sorter of
+        None ->
+            data
+
+        IncOrDec sort ->
+            if isReversed then
+                List.reverse (sort data)
+            else
+                sort data
+
+
+findSorter : String -> List (Column data msg) -> Maybe (Sorter data)
+findSorter selectedColumn columnData =
+    case columnData of
+        [] ->
+            Nothing
+
+        column :: remainingColumnData ->
+            case column of
+                StringColumn name data dataToString sorter ->
+                    if name == selectedColumn then
+                        Just sorter
+                    else
+                        findSorter selectedColumn remainingColumnData
+
+                NullableStringColumn name data dataToString sorter ->
+                    if name == selectedColumn then
+                        Just sorter
+                    else
+                        findSorter selectedColumn remainingColumnData
+
+                NullableDateTimeColumn name data dataToString sorter ->
+                    if name == selectedColumn then
+                        Just sorter
+                    else
+                        findSorter selectedColumn remainingColumnData
+
+                DropdownColumn dropDownItems ->
+                    Nothing
+
+
+sortTest : Column data msg -> List (Row data msg) -> List (Row data msg)
+sortTest column rows =
+    case column of
+        StringColumn name data dataToString sorter ->
+            rows
+
+        --                        text (dataToString data)
+        NullableStringColumn name data dataToString sorter ->
+            rows
+
+        --text (Maybe.withDefault "" (dataToString data))
+        NullableDateTimeColumn name data dataToString sorter ->
+            rows
+
+        --text (defaultDateTime (dataToString data))
+        DropdownColumn dropDownItems ->
+            rows
 
 
 unsortable : Sorter data
