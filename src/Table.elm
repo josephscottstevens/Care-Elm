@@ -243,20 +243,19 @@ rowDropDownDiv state toMsg row dropDownItems =
         btnClick =
             case state.openDropdownId of
                 Just _ ->
-                    Events.onClick (toMsg { state | openDropdownId = Just row.rowId })
+                    Events.onClick (toMsg { state | openDropdownId = Nothing })
 
                 Nothing ->
                     Events.onClick (toMsg { state | openDropdownId = Just row.rowId })
 
-        -- btnBlur =
-        --     Events.onBlur (toMsg { state | openDropdownId = Nothing })
+        btnBlur =
+            Events.onBlur (toMsg { state | openDropdownId = Nothing })
     in
         Debug.log ("testing" ++ (toString row.rowId))
             div
             []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ id "contextMenuButton", type_ "button", btnClass, btnClick, btnStyle ]
-                    --btnBlur
+                [ button [ id "contextMenuButton", type_ "button", btnClass, btnClick, btnBlur, btnStyle ]
                     [ div [ id "editButtonMenu", dropDownMenuStyle ]
                         dropMenu
                     ]
