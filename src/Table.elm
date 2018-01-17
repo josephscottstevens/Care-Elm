@@ -3,6 +3,7 @@ module Table exposing (..)
 import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span)
 import Html.Attributes exposing (class, id, style, type_, target, colspan, classList)
 import Html.Events as Events
+import Json.Decode as Decode
 
 
 -- Data Types
@@ -76,6 +77,12 @@ view state rows config maybeCustomRow =
         ]
 
 
+onCustomClick : (String -> msg) -> Attribute msg
+onCustomClick tagger =
+    Events.on "click"
+        (Decode.map tagger (Decode.at [ "target", "id" ] Decode.string))
+
+
 viewTr : State -> List (Row msg) -> Config msg -> Maybe (Html msg) -> List (Html msg)
 viewTr state rows config maybeCustomRow =
     let
@@ -96,18 +103,21 @@ viewTr state rows config maybeCustomRow =
                 ]
 
         clickEvent row =
-            Events.onClick (config.toMsg { state | selectedId = Just row.rowId })
-
-        blurEvent row =
-            Events.onBlur (config.toMsg { state | selectedId = Nothing })
+            onCustomClick
+                (\t ->
+                    --Debug.log ("test: " ++ t ++ "! ")
+                    (if t == "contextMenuButton" then
+                        (config.toMsg { state | openDropdownId = Just row.rowId })
+                     else
+                        (config.toMsg { state | selectedId = Just row.rowId })
+                    )
+                )
 
         standardTr ctr row =
             tr
                 [ rowClass row ctr
                 , selectedStyle row
-
-                --, clickEvent row
-                --, blurEvent row
+                , clickEvent row
                 ]
                 (List.map (viewTd state row config) row.columns)
 
@@ -240,22 +250,12 @@ rowDropDownDiv state toMsg row dropDownItems =
         btnStyle =
             style [ ( "position", "relative" ) ]
 
-        btnClick =
-            case state.openDropdownId of
-                Just _ ->
-                    Events.onClick (toMsg { state | openDropdownId = Nothing })
-
-                Nothing ->
-                    Events.onClick (toMsg { state | openDropdownId = Just row.rowId })
-
-        btnBlur =
+        blurEvent =
             Events.onBlur (toMsg { state | openDropdownId = Nothing })
     in
-        Debug.log ("testing" ++ (toString row.rowId))
-            div
-            []
+        div []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ id "contextMenuButton", type_ "button", btnClass, btnClick, btnBlur, btnStyle ]
+                [ button [ id "contextMenuButton", type_ "button", btnClass, blurEvent, btnStyle ]
                     [ div [ id "editButtonMenu", dropDownMenuStyle ]
                         dropMenu
                     ]
