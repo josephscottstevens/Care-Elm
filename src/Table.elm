@@ -116,8 +116,9 @@ viewTr state rows config maybeCustomRow =
                 , selectedStyle row
                 , hoverEvent row
                 , leaveEvent row
-                , clickEvent row
-                , blurEvent row
+
+                -- , clickEvent row
+                -- , blurEvent row
                 ]
                 (List.map (viewTd state row config) row.columns)
 
@@ -253,17 +254,20 @@ rowDropDownDiv state toMsg row dropDownItems =
         btnClick =
             case state.openDropdownId of
                 Just _ ->
-                    Events.onClick (toMsg { state | openDropdownId = Nothing })
+                    Events.onClick (toMsg { state | openDropdownId = Just row.rowId })
 
                 Nothing ->
                     Events.onClick (toMsg { state | openDropdownId = Just row.rowId })
 
-        btnBlur =
-            Events.onBlur (toMsg { state | openDropdownId = Nothing })
+        -- btnBlur =
+        --     Events.onBlur (toMsg { state | openDropdownId = Nothing })
     in
-        div []
+        Debug.log ("testing" ++ (toString row.rowId))
+            div
+            []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ id "contextMenuButton", type_ "button", btnClass, btnClick, btnBlur, btnStyle ]
+                [ button [ id "contextMenuButton", type_ "button", btnClass, btnClick, btnStyle ]
+                    --btnBlur
                     [ div [ id "editButtonMenu", dropDownMenuStyle ]
                         dropMenu
                     ]
