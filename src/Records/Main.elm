@@ -238,8 +238,9 @@ view model =
     let
         rows =
             model.records
-                -- |> sort model.tableState (List.map (getColumns model.recordTypeId) model.records)
-                |> List.map (getRow model.recordTypeId)
+
+        -- |> sort model.tableState (List.map (getColumns model.recordTypeId) model.records)
+        -- |> List.map (getRow model.recordTypeId)
     in
         case model.state of
             Grid ->
@@ -378,17 +379,14 @@ gridConfig recordTypeId =
         ]
     , toolbar = [ ( "e-addnew", AddNewStart ) ]
     , toMsg = SetTableState
-    , columns = []
+    , columns =
+        [ NullableDateTimeColumn "Date Collected" .date (defaultSort .date)
+        , NullableStringColumn "Doctor of Visit" .provider (defaultSort .provider)
+        , NullableStringColumn "Specialty" .specialty (defaultSort .specialty)
+        , NullableStringColumn "Comments" .comments (defaultSort .comments)
+        , DropdownColumn (dropdownItems recordTypeId 0)
+        ]
     }
-
-
-getRow recordTypeId t =
-    [ NullableDateTimeColumn "Date Collected" t .date (defaultSort .date)
-    , NullableStringColumn "Doctor of Visit" t .provider (defaultSort .provider)
-    , NullableStringColumn "Specialty" t .specialty (defaultSort .specialty)
-    , NullableStringColumn "Comments" t .comments (defaultSort .comments)
-    , DropdownColumn (dropdownItems recordTypeId 0)
-    ]
 
 
 dropdownItems : Maybe Int -> Int -> List ( String, String, Html.Attribute Msg )

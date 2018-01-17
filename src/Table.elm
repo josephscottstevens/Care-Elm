@@ -28,9 +28,9 @@ init sortedColumnName =
 
 
 type Column data msg
-    = StringColumn String data (data -> String) (Sorter data)
-    | NullableStringColumn String data (data -> Maybe String) (Sorter data)
-    | NullableDateTimeColumn String data (data -> Maybe String) (Sorter data)
+    = StringColumn String ({ data | id : Int } -> String) (Sorter data)
+    | NullableStringColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
+    | NullableDateTimeColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
     | DropdownColumn (List ( String, String, Html.Attribute msg ))
 
 
@@ -174,14 +174,14 @@ viewTd state row config column =
     in
         td [ tdClass, tdStyle ]
             [ case column of
-                StringColumn name data dataToString _ ->
-                    text (dataToString data)
+                StringColumn name dataToString _ ->
+                    text (dataToString row)
 
-                NullableStringColumn name data dataToString _ ->
-                    text (Maybe.withDefault "" (dataToString data))
+                NullableStringColumn name dataToString _ ->
+                    text (Maybe.withDefault "" (dataToString row))
 
-                NullableDateTimeColumn name data dataToString _ ->
-                    text (defaultDateTime (dataToString data))
+                NullableDateTimeColumn name dataToString _ ->
+                    text (defaultDateTime (dataToString row))
 
                 DropdownColumn dropDownItems ->
                     rowDropDownDiv state config.toMsg row dropDownItems
@@ -377,22 +377,17 @@ pagingView currentPage totalVisiblePages =
 --         |> List.concat
 --         |> List.map columnData
 --         |> List.filterMap identity
-
-
-columnData : Column data msg -> Maybe data
-columnData column =
-    case column of
-        StringColumn name data dataToString sorter ->
-            Just data
-
-        NullableStringColumn name data dataToString sorter ->
-            Just data
-
-        NullableDateTimeColumn name data dataToString sorter ->
-            Just data
-
-        DropdownColumn dropDownItems ->
-            Nothing
+-- columnData : Column data msg -> Maybe data
+-- columnData column =
+--     case column of
+--         StringColumn name dataToString sorter ->
+--             Just data
+--         NullableStringColumn name dataToString sorter ->
+--             Just data
+--         NullableDateTimeColumn name dataToString sorter ->
+--             Just data
+--         DropdownColumn dropDownItems ->
+--             Nothing
 
 
 sort : State -> List (Column data msg) -> List data -> List data
@@ -426,19 +421,19 @@ findSorter selectedColumn columnData =
 
         column :: remainingColumnData ->
             case column of
-                StringColumn name data dataToString sorter ->
+                StringColumn name dataToString sorter ->
                     if name == selectedColumn then
                         Just sorter
                     else
                         findSorter selectedColumn remainingColumnData
 
-                NullableStringColumn name data dataToString sorter ->
+                NullableStringColumn name dataToString sorter ->
                     if name == selectedColumn then
                         Just sorter
                     else
                         findSorter selectedColumn remainingColumnData
 
-                NullableDateTimeColumn name data dataToString sorter ->
+                NullableDateTimeColumn name dataToString sorter ->
                     if name == selectedColumn then
                         Just sorter
                     else
