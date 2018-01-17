@@ -144,8 +144,11 @@ viewTh state config name =
                     [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
             else
                 [ text name ]
+
+        sortClick =
+            Events.onClick (config.toMsg { state | isReversed = not state.isReversed, sortedColumnName = name })
     in
-        th [ class ("e-headercell e-default " ++ name) ]
+        th [ class ("e-headercell e-default " ++ name), sortClick ]
             [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
             ]
 
@@ -157,8 +160,6 @@ viewTd state row config column =
             classList
                 [ ( "e-gridtooltip", True )
                 , ( "e-active", Just row.rowId == state.selectedId )
-
-                --e-rowcell (Removed due to it clipping dropdown menu)
                 ]
 
         tdStyle =
