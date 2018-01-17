@@ -237,7 +237,8 @@ view : Model -> Html Msg
 view model =
     let
         rows =
-            List.map (getRow model.recordTypeId) model.records
+            model.records
+                |> List.map (getRow model.recordTypeId)
     in
         case model.state of
             Grid ->

@@ -451,25 +451,6 @@ findSorter selectedColumn columnData =
                     Nothing
 
 
-sortTest : Column data msg -> List (Row data msg) -> List (Row data msg)
-sortTest column rows =
-    case column of
-        StringColumn name data dataToString sorter ->
-            rows
-
-        --                        text (dataToString data)
-        NullableStringColumn name data dataToString sorter ->
-            rows
-
-        --text (Maybe.withDefault "" (dataToString data))
-        NullableDateTimeColumn name data dataToString sorter ->
-            rows
-
-        --text (defaultDateTime (dataToString data))
-        DropdownColumn dropDownItems ->
-            rows
-
-
 unsortable : Sorter data
 unsortable =
     None
