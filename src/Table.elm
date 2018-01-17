@@ -53,9 +53,11 @@ view : State -> List (Row msg) -> Config msg -> Maybe (Html msg) -> Html msg
 view state rows config maybeCustomRow =
     div [ class "e-grid e-js e-waitingpopup" ]
         [ viewToolbar config.toolbar
-        , table [ id config.domTableId, class "e-table" ]
+        , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
             [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                (List.map (viewTh state config) config.headers)
+                [ tr []
+                    (List.map (viewTh state config) config.headers)
+                ]
             , tbody []
                 (viewTr state rows config maybeCustomRow)
             ]
@@ -222,8 +224,7 @@ rowDropDownDiv state toMsg row dropDownItems =
     in
         div []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ id "contextMenuButton", type_ "button", btnClass, btnStyle ]
-                    --blurEvent
+                [ button [ id "contextMenuButton", type_ "button", btnClass, blurEvent, btnStyle ]
                     [ div [ id "editButtonMenu", dropDownMenuStyle ]
                         dropMenu
                     ]
