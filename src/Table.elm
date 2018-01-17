@@ -376,7 +376,9 @@ pagingView currentPage totalVisiblePages =
 justTheData : List (Row data msg) -> List data
 justTheData rows =
     rows
-        |> List.concatMap (\row -> List.map columnData row.columns)
+        |> List.map (\row -> row.columns)
+        |> List.concat
+        |> List.map columnData
         |> List.filterMap identity
 
 
