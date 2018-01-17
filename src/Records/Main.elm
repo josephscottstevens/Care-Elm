@@ -381,10 +381,10 @@ gridConfig =
 
 getRow recordTypeId t =
     Row
-        [ NullableDateTimeColumn "Date Collected" t .date
-        , NullableStringColumn "Doctor of Visit" t .provider
-        , NullableStringColumn "Specialty" t .specialty
-        , NullableStringColumn "Comments" t .comments
+        [ NullableDateTimeColumn "Date Collected" t .date (defaultSort .date)
+        , NullableStringColumn "Doctor of Visit" t .provider (defaultSort .provider)
+        , NullableStringColumn "Specialty" t .specialty (defaultSort .specialty)
+        , NullableStringColumn "Comments" t .comments (defaultSort .comments)
         , DropdownColumn (dropdownItems recordTypeId t.id)
         ]
         t.id

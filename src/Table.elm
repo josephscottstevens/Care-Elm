@@ -4,7 +4,7 @@ import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, tex
 import Html.Attributes exposing (class, id, style, type_, target, colspan, classList)
 import Html.Events as Events
 import Json.Decode as Decode
-import Utils.CommonFunctions exposing (defaultDateTime)
+import Utils.CommonFunctions exposing (defaultDateTime, defaultString)
 
 
 -- Data Types
@@ -34,9 +34,9 @@ type alias Row data msg =
 
 
 type Column data msg
-    = StringColumn String data (data -> String)
-    | NullableStringColumn String data (data -> Maybe String)
-    | NullableDateTimeColumn String data (data -> Maybe String)
+    = StringColumn String data (data -> String) (Sorter data)
+    | NullableStringColumn String data (data -> Maybe String) (Sorter data)
+    | NullableDateTimeColumn String data (data -> Maybe String) (Sorter data)
     | DropdownColumn (List ( String, String, Html.Attribute msg ))
 
 
@@ -46,6 +46,11 @@ type alias Config msg =
     , toolbar : List ( String, msg )
     , toMsg : State -> msg
     }
+
+
+type Sorter data
+    = None
+    | IncOrDec (List data -> List data)
 
 
 
@@ -161,6 +166,25 @@ tester2 data msg =
     ""
 
 
+sortTest : Column data msg -> List (Row data msg) -> List (Row data msg)
+sortTest column rows =
+    case column of
+        StringColumn name data dataToString sorter ->
+            rows
+
+        --                        text (dataToString data)
+        NullableStringColumn name data dataToString sorter ->
+            rows
+
+        --text (Maybe.withDefault "" (dataToString data))
+        NullableDateTimeColumn name data dataToString sorter ->
+            rows
+
+        --text (defaultDateTime (dataToString data))
+        DropdownColumn dropDownItems ->
+            rows
+
+
 viewTd : State -> Row data msg -> Config msg -> Column data msg -> Html msg
 viewTd state row config column =
     let
@@ -175,13 +199,13 @@ viewTd state row config column =
     in
         td [ tdClass, tdStyle ]
             [ case column of
-                StringColumn name data dataToString ->
+                StringColumn name data dataToString _ ->
                     text (dataToString data)
 
-                NullableStringColumn name data dataToString ->
+                NullableStringColumn name data dataToString _ ->
                     text (Maybe.withDefault "" (dataToString data))
 
-                NullableDateTimeColumn name data dataToString ->
+                NullableDateTimeColumn name data dataToString _ ->
                     text (defaultDateTime (dataToString data))
 
                 DropdownColumn dropDownItems ->
@@ -367,3 +391,18 @@ pagingView currentPage totalVisiblePages =
                 [ span [ class "e-pagermsg" ] [ text pagerText ]
                 ]
             ]
+
+
+unsortable : Sorter data
+unsortable =
+    None
+
+
+increasingOrDecreasingBy : (data -> comparable) -> Sorter data
+increasingOrDecreasingBy toComparable =
+    IncOrDec (List.sortBy toComparable)
+
+
+defaultSort : (a -> Maybe String) -> Sorter a
+defaultSort t =
+    increasingOrDecreasingBy (defaultString << t)
