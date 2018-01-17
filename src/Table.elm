@@ -13,7 +13,6 @@ type alias State =
     , isReversed : Bool
     , sortedColumnName : String
     , openDropdownId : Maybe Int
-    , rowHoverId : Maybe Int
     }
 
 
@@ -23,7 +22,6 @@ init sortedColumnName =
     , isReversed = False
     , sortedColumnName = sortedColumnName
     , openDropdownId = Nothing
-    , rowHoverId = Nothing
     }
 
 
@@ -95,14 +93,7 @@ viewTr state rows config maybeCustomRow =
             classList
                 [ ( "e-row", ctr % 2 == 0 )
                 , ( "e-alt_row", ctr % 2 == 1 )
-                , ( "e-hover", Just row.rowId == state.rowHoverId )
                 ]
-
-        hoverEvent row =
-            Events.onMouseEnter (config.toMsg { state | rowHoverId = Just row.rowId })
-
-        leaveEvent row =
-            Events.onMouseLeave (config.toMsg { state | rowHoverId = Nothing })
 
         clickEvent row =
             Events.onClick (config.toMsg { state | selectedId = Just row.rowId })
@@ -114,11 +105,9 @@ viewTr state rows config maybeCustomRow =
             tr
                 [ rowClass row ctr
                 , selectedStyle row
-                , hoverEvent row
-                , leaveEvent row
 
-                -- , clickEvent row
-                -- , blurEvent row
+                --, clickEvent row
+                --, blurEvent row
                 ]
                 (List.map (viewTd state row config) row.columns)
 
