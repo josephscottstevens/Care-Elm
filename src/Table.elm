@@ -56,8 +56,7 @@ view : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Ma
 view state rows config maybeCustomRow =
     let
         sortedRows =
-            --sort config.columns rows
-            rows
+            sort state config.columns rows
     in
         div [ class "e-grid e-js e-waitingpopup" ]
             [ viewToolbar config.toolbar
@@ -371,24 +370,6 @@ pagingView currentPage totalVisiblePages =
 
 
 -- Sorting
--- justTheData : List (Row data msg) -> List data
--- justTheData rows =
---     rows
---         |> List.map (\row -> row.columns)
---         |> List.concat
---         |> List.map columnData
---         |> List.filterMap identity
--- columnData : Column data msg -> Maybe data
--- columnData column =
---     case column of
---         StringColumn name dataToString sorter ->
---             Just data
---         NullableStringColumn name dataToString sorter ->
---             Just data
---         NullableDateTimeColumn name dataToString sorter ->
---             Just data
---         DropdownColumn dropDownItems ->
---             Nothing
 
 
 sort : State -> List (Column data msg) -> List { data | id : Int } -> List { data | id : Int }
