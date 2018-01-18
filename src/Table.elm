@@ -48,29 +48,29 @@ type Column data msg
     | DateTimeColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
     | DateColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
     | HrefColumn String String ({ data | id : Int } -> Maybe String) (Sorter data)
-    | HrefColumnExtra ({ data | id : Int } -> Html msg)
+    | HrefColumnExtra String ({ data | id : Int } -> Html msg)
     | CheckColumn String ({ data | id : Int } -> Bool) (Sorter data)
     | DropdownColumn (List ( String, String, Int -> msg ))
 
 
 intColumn : String -> ({ data | id : Int } -> Maybe Int) -> Column data msg
-intColumn str data =
-    IntColumn str data (defaultIntSort data)
+intColumn name data =
+    IntColumn name data (defaultIntSort data)
 
 
 stringColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
-stringColumn str data =
-    StringColumn str data (defaultSort data)
+stringColumn name data =
+    StringColumn name data (defaultSort data)
 
 
 dateTimeColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
-dateTimeColumn str data =
-    DateTimeColumn str data (defaultSort data)
+dateTimeColumn name data =
+    DateTimeColumn name data (defaultSort data)
 
 
 dateColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
-dateColumn str data =
-    DateColumn str data (defaultSort data)
+dateColumn name data =
+    DateColumn name data (defaultSort data)
 
 
 hrefColumn : String -> String -> ({ data | id : Int } -> Maybe String) -> Column data msg
@@ -78,9 +78,9 @@ hrefColumn url displayStr data =
     HrefColumn url displayStr data (defaultSort data)
 
 
-hrefColumnExtra : ({ data | id : Int } -> Html msg) -> Column data msg
-hrefColumnExtra toNode =
-    HrefColumnExtra toNode
+hrefColumnExtra : String -> ({ data | id : Int } -> Html msg) -> Column data msg
+hrefColumnExtra name toNode =
+    HrefColumnExtra name toNode
 
 
 checkColumn : String -> ({ data | id : Int } -> Bool) -> Column data msg
@@ -239,25 +239,25 @@ viewTd state row config column =
     in
         td [ tdClass, tdStyle ]
             [ case column of
-                IntColumn name dataToInt _ ->
+                IntColumn _ dataToInt _ ->
                     text (Functions.defaultIntToString (dataToInt row))
 
-                StringColumn name dataToString _ ->
+                StringColumn _ dataToString _ ->
                     text (Maybe.withDefault "" (dataToString row))
 
-                DateTimeColumn name dataToString _ ->
+                DateTimeColumn _ dataToString _ ->
                     text (Functions.defaultDateTime (dataToString row))
 
-                DateColumn name dataToString _ ->
+                DateColumn _ dataToString _ ->
                     text (Functions.defaultDate (dataToString row))
 
                 HrefColumn url displayText dataToString _ ->
                     a [ href url, target "_blank" ] [ text displayText ]
 
-                HrefColumnExtra toNode ->
+                HrefColumnExtra _ toNode ->
                     toNode row
 
-                CheckColumn name dataToString _ ->
+                CheckColumn _ dataToString _ ->
                     div [ class "e-checkcell" ]
                         [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
                             [ input [ type_ "checkbox", disabled True, checked (dataToString row) ] []
@@ -524,7 +524,7 @@ findSorter selectedColumn columnData =
                     else
                         findSorter selectedColumn remainingColumnData
 
-                HrefColumnExtra _ ->
+                HrefColumnExtra _ _ ->
                     Nothing
 
                 CheckColumn name _ sorter ->
