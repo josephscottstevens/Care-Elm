@@ -3,7 +3,7 @@ port module Records exposing (Msg, Model, emptyModel, subscriptions, init, updat
 import Html exposing (Html, text, div, h4, button)
 import Html.Attributes exposing (class, type_, id, value)
 import Html.Events exposing (onClick)
-import Table exposing (Config, Column(NullableDateTimeColumn, NullableStringColumn, NullableIntColumn, DropdownColumn), defaultSort)
+import Table exposing (Config, Column(DateTimeColumn, StringColumn, IntColumn, DropdownColumn), defaultSort, defaultIntSort)
 import Common.Types as Common exposing (RequiredType(Required, Optional), AddEditDataSource, RecordType, DropdownItem)
 import Common.Functions as Functions exposing (sendMenuMessage, displaySuccessMessage, displayErrorMessage, maybeVal, defaultString, maybeToDateString)
 import Common.Html
@@ -390,10 +390,10 @@ getColumns recordTypeId =
         Just recordType ->
             let
                 commonColumns =
-                    [ NullableDateTimeColumn "Date Collected" .date (defaultSort .date)
-                    , NullableStringColumn "Doctor of Visit" .provider (defaultSort .provider)
-                    , NullableStringColumn "Specialty" .specialty (defaultSort .specialty)
-                    , NullableStringColumn "Comments" .comments (defaultSort .comments)
+                    [ DateTimeColumn "Date Collected" .date (defaultSort .date)
+                    , StringColumn "Doctor of Visit" .provider (defaultSort .provider)
+                    , StringColumn "Specialty" .specialty (defaultSort .specialty)
+                    , StringColumn "Comments" .comments (defaultSort .comments)
                     ]
 
                 firstColumns =
@@ -405,57 +405,57 @@ getColumns recordTypeId =
                             commonColumns
 
                         Common.Labs ->
-                            [ NullableDateTimeColumn "Date Collected" .date (defaultSort .date)
-                            , NullableDateTimeColumn "Date Accessioned" .dateAccessed (defaultSort .dateAccessed)
-                            , NullableStringColumn "Name of Lab" .title (defaultSort .title)
-                            , NullableStringColumn "Provider" .provider (defaultSort .provider)
-                            , NullableStringColumn "Comments" .comments (defaultSort .comments)
+                            [ DateTimeColumn "Date Collected" .date (defaultSort .date)
+                            , DateTimeColumn "Date Accessioned" .dateAccessed (defaultSort .dateAccessed)
+                            , StringColumn "Name of Lab" .title (defaultSort .title)
+                            , StringColumn "Provider" .provider (defaultSort .provider)
+                            , StringColumn "Comments" .comments (defaultSort .comments)
                             ]
 
                         Common.Radiology ->
-                            [ NullableDateTimeColumn "Date Collected" .date (defaultSort .date)
-                            , NullableDateTimeColumn "Date Accessioned" .dateAccessed (defaultSort .dateAccessed)
-                            , NullableStringColumn "Name of Study" .title (defaultSort .title)
-                            , NullableStringColumn "Provider" .provider (defaultSort .provider)
-                            , NullableStringColumn "Comments" .comments (defaultSort .comments)
+                            [ DateTimeColumn "Date Collected" .date (defaultSort .date)
+                            , DateTimeColumn "Date Accessioned" .dateAccessed (defaultSort .dateAccessed)
+                            , StringColumn "Name of Study" .title (defaultSort .title)
+                            , StringColumn "Provider" .provider (defaultSort .provider)
+                            , StringColumn "Comments" .comments (defaultSort .comments)
                             ]
 
                         Common.Hospitalizations ->
-                            [ NullableDateTimeColumn "Date Collected" .date (defaultSort .date)
-
-                            -- , NullableIntColumn "Hospitalization ID" .hospitalizationId (defaultSort .hospitalizationId)
-                            , NullableDateTimeColumn "Admin Collected" .dateOfAdmission (defaultSort .dateOfAdmission)
-                            , NullableDateTimeColumn "Discharge Date" .dateOfDischarge (defaultSort .dateOfDischarge)
-                            , NullableStringColumn "Service Type" .hospitalizationServiceType (defaultSort .hospitalizationServiceType)
-                            , NullableStringColumn "Discharge Recommendations" .recommendations (defaultSort .recommendations)
-                            , NullableStringColumn "Discharge Physician" .dischargePhysician (defaultSort .dischargePhysician)
-                            , NullableStringColumn "Comments" .comments (defaultSort .comments)
+                            [ DateTimeColumn "Date Collected" .date (defaultSort .date)
+                            , IntColumn "Hospitalization ID" .hospitalizationId (defaultIntSort .hospitalizationId)
+                            , DateTimeColumn "Admin Collected" .dateOfAdmission (defaultSort .dateOfAdmission)
+                            , DateTimeColumn "Discharge Date" .dateOfDischarge (defaultSort .dateOfDischarge)
+                            , StringColumn "Service Type" .hospitalizationServiceType (defaultSort .hospitalizationServiceType)
+                            , StringColumn "Discharge Recommendations" .recommendations (defaultSort .recommendations)
+                            , StringColumn "Discharge Physician" .dischargePhysician (defaultSort .dischargePhysician)
+                            , StringColumn "Comments" .comments (defaultSort .comments)
                             ]
 
                         Common.Legal ->
-                            [ NullableDateTimeColumn "Date Collected" .date (defaultSort .date)
-                            , NullableStringColumn "Comments" .comments (defaultSort .comments)
+                            [ DateTimeColumn "Date Collected" .date (defaultSort .date)
+                            , StringColumn "Comments" .comments (defaultSort .comments)
                             ]
 
                         Common.CallRecordings ->
-                            [--     NullableDateColumn "Date" .recordingDate (defaultSort .recordingDate)
-                             -- , hrefColumn "Recording" "Open" (\t -> Functions.defaultString t.recording)
-                             -- , hrefCustom
-                             -- , checkColumn "During Enrollment" (\t -> t.enrollment)
-                             -- , checkColumn "Consent" (\t -> t.hasVerbalConsent)
-                             -- , stringColumn "User" (\t -> Functions.defaultString t.staffName)
+                            [ DateColumn "Date" .recordingDate (defaultSort .recordingDate)
+
+                            -- , hrefColumn "Recording" "Open" (\t -> Functions.defaultString t.recording)
+                            -- , hrefCustom
+                            -- , checkColumn "During Enrollment" (\t -> t.enrollment)
+                            -- , checkColumn "Consent" (\t -> t.hasVerbalConsent)
+                            -- , stringColumn "User" (\t -> Functions.defaultString t.staffName)
                             ]
 
                         Common.PreviousHistories ->
-                            [--  NullableDateTimeColumn "Date Collected" .date (defaultSort .date)
-                             -- , NullableStringColumn "File Name" .fileName (defaultSort .fileName)
+                            [--  DateTimeColumn "Date Collected" .date (defaultSort .date)
+                             -- , StringColumn "File Name" .fileName (defaultSort .fileName)
                              -- , NullableDateColumn "Report Date" .reportDate (defaultSort .reportDate)
-                             -- , NullableStringColumn "Comments" .comments (defaultSort .comments)
+                             -- , StringColumn "Comments" .comments (defaultSort .comments)
                             ]
 
                         Common.Enrollment ->
-                            [ NullableDateTimeColumn "Date Collected" .date (defaultSort .date)
-                            , NullableStringColumn "Comments" .comments (defaultSort .comments)
+                            [ DateTimeColumn "Date Collected" .date (defaultSort .date)
+                            , StringColumn "Comments" .comments (defaultSort .comments)
                             ]
 
                         Common.Misc ->

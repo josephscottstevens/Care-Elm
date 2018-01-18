@@ -28,10 +28,9 @@ init sortedColumnName =
 
 
 type Column data msg
-    = StringColumn String ({ data | id : Int } -> String) (Sorter { data | id : Int })
-    | NullableIntColumn String ({ data | id : Int } -> Maybe Int) (Sorter { data | id : Int })
-    | NullableStringColumn String ({ data | id : Int } -> Maybe String) (Sorter { data | id : Int })
-    | NullableDateTimeColumn String ({ data | id : Int } -> Maybe String) (Sorter { data | id : Int })
+    = IntColumn String ({ data | id : Int } -> Maybe Int) (Sorter { data | id : Int })
+    | StringColumn String ({ data | id : Int } -> Maybe String) (Sorter { data | id : Int })
+    | DateTimeColumn String ({ data | id : Int } -> Maybe String) (Sorter { data | id : Int })
     | DropdownColumn (List ( String, String, Int -> msg ))
 
 
@@ -181,16 +180,13 @@ viewTd state row config column =
     in
         td [ tdClass, tdStyle ]
             [ case column of
-                StringColumn name dataToString _ ->
-                    text (dataToString row)
-
-                NullableIntColumn name dataToInt _ ->
+                IntColumn name dataToInt _ ->
                     text (Functions.defaultIntToString (dataToInt row))
 
-                NullableStringColumn name dataToString _ ->
+                StringColumn name dataToString _ ->
                     text (Maybe.withDefault "" (dataToString row))
 
-                NullableDateTimeColumn name dataToString _ ->
+                DateTimeColumn name dataToString _ ->
                     text (Functions.defaultDateTime (dataToString row))
 
                 DropdownColumn dropDownItems ->
@@ -392,7 +388,7 @@ pagingView currentPage totalVisiblePages =
 -- Sorting
 
 
-sort : State -> List (Column data msg) -> List { data | id : Int } -> List { data | id : Int }
+sort : State -> List (Column { data | id : Int } msg) -> List { data | id : Int } -> List { data | id : Int }
 sort state columnData data =
     case findSorter state.sortedColumnName columnData of
         Nothing ->
@@ -402,7 +398,7 @@ sort state columnData data =
             applySorter state.isReversed sorter data
 
 
-applySorter : Bool -> Sorter data -> List { data | id : Int } -> List { data | id : Int }
+applySorter : Bool -> Sorter { data | id : Int } -> List { data | id : Int } -> List { data | id : Int }
 applySorter isReversed sorter data =
     case sorter of
         None ->
@@ -415,7 +411,7 @@ applySorter isReversed sorter data =
                 sort data
 
 
-findSorter : String -> List (Column data msg) -> Maybe (Sorter { data | id : Int })
+findSorter : String -> List (Column { data | id : Int } msg) -> Maybe (Sorter { data | id : Int })
 findSorter selectedColumn columnData =
     case columnData of
         [] ->
@@ -423,25 +419,19 @@ findSorter selectedColumn columnData =
 
         column :: remainingColumnData ->
             case column of
+                IntColumn name dataToString sorter ->
+                    if name == selectedColumn then
+                        Just sorter
+                    else
+                        findSorter selectedColumn remainingColumnData
+
                 StringColumn name dataToString sorter ->
                     if name == selectedColumn then
                         Just sorter
                     else
                         findSorter selectedColumn remainingColumnData
 
-                NullableIntColumn name dataToString sorter ->
-                    if name == selectedColumn then
-                        Just sorter
-                    else
-                        findSorter selectedColumn remainingColumnData
-
-                NullableStringColumn name dataToString sorter ->
-                    if name == selectedColumn then
-                        Just sorter
-                    else
-                        findSorter selectedColumn remainingColumnData
-
-                NullableDateTimeColumn name dataToString sorter ->
+                DateTimeColumn name dataToString sorter ->
                     if name == selectedColumn then
                         Just sorter
                     else
@@ -464,3 +454,8 @@ increasingOrDecreasingBy toComparable =
 defaultSort : ({ data | id : Int } -> Maybe String) -> Sorter data
 defaultSort t =
     increasingOrDecreasingBy (Functions.defaultString << t)
+
+
+defaultIntSort : ({ data | id : Int } -> Maybe Int) -> Sorter data
+defaultIntSort t =
+    increasingOrDecreasingBy (Functions.defaultIntToString << t)
