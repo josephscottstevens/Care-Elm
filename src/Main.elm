@@ -1,10 +1,9 @@
 port module Main exposing (main)
 
 import Html exposing (Html, div)
-import Records.Main
-import Records.Model
+import Records
 import Demographics
-import Utils.CommonTypes exposing (..)
+import Common.Types exposing (..)
 
 
 port openPage : (String -> msg) -> Sub msg
@@ -22,7 +21,7 @@ init flags =
             emptyModel flags
     in
         if flags.pageFlag == "records" then
-            ( { model | page = RecordsPage }, Cmd.map RecordsMsg (Records.Main.init flags) )
+            ( { model | page = RecordsPage }, Cmd.map RecordsMsg (Records.init flags.recordType flags.patientId) )
         else if flags.pageFlag == "demographics" then
             ( { model | page = DemographicsPage }, Cmd.map DemographicsMsg (Demographics.init flags) )
         else
@@ -37,13 +36,14 @@ type Page
 
 type alias Model =
     { page : Page
-    , recordsState : Records.Model.Model
+    , recordsState : Records.Model
     , demographicsState : Demographics.Model
+    , flags : Flags
     }
 
 
 type Msg
-    = RecordsMsg Records.Model.Msg
+    = RecordsMsg Records.Msg
     | DemographicsMsg Demographics.Msg
 
 
@@ -64,7 +64,7 @@ view model =
             div [] []
 
         RecordsPage ->
-            Html.map RecordsMsg (Records.Main.view model.recordsState)
+            Html.map RecordsMsg (Records.view model.recordsState model.flags.recordType)
 
         DemographicsPage ->
             Html.map DemographicsMsg (Demographics.view model.demographicsState)
@@ -76,7 +76,7 @@ update msg model =
         RecordsMsg recordsMsg ->
             let
                 ( newRecordModel, widgetCmd ) =
-                    Records.Main.update recordsMsg model.recordsState
+                    Records.update recordsMsg model.recordsState model.flags.patientId model.flags.recordType
             in
                 ( { model | recordsState = newRecordModel }, Cmd.map RecordsMsg widgetCmd )
 
@@ -91,6 +91,7 @@ update msg model =
 emptyModel : Flags -> Model
 emptyModel flags =
     { page = NoPage
-    , recordsState = Records.Model.emptyModel flags
+    , recordsState = Records.emptyModel
     , demographicsState = Demographics.emptyModel flags.patientId
+    , flags = flags
     }

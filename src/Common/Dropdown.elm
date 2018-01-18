@@ -1,11 +1,11 @@
-port module Utils.Dropdown exposing (DropState, Msg, init, update, view)
+port module Common.Dropdown exposing (DropState, Msg, init, update, view)
 
 import Html exposing (Html, Attribute, div, span, text, li, ul, input)
 import Html.Attributes exposing (style, value, class, readonly)
 import Html.Events as Events
 import Json.Decode
-import Utils.CommonTypes exposing (DropdownItem)
-import Utils.CommonFunctions as Functions
+import Common.Types exposing (DropdownItem)
+import Common.Functions as Functions
 import Char
 
 

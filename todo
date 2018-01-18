@@ -14,17 +14,11 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-from matt 1/16/2018
+get row dropdown back
+make sure I didn't undo any completed tasks
 
-no records found
-footer is missing
-style is off (highlight)
-click turn blue
-dropdown arrow squished
-+ button (not edit template)
-the 1 in the paging looks off
-
------------------------------------------------------------------
+test that all the columns in records back
+make sure the row dropdown shows right stuff
 
 has changes js error when click on checkbox in contacts
 test Contact Hours still works (load and save)

@@ -4,7 +4,7 @@ import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, tex
 import Html.Attributes exposing (class, id, style, type_, target, colspan, classList)
 import Html.Events as Events
 import Json.Decode as Decode
-import Utils.CommonFunctions exposing (defaultDateTime, defaultString)
+import Common.Functions as Functions
 
 
 -- Data Types
@@ -29,6 +29,7 @@ init sortedColumnName =
 
 type Column data msg
     = StringColumn String ({ data | id : Int } -> String) (Sorter { data | id : Int })
+    | NullableIntColumn String ({ data | id : Int } -> Maybe Int) (Sorter { data | id : Int })
     | NullableStringColumn String ({ data | id : Int } -> Maybe String) (Sorter { data | id : Int })
     | NullableDateTimeColumn String ({ data | id : Int } -> Maybe String) (Sorter { data | id : Int })
     | DropdownColumn (List ( String, String, Html.Attribute msg ))
@@ -183,11 +184,14 @@ viewTd state row config column =
                 StringColumn name dataToString _ ->
                     text (dataToString row)
 
+                NullableIntColumn name dataToInt _ ->
+                    text (Functions.defaultIntToString (dataToInt row))
+
                 NullableStringColumn name dataToString _ ->
                     text (Maybe.withDefault "" (dataToString row))
 
                 NullableDateTimeColumn name dataToString _ ->
-                    text (defaultDateTime (dataToString row))
+                    text (Functions.defaultDateTime (dataToString row))
 
                 DropdownColumn dropDownItems ->
                     rowDropDownDiv state config.toMsg row dropDownItems
@@ -415,6 +419,12 @@ findSorter selectedColumn columnData =
                     else
                         findSorter selectedColumn remainingColumnData
 
+                NullableIntColumn name dataToString sorter ->
+                    if name == selectedColumn then
+                        Just sorter
+                    else
+                        findSorter selectedColumn remainingColumnData
+
                 NullableStringColumn name dataToString sorter ->
                     if name == selectedColumn then
                         Just sorter
@@ -443,4 +453,4 @@ increasingOrDecreasingBy toComparable =
 
 defaultSort : ({ data | id : Int } -> Maybe String) -> Sorter data
 defaultSort t =
-    increasingOrDecreasingBy (defaultString << t)
+    increasingOrDecreasingBy (Functions.defaultString << t)

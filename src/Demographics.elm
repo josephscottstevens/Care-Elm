@@ -3,10 +3,9 @@ port module Demographics exposing (..)
 import Html exposing (Html, text, div, span, button, ul, li, a, input, label, h4)
 import Html.Attributes exposing (class, id, type_, value, style, title, checked, hidden, attribute, maxlength, name)
 import Html.Events exposing (onClick, onInput, onCheck)
-import Utils.CommonTypes exposing (DropdownItem, Flags)
-import Utils.CommonFunctions exposing (decodeDropdownItem)
-import Utils.Dropdown as Dropdown
-import Utils.CommonFunctions as Functions
+import Common.Types exposing (DropdownItem, Flags)
+import Common.Dropdown as Dropdown
+import Common.Functions as Functions exposing (decodeDropdownItem)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
