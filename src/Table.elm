@@ -68,7 +68,7 @@ view state rows config maybeCustomRow =
                 , tbody []
                     (viewTr state sortedRows config maybeCustomRow)
                 ]
-            , pagingView 0 (List.length rows)
+            , pagingView 0 (List.length sortedRows)
             ]
 
 
@@ -121,18 +121,24 @@ viewTr state rows config maybeCustomRow =
                 , ( "margin-left", "5px" )
                 ]
     in
-        case maybeCustomRow of
-            Just customRow ->
-                (tr []
-                    [ td [ colspan 4, inlineStyle ]
-                        [ customRow
+        if List.length rows == 0 then
+            [ tr []
+                [ td [] [ text "No records to display" ]
+                ]
+            ]
+        else
+            case maybeCustomRow of
+                Just customRow ->
+                    (tr []
+                        [ td [ colspan 4, inlineStyle ]
+                            [ customRow
+                            ]
                         ]
-                    ]
-                )
-                    :: List.indexedMap standardTr rows
+                    )
+                        :: List.indexedMap standardTr rows
 
-            Nothing ->
-                List.indexedMap standardTr rows
+                Nothing ->
+                    List.indexedMap standardTr rows
 
 
 emptyAttr : Attribute msg
