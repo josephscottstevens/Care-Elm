@@ -95,7 +95,6 @@ dropdownColumn items =
 
 type alias Config data msg =
     { domTableId : String
-    , headers : List String
     , toolbar : List ( String, msg )
     , toMsg : State -> msg
     , columns : List (Column { data | id : Int } msg)
@@ -122,7 +121,7 @@ view state rows config maybeCustomRow =
             , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
                 [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
                     [ tr []
-                        (List.map (viewTh state config) config.headers)
+                        (List.map (viewTh state config) config.columns)
                     ]
                 , tbody []
                     (viewTr state sortedRows config maybeCustomRow)
@@ -205,9 +204,12 @@ emptyAttr =
     class ""
 
 
-viewTh : State -> Config { data | id : Int } msg -> String -> Html msg
-viewTh state config name =
+viewTh : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
+viewTh state config column =
     let
+        name =
+            getColumnName column
+
         headerContent =
             if state.sortedColumnName == name then
                 if state.isReversed then
@@ -267,6 +269,34 @@ viewTd state row config column =
                 DropdownColumn dropDownItems ->
                     rowDropDownDiv state config.toMsg row dropDownItems
             ]
+
+
+getColumnName : Column { data | id : Int } msg -> String
+getColumnName column =
+    case column of
+        IntColumn name _ _ ->
+            name
+
+        StringColumn name _ _ ->
+            name
+
+        DateTimeColumn name _ _ ->
+            name
+
+        DateColumn name _ _ ->
+            name
+
+        HrefColumn name _ _ _ ->
+            name
+
+        HrefColumnExtra name _ ->
+            name
+
+        CheckColumn name _ _ ->
+            name
+
+        DropdownColumn dropDownItems ->
+            ""
 
 
 

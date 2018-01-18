@@ -439,7 +439,7 @@ getColumns recordTypeId =
                         Common.CallRecordings ->
                             [ dateColumn "Date" .recordingDate
                             , hrefColumn "Recording" "Open" .recording
-                            , hrefColumnExtra hrefCustom
+                            , hrefColumnExtra "Task" hrefCustom
                             , checkColumn "During Enrollment" .enrollment
                             , checkColumn "Consent" .hasVerbalConsent
                             , stringColumn "User" .staffName
@@ -680,13 +680,6 @@ formInputs model editData recordTypeId =
 gridConfig : Maybe Int -> Maybe AddEditDataSource -> Table.Config RecordRow Msg
 gridConfig recordTypeId addEditDataSource =
     { domTableId = "RecordTable"
-    , headers =
-        [ "Date Collected"
-        , "Doctor of Visit"
-        , "Specialty"
-        , "Comments"
-        , ""
-        ]
     , toolbar =
         case addEditDataSource of
             Just t ->
