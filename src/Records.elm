@@ -3,7 +3,7 @@ port module Records exposing (Msg, Model, emptyModel, subscriptions, init, updat
 import Html exposing (Html, text, div, h4, button)
 import Html.Attributes exposing (class, type_, id, value)
 import Html.Events exposing (onClick)
-import Table exposing (Config, Column(DateTimeColumn, StringColumn, IntColumn, DropdownColumn), defaultSort, defaultIntSort)
+import Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, checkColumn)
 import Common.Types as Common exposing (RequiredType(Required, Optional), AddEditDataSource, RecordType, DropdownItem)
 import Common.Functions as Functions exposing (sendMenuMessage, displaySuccessMessage, displayErrorMessage, maybeVal, defaultString, maybeToDateString)
 import Common.Html
@@ -112,7 +112,7 @@ type alias RecordRow =
     , taskId : Maybe Int
     , taskTitle : Maybe String
     , recording : Maybe String
-    , recordingDate : String
+    , recordingDate : Maybe String
     , recordingDuration : Int
     , enrollment : Bool
     , staffId : Int
@@ -390,10 +390,10 @@ getColumns recordTypeId =
         Just recordType ->
             let
                 commonColumns =
-                    [ DateTimeColumn "Date Collected" .date (defaultSort .date)
-                    , StringColumn "Doctor of Visit" .provider (defaultSort .provider)
-                    , StringColumn "Specialty" .specialty (defaultSort .specialty)
-                    , StringColumn "Comments" .comments (defaultSort .comments)
+                    [ dateTimeColumn "Date Collected" .date
+                    , stringColumn "Doctor of Visit" .provider
+                    , stringColumn "Specialty" .specialty
+                    , stringColumn "Comments" .comments
                     ]
 
                 firstColumns =
@@ -405,64 +405,64 @@ getColumns recordTypeId =
                             commonColumns
 
                         Common.Labs ->
-                            [ DateTimeColumn "Date Collected" .date (defaultSort .date)
-                            , DateTimeColumn "Date Accessioned" .dateAccessed (defaultSort .dateAccessed)
-                            , StringColumn "Name of Lab" .title (defaultSort .title)
-                            , StringColumn "Provider" .provider (defaultSort .provider)
-                            , StringColumn "Comments" .comments (defaultSort .comments)
+                            [ dateTimeColumn "Date Collected" .date
+                            , dateTimeColumn "Date Accessioned" .dateAccessed
+                            , stringColumn "Name of Lab" .title
+                            , stringColumn "Provider" .provider
+                            , stringColumn "Comments" .comments
                             ]
 
                         Common.Radiology ->
-                            [ DateTimeColumn "Date Collected" .date (defaultSort .date)
-                            , DateTimeColumn "Date Accessioned" .dateAccessed (defaultSort .dateAccessed)
-                            , StringColumn "Name of Study" .title (defaultSort .title)
-                            , StringColumn "Provider" .provider (defaultSort .provider)
-                            , StringColumn "Comments" .comments (defaultSort .comments)
+                            [ dateTimeColumn "Date Collected" .date
+                            , dateTimeColumn "Date Accessioned" .dateAccessed
+                            , stringColumn "Name of Study" .title
+                            , stringColumn "Provider" .provider
+                            , stringColumn "Comments" .comments
                             ]
 
                         Common.Hospitalizations ->
-                            [ DateTimeColumn "Date Collected" .date (defaultSort .date)
-                            , IntColumn "Hospitalization ID" .hospitalizationId (defaultIntSort .hospitalizationId)
-                            , DateTimeColumn "Admin Collected" .dateOfAdmission (defaultSort .dateOfAdmission)
-                            , DateTimeColumn "Discharge Date" .dateOfDischarge (defaultSort .dateOfDischarge)
-                            , StringColumn "Service Type" .hospitalizationServiceType (defaultSort .hospitalizationServiceType)
-                            , StringColumn "Discharge Recommendations" .recommendations (defaultSort .recommendations)
-                            , StringColumn "Discharge Physician" .dischargePhysician (defaultSort .dischargePhysician)
-                            , StringColumn "Comments" .comments (defaultSort .comments)
+                            [ dateTimeColumn "Date Collected" .date
+                            , intColumn "Hospitalization ID" .hospitalizationId
+                            , dateTimeColumn "Admin Collected" .dateOfAdmission
+                            , dateTimeColumn "Discharge Date" .dateOfDischarge
+                            , stringColumn "Service Type" .hospitalizationServiceType
+                            , stringColumn "Discharge Recommendations" .recommendations
+                            , stringColumn "Discharge Physician" .dischargePhysician
+                            , stringColumn "Comments" .comments
                             ]
 
                         Common.Legal ->
-                            [ DateTimeColumn "Date Collected" .date (defaultSort .date)
-                            , StringColumn "Comments" .comments (defaultSort .comments)
+                            [ dateTimeColumn "Date Collected" .date
+                            , stringColumn "Comments" .comments
                             ]
 
                         Common.CallRecordings ->
-                            [ DateColumn "Date" .recordingDate (defaultSort .recordingDate)
+                            [ dateColumn "Date" .recordingDate
+                            , hrefColumn "Recording" "Open" .recording
 
-                            -- , hrefColumn "Recording" "Open" (\t -> Functions.defaultString t.recording)
                             -- , hrefCustom
-                            -- , checkColumn "During Enrollment" (\t -> t.enrollment)
-                            -- , checkColumn "Consent" (\t -> t.hasVerbalConsent)
-                            -- , stringColumn "User" (\t -> Functions.defaultString t.staffName)
+                            , checkColumn "During Enrollment" .enrollment
+                            , checkColumn "Consent" .hasVerbalConsent
+                            , stringColumn "User" .staffName
                             ]
 
                         Common.PreviousHistories ->
-                            [--  DateTimeColumn "Date Collected" .date (defaultSort .date)
-                             -- , StringColumn "File Name" .fileName (defaultSort .fileName)
-                             -- , NullableDateColumn "Report Date" .reportDate (defaultSort .reportDate)
-                             -- , StringColumn "Comments" .comments (defaultSort .comments)
+                            [ dateTimeColumn "Date Collected" .date
+                            , stringColumn "File Name" .fileName
+                            , dateColumn "Report Date" .reportDate
+                            , stringColumn "Comments" .comments
                             ]
 
                         Common.Enrollment ->
-                            [ DateTimeColumn "Date Collected" .date (defaultSort .date)
-                            , StringColumn "Comments" .comments (defaultSort .comments)
+                            [ dateTimeColumn "Date Collected" .date
+                            , stringColumn "Comments" .comments
                             ]
 
                         Common.Misc ->
                             commonColumns
 
                 lastColumns =
-                    [ DropdownColumn (dropdownItems recordTypeId)
+                    [ dropdownColumn (dropdownItems recordTypeId)
                     ]
             in
                 List.append firstColumns lastColumns
@@ -496,7 +496,7 @@ decodeRecordRow =
         |> required "TaskId" (maybe Decode.int)
         |> required "TaskTitle" (maybe Decode.string)
         |> required "Recording" (maybe Decode.string)
-        |> required "RecordingDate" Decode.string
+        |> required "RecordingDate" (maybe Decode.string)
         |> required "RecordingDuration" Decode.int
         |> required "Enrollment" Decode.bool
         |> required "StaffId" Decode.int
@@ -668,7 +668,7 @@ formInputs model editData recordTypeId =
         columns
 
 
-gridConfig : Maybe Int -> Maybe AddEditDataSource -> Config RecordRow Msg
+gridConfig : Maybe Int -> Maybe AddEditDataSource -> Table.Config RecordRow Msg
 gridConfig recordTypeId addEditDataSource =
     { domTableId = "RecordTable"
     , headers =

@@ -1,7 +1,21 @@
-module Table exposing (..)
+module Table
+    exposing
+        ( State
+        , Column
+        , Config
+        , init
+        , view
+        , intColumn
+        , stringColumn
+        , dateTimeColumn
+        , dropdownColumn
+        , dateColumn
+        , hrefColumn
+        , checkColumn
+        )
 
-import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span)
-import Html.Attributes exposing (class, id, style, type_, target, colspan, classList)
+import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
+import Html.Attributes exposing (class, id, style, type_, target, colspan, classList, href, disabled, checked)
 import Html.Events as Events
 import Json.Decode as Decode
 import Common.Functions as Functions
@@ -28,10 +42,48 @@ init sortedColumnName =
 
 
 type Column data msg
-    = IntColumn String ({ data | id : Int } -> Maybe Int) (Sorter { data | id : Int })
-    | StringColumn String ({ data | id : Int } -> Maybe String) (Sorter { data | id : Int })
-    | DateTimeColumn String ({ data | id : Int } -> Maybe String) (Sorter { data | id : Int })
+    = IntColumn String ({ data | id : Int } -> Maybe Int) (Sorter data)
+    | StringColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
+    | DateTimeColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
+    | DateColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
+    | HrefColumn String String ({ data | id : Int } -> Maybe String) (Sorter data)
+    | CheckColumn String ({ data | id : Int } -> Bool) (Sorter data)
     | DropdownColumn (List ( String, String, Int -> msg ))
+
+
+intColumn : String -> ({ data | id : Int } -> Maybe Int) -> Column data msg
+intColumn str data =
+    IntColumn str data (defaultIntSort data)
+
+
+stringColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+stringColumn str data =
+    StringColumn str data (defaultSort data)
+
+
+dateTimeColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+dateTimeColumn str data =
+    DateTimeColumn str data (defaultSort data)
+
+
+dateColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+dateColumn str data =
+    DateColumn str data (defaultSort data)
+
+
+hrefColumn : String -> String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+hrefColumn url displayStr data =
+    HrefColumn url displayStr data (defaultSort data)
+
+
+checkColumn : String -> ({ data | id : Int } -> Bool) -> Column data msg
+checkColumn str data =
+    CheckColumn str data (defaultBoolSort data)
+
+
+dropdownColumn : List ( String, String, Int -> msg ) -> Column data msg
+dropdownColumn items =
+    DropdownColumn items
 
 
 type alias Config data msg =
@@ -188,6 +240,19 @@ viewTd state row config column =
 
                 DateTimeColumn name dataToString _ ->
                     text (Functions.defaultDateTime (dataToString row))
+
+                DateColumn name dataToString _ ->
+                    text (Functions.defaultDate (dataToString row))
+
+                HrefColumn url displayText dataToString _ ->
+                    a [ href url, target "_blank" ] [ text displayText ]
+
+                CheckColumn name dataToString _ ->
+                    div [ class "e-checkcell" ]
+                        [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
+                            [ input [ type_ "checkbox", disabled True, checked (dataToString row) ] []
+                            ]
+                        ]
 
                 DropdownColumn dropDownItems ->
                     rowDropDownDiv state config.toMsg row dropDownItems
@@ -419,31 +484,53 @@ findSorter selectedColumn columnData =
 
         column :: remainingColumnData ->
             case column of
-                IntColumn name dataToString sorter ->
+                IntColumn name _ sorter ->
                     if name == selectedColumn then
                         Just sorter
                     else
                         findSorter selectedColumn remainingColumnData
 
-                StringColumn name dataToString sorter ->
+                StringColumn name _ sorter ->
                     if name == selectedColumn then
                         Just sorter
                     else
                         findSorter selectedColumn remainingColumnData
 
-                DateTimeColumn name dataToString sorter ->
+                DateTimeColumn name _ sorter ->
                     if name == selectedColumn then
                         Just sorter
                     else
                         findSorter selectedColumn remainingColumnData
 
-                DropdownColumn dropDownItems ->
+                DateColumn name _ sorter ->
+                    if name == selectedColumn then
+                        Just sorter
+                    else
+                        findSorter selectedColumn remainingColumnData
+
+                HrefColumn name _ _ sorter ->
+                    if name == selectedColumn then
+                        Just sorter
+                    else
+                        findSorter selectedColumn remainingColumnData
+
+                CheckColumn name _ sorter ->
+                    if name == selectedColumn then
+                        Just sorter
+                    else
+                        findSorter selectedColumn remainingColumnData
+
+                DropdownColumn _ ->
                     Nothing
 
 
 unsortable : Sorter { data | id : Int }
 unsortable =
     None
+
+
+
+-- increasingOrDecreasingBy : ({ data | id : Int } -> comparable) -> Sorter { data | id : Int }
 
 
 increasingOrDecreasingBy : ({ data | id : Int } -> comparable) -> Sorter data
@@ -459,3 +546,8 @@ defaultSort t =
 defaultIntSort : ({ data | id : Int } -> Maybe Int) -> Sorter data
 defaultIntSort t =
     increasingOrDecreasingBy (Functions.defaultIntToString << t)
+
+
+defaultBoolSort : ({ data | id : Int } -> Bool) -> Sorter data
+defaultBoolSort t =
+    increasingOrDecreasingBy (toString << t)
