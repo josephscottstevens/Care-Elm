@@ -32,7 +32,7 @@ type Column data msg
     | NullableIntColumn String ({ data | id : Int } -> Maybe Int) (Sorter { data | id : Int })
     | NullableStringColumn String ({ data | id : Int } -> Maybe String) (Sorter { data | id : Int })
     | NullableDateTimeColumn String ({ data | id : Int } -> Maybe String) (Sorter { data | id : Int })
-    | DropdownColumn (List ( String, String, Html.Attribute msg ))
+    | DropdownColumn (List ( String, String, Int -> msg ))
 
 
 type alias Config data msg =
@@ -202,13 +202,13 @@ viewTd state row config column =
 -- Custom
 
 
-rowDropDownDiv : State -> (State -> msg) -> { data | id : Int } -> List ( String, String, Html.Attribute msg ) -> Html msg
+rowDropDownDiv : State -> (State -> msg) -> { data | id : Int } -> List ( String, String, Int -> msg ) -> Html msg
 rowDropDownDiv state toMsg row dropDownItems =
     let
-        dropDownMenuItem : ( String, String, Html.Attribute msg ) -> Html msg
+        dropDownMenuItem : ( String, String, Int -> msg ) -> Html msg
         dropDownMenuItem ( iconClass, displayText, event ) =
             li [ class "e-content e-list" ]
-                [ a [ class "e-menulink", event, target "_blank" ]
+                [ a [ class "e-menulink", Events.onClick (event row.id), target "_blank" ]
                     [ text displayText
                     , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
                     ]
@@ -268,7 +268,17 @@ viewToolbar items =
 
 toolbarHelper : ( String, msg ) -> Html msg
 toolbarHelper ( iconStr, event ) =
-    a [ class ("e-addnewitem e-toolbaricons e-icon " ++ iconStr), Events.onClick event, style [ ( "cursor", "pointer" ) ] ] []
+    let
+        iconStyle =
+            if String.contains "e-disable" iconStr then
+                style []
+            else
+                style [ ( "cursor", "pointer" ) ]
+
+        iconClass =
+            "e-addnewitem e-toolbaricons e-icon " ++ iconStr
+    in
+        a [ class iconClass, Events.onClick event, iconStyle ] []
 
 
 

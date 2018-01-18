@@ -224,7 +224,7 @@ type Msg
     = Load (Result Http.Error (List RecordRow))
     | SetTableState Table.State
     | Add AddEditDataSource
-    | SendMenuMessage Int Common.RecordType String
+    | SendMenuMessage Common.RecordType String Int
     | EditTask Int
     | DeletePrompt Int
     | DeleteConfirmed Int
@@ -271,7 +271,7 @@ update msg model patientId recordTypeId =
             SetTableState newState ->
                 { model | tableState = newState } ! []
 
-            SendMenuMessage recordId recordType messageType ->
+            SendMenuMessage recordType messageType recordId ->
                 { model | rows = flipConsent model.rows recordId recordType }
                     ! [ sendMenuMessage (getMenuMessage model.rows recordType recordId messageType) ]
 
@@ -384,22 +384,6 @@ update msg model patientId recordTypeId =
                 updateAddNew { model | dischargeDiagnosis = str }
 
 
-dropDownItems : RecordType -> Int -> List ( String, String, Html.Attribute Msg )
-dropDownItems recordType rowId =
-    case recordType of
-        Common.CallRecordings ->
-            [ ( "e-edit", "Mark As Consent", onClick (SendMenuMessage rowId recordType "MarkAsConsent") ) ]
-
-        _ ->
-            [ ( "e-sync", "Transfer", onClick (SendMenuMessage rowId recordType "Transfer") )
-            , ( "e-download", "View File", onClick (SendMenuMessage rowId recordType "ViewFile") )
-            , ( "e-mail", "Send By Email", onClick (SendMenuMessage rowId recordType "SendByEmail") )
-            , ( "e-print_01", "Send By Fax", onClick (SendMenuMessage rowId recordType "SendByFax") )
-            , ( "e-save", "Save To Client Portal", onClick (SendMenuMessage rowId recordType "SaveToClientPortal") )
-            , ( "e-contextdelete", "Delete", onClick (DeletePrompt rowId) )
-            ]
-
-
 getColumns : Maybe Int -> List (Table.Column RecordRow Msg)
 getColumns recordTypeId =
     case Functions.getRecordTypeById recordTypeId of
@@ -478,7 +462,7 @@ getColumns recordTypeId =
                             commonColumns
 
                 lastColumns =
-                    [ DropdownColumn (dropDownItems recordType 0)
+                    [ DropdownColumn (dropdownItems recordTypeId)
                     ]
             in
                 List.append firstColumns lastColumns
@@ -700,27 +684,27 @@ gridConfig recordTypeId addEditDataSource =
                 [ ( "e-addnew", Add t ) ]
 
             Nothing ->
-                [ ( "e-addnew", NoOp ) ]
+                [ ( "e-addnew e-disable", NoOp ) ]
     , toMsg = SetTableState
     , columns = getColumns recordTypeId
     }
 
 
-dropdownItems : Maybe Int -> Int -> List ( String, String, Html.Attribute Msg )
-dropdownItems recordTypeId rowId =
+dropdownItems : Maybe Int -> List ( String, String, Int -> Msg )
+dropdownItems recordTypeId =
     case Functions.getRecordTypeById recordTypeId of
         Just recordType ->
             case recordType of
                 Common.CallRecordings ->
-                    [ ( "e-edit", "Mark As Consent", onClick (SendMenuMessage rowId recordType "MarkAsConsent") ) ]
+                    [ ( "e-edit", "Mark As Consent", SendMenuMessage recordType "MarkAsConsent" ) ]
 
                 _ ->
-                    [ ( "e-sync", "Transfer", onClick (SendMenuMessage rowId recordType "Transfer") )
-                    , ( "e-download", "View File", onClick (SendMenuMessage rowId recordType "ViewFile") )
-                    , ( "e-mail", "Send By Email", onClick (SendMenuMessage rowId recordType "SendByEmail") )
-                    , ( "e-print_01", "Send By Fax", onClick (SendMenuMessage rowId recordType "SendByFax") )
-                    , ( "e-save", "Save To Client Portal", onClick (SendMenuMessage rowId recordType "SaveToClientPortal") )
-                    , ( "e-contextdelete", "Delete", onClick (SendMenuMessage rowId recordType "Delete") )
+                    [ ( "e-sync", "Transfer", (SendMenuMessage recordType "Transfer") )
+                    , ( "e-download", "View File", (SendMenuMessage recordType "ViewFile") )
+                    , ( "e-mail", "Send By Email", (SendMenuMessage recordType "SendByEmail") )
+                    , ( "e-print_01", "Send By Fax", (SendMenuMessage recordType "SendByFax") )
+                    , ( "e-save", "Save To Client Portal", (SendMenuMessage recordType "SaveToClientPortal") )
+                    , ( "e-contextdelete", "Delete", (SendMenuMessage recordType "Delete") )
                     ]
 
         Nothing ->
