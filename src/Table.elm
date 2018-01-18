@@ -11,6 +11,7 @@ module Table
         , dropdownColumn
         , dateColumn
         , hrefColumn
+        , hrefColumnExtra
         , checkColumn
         )
 
@@ -47,6 +48,7 @@ type Column data msg
     | DateTimeColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
     | DateColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
     | HrefColumn String String ({ data | id : Int } -> Maybe String) (Sorter data)
+    | HrefColumnExtra ({ data | id : Int } -> Html msg)
     | CheckColumn String ({ data | id : Int } -> Bool) (Sorter data)
     | DropdownColumn (List ( String, String, Int -> msg ))
 
@@ -74,6 +76,11 @@ dateColumn str data =
 hrefColumn : String -> String -> ({ data | id : Int } -> Maybe String) -> Column data msg
 hrefColumn url displayStr data =
     HrefColumn url displayStr data (defaultSort data)
+
+
+hrefColumnExtra : ({ data | id : Int } -> Html msg) -> Column data msg
+hrefColumnExtra toNode =
+    HrefColumnExtra toNode
 
 
 checkColumn : String -> ({ data | id : Int } -> Bool) -> Column data msg
@@ -246,6 +253,9 @@ viewTd state row config column =
 
                 HrefColumn url displayText dataToString _ ->
                     a [ href url, target "_blank" ] [ text displayText ]
+
+                HrefColumnExtra toNode ->
+                    toNode row
 
                 CheckColumn name dataToString _ ->
                     div [ class "e-checkcell" ]
@@ -513,6 +523,9 @@ findSorter selectedColumn columnData =
                         Just sorter
                     else
                         findSorter selectedColumn remainingColumnData
+
+                HrefColumnExtra _ ->
+                    Nothing
 
                 CheckColumn name _ sorter ->
                     if name == selectedColumn then

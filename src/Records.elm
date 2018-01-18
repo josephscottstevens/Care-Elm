@@ -3,7 +3,7 @@ port module Records exposing (Msg, Model, emptyModel, subscriptions, init, updat
 import Html exposing (Html, text, div, h4, button)
 import Html.Attributes exposing (class, type_, id, value)
 import Html.Events exposing (onClick)
-import Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, checkColumn)
+import Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn)
 import Common.Types as Common exposing (RequiredType(Required, Optional), AddEditDataSource, RecordType, DropdownItem)
 import Common.Functions as Functions exposing (sendMenuMessage, displaySuccessMessage, displayErrorMessage, maybeVal, defaultString, maybeToDateString)
 import Common.Html
@@ -439,8 +439,7 @@ getColumns recordTypeId =
                         Common.CallRecordings ->
                             [ dateColumn "Date" .recordingDate
                             , hrefColumn "Recording" "Open" .recording
-
-                            -- , hrefCustom
+                            , hrefColumnExtra hrefCustom
                             , checkColumn "During Enrollment" .enrollment
                             , checkColumn "Consent" .hasVerbalConsent
                             , stringColumn "User" .staffName
@@ -469,6 +468,16 @@ getColumns recordTypeId =
 
         Nothing ->
             []
+
+
+hrefCustom : { a | taskId : Maybe Int, taskTitle : Maybe String } -> Html Msg
+hrefCustom row =
+    case ( row.taskId, row.taskTitle ) of
+        ( Just t, Just y ) ->
+            div [ class "RecordTableHref", onClick (EditTask t) ] [ text y ]
+
+        _ ->
+            div [] []
 
 
 decodeRecordRow : Decoder RecordRow
