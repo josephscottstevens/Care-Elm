@@ -172,10 +172,17 @@ viewTr state rows config maybeCustomRow =
                 ]
                 (List.map (viewTd state row config) config.columns)
 
-        inlineStyle =
+        customRowStyle =
+            style
+                [ ( "border-bottom-color", "#cecece" )
+                , ( "border-bottom-width", "1px" )
+                , ( "border-bottom-style", "solid" )
+                ]
+
+        customCellStyle =
             style
                 [ ( "background-color", "white" )
-                , ( "padding-top", "5px" )
+                , ( "padding-top", "10px" )
                 , ( "margin-left", "5px" )
                 ]
     in
@@ -187,8 +194,8 @@ viewTr state rows config maybeCustomRow =
         else
             case maybeCustomRow of
                 Just customRow ->
-                    (tr []
-                        [ td [ colspan 4, inlineStyle ]
+                    (tr [ customRowStyle ]
+                        [ td [ colspan (List.length config.columns), customCellStyle ]
                             [ customRow
                             ]
                         ]
