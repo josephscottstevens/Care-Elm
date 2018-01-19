@@ -10,6 +10,7 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 import Http
+import Http.Progress as Progress exposing (Progress(..))
 import Char
 import MaskedInput.Number as MaskedNumber
 
@@ -29,19 +30,25 @@ port updateDemographics : (SfData -> msg) -> Sub msg
 port save : Encode.Value -> Cmd msg
 
 
-subscriptions : Sub Msg
-subscriptions =
+subscriptions : Model -> Int -> Sub Msg
+subscriptions model patientId =
     Sub.batch
         [ updateDemographics UpdateDemographics
         , initDemographicsDone InitDemographicsDone
+        , case model.demographicsUrl of
+            Just demographicsUrl ->
+                decodeServerResponse
+                    |> Http.get demographicsUrl
+                    |> Progress.track demographicsUrl Load
+
+            Nothing ->
+                Sub.none
         ]
 
 
-init : Flags -> Cmd Msg
-init flag =
-    decodeServerResponse
-        |> Http.get ("/People/GetDemographicsInformation?patientId=" ++ toString flag.patientId)
-        |> Http.send Load
+init : Model -> Int -> Model
+init model patientId =
+    { model | demographicsUrl = Just (getDemographicsUrl patientId) }
 
 
 
@@ -79,6 +86,8 @@ type alias Model =
     , suffixDropdown : List DropdownItem
     , suffixDropState : Dropdown.DropState
     , nodeCounter : Int
+    , progress : Progress ServerResponse
+    , demographicsUrl : Maybe String
     }
 
 
@@ -340,7 +349,7 @@ viewAddress dropdownItems address =
 
 
 type Msg
-    = Load (Result Http.Error ServerResponse)
+    = Load (Progress ServerResponse)
     | UpdateDemographics SfData
     | InitDemographicsDone String
     | Save
@@ -441,7 +450,7 @@ togglePreferred nodeId t =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Load (Ok serverResponse) ->
+        Load (Done serverResponse) ->
             let
                 newModel =
                     updateModelFromServerMessage serverResponse model
@@ -472,11 +481,15 @@ update msg model =
                     , patientPhoneNumbers = newPatientPhoneNumber
                     , patientAddresses = newPatientAddress
                     , nodeCounter = 3
+                    , demographicsUrl = Nothing
                 }
                     ! [ initDemographics newModel.sfData ]
 
-        Load (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+        Load (Fail t) ->
+            { model | progress = Done (ServerFail ""), demographicsUrl = Nothing } ! [ Functions.displayErrorMessage (toString t) ]
+
+        Load progress ->
+            { model | progress = progress } ! []
 
         InitDemographicsDone _ ->
             model ! [ initContactHours "" ]
@@ -952,7 +965,14 @@ emptyModel patientId =
     , suffixDropdown = []
     , suffixDropState = Dropdown.init "suffixDropdown"
     , nodeCounter = 0
+    , progress = Progress.None
+    , demographicsUrl = Just (getDemographicsUrl patientId)
     }
+
+
+getDemographicsUrl : Int -> String
+getDemographicsUrl patientId =
+    "/People/GetDemographicsInformation?patientId=" ++ toString patientId
 
 
 emptySfData : SfData
@@ -1023,35 +1043,40 @@ emptyPatientAddress nodeCounter isPreferred =
 
 
 updateModelFromServerMessage : ServerResponse -> Model -> Model
-updateModelFromServerMessage { d, c, h } model =
-    { model
-        | demographicsId = d.demographicsId
-        , nickName = d.nickName
-        , ssn = d.ssn
-        , lastName = d.lastName
-        , firstName = d.firstName
-        , middle = d.middle
-        , birthPlace = d.birthPlace
-        , mrn = d.mrn
-        , patientAccountNumber = d.patientAccountNumber
-        , facilityPtID = d.facilityPtID
-        , sexualOrientationNote = d.sexualOrientationNote
-        , genderIdentityNote = d.genderIdentityNote
-        , email = d.email
-        , preferredLanguageIndex = d.preferredLanguageIndex
-        , sfData = d.sfData
-        , patientLanguagesMap = d.patientLanguagesMap
-        , patientPhoneNumbers = c.patientPhoneNumbers
-        , patientAddresses = c.patientAddresses
-        , phoneNumberTypeDropdown = c.phoneNumberTypeDropdown
-        , stateDropdown = c.stateDropdown
-        , primaryAddressIndex = c.primaryAddressIndex
-        , preferredPhoneIndex = c.preferredPhoneIndex
-        , contactHoursModel = Just h
-        , languageDropdown = d.languageDropdown
-        , suffixId = d.suffixId
-        , suffixDropdown = d.suffixDropdown
-    }
+updateModelFromServerMessage serverResponse model =
+    case serverResponse of
+        ServerSuccess d c h ->
+            { model
+                | demographicsId = d.demographicsId
+                , nickName = d.nickName
+                , ssn = d.ssn
+                , lastName = d.lastName
+                , firstName = d.firstName
+                , middle = d.middle
+                , birthPlace = d.birthPlace
+                , mrn = d.mrn
+                , patientAccountNumber = d.patientAccountNumber
+                , facilityPtID = d.facilityPtID
+                , sexualOrientationNote = d.sexualOrientationNote
+                , genderIdentityNote = d.genderIdentityNote
+                , email = d.email
+                , preferredLanguageIndex = d.preferredLanguageIndex
+                , sfData = d.sfData
+                , patientLanguagesMap = d.patientLanguagesMap
+                , patientPhoneNumbers = c.patientPhoneNumbers
+                , patientAddresses = c.patientAddresses
+                , phoneNumberTypeDropdown = c.phoneNumberTypeDropdown
+                , stateDropdown = c.stateDropdown
+                , primaryAddressIndex = c.primaryAddressIndex
+                , preferredPhoneIndex = c.preferredPhoneIndex
+                , contactHoursModel = Just h
+                , languageDropdown = d.languageDropdown
+                , suffixId = d.suffixId
+                , suffixDropdown = d.suffixDropdown
+            }
+
+        ServerFail _ ->
+            model
 
 
 
@@ -1092,16 +1117,14 @@ type alias ContactInformationModel =
     }
 
 
-type alias ServerResponse =
-    { d : DemographicsInformationModel
-    , c : ContactInformationModel
-    , h : Decode.Value
-    }
+type ServerResponse
+    = ServerSuccess DemographicsInformationModel ContactInformationModel Decode.Value
+    | ServerFail String
 
 
 decodeServerResponse : Decode.Decoder ServerResponse
 decodeServerResponse =
-    Pipeline.decode ServerResponse
+    Pipeline.decode ServerSuccess
         |> Pipeline.required "demographicsInformationModel" decodeDemographicsInformationModel
         |> Pipeline.required "contactInformationModel" decodeContactInformationModel
         |> Pipeline.required "contactHoursModel" Decode.value

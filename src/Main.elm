@@ -9,17 +9,28 @@ import Common.Types exposing (..)
 port openPage : (String -> msg) -> Sub msg
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
+port cancelPage : (String -> msg) -> Sub msg
+
+
+getSub : Model -> Sub Msg
+getSub model =
     case model.page of
         RecordsPage ->
             Sub.map RecordsMsg Records.subscriptions
 
         DemographicsPage ->
-            Sub.map DemographicsMsg Demographics.subscriptions
+            Sub.map DemographicsMsg (Demographics.subscriptions model.demographicsState model.flags.patientId)
 
         NoPage ->
             Sub.none
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ getSub model
+        , cancelPage CancelPage
+        ]
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -31,7 +42,12 @@ init flags =
         if flags.pageFlag == "records" then
             ( { model | page = RecordsPage }, Cmd.map RecordsMsg (Records.init flags.recordType flags.patientId) )
         else if flags.pageFlag == "demographics" then
-            ( { model | page = DemographicsPage }, Cmd.map DemographicsMsg (Demographics.init flags) )
+            ( { model
+                | page = DemographicsPage
+                , demographicsState = Demographics.init model.demographicsState flags.patientId
+              }
+            , Cmd.none
+            )
         else
             ( model, Cmd.none )
 
@@ -53,6 +69,7 @@ type alias Model =
 type Msg
     = RecordsMsg Records.Msg
     | DemographicsMsg Demographics.Msg
+    | CancelPage String
 
 
 main : Program Flags Model Msg
@@ -94,6 +111,13 @@ update msg model =
                     Demographics.update demographicsMsg model.demographicsState
             in
                 ( { model | demographicsState = newDemographicsModel }, Cmd.map DemographicsMsg widgetCmd )
+
+        CancelPage _ ->
+            let
+                demographicsModel =
+                    model.demographicsState
+            in
+                { model | demographicsState = { demographicsModel | demographicsUrl = Nothing } } ! []
 
 
 emptyModel : Flags -> Model
