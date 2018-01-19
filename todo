@@ -14,7 +14,7 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-
+double check the params on HrefColumn does it make sense? and sfcheckbox
 
 has changes js error when click on checkbox in contacts
 test Contact Hours still works (load and save)
@@ -27,7 +27,7 @@ test rowdropdown
 dropdown toggle isn't working
 file upload not working or atleast showing that it is
 
-
+call recording bombs out on add (fk exception? is this what test4 does?)
 
 fix save button being in the middle of the form
 oh crap... test new patient as well
@@ -39,6 +39,9 @@ server call is happening twice (contacts is still calling it) (send it json valu
 PreferredLanguageIndex does nothing
 suffixDropdown's min width is too small
 	re-think dropdown min-width
+	
+change table over to maybe list, (if List is nothing, don't display no records found, but if the list exists and its length == 0 then, display no records found)
+currently, mouse active class shows active row highlight on empty grid
 
 -----------------------------------------------------------------
 don't show highlight for keyboard when mouse is selecting (or vice versa)

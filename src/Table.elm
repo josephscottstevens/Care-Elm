@@ -149,7 +149,7 @@ viewTr state rows config maybeCustomRow =
                     [ ( "", "" ) ]
                 )
 
-        rowClass row ctr =
+        rowClass ctr =
             classList
                 [ ( "e-row", ctr % 2 == 0 )
                 , ( "e-alt_row", ctr % 2 == 1 )
@@ -166,18 +166,21 @@ viewTr state rows config maybeCustomRow =
 
         standardTr ctr row =
             tr
-                [ rowClass row ctr
+                [ rowClass ctr
                 , selectedStyle row
                 , clickEvent row
                 ]
                 (List.map (viewTd state row config) config.columns)
 
         customRowStyle =
-            style
-                [ ( "border-bottom-color", "#cecece" )
-                , ( "border-bottom-width", "1px" )
-                , ( "border-bottom-style", "solid" )
-                ]
+            if List.length rows == 0 then
+                style []
+            else
+                style
+                    [ ( "border-bottom-color", "#cecece" )
+                    , ( "border-bottom-width", "1px" )
+                    , ( "border-bottom-style", "solid" )
+                    ]
 
         customCellStyle =
             style
@@ -186,29 +189,23 @@ viewTr state rows config maybeCustomRow =
                 , ( "margin-left", "5px" )
                 ]
     in
-        if List.length rows == 0 then
-            [ tr []
-                [ td [] [ text "No records to display" ]
-                ]
-            ]
-        else
-            case maybeCustomRow of
-                Just customRow ->
-                    (tr [ customRowStyle ]
-                        [ td [ colspan (List.length config.columns), customCellStyle ]
-                            [ customRow
-                            ]
+        case maybeCustomRow of
+            Just customRow ->
+                tr [ customRowStyle ]
+                    [ td [ colspan (List.length config.columns), customCellStyle ]
+                        [ customRow
                         ]
-                    )
-                        :: List.indexedMap standardTr rows
+                    ]
+                    :: List.indexedMap standardTr rows
 
-                Nothing ->
+            Nothing ->
+                if List.length rows == 0 then
+                    [ tr []
+                        [ td [] [ text "No records to display" ]
+                        ]
+                    ]
+                else
                     List.indexedMap standardTr rows
-
-
-emptyAttr : Attribute msg
-emptyAttr =
-    class ""
 
 
 viewTh : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
@@ -302,7 +299,7 @@ getColumnName column =
         CheckColumn name _ _ ->
             name
 
-        DropdownColumn dropDownItems ->
+        DropdownColumn _ ->
             ""
 
 
@@ -407,7 +404,7 @@ pagingView : Int -> Int -> Html msg
 pagingView currentPage totalVisiblePages =
     let
         totalPages =
-            (totalVisiblePages // itemsPerPage)
+            totalVisiblePages // itemsPerPage
 
         activeOrNot pageIndex =
             let
@@ -424,7 +421,7 @@ pagingView currentPage totalVisiblePages =
 
         rng =
             List.range 0 totalPages
-                |> List.drop ((currentPage // pagesPerBlock) * pagesPerBlock)
+                |> List.drop (currentPage // pagesPerBlock * pagesPerBlock)
                 |> List.take pagesPerBlock
                 |> List.map activeOrNot
 
@@ -463,9 +460,6 @@ pagingView currentPage totalVisiblePages =
                 "e-lastpage e-icon e-mediaforward e-default"
             else
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
-
-        employersCount =
-            toString totalVisiblePages
 
         pagerText =
             let
@@ -572,15 +566,6 @@ findSorter selectedColumn columnData =
 
                 DropdownColumn _ ->
                     Nothing
-
-
-unsortable : Sorter { data | id : Int }
-unsortable =
-    None
-
-
-
--- increasingOrDecreasingBy : ({ data | id : Int } -> comparable) -> Sorter { data | id : Int }
 
 
 increasingOrDecreasingBy : ({ data | id : Int } -> comparable) -> Sorter data

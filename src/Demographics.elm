@@ -1,7 +1,7 @@
 port module Demographics exposing (..)
 
-import Html exposing (Html, text, div, span, button, ul, li, a, input, label, h4)
-import Html.Attributes exposing (class, id, type_, value, style, title, checked, hidden, attribute, maxlength, name)
+import Html exposing (Html, text, div, span, input, label, h4)
+import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name)
 import Html.Events exposing (onClick, onInput, onCheck)
 import Common.Types exposing (DropdownItem, Flags)
 import Common.Dropdown as Dropdown
@@ -734,7 +734,7 @@ rowStyle =
 
 idAttr : String -> Html.Attribute msg
 idAttr str =
-    id ((String.filter isAlpha str) ++ "Id")
+    id (String.filter isAlpha str ++ "Id")
 
 
 isAlpha : Char -> Bool
@@ -1217,8 +1217,8 @@ decodeSfData =
 encodePatientLanguagesMap : PatientLanguagesMap -> Encode.Value
 encodePatientLanguagesMap lang =
     Encode.object
-        [ ( "Id ", (maybeVal Encode.int) lang.id )
-        , ( "LanguageId", (maybeVal Encode.int) lang.languageId )
+        [ ( "Id ", maybeVal Encode.int lang.id )
+        , ( "LanguageId", maybeVal Encode.int lang.languageId )
         , ( "IsPreferred", Encode.bool lang.isPreferred )
         ]
 
@@ -1232,34 +1232,34 @@ encodeDemographicsInformationModel : Model -> Encode.Value
 encodeDemographicsInformationModel model =
     Encode.object
         [ ( "PatientId", Encode.int model.patientId )
-        , ( "DemographicsId", (maybeVal Encode.int) model.demographicsId )
-        , ( "NickName", (maybeVal Encode.string) model.nickName )
-        , ( "SSN", (maybeVal Encode.string) model.ssn )
-        , ( "LastName", (maybeVal Encode.string) model.lastName )
-        , ( "FirstName", (maybeVal Encode.string) model.firstName )
-        , ( "Middle", (maybeVal Encode.string) model.middle )
-        , ( "BirthPlace", (maybeVal Encode.string) model.birthPlace )
-        , ( "MRN", (maybeVal Encode.string) model.mrn )
-        , ( "PatientAccountNumber", (maybeVal Encode.string) model.patientAccountNumber )
-        , ( "FacilityPtID", (maybeVal Encode.string) model.facilityPtID )
-        , ( "SexualOrientationNote", (maybeVal Encode.string) model.sexualOrientationNote )
-        , ( "GenderIdentityNote", (maybeVal Encode.string) model.genderIdentityNote )
-        , ( "Email", (maybeVal Encode.string) model.email )
-        , ( "FacilityId", (maybeVal Encode.int) model.sfData.facilityId )
-        , ( "MainProviderId", (maybeVal Encode.int) model.sfData.mainProviderId )
-        , ( "CareCoordinatorId", (maybeVal Encode.int) model.sfData.careCoordinatorId )
-        , ( "PrefixId", (maybeVal Encode.int) model.sfData.prefixId )
-        , ( "SexTypeId", (maybeVal Encode.int) model.sfData.sexTypeId )
-        , ( "SexualOrientationId", (maybeVal Encode.int) model.sfData.sexualOrientationId )
-        , ( "SuffixId", (maybeVal Encode.int) model.suffixId )
-        , ( "GenderIdentityId", (maybeVal Encode.int) model.sfData.genderIdentityId )
-        , ( "RaceId", (maybeVal Encode.int) model.sfData.raceId )
-        , ( "EthnicityId", (maybeVal Encode.int) model.sfData.ethnicityId )
-        , ( "USVeteranId", (maybeVal Encode.int) model.sfData.uSVeteranId )
-        , ( "ReligionId", (maybeVal Encode.int) model.sfData.religionId )
-        , ( "DateOfBirth", (maybeVal Encode.string) model.sfData.dateOfBirth )
-        , ( "DateOfDeath", (maybeVal Encode.string) model.sfData.dateOfDeath )
-        , ( "VIP", (maybeVal Encode.bool) model.sfData.vip )
+        , ( "DemographicsId", maybeVal Encode.int model.demographicsId )
+        , ( "NickName", maybeVal Encode.string model.nickName )
+        , ( "SSN", maybeVal Encode.string model.ssn )
+        , ( "LastName", maybeVal Encode.string model.lastName )
+        , ( "FirstName", maybeVal Encode.string model.firstName )
+        , ( "Middle", maybeVal Encode.string model.middle )
+        , ( "BirthPlace", maybeVal Encode.string model.birthPlace )
+        , ( "MRN", maybeVal Encode.string model.mrn )
+        , ( "PatientAccountNumber", maybeVal Encode.string model.patientAccountNumber )
+        , ( "FacilityPtID", maybeVal Encode.string model.facilityPtID )
+        , ( "SexualOrientationNote", maybeVal Encode.string model.sexualOrientationNote )
+        , ( "GenderIdentityNote", maybeVal Encode.string model.genderIdentityNote )
+        , ( "Email", maybeVal Encode.string model.email )
+        , ( "FacilityId", maybeVal Encode.int model.sfData.facilityId )
+        , ( "MainProviderId", maybeVal Encode.int model.sfData.mainProviderId )
+        , ( "CareCoordinatorId", maybeVal Encode.int model.sfData.careCoordinatorId )
+        , ( "PrefixId", maybeVal Encode.int model.sfData.prefixId )
+        , ( "SexTypeId", maybeVal Encode.int model.sfData.sexTypeId )
+        , ( "SexualOrientationId", maybeVal Encode.int model.sfData.sexualOrientationId )
+        , ( "SuffixId", maybeVal Encode.int model.suffixId )
+        , ( "GenderIdentityId", maybeVal Encode.int model.sfData.genderIdentityId )
+        , ( "RaceId", maybeVal Encode.int model.sfData.raceId )
+        , ( "EthnicityId", maybeVal Encode.int model.sfData.ethnicityId )
+        , ( "USVeteranId", maybeVal Encode.int model.sfData.uSVeteranId )
+        , ( "ReligionId", maybeVal Encode.int model.sfData.religionId )
+        , ( "DateOfBirth", maybeVal Encode.string model.sfData.dateOfBirth )
+        , ( "DateOfDeath", maybeVal Encode.string model.sfData.dateOfDeath )
+        , ( "VIP", maybeVal Encode.bool model.sfData.vip )
         , ( "PatientLanguagesMap", Encode.list (List.map encodePatientLanguagesMap model.patientLanguagesMap) )
         ]
 
@@ -1275,13 +1275,13 @@ encodeContactInformationModel model =
 encodePatientAddress : PatientAddress -> Encode.Value
 encodePatientAddress address =
     Encode.object
-        [ ( "Id ", (maybeVal Encode.int) address.id )
-        , ( "AddressLine1", (maybeVal Encode.string) address.addressLine1 )
-        , ( "AddressLine2", (maybeVal Encode.string) address.addressLine2 )
-        , ( "AddressLine3", (maybeVal Encode.string) address.addressLine3 )
-        , ( "City", (maybeVal Encode.string) address.city )
-        , ( "StateId", (maybeVal Encode.int) address.stateId )
-        , ( "ZipCode", (maybeVal Encode.string) address.zipCode )
+        [ ( "Id ", maybeVal Encode.int address.id )
+        , ( "AddressLine1", maybeVal Encode.string address.addressLine1 )
+        , ( "AddressLine2", maybeVal Encode.string address.addressLine2 )
+        , ( "AddressLine3", maybeVal Encode.string address.addressLine3 )
+        , ( "City", maybeVal Encode.string address.city )
+        , ( "StateId", maybeVal Encode.int address.stateId )
+        , ( "ZipCode", maybeVal Encode.string address.zipCode )
         , ( "IsPrimary", Encode.bool address.isPreferred )
         ]
 
@@ -1289,9 +1289,9 @@ encodePatientAddress address =
 encodePatientPhoneNumber : PatientPhoneNumber -> Encode.Value
 encodePatientPhoneNumber phone =
     Encode.object
-        [ ( "Id ", (maybeVal Encode.int) phone.id )
-        , ( "PhoneNumber", (maybeVal Encode.string) phone.phoneNumber )
-        , ( "PhoneNumberTypeId", (maybeVal Encode.int) phone.phoneNumberTypeId )
+        [ ( "Id ", maybeVal Encode.int phone.id )
+        , ( "PhoneNumber", maybeVal Encode.string phone.phoneNumber )
+        , ( "PhoneNumberTypeId", maybeVal Encode.int phone.phoneNumberTypeId )
         , ( "IsPreferred", Encode.bool phone.isPreferred )
         ]
 

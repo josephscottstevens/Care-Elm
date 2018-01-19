@@ -84,7 +84,7 @@ update msg model =
         RecordsMsg recordsMsg ->
             let
                 ( newRecordModel, widgetCmd ) =
-                    Records.update recordsMsg model.recordsState model.flags.patientId model.flags.recordType
+                    Records.update recordsMsg model.recordsState model.flags.patientId
             in
                 ( { model | recordsState = newRecordModel }, Cmd.map RecordsMsg widgetCmd )
 
