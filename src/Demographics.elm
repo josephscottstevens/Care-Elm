@@ -21,7 +21,7 @@ port initDemographics : SfData -> Cmd msg
 port initDemographicsDone : (String -> msg) -> Sub msg
 
 
-port initContactHours : String -> Cmd msg
+port initContactHours : Maybe Decode.Value -> Cmd msg
 
 
 port updateDemographics : (SfData -> msg) -> Sub msg
@@ -492,7 +492,7 @@ update msg model =
             { model | progress = progress } ! []
 
         InitDemographicsDone _ ->
-            model ! [ initContactHours "" ]
+            model ! [ initContactHours model.contactHoursModel ]
 
         UpdateDemographics sfData ->
             { model | sfData = sfData } ! []
@@ -526,14 +526,14 @@ update msg model =
             model ! [ Functions.displayErrorMessage (toString t) ]
 
         Cancel ->
-            emptyModel model.patientId ! []
+            emptyModel model.patientId ! [ Functions.setUnsavedChanges False ]
 
         AddNewLanguage ->
             { model
                 | patientLanguagesMap = model.patientLanguagesMap ++ [ emptyPatientLanguagesMap model.nodeCounter False ]
                 , nodeCounter = model.nodeCounter + 1
             }
-                ! []
+                ! [ Functions.setUnsavedChanges True ]
 
         RemoveLanguage lang ->
             let
@@ -556,14 +556,14 @@ update msg model =
                                 )
                                 newPatientLanguagesMap
             in
-                { model | patientLanguagesMap = updatedPatientLanguagesMap } ! []
+                { model | patientLanguagesMap = updatedPatientLanguagesMap } ! [ Functions.setUnsavedChanges True ]
 
         AddNewPhone ->
             { model
                 | patientPhoneNumbers = model.patientPhoneNumbers ++ [ emptyPatientPhoneNumber model.nodeCounter False ]
                 , nodeCounter = model.nodeCounter + 1
             }
-                ! []
+                ! [ Functions.setUnsavedChanges True ]
 
         RemovePhone phone ->
             let
@@ -586,14 +586,14 @@ update msg model =
                                 )
                                 newPatientPhoneNumber
             in
-                { model | patientPhoneNumbers = updatedPatientPhoneNumber } ! []
+                { model | patientPhoneNumbers = updatedPatientPhoneNumber } ! [ Functions.setUnsavedChanges True ]
 
         AddNewAddress ->
             { model
                 | patientAddresses = model.patientAddresses ++ [ emptyPatientAddress model.nodeCounter False ]
                 , nodeCounter = model.nodeCounter + 1
             }
-                ! []
+                ! [ Functions.setUnsavedChanges True ]
 
         RemoveAddress address ->
             let
@@ -616,103 +616,103 @@ update msg model =
                                 )
                                 newAddress
             in
-                { model | patientAddresses = updatedAddress } ! []
+                { model | patientAddresses = updatedAddress } ! [ Functions.setUnsavedChanges True ]
 
         -- Nested Controls
         UpdateAddressLine1 patientAddress str ->
-            updateAddress model { patientAddress | addressLine1 = Just str } ! []
+            updateAddress model { patientAddress | addressLine1 = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateAddressLine2 patientAddress str ->
-            updateAddress model { patientAddress | addressLine2 = Just str } ! []
+            updateAddress model { patientAddress | addressLine2 = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateAddressLine3 patientAddress str ->
-            updateAddress model { patientAddress | addressLine3 = Just str } ! []
+            updateAddress model { patientAddress | addressLine3 = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateCity patientAddress str ->
-            updateAddress model { patientAddress | city = Just str } ! []
+            updateAddress model { patientAddress | city = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateZipcode patientAddress str ->
-            updateAddress model { patientAddress | zipCode = Just str } ! []
+            updateAddress model { patientAddress | zipCode = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdatePreferredAddress address _ ->
-            { model | patientAddresses = List.map (togglePreferred address.nodeId) model.patientAddresses } ! []
+            { model | patientAddresses = List.map (togglePreferred address.nodeId) model.patientAddresses } ! [ Functions.setUnsavedChanges True ]
 
         UpdatePreferredPhone phone _ ->
-            { model | patientPhoneNumbers = List.map (togglePreferred phone.nodeId) model.patientPhoneNumbers } ! []
+            { model | patientPhoneNumbers = List.map (togglePreferred phone.nodeId) model.patientPhoneNumbers } ! [ Functions.setUnsavedChanges True ]
 
         UpdatePreferredLanguage language _ ->
-            { model | patientLanguagesMap = List.map (togglePreferred language.nodeId) model.patientLanguagesMap } ! []
+            { model | patientLanguagesMap = List.map (togglePreferred language.nodeId) model.patientLanguagesMap } ! [ Functions.setUnsavedChanges True ]
 
         UpdateState t dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
                     Dropdown.update dropdownMsg t.dropState t.stateId model.stateDropdown
             in
-                updateAddress model { t | dropState = newDropState, stateId = newId } ! [ newMsg ]
+                updateAddress model { t | dropState = newDropState, stateId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdatePhoneType t dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
                     Dropdown.update dropdownMsg t.dropState t.phoneNumberTypeId model.phoneNumberTypeDropdown
             in
-                updatePhones model { t | dropState = newDropState, phoneNumberTypeId = newId } ! [ newMsg ]
+                updatePhones model { t | dropState = newDropState, phoneNumberTypeId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateLanguage t dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
                     Dropdown.update dropdownMsg t.dropState t.languageId model.languageDropdown
             in
-                updateLanguage model { t | dropState = newDropState, languageId = newId } ! [ newMsg ]
+                updateLanguage model { t | dropState = newDropState, languageId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
         InputChanged patientPhoneNumber value ->
-            updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString value } ! []
+            updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString value } ! [ Functions.setUnsavedChanges True ]
 
         InputStateChanged patientPhoneNumber maskState ->
-            updatePhones model { patientPhoneNumber | maskState = maskState } ! []
+            updatePhones model { patientPhoneNumber | maskState = maskState } ! [ Functions.setUnsavedChanges True ]
 
         -- Edit
         UpdateFacilityPtID str ->
-            { model | facilityPtID = Just str } ! []
+            { model | facilityPtID = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateMedicalRecordNo str ->
-            { model | mrn = Just str } ! []
+            { model | mrn = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdatePatientAccountNo str ->
-            { model | patientAccountNumber = Just str } ! []
+            { model | patientAccountNumber = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateFirstName str ->
-            { model | firstName = Just str } ! []
+            { model | firstName = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateMiddle str ->
-            { model | middle = Just str } ! []
+            { model | middle = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateLastName str ->
-            { model | lastName = Just str } ! []
+            { model | lastName = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateNickname str ->
-            { model | nickName = Just str } ! []
+            { model | nickName = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateBirthPlace str ->
-            { model | birthPlace = Just str } ! []
+            { model | birthPlace = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateSSN str ->
-            { model | ssn = Just str } ! []
+            { model | ssn = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateSexualOrientationNote str ->
-            { model | sexualOrientationNote = Just str } ! []
+            { model | sexualOrientationNote = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateGenderIdentityNote str ->
-            { model | genderIdentityNote = Just str } ! []
+            { model | genderIdentityNote = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateEmail str ->
-            { model | email = Just str } ! []
+            { model | email = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateSuffix dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
                     Dropdown.update dropdownMsg model.suffixDropState model.suffixId model.suffixDropdown
             in
-                { model | suffixDropState = newDropState, suffixId = newId } ! [ newMsg ]
+                { model | suffixDropState = newDropState, suffixId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
 
 

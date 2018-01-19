@@ -14,12 +14,19 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-double check the params on HrefColumn does it make sense? and sfcheckbox
-
 has changes js error when click on checkbox in contacts
 test Contact Hours still works (load and save)
+fix save button being in the middle of the form
 
-if you click really fast, elm breaks :'( (vmcontact hours cuplrit?)
+demographics are you sure you want to leave fix
+contacts cant show errors
+implement clear
+test new patient
+look for TODO, clean up	
+
+double check the params on HrefColumn does it make sense? and sfcheckbox
+
+---------------------------------------------
 
 test call recordings edit task custom href
 
@@ -29,10 +36,10 @@ file upload not working or atleast showing that it is
 
 call recording bombs out on add (fk exception? is this what test4 does?)
 
-fix save button being in the middle of the form
-oh crap... test new patient as well
-can I get a non-global copy of vmDemographics? (think I am currently killing contacts page)
-look for TODO, clean up	
+
+
+
+
 
 convert over other dropdowns ? performance is like.... 1600ms to 80
 server call is happening twice (contacts is still calling it) (send it json value)
