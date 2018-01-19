@@ -43,13 +43,6 @@ subscriptions =
         ]
 
 
-type ModelState
-    = Grid
-    | AddNew EditData
-    | Limbo
-    | Error String
-
-
 init : Maybe Int -> Int -> Cmd Msg
 init recordTypeId patientId =
     case recordTypeId of
@@ -64,8 +57,7 @@ init recordTypeId patientId =
 
 
 type alias Model =
-    { state : ModelState
-    , rows : List RecordRow
+    { rows : List RecordRow
     , dropDownState : Int
     , tableState : Table.State
 
@@ -172,18 +164,12 @@ view model recordTypeId =
         config =
             (gridConfig recordTypeId model.addEditDataSource)
     in
-        case model.state of
-            Grid ->
+        case model.editData of
+            Just editData ->
+                Table.view model.tableState model.rows config (Just <| viewNewRecord model editData recordTypeId)
+
+            Nothing ->
                 Table.view model.tableState model.rows config Nothing
-
-            AddNew newRecord ->
-                Table.view model.tableState model.rows config (Just <| viewNewRecord model newRecord recordTypeId)
-
-            Limbo ->
-                div [] []
-
-            Error errMessage ->
-                div [] [ text errMessage ]
 
 
 viewNewRecord : Model -> EditData -> Maybe Int -> Html Msg
@@ -265,8 +251,8 @@ update msg model patientId recordTypeId =
                 model ! [ displayErrorMessage (toString t) ]
 
             Add addEditDataSource ->
-                { model | state = AddNew (getEditData addEditDataSource recordTypeId) }
-                    ! [ initRecordAddNew (getEditData addEditDataSource recordTypeId) ]
+                { model | editData = Just (createNewRecord addEditDataSource recordTypeId) }
+                    ! [ initRecordAddNew (createNewRecord addEditDataSource recordTypeId) ]
 
             SetTableState newState ->
                 { model | tableState = newState } ! []
@@ -330,10 +316,10 @@ update msg model patientId recordTypeId =
             SaveCompleted (Ok responseMsg) ->
                 case Functions.getResponseError responseMsg of
                     Just t ->
-                        { model | state = Grid } ! [ displayErrorMessage t ]
+                        clearModel model ! [ displayErrorMessage t ]
 
                     Nothing ->
-                        { model | state = Grid }
+                        clearModel model
                             ! [ displaySuccessMessage "Save completed successfully!"
                               , case recordTypeId of
                                     Just recordTypeId ->
@@ -347,7 +333,7 @@ update msg model patientId recordTypeId =
                 (model ! [ displayErrorMessage (toString t) ])
 
             Cancel ->
-                { model | state = Grid } ! [ Functions.setUnsavedChanges False ]
+                clearModel model ! [ Functions.setUnsavedChanges False ]
 
             UpdateRecordAddNew editData ->
                 { model | editData = Just editData } ! []
@@ -753,8 +739,7 @@ encodeRecord newRecord editData patientId recordTypeId =
 
 emptyModel : Model
 emptyModel =
-    { state = Grid
-    , addEditDataSource = Nothing
+    { addEditDataSource = Nothing
     , title = ""
     , specialty = ""
     , provider = ""
@@ -776,8 +761,8 @@ emptyModel =
     }
 
 
-getEditData : AddEditDataSource -> Maybe Int -> EditData
-getEditData addEditDataSource recordTypeId =
+createNewRecord : AddEditDataSource -> Maybe Int -> EditData
+createNewRecord addEditDataSource recordTypeId =
     case Functions.getRecordTypeById recordTypeId of
         Just t ->
             { facilityId = addEditDataSource.facilityId
@@ -818,6 +803,28 @@ getEditData addEditDataSource recordTypeId =
 
         Nothing ->
             Debug.crash "whoops"
+
+
+clearModel : Model -> Model
+clearModel model =
+    { model
+        | -- Hospitilizations
+          isExistingHospitilization = False
+        , patientReported = False
+        , dischargeDiagnosis = ""
+
+        -- Edit
+        , editData = Nothing
+        , recordId = Nothing
+        , title = ""
+        , specialty = ""
+        , provider = ""
+        , comments = ""
+        , showValidationErrors = False
+        , recording = ""
+        , callSid = ""
+        , duration = 0
+    }
 
 
 getDropDowns : Int -> (Result Http.Error AddEditDataSource -> msg) -> Cmd msg

@@ -11,7 +11,15 @@ port openPage : (String -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map DemographicsMsg Demographics.subscriptions
+    case model.page of
+        RecordsPage ->
+            Sub.map RecordsMsg Records.subscriptions
+
+        DemographicsPage ->
+            Sub.map DemographicsMsg Demographics.subscriptions
+
+        NoPage ->
+            Sub.none
 
 
 init : Flags -> ( Model, Cmd Msg )

@@ -14,18 +14,21 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-get row dropdown back
-make sure I didn't undo any completed tasks
-test call recordings edit task custom href
 
-edit record needs line below
-
-
-test that all the columns in records back
-make sure the row dropdown shows right stuff
 
 has changes js error when click on checkbox in contacts
 test Contact Hours still works (load and save)
+
+if you click really fast, elm breaks :'( (vmcontact hours cuplrit?)
+
+test call recordings edit task custom href
+
+test rowdropdown
+dropdown toggle isn't working
+file upload not working or atleast showing that it is
+
+
+
 fix save button being in the middle of the form
 oh crap... test new patient as well
 can I get a non-global copy of vmDemographics? (think I am currently killing contacts page)
