@@ -27,6 +27,12 @@ port initContactHours : Maybe Decode.Value -> Cmd msg
 port updateDemographics : (SfData -> msg) -> Sub msg
 
 
+port startSave : (Bool -> msg) -> Sub msg
+
+
+port cancel : (Bool -> msg) -> Sub msg
+
+
 port save : Encode.Value -> Cmd msg
 
 
@@ -35,6 +41,8 @@ subscriptions model patientId =
     Sub.batch
         [ updateDemographics UpdateDemographics
         , initDemographicsDone InitDemographicsDone
+        , startSave Save
+        , cancel Cancel
         , case model.demographicsUrl of
             Just demographicsUrl ->
                 decodeServerResponse
@@ -230,12 +238,6 @@ view model =
                 , div [] (List.map (viewAddress model.stateDropdown) model.patientAddresses)
                 ]
             ]
-        , div [ class "col-xs-12 padding-h-0 padding-top-10 padding-bottom-10" ]
-            [ div [ class "col-xs-12 padding-h-0 padding-top-10" ]
-                [ input [ type_ "button", class "btn btn-sm btn-success", value "Save", onClick Save ] []
-                , input [ type_ "button", class "btn btn-sm btn-default margin-left-5", value "Cancel", onClick Cancel ] []
-                ]
-            ]
         ]
 
 
@@ -352,9 +354,9 @@ type Msg
     = Load (Progress ServerResponse)
     | UpdateDemographics SfData
     | InitDemographicsDone String
-    | Save
+    | Save Bool
     | SaveCompleted (Result Http.Error String)
-    | Cancel
+    | Cancel Bool
     | AddNewLanguage
     | RemoveLanguage PatientLanguagesMap
     | AddNewPhone
@@ -497,7 +499,7 @@ update msg model =
         UpdateDemographics sfData ->
             { model | sfData = sfData } ! []
 
-        Save ->
+        Save _ ->
             if List.length (validatationErrors model) > 0 then
                 { model | showValidationErrors = True } ! []
                 -- todo, save
@@ -525,7 +527,7 @@ update msg model =
         SaveCompleted (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
 
-        Cancel ->
+        Cancel _ ->
             emptyModel model.patientId ! [ Functions.setUnsavedChanges False ]
 
         AddNewLanguage ->
@@ -1319,6 +1321,13 @@ encodePatientPhoneNumber phone =
         ]
 
 
+
+-- type alias ContactsData =
+--     { tZ : String
+--     , wDStr : String
+--     }
+
+
 encodeBody : Model -> Encode.Value
 encodeBody model =
     Encode.object
@@ -1327,4 +1336,7 @@ encodeBody model =
         , ( "phones", Encode.list (List.map encodePatientPhoneNumber model.patientPhoneNumbers) )
         , ( "addresses", Encode.list (List.map encodePatientAddress model.patientAddresses) )
         , ( "languages", Encode.list (List.map encodePatientLanguagesMap model.patientLanguagesMap) )
+
+        -- , ( "TZ", Encode.string contactsData.tZ )
+        -- , ( "WDStr", Encode.string contactsData.wDStr )
         ]

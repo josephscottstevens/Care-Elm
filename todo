@@ -14,12 +14,6 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-has changes js error when click on checkbox in contacts
-test Contact Hours still works (load and save)
-fix save button being in the middle of the form
-
-demographics are you sure you want to leave fix
-contacts cant show errors
 implement clear
 test new patient
 look for TODO, clean up	
