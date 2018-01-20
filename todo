@@ -14,24 +14,21 @@ REQUESTED TODO:
 	
 ===========================================================================================================
 
-implement clear
 test new patient
-look for TODO, clean up	
-
+unique phone number save?
 double check the params on HrefColumn does it make sense? and sfcheckbox
+test call recordings edit task custom href
 
 ---------------------------------------------
 
-test call recordings edit task custom href
+
+
 
 test rowdropdown
 dropdown toggle isn't working
 file upload not working or atleast showing that it is
 
 call recording bombs out on add (fk exception? is this what test4 does?)
-
-
-
 
 
 

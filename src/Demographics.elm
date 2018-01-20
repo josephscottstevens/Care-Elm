@@ -485,10 +485,11 @@ update msg model =
                     , nodeCounter = 3
                     , demographicsUrl = Nothing
                 }
-                    ! [ initDemographics newModel.sfData ]
+                    ! [ initDemographics newModel.sfData, Functions.setLoadingStatus False ]
 
         Load (Fail t) ->
-            { model | progress = Done (ServerFail ""), demographicsUrl = Nothing } ! [ Functions.displayErrorMessage (toString t) ]
+            { model | progress = Done (ServerFail ""), demographicsUrl = Nothing }
+                ! [ Functions.displayErrorMessage (toString t), Functions.setLoadingStatus False ]
 
         Load progress ->
             { model | progress = progress } ! []
@@ -514,21 +515,21 @@ update msg model =
                             | patientLanguagesMap = newLangs
                         }
                 in
-                    model ! [ save (encodeBody newModel), Functions.setUnsavedChanges False ]
+                    model ! [ save (encodeBody newModel), Functions.setLoadingStatus True ]
 
         SaveCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ Functions.displayErrorMessage t ]
+                    model ! [ Functions.displayErrorMessage t, Functions.setLoadingStatus False ]
 
                 Nothing ->
-                    model ! [ Functions.displaySuccessMessage "Save completed successfully!" ]
+                    model ! [ Functions.displaySuccessMessage "Save completed successfully!", Functions.setLoadingStatus False ]
 
         SaveCompleted (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
 
         Cancel _ ->
-            emptyModel model.patientId ! [ Functions.setUnsavedChanges False ]
+            { model | demographicsUrl = Just (getDemographicsUrl model.patientId) } ! [ Functions.setLoadingStatus True ]
 
         AddNewLanguage ->
             { model
