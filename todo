@@ -7,41 +7,52 @@ QUESTIONS:
 	Previous histories shows a comment column, but doesn't have it in the edit?
 	We said to have cancel \ save on the left, where exactly on my edit form?
 	Perhaps an alternative to having inline edit grid mode... which doesn't add up to me, is a back button where new button was?
-
-	
-REQUESTED TODO:
-	put edit mode inside of grid  (but.. how?)
 	
 ===========================================================================================================
 
-test new patient
-unique phone number save?
 double check the params on HrefColumn does it make sense? and sfcheckbox
 test call recordings edit task custom href
 
----------------------------------------------
+---------------------------dropdown ---------------------------
 
+call recordings mark consent not toggling dropdown
+grid dropdown won't toggle
+can't un-select suffix
+dropdowns don't have "Choose..." When no value in dropdown
+Show search in dropdown as an option (or as an init thing)
 
+suffixDropdown's min width is too small
+	re-think dropdown min-width
 
+---------------------------------------------------------------
 
-test rowdropdown
-dropdown toggle isn't working
+test reported file upload errors
 file upload not working or atleast showing that it is
 
 call recording bombs out on add (fk exception? is this what test4 does?)
 
+test new patient	
+2 minutes can I get initial loading bar in
+save to client portal looks borked... but I remember... that was just meh? Check bugs
 
+---------------------------on publish ---------------------------
 
+check for double empty fields
+test saving dates
+test viewing dates
+get demographics script perforemance (~3.5 seconds yeh?)
+test fast switching between demographics and other pages (I can cancel demographics request yah?)
+test performance
+
+--------------------------    low    ----------------------------
+initial sort? Verify if it is just Date on call recordings
+column widths (call recordings, and others?)
+validation errors don't have . at the end
+validation error for phone numbers aren't formatted
+PreferredLanguageIndex does nothing, remove it
 convert over other dropdowns ? performance is like.... 1600ms to 80
-server call is happening twice (contacts is still calling it) (send it json value)
-PreferredLanguageIndex does nothing
-suffixDropdown's min width is too small
-	re-think dropdown min-width
-	
 change table over to maybe list, (if List is nothing, don't display no records found, but if the list exists and its length == 0 then, display no records found)
 currently, mouse active class shows active row highlight on empty grid
-
------------------------------------------------------------------
 don't show highlight for keyboard when mouse is selecting (or vice versa)
 keyboard search not working
 you can arrow up on dropdown and get no item selected, even though the dropdown doesn't support that

@@ -36,6 +36,14 @@ port cancel : (Bool -> msg) -> Sub msg
 port save : Encode.Value -> Cmd msg
 
 
+port scrollTo : String -> Cmd msg
+
+
+scrollToError : Cmd msg
+scrollToError =
+    scrollTo "#ErrorDiv"
+
+
 subscriptions : Model -> Int -> Sub Msg
 subscriptions model patientId =
     Sub.batch
@@ -501,21 +509,29 @@ update msg model =
             { model | sfData = sfData } ! []
 
         Save _ ->
-            if List.length (validatationErrors model) > 0 then
-                { model | showValidationErrors = True } ! []
-                -- todo, save
-                --  |> Functions.uniqueBy (\t -> Maybe.withDefault "" t.phoneNumber)
-            else
-                let
-                    newLangs =
-                        model.patientLanguagesMap |> List.filter (\t -> t.languageId /= Nothing)
+            let
+                newLangs =
+                    model.patientLanguagesMap |> List.filter (\t -> t.languageId /= Nothing)
 
-                    newModel =
-                        { model
-                            | patientLanguagesMap = newLangs
-                        }
-                in
-                    model ! [ save (encodeBody newModel), Functions.setLoadingStatus True ]
+                newPhones =
+                    model.patientPhoneNumbers |> List.filter (\t -> t.phoneNumber /= Nothing)
+
+                newAddresses =
+                    model.patientAddresses
+                        |> List.filter (\t -> t.addressLine1 /= Nothing && t.city /= Nothing && t.stateId /= Nothing && t.zipCode /= Nothing)
+
+                newModel =
+                    { model
+                        | patientLanguagesMap = newLangs
+                        , patientPhoneNumbers = newPhones
+                        , patientAddresses = newAddresses
+                        , showValidationErrors = False
+                    }
+            in
+                if List.length (validatationErrors newModel) > 0 then
+                    { model | showValidationErrors = True } ! [ scrollToError ]
+                else
+                    newModel ! [ save (encodeBody newModel), Functions.setLoadingStatus True ]
 
         SaveCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
@@ -858,20 +874,27 @@ sfcheckbox displayText isRequired maybeStr =
         input [ type_ "checkbox", idAttr displayText, class "e-checkbox" ] []
 
 
+defaultErrorMsg : String
+defaultErrorMsg =
+    "Please provide a value for all required(*) fields."
+
+
 requireInt : String -> Maybe Int -> Maybe String
 requireInt fieldName maybeInt =
     case maybeInt of
         Nothing ->
-            Just (fieldName ++ " is required")
+            -- Just (fieldName ++ " is required")
+            Just defaultErrorMsg
 
         Just _ ->
             Nothing
 
 
 requireString : String -> Maybe String -> Maybe String
-requireString fieldName maybeStr =
+requireString _ maybeStr =
     if Maybe.withDefault "" maybeStr == "" then
-        Just (fieldName ++ " is required")
+        -- Just (fieldName ++ " is required")
+        Just defaultErrorMsg
     else
         Nothing
 
@@ -904,6 +927,27 @@ addressValidation address =
         |> List.head
 
 
+phoneDuplicateValidation : Model -> Maybe String
+phoneDuplicateValidation model =
+    let
+        uniquePhones =
+            model.patientPhoneNumbers
+                |> Functions.uniqueBy (\t -> Maybe.withDefault "" t.phoneNumber)
+
+        duplicatePhone =
+            List.head uniquePhones
+    in
+        if List.length model.patientPhoneNumbers == List.length uniquePhones then
+            Nothing
+        else
+            case duplicatePhone of
+                Just t ->
+                    Just ("Duplicate phone number \"" ++ Maybe.withDefault "" t.phoneNumber ++ "\"")
+
+                Nothing ->
+                    Just "Duplicate phone number"
+
+
 validatationErrors : Model -> List String
 validatationErrors model =
     [ requireInt "Facility" model.sfData.facilityId
@@ -921,6 +965,7 @@ validatationErrors model =
     , model.patientAddresses
         |> List.filterMap addressValidation
         |> List.head
+    , phoneDuplicateValidation model
     ]
         |> List.filterMap identity
 
