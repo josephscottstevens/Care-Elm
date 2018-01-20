@@ -18,7 +18,6 @@ module Table
 import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
 import Html.Attributes exposing (class, id, style, type_, target, colspan, classList, href, disabled, checked)
 import Html.Events as Events
-import Json.Decode as Decode
 import Common.Functions as Functions
 
 
@@ -130,12 +129,6 @@ view state rows config maybeCustomRow =
             ]
 
 
-onCustomClick : (String -> msg) -> Attribute msg
-onCustomClick tagger =
-    Events.on "click"
-        (Decode.map tagger (Decode.at [ "target", "id" ] Decode.string))
-
-
 viewTr : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> List (Html msg)
 viewTr state rows config maybeCustomRow =
     let
@@ -155,20 +148,10 @@ viewTr state rows config maybeCustomRow =
                 , ( "e-alt_row", ctr % 2 == 1 )
                 ]
 
-        clickEvent row =
-            onCustomClick
-                (\t ->
-                    if t == "contextMenuButton" then
-                        config.toMsg { state | openDropdownId = Just row.id }
-                    else
-                        config.toMsg { state | selectedId = Just row.id }
-                )
-
         standardTr ctr row =
             tr
                 [ rowClass ctr
                 , selectedStyle row
-                , clickEvent row
                 ]
                 (List.map (viewTd state row config) config.columns)
 
@@ -242,8 +225,16 @@ viewTd state row config column =
 
         tdStyle =
             style [ ( "padding-left", "8.4px" ) ]
+
+        tdClick =
+            case column of
+                DropdownColumn _ ->
+                    disabled False
+
+                _ ->
+                    Events.onClick (config.toMsg { state | selectedId = Just row.id })
     in
-        td [ tdClass, tdStyle ]
+        td [ tdClass, tdStyle, tdClick ]
             [ case column of
                 IntColumn _ dataToInt _ ->
                     text (Functions.defaultIntToString (dataToInt row))
@@ -310,10 +301,13 @@ getColumnName column =
 rowDropDownDiv : State -> (State -> msg) -> { data | id : Int } -> List ( String, String, Int -> msg ) -> Html msg
 rowDropDownDiv state toMsg row dropDownItems =
     let
+        dropClickEvent event =
+            Events.onClick (event row.id)
+
         dropDownMenuItem : ( String, String, Int -> msg ) -> Html msg
         dropDownMenuItem ( iconClass, displayText, event ) =
-            li [ class "e-content e-list" ]
-                [ a [ class "e-menulink", Events.onClick (event row.id), target "_blank" ]
+            li [ class "e-content e-list", dropClickEvent event ]
+                [ a [ class "e-menulink", target "_blank" ]
                     [ text displayText
                     , span [ class ("e-gridcontext e-icon " ++ iconClass) ] []
                     ]
@@ -348,12 +342,20 @@ rowDropDownDiv state toMsg row dropDownItems =
         btnStyle =
             style [ ( "position", "relative" ) ]
 
+        clickEvent =
+            case state.openDropdownId of
+                Just _ ->
+                    Events.onClick (toMsg { state | openDropdownId = Nothing })
+
+                Nothing ->
+                    Events.onClick (toMsg { state | openDropdownId = Just row.id })
+
         blurEvent =
             Events.onBlur (toMsg { state | openDropdownId = Nothing })
     in
         div []
             [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ id "contextMenuButton", type_ "button", btnClass, blurEvent, btnStyle ]
+                [ button [ id "contextMenuButton", type_ "button", btnClass, clickEvent, blurEvent, btnStyle ]
                     [ div [ id "editButtonMenu", dropDownMenuStyle ]
                         dropMenu
                     ]

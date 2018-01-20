@@ -15,8 +15,6 @@ test call recordings edit task custom href
 
 ---------------------------dropdown ---------------------------
 
-call recordings mark consent not toggling dropdown
-grid dropdown won't toggle
 can't un-select suffix
 dropdowns don't have "Choose..." When no value in dropdown
 Show search in dropdown as an option (or as an init thing)
