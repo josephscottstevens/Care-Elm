@@ -10,9 +10,6 @@ QUESTIONS:
 	
 ===========================================================================================================
 
-double check the params on HrefColumn does it make sense? and sfcheckbox
-test call recordings edit task custom href
-
 test reported file upload errors
 file upload not working or atleast showing that it is
 
@@ -33,7 +30,7 @@ test performance
 
 --------------------------    low    ----------------------------
 Show search in dropdown as an option (or as an init thing)
-
+move Table.elm to Common folder
 initial sort? Verify if it is just Date on call recordings
 column widths (call recordings, and others?)
 validation errors don't have . at the end
