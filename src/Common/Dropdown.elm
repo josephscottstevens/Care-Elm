@@ -52,6 +52,12 @@ type Key
     | Searchable Char
 
 
+type SkipAmount
+    = First
+    | Last
+    | Exact Int
+
+
 type Msg
     = ItemPicked DropdownItem
     | ItemEntered DropdownItem
@@ -61,34 +67,11 @@ type Msg
     | OnKey Key
 
 
-type SkipAmount
-    = First
-    | Last
-    | Exact Int
-
-
-byId : Int -> List DropdownItem -> DropdownItem
-byId id items =
-    items
-        |> List.filter (\t -> t.id == Just id)
-        |> List.head
-        |> Maybe.withDefault (DropdownItem Nothing "")
-
-
-getDropdownText : Maybe Int -> List DropdownItem -> String
-getDropdownText id dropdownItems =
-    dropdownItems
-        |> List.filter (\t -> t.id == id)
-        |> List.map (\t -> t.name)
-        |> List.head
-        |> Maybe.withDefault ""
-
-
 update : Msg -> DropState -> Maybe Int -> List DropdownItem -> ( DropState, Maybe Int, Cmd msg )
 update msg dropdown selectedId dropdownItems =
     case msg of
         ItemPicked item ->
-            ( { dropdown | isOpen = False }, dropdown.mouseSelectedId, Cmd.none )
+            ( { dropdown | isOpen = False }, item.id, Cmd.none )
 
         ItemEntered item ->
             ( { dropdown | mouseSelectedId = item.id }, selectedId, Cmd.none )
@@ -136,23 +119,13 @@ update msg dropdown selectedId dropdownItems =
             updateSearchString char dropdown dropdownItems selectedId
 
 
-boundedIndex : List DropdownItem -> Int -> Int
-boundedIndex dropdownSource index =
-    if index < 0 then
-        0
-    else if index > List.length dropdownSource then
-        List.length dropdownSource - 1
-    else
-        index
-
-
 pickerSkip : DropState -> SkipAmount -> List DropdownItem -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
 pickerSkip dropdown skipAmount dropdownItems selectedId =
     let
         newIndexCalc =
             case skipAmount of
                 Exact skipCount ->
-                    (Functions.defaultInt dropdown.keyboardSelectedId) + skipCount
+                    Functions.defaultInt dropdown.keyboardSelectedId + skipCount
 
                 First ->
                     0
@@ -161,10 +134,18 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
                     List.length dropdownItems - 1
 
         newIndex =
-            boundedIndex dropdownItems newIndexCalc
+            if newIndexCalc < 0 then
+                0
+            else if newIndexCalc > List.length dropdownItems then
+                List.length dropdownItems - 1
+            else
+                newIndexCalc
 
         selectedItem =
-            byId newIndex dropdownItems
+            dropdownItems
+                |> List.filter (\t -> t.id == Just newIndex)
+                |> List.head
+                |> Maybe.withDefault (DropdownItem Nothing "")
     in
         if dropdown.isOpen then
             ( { dropdown | keyboardSelectedId = Just newIndex }, selectedId, scrollToDomId dropdown.domId selectedItem.id )
@@ -194,6 +175,13 @@ view dropdown dropdownItems selectedId =
             Events.keyCode
                 |> Json.Decode.andThen (keyDecoder dropdown)
                 |> Json.Decode.map OnKey
+
+        getDropdownText =
+            dropdownItems
+                |> List.filter (\t -> t.id == selectedId)
+                |> List.map (\t -> t.name)
+                |> List.head
+                |> Maybe.withDefault ""
     in
         div [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder ]
             [ span
@@ -206,7 +194,7 @@ view dropdown dropdownItems selectedId =
                     [ input
                         [ class "e-input"
                         , readonly True
-                        , value (getDropdownText selectedId dropdownItems)
+                        , value getDropdownText
                         , if dropdown.isOpen then
                             Events.onBlur OnBlur
                           else
