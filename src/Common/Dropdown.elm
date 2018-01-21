@@ -23,7 +23,7 @@ scrollToDomId str id =
 
 type alias DropState =
     { isOpen : Bool
-    , mouseSelectedId : Maybe Int
+    , mouseSelectedId : Maybe (Maybe Int)
     , keyboardSelectedId : Maybe Int
     , searchString : String
     , domId : String
@@ -59,8 +59,7 @@ type SkipAmount
 
 
 type Msg
-    = ItemPicked DropdownItem
-    | ItemEntered DropdownItem
+    = ItemEntered DropdownItem
     | ItemLeft
     | SetOpenState Bool
     | OnBlur
@@ -70,11 +69,8 @@ type Msg
 update : Msg -> DropState -> Maybe Int -> List DropdownItem -> ( DropState, Maybe Int, Cmd msg )
 update msg dropdown selectedId dropdownItems =
     case msg of
-        ItemPicked item ->
-            ( { dropdown | isOpen = False }, item.id, Cmd.none )
-
         ItemEntered item ->
-            ( { dropdown | mouseSelectedId = item.id }, selectedId, Cmd.none )
+            ( { dropdown | mouseSelectedId = Just item.id }, selectedId, Cmd.none )
 
         ItemLeft ->
             ( { dropdown | mouseSelectedId = Nothing }, selectedId, Cmd.none )
@@ -83,10 +79,12 @@ update msg dropdown selectedId dropdownItems =
             ( { dropdown | isOpen = newState, keyboardSelectedId = selectedId }, selectedId, scrollToDomId dropdown.domId selectedId )
 
         OnBlur ->
-            if selectedId /= Nothing && dropdown.mouseSelectedId == Nothing then
-                ( { dropdown | isOpen = False }, selectedId, Cmd.none )
-            else
-                ( { dropdown | isOpen = False }, dropdown.mouseSelectedId, Cmd.none )
+            case dropdown.mouseSelectedId of
+                Just mouseSelectedId ->
+                    ( { dropdown | isOpen = False }, mouseSelectedId, Cmd.none )
+
+                Nothing ->
+                    ( { dropdown | isOpen = False }, selectedId, Cmd.none )
 
         OnKey Esc ->
             ( { dropdown | isOpen = False }, selectedId, Cmd.none )
@@ -185,7 +183,7 @@ view dropdown dropdownItems selectedId =
     in
         div [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder ]
             [ span
-                [ onClick (SetOpenState (not dropdown.isOpen))
+                [ Events.onClick (SetOpenState (not dropdown.isOpen))
                 , class ("e-ddl e-widget " ++ activeClass)
                 , dropInputWidth
                 ]
@@ -245,11 +243,10 @@ viewItem dropdown dropdownItems =
             |> List.map
                 (\item ->
                     li
-                        [ onClick (ItemPicked item)
-                        , Events.onMouseEnter (ItemEntered item)
+                        [ Events.onMouseEnter (ItemEntered item)
                         , Events.onMouseLeave ItemLeft
                         , class "dropdown-li"
-                        , if dropdown.mouseSelectedId == item.id then
+                        , if dropdown.mouseSelectedId == Just item.id then
                             style mouseActive
                           else if dropdown.keyboardSelectedId == item.id && dropdown.isOpen then
                             style keyActive
