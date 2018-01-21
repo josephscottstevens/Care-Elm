@@ -13,15 +13,6 @@ QUESTIONS:
 double check the params on HrefColumn does it make sense? and sfcheckbox
 test call recordings edit task custom href
 
----------------------------dropdown ---------------------------
-
-Show search in dropdown as an option (or as an init thing)
-
-suffixDropdown's min width is too small
-	re-think dropdown min-width
-
----------------------------------------------------------------
-
 test reported file upload errors
 file upload not working or atleast showing that it is
 
@@ -41,6 +32,8 @@ test fast switching between demographics and other pages (I can cancel demograph
 test performance
 
 --------------------------    low    ----------------------------
+Show search in dropdown as an option (or as an init thing)
+
 initial sort? Verify if it is just Date on call recordings
 column widths (call recordings, and others?)
 validation errors don't have . at the end

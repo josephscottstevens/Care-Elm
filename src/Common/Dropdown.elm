@@ -225,14 +225,10 @@ viewItem dropdown dropdownItems =
                 |> List.head
                 |> Maybe.withDefault 150
 
-        width =
-            if biggestStrLength * 6 < 100 then
-                100
-            else
-                biggestStrLength * 6
-
         commonWidth =
-            [ ( "width", toString width ++ "px" ) ]
+            [ ( "width", toString biggestStrLength ++ "px" )
+            , ( "min-width", "99.7%" )
+            ]
 
         mouseActive =
             [ ( "background-color", "" ), ( "color", "#808080" ) ] ++ commonWidth
@@ -283,6 +279,7 @@ dropdownList =
     , ( "overflow-x", "hidden" )
     , ( "overflow-y", "scroll" )
     , ( "z-index", "100" )
+    , ( "min-width", "74%" )
     ]
 
 
