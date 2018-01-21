@@ -1,7 +1,7 @@
 port module Common.Dropdown exposing (DropState, Msg, init, update, view)
 
 import Html exposing (Html, Attribute, div, span, text, li, ul, input)
-import Html.Attributes exposing (style, value, class, readonly)
+import Html.Attributes exposing (style, value, class, readonly, placeholder)
 import Html.Events as Events
 import Json.Decode
 import Common.Types exposing (DropdownItem)
@@ -177,7 +177,7 @@ view dropdown dropdownItems selectedId =
         getDropdownText =
             dropdownItems
                 |> List.filter (\t -> t.id == selectedId)
-                |> List.map (\t -> t.name)
+                |> List.map .name
                 |> List.head
                 |> Maybe.withDefault ""
     in
@@ -193,6 +193,7 @@ view dropdown dropdownItems selectedId =
                         [ class "e-input"
                         , readonly True
                         , value getDropdownText
+                        , placeholder "Choose..."
                         , if dropdown.isOpen then
                             Events.onBlur OnBlur
                           else
