@@ -101,6 +101,15 @@ type alias Model =
     , suffixId : Maybe Int
     , suffixDropdown : List DropdownItem
     , suffixDropState : Dropdown.DropState
+    , prefixId : Maybe Int
+    , prefixDropdown : List DropdownItem
+    , prefixDropState : Dropdown.DropState
+    , raceId : Maybe Int
+    , raceDropdown : List DropdownItem
+    , raceDropState : Dropdown.DropState
+    , ethnicityId : Maybe Int
+    , ethnicityDropdown : List DropdownItem
+    , ethnicityDropState : Dropdown.DropState
     , nodeCounter : Int
     , progress : Progress ServerResponse
     , demographicsUrl : Maybe String
@@ -111,23 +120,17 @@ type alias SfData =
     { facilityId : Maybe Int
     , mainProviderId : Maybe Int
     , careCoordinatorId : Maybe Int
-    , prefixId : Maybe Int
     , sexTypeId : Maybe Int
     , sexualOrientationId : Maybe Int
     , genderIdentityId : Maybe Int
-    , raceId : Maybe Int
-    , ethnicityId : Maybe Int
     , uSVeteranId : Maybe Int
     , religionId : Maybe Int
     , careCoordinatorDropdown : List DropdownItem
-    , ethnicityDropdown : List DropdownItem
     , sexTypeDropdown : List DropdownItem
     , sexualOrientationDropdown : List DropdownItem
     , genderIdentityDropdown : List DropdownItem
     , facilityDropdown : List DropdownItem
     , mainProviderDropdown : List DropdownItem
-    , raceDropdown : List DropdownItem
-    , prefixDropdown : List DropdownItem
     , uSVeteranDropdown : List DropdownItem
     , religionDropdown : List DropdownItem
     , dateOfBirth : Maybe String
@@ -193,7 +196,9 @@ view model =
             ]
         , h4 [ class "col-xs-12 padding-h-0 padding-top-10" ] [ text "Demographic Information" ]
         , div rowStyle
-            [ sfbox "Prefix" False
+            [ dropbox "Prefix" False <|
+                Html.map UpdatePrefix <|
+                    Dropdown.view model.prefixDropState model.prefixDropdown model.prefixId
             , nonumberbox "First Name" True model.firstName UpdateFirstName
             , nonumberbox "Middle Name" False model.middle UpdateMiddle
             , nonumberbox "Last Name" True model.lastName UpdateLastName
@@ -213,8 +218,12 @@ view model =
             , textbox "Sexual Orientation Note" False model.sexualOrientationNote UpdateSexualOrientationNote
             , sfbox "Gender Identity" False
             , textbox "Gender Identity Note" False model.genderIdentityNote UpdateGenderIdentityNote
-            , sfbox "Race" False
-            , sfbox "Ethnicity" False
+            , dropbox "Race" False <|
+                Html.map UpdateRace <|
+                    Dropdown.view model.raceDropState model.raceDropdown model.raceId
+            , dropbox "Ethnicity" False <|
+                Html.map UpdateEthnicity <|
+                    Dropdown.view model.ethnicityDropState model.ethnicityDropdown model.ethnicityId
             , sfbox "US Veteran" False
             , sfbox "Religion" False
             , textbox "Email" False model.email UpdateEmail
@@ -396,7 +405,10 @@ type Msg
     | UpdateSexualOrientationNote String
     | UpdateGenderIdentityNote String
     | UpdateEmail String
+    | UpdatePrefix Dropdown.Msg
     | UpdateSuffix Dropdown.Msg
+    | UpdateRace Dropdown.Msg
+    | UpdateEthnicity Dropdown.Msg
     | InputChanged PatientPhoneNumber (Maybe Int)
     | InputStateChanged PatientPhoneNumber MaskedNumber.State
 
@@ -726,12 +738,33 @@ update msg model =
         UpdateEmail str ->
             { model | email = Just str } ! [ Functions.setUnsavedChanges True ]
 
+        UpdatePrefix dropdownMsg ->
+            let
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg model.prefixDropState model.prefixId model.prefixDropdown
+            in
+                { model | prefixDropState = newDropState, prefixId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+
         UpdateSuffix dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
                     Dropdown.update dropdownMsg model.suffixDropState model.suffixId model.suffixDropdown
             in
                 { model | suffixDropState = newDropState, suffixId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateRace dropdownMsg ->
+            let
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg model.raceDropState model.raceId model.raceDropdown
+            in
+                { model | raceDropState = newDropState, raceId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateEthnicity dropdownMsg ->
+            let
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg model.ethnicityDropState model.ethnicityId model.ethnicityDropdown
+            in
+                { model | ethnicityDropState = newDropState, ethnicityId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
 
 
@@ -1012,6 +1045,15 @@ emptyModel patientId =
     , suffixId = Nothing
     , suffixDropdown = []
     , suffixDropState = Dropdown.init "suffixDropdown"
+    , prefixId = Nothing
+    , prefixDropdown = []
+    , prefixDropState = Dropdown.init "prefixDropdown"
+    , raceId = Nothing
+    , raceDropdown = []
+    , raceDropState = Dropdown.init "raceDropdown"
+    , ethnicityId = Nothing
+    , ethnicityDropdown = []
+    , ethnicityDropState = Dropdown.init "ethnicityDropdown"
     , nodeCounter = 0
     , progress = Progress.None
     , demographicsUrl = Just (getDemographicsUrl patientId)
@@ -1028,23 +1070,17 @@ emptySfData =
     { facilityId = Nothing
     , careCoordinatorId = Nothing
     , mainProviderId = Nothing
-    , prefixId = Nothing
     , sexTypeId = Nothing
     , sexualOrientationId = Nothing
     , genderIdentityId = Nothing
-    , raceId = Nothing
-    , ethnicityId = Nothing
     , uSVeteranId = Nothing
     , religionId = Nothing
     , careCoordinatorDropdown = []
-    , ethnicityDropdown = []
     , sexTypeDropdown = []
     , sexualOrientationDropdown = []
     , genderIdentityDropdown = []
     , facilityDropdown = []
     , mainProviderDropdown = []
-    , raceDropdown = []
-    , prefixDropdown = []
     , uSVeteranDropdown = []
     , religionDropdown = []
     , dateOfBirth = Nothing
@@ -1121,6 +1157,12 @@ updateModelFromServerMessage serverResponse model =
                 , languageDropdown = d.languageDropdown
                 , suffixId = d.suffixId
                 , suffixDropdown = d.suffixDropdown
+                , prefixId = d.prefixId
+                , prefixDropdown = d.prefixDropdown
+                , raceId = d.raceId
+                , raceDropdown = d.raceDropdown
+                , ethnicityId = d.ethnicityId
+                , ethnicityDropdown = d.ethnicityDropdown
             }
 
         ServerFail _ ->
@@ -1152,6 +1194,12 @@ type alias DemographicsInformationModel =
     , languageDropdown : List DropdownItem
     , suffixId : Maybe Int
     , suffixDropdown : List DropdownItem
+    , prefixId : Maybe Int
+    , prefixDropdown : List DropdownItem
+    , raceId : Maybe Int
+    , raceDropdown : List DropdownItem
+    , ethnicityId : Maybe Int
+    , ethnicityDropdown : List DropdownItem
     }
 
 
@@ -1201,6 +1249,12 @@ decodeDemographicsInformationModel =
         |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "SuffixId" (Decode.maybe Decode.int)
         |> Pipeline.required "SuffixDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "PrefixId" (Decode.maybe Decode.int)
+        |> Pipeline.required "PrefixDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "RaceId" (Decode.maybe Decode.int)
+        |> Pipeline.required "RaceDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "EthnicityId" (Decode.maybe Decode.int)
+        |> Pipeline.required "EthnicityDropdown" (Decode.list decodeDropdownItem)
 
 
 decodeContactInformationModel : Decode.Decoder ContactInformationModel
@@ -1257,23 +1311,17 @@ decodeSfData =
         |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
         |> Pipeline.required "MainProviderId" (Decode.maybe Decode.int)
         |> Pipeline.required "CareCoordinatorId" (Decode.maybe Decode.int)
-        |> Pipeline.required "PrefixId" (Decode.maybe Decode.int)
         |> Pipeline.required "SexTypeId" (Decode.maybe Decode.int)
         |> Pipeline.required "SexualOrientationId" (Decode.maybe Decode.int)
         |> Pipeline.required "GenderIdentityId" (Decode.maybe Decode.int)
-        |> Pipeline.required "RaceId" (Decode.maybe Decode.int)
-        |> Pipeline.required "EthnicityId" (Decode.maybe Decode.int)
         |> Pipeline.required "USVeteranId" (Decode.maybe Decode.int)
         |> Pipeline.required "ReligionId" (Decode.maybe Decode.int)
         |> Pipeline.required "CareCoordinatorDropdown" (Decode.list decodeDropdownItem)
-        |> Pipeline.required "EthnicityDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "SexTypeDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "SexualOrientationDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "GenderIdentityDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "FacilityDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "MainProviderDropdown" (Decode.list decodeDropdownItem)
-        |> Pipeline.required "RaceDropdown" (Decode.list decodeDropdownItem)
-        |> Pipeline.required "PrefixDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "USVeteranDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "ReligionDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "DateOfBirth" (Decode.maybe Decode.string)
@@ -1319,13 +1367,13 @@ encodeDemographicsInformationModel model =
         , ( "FacilityId", maybeVal Encode.int model.sfData.facilityId )
         , ( "MainProviderId", maybeVal Encode.int model.sfData.mainProviderId )
         , ( "CareCoordinatorId", maybeVal Encode.int model.sfData.careCoordinatorId )
-        , ( "PrefixId", maybeVal Encode.int model.sfData.prefixId )
+        , ( "PrefixId", maybeVal Encode.int model.prefixId )
         , ( "SexTypeId", maybeVal Encode.int model.sfData.sexTypeId )
         , ( "SexualOrientationId", maybeVal Encode.int model.sfData.sexualOrientationId )
         , ( "SuffixId", maybeVal Encode.int model.suffixId )
         , ( "GenderIdentityId", maybeVal Encode.int model.sfData.genderIdentityId )
-        , ( "RaceId", maybeVal Encode.int model.sfData.raceId )
-        , ( "EthnicityId", maybeVal Encode.int model.sfData.ethnicityId )
+        , ( "RaceId", maybeVal Encode.int model.raceId )
+        , ( "EthnicityId", maybeVal Encode.int model.ethnicityId )
         , ( "USVeteranId", maybeVal Encode.int model.sfData.uSVeteranId )
         , ( "ReligionId", maybeVal Encode.int model.sfData.religionId )
         , ( "DateOfBirth", maybeVal Encode.string model.sfData.dateOfBirth )
