@@ -97,22 +97,18 @@ type alias Model =
     , patientLanguagesMap : List PatientLanguagesMap
     , contactHoursModel : Maybe Decode.Value
     , showValidationErrors : Bool
-    , languageDropdown : List DropdownItem
     , suffixId : Maybe Int
-    , suffixDropdown : List DropdownItem
     , suffixDropState : Dropdown.DropState
     , prefixId : Maybe Int
-    , prefixDropdown : List DropdownItem
     , prefixDropState : Dropdown.DropState
     , raceId : Maybe Int
-    , raceDropdown : List DropdownItem
     , raceDropState : Dropdown.DropState
     , ethnicityId : Maybe Int
-    , ethnicityDropdown : List DropdownItem
     , ethnicityDropState : Dropdown.DropState
     , nodeCounter : Int
     , progress : Progress ServerResponse
     , demographicsUrl : Maybe String
+    , drops : DropdownSource
     }
 
 
@@ -125,17 +121,10 @@ type alias SfData =
     , genderIdentityId : Maybe Int
     , uSVeteranId : Maybe Int
     , religionId : Maybe Int
-    , careCoordinatorDropdown : List DropdownItem
-    , sexTypeDropdown : List DropdownItem
-    , sexualOrientationDropdown : List DropdownItem
-    , genderIdentityDropdown : List DropdownItem
-    , facilityDropdown : List DropdownItem
-    , mainProviderDropdown : List DropdownItem
-    , uSVeteranDropdown : List DropdownItem
-    , religionDropdown : List DropdownItem
     , dateOfBirth : Maybe String
     , dateOfDeath : Maybe String
     , vip : Maybe Bool
+    , drops : DropdownSource
     }
 
 
@@ -198,13 +187,13 @@ view model =
         , div rowStyle
             [ dropbox "Prefix" False <|
                 Html.map UpdatePrefix <|
-                    Dropdown.view model.prefixDropState model.prefixDropdown model.prefixId
+                    Dropdown.view model.prefixDropState model.drops.prefixDropdown model.prefixId
             , nonumberbox "First Name" True model.firstName UpdateFirstName
             , nonumberbox "Middle Name" False model.middle UpdateMiddle
             , nonumberbox "Last Name" True model.lastName UpdateLastName
             , dropbox "Suffix" False <|
                 Html.map UpdateSuffix <|
-                    Dropdown.view model.suffixDropState model.suffixDropdown model.suffixId
+                    Dropdown.view model.suffixDropState model.drops.suffixDropdown model.suffixId
             , textbox "Nickname" False model.nickName UpdateNickname
             , sfbox "Date of Birth" True
             , textbox "Birth Place" False model.birthPlace UpdateBirthPlace
@@ -220,10 +209,10 @@ view model =
             , textbox "Gender Identity Note" False model.genderIdentityNote UpdateGenderIdentityNote
             , dropbox "Race" False <|
                 Html.map UpdateRace <|
-                    Dropdown.view model.raceDropState model.raceDropdown model.raceId
+                    Dropdown.view model.raceDropState model.drops.raceDropdown model.raceId
             , dropbox "Ethnicity" False <|
                 Html.map UpdateEthnicity <|
-                    Dropdown.view model.ethnicityDropState model.ethnicityDropdown model.ethnicityId
+                    Dropdown.view model.ethnicityDropState model.drops.ethnicityDropdown model.ethnicityId
             , sfbox "US Veteran" False
             , sfbox "Religion" False
             , textbox "Email" False model.email UpdateEmail
@@ -234,7 +223,7 @@ view model =
                 , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
-                , div [] (List.map (viewLanguages model.languageDropdown) model.patientLanguagesMap)
+                , div [] (List.map (viewLanguages model.drops.languageDropdown) model.patientLanguagesMap)
                 ]
             ]
         , div [ class "col-xs-12 padding-h-0" ]
@@ -691,7 +680,7 @@ update msg model =
         UpdateLanguage t dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg t.dropState t.languageId model.languageDropdown
+                    Dropdown.update dropdownMsg t.dropState t.languageId model.drops.languageDropdown
             in
                 updateLanguage model { t | dropState = newDropState, languageId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
@@ -741,28 +730,28 @@ update msg model =
         UpdatePrefix dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg model.prefixDropState model.prefixId model.prefixDropdown
+                    Dropdown.update dropdownMsg model.prefixDropState model.prefixId model.drops.prefixDropdown
             in
                 { model | prefixDropState = newDropState, prefixId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateSuffix dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg model.suffixDropState model.suffixId model.suffixDropdown
+                    Dropdown.update dropdownMsg model.suffixDropState model.suffixId model.drops.suffixDropdown
             in
                 { model | suffixDropState = newDropState, suffixId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateRace dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg model.raceDropState model.raceId model.raceDropdown
+                    Dropdown.update dropdownMsg model.raceDropState model.raceId model.drops.raceDropdown
             in
                 { model | raceDropState = newDropState, raceId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateEthnicity dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg model.ethnicityDropState model.ethnicityId model.ethnicityDropdown
+                    Dropdown.update dropdownMsg model.ethnicityDropState model.ethnicityId model.drops.ethnicityDropdown
             in
                 { model | ethnicityDropState = newDropState, ethnicityId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
@@ -1041,22 +1030,18 @@ emptyModel patientId =
     , preferredPhoneIndex = 0
     , contactHoursModel = Nothing
     , showValidationErrors = False
-    , languageDropdown = []
     , suffixId = Nothing
-    , suffixDropdown = []
     , suffixDropState = Dropdown.init "suffixDropdown"
     , prefixId = Nothing
-    , prefixDropdown = []
     , prefixDropState = Dropdown.init "prefixDropdown"
     , raceId = Nothing
-    , raceDropdown = []
     , raceDropState = Dropdown.init "raceDropdown"
     , ethnicityId = Nothing
-    , ethnicityDropdown = []
     , ethnicityDropState = Dropdown.init "ethnicityDropdown"
     , nodeCounter = 0
     , progress = Progress.None
     , demographicsUrl = Just (getDemographicsUrl patientId)
+    , drops = emptyDrops
     }
 
 
@@ -1075,17 +1060,10 @@ emptySfData =
     , genderIdentityId = Nothing
     , uSVeteranId = Nothing
     , religionId = Nothing
-    , careCoordinatorDropdown = []
-    , sexTypeDropdown = []
-    , sexualOrientationDropdown = []
-    , genderIdentityDropdown = []
-    , facilityDropdown = []
-    , mainProviderDropdown = []
-    , uSVeteranDropdown = []
-    , religionDropdown = []
     , dateOfBirth = Nothing
     , dateOfDeath = Nothing
     , vip = Nothing
+    , drops = emptyDrops
     }
 
 
@@ -1126,44 +1104,62 @@ emptyPatientAddress nodeCounter isPreferred =
     }
 
 
+emptyDrops : DropdownSource
+emptyDrops =
+    { languageDropdown = []
+    , ethnicityDropdown = []
+    , sexTypeDropdown = []
+    , sexualOrientationDropdown = []
+    , genderIdentityDropdown = []
+    , raceDropdown = []
+    , suffixDropdown = []
+    , prefixDropdown = []
+    , uSVeteranDropdown = []
+    , religionDropdown = []
+    , careCoordinatorDropdown = []
+    , facilityDropdown = []
+    , mainProviderDropdown = []
+    }
+
+
 updateModelFromServerMessage : ServerResponse -> Model -> Model
 updateModelFromServerMessage serverResponse model =
     case serverResponse of
-        ServerSuccess d c h ->
-            { model
-                | demographicsId = d.demographicsId
-                , nickName = d.nickName
-                , ssn = d.ssn
-                , lastName = d.lastName
-                , firstName = d.firstName
-                , middle = d.middle
-                , birthPlace = d.birthPlace
-                , mrn = d.mrn
-                , patientAccountNumber = d.patientAccountNumber
-                , facilityPtID = d.facilityPtID
-                , sexualOrientationNote = d.sexualOrientationNote
-                , genderIdentityNote = d.genderIdentityNote
-                , email = d.email
-                , preferredLanguageIndex = d.preferredLanguageIndex
-                , sfData = d.sfData
-                , patientLanguagesMap = d.patientLanguagesMap
-                , patientPhoneNumbers = c.patientPhoneNumbers
-                , patientAddresses = c.patientAddresses
-                , phoneNumberTypeDropdown = c.phoneNumberTypeDropdown
-                , stateDropdown = c.stateDropdown
-                , primaryAddressIndex = c.primaryAddressIndex
-                , preferredPhoneIndex = c.preferredPhoneIndex
-                , contactHoursModel = Just h
-                , languageDropdown = d.languageDropdown
-                , suffixId = d.suffixId
-                , suffixDropdown = d.suffixDropdown
-                , prefixId = d.prefixId
-                , prefixDropdown = d.prefixDropdown
-                , raceId = d.raceId
-                , raceDropdown = d.raceDropdown
-                , ethnicityId = d.ethnicityId
-                , ethnicityDropdown = d.ethnicityDropdown
-            }
+        ServerSuccess d c h ds ->
+            let
+                sfDrops =
+                    d.sfData
+            in
+                { model
+                    | demographicsId = d.demographicsId
+                    , nickName = d.nickName
+                    , ssn = d.ssn
+                    , lastName = d.lastName
+                    , firstName = d.firstName
+                    , middle = d.middle
+                    , birthPlace = d.birthPlace
+                    , mrn = d.mrn
+                    , patientAccountNumber = d.patientAccountNumber
+                    , facilityPtID = d.facilityPtID
+                    , sexualOrientationNote = d.sexualOrientationNote
+                    , genderIdentityNote = d.genderIdentityNote
+                    , email = d.email
+                    , preferredLanguageIndex = d.preferredLanguageIndex
+                    , sfData = { sfDrops | drops = ds }
+                    , patientLanguagesMap = d.patientLanguagesMap
+                    , patientPhoneNumbers = c.patientPhoneNumbers
+                    , patientAddresses = c.patientAddresses
+                    , primaryAddressIndex = c.primaryAddressIndex
+                    , preferredPhoneIndex = c.preferredPhoneIndex
+                    , contactHoursModel = Just h
+                    , suffixId = d.suffixId
+                    , prefixId = d.prefixId
+                    , raceId = d.raceId
+                    , ethnicityId = d.ethnicityId
+                    , stateDropdown = c.stateDropdown
+                    , phoneNumberTypeDropdown = c.phoneNumberTypeDropdown
+                    , drops = ds
+                }
 
         ServerFail _ ->
             model
@@ -1191,15 +1187,10 @@ type alias DemographicsInformationModel =
     , preferredLanguageIndex : Int
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
-    , languageDropdown : List DropdownItem
     , suffixId : Maybe Int
-    , suffixDropdown : List DropdownItem
     , prefixId : Maybe Int
-    , prefixDropdown : List DropdownItem
     , raceId : Maybe Int
-    , raceDropdown : List DropdownItem
     , ethnicityId : Maybe Int
-    , ethnicityDropdown : List DropdownItem
     }
 
 
@@ -1214,7 +1205,7 @@ type alias ContactInformationModel =
 
 
 type ServerResponse
-    = ServerSuccess DemographicsInformationModel ContactInformationModel Decode.Value
+    = ServerSuccess DemographicsInformationModel ContactInformationModel Decode.Value DropdownSource
     | ServerFail String
 
 
@@ -1224,6 +1215,7 @@ decodeServerResponse =
         |> Pipeline.required "demographicsInformationModel" decodeDemographicsInformationModel
         |> Pipeline.required "contactInformationModel" decodeContactInformationModel
         |> Pipeline.required "contactHoursModel" Decode.value
+        |> Pipeline.required "demographicLists" decodeLists
 
 
 decodeDemographicsInformationModel : Decode.Decoder DemographicsInformationModel
@@ -1246,15 +1238,10 @@ decodeDemographicsInformationModel =
         |> Pipeline.required "PreferredLanguageIndex" Decode.int
         |> Pipeline.custom decodeSfData
         |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
-        |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "SuffixId" (Decode.maybe Decode.int)
-        |> Pipeline.required "SuffixDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "PrefixId" (Decode.maybe Decode.int)
-        |> Pipeline.required "PrefixDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "RaceId" (Decode.maybe Decode.int)
-        |> Pipeline.required "RaceDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "EthnicityId" (Decode.maybe Decode.int)
-        |> Pipeline.required "EthnicityDropdown" (Decode.list decodeDropdownItem)
 
 
 decodeContactInformationModel : Decode.Decoder ContactInformationModel
@@ -1316,17 +1303,45 @@ decodeSfData =
         |> Pipeline.required "GenderIdentityId" (Decode.maybe Decode.int)
         |> Pipeline.required "USVeteranId" (Decode.maybe Decode.int)
         |> Pipeline.required "ReligionId" (Decode.maybe Decode.int)
-        |> Pipeline.required "CareCoordinatorDropdown" (Decode.list decodeDropdownItem)
-        |> Pipeline.required "SexTypeDropdown" (Decode.list decodeDropdownItem)
-        |> Pipeline.required "SexualOrientationDropdown" (Decode.list decodeDropdownItem)
-        |> Pipeline.required "GenderIdentityDropdown" (Decode.list decodeDropdownItem)
-        |> Pipeline.required "FacilityDropdown" (Decode.list decodeDropdownItem)
-        |> Pipeline.required "MainProviderDropdown" (Decode.list decodeDropdownItem)
-        |> Pipeline.required "USVeteranDropdown" (Decode.list decodeDropdownItem)
-        |> Pipeline.required "ReligionDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "DateOfBirth" (Decode.maybe Decode.string)
         |> Pipeline.required "DateOfDeath" (Decode.maybe Decode.string)
         |> Pipeline.required "VIP" (Decode.maybe Decode.bool)
+        |> Pipeline.hardcoded emptyDrops
+
+
+type alias DropdownSource =
+    { languageDropdown : List DropdownItem
+    , ethnicityDropdown : List DropdownItem
+    , sexTypeDropdown : List DropdownItem
+    , sexualOrientationDropdown : List DropdownItem
+    , genderIdentityDropdown : List DropdownItem
+    , raceDropdown : List DropdownItem
+    , suffixDropdown : List DropdownItem
+    , prefixDropdown : List DropdownItem
+    , uSVeteranDropdown : List DropdownItem
+    , religionDropdown : List DropdownItem
+    , careCoordinatorDropdown : List DropdownItem
+    , facilityDropdown : List DropdownItem
+    , mainProviderDropdown : List DropdownItem
+    }
+
+
+decodeLists : Decode.Decoder DropdownSource
+decodeLists =
+    Pipeline.decode DropdownSource
+        |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "EthnicityDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "SexTypeDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "SexualOrientationDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "GenderIdentityDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "RaceDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "SuffixDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "PrefixDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "USVeteranDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "ReligionDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "CareCoordinatorDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "FacilityDropdown" (Decode.list decodeDropdownItem)
+        |> Pipeline.required "MainProviderDropdown" (Decode.list decodeDropdownItem)
 
 
 
