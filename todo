@@ -10,13 +10,9 @@ QUESTIONS:
 	
 ===========================================================================================================
 
-test reported file upload errors
-file upload not working or atleast showing that it is
-
 call recording bombs out on add (fk exception? is this what test4 does?)
 
-test new patient	
-2 minutes can I get initial loading bar in
+test new patient
 save to client portal looks borked... but I remember... that was just meh? Check bugs
 
 ---------------------------on publish ---------------------------
@@ -29,6 +25,7 @@ test fast switching between demographics and other pages (I can cancel demograph
 test performance
 
 --------------------------    low    ----------------------------
+cleanup UploadFile
 Show search in dropdown as an option (or as an init thing)
 move Table.elm to Common folder
 initial sort? Verify if it is just Date on call recordings

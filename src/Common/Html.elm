@@ -21,7 +21,7 @@ module Common.Html
         , defaultConfig
         )
 
-import Html exposing (Html, text, div, button, input, label, textarea)
+import Html exposing (Html, text, div, button, input, label, textarea, i)
 import Html.Attributes exposing (class, type_, id, value, for, name, readonly, style, checked)
 import Html.Events exposing (onInput, onCheck)
 import Common.Functions exposing (isAlpha)
@@ -152,9 +152,11 @@ makeControls config controls =
                 FileInput labelText requiredType displayValue ->
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
-                        , div config.controlAttributes
-                            [ input [ type_ "text", class "e-textbox", id "fileName", readonly True, value displayValue ] [] ]
-                        , div [ class labelWidth ] [ div [ id "fileBtn" ] [] ]
+                        , div config.controlAttributes [ input [ type_ "text", class "e-textbox", value displayValue ] [] ]
+                        , div [ class labelWidth ]
+                            [ input [ type_ "file", name "UploadFile", id "UploadFile", style [ ( "display", "none" ) ] ] []
+                            , label [ for "UploadFile", class "sf-file-upload" ] [ text "Browse Files" ]
+                            ]
                         ]
 
                 HtmlElement labelText htmlElement ->

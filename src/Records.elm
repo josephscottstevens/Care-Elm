@@ -574,8 +574,8 @@ formInputs editData =
 
                 Common.Labs ->
                     firstColumns
-                        ++ [ DateInput "Date/Time of Labs Collected" Required (defaultString editData.sfData.timeVisit) "TimeVisitId"
-                           , DateInput "Date/Time of Labs Accessioned" Required (defaultString editData.sfData.timeAcc) "TimeAccId"
+                        ++ [ DateInput "Date of Labs Collected" Required (defaultString editData.sfData.timeVisit) "TimeVisitId"
+                           , DateInput "Date of Labs Accessioned" Required (defaultString editData.sfData.timeAcc) "TimeAccId"
                            , TextInput "Name of Lab" Optional editData.title (UpdateTitle editData)
                            , TextInput "Provider of Lab" Optional editData.provider (UpdateProvider editData)
                            ]
@@ -583,8 +583,8 @@ formInputs editData =
 
                 Common.Radiology ->
                     firstColumns
-                        ++ [ DateInput "Date/Time of Study was done" Required (defaultString editData.sfData.timeVisit) "TimeVisitId"
-                           , DateInput "Date/Time of Study Accessioned" Required (defaultString editData.sfData.timeAcc) "TimeAccId"
+                        ++ [ DateInput "Date of Study was done" Required (defaultString editData.sfData.timeVisit) "TimeVisitId"
+                           , DateInput "Date of Study Accessioned" Required (defaultString editData.sfData.timeAcc) "TimeAccId"
                            , TextInput "Name of Study" Optional editData.title (UpdateTitle editData)
                            , TextInput "Provider of Study" Optional editData.provider (UpdateProvider editData)
                            ]
