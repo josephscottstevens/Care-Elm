@@ -1,7 +1,7 @@
 port module Common.Dropdown exposing (DropState, Msg, init, update, view)
 
 import Html exposing (Html, Attribute, div, span, text, li, ul, input)
-import Html.Attributes exposing (style, value, class, readonly, placeholder)
+import Html.Attributes exposing (style, value, class, readonly, placeholder, tabindex)
 import Html.Events as Events
 import Json.Decode
 import Common.Types exposing (DropdownItem)
@@ -59,7 +59,8 @@ type SkipAmount
 
 
 type Msg
-    = ItemEntered DropdownItem
+    = ItemClicked DropdownItem
+    | ItemEntered DropdownItem
     | ItemLeft
     | SetOpenState Bool
     | OnBlur
@@ -69,6 +70,9 @@ type Msg
 update : Msg -> DropState -> Maybe Int -> List DropdownItem -> ( DropState, Maybe Int, Cmd msg )
 update msg dropdown selectedId dropdownItems =
     case msg of
+        ItemClicked item ->
+            ( { dropdown | isOpen = False }, item.id, Cmd.none )
+
         ItemEntered item ->
             ( { dropdown | mouseSelectedId = Just item.id }, selectedId, Cmd.none )
 
@@ -181,7 +185,11 @@ view dropdown dropdownItems selectedId =
                 |> List.head
                 |> Maybe.withDefault ""
     in
-        div [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder ]
+        div
+            [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
+            , Events.onBlur OnBlur
+            , tabindex 0
+            ]
             [ span
                 [ Events.onClick (SetOpenState (not dropdown.isOpen))
                 , class ("e-ddl e-widget " ++ activeClass)
@@ -194,10 +202,6 @@ view dropdown dropdownItems selectedId =
                         , readonly True
                         , value getDropdownText
                         , placeholder "Choose..."
-                        , if dropdown.isOpen then
-                            Events.onBlur OnBlur
-                          else
-                            style []
                         ]
                         []
                     , span [ class "e-select" ]
@@ -242,6 +246,7 @@ viewItem dropdown dropdownItems =
                     li
                         [ Events.onMouseEnter (ItemEntered item)
                         , Events.onMouseLeave ItemLeft
+                        , Events.onClick (ItemClicked item)
                         , class "dropdown-li"
                         , if dropdown.mouseSelectedId == Just item.id then
                             style mouseActive

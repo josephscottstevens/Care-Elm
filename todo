@@ -25,7 +25,6 @@ test fast switching between demographics and other pages (I can cancel demograph
 test performance
 
 --------------------------    low    ----------------------------
-cleanup UploadFile javascript
 Show search in dropdown as an option (or as an init thing)
 move Table.elm to Common folder
 initial sort? Verify if it is just Date on call recordings
