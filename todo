@@ -15,6 +15,7 @@ call recording bombs out on add (fk exception? is this what test4 does?)
 test new patient
 save to client portal looks borked... but I remember... that was just meh? Check bugs
 
+
 ---------------------------on publish ---------------------------
 
 check for double empty fields

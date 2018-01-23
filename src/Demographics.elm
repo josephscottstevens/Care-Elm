@@ -970,6 +970,16 @@ phoneDuplicateValidation model =
                     Just "Duplicate phone number"
 
 
+atleast1 : List a -> String -> Maybe String
+atleast1 items msg =
+    case List.head items of
+        Just _ ->
+            Nothing
+
+        Nothing ->
+            Just msg
+
+
 validatationErrors : Model -> List String
 validatationErrors model =
     [ requireInt "Facility" model.sfData.facilityId
@@ -988,6 +998,8 @@ validatationErrors model =
         |> List.filterMap addressValidation
         |> List.head
     , phoneDuplicateValidation model
+    , atleast1 model.patientAddresses "At least one address is required."
+    , atleast1 model.patientPhoneNumbers "At least one phone is required."
     ]
         |> List.filterMap identity
 
