@@ -7,64 +7,14 @@ import Json.Decode
 import Common.Types exposing (DropdownItem)
 import Common.Functions as Functions
 import Char
-import Array exposing (Array)
 
 
 port dropdownMenuScroll : String -> Cmd msg
 
 
-scrollToDomId : String -> Maybe Int -> List DropdownItem -> Cmd msg
-scrollToDomId str id dropdownItems =
-    let
-        dropLength : Int
-        dropLength =
-            List.length dropdownItems - 1
-
-        itemArray : Array DropdownItem
-        itemArray =
-            Array.fromList dropdownItems
-
-        nextIdx : Maybe Int
-        nextIdx =
-            dropdownItems
-                |> List.filter (\t -> t.id == id)
-                |> List.head
-                |> Maybe.map .id
-                |> Maybe.withDefault Nothing
-
-        nextValidIdx : Maybe Int
-        nextValidIdx =
-            case nextIdx of
-                Just idx ->
-                    if idx >= dropLength then
-                        Just dropLength
-                    else if idx < 0 then
-                        Just 0
-                    else
-                        nextIdx
-
-                Nothing ->
-                    Nothing
-
-        getItemByIdx : Maybe Int
-        getItemByIdx =
-            case nextValidIdx of
-                Just idx ->
-                    getId idx dropdownItems
-
-                Nothing ->
-                    Nothing
-
-        nextIndexString : String
-        nextIndexString =
-            case getItemByIdx of
-                Just t ->
-                    toString t
-
-                Nothing ->
-                    ""
-    in
-        dropdownMenuScroll (str ++ "-" ++ nextIndexString)
+scrollToDomId : String -> Maybe Int -> Cmd msg
+scrollToDomId str id =
+    dropdownMenuScroll (str ++ "-" ++ Functions.defaultIntToString id)
 
 
 type alias DropState =
@@ -129,11 +79,10 @@ getIndex selectedId dropdownItems =
         |> Maybe.withDefault 0
 
 
-getId : Int -> List DropdownItem -> Maybe Int
-getId index dropdownItems =
+getId : List DropdownItem -> Int -> Maybe Int
+getId dropdownItems index =
     dropdownItems
-        |> Array.fromList
-        |> Array.get index
+        |> Functions.getAt index
         |> Maybe.map .id
         |> Maybe.withDefault Nothing
 
@@ -151,7 +100,13 @@ update msg dropdown selectedId dropdownItems =
             ( { dropdown | mouseSelectedId = Nothing, searchString = "" }, selectedId, Cmd.none )
 
         SetOpenState newState ->
-            ( { dropdown | isOpen = newState, keyboardSelectedIndex = getIndex selectedId dropdownItems }, selectedId, scrollToDomId dropdown.domId selectedId dropdownItems )
+            ( { dropdown
+                | isOpen = newState
+                , keyboardSelectedIndex = getIndex selectedId dropdownItems
+              }
+            , selectedId
+            , scrollToDomId dropdown.domId selectedId
+            )
 
         OnBlur ->
             let
@@ -174,7 +129,7 @@ update msg dropdown selectedId dropdownItems =
                     { dropdown | isOpen = False, searchString = "" }
             in
                 if dropdown.isOpen then
-                    ( newDropdown, getId dropdown.keyboardSelectedIndex dropdownItems, Cmd.none )
+                    ( newDropdown, getId dropdownItems dropdown.keyboardSelectedIndex, Cmd.none )
                 else
                     ( newDropdown, selectedId, Cmd.none )
 
@@ -226,7 +181,7 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
                 newIndexCalc
 
         newSelectedId =
-            getId newIndex dropdownItems
+            getId dropdownItems newIndex
 
         newDropdown =
             { dropdown
@@ -235,7 +190,7 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
             }
     in
         if dropdown.isOpen then
-            ( newDropdown, selectedId, scrollToDomId dropdown.domId newSelectedId dropdownItems )
+            ( newDropdown, selectedId, scrollToDomId dropdown.domId newSelectedId )
         else
             ( newDropdown, Just newIndex, Cmd.none )
 
@@ -342,13 +297,6 @@ viewItem dropdown dropdownItems =
                 )
 
 
-onClick : msg -> Attribute msg
-onClick message =
-    Events.onWithOptions "click"
-        { stopPropagation = True, preventDefault = False }
-        (Json.Decode.succeed message)
-
-
 
 -- styles for list container
 
@@ -387,10 +335,9 @@ updateSearchString searchChar dropdown dropdownItems selectedId =
     in
         case maybeSelectedItem of
             Just t ->
-                ( { dropdown | searchString = searchString, keyboardSelectedIndex = getIndex t.id dropdownItems }, t.id, scrollToDomId dropdown.domId t.id dropdownItems )
+                ( { dropdown | searchString = searchString, keyboardSelectedIndex = getIndex t.id dropdownItems }, t.id, scrollToDomId dropdown.domId t.id )
 
             Nothing ->
-                --TODO, I am not sure about this branch of logic
                 ( dropdown, selectedId, Cmd.none )
 
 

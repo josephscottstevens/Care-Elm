@@ -34,6 +34,7 @@ port module Common.Functions
         , deletePrompt
         , deleteConfirmed
         , uniqueBy
+        , getAt
         )
 
 import Char exposing (isLower, isUpper)
@@ -401,3 +402,8 @@ uniqueHelp f existing remaining accumulator =
                     uniqueHelp f existing rest accumulator
                 else
                     uniqueHelp f (Set.insert computedFirst existing) rest (first :: accumulator)
+
+
+getAt : Int -> List a -> Maybe a
+getAt idx xs =
+    List.head <| List.drop idx xs
