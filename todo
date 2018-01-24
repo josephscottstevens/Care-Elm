@@ -11,6 +11,10 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO: 
+close dropdowns on save
+validation errors don't have . at the end
+validation error for phone numbers aren't formatted
+
 
 call recording bombs out on add (fk exception? is this what test4 does?)
 
@@ -18,29 +22,20 @@ save to client portal looks borked... but I remember... that was just meh? Check
 
 LOW TODO:
 
-validation errors don't have . at the end
-validation error for phone numbers aren't formatted
-
-Show search in dropdown as an option (or as an init thing)
-move Table.elm to Common folder
 initial sort? Verify if it is just Date on call recordings
 column widths (call recordings, and others?)
 
 PreferredLanguageIndex does nothing, remove it
-convert over other dropdowns ? performance is like.... 1600ms to 80
 change table over to maybe list, (if List is nothing, don't display no records found, but if the list exists and its length == 0 then, display no records found)
 currently, mouse active class shows active row highlight on empty grid
-don't show highlight for keyboard when mouse is selecting (or vice versa)
-keyboard search not working
-you can arrow up on dropdown and get no item selected, even though the dropdown doesn't support that
-
-ideally the scrolltoDomId stays in center like sf does. (on arrow keys when dropdown is open)
 
 REALLY LOW TODO:
+Show search in dropdown as an option (or as an init thing)
 It would be nice to have the Call recordings grid refresh after task edit popup closes.
 When page left is disabled, you can still click it. (for pagination Grid)
 For example, when you are on page 12, and you filter down to like 20 rows, the highlighted row is gone (for pagination Grid)
 recordTypeId should be a maybe type, there are hacks all over keeping from that
+move Table.elm to Common folder
 	
 On Deploy Todo:
 	Validate File stuff still works

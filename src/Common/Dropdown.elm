@@ -1,12 +1,13 @@
 port module Common.Dropdown exposing (DropState, Msg, init, update, view)
 
 import Html exposing (Html, Attribute, div, span, text, li, ul, input)
-import Html.Attributes exposing (style, value, class, readonly, placeholder, tabindex)
+import Html.Attributes exposing (style, value, class, readonly, placeholder, tabindex, disabled)
 import Html.Events as Events
 import Json.Decode
 import Common.Types exposing (DropdownItem)
 import Common.Functions as Functions
 import Char
+import Array exposing (Array)
 
 
 port dropdownMenuScroll : String -> Cmd msg
@@ -15,21 +16,61 @@ port dropdownMenuScroll : String -> Cmd msg
 scrollToDomId : String -> Maybe Int -> List DropdownItem -> Cmd msg
 scrollToDomId str id dropdownItems =
     let
-        newId =
-            case id of
+        dropLength : Int
+        dropLength =
+            List.length dropdownItems - 1
+
+        itemArray : Array DropdownItem
+        itemArray =
+            Array.fromList dropdownItems
+
+        nextIdx : Maybe Int
+        nextIdx =
+            dropdownItems
+                |> List.filter (\t -> t.id == id)
+                |> List.head
+                |> Maybe.map .id
+                |> Maybe.withDefault Nothing
+
+        nextValidIdx : Maybe Int
+        nextValidIdx =
+            case nextIdx of
+                Just idx ->
+                    if idx >= dropLength then
+                        Just dropLength
+                    else if idx < 0 then
+                        Just 0
+                    else
+                        nextIdx
+
+                Nothing ->
+                    Nothing
+
+        getItemByIdx : Maybe Int
+        getItemByIdx =
+            case nextValidIdx of
+                Just idx ->
+                    getId idx dropdownItems
+
+                Nothing ->
+                    Nothing
+
+        nextIndexString : String
+        nextIndexString =
+            case getItemByIdx of
                 Just t ->
                     toString t
 
                 Nothing ->
                     ""
     in
-        dropdownMenuScroll (str ++ "-" ++ newId)
+        dropdownMenuScroll (str ++ "-" ++ nextIndexString)
 
 
 type alias DropState =
     { isOpen : Bool
     , mouseSelectedId : Maybe (Maybe Int)
-    , keyboardSelectedId : Maybe Int
+    , keyboardSelectedIndex : Int
     , searchString : String
     , domId : String
     }
@@ -39,7 +80,7 @@ init : String -> DropState
 init domId =
     { isOpen = False
     , mouseSelectedId = Nothing
-    , keyboardSelectedId = Nothing
+    , keyboardSelectedIndex = 0
     , searchString = ""
     , domId = domId
     }
@@ -73,6 +114,30 @@ type Msg
     | ResetSearchString
 
 
+getIndex : Maybe Int -> List DropdownItem -> Int
+getIndex selectedId dropdownItems =
+    dropdownItems
+        |> List.indexedMap
+            (\idx t ->
+                if t.id == selectedId then
+                    Just idx
+                else
+                    Nothing
+            )
+        |> List.filterMap identity
+        |> List.head
+        |> Maybe.withDefault 0
+
+
+getId : Int -> List DropdownItem -> Maybe Int
+getId index dropdownItems =
+    dropdownItems
+        |> Array.fromList
+        |> Array.get index
+        |> Maybe.map .id
+        |> Maybe.withDefault Nothing
+
+
 update : Msg -> DropState -> Maybe Int -> List DropdownItem -> ( DropState, Maybe Int, Cmd msg )
 update msg dropdown selectedId dropdownItems =
     case msg of
@@ -86,7 +151,7 @@ update msg dropdown selectedId dropdownItems =
             ( { dropdown | mouseSelectedId = Nothing, searchString = "" }, selectedId, Cmd.none )
 
         SetOpenState newState ->
-            ( { dropdown | isOpen = newState, keyboardSelectedId = selectedId }, selectedId, scrollToDomId dropdown.domId selectedId dropdownItems )
+            ( { dropdown | isOpen = newState, keyboardSelectedIndex = getIndex selectedId dropdownItems }, selectedId, scrollToDomId dropdown.domId selectedId dropdownItems )
 
         OnBlur ->
             let
@@ -109,7 +174,7 @@ update msg dropdown selectedId dropdownItems =
                     { dropdown | isOpen = False, searchString = "" }
             in
                 if dropdown.isOpen then
-                    ( newDropdown, dropdown.keyboardSelectedId, Cmd.none )
+                    ( newDropdown, getId dropdown.keyboardSelectedIndex dropdownItems, Cmd.none )
                 else
                     ( newDropdown, selectedId, Cmd.none )
 
@@ -144,7 +209,7 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
         newIndexCalc =
             case skipAmount of
                 Exact skipCount ->
-                    Functions.defaultInt dropdown.keyboardSelectedId + skipCount
+                    dropdown.keyboardSelectedIndex + skipCount
 
                 First ->
                     0
@@ -155,25 +220,22 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
         newIndex =
             if newIndexCalc < 0 then
                 0
-            else if newIndexCalc > List.length dropdownItems then
+            else if newIndexCalc >= List.length dropdownItems then
                 List.length dropdownItems - 1
             else
                 newIndexCalc
 
-        selectedItem =
-            dropdownItems
-                |> List.filter (\t -> t.id == Just newIndex)
-                |> List.head
-                |> Maybe.withDefault (DropdownItem Nothing "")
+        newSelectedId =
+            getId newIndex dropdownItems
 
         newDropdown =
             { dropdown
-                | keyboardSelectedId = Just newIndex
+                | keyboardSelectedIndex = newIndex
                 , searchString = ""
             }
     in
         if dropdown.isOpen then
-            ( newDropdown, selectedId, scrollToDomId dropdown.domId selectedItem.id dropdownItems )
+            ( newDropdown, selectedId, scrollToDomId dropdown.domId newSelectedId dropdownItems )
         else
             ( newDropdown, Just newIndex, Cmd.none )
 
@@ -224,7 +286,8 @@ view dropdown dropdownItems selectedId =
                         [ class "noselect e-input"
                         , readonly True
                         , value getDropdownText
-                        , tabindex -1
+                        , tabindex -1 -- Make it so you cannot set focus via tabbing, we need root div to have the focus
+                        , disabled True -- Make it so you cannot click to set focus, we need root div to have the focus
                         , placeholder "Choose..."
                         ]
                         []
@@ -235,11 +298,6 @@ view dropdown dropdownItems selectedId =
                 ]
             , ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (viewItem dropdown dropdownItems)
             ]
-
-
-getId : String -> DropdownItem -> String
-getId id item =
-    id ++ "-" ++ Functions.defaultIntToString item.id
 
 
 viewItem : DropState -> List DropdownItem -> List (Html Msg)
@@ -274,11 +332,11 @@ viewItem dropdown dropdownItems =
                         , class "noselect dropdown-li"
                         , if dropdown.mouseSelectedId == Just item.id then
                             style mouseActive
-                          else if dropdown.keyboardSelectedId == item.id && dropdown.isOpen then
+                          else if dropdown.keyboardSelectedIndex == getIndex item.id dropdownItems && dropdown.isOpen then
                             style keyActive
                           else
                             style commonWidth
-                        , Html.Attributes.id (getId dropdown.domId item)
+                        , Html.Attributes.id (dropdown.domId ++ "-" ++ Functions.defaultIntToString item.id)
                         ]
                         [ text item.name ]
                 )
@@ -329,7 +387,7 @@ updateSearchString searchChar dropdown dropdownItems selectedId =
     in
         case maybeSelectedItem of
             Just t ->
-                ( { dropdown | searchString = searchString, keyboardSelectedId = t.id }, t.id, scrollToDomId dropdown.domId t.id dropdownItems )
+                ( { dropdown | searchString = searchString, keyboardSelectedIndex = getIndex t.id dropdownItems }, t.id, scrollToDomId dropdown.domId t.id dropdownItems )
 
             Nothing ->
                 --TODO, I am not sure about this branch of logic
