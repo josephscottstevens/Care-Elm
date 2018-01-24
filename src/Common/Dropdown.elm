@@ -12,13 +12,18 @@ import Char
 port dropdownMenuScroll : String -> Cmd msg
 
 
-scrollToDomId : String -> Maybe Int -> Cmd msg
-scrollToDomId str id =
+scrollToDomId : String -> Maybe Int -> List DropdownItem -> Cmd msg
+scrollToDomId str id dropdownItems =
     let
         newId =
-            Maybe.withDefault 1 id
+            case id of
+                Just t ->
+                    toString t
+
+                Nothing ->
+                    ""
     in
-        dropdownMenuScroll (str ++ "-" ++ toString newId)
+        dropdownMenuScroll (str ++ "-" ++ newId)
 
 
 type alias DropState =
@@ -81,7 +86,7 @@ update msg dropdown selectedId dropdownItems =
             ( { dropdown | mouseSelectedId = Nothing, searchString = "" }, selectedId, Cmd.none )
 
         SetOpenState newState ->
-            ( { dropdown | isOpen = newState, keyboardSelectedId = selectedId }, selectedId, scrollToDomId dropdown.domId selectedId )
+            ( { dropdown | isOpen = newState, keyboardSelectedId = selectedId }, selectedId, scrollToDomId dropdown.domId selectedId dropdownItems )
 
         OnBlur ->
             let
@@ -168,7 +173,7 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
             }
     in
         if dropdown.isOpen then
-            ( newDropdown, selectedId, scrollToDomId dropdown.domId selectedItem.id )
+            ( newDropdown, selectedId, scrollToDomId dropdown.domId selectedItem.id dropdownItems )
         else
             ( newDropdown, Just newIndex, Cmd.none )
 
@@ -324,9 +329,10 @@ updateSearchString searchChar dropdown dropdownItems selectedId =
     in
         case maybeSelectedItem of
             Just t ->
-                ( { dropdown | searchString = searchString, keyboardSelectedId = t.id }, t.id, scrollToDomId dropdown.domId t.id )
+                ( { dropdown | searchString = searchString, keyboardSelectedId = t.id }, t.id, scrollToDomId dropdown.domId t.id dropdownItems )
 
             Nothing ->
+                --TODO, I am not sure about this branch of logic
                 ( dropdown, selectedId, Cmd.none )
 
 
