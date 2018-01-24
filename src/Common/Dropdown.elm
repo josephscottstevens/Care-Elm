@@ -188,20 +188,20 @@ view dropdown dropdownItems selectedId =
         div
             [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
             , Events.onBlur OnBlur
+            , Events.onClick (SetOpenState (not dropdown.isOpen))
             , tabindex 0
             ]
             [ span
-                [ Events.onClick (SetOpenState (not dropdown.isOpen))
-                , class ("e-ddl e-widget " ++ activeClass)
+                [ class ("e-ddl e-widget " ++ activeClass)
                 , dropInputWidth
                 ]
                 [ span
                     [ class "e-in-wrap e-box" ]
                     [ input
                         [ class "noselect e-input"
-                        , Events.onBlur OnBlur
                         , readonly True
                         , value getDropdownText
+                        , tabindex -1
                         , placeholder "Choose..."
                         ]
                         []

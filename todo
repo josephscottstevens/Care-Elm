@@ -10,28 +10,22 @@ QUESTIONS:
 	
 ===========================================================================================================
 
+TODO: 
+
 call recording bombs out on add (fk exception? is this what test4 does?)
 
-test new patient
 save to client portal looks borked... but I remember... that was just meh? Check bugs
 
+LOW TODO:
 
----------------------------on publish ---------------------------
+validation errors don't have . at the end
+validation error for phone numbers aren't formatted
 
-check for double empty fields
-test saving dates
-test viewing dates
-get demographics script perforemance (~3.5 seconds yeh?)
-test fast switching between demographics and other pages (I can cancel demographics request yah?)
-test performance
-
---------------------------    low    ----------------------------
 Show search in dropdown as an option (or as an init thing)
 move Table.elm to Common folder
 initial sort? Verify if it is just Date on call recordings
 column widths (call recordings, and others?)
-validation errors don't have . at the end
-validation error for phone numbers aren't formatted
+
 PreferredLanguageIndex does nothing, remove it
 convert over other dropdowns ? performance is like.... 1600ms to 80
 change table over to maybe list, (if List is nothing, don't display no records found, but if the list exists and its length == 0 then, display no records found)
@@ -42,38 +36,11 @@ you can arrow up on dropdown and get no item selected, even though the dropdown 
 
 ideally the scrolltoDomId stays in center like sf does. (on arrow keys when dropdown is open)
 
-todo, missing title (see _demographics.cshtml)
-
-test all the little alignments
-
------------------------------------------------------------------            
-
-
-rounded buttons? 
-and css popup? 
-
-Task column is only shown... if... there is a task? How does that work?
-Create add new in edit
-Implement Hospitalizations
-there seems to be a bit of logic on transfer logic... not sure how to handle or if I am already
-
-LOW TODO:
-
-
 REALLY LOW TODO:
-if I think it is worth any performance boost, I don't need to return userDropDown or taskDropdown unless I am on recorcTypeId of 10
-remove un-used fields in MVC list type
-Cleanup C# PeopleRecords, kind of tangled, but not yet. (unused stuff?) (super duplicated stuff?) [no reason to be in same class right?]
 It would be nice to have the Call recordings grid refresh after task edit popup closes.
 When page left is disabled, you can still click it. (for pagination Grid)
 For example, when you are on page 12, and you filter down to like 20 rows, the highlighted row is gone (for pagination Grid)
-How can I put Elm-Make command as apart of vscode instead of needing to up arrow use recent command
-	see: https://github.com/Krzysztof-Cieslak/vscode-elm/blob/master/package.json
 recordTypeId should be a maybe type, there are hacks all over keeping from that
-I can optimize filter, since I don't need every filter all the time...
-refactor long else if filter in load, to case of instead of if else
-Edit Button's class name is "-Column", and I am styling that class, but if we have any columns without a name... how to handle?
-	Maybe have a type, Column-With-ClassName function?
 	
 On Deploy Todo:
 	Validate File stuff still works
@@ -83,3 +50,10 @@ On Deploy Todo:
 	Test Saving
 	Test Validation
 	Test Server errors
+	
+	check for double empty fields
+	test saving dates
+	test viewing dates
+	get demographics script perforemance (~3.5 seconds yeh?)
+	test fast switching between demographics and other pages (I can cancel demographics request yah?)
+	test performance
