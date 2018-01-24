@@ -65,39 +65,48 @@ type Msg
     | SetOpenState Bool
     | OnBlur
     | OnKey Key
+    | ResetSearchString
 
 
 update : Msg -> DropState -> Maybe Int -> List DropdownItem -> ( DropState, Maybe Int, Cmd msg )
 update msg dropdown selectedId dropdownItems =
     case msg of
         ItemClicked item ->
-            ( { dropdown | isOpen = False }, item.id, Cmd.none )
+            ( { dropdown | isOpen = False, searchString = "" }, item.id, Cmd.none )
 
         ItemEntered item ->
-            ( { dropdown | mouseSelectedId = Just item.id }, selectedId, Cmd.none )
+            ( { dropdown | mouseSelectedId = Just item.id, searchString = "" }, selectedId, Cmd.none )
 
         ItemLeft ->
-            ( { dropdown | mouseSelectedId = Nothing }, selectedId, Cmd.none )
+            ( { dropdown | mouseSelectedId = Nothing, searchString = "" }, selectedId, Cmd.none )
 
         SetOpenState newState ->
             ( { dropdown | isOpen = newState, keyboardSelectedId = selectedId }, selectedId, scrollToDomId dropdown.domId selectedId )
 
         OnBlur ->
-            case dropdown.mouseSelectedId of
-                Just mouseSelectedId ->
-                    ( { dropdown | isOpen = False }, mouseSelectedId, Cmd.none )
+            let
+                newDropdown =
+                    { dropdown | isOpen = False, searchString = "" }
+            in
+                case dropdown.mouseSelectedId of
+                    Just mouseSelectedId ->
+                        ( newDropdown, mouseSelectedId, Cmd.none )
 
-                Nothing ->
-                    ( { dropdown | isOpen = False }, selectedId, Cmd.none )
+                    Nothing ->
+                        ( newDropdown, selectedId, Cmd.none )
 
         OnKey Esc ->
-            ( { dropdown | isOpen = False }, selectedId, Cmd.none )
+            ( { dropdown | isOpen = False, searchString = "" }, selectedId, Cmd.none )
 
         OnKey Enter ->
-            if dropdown.isOpen then
-                ( { dropdown | isOpen = False }, dropdown.keyboardSelectedId, Cmd.none )
-            else
-                ( dropdown, selectedId, Cmd.none )
+            let
+                newDropdown =
+                    { dropdown | isOpen = False, searchString = "" }
+            in
+                if dropdown.isOpen then
+                    ( newDropdown, dropdown.keyboardSelectedId, Cmd.none )
+                else
+                    ( newDropdown, selectedId, Cmd.none )
 
         OnKey ArrowUp ->
             pickerSkip dropdown (Exact -1) dropdownItems selectedId
@@ -119,6 +128,9 @@ update msg dropdown selectedId dropdownItems =
 
         OnKey (Searchable char) ->
             updateSearchString char dropdown dropdownItems selectedId
+
+        ResetSearchString ->
+            ( { dropdown | searchString = "" }, selectedId, Cmd.none )
 
 
 pickerSkip : DropState -> SkipAmount -> List DropdownItem -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
@@ -148,11 +160,17 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
                 |> List.filter (\t -> t.id == Just newIndex)
                 |> List.head
                 |> Maybe.withDefault (DropdownItem Nothing "")
+
+        newDropdown =
+            { dropdown
+                | keyboardSelectedId = Just newIndex
+                , searchString = ""
+            }
     in
         if dropdown.isOpen then
-            ( { dropdown | keyboardSelectedId = Just newIndex }, selectedId, scrollToDomId dropdown.domId selectedItem.id )
+            ( newDropdown, selectedId, scrollToDomId dropdown.domId selectedItem.id )
         else
-            ( { dropdown | keyboardSelectedId = Just newIndex }, Just newIndex, Cmd.none )
+            ( newDropdown, Just newIndex, Cmd.none )
 
 
 view : DropState -> List DropdownItem -> Maybe Int -> Html Msg
@@ -306,11 +324,8 @@ updateSearchString searchChar dropdown dropdownItems selectedId =
     in
         case maybeSelectedItem of
             Just t ->
-                --todo... why was this here? , selectedId = selectedItem.id
-                ( { dropdown | searchString = searchString }, selectedId, Cmd.none )
+                ( { dropdown | searchString = searchString, keyboardSelectedId = t.id }, t.id, scrollToDomId dropdown.domId t.id )
 
-            --TODO
-            --! [ scrollToDomId (getId dropdown.domId t.id) ]
             Nothing ->
                 ( dropdown, selectedId, Cmd.none )
 
