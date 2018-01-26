@@ -19,7 +19,6 @@ scrollToDomId str id =
 
 type alias DropState =
     { isOpen : Bool
-    , mouseSelectedId : Maybe (Maybe Int)
     , keyboardSelectedIndex : Int
     , searchString : String
     , domId : String
@@ -29,7 +28,6 @@ type alias DropState =
 init : String -> DropState
 init domId =
     { isOpen = False
-    , mouseSelectedId = Nothing
     , keyboardSelectedIndex = 0
     , searchString = ""
     , domId = domId
@@ -56,8 +54,6 @@ type SkipAmount
 
 type Msg
     = ItemClicked DropdownItem
-    | ItemEntered DropdownItem
-    | ItemLeft
     | SetOpenState Bool
     | OnBlur
     | OnKey Key
@@ -93,12 +89,6 @@ update msg dropdown selectedId dropdownItems =
         ItemClicked item ->
             ( { dropdown | isOpen = False, searchString = "" }, item.id, Cmd.none )
 
-        ItemEntered item ->
-            ( { dropdown | mouseSelectedId = Just item.id, searchString = "" }, selectedId, Cmd.none )
-
-        ItemLeft ->
-            ( { dropdown | mouseSelectedId = Nothing, searchString = "" }, selectedId, Cmd.none )
-
         SetOpenState newState ->
             ( { dropdown
                 | isOpen = newState
@@ -109,16 +99,7 @@ update msg dropdown selectedId dropdownItems =
             )
 
         OnBlur ->
-            let
-                newDropdown =
-                    { dropdown | isOpen = False, searchString = "" }
-            in
-                case dropdown.mouseSelectedId of
-                    Just mouseSelectedId ->
-                        ( newDropdown, mouseSelectedId, Cmd.none )
-
-                    Nothing ->
-                        ( newDropdown, selectedId, Cmd.none )
+            ( { dropdown | isOpen = False, searchString = "" }, selectedId, Cmd.none )
 
         OnKey Esc ->
             ( { dropdown | isOpen = False, searchString = "" }, selectedId, Cmd.none )
@@ -224,12 +205,31 @@ view dropdown dropdownItems selectedId =
                 |> List.map .name
                 |> List.head
                 |> Maybe.withDefault ""
+
+        biggestStrLength =
+            dropdownItems
+                |> List.map (\t -> (String.length t.name) * 7)
+                |> List.sortBy identity
+                |> List.reverse
+                |> List.head
+                |> Maybe.withDefault 150
+
+        maxWidth =
+            ( "width", toString biggestStrLength ++ "px" )
     in
         div
             [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
-            , Events.onBlur OnBlur
-            , Events.onClick (SetOpenState (not dropdown.isOpen))
-            , tabindex 0
+            , if dropdown.isOpen then
+                Events.onBlur OnBlur
+              else
+                disabled False
+            , if dropdown.isOpen then
+                disabled False
+              else
+                Events.onClick (SetOpenState True)
+            , tabindex 0 -- Make div focusable, since we need the on blur to trigger for both child elements
+            , style [ ( "position", "relative" ), ( "width", "100%" ) ]
+            , class "dropdown-outline"
             ]
             [ span
                 [ class ("e-ddl e-widget " ++ activeClass)
@@ -251,28 +251,16 @@ view dropdown dropdownItems selectedId =
                         ]
                     ]
                 ]
-            , ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (viewItem dropdown dropdownItems)
+            , ul [ style <| displayStyle :: maxWidth :: dropdownList, class "dropdown-ul" ] (viewItem dropdown dropdownItems)
             ]
 
 
 viewItem : DropState -> List DropdownItem -> List (Html Msg)
 viewItem dropdown dropdownItems =
     let
-        biggestStrLength =
-            dropdownItems
-                |> List.map (\t -> String.length t.name)
-                |> List.sortBy identity
-                |> List.reverse
-                |> List.head
-                |> Maybe.withDefault 150
-
         commonWidth =
-            [ ( "width", toString biggestStrLength ++ "px" )
-            , ( "min-width", "99.7%" )
+            [ ( "min-width", "99.7%" )
             ]
-
-        mouseActive =
-            [ ( "background-color", "" ), ( "color", "#808080" ) ] ++ commonWidth
 
         keyActive =
             [ ( "background-color", "#f4f4f4" ), ( "color", "#333" ) ] ++ commonWidth
@@ -281,13 +269,9 @@ viewItem dropdown dropdownItems =
             |> List.map
                 (\item ->
                     li
-                        [ Events.onMouseEnter (ItemEntered item)
-                        , Events.onMouseLeave ItemLeft
-                        , Events.onClick (ItemClicked item)
+                        [ Events.onClick (ItemClicked item)
                         , class "noselect dropdown-li"
-                        , if dropdown.mouseSelectedId == Just item.id then
-                            style mouseActive
-                          else if dropdown.keyboardSelectedIndex == getIndex item.id dropdownItems && dropdown.isOpen then
+                        , if dropdown.keyboardSelectedIndex == getIndex item.id dropdownItems && dropdown.isOpen then
                             style keyActive
                           else
                             style commonWidth
@@ -314,7 +298,7 @@ dropdownList =
     , ( "overflow-x", "hidden" )
     , ( "overflow-y", "scroll" )
     , ( "z-index", "100" )
-    , ( "min-width", "74%" )
+    , ( "min-width", "99.7%" )
     ]
 
 

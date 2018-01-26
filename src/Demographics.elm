@@ -682,7 +682,8 @@ update msg model =
                 ( newDropState, newId, newMsg ) =
                     Dropdown.update dropdownMsg t.dropState t.languageId model.drops.languageDropdown
             in
-                updateLanguage model { t | dropState = newDropState, languageId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+                updateLanguage model { t | dropState = newDropState, languageId = newId }
+                    ! [ newMsg, Functions.setUnsavedChanges True ]
 
         InputChanged patientPhoneNumber value ->
             updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString value } ! [ Functions.setUnsavedChanges True ]
