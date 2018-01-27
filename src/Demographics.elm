@@ -176,8 +176,8 @@ view model =
         , div rowStyle
             [ sfbox "Facility" True
             , textbox "Patient's Facility ID No" True model.facilityPtID UpdateFacilityPtID
-            , numberbox "Medical Record No" False model.mrn UpdateMedicalRecordNo
-            , numberbox "Patient Account No" False model.patientAccountNumber UpdatePatientAccountNo
+            , textbox "Medical Record No" False model.mrn UpdateMedicalRecordNo
+            , textbox "Patient Account No" False model.patientAccountNumber UpdatePatientAccountNo
             ]
         , div rowStyle
             [ sfbox "Main Provider" True
