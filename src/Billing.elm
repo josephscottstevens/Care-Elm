@@ -15,7 +15,7 @@ import Json.Encode as Encode
 
 init : Int -> Cmd Msg
 init patientId =
-    load patientId
+    load patientId Nothing
 
 
 subscriptions : Sub msg
@@ -119,7 +119,11 @@ update msg model patientId =
             model ! [ Functions.displayErrorMessage (toString t) ]
 
         SetPagingState page ->
-            { model | gridOperations = getNewState page model.gridOperations } ! []
+            let
+                newState =
+                    getNewState page model.gridOperations
+            in
+                { model | gridOperations = newState } ! [ load patientId (Just newState) ]
 
         SetQuery newQuery ->
             { model | query = newQuery } ! []
@@ -152,7 +156,7 @@ getNewState page gridOperations =
             gridOperations.totalRows // gridOperations.rowsPerPage
 
         currentPage =
-            gridOperations.rowIndex // gridOperations.rowsPerPage
+            gridOperations.pageIndex
 
         newIndex =
             case page of
@@ -180,7 +184,7 @@ getNewState page gridOperations =
                 Last ->
                     totalPages - 1
     in
-        { gridOperations | rowIndex = newIndex }
+        { gridOperations | pageIndex = newIndex }
 
 
 decodeBillingCcm : Decode.Decoder Row
@@ -235,7 +239,7 @@ pagingView gridOperations =
             (gridOperations.totalRows // gridOperations.rowsPerPage) - 1
 
         currentPage =
-            gridOperations.rowIndex // gridOperations.rowsPerPage
+            gridOperations.pageIndex
 
         activeOrNot pageIndex =
             let
@@ -321,7 +325,7 @@ pagingView gridOperations =
 
 
 type alias GridOperations =
-    { rowIndex : Int
+    { pageIndex : Int
     , rowsPerPage : Int
     , pagesPerBlock : Int
     , totalRows : Int
@@ -332,7 +336,7 @@ type alias GridOperations =
 
 sampleGridOperations : GridOperations
 sampleGridOperations =
-    { rowIndex = 0
+    { pageIndex = 0
     , rowsPerPage = 20
     , pagesPerBlock = 15
     , totalRows = -1
@@ -341,16 +345,20 @@ sampleGridOperations =
     }
 
 
-encodeResponse : GridOperations -> Encode.Value
-encodeResponse gridOperations =
-    Encode.object
-        [ ( "Skip", Encode.int gridOperations.rowIndex )
-        , ( "RowsPerPage", Encode.int gridOperations.rowsPerPage )
-        , ( "PageSize", Encode.int gridOperations.pagesPerBlock )
-        , ( "TotalRows", Encode.int gridOperations.totalRows )
-        , ( "SortField", maybeVal Encode.string gridOperations.sortField )
-        , ( "SortAscending", maybeVal Encode.bool gridOperations.sortAscending )
-        ]
+encodeResponse : Maybe GridOperations -> Encode.Value
+encodeResponse maybeGridOperations =
+    let
+        gridOperations =
+            Maybe.withDefault sampleGridOperations maybeGridOperations
+    in
+        Encode.object
+            [ ( "Skip", Encode.int gridOperations.pageIndex )
+            , ( "RowsPerPage", Encode.int gridOperations.rowsPerPage )
+            , ( "PageSize", Encode.int gridOperations.pagesPerBlock )
+            , ( "TotalRows", Encode.int gridOperations.totalRows )
+            , ( "SortField", maybeVal Encode.string gridOperations.sortField )
+            , ( "SortAscending", maybeVal Encode.bool gridOperations.sortAscending )
+            ]
 
 
 decodeResponse : Decode.Decoder GridOperations
@@ -377,10 +385,10 @@ jsonDecodeLoad =
         |> Pipeline.required "gridOperations" decodeResponse
 
 
-load : Int -> Cmd Msg
-load patientId =
+load : Int -> Maybe GridOperations -> Cmd Msg
+load patientId gridOperations =
     jsonDecodeLoad
-        |> Functions.postJsonRequest (encodeResponse sampleGridOperations) ("/People/BillingTest?patientId=" ++ toString patientId)
+        |> Functions.postJsonRequest (encodeResponse gridOperations) ("/People/BillingTest?patientId=" ++ toString patientId)
         |> Http.send Load
 
 
