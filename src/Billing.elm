@@ -84,7 +84,8 @@ type alias Row =
     , recordingPresent : Bool
     , chartComplete : Bool
     , status : String
-    , is24HoursSinceBilled : Bool
+
+    --, is24HoursSinceBilled : Bool
     }
 
 
@@ -112,17 +113,13 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
         Load (Ok t) ->
-            { model | rows = t.result } ! []
+            { model | rows = t.result, gridOperations = t.gridOperations } ! []
 
         Load (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
 
         SetPagingState page ->
-            let
-                newPageIndex =
-                    getNewState page model.gridOperations
-            in
-                { model | currentPage = newPageIndex } ! []
+            { model | gridOperations = getNewState page model.gridOperations } ! []
 
         SetQuery newQuery ->
             { model | query = newQuery } ! []
@@ -148,39 +145,42 @@ filteredCcm model =
 -- Paging stuff
 
 
-getNewState : Page -> GridOperations -> Int
+getNewState : Page -> GridOperations -> GridOperations
 getNewState page gridOperations =
     let
         totalPages =
             gridOperations.totalRows // gridOperations.rowsPerPage
 
         currentPage =
-            gridOperations.skip // gridOperations.rowsPerPage
-    in
-        case page of
-            First ->
-                0
+            gridOperations.rowIndex // gridOperations.rowsPerPage
 
-            Previous ->
-                if currentPage > 0 then
-                    currentPage - 1
-                else
+        newIndex =
+            case page of
+                First ->
                     0
 
-            PreviousBlock ->
-                0
+                Previous ->
+                    if currentPage > 0 then
+                        currentPage - 1
+                    else
+                        0
 
-            Index t ->
-                t
+                PreviousBlock ->
+                    0
 
-            NextBlock ->
-                0
+                Index t ->
+                    t
 
-            Next ->
-                currentPage + 1
+                NextBlock ->
+                    0
 
-            Last ->
-                totalPages - 1
+                Next ->
+                    currentPage + 1
+
+                Last ->
+                    totalPages - 1
+    in
+        { gridOperations | rowIndex = newIndex }
 
 
 decodeBillingCcm : Decode.Decoder Row
@@ -222,17 +222,20 @@ decodeBillingCcm =
         |> Pipeline.required "RecordingPresent" Decode.bool
         |> Pipeline.required "ChartComplete" (Decode.bool)
         |> Pipeline.required "Status" (Decode.string)
-        |> Pipeline.required "Is24HoursSinceBilled" (Decode.bool)
+
+
+
+-- |> Pipeline.required "Is24HoursSinceBilled" (Decode.bool)
 
 
 pagingView : GridOperations -> Html Msg
 pagingView gridOperations =
     let
         totalPages =
-            (gridOperations.totalVisiblePages // gridOperations.itemsPerPage) - 1
+            (gridOperations.totalRows // gridOperations.rowsPerPage) - 1
 
         currentPage =
-            gridOperations.skip // gridOperations.rowsPerPage
+            gridOperations.rowIndex // gridOperations.rowsPerPage
 
         activeOrNot pageIndex =
             let
@@ -297,7 +300,7 @@ pagingView gridOperations =
                     toString (totalPages + 1)
 
                 totalItemsText =
-                    toString gridOperations.totalVisiblePages
+                    toString gridOperations.totalRows
             in
                 currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
     in
@@ -318,9 +321,9 @@ pagingView gridOperations =
 
 
 type alias GridOperations =
-    { skip : Int
-    , pageSize : Int
+    { rowIndex : Int
     , rowsPerPage : Int
+    , pagesPerBlock : Int
     , totalRows : Int
     , sortField : Maybe String
     , sortAscending : Maybe Bool
@@ -329,9 +332,9 @@ type alias GridOperations =
 
 sampleGridOperations : GridOperations
 sampleGridOperations =
-    { skip = 0
-    , pageSize = 10
+    { rowIndex = 0
     , rowsPerPage = 20
+    , pagesPerBlock = 15
     , totalRows = -1
     , sortField = Just "DoB"
     , sortAscending = Just False
@@ -341,9 +344,9 @@ sampleGridOperations =
 encodeResponse : GridOperations -> Encode.Value
 encodeResponse gridOperations =
     Encode.object
-        [ ( "Skip", Encode.int gridOperations.skip )
-        , ( "PageSize", Encode.int gridOperations.pageSize )
+        [ ( "Skip", Encode.int gridOperations.rowIndex )
         , ( "RowsPerPage", Encode.int gridOperations.rowsPerPage )
+        , ( "PageSize", Encode.int gridOperations.pagesPerBlock )
         , ( "TotalRows", Encode.int gridOperations.totalRows )
         , ( "SortField", maybeVal Encode.string gridOperations.sortField )
         , ( "SortAscending", maybeVal Encode.bool gridOperations.sortAscending )
@@ -354,8 +357,8 @@ decodeResponse : Decode.Decoder GridOperations
 decodeResponse =
     Pipeline.decode GridOperations
         |> Pipeline.required "Skip" Decode.int
-        |> Pipeline.required "PageSize" Decode.int
         |> Pipeline.required "RowsPerPage" Decode.int
+        |> Pipeline.required "PageSize" Decode.int
         |> Pipeline.required "TotalRows" Decode.int
         |> Pipeline.required "SortField" (Decode.maybe Decode.string)
         |> Pipeline.required "SortAscending" (Decode.maybe Decode.bool)
@@ -386,7 +389,6 @@ emptyModel =
     { rows = []
     , tableState = Table.initialSort "Date"
     , query = ""
-    , currentPage = 0
     , gridOperations = sampleGridOperations
     }
 
