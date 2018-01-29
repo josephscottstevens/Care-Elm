@@ -1,8 +1,9 @@
-module ServerTable
+module Common.ServerTable
     exposing
         ( State
         , Column
         , Config
+        , GridOperations
         , init
         , view
         , intColumn
@@ -13,12 +14,19 @@ module ServerTable
         , hrefColumn
         , hrefColumnExtra
         , checkColumn
+        , decodeGridOperations
+        , encodeGridOperations
+        , defaultGridOperations
+        , getGridOperations
         )
 
 import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
 import Html.Attributes exposing (class, id, style, type_, target, colspan, classList, href, disabled, checked)
 import Html.Events as Events
-import Common.Functions as Functions
+import Common.Functions as Functions exposing (maybeVal)
+import Json.Decode as Decode
+import Json.Decode.Pipeline as Pipeline
+import Json.Encode as Encode
 
 
 -- Data Types
@@ -43,6 +51,17 @@ type alias GridOperations =
     , totalRows : Int
     , sortField : Maybe String
     , sortAscending : Bool
+    }
+
+
+getGridOperations : State -> GridOperations
+getGridOperations state =
+    { pageIndex = state.pageIndex
+    , rowsPerPage = state.rowsPerPage
+    , pagesPerBlock = state.pagesPerBlock
+    , totalRows = state.totalRows
+    , sortField = state.sortField
+    , sortAscending = state.sortAscending
     }
 
 
@@ -552,3 +571,41 @@ pagingView state toMsg =
                 [ span [ class "e-pagermsg" ] [ text pagerText ]
                 ]
             ]
+
+
+
+--Server Stuff
+
+
+defaultGridOperations : GridOperations
+defaultGridOperations =
+    { pageIndex = -1
+    , rowsPerPage = 12
+    , pagesPerBlock = 15
+    , totalRows = -1
+    , sortField = Nothing
+    , sortAscending = False
+    }
+
+
+encodeGridOperations : GridOperations -> Encode.Value
+encodeGridOperations gridOperations =
+    Encode.object
+        [ ( "Skip", Encode.int gridOperations.pageIndex )
+        , ( "RowsPerPage", Encode.int gridOperations.rowsPerPage )
+        , ( "PageSize", Encode.int gridOperations.pagesPerBlock )
+        , ( "TotalRows", Encode.int gridOperations.totalRows )
+        , ( "SortField", maybeVal Encode.string gridOperations.sortField )
+        , ( "SortAscending", Encode.bool gridOperations.sortAscending )
+        ]
+
+
+decodeGridOperations : Decode.Decoder GridOperations
+decodeGridOperations =
+    Pipeline.decode GridOperations
+        |> Pipeline.required "Skip" Decode.int
+        |> Pipeline.required "RowsPerPage" Decode.int
+        |> Pipeline.required "PageSize" Decode.int
+        |> Pipeline.required "TotalRows" Decode.int
+        |> Pipeline.required "SortField" (Decode.maybe Decode.string)
+        |> Pipeline.required "SortAscending" Decode.bool

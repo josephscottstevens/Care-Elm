@@ -3,19 +3,17 @@ module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, vi
 import Html exposing (Html, text, div, input, program, button, select, option, span, a)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)
-import Common.Table as Table exposing (defaultCustomizations)
-import Common.Grid as Grid
+import Common.ServerTable as Table exposing (stringColumn)
 import Common.Functions as Functions exposing (maybeVal, defaultString)
 import Common.Types exposing (AddEditDataSource)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
-import Json.Encode as Encode
 
 
 init : Int -> Cmd Msg
 init patientId =
-    load patientId Nothing
+    load patientId Table.defaultGridOperations
 
 
 subscriptions : Sub msg
@@ -23,49 +21,32 @@ subscriptions =
     Sub.none
 
 
-type Page
-    = First
-    | Previous
-    | PreviousBlock
-    | Index Int
-    | NextBlock
-    | Next
-    | Last
-
-
 type alias Model =
     { rows : List Row
     , tableState : Table.State
     , query : String
-    , gridOperations : GridOperations
     }
-
-
-type SortMode
-    = SortNone
-    | SortAsc
-    | SortDesc
 
 
 type alias Row =
     { id : Int
-    , facility : String
+    , facility : Maybe String
     , facilityId : Int
     , practiceLocation : Maybe String
-    , mainProvider : String
+    , mainProvider : Maybe String
     , providerId : Int
-    , patientName : String
+    , patientName : Maybe String
     , patientId : Int
-    , dob : String
+    , dob : Maybe String
     , patientFacilityIdNo : Maybe String
-    , phone : String
+    , phone : Maybe String
     , assignedTo : Maybe String
     , staffId : Maybe Int
     , openTasks : Int
     , totalTimeSpent : Maybe Int
-    , ccmRegistrationDate : String
-    , dateOfService : String
-    , billingDate : String
+    , ccmRegistrationDate : Maybe String
+    , dateOfService : Maybe String
+    , billingDate : Maybe String
     , billingMonth : Int
     , billingYear : Int
     , isClosed : Bool
@@ -83,7 +64,7 @@ type alias Row =
     , vitalsPresent : Bool
     , recordingPresent : Bool
     , chartComplete : Bool
-    , status : String
+    , status : Maybe String
 
     --, is24HoursSinceBilled : Bool
     }
@@ -91,20 +72,11 @@ type alias Row =
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
-    div []
-        [ button [ class "btn btn-default", onClick Reset ] [ text "reset" ]
-        , input [ class "form-control", placeholder "Search by Facility" ] []
-        , div [ class "e-grid e-js e-waitingpopup" ]
-            [ Table.view (config addEditDataSource model.tableState) model.tableState model.rows
-            ]
-        , pagingView model.gridOperations
-        ]
+    Table.view model.tableState model.rows (gridConfig addEditDataSource) Nothing
 
 
 type Msg
     = Load (Result Http.Error LoadResult)
-    | SetPagingState Page
-    | SetQuery String
     | SetTableState Table.State
     | Reset
 
@@ -113,101 +85,47 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
         Load (Ok t) ->
-            { model | rows = t.result, gridOperations = t.gridOperations } ! []
+            let
+                tableState =
+                    model.tableState
+            in
+                { model | rows = t.result, tableState = { tableState | totalRows = t.gridOperations.totalRows } } ! []
 
         Load (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
 
-        SetPagingState page ->
-            let
-                newState =
-                    getNewState page model.gridOperations
-            in
-                { model | gridOperations = newState } ! [ load patientId (Just newState) ]
-
-        SetQuery newQuery ->
-            { model | query = newQuery } ! []
-
         SetTableState newState ->
-            { model | tableState = newState } ! []
+            { model | tableState = newState } ! [ load patientId (Table.getGridOperations newState) ]
 
         Reset ->
             model ! []
-
-
-filteredCcm : Model -> List Row
-filteredCcm model =
-    let
-        lowerQuery =
-            String.toLower model.query
-    in
-        model.rows
-            |> List.filter (String.contains lowerQuery << String.toLower << .facility)
 
 
 
 -- Paging stuff
 
 
-getNewState : Page -> GridOperations -> GridOperations
-getNewState page gridOperations =
-    let
-        totalPages =
-            gridOperations.totalRows // gridOperations.rowsPerPage
-
-        currentPage =
-            gridOperations.pageIndex
-
-        newIndex =
-            case page of
-                First ->
-                    0
-
-                Previous ->
-                    if currentPage > 0 then
-                        currentPage - 1
-                    else
-                        0
-
-                PreviousBlock ->
-                    0
-
-                Index t ->
-                    t
-
-                NextBlock ->
-                    0
-
-                Next ->
-                    currentPage + 1
-
-                Last ->
-                    totalPages - 1
-    in
-        { gridOperations | pageIndex = newIndex }
-
-
 decodeBillingCcm : Decode.Decoder Row
 decodeBillingCcm =
     Pipeline.decode Row
         |> Pipeline.required "ID" (Decode.int)
-        |> Pipeline.required "Facility" (Decode.string)
+        |> Pipeline.required "Facility" (Decode.maybe Decode.string)
         |> Pipeline.required "FacilityId" (Decode.int)
         |> Pipeline.required "PracticeLocation" (Decode.maybe Decode.string)
-        |> Pipeline.required "MainProvider" (Decode.string)
+        |> Pipeline.required "MainProvider" (Decode.maybe Decode.string)
         |> Pipeline.required "ProviderId" (Decode.int)
-        |> Pipeline.required "PatientName" (Decode.string)
+        |> Pipeline.required "PatientName" (Decode.maybe Decode.string)
         |> Pipeline.required "PatientId" (Decode.int)
-        |> Pipeline.required "DoB" (Decode.string)
+        |> Pipeline.required "DoB" (Decode.maybe Decode.string)
         |> Pipeline.required "PatientFacilityIdNo" (Decode.maybe Decode.string)
-        |> Pipeline.required "Phone" (Decode.string)
+        |> Pipeline.required "Phone" (Decode.maybe Decode.string)
         |> Pipeline.required "AssignedTo" (Decode.maybe Decode.string)
         |> Pipeline.required "StaffId" (Decode.maybe Decode.int)
         |> Pipeline.required "OpenTasks" (Decode.int)
         |> Pipeline.required "TotalTimeSpent" (Decode.maybe Decode.int)
-        |> Pipeline.required "CcmRegistrationDate" (Decode.string)
-        |> Pipeline.required "DateOfService" (Decode.string)
-        |> Pipeline.required "BillingDate" (Decode.string)
+        |> Pipeline.required "CcmRegistrationDate" (Decode.maybe Decode.string)
+        |> Pipeline.required "DateOfService" (Decode.maybe Decode.string)
+        |> Pipeline.required "BillingDate" (Decode.maybe Decode.string)
         |> Pipeline.required "BillingMonth" (Decode.int)
         |> Pipeline.required "BillingYear" (Decode.int)
         |> Pipeline.required "IsClosed" (Decode.bool)
@@ -225,156 +143,16 @@ decodeBillingCcm =
         |> Pipeline.required "VitalsPresent" (Decode.bool)
         |> Pipeline.required "RecordingPresent" Decode.bool
         |> Pipeline.required "ChartComplete" (Decode.bool)
-        |> Pipeline.required "Status" (Decode.string)
+        |> Pipeline.required "Status" (Decode.maybe Decode.string)
 
 
 
 -- |> Pipeline.required "Is24HoursSinceBilled" (Decode.bool)
 
 
-pagingView : GridOperations -> Html Msg
-pagingView gridOperations =
-    let
-        totalPages =
-            (gridOperations.totalRows // gridOperations.rowsPerPage) - 1
-
-        currentPage =
-            gridOperations.pageIndex
-
-        activeOrNot pageIndex =
-            let
-                activeOrNotText =
-                    if pageIndex == currentPage then
-                        "e-currentitem e-active"
-                    else
-                        "e-default"
-            in
-                div
-                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), onClick (SetPagingState (Index pageIndex)) ]
-                    [ text (toString (pageIndex + 1)) ]
-
-        rng =
-            List.range 0 totalPages
-                |> List.drop ((currentPage // gridOperations.pagesPerBlock) * gridOperations.pagesPerBlock)
-                |> List.take gridOperations.pagesPerBlock
-                |> List.map activeOrNot
-
-        firstPageClass =
-            if currentPage >= gridOperations.rowsPerPage then
-                "e-icon e-mediaback e-firstpage e-default"
-            else
-                "e-icon e-mediaback e-firstpagedisabled e-disable"
-
-        leftPageClass =
-            if currentPage > 0 then
-                "e-icon e-arrowheadleft-2x e-prevpage e-default"
-            else
-                "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
-
-        leftPageBlockClass =
-            if currentPage >= gridOperations.pagesPerBlock then
-                "e-link e-spacing e-PP e-numericitem e-default"
-            else
-                "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
-
-        rightPageBlockClass =
-            if currentPage < totalPages - gridOperations.pagesPerBlock then
-                "e-link e-NP e-spacing e-numericitem e-default"
-            else
-                "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
-
-        rightPageClass =
-            if currentPage < totalPages then
-                "e-nextpage e-icon e-arrowheadright-2x e-default"
-            else
-                "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
-
-        lastPageClass =
-            if currentPage < totalPages - gridOperations.pagesPerBlock then
-                "e-lastpage e-icon e-mediaforward e-default"
-            else
-                "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
-
-        pagerText =
-            let
-                currentPageText =
-                    toString (currentPage + 1)
-
-                totalPagesText =
-                    toString (totalPages + 1)
-
-                totalItemsText =
-                    toString gridOperations.totalRows
-            in
-                currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
-    in
-        div [ class "e-pager e-js e-pager" ]
-            [ div [ class "e-pagercontainer" ]
-                [ div [ class firstPageClass, onClick (SetPagingState First) ] []
-                , div [ class leftPageClass, onClick (SetPagingState Previous) ] []
-                , a [ class leftPageBlockClass, onClick (SetPagingState PreviousBlock) ] [ text "..." ]
-                , div [ class "e-numericcontainer e-default" ] rng
-                , a [ class rightPageBlockClass, onClick (SetPagingState NextBlock) ] [ text "..." ]
-                , div [ class rightPageClass, onClick (SetPagingState Next) ] []
-                , div [ class lastPageClass, onClick (SetPagingState Last) ] []
-                ]
-            , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
-                [ span [ class "e-pagermsg" ] [ text pagerText ]
-                ]
-            ]
-
-
-type alias GridOperations =
-    { pageIndex : Int
-    , rowsPerPage : Int
-    , pagesPerBlock : Int
-    , totalRows : Int
-    , sortField : Maybe String
-    , sortAscending : Maybe Bool
-    }
-
-
-sampleGridOperations : GridOperations
-sampleGridOperations =
-    { pageIndex = 0
-    , rowsPerPage = 20
-    , pagesPerBlock = 15
-    , totalRows = -1
-    , sortField = Just "DoB"
-    , sortAscending = Just False
-    }
-
-
-encodeResponse : Maybe GridOperations -> Encode.Value
-encodeResponse maybeGridOperations =
-    let
-        gridOperations =
-            Maybe.withDefault sampleGridOperations maybeGridOperations
-    in
-        Encode.object
-            [ ( "Skip", Encode.int gridOperations.pageIndex )
-            , ( "RowsPerPage", Encode.int gridOperations.rowsPerPage )
-            , ( "PageSize", Encode.int gridOperations.pagesPerBlock )
-            , ( "TotalRows", Encode.int gridOperations.totalRows )
-            , ( "SortField", maybeVal Encode.string gridOperations.sortField )
-            , ( "SortAscending", maybeVal Encode.bool gridOperations.sortAscending )
-            ]
-
-
-decodeResponse : Decode.Decoder GridOperations
-decodeResponse =
-    Pipeline.decode GridOperations
-        |> Pipeline.required "Skip" Decode.int
-        |> Pipeline.required "RowsPerPage" Decode.int
-        |> Pipeline.required "PageSize" Decode.int
-        |> Pipeline.required "TotalRows" Decode.int
-        |> Pipeline.required "SortField" (Decode.maybe Decode.string)
-        |> Pipeline.required "SortAscending" (Decode.maybe Decode.bool)
-
-
 type alias LoadResult =
     { result : List Row
-    , gridOperations : GridOperations
+    , gridOperations : Table.GridOperations
     }
 
 
@@ -382,54 +160,47 @@ jsonDecodeLoad : Decode.Decoder LoadResult
 jsonDecodeLoad =
     Pipeline.decode LoadResult
         |> Pipeline.required "result" (Decode.list decodeBillingCcm)
-        |> Pipeline.required "gridOperations" decodeResponse
+        |> Pipeline.required "gridOperations" Table.decodeGridOperations
 
 
-load : Int -> Maybe GridOperations -> Cmd Msg
+load : Int -> Table.GridOperations -> Cmd Msg
 load patientId gridOperations =
     jsonDecodeLoad
-        |> Functions.postJsonRequest (encodeResponse gridOperations) ("/People/BillingTest?patientId=" ++ toString patientId)
+        |> Functions.postJsonRequest (Table.encodeGridOperations gridOperations) ("/People/BillingTest?patientId=" ++ toString patientId)
         |> Http.send Load
 
 
 emptyModel : Model
 emptyModel =
     { rows = []
-    , tableState = Table.initialSort "Date"
+    , tableState = Table.init "Date"
     , query = ""
-    , gridOperations = sampleGridOperations
     }
 
 
-config : Maybe AddEditDataSource -> Table.State -> Table.Config Row Msg
-config addEditDataSource _ =
-    let
-        buttons =
-            case addEditDataSource of
-                Just _ ->
-                    []
+gridConfig : Maybe AddEditDataSource -> Table.Config Row Msg
+gridConfig addEditDataSource =
+    { domTableId = "RecordTable"
+    , toolbar = []
 
-                --[ ( "e-addnew", onClick (Add t) ) ]
-                Nothing ->
-                    []
-    in
-        Table.customConfig
-            { toId = \t -> toString t.id
-            , toMsg = SetTableState
-            , columns =
-                [ --checkColumn "" ,
-                  Table.stringColumn "Facility" .facility
-                , Table.stringColumn "Billing Date" .billingDate
-                , Table.stringColumn "Main Provider" .mainProvider
-                , Table.stringColumn "Patient Name" .patientName
-                , Table.stringColumn "DOB" .dob
-                , Table.stringColumn "Id No" (\t -> defaultString t.patientFacilityIdNo)
-                , Table.stringColumn "AssignedTo" (\t -> defaultString t.assignedTo)
-                ]
-            , customizations =
-                { defaultCustomizations
-                    | tableAttrs = Grid.standardTableAttrs "RecordTable"
-                    , thead = Grid.standardTheadNoFilters
-                    , theadButtons = buttons
-                }
-            }
+    -- case addEditDataSource of
+    --     Just t ->
+    --         [ ( "e-addnew", Add t recordType ) ]
+    --     Nothing ->
+    --         [ ( "e-addnew e-disable", NoOp ) ]
+    , toMsg = SetTableState
+    , columns = getColumns addEditDataSource
+    }
+
+
+getColumns : Maybe AddEditDataSource -> List (Table.Column Row Msg)
+getColumns addEditDataSource =
+    [ --checkColumn "" ,
+      stringColumn "Facility" .facility
+    , stringColumn "Billing Date" .billingDate
+    , stringColumn "Main Provider" .mainProvider
+    , stringColumn "Patient Name" .patientName
+    , stringColumn "DOB" .dob
+    , stringColumn "Id No" .patientFacilityIdNo
+    , stringColumn "AssignedTo" .assignedTo
+    ]
