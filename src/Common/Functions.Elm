@@ -19,6 +19,7 @@ port module Common.Functions
         , defaultDate
         , defaultLowerDate
         , defaultLowerDateTime
+        , dateFormat
         , defaultIntStr
         , maybeVal
         , maybeToDateString
@@ -177,6 +178,15 @@ defaultDateTime str =
 defaultDate : Maybe String -> String
 defaultDate str =
     date (defaultString str)
+
+
+dateFormat : String -> Maybe String -> Maybe String
+dateFormat format maybeStr =
+    maybeStr
+        |> Maybe.withDefault ""
+        |> Date.fromString
+        |> Result.map (Date.Extra.toFormattedString format)
+        |> Result.toMaybe
 
 
 defaultLowerDate : Maybe String -> String

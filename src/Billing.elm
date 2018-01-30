@@ -3,7 +3,7 @@ module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, vi
 import Html exposing (Html, text, div, input, program, button, select, option, span, a)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)
-import Common.ServerTable as Table exposing (stringColumn)
+import Common.ServerTable as Table exposing (stringColumn, dateColumn)
 import Common.Functions as Functions exposing (maybeVal, defaultString)
 import Common.Types exposing (AddEditDataSource)
 import Http
@@ -89,7 +89,7 @@ update msg model patientId =
                 tableState =
                     model.tableState
             in
-                { model | rows = t.result, tableState = { tableState | totalRows = t.gridOperations.totalRows } } ! []
+                { model | rows = t.result, tableState = { tableState | totalRows = t.totalRows } } ! []
 
         Load (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
@@ -152,15 +152,15 @@ decodeBillingCcm =
 
 type alias LoadResult =
     { result : List Row
-    , gridOperations : Table.GridOperations
+    , totalRows : Int
     }
 
 
 jsonDecodeLoad : Decode.Decoder LoadResult
 jsonDecodeLoad =
     Pipeline.decode LoadResult
-        |> Pipeline.required "result" (Decode.list decodeBillingCcm)
-        |> Pipeline.required "gridOperations" Table.decodeGridOperations
+        |> Pipeline.required "Data" (Decode.list decodeBillingCcm)
+        |> Pipeline.required "Count" Decode.int
 
 
 load : Int -> Table.GridOperations -> Cmd Msg
@@ -197,10 +197,10 @@ getColumns : Maybe AddEditDataSource -> List (Table.Column Row Msg)
 getColumns addEditDataSource =
     [ --checkColumn "" ,
       stringColumn "Facility" .facility
-    , stringColumn "Billing Date" .billingDate
+    , stringColumn "Billing Date" (\t -> Functions.dateFormat "MMMM YYYY" t.billingDate)
     , stringColumn "Main Provider" .mainProvider
     , stringColumn "Patient Name" .patientName
-    , stringColumn "DOB" .dob
+    , dateColumn "DOB" .dob
     , stringColumn "Id No" .patientFacilityIdNo
     , stringColumn "AssignedTo" .assignedTo
     ]
