@@ -89,39 +89,39 @@ init sortedColumnName =
 
 
 type Column data msg
-    = IntColumn String ({ data | id : Int } -> Maybe Int) String
-    | StringColumn String ({ data | id : Int } -> Maybe String) String
-    | DateTimeColumn String ({ data | id : Int } -> Maybe String) String
-    | DateColumn String ({ data | id : Int } -> Maybe String) String
-    | HrefColumn String String ({ data | id : Int } -> Maybe String) String
+    = IntColumn String ({ data | id : Int } -> Maybe Int) String String
+    | StringColumn String ({ data | id : Int } -> Maybe String) String String
+    | DateTimeColumn String ({ data | id : Int } -> Maybe String) String String
+    | DateColumn String ({ data | id : Int } -> Maybe String) String String
+    | HrefColumn String String ({ data | id : Int } -> Maybe String) String String
     | HrefColumnExtra String ({ data | id : Int } -> Html msg)
-    | CheckColumn String ({ data | id : Int } -> Bool) String
+    | CheckColumn String ({ data | id : Int } -> Bool) String String
     | DropdownColumn (List ( String, String, Int -> msg ))
 
 
 intColumn : String -> ({ data | id : Int } -> Maybe Int) -> Column data msg
 intColumn name data =
-    IntColumn name data name
+    IntColumn name data name ""
 
 
 stringColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
 stringColumn name data =
-    StringColumn name data name
+    StringColumn name data name ""
 
 
 dateTimeColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
 dateTimeColumn name data =
-    DateTimeColumn name data name
+    DateTimeColumn name data name ""
 
 
 dateColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
 dateColumn name data =
-    DateColumn name data name
+    DateColumn name data name ""
 
 
 hrefColumn : String -> String -> ({ data | id : Int } -> Maybe String) -> Column data msg
 hrefColumn name displayStr data =
-    HrefColumn name displayStr data name
+    HrefColumn name displayStr data name ""
 
 
 hrefColumnExtra : String -> ({ data | id : Int } -> Html msg) -> Column data msg
@@ -131,7 +131,7 @@ hrefColumnExtra name toNode =
 
 checkColumn : String -> ({ data | id : Int } -> Bool) -> Column data msg
 checkColumn name data =
-    CheckColumn name data name
+    CheckColumn name data name ""
 
 
 dropdownColumn : List ( String, String, Int -> msg ) -> Column data msg
@@ -162,8 +162,8 @@ view state rows config maybeCustomRow =
         [ viewToolbar config.toolbar
         , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
             [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                [ tr []
-                    (List.map (viewTh state config) config.columns)
+                [ tr [] (List.map (viewTh state config) config.columns)
+                , tr [] (List.map (viewThFilter state config) config.columns)
                 ]
             , tbody []
                 (viewTr state rows config maybeCustomRow)
@@ -270,6 +270,16 @@ viewTh state config column =
             ]
 
 
+viewThFilter : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
+viewThFilter state config column =
+    th [ class ("e-filterbarcell") ]
+        [ div [ class "e-filterdiv e-fltrinputdiv" ]
+            [ input [ class "e-ejinputtext e-filtertext" ] []
+            , span [ class "e-cancel e-icon" ] []
+            ]
+        ]
+
+
 viewTd : State -> { data | id : Int } -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
 viewTd state row config column =
     let
@@ -292,26 +302,26 @@ viewTd state row config column =
     in
         td [ tdClass, tdStyle, tdClick ]
             [ case column of
-                IntColumn _ dataToInt _ ->
+                IntColumn _ dataToInt _ _ ->
                     text (Functions.defaultIntToString (dataToInt row))
 
-                StringColumn _ dataToString _ ->
+                StringColumn _ dataToString _ _ ->
                     text (Maybe.withDefault "" (dataToString row))
 
-                DateTimeColumn _ dataToString _ ->
+                DateTimeColumn _ dataToString _ _ ->
                     text (Functions.defaultDateTime (dataToString row))
 
-                DateColumn _ dataToString _ ->
+                DateColumn _ dataToString _ _ ->
                     text (Functions.defaultDate (dataToString row))
 
-                HrefColumn _ displayText dataToString _ ->
+                HrefColumn _ displayText dataToString _ _ ->
                     --TODO, how do I want to display empty? I think.. it is hide the href, not go to an empty url right?
                     a [ href (Maybe.withDefault "" (dataToString row)), target "_blank" ] [ text displayText ]
 
                 HrefColumnExtra _ toNode ->
                     toNode row
 
-                CheckColumn _ dataToString _ ->
+                CheckColumn _ dataToString _ _ ->
                     div [ class "e-checkcell" ]
                         [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
                             [ input [ type_ "checkbox", disabled True, checked (dataToString row) ] []
@@ -326,25 +336,25 @@ viewTd state row config column =
 getColumnName : Column { data | id : Int } msg -> String
 getColumnName column =
     case column of
-        IntColumn name _ _ ->
+        IntColumn name _ _ _ ->
             name
 
-        StringColumn name _ _ ->
+        StringColumn name _ _ _ ->
             name
 
-        DateTimeColumn name _ _ ->
+        DateTimeColumn name _ _ _ ->
             name
 
-        DateColumn name _ _ ->
+        DateColumn name _ _ _ ->
             name
 
-        HrefColumn name _ _ _ ->
+        HrefColumn name _ _ _ _ ->
             name
 
         HrefColumnExtra name _ ->
             name
 
-        CheckColumn name _ _ ->
+        CheckColumn name _ _ _ ->
             name
 
         DropdownColumn _ ->

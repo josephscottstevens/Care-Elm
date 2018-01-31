@@ -12,16 +12,20 @@ QUESTIONS:
 	Testing branch... if they get a copy of ports with no ports... bam crash until hard-refresh
 ===========================================================================================================
 
+Billing TODO:
+Batch close is a checkable column
+
+
 TODO:
-test setUnsavedChanges
-scroll to top if validation fails?
-in dropdown, updateSearchString needs to work when closed as well (and has focus)
-records > Hospitalizations is broken again :'(
-test are you sure you want to leave
-consolidate HandleSuccessResponse \ ErroResponse with json parse
+import Records from Phase2Bugs
+import Demographics from Phase2Bugs
+import Table from Phase2Bugs as Table 
+Refactor data from string to Maybe String
+Refactor date functions to be more like DefaultFormat
+
 
 LOW TODO:
-hospitilizations addedit move into same file?
+in dropdown, updateSearchString needs to work when closed as well (and has focus)
 There is phone number validation, any other hidden validations?
 Perhaps hrefExtra doesn't really belong in grid
 how to clear sort?
