@@ -28,6 +28,7 @@ import Common.Functions as Functions exposing (maybeVal)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Dict exposing (Dict)
 
 
 -- Data Types
@@ -42,6 +43,7 @@ type alias State =
     , totalRows : Int
     , sortField : Maybe String
     , sortAscending : Bool
+    , filters : Dict String String
     }
 
 
@@ -86,6 +88,7 @@ init sortedColumnName =
     , totalRows = -1
     , sortField = Just "DoB"
     , sortAscending = False
+    , filters = Dict.empty
     }
 
 
@@ -100,39 +103,39 @@ type Column data msg
     | DropdownColumn (List ( String, String, Int -> msg ))
 
 
-intColumn : String -> ({ data | id : Int } -> Maybe Int) -> Column data msg
-intColumn name data =
-    IntColumn name data name ""
+intColumn : String -> String -> ({ data | id : Int } -> Maybe Int) -> Column data msg
+intColumn name displayName data =
+    IntColumn displayName data name ""
 
 
-stringColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
-stringColumn name data =
-    StringColumn name data name ""
+stringColumn : String -> String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+stringColumn name displayName data =
+    StringColumn displayName data name ""
 
 
-dateTimeColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
-dateTimeColumn name data =
-    DateTimeColumn name data name ""
+dateTimeColumn : String -> String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+dateTimeColumn name displayName data =
+    DateTimeColumn displayName data name ""
 
 
-dateColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
-dateColumn name data =
-    DateColumn name data name ""
+dateColumn : String -> String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+dateColumn name displayName data =
+    DateColumn displayName data name ""
 
 
-hrefColumn : String -> String -> ({ data | id : Int } -> Maybe String) -> Column data msg
-hrefColumn name displayStr data =
-    HrefColumn name displayStr data name ""
+hrefColumn : String -> String -> String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+hrefColumn name displayName displayStr data =
+    HrefColumn displayName displayStr data name ""
 
 
-hrefColumnExtra : String -> ({ data | id : Int } -> Html msg) -> Column data msg
-hrefColumnExtra name toNode =
+hrefColumnExtra : String -> String -> ({ data | id : Int } -> Html msg) -> Column data msg
+hrefColumnExtra name displayName toNode =
     HrefColumnExtra name toNode
 
 
-checkColumn : String -> ({ data | id : Int } -> Bool) -> Column data msg
-checkColumn name data =
-    CheckColumn name data name ""
+checkColumn : String -> String -> ({ data | id : Int } -> Bool) -> Column data msg
+checkColumn name displayName data =
+    CheckColumn displayName data name ""
 
 
 dropdownColumn : List ( String, String, Int -> msg ) -> Column data msg
@@ -332,6 +335,10 @@ viewTd state row config column =
                 DropdownColumn dropDownItems ->
                     rowDropDownDiv state config.toMsg row dropDownItems
             ]
+
+
+
+-- TODO: This makes no sense
 
 
 getColumnName : Column { data | id : Int } msg -> String
@@ -614,30 +621,30 @@ encodeGridOperations gridOperations =
 getFilter : Column { data | id : Int } msg -> ( String, Encode.Value )
 getFilter column =
     case column of
-        IntColumn _ dataToInt _ filterField ->
+        IntColumn _ dataToInt fieldName filterField ->
             -- text (Functions.defaultIntToString (dataToInt row))
-            ( filterField, Encode.string "" )
+            ( fieldName, Encode.string filterField )
 
-        StringColumn _ dataToString _ filterField ->
+        StringColumn _ dataToString fieldName filterField ->
             -- text (Maybe.withDefault "" (dataToString row))
-            ( filterField, Encode.string "" )
+            ( fieldName, Encode.string filterField )
 
-        DateTimeColumn _ dataToString _ filterField ->
+        DateTimeColumn _ dataToString fieldName filterField ->
             -- text (Functions.defaultDateTime (dataToString row))
-            ( filterField, Encode.string "" )
+            ( fieldName, Encode.string filterField )
 
-        DateColumn _ dataToString _ filterField ->
+        DateColumn _ dataToString fieldName filterField ->
             -- text (Functions.defaultDate (dataToString row))
-            ( filterField, Encode.string "" )
+            ( fieldName, Encode.string filterField )
 
-        HrefColumn _ displayText dataToString _ filterField ->
+        HrefColumn _ displayText dataToString fieldName filterField ->
             -- a [ href (Maybe.withDefault "" (dataToString row)), target "_blank" ] [ text displayText ]
-            ( filterField, Encode.string "" )
+            ( fieldName, Encode.string filterField )
 
         HrefColumnExtra _ toNode ->
             ( "", Encode.string "" )
 
-        CheckColumn _ dataToString _ filterField ->
+        CheckColumn _ dataToString _ _ ->
             ( "", Encode.string "" )
 
         DropdownColumn dropDownItems ->
@@ -648,14 +655,7 @@ encodeGridStuff : List (Column { data | id : Int } msg) -> GridOperations -> Enc
 encodeGridStuff columns gridOperations =
     Encode.object
         (( "GridOperations", encodeGridOperations gridOperations )
-            :: [ ( "Facility", Encode.string "" )
-               , ( "BillingDate", Encode.string "Sun, 04 Feb 2018 14:30:02 GMT" )
-               , ( "MainProvider", Encode.string "" )
-               , ( "PatientName", Encode.string "" )
-               , ( "DoB", Encode.string "Sun, 04 Feb 2018 14:30:02 GMT" )
-               , ( "PatientFacilityIdNo", Encode.string "" )
-               , ( "AssignedTo", Encode.string "" )
-               ]
+            :: List.map getFilter columns
         )
 
 

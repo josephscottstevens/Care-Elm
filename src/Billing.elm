@@ -196,11 +196,11 @@ gridConfig addEditDataSource =
 getColumns : Maybe AddEditDataSource -> List (Table.Column Row Msg)
 getColumns addEditDataSource =
     [ --checkColumn "" ,
-      stringColumn "Facility" .facility
-    , stringColumn "Billing Date" (\t -> Functions.dateFormat "MMMM YYYY" t.billingDate)
-    , stringColumn "Main Provider" .mainProvider
-    , stringColumn "Patient Name" .patientName
-    , dateColumn "DOB" .dob
-    , stringColumn "Id No" .patientFacilityIdNo
-    , stringColumn "AssignedTo" .assignedTo
+      stringColumn "Facility" "Facility" .facility
+    , stringColumn "BillingDate" "Billing Date" (\t -> Functions.dateFormat "MMMM YYYY" t.billingDate)
+    , stringColumn "MainProvider" "Main Provider" .mainProvider
+    , stringColumn "PatientName" "Patient Name" .patientName
+    , dateColumn "DoB" "DOB" .dob
+    , stringColumn "PatientFacilityIdNo" "Id No" .patientFacilityIdNo
+    , stringColumn "AssignedTo" "AssignedTo" .assignedTo
     ]
