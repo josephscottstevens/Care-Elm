@@ -611,18 +611,52 @@ encodeGridOperations gridOperations =
         ]
 
 
+getFilter : Column { data | id : Int } msg -> ( String, Encode.Value )
+getFilter column =
+    case column of
+        IntColumn _ dataToInt _ filterField ->
+            -- text (Functions.defaultIntToString (dataToInt row))
+            ( filterField, Encode.string "" )
+
+        StringColumn _ dataToString _ filterField ->
+            -- text (Maybe.withDefault "" (dataToString row))
+            ( filterField, Encode.string "" )
+
+        DateTimeColumn _ dataToString _ filterField ->
+            -- text (Functions.defaultDateTime (dataToString row))
+            ( filterField, Encode.string "" )
+
+        DateColumn _ dataToString _ filterField ->
+            -- text (Functions.defaultDate (dataToString row))
+            ( filterField, Encode.string "" )
+
+        HrefColumn _ displayText dataToString _ filterField ->
+            -- a [ href (Maybe.withDefault "" (dataToString row)), target "_blank" ] [ text displayText ]
+            ( filterField, Encode.string "" )
+
+        HrefColumnExtra _ toNode ->
+            ( "", Encode.string "" )
+
+        CheckColumn _ dataToString _ filterField ->
+            ( "", Encode.string "" )
+
+        DropdownColumn dropDownItems ->
+            ( "", Encode.string "" )
+
+
 encodeGridStuff : List (Column { data | id : Int } msg) -> GridOperations -> Encode.Value
 encodeGridStuff columns gridOperations =
     Encode.object
-        [ ( "GridOperations", encodeGridOperations gridOperations )
-        , ( "Facility", Encode.string "" )
-        , ( "BillingDate", Encode.string "Sun, 04 Feb 2018 14:30:02 GMT" )
-        , ( "MainProvider", Encode.string "" )
-        , ( "PatientName", Encode.string "" )
-        , ( "DoB", Encode.string "Sun, 04 Feb 2018 14:30:02 GMT" )
-        , ( "PatientFacilityIdNo", Encode.string "" )
-        , ( "AssignedTo", Encode.string "" )
-        ]
+        (( "GridOperations", encodeGridOperations gridOperations )
+            :: [ ( "Facility", Encode.string "" )
+               , ( "BillingDate", Encode.string "Sun, 04 Feb 2018 14:30:02 GMT" )
+               , ( "MainProvider", Encode.string "" )
+               , ( "PatientName", Encode.string "" )
+               , ( "DoB", Encode.string "Sun, 04 Feb 2018 14:30:02 GMT" )
+               , ( "PatientFacilityIdNo", Encode.string "" )
+               , ( "AssignedTo", Encode.string "" )
+               ]
+        )
 
 
 decodeGridOperations : Decode.Decoder GridOperations
