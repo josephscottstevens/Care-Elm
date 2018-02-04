@@ -173,7 +173,7 @@ load patientId gridOperations =
 emptyModel : Model
 emptyModel =
     { rows = []
-    , tableState = Table.init "Date"
+    , tableState = Table.init "Date" (getColumns Nothing)
     , query = ""
     }
 

@@ -28,7 +28,6 @@ import Common.Functions as Functions exposing (maybeVal)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
-import Dict exposing (Dict)
 
 
 -- Data Types
@@ -43,7 +42,7 @@ type alias State =
     , totalRows : Int
     , sortField : Maybe String
     , sortAscending : Bool
-    , filters : Dict String String
+    , filters : List ( String, String )
     }
 
 
@@ -54,6 +53,14 @@ type alias GridOperations =
     , totalRows : Int
     , sortField : Maybe String
     , sortAscending : Bool
+    }
+
+
+type alias Config data msg =
+    { domTableId : String
+    , toolbar : List ( String, msg )
+    , toMsg : State -> msg
+    , columns : List (Column { data | id : Int } msg)
     }
 
 
@@ -78,8 +85,8 @@ type Page
     | Last
 
 
-init : String -> State
-init sortedColumnName =
+init : String -> List (Column { data | id : Int } msg) -> State
+init sortedColumnName columns =
     { selectedId = Nothing
     , openDropdownId = Nothing
     , pageIndex = 0
@@ -88,8 +95,41 @@ init sortedColumnName =
     , totalRows = -1
     , sortField = Just "DoB"
     , sortAscending = False
-    , filters = Dict.empty
+    , filters = List.map buildFilter columns
     }
+
+
+buildFilter : Column { data | id : Int } msg -> ( String, String )
+buildFilter column =
+    case column of
+        IntColumn _ dataToInt fieldName filterField ->
+            -- text (Functions.defaultIntToString (dataToInt row))
+            ( fieldName, filterField )
+
+        StringColumn _ dataToString fieldName filterField ->
+            -- text (Maybe.withDefault "" (dataToString row))
+            ( fieldName, filterField )
+
+        DateTimeColumn _ dataToString fieldName filterField ->
+            -- text (Functions.defaultDateTime (dataToString row))
+            ( fieldName, filterField )
+
+        DateColumn _ dataToString fieldName filterField ->
+            -- text (Functions.defaultDate (dataToString row))
+            ( fieldName, filterField )
+
+        HrefColumn _ displayText dataToString fieldName filterField ->
+            -- a [ href (Maybe.withDefault "" (dataToString row)), target "_blank" ] [ text displayText ]
+            ( fieldName, filterField )
+
+        HrefColumnExtra _ toNode ->
+            ( "", "" )
+
+        CheckColumn _ dataToString _ _ ->
+            ( "", "" )
+
+        DropdownColumn dropDownItems ->
+            ( "", "" )
 
 
 type Column data msg
@@ -141,19 +181,6 @@ checkColumn name displayName data =
 dropdownColumn : List ( String, String, Int -> msg ) -> Column data msg
 dropdownColumn items =
     DropdownColumn items
-
-
-type alias Config data msg =
-    { domTableId : String
-    , toolbar : List ( String, msg )
-    , toMsg : State -> msg
-    , columns : List (Column { data | id : Int } msg)
-    }
-
-
-type Sorter data
-    = None
-    | IncOrDec (List { data | id : Int } -> List { data | id : Int })
 
 
 
@@ -274,11 +301,27 @@ viewTh state config column =
             ]
 
 
+updateFilterInput : List ( String, String ) -> Config { data | id : Int } msg -> String -> String -> List ( String, String )
+updateFilterInput filters config fieldName fieldValue =
+    filters
+        |> List.map
+            (\( name, value ) ->
+                if name == fieldName then
+                    ( fieldName, fieldValue )
+                else
+                    ( name, value )
+            )
+
+
 viewThFilter : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
 viewThFilter state config column =
     th [ class ("e-filterbarcell") ]
         [ div [ class "e-filterdiv e-fltrinputdiv" ]
-            [ input [ class "e-ejinputtext e-filtertext" ] []
+            [ input
+                [ class "e-ejinputtext e-filtertext"
+                , Events.onInput (\t -> config.toMsg { state | filters = updateFilterInput state.filters config "Facility" t })
+                ]
+                []
             , span [ class "e-cancel e-icon" ] []
             ]
         ]
