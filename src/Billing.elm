@@ -166,7 +166,7 @@ jsonDecodeLoad =
 load : Int -> Table.GridOperations -> Cmd Msg
 load patientId gridOperations =
     jsonDecodeLoad
-        |> Functions.postJsonRequest (Table.encodeGridOperations gridOperations) ("/People/BillingTest?patientId=" ++ toString patientId)
+        |> Functions.postJsonRequest (Table.encodeGridStuff gridOperations) ("/People/BillingTest?patientId=" ++ toString patientId)
         |> Http.send Load
 
 

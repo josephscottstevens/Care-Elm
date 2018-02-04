@@ -16,6 +16,7 @@ module Common.ServerTable
         , checkColumn
         , decodeGridOperations
         , encodeGridOperations
+        , encodeGridStuff
         , defaultGridOperations
         , getGridOperations
         )
@@ -589,7 +590,7 @@ pagingView state toMsg =
 
 defaultGridOperations : GridOperations
 defaultGridOperations =
-    { pageIndex = -1
+    { pageIndex = 0
     , rowsPerPage = 12
     , pagesPerBlock = 15
     , totalRows = -1
@@ -607,6 +608,20 @@ encodeGridOperations gridOperations =
         , ( "TotalRows", Encode.int gridOperations.totalRows )
         , ( "SortField", maybeVal Encode.string gridOperations.sortField )
         , ( "SortAscending", Encode.bool gridOperations.sortAscending )
+        ]
+
+
+encodeGridStuff : GridOperations -> Encode.Value
+encodeGridStuff gridOperations =
+    Encode.object
+        [ ( "GridOperations", encodeGridOperations gridOperations )
+        , ( "Facility", Encode.string "" )
+        , ( "BillingDate", Encode.string "Sun, 04 Feb 2018 14:30:02 GMT" )
+        , ( "MainProvider", Encode.string "" )
+        , ( "PatientName", Encode.string "" )
+        , ( "DoB", Encode.string "Sun, 04 Feb 2018 14:30:02 GMT" )
+        , ( "PatientFacilityIdNo", Encode.string "" )
+        , ( "AssignedTo", Encode.string "" )
         ]
 
 
