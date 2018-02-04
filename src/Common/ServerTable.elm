@@ -611,8 +611,8 @@ encodeGridOperations gridOperations =
         ]
 
 
-encodeGridStuff : GridOperations -> Encode.Value
-encodeGridStuff gridOperations =
+encodeGridStuff : List (Column { data | id : Int } msg) -> GridOperations -> Encode.Value
+encodeGridStuff columns gridOperations =
     Encode.object
         [ ( "GridOperations", encodeGridOperations gridOperations )
         , ( "Facility", Encode.string "" )
