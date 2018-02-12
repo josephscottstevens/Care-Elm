@@ -31,6 +31,7 @@ port module Common.Functions
         , getDesc
         , getRecordTypeById
         , getId
+        , getAt
         , sendMenuMessage
         , setUnsavedChanges
         , deletePrompt
@@ -407,3 +408,8 @@ getId recordType =
 
         Misc ->
             5
+
+
+getAt : Int -> List a -> Maybe a
+getAt idx xs =
+    List.head <| List.drop idx xs

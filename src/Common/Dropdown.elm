@@ -1,53 +1,36 @@
-port module Common.Dropdown exposing (Dropdown, Msg, init, update, view)
+port module Common.Dropdown exposing (DropState, Msg, init, update, view)
 
 import Html exposing (Html, Attribute, div, span, text, li, ul, input)
-import Html.Attributes exposing (style, value, class, readonly)
+import Html.Attributes exposing (style, value, class, readonly, placeholder, tabindex, disabled)
 import Html.Events as Events
 import Json.Decode
 import Common.Types exposing (DropdownItem)
 import Common.Functions as Functions
 import Char
-import Array exposing (Array)
 
 
 port dropdownMenuScroll : String -> Cmd msg
 
 
-scrollToDomId : String -> Cmd msg
-scrollToDomId =
-    dropdownMenuScroll
+scrollToDomId : String -> Maybe Int -> Cmd msg
+scrollToDomId str id =
+    dropdownMenuScroll (str ++ "-" ++ Functions.defaultIntToString id)
 
 
-type alias Dropdown =
+type alias DropState =
     { isOpen : Bool
-    , selectedItem : DropdownItem
-    , highlightedItem : Maybe DropdownItem
-    , highlightedIndex : Int
-    , dropdownSource : Array DropdownItem
+    , keyboardSelectedIndex : Int
     , searchString : String
-    , id : String
+    , domId : String
     }
 
 
-emptyItem : DropdownItem
-emptyItem =
-    DropdownItem Nothing ""
-
-
-defaultSelectedItem : Maybe DropdownItem -> DropdownItem
-defaultSelectedItem selectedItem =
-    Maybe.withDefault emptyItem selectedItem
-
-
-init : String -> List DropdownItem -> Maybe DropdownItem -> Dropdown
-init id list selectedItem =
+init : String -> DropState
+init domId =
     { isOpen = False
-    , selectedItem = defaultSelectedItem selectedItem
-    , highlightedItem = Nothing
-    , highlightedIndex = 0
-    , dropdownSource = Array.fromList list
+    , keyboardSelectedIndex = 0
     , searchString = ""
-    , id = id
+    , domId = domId
     }
 
 
@@ -63,126 +46,138 @@ type Key
     | Searchable Char
 
 
-type Msg
-    = ItemPicked DropdownItem
-    | ItemEntered DropdownItem
-    | ItemLeft
-    | SetOpenState Bool
-    | OnBlur
-    | OnKey Key
-
-
 type SkipAmount
     = First
     | Last
     | Exact Int
 
 
-byId : Int -> Array DropdownItem -> DropdownItem
-byId index items =
-    case Array.get index items of
-        Just t ->
-            t
-
-        Nothing ->
-            emptyItem
+type Msg
+    = ItemClicked DropdownItem
+    | SetOpenState Bool
+    | OnBlur
+    | OnKey Key
+    | ResetSearchString
 
 
-update : Msg -> Dropdown -> ( Dropdown, Cmd msg )
-update msg dropdown =
+getIndex : Maybe Int -> List DropdownItem -> Int
+getIndex selectedId dropdownItems =
+    dropdownItems
+        |> List.indexedMap
+            (\idx t ->
+                if t.id == selectedId then
+                    Just idx
+                else
+                    Nothing
+            )
+        |> List.filterMap identity
+        |> List.head
+        |> Maybe.withDefault 0
+
+
+getId : List DropdownItem -> Int -> Maybe Int
+getId dropdownItems index =
+    dropdownItems
+        |> Functions.getAt index
+        |> Maybe.map .id
+        |> Maybe.withDefault Nothing
+
+
+update : Msg -> DropState -> Maybe Int -> List DropdownItem -> ( DropState, Maybe Int, Cmd msg )
+update msg dropdown selectedId dropdownItems =
     case msg of
-        ItemPicked item ->
-            { dropdown | selectedItem = item, isOpen = False } ! []
-
-        ItemEntered item ->
-            { dropdown | highlightedItem = Just item } ! []
-
-        ItemLeft ->
-            { dropdown | highlightedItem = Nothing } ! []
+        ItemClicked item ->
+            ( { dropdown | isOpen = False, searchString = "" }, item.id, Cmd.none )
 
         SetOpenState newState ->
-            { dropdown | isOpen = newState } ! []
+            ( { dropdown
+                | isOpen = newState
+                , keyboardSelectedIndex = getIndex selectedId dropdownItems
+              }
+            , selectedId
+            , scrollToDomId dropdown.domId selectedId
+            )
 
         OnBlur ->
-            { dropdown
-                | isOpen = False
-                , selectedItem = defaultSelectedItem dropdown.highlightedItem
-            }
-                ! []
+            ( { dropdown | isOpen = False, searchString = "" }, selectedId, Cmd.none )
 
         OnKey Esc ->
-            { dropdown | isOpen = False } ! []
+            ( { dropdown | isOpen = False, searchString = "" }, selectedId, Cmd.none )
 
         OnKey Enter ->
-            if dropdown.isOpen then
-                { dropdown
-                    | isOpen = False
-                    , selectedItem = byId dropdown.highlightedIndex dropdown.dropdownSource
-                }
-                    ! []
-            else
-                dropdown ! []
+            let
+                newDropdown =
+                    { dropdown | isOpen = False, searchString = "" }
+            in
+                if dropdown.isOpen then
+                    ( newDropdown, getId dropdownItems dropdown.keyboardSelectedIndex, Cmd.none )
+                else
+                    ( newDropdown, selectedId, Cmd.none )
 
         OnKey ArrowUp ->
-            pickerSkip dropdown (Exact -1)
+            pickerSkip dropdown (Exact -1) dropdownItems selectedId
 
         OnKey ArrowDown ->
-            pickerSkip dropdown (Exact 1)
+            pickerSkip dropdown (Exact 1) dropdownItems selectedId
 
         OnKey PageUp ->
-            pickerSkip dropdown (Exact -9)
+            pickerSkip dropdown (Exact -9) dropdownItems selectedId
 
         OnKey PageDown ->
-            pickerSkip dropdown (Exact 9)
+            pickerSkip dropdown (Exact 9) dropdownItems selectedId
 
         OnKey Home ->
-            pickerSkip dropdown First
+            pickerSkip dropdown First dropdownItems selectedId
 
         OnKey End ->
-            pickerSkip dropdown Last
+            pickerSkip dropdown Last dropdownItems selectedId
 
         OnKey (Searchable char) ->
-            updateSearchString char dropdown
+            updateSearchString char dropdown dropdownItems selectedId
+
+        ResetSearchString ->
+            ( { dropdown | searchString = "" }, selectedId, Cmd.none )
 
 
-boundedIndex : Array DropdownItem -> Int -> Int
-boundedIndex dropdownSource index =
-    if index < 0 then
-        0
-    else if index > Array.length dropdownSource then
-        Array.length dropdownSource - 1
-    else
-        index
-
-
-pickerSkip : Dropdown -> SkipAmount -> ( Dropdown, Cmd msg )
-pickerSkip dropdown skipAmount =
+pickerSkip : DropState -> SkipAmount -> List DropdownItem -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
+pickerSkip dropdown skipAmount dropdownItems selectedId =
     let
         newIndexCalc =
             case skipAmount of
                 Exact skipCount ->
-                    dropdown.highlightedIndex + skipCount
+                    dropdown.keyboardSelectedIndex + skipCount
 
                 First ->
                     0
 
                 Last ->
-                    Array.length dropdown.dropdownSource - 1
+                    List.length dropdownItems - 1
 
         newIndex =
-            boundedIndex dropdown.dropdownSource newIndexCalc
+            if newIndexCalc < 0 then
+                0
+            else if newIndexCalc >= List.length dropdownItems then
+                List.length dropdownItems - 1
+            else
+                newIndexCalc
 
-        selectedItem =
-            byId newIndex dropdown.dropdownSource
+        newSelectedId =
+            getId dropdownItems newIndex
+
+        newDropdown =
+            { dropdown
+                | keyboardSelectedIndex = newIndex
+                , searchString = ""
+            }
     in
         if dropdown.isOpen then
-            { dropdown | highlightedIndex = newIndex } ! [ scrollToDomId (getId dropdown.id selectedItem) ]
+            ( newDropdown, selectedId, scrollToDomId dropdown.domId newSelectedId )
         else
-            { dropdown | highlightedIndex = newIndex, selectedItem = selectedItem } ! []
+            ( newDropdown, Just newIndex, Cmd.none )
 
 
-view : Dropdown -> Html Msg
-view dropdown =
+view : DropState -> List DropdownItem -> Maybe Int -> Html Msg
+view dropdown dropdownItems selectedId =
     let
         displayStyle =
             if dropdown.isOpen then
@@ -203,23 +198,52 @@ view dropdown =
             Events.keyCode
                 |> Json.Decode.andThen (keyDecoder dropdown)
                 |> Json.Decode.map OnKey
+
+        getDropdownText =
+            dropdownItems
+                |> List.filter (\t -> t.id == selectedId)
+                |> List.map .name
+                |> List.head
+                |> Maybe.withDefault ""
+
+        biggestStrLength =
+            dropdownItems
+                |> List.map (\t -> (String.length t.name) * 7)
+                |> List.sortBy identity
+                |> List.reverse
+                |> List.head
+                |> Maybe.withDefault 150
+
+        maxWidth =
+            ( "width", toString biggestStrLength ++ "px" )
     in
-        div [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder ]
+        div
+            [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
+            , if dropdown.isOpen then
+                Events.onBlur OnBlur
+              else
+                disabled False
+            , if dropdown.isOpen then
+                disabled False
+              else
+                Events.onClick (SetOpenState True)
+            , tabindex 0 -- Make div focusable, since we need the on blur to trigger for both child elements
+            , style [ ( "position", "relative" ), ( "width", "100%" ) ]
+            , class "dropdown-outline"
+            ]
             [ span
-                [ onClick (SetOpenState (not dropdown.isOpen))
-                , class ("e-ddl e-widget " ++ activeClass)
+                [ class ("e-ddl e-widget " ++ activeClass)
                 , dropInputWidth
                 ]
                 [ span
                     [ class "e-in-wrap e-box" ]
                     [ input
-                        [ class "e-input"
+                        [ class "noselect e-input"
                         , readonly True
-                        , value dropdown.selectedItem.name
-                        , if dropdown.isOpen then
-                            Events.onBlur OnBlur
-                          else
-                            style []
+                        , value getDropdownText
+                        , tabindex -1 -- Make it so you cannot set focus via tabbing, we need root div to have the focus
+                        , disabled True -- Make it so you cannot click to set focus, we need root div to have the focus
+                        , placeholder "Choose..."
                         ]
                         []
                     , span [ class "e-select" ]
@@ -227,65 +251,34 @@ view dropdown =
                         ]
                     ]
                 ]
-            , ul [ style <| displayStyle :: dropdownList, class "dropdown-ul" ] (viewItem dropdown)
+            , ul [ style <| displayStyle :: maxWidth :: dropdownList, class "dropdown-ul" ] (viewItem dropdown dropdownItems)
             ]
 
 
-getId : String -> DropdownItem -> String
-getId id item =
-    id ++ "-" ++ Functions.defaultIntToString item.id
-
-
-viewItem : Dropdown -> List (Html Msg)
-viewItem dropdown =
+viewItem : DropState -> List DropdownItem -> List (Html Msg)
+viewItem dropdown dropdownItems =
     let
-        numItems =
-            dropdown.dropdownSource
-                |> Array.toList
-                |> List.map (\t -> String.length t.name)
-                |> List.sortBy identity
-                |> List.reverse
-                |> List.head
-                |> Maybe.withDefault 150
-
-        width =
-            numItems * 6
-
         commonWidth =
-            [ ( "width", toString width ++ "px" ) ]
-
-        mouseActive =
-            [ ( "background-color", "" ), ( "color", "#808080" ) ] ++ commonWidth
+            [ ( "min-width", "99.7%" )
+            ]
 
         keyActive =
             [ ( "background-color", "#f4f4f4" ), ( "color", "#333" ) ] ++ commonWidth
     in
-        dropdown.dropdownSource
-            |> Array.indexedMap
-                (\index item ->
+        dropdownItems
+            |> List.map
+                (\item ->
                     li
-                        [ onClick (ItemPicked item)
-                        , Events.onMouseEnter (ItemEntered item)
-                        , Events.onMouseLeave ItemLeft
-                        , class "dropdown-li"
-                        , if dropdown.highlightedItem == Just item then
-                            style mouseActive
-                          else if dropdown.highlightedIndex == index && (index > 0 || dropdown.isOpen) then
+                        [ Events.onClick (ItemClicked item)
+                        , class "noselect dropdown-li"
+                        , if dropdown.keyboardSelectedIndex == getIndex item.id dropdownItems && dropdown.isOpen then
                             style keyActive
                           else
                             style commonWidth
-                        , Html.Attributes.id (getId dropdown.id item)
+                        , Html.Attributes.id (dropdown.domId ++ "-" ++ Functions.defaultIntToString item.id)
                         ]
                         [ text item.name ]
                 )
-            |> Array.toList
-
-
-onClick : msg -> Attribute msg
-onClick message =
-    Events.onWithOptions "click"
-        { stopPropagation = True, preventDefault = False }
-        (Json.Decode.succeed message)
 
 
 
@@ -300,18 +293,17 @@ dropdownList =
     , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
     , ( "padding", "0" )
     , ( "margin", "0" )
-
-    -- , ( "width", "150px" )
     , ( "background-color", "white" )
     , ( "max-height", "152px" )
     , ( "overflow-x", "hidden" )
     , ( "overflow-y", "scroll" )
     , ( "z-index", "100" )
+    , ( "min-width", "99.7%" )
     ]
 
 
-updateSearchString : Char -> Dropdown -> ( Dropdown, Cmd msg )
-updateSearchString searchChar dropdown =
+updateSearchString : Char -> DropState -> List DropdownItem -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
+updateSearchString searchChar dropdown dropdownItems selectedId =
     let
         searchString =
             -- Manage backspace character
@@ -321,24 +313,19 @@ updateSearchString searchChar dropdown =
                 dropdown.searchString ++ String.toLower (String.fromChar searchChar)
 
         maybeSelectedItem =
-            dropdown.dropdownSource
-                |> Array.toList
+            dropdownItems
                 |> List.filter (\t -> String.startsWith searchString (String.toLower t.name))
                 |> List.head
     in
         case maybeSelectedItem of
             Just t ->
-                { dropdown
-                    | selectedItem = t
-                    , searchString = searchString
-                }
-                    ! [ scrollToDomId (getId dropdown.id t) ]
+                ( { dropdown | searchString = searchString, keyboardSelectedIndex = getIndex t.id dropdownItems }, t.id, scrollToDomId dropdown.domId t.id )
 
             Nothing ->
-                dropdown ! [ Cmd.none ]
+                ( dropdown, selectedId, Cmd.none )
 
 
-keyDecoder : Dropdown -> Int -> Json.Decode.Decoder Key
+keyDecoder : DropState -> Int -> Json.Decode.Decoder Key
 keyDecoder dropdown keyCode =
     let
         -- This is necessary to ensure that the key is not consumed and can propagate to the parent

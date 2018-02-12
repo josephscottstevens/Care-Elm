@@ -40,7 +40,7 @@ type InputControlType msg
     | DateInput String Common.RequiredType String String
     | FileInput String Common.RequiredType String
     | HtmlElement String (Html msg)
-    | Dropdown String Common.RequiredType Dropdown.Dropdown (Dropdown.Msg -> msg)
+    | Dropdown String Common.RequiredType Dropdown.DropState (Dropdown.Msg -> msg) (List Common.DropdownItem) (Maybe Int)
 
 
 forId : String -> Html.Attribute msg
@@ -164,11 +164,11 @@ makeControls config controls =
                             [ htmlElement ]
                         ]
 
-                Dropdown labelText requiredType displayValue event ->
+                Dropdown labelText requiredType dropState toMsg dropdownItems selectedId ->
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ Html.map event <| Dropdown.view displayValue ]
+                            [ Html.map toMsg <| Dropdown.view dropState dropdownItems selectedId ]
                         ]
     in
         div [] (controls |> List.map common)
@@ -253,8 +253,14 @@ commonValidation controlType =
         HtmlElement _ _ ->
             Nothing
 
-        Dropdown labelText requiredType displayValue _ ->
-            is requiredType <| requiredStr labelText displayValue.selectedItem.name
+        Dropdown labelText requiredType _ _ _ selectedId ->
+            is requiredType <|
+                case selectedId of
+                    Just _ ->
+                        Nothing
+
+                    Nothing ->
+                        Just (labelText ++ " is required")
 
 
 requiredStr : String -> String -> Maybe String
