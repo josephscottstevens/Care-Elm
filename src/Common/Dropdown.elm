@@ -179,20 +179,11 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
 view : DropState -> List DropdownItem -> Maybe Int -> Html Msg
 view dropdown dropdownItems selectedId =
     let
-        displayStyle =
-            if dropdown.isOpen then
-                ( "display", "block" )
-            else
-                ( "display", "none" )
-
         activeClass =
             if dropdown.isOpen then
                 "e-focus e-popactive"
             else
                 ""
-
-        dropInputWidth =
-            style [ ( "width", "100%" ) ]
 
         keyMsgDecoder =
             Events.keyCode
@@ -214,8 +205,25 @@ view dropdown dropdownItems selectedId =
                 |> List.head
                 |> Maybe.withDefault 150
 
-        maxWidth =
-            ( "width", toString biggestStrLength ++ "px" )
+        dropdownList =
+            [ if dropdown.isOpen then
+                ( "display", "block" )
+              else
+                ( "display", "none" )
+            , ( "width", toString biggestStrLength ++ "px" )
+            , ( "position", "absolute" )
+            , ( "top", "32px" )
+            , ( "border-radius", "4px" )
+            , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
+            , ( "padding", "0" )
+            , ( "margin", "0" )
+            , ( "background-color", "white" )
+            , ( "max-height", "152px" )
+            , ( "overflow-x", "hidden" )
+            , ( "overflow-y", "scroll" )
+            , ( "z-index", "100" )
+            , ( "min-width", "99.7%" )
+            ]
     in
         div
             [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
@@ -233,7 +241,7 @@ view dropdown dropdownItems selectedId =
             ]
             [ span
                 [ class ("e-ddl e-widget " ++ activeClass)
-                , dropInputWidth
+                , style [ ( "width", "100%" ) ]
                 ]
                 [ span
                     [ class "e-in-wrap e-box" ]
@@ -251,7 +259,7 @@ view dropdown dropdownItems selectedId =
                         ]
                     ]
                 ]
-            , ul [ style <| displayStyle :: maxWidth :: dropdownList, class "dropdown-ul" ] (viewItem dropdown dropdownItems)
+            , ul [ style dropdownList, class "dropdown-ul" ] (viewItem dropdown dropdownItems)
             ]
 
 
@@ -279,27 +287,6 @@ viewItem dropdown dropdownItems =
                         ]
                         [ text item.name ]
                 )
-
-
-
--- styles for list container
-
-
-dropdownList : List ( String, String )
-dropdownList =
-    [ ( "position", "absolute" )
-    , ( "top", "32px" )
-    , ( "border-radius", "4px" )
-    , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
-    , ( "padding", "0" )
-    , ( "margin", "0" )
-    , ( "background-color", "white" )
-    , ( "max-height", "152px" )
-    , ( "overflow-x", "hidden" )
-    , ( "overflow-y", "scroll" )
-    , ( "z-index", "100" )
-    , ( "min-width", "99.7%" )
-    ]
 
 
 updateSearchString : Char -> DropState -> List DropdownItem -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
