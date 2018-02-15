@@ -1,4 +1,0 @@
-{
-    "elm.makeCommand": ".\\node_modules\\.bin\\elm-make",
-    "elm.formatOnSave": true
-}
