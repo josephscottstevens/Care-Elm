@@ -674,7 +674,7 @@ gridConfig recordType addEditDataSource =
     , toolbar =
         case addEditDataSource of
             Just t ->
-                [ ( "e-addnew", Add t recordType ) ]
+                [ ( "e-addnew e-loaded", Add t recordType ) ]
 
             Nothing ->
                 [ ( "e-addnew e-disable", NoOp ) ]

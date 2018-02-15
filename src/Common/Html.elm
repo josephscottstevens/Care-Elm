@@ -98,7 +98,7 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ input [ type_ "textbox", class "e-textbox", nameAttr labelText, onInput event, value displayValue ] []
+                            [ input [ type_ "textbox", class "e-textbox", nameAttr labelText, idAttr labelText, onInput event, value displayValue ] []
                             ]
                         ]
 
@@ -106,7 +106,7 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ input [ type_ "number", class "e-textbox", nameAttr labelText, onInput event, value <| toString displayValue ] []
+                            [ input [ type_ "number", class "e-textbox", nameAttr labelText, idAttr labelText, onInput event, value <| toString displayValue ] []
                             ]
                         ]
 
@@ -114,7 +114,7 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ input [ type_ "checkbox", checkStyle, nameAttr labelText, onCheck event, checked displayValue ] []
+                            [ input [ type_ "checkbox", checkStyle, nameAttr labelText, idAttr labelText, onCheck event, checked displayValue ] []
                             ]
                         ]
 

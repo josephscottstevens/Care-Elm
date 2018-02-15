@@ -386,7 +386,7 @@ toolbarHelper ( iconStr, event ) =
         iconClass =
             "e-addnewitem e-toolbaricons e-icon " ++ iconStr
     in
-        a [ class iconClass, Events.onClick event, iconStyle ] []
+        a [ class iconClass, Events.onClick event, iconStyle, id "btnNewRecord" ] []
 
 
 
