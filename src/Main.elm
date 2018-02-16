@@ -1,6 +1,7 @@
 port module Main exposing (main)
 
-import Html exposing (Html, div)
+import Html exposing (Html, div, img, ul, li, a, text)
+import Html.Attributes exposing (id, src, class, href)
 import Records
 import Demographics
 import Common.Types exposing (..)
@@ -33,9 +34,12 @@ subscriptions model =
         ]
 
 
-init : Flags -> ( Model, Cmd Msg )
-init flags =
+init : ( Model, Cmd Msg )
+init =
     let
+        flags =
+            { pageFlag = "", patientId = 1, recordType = Nothing }
+
         model =
             emptyModel flags
     in
@@ -72,9 +76,9 @@ type Msg
     | CancelPage String
 
 
-main : Program Flags Model Msg
+main : Program Never Model Msg
 main =
-    Html.programWithFlags
+    Html.program
         { init = init
         , view = view
         , update = update
@@ -82,17 +86,63 @@ main =
         }
 
 
+type alias NavItem =
+    { displayText : String, urlPath : String }
+
+
+topUrls : List NavItem
+topUrls =
+    [ { displayText = "Home", urlPath = "/" }
+    , { displayText = "Search", urlPath = "/search" }
+    , { displayText = "Enrollment", urlPath = "/enrollment" }
+    , { displayText = "Communications", urlPath = "/communications" }
+    , { displayText = "Records", urlPath = "/records" }
+    , { displayText = "Billing", urlPath = "/billing" }
+    , { displayText = "Settings", urlPath = "/settings" }
+    , { displayText = "Admin", urlPath = "/admin" }
+    , { displayText = "Resources", urlPath = "/resources" }
+    , { displayText = "Account", urlPath = "/account" }
+    ]
+
+
+ulTag : NavItem -> Html Msg
+ulTag t =
+    li [] [ a [ class "pointer", href t.urlPath ] [ text t.displayText ] ]
+
+
+aTagUrls : List (Html Msg)
+aTagUrls =
+    List.map ulTag topUrls
+
+
 view : Model -> Html Msg
 view model =
-    case model.page of
-        NoPage ->
-            div [] []
+    let
+        pageBody =
+            case model.page of
+                NoPage ->
+                    div [] []
 
-        RecordsPage ->
-            Html.map RecordsMsg (Records.view model.recordsState model.flags.recordType)
+                RecordsPage ->
+                    Html.map RecordsMsg (Records.view model.recordsState model.flags.recordType)
 
-        DemographicsPage ->
-            Html.map DemographicsMsg (Demographics.view model.demographicsState)
+                DemographicsPage ->
+                    Html.map DemographicsMsg (Demographics.view model.demographicsState)
+    in
+        div [ id "mainHeader" ]
+            [ div [ id "logoContainer", class "hidden-xs hidden-sm col-md-2 col-lg-3 full-height vertical-align-middle" ]
+                [ a [ href "/" ]
+                    [ img [ id "clientLogo", src "/Images/Logos/Logo-ncn.png", class "pointer" ] [] --click: function() { navigate('/'); }
+                    ]
+                ]
+            , div [ class "hidden-xs hidden-sm col-md-10 col-lg-9 full-height padding-h-0" ]
+                [ ul [ id "mainNav", class "nav nav-pills pull-right" ] aTagUrls
+                ]
+            ]
+
+
+
+--, pageBody
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
