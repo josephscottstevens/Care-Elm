@@ -1,7 +1,12 @@
 port module Main exposing (main)
 
-import Html exposing (Html, div, img, ul, li, a, text)
-import Html.Attributes exposing (id, src, class, href)
+import Html exposing (Html)
+import Element exposing (column, el, image, row, text, link, empty)
+import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px)
+import Color
+import Style exposing (style, styleSheet)
+import Style.Color as Color
+import Style.Font as Font
 import Records
 import Demographics
 import Common.Types exposing (..)
@@ -90,59 +95,99 @@ type alias NavItem =
     { displayText : String, urlPath : String }
 
 
-topUrls : List NavItem
-topUrls =
-    [ { displayText = "Home", urlPath = "/" }
-    , { displayText = "Search", urlPath = "/search" }
-    , { displayText = "Enrollment", urlPath = "/enrollment" }
-    , { displayText = "Communications", urlPath = "/communications" }
-    , { displayText = "Records", urlPath = "/records" }
-    , { displayText = "Billing", urlPath = "/billing" }
-    , { displayText = "Settings", urlPath = "/settings" }
-    , { displayText = "Admin", urlPath = "/admin" }
-    , { displayText = "Resources", urlPath = "/resources" }
-    , { displayText = "Account", urlPath = "/account" }
-    ]
+type MyStyles
+    = Root
+    | HeaderNav
+    | HeaderBreadQuick
+    | SideNav
+    | Body
+    | None
 
 
-ulTag : NavItem -> Html Msg
-ulTag t =
-    li [] [ a [ class "pointer", href t.urlPath ] [ text t.displayText ] ]
+stylesheet =
+    styleSheet
+        [ style Root
+            [ Font.typeface [ Font.importUrl { url = "https://fonts.googleapis.com/css", name = "eb garamond" } ]
+            , Font.size 20
+            ]
+        , style HeaderNav
+            [ Color.text <| Color.rgb 51 122 183
+            , Color.background Color.white
+            ]
+        , style HeaderBreadQuick
+            [ Color.text Color.white
+            , Color.background <| Color.rgb 51 122 183
+            ]
+        , style SideNav []
+        , style Body
+            [ Color.text Color.black
+            ]
+        , style None []
+        ]
 
 
-aTagUrls : List (Html Msg)
-aTagUrls =
-    List.map ulTag topUrls
-
-
-view : Model -> Html Msg
 view model =
     let
-        pageBody =
-            case model.page of
-                NoPage ->
-                    div [] []
+        --     pageBody =
+        --         case model.page of
+        --             NoPage ->
+        --                 div [] []
+        --             RecordsPage ->
+        --                 Html.map RecordsMsg (Records.view model.recordsState model.flags.recordType)
+        --             DemographicsPage ->
+        --                 Html.map DemographicsMsg (Demographics.view model.demographicsState)
+        fr amount =
+            width <| fillPortion amount
 
-                RecordsPage ->
-                    Html.map RecordsMsg (Records.view model.recordsState model.flags.recordType)
-
-                DemographicsPage ->
-                    Html.map DemographicsMsg (Demographics.view model.demographicsState)
+        toTopUrl navUrl navText =
+            el HeaderNav [] <| link navUrl <| el None [] (text navText)
     in
-        div [ id "mainHeader" ]
-            [ div [ id "logoContainer", class "hidden-xs hidden-sm col-md-2 col-lg-3 full-height vertical-align-middle" ]
-                [ a [ href "/" ]
-                    [ img [ id "clientLogo", src "/Images/Logos/Logo-ncn.png", class "pointer" ] [] --click: function() { navigate('/'); }
+        Element.layout stylesheet <|
+            column None
+                []
+                [ row None
+                    [ width fill, height <| px 59 ]
+                    [ column None
+                        [ fr 5 ]
+                        [ row None
+                            []
+                            [ image None [ class "pointer" ] { src = "/Images/Logos/Logo-ncn.png", caption = "" } ]
+                        ]
+                    , column None
+                        [ fr 6 ]
+                        [ row None
+                            [ spacing 14 ]
+                            [ toTopUrl "/" "Home"
+                            , toTopUrl "/search" "Search"
+                            , toTopUrl "/enrollment" "Enrollment"
+                            , toTopUrl "/communications" "Communications"
+                            , toTopUrl "/records" "Records"
+                            , toTopUrl "/billing" "Billing"
+                            , toTopUrl "/settings" "Settings"
+                            , toTopUrl "/admin" "Admin"
+                            , toTopUrl "/resources" "Resources"
+                            , toTopUrl "/account" "Account"
+                            ]
+                        ]
+                    ]
+                , row HeaderBreadQuick
+                    []
+                    [ column None
+                        []
+                        [ row None
+                            []
+                            [ text "Home..Profile..Dem"
+                            ]
+                        ]
+                    , column None
+                        []
+                        [ row None
+                            []
+                            [ text "Home..Profile..Dem"
+                            ]
+                        ]
                     ]
                 ]
-            , div [ class "hidden-xs hidden-sm col-md-10 col-lg-9 full-height padding-h-0" ]
-                [ ul [ id "mainNav", class "nav nav-pills pull-right" ] aTagUrls
-                ]
-            ]
-
-
-
---, pageBody
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
