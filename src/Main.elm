@@ -5,6 +5,7 @@ import Element exposing (column, el, image, row, text, link, empty)
 import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px)
 import Color
 import Style exposing (style, styleSheet)
+import Style.Border as Border
 import Style.Color as Color
 import Style.Font as Font
 import Records
@@ -98,6 +99,7 @@ type alias NavItem =
 type MyStyles
     = Root
     | HeaderNav
+    | HeaderNavActive
     | HeaderBreadQuick
     | SideNav
     | Body
@@ -113,6 +115,11 @@ stylesheet =
         , style HeaderNav
             [ Color.text <| Color.rgb 51 122 183
             , Color.background Color.white
+            ]
+        , style HeaderNavActive
+            [ Color.text Color.white
+            , Color.background <| Color.rgb 51 122 183
+            , Border.rounded 4.0
             ]
         , style HeaderBreadQuick
             [ Color.text Color.white
@@ -140,7 +147,14 @@ view model =
             width <| fillPortion amount
 
         toTopUrl navUrl navText =
-            el HeaderNav [] <| link navUrl <| el None [] (text navText)
+            let
+                activeClass =
+                    if navText == "Search" then
+                        HeaderNavActive
+                    else
+                        HeaderNav
+            in
+                el activeClass [] <| link navUrl <| el None [] (text navText)
     in
         Element.layout stylesheet <|
             column None

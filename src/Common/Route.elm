@@ -26,6 +26,28 @@ import Html.Attributes as Attr
 import UrlParser as Url exposing ((</>), (<?>), Parser, oneOf, parseHash, s, parsePath, intParam)
 
 
+type ProfileRoute
+    = Demographics
+    | Contacts
+    | SocialHistory
+    | EmploymentInformation
+    | InsuranceInformation
+
+
+type ServicesRoute
+    = CCM
+    | TCM
+
+
+type ProvidersRoute
+    = Providers
+
+
+type ClinicalSummaryRoute
+    = ClinicalSummary2
+    | ProblemList
+
+
 type Route
     = None
     | Billing
