@@ -2,7 +2,7 @@ port module Main exposing (main)
 
 import Html exposing (Html)
 import Element exposing (column, el, image, row, text, link, empty)
-import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px)
+import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter)
 import Color
 import Style exposing (style, styleSheet)
 import Style.Border as Border
@@ -92,10 +92,6 @@ main =
         }
 
 
-type alias NavItem =
-    { displayText : String, urlPath : String }
-
-
 type MyStyles
     = Root
     | HeaderNav
@@ -125,7 +121,10 @@ stylesheet =
             [ Color.text Color.white
             , Color.background <| Color.rgb 51 122 183
             ]
-        , style SideNav []
+        , style SideNav
+            [ Color.text <| Color.rgb 51 122 183
+            , Color.background <| Color.rgb 187 217 238
+            ]
         , style Body
             [ Color.text Color.black
             ]
@@ -155,6 +154,16 @@ view model =
                         HeaderNav
             in
                 el activeClass [] <| link navUrl <| el None [] (text navText)
+
+        toSideUrl navUrl navText =
+            el None
+                [ height <| px 40
+                , verticalCenter
+                , spacing 8
+                ]
+            <|
+                link navUrl <|
+                    el None [ height fill ] (text navText)
     in
         Element.layout stylesheet <|
             column None
@@ -200,6 +209,23 @@ view model =
                             [ text "Home..Profile..Dem"
                             ]
                         ]
+                    ]
+                , row None
+                    []
+                    [ column SideNav
+                        [ fr 2 ]
+                        [ toSideUrl "/" "Profile"
+                        , toSideUrl "/" "Services"
+                        , toSideUrl "/" "Providers"
+                        , toSideUrl "/" "Clinical Summary"
+                        , toSideUrl "/" "Tasks"
+                        , toSideUrl "/" "Appointments"
+                        , toSideUrl "/" "Records"
+                        , toSideUrl "/" "Notes"
+                        ]
+                    , column None
+                        [ fr 10 ]
+                        []
                     ]
                 ]
 
