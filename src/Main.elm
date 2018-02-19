@@ -2,7 +2,7 @@ port module Main exposing (main)
 
 import Html exposing (Html)
 import Element exposing (column, el, image, row, text, link, empty)
-import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter)
+import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter, spacingXY, paddingLeft, paddingRight, paddingBottom, paddingTop)
 import Color
 import Style exposing (style, styleSheet)
 import Style.Border as Border
@@ -98,8 +98,17 @@ type MyStyles
     | HeaderNavActive
     | HeaderBreadQuick
     | SideNav
+    | SideNavActive
     | Body
     | None
+
+
+navBlue =
+    Color.rgb 51 122 183
+
+
+navBlueActive =
+    Color.rgb 187 217 238
 
 
 stylesheet =
@@ -109,21 +118,25 @@ stylesheet =
             , Font.size 20
             ]
         , style HeaderNav
-            [ Color.text <| Color.rgb 51 122 183
+            [ Color.text navBlue
             , Color.background Color.white
             ]
         , style HeaderNavActive
             [ Color.text Color.white
-            , Color.background <| Color.rgb 51 122 183
+            , Color.background navBlue
             , Border.rounded 4.0
             ]
         , style HeaderBreadQuick
             [ Color.text Color.white
-            , Color.background <| Color.rgb 51 122 183
+            , Color.background navBlue
             ]
         , style SideNav
-            [ Color.text <| Color.rgb 51 122 183
-            , Color.background <| Color.rgb 187 217 238
+            [ Color.text navBlue
+            , Color.background Color.white
+            ]
+        , style SideNavActive
+            [ Color.text navBlue
+            , Color.background navBlueActive
             ]
         , style Body
             [ Color.text Color.black
@@ -156,14 +169,24 @@ view model =
                 el activeClass [] <| link navUrl <| el None [] (text navText)
 
         toSideUrl navUrl navText =
-            el None
-                [ height <| px 40
-                , verticalCenter
-                , spacing 8
-                ]
-            <|
+            let
+                activeClass =
+                    if navText == "Profile" then
+                        SideNavActive
+                    else
+                        SideNav
+            in
                 link navUrl <|
-                    el None [ height fill ] (text navText)
+                    el activeClass
+                        [ height <| px 40
+                        , verticalCenter
+                        , paddingLeft 25.0
+                        , paddingTop 10.0
+                        , paddingBottom 10.0
+                        , paddingRight 0.0
+                        , width fill
+                        ]
+                        (text navText)
     in
         Element.layout stylesheet <|
             column None
@@ -212,7 +235,7 @@ view model =
                     ]
                 , row None
                     []
-                    [ column SideNav
+                    [ column None
                         [ fr 2 ]
                         [ toSideUrl "/" "Profile"
                         , toSideUrl "/" "Services"
