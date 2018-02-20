@@ -146,6 +146,7 @@ stylesheet =
         ]
 
 
+view : Model -> Html Msg
 view model =
     let
         --     pageBody =
@@ -239,16 +240,6 @@ view model =
                     [ column None
                         [ fr 2 ]
                         (List.map toSideUrl Route.getSideNav)
-
-                    -- [ toSideUrl "/" "Profile"
-                    -- , toSideUrl "/" "Services"
-                    -- , toSideUrl "/" "Providers"
-                    -- , toSideUrl "/" "Clinical Summary"
-                    -- , toSideUrl "/" "Tasks"
-                    -- , toSideUrl "/" "Appointments"
-                    -- , toSideUrl "/" "Records"
-                    -- , toSideUrl "/" "Notes"
-                    -- ]
                     , column None
                         [ fr 10 ]
                         []
