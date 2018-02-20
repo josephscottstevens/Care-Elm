@@ -238,9 +238,8 @@ view model =
                     []
                     [ column None
                         [ fr 2 ]
-                        []
+                        (List.map toSideUrl Route.getSideNav)
 
-                    -- (List.map toSideUrl Route.getSideNav)
                     -- [ toSideUrl "/" "Profile"
                     -- , toSideUrl "/" "Services"
                     -- , toSideUrl "/" "Providers"
