@@ -27,60 +27,60 @@ import Html.Attributes as Attr
 import UrlParser as Url exposing ((</>), (<?>), Parser, oneOf, parseHash, s, parsePath, intParam)
 
 
-type alias Page =
-    { route : Route
-    , display : String
-    , children : Nodes
-    }
+type Tree a
+    = Child a
+    | Parent a (List (Tree a))
 
 
-type Nodes
-    = Empty
-    | Nodes (List Page)
-
-
-nodes : Nodes
+nodes : Tree Route
 nodes =
-    Nodes
-        [ Page Profile "Profile" <|
-            Nodes
-                [ Page Demographics "Demographic Information" Empty
-                , Page Contacts "Contacts" Empty
-                ]
-        , Page Billing "Billing" Empty
-        , Page Profile "Colors" <|
-            Nodes
-                [ Page Demographics "Green" Empty
-                , Page Contacts "Red" Empty
-                ]
+    Parent Home
+        [ Parent Profile
+            [ Child Demographics
+            , Child Contacts
+            , Child SocialHistory
+            , Child Employment
+            , Child Insurance
+            ]
+        , Parent Services
+            [ Child CCM
+            , Child TCM
+            ]
+        , Parent Providers
+            []
+        , Parent ClinicalSummary
+            [ Child Tasks
+            , Child Appointments
+            ]
         ]
 
 
-flatten : Float -> Nodes -> List ( Float, String, String )
-flatten depth nodes =
-    case nodes of
-        Empty ->
-            []
+flattenWithDepth : Float -> Tree Route -> List ( Route, Float )
+flattenWithDepth depth tree =
+    case tree of
+        Child t ->
+            [ ( t, depth ) ]
 
-        Nodes t ->
-            let
-                newItem =
-                    List.map (\page -> ( depth, (routeToString page.route), page.display )) t
-            in
-                (List.concatMap (\page -> flatten (depth + 1.0) page.children) t) ++ newItem
+        Parent t y ->
+            ( t, depth ) :: List.concatMap (flattenWithDepth (depth + 1.0)) y
+
+
+routeToSideNav : ( Route, Float ) -> ( Float, String, String )
+routeToSideNav ( route, depth ) =
+    ( depth, routeToString route, toString route )
 
 
 getSideNav : List ( Float, String, String )
 getSideNav =
-    flatten 0.0 nodes
+    flattenWithDepth -1.0 nodes
+        |> List.map routeToSideNav
+        |> List.filter (\( t, _, _ ) -> t /= -1.0)
 
 
 type Route
     = None
-    | Home
     | Profile
     | Demographics
-    | Contacts
     | Billing
     | ClinicalSummary
     | Records Common.RecordType
@@ -90,6 +90,18 @@ type Route
     | Immunizations
     | LastKnownVitals
     | Error String
+      -- Non Elm Routes
+    | Home
+    | Contacts
+    | SocialHistory
+    | Employment
+    | Insurance
+    | Services
+    | CCM
+    | TCM
+    | Providers
+    | Tasks
+    | Appointments
 
 
 recordTypeToString : Common.RecordType -> String
