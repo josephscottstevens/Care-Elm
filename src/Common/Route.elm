@@ -51,7 +51,7 @@ nodes =
         ]
 
 
-flatten : Int -> Nodes -> List ( Int, String, String )
+flatten : Float -> Nodes -> List ( Float, String, String )
 flatten depth nodes =
     case nodes of
         Empty ->
@@ -59,21 +59,15 @@ flatten depth nodes =
 
         Nodes t ->
             let
-                newItem : List ( Int, String, String )
                 newItem =
                     List.map (\page -> ( depth, (routeToString page.route), page.display )) t
             in
-                newItem ++ (List.concatMap (\page -> flatten (depth + 1) page.children) t)
+                (List.concatMap (\page -> flatten (depth + 1.0) page.children) t) ++ newItem
 
 
-getSideNav : List ( Int, String, String )
+getSideNav : List ( Float, String, String )
 getSideNav =
-    Debug.log ""
-        (flatten 1 nodes)
-
-
-
---getFlatWithDepth 0 nodes
+    flatten 0.0 nodes
 
 
 type Route

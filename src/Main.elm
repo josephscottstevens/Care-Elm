@@ -181,7 +181,7 @@ view model =
                     el activeClass
                         [ height <| px 40
                         , verticalCenter
-                        , paddingLeft 25.0
+                        , paddingLeft (10 + (depth * 15))
                         , paddingTop 10.0
                         , paddingBottom 10.0
                         , paddingRight 0.0
