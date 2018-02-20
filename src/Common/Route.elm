@@ -41,16 +41,23 @@ type Nodes
 nodes : Nodes
 nodes =
     Nodes
-        [ Page Home "Home" <|
+        [ Page Profile "Profile" <|
             Nodes
-                [ Page Profile "Profile" <|
-                    Nodes
-                        [ Page Demographics "Demographic Information" Empty
-                        , Page Contacts "Contacts" Empty
-                        ]
-                , Page Billing "Billing" Empty
+                [ Page Demographics "Demographic Information" Empty
+                , Page Contacts "Contacts" Empty
                 ]
+        , Page Billing "Billing" Empty
         ]
+
+
+getFlatWithDepth : Int -> Nodes -> List Page -> List Page
+getFlatWithDepth depth nodes pages =
+    case nodes of
+        Empty ->
+            []
+
+        Nodes t ->
+            getFlatWithDepth (depth + 1) nodes (t ++ pages)
 
 
 type Route
