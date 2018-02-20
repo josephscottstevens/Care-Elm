@@ -169,7 +169,7 @@ view model =
             in
                 el activeClass [] <| link navUrl <| el None [] (text navText)
 
-        toSideUrl ( depth, navUrl, navText ) =
+        toSideUrl { depth, url, navText } =
             let
                 activeClass =
                     if navText == "Profile" then
@@ -177,7 +177,7 @@ view model =
                     else
                         SideNav
             in
-                link navUrl <|
+                link url <|
                     el activeClass
                         [ height <| px 40
                         , verticalCenter

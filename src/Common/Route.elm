@@ -18,6 +18,7 @@ module Common.Route
         , modifyUrl
         , back
         , getSideNav
+        , RouteDesc
         )
 
 import Navigation
@@ -30,6 +31,13 @@ import UrlParser as Url exposing ((</>), (<?>), Parser, oneOf, parseHash, s, par
 type Tree a
     = Child a
     | Parent a (List (Tree a))
+
+
+type alias RouteDesc =
+    { depth : Float
+    , url : String
+    , navText : String
+    }
 
 
 nodes : Tree Route
@@ -65,16 +73,19 @@ flattenWithDepth depth tree =
             ( t, depth ) :: List.concatMap (flattenWithDepth (depth + 1.0)) y
 
 
-routeToSideNav : ( Route, Float ) -> ( Float, String, String )
+routeToSideNav : ( Route, Float ) -> RouteDesc
 routeToSideNav ( route, depth ) =
-    ( depth, routeToString route, toString route )
+    { depth = depth
+    , url = routeToString route
+    , navText = toString route
+    }
 
 
-getSideNav : List ( Float, String, String )
+getSideNav : List RouteDesc
 getSideNav =
     flattenWithDepth -1.0 nodes
         |> List.map routeToSideNav
-        |> List.filter (\( t, _, _ ) -> t /= -1.0)
+        |> List.filter (\t -> t.depth /= -1.0)
 
 
 type Route
