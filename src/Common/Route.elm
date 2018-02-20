@@ -26,8 +26,39 @@ import Html.Attributes as Attr
 import UrlParser as Url exposing ((</>), (<?>), Parser, oneOf, parseHash, s, parsePath, intParam)
 
 
+type alias Page =
+    { route : Route
+    , display : String
+    , children : Nodes
+    }
+
+
+type Nodes
+    = Empty
+    | Nodes (List Page)
+
+
+nodes : Nodes
+nodes =
+    Nodes
+        [ Page Home "Home" <|
+            Nodes
+                [ Page Profile "Profile" <|
+                    Nodes
+                        [ Page Demographics "Demographic Information" Empty
+                        , Page Contacts "Contacts" Empty
+                        ]
+                , Page Billing "Billing" Empty
+                ]
+        ]
+
+
 type Route
     = None
+    | Home
+    | Profile
+    | Demographics
+    | Contacts
     | Billing
     | ClinicalSummary
     | Records Common.RecordType
@@ -105,6 +136,9 @@ routeToString route =
 
         Error t ->
             "#/Error" ++ t
+
+        _ ->
+            ""
 
 
 route : Parser (Route -> a) a

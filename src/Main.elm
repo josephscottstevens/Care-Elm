@@ -114,8 +114,8 @@ navBlueActive =
 stylesheet =
     styleSheet
         [ style Root
-            [ Font.typeface [ Font.importUrl { url = "https://fonts.googleapis.com/css", name = "eb garamond" } ]
-            , Font.size 20
+            [ --Font.typeface [ Font.importUrl { url = "https://fonts.googleapis.com/css", name = "eb garamond" } ]
+              Font.size 20
             ]
         , style HeaderNav
             [ Color.text navBlue
