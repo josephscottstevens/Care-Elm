@@ -169,7 +169,7 @@ view model =
             in
                 el activeClass [] <| link navUrl <| el None [] (text navText)
 
-        toSideUrl navUrl navText =
+        toSideUrl ( depth, navUrl, navText ) =
             let
                 activeClass =
                     if navText == "Profile" then
@@ -238,15 +238,18 @@ view model =
                     []
                     [ column None
                         [ fr 2 ]
-                        [ toSideUrl "/" "Profile"
-                        , toSideUrl "/" "Services"
-                        , toSideUrl "/" "Providers"
-                        , toSideUrl "/" "Clinical Summary"
-                        , toSideUrl "/" "Tasks"
-                        , toSideUrl "/" "Appointments"
-                        , toSideUrl "/" "Records"
-                        , toSideUrl "/" "Notes"
-                        ]
+                        []
+
+                    -- (List.map toSideUrl Route.getSideNav)
+                    -- [ toSideUrl "/" "Profile"
+                    -- , toSideUrl "/" "Services"
+                    -- , toSideUrl "/" "Providers"
+                    -- , toSideUrl "/" "Clinical Summary"
+                    -- , toSideUrl "/" "Tasks"
+                    -- , toSideUrl "/" "Appointments"
+                    -- , toSideUrl "/" "Records"
+                    -- , toSideUrl "/" "Notes"
+                    -- ]
                     , column None
                         [ fr 10 ]
                         []

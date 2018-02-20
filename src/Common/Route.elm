@@ -17,8 +17,7 @@ module Common.Route
         , href
         , modifyUrl
         , back
-        , Nodes
-        , getFlatWithDepth
+        , getSideNav
         )
 
 import Navigation
@@ -52,19 +51,40 @@ nodes =
         ]
 
 
-getFlatWithDepth : Int -> Nodes -> List ( Int, String, String )
-getFlatWithDepth depth nodes =
+flatten : Nodes -> List Page
+flatten nodes =
     case nodes of
         Empty ->
             []
 
         Nodes t ->
-            let
-                newItem : List ( Int, String, String )
-                newItem =
-                    List.map (\page -> ( depth, page.display, (routeToString page.route) )) t
-            in
-                newItem ++ getFlatWithDepth (depth + 1) nodes
+            t ++ (List.concatMap (\page -> flatten page.children) t)
+
+
+
+-- getFlatWithDepth : Int -> Nodes -> List ( Int, String, String )
+-- getFlatWithDepth depth nodes =
+--     case nodes of
+--         Empty ->
+--             []
+--         Nodes t ->
+--             let
+--                 newItem : List ( Int, String, String )
+--                 newItem =
+--                     List.map (\page -> ( depth, (routeToString page.route), page.display )) t
+--             in
+--                 newItem
+--                     ++ getFlatWithDepth (depth + 1) (Nodes t)
+
+
+getSideNav : List ( Int, String, String )
+getSideNav =
+    flatten nodes
+        |> List.map (\t -> ( 0, "", "" ))
+
+
+
+--getFlatWithDepth 0 nodes
 
 
 type Route
