@@ -48,6 +48,11 @@ nodes =
                 , Page Contacts "Contacts" Empty
                 ]
         , Page Billing "Billing" Empty
+        , Page Profile "Colors" <|
+            Nodes
+                [ Page Demographics "Green" Empty
+                , Page Contacts "Red" Empty
+                ]
         ]
 
 
