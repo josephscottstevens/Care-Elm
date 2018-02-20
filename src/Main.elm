@@ -11,6 +11,7 @@ import Style.Font as Font
 import Records
 import Demographics
 import Common.Types exposing (..)
+import Common.Route as Route
 
 
 port openPage : (String -> msg) -> Sub msg
