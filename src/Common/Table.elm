@@ -1,4 +1,4 @@
-module Table
+module Common.Table
     exposing
         ( State
         , Column
