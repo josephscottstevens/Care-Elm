@@ -6,12 +6,11 @@ import Html.Events exposing (onClick)
 import Common.Html exposing (InputControlType(TextInput, AreaInput, Dropdown, HtmlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
 import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage, DropdownItem)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
-import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters)
 import Common.Dropdown as Dropdown
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required)
-import Common.Table as Table exposing (defaultCustomizations)
+import Common.Table as Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn)
 import Http
 
 
@@ -46,18 +45,19 @@ type Msg
     | Save NewRecord
     | SaveCompleted (Result Http.Error String)
     | Add AddEditDataSource
-    | Edit AddEditDataSource Int
+    | Edit AddEditDataSource (Maybe Int)
     | SetTableState Table.State
     | DeletePrompt Int
     | DeletePastMedicalHistoryConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | SendMenuMessage Int
       -- Updates
-    | UpdateDescription NewRecord String
-    | UpdateYear NewRecord String
-    | UpdateFacility NewRecord String
+    | NoOp
+    | UpdateDescription NewRecord (Maybe String)
+    | UpdateYear NewRecord (Maybe String)
+    | UpdateFacility NewRecord (Maybe String)
     | UpdateProvider NewRecord Dropdown.Msg
-    | UpdateNotes NewRecord String
+    | UpdateNotes NewRecord (Maybe String)
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -106,7 +106,7 @@ update msg model patientId =
             model ! [ Functions.deletePrompt rowId ]
 
         DeletePastMedicalHistoryConfirmed rowId ->
-            { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
+            { model | rows = model.rows |> List.filter (\t -> t.id /= Just rowId) }
                 ! [ deletePastMedicalHistoryRequest rowId ]
 
         DeleteCompleted (Ok responseMsg) ->
@@ -123,6 +123,9 @@ update msg model patientId =
         SendMenuMessage recordId ->
             model ! [ sendMenuMessage (MenuMessage "PastMedicalHistoryDelete" recordId Nothing Nothing) ]
 
+        NoOp ->
+            model ! []
+
         -- Updates
         UpdateDescription newRecord str ->
             { model | state = AddEdit { newRecord | description = str } } ! []
@@ -135,10 +138,10 @@ update msg model patientId =
 
         UpdateProvider newRecord dropdownMsg ->
             let
-                ( newDrop, newMsg ) =
-                    Dropdown.update dropdownMsg newRecord.providerDropdown
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg newRecord.providerDropState newRecord.providerId newRecord.addEditDataSource.providers
             in
-                { model | state = AddEdit { newRecord | providerDropdown = newDrop } } ! [ newMsg ]
+                { model | state = AddEdit { newRecord | providerDropState = newDropState, providerId = newId } } ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateNotes newRecord str ->
             { model | state = AddEdit { newRecord | notes = str } } ! []
@@ -151,7 +154,7 @@ view model addEditDataSource =
             div []
                 [ h4 [] [ text "Past Medical History" ]
                 , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config addEditDataSource model.tableState) model.tableState model.rows ]
+                    [ Table.view model.tableState model.rows (gridConfig addEditDataSource) Nothing ]
                 ]
 
         AddEdit newRecord ->
@@ -178,26 +181,20 @@ view model addEditDataSource =
                     ]
 
 
-getColumns : Maybe AddEditDataSource -> Table.State -> List (Table.Column PastMedicalHistoryRow Msg)
-getColumns addEditDataSource state =
-    let
-        menuItems row =
-            [ case addEditDataSource of
-                Just t ->
-                    ( "e-edit", "Edit", onClick (Edit t row.id) )
 
-                Nothing ->
-                    ( "", "No Datasrc", class "disabled" )
-            , ( "e-contextdelete", "Delete", onClick (DeletePrompt row.id) )
-            ]
-    in
-        [ Table.stringColumn "Description" (\t -> t.description)
-        , Table.stringColumn "Year" (\t -> t.year)
-        , Table.stringColumn "Facility" (\t -> t.facility)
-        , Table.stringColumn "Provider" (\t -> t.provider)
-        , Table.stringColumn "Notes" (\t -> t.notes)
-        , Table.dropdownColumn (\t -> Table.dropdownDetails (menuItems t) t.id state SetTableState)
-        ]
+-- getColumns : Maybe AddEditDataSource -> Table.State -> List (Table.Column PastMedicalHistoryRow Msg)
+-- getColumns addEditDataSource state =
+-- TODO, verify menu items are correct
+-- let
+--     menuItems row =
+--         [ case addEditDataSource of
+--             Just t ->
+--                 ( "e-edit", "Edit", onClick (Edit t row.id) )
+--             Nothing ->
+--                 ( "", "No Datasrc", class "disabled" )
+--         , ( "e-contextdelete", "Delete", onClick (DeletePrompt row.id) )
+--         ]
+-- in
 
 
 noteStyle : Html.Attribute msg
@@ -218,40 +215,40 @@ formInputs newRecord =
     ]
 
 
-config : Maybe AddEditDataSource -> Table.State -> Table.Config PastMedicalHistoryRow Msg
-config addEditDataSource state =
-    let
-        buttons =
-            case addEditDataSource of
-                Just t ->
-                    [ ( "e-addnew", onClick (Add t) ) ]
+gridConfig : Maybe AddEditDataSource -> Table.Config PastMedicalHistoryRow Msg
+gridConfig addEditDataSource =
+    { domTableId = "PastMedicalHistoryTable"
+    , toolbar =
+        case addEditDataSource of
+            Just t ->
+                [ ( "e-addnew e-loaded", Add t ) ]
 
-                Nothing ->
-                    []
-    in
-        Table.customConfig
-            { toId = \t -> toString t.id
-            , toMsg = SetTableState
-            , columns = getColumns addEditDataSource state
-            , customizations =
-                { defaultCustomizations
-                    | tableAttrs = standardTableAttrs "RecordTable"
-                    , thead = standardTheadNoFilters
-                    , theadButtons = buttons
-                }
-            }
+            Nothing ->
+                [ ( "e-addnew e-disable", NoOp ) ]
+    , toMsg = SetTableState
+    , columns =
+        [ stringColumn "Description" .description
+        , stringColumn "Year" .year
+        , stringColumn "Facility" .facility
+        , stringColumn "Provider" .provider
+        , stringColumn "Notes" .notes
+
+        -- TODO, verify dropdown is present
+        -- , Table.dropdownColumn (\t -> Table.dropdownDetails (menuItems t) t.id state SetTableState)
+        ]
+    }
 
 
 decodePastMedicalHistoryRow : Decode.Decoder PastMedicalHistoryRow
 decodePastMedicalHistoryRow =
     decode PastMedicalHistoryRow
-        |> required "Id" Decode.int
-        |> required "Description" Decode.string
-        |> required "Year" Decode.string
-        |> required "Treatment" Decode.string
-        |> required "Facility" Decode.string
-        |> required "Provider" Decode.string
-        |> required "Notes" Decode.string
+        |> required "Id" (Decode.maybe Decode.int)
+        |> required "Description" (Decode.maybe Decode.string)
+        |> required "Year" (Decode.maybe Decode.string)
+        |> required "Treatment" (Decode.maybe Decode.string)
+        |> required "Facility" (Decode.maybe Decode.string)
+        |> required "Provider" (Decode.maybe Decode.string)
+        |> required "Notes" (Decode.maybe Decode.string)
         |> required "ProviderId" (Decode.maybe Decode.int)
         |> required "ProblemId" (Decode.maybe Decode.int)
 
@@ -259,28 +256,42 @@ decodePastMedicalHistoryRow =
 encodeNewRow : NewRecord -> Int -> Encode.Value
 encodeNewRow newRecord patientId =
     Encode.object
-        [ ( "Id", Encode.int <| newRecord.id )
+        [ ( "Id", maybeVal Encode.int <| newRecord.id )
         , ( "PatientId", Encode.int <| patientId )
-        , ( "Description", Encode.string <| newRecord.description )
-        , ( "Year", Encode.string <| newRecord.year )
-        , ( "Treatment", Encode.string <| newRecord.treatment )
-        , ( "Facility", Encode.string <| newRecord.facility )
-        , ( "Notes", Encode.string <| newRecord.notes )
-        , ( "ProviderId", maybeVal Encode.int <| newRecord.providerDropdown.selectedItem.id )
+        , ( "Description", maybeVal Encode.string <| newRecord.description )
+        , ( "Year", maybeVal Encode.string <| newRecord.year )
+        , ( "Treatment", maybeVal Encode.string <| newRecord.treatment )
+        , ( "Facility", maybeVal Encode.string <| newRecord.facility )
+        , ( "Notes", maybeVal Encode.string <| newRecord.notes )
+        , ( "ProviderId", maybeVal Encode.int <| newRecord.providerId )
         , ( "ProblemId", maybeVal Encode.int <| newRecord.problemId )
         ]
 
 
 type alias PastMedicalHistoryRow =
-    { id : Int
-    , description : String
-    , year : String
-    , treatment : String
-    , facility : String
-    , provider : String
-    , notes : String
+    { id : Maybe Int
+    , description : Maybe String
+    , year : Maybe String
+    , treatment : Maybe String
+    , facility : Maybe String
+    , provider : Maybe String
+    , notes : Maybe String
     , providerId : Maybe Int
     , problemId : Maybe Int
+    }
+
+
+type alias NewRecord =
+    { id : Maybe Int
+    , description : Maybe String
+    , year : Maybe String
+    , facility : Maybe String
+    , notes : Maybe String
+    , treatment : Maybe String
+    , problemId : Maybe Int
+    , providerId : Maybe Int
+    , providerDropState : Dropdown.DropState
+    , addEditDataSource : AddEditDataSource
     }
 
 
@@ -295,37 +306,29 @@ newRecord addEditDataSource pastMedicalHistoryRow =
             , notes = row.notes
             , treatment = row.treatment
             , problemId = row.problemId
-            , providerDropdown = Dropdown.init "providerDropdown" addEditDataSource.providers (Just (DropdownItem row.providerId row.provider))
+            , providerId = row.providerId
+            , providerDropState = Dropdown.init "providerDropdown"
+            , addEditDataSource = addEditDataSource
             }
 
         Nothing ->
-            { id = -1
-            , description = ""
-            , year = ""
-            , facility = ""
-            , notes = ""
-            , treatment = ""
+            { id = Nothing
+            , description = Nothing
+            , year = Nothing
+            , facility = Nothing
+            , notes = Nothing
+            , treatment = Nothing
             , problemId = Nothing
-            , providerDropdown = Dropdown.init "providerDropdown" addEditDataSource.providers (Just (DropdownItem Nothing ""))
+            , providerId = Nothing
+            , providerDropState = Dropdown.init "providerDropdown"
+            , addEditDataSource = addEditDataSource
             }
-
-
-type alias NewRecord =
-    { id : Int
-    , description : String
-    , year : String
-    , facility : String
-    , notes : String
-    , treatment : String
-    , problemId : Maybe Int
-    , providerDropdown : Dropdown.Dropdown
-    }
 
 
 emptyModel : Model
 emptyModel =
     { rows = []
-    , tableState = Table.initialSort ""
+    , tableState = Table.init ""
     , state = Grid
     , showValidationErrors = False
     }

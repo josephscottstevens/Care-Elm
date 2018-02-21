@@ -1,5 +1,6 @@
 module Common.SharedView exposing (view)
 
+import Html exposing (Html)
 import Element exposing (column, el, image, row, text, link, empty)
 import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter, spacingXY, paddingLeft, paddingRight, paddingBottom, paddingTop)
 import Color
@@ -63,16 +64,13 @@ stylesheet =
         ]
 
 
+view : Html msg
 view =
     let
         --     pageBody =
         --         case model.page of
         --             NoPage ->
         --                 div [] []
-        --             RecordsPage ->
-        --                 Html.map RecordsMsg (Records.view model.recordsState model.flags.recordType)
-        --             DemographicsPage ->
-        --                 Html.map DemographicsMsg (Demographics.view model.demographicsState)
         fr amount =
             width <| fillPortion amount
 

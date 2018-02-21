@@ -30,10 +30,10 @@ import Common.Dropdown as Dropdown
 
 
 type InputControlType msg
-    = TextInput String Common.RequiredType String (String -> msg)
+    = TextInput String Common.RequiredType (Maybe String) (String -> msg)
     | NumrInput String Common.RequiredType Int (String -> msg)
     | CheckInput String Common.RequiredType Bool (Bool -> msg)
-    | AreaInput String Common.RequiredType String (String -> msg)
+    | AreaInput String Common.RequiredType (Maybe String) (String -> msg)
     | KnockInput String Common.RequiredType String
     | DropInput String Common.RequiredType (Maybe Int) String
     | DropInputWithButton String Common.RequiredType (Maybe Int) String String
@@ -98,7 +98,7 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ input [ type_ "textbox", class "e-textbox", nameAttr labelText, idAttr labelText, onInput event, value displayValue ] []
+                            [ input [ type_ "textbox", class "e-textbox", nameAttr labelText, idAttr labelText, onInput event, value (Maybe.withDefault "" displayValue) ] []
                             ]
                         ]
 
@@ -122,7 +122,7 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ textarea [ idAttr labelText, class "e-textbox", onInput event, value displayValue ] [] ]
+                            [ textarea [ idAttr labelText, class "e-textbox", onInput event, value (Maybe.withDefault "" displayValue) ] [] ]
                         ]
 
                 DropInput labelText requiredType _ syncfusionId ->
@@ -216,10 +216,10 @@ commonValidation : InputControlType msg -> Maybe String
 commonValidation controlType =
     case controlType of
         TextInput labelText requiredType displayValue _ ->
-            is requiredType <| requiredStr labelText displayValue
+            is requiredType <| requiredStr labelText (Maybe.withDefault "" displayValue)
 
         AreaInput labelText requiredType displayValue _ ->
-            is requiredType <| requiredStr labelText displayValue
+            is requiredType <| requiredStr labelText (Maybe.withDefault "" displayValue)
 
         DropInput labelText requiredType displayValue _ ->
             is requiredType <|
