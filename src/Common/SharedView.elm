@@ -64,8 +64,8 @@ stylesheet =
         ]
 
 
-view : Html msg
-view =
+view : Html msg -> Html msg
+view innerView =
     let
         --     pageBody =
         --         case model.page of
@@ -161,6 +161,6 @@ view =
                         sideNav
                     , column None
                         [ fr 10 ]
-                        []
+                        [ Element.html innerView ]
                     ]
                 ]

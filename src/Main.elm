@@ -11,6 +11,7 @@ import Immunizations
 import LastKnownVitals
 import Billing
 import Demographics
+import Common.SharedView as SharedView
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Common.Route as Route exposing (Route)
@@ -71,39 +72,43 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    case model.page of
-        None ->
-            div [] [ text "no view here" ]
+    let
+        innerView =
+            case model.page of
+                None ->
+                    div [] [ text "no view here" ]
 
-        Records subModel ->
-            Html.map RecordsMsg (Records.view subModel)
+                Records subModel ->
+                    Html.map RecordsMsg (Records.view subModel)
 
-        Demographics subModel ->
-            Html.map DemographicsMsg (Demographics.view subModel)
+                Demographics subModel ->
+                    Html.map DemographicsMsg (Demographics.view subModel)
 
-        Billing subModel ->
-            Html.map BillingMsg (Billing.view subModel model.addEditDataSource)
+                Billing subModel ->
+                    Html.map BillingMsg (Billing.view subModel model.addEditDataSource)
 
-        ClinicalSummary subModel ->
-            Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel model.patientId)
+                ClinicalSummary subModel ->
+                    Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel model.patientId)
 
-        PastMedicalHistory subModel ->
-            Html.map PastMedicalHistoryMsg (PastMedicalHistory.view subModel model.addEditDataSource)
+                PastMedicalHistory subModel ->
+                    Html.map PastMedicalHistoryMsg (PastMedicalHistory.view subModel model.addEditDataSource)
 
-        Hospitilizations subModel ->
-            Html.map HospitilizationsMsg (Hospitilizations.view subModel model.addEditDataSource)
+                Hospitilizations subModel ->
+                    Html.map HospitilizationsMsg (Hospitilizations.view subModel model.addEditDataSource)
 
-        Allergies subModel ->
-            Html.map AllergiesMsg (Allergies.view subModel model.addEditDataSource)
+                Allergies subModel ->
+                    Html.map AllergiesMsg (Allergies.view subModel model.addEditDataSource)
 
-        Immunizations subModel ->
-            Html.map ImmunizationsMsg (Immunizations.view subModel model.addEditDataSource)
+                Immunizations subModel ->
+                    Html.map ImmunizationsMsg (Immunizations.view subModel model.addEditDataSource)
 
-        LastKnownVitals subModel ->
-            Html.map LastKnownVitalsMsg (LastKnownVitals.view subModel model.addEditDataSource)
+                LastKnownVitals subModel ->
+                    Html.map LastKnownVitalsMsg (LastKnownVitals.view subModel model.addEditDataSource)
 
-        Error str ->
-            div [] [ text str ]
+                Error str ->
+                    div [] [ text str ]
+    in
+        SharedView.view innerView
 
 
 pageSubscriptions : Page -> Sub Msg
@@ -216,9 +221,7 @@ setRoute maybeRoute model =
 
             Just _ ->
                 -- TODO, dangerous, don't leave this
-                Debug.log "miss"
-                    model
-                    ! []
+                Debug.crash ""
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []

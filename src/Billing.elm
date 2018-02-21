@@ -1,6 +1,6 @@
 module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
-import Html exposing (Html, text, div, input, program, button, select, option, span, a)
+import Html exposing (Html, div, input, program, button, select, option, span, a)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)
 import Common.ServerTable as Table exposing (stringColumn, dateColumn)

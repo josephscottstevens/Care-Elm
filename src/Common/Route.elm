@@ -155,6 +155,12 @@ routeToString route =
         None ->
             "#"
 
+        Profile ->
+            "#/people/_demographics"
+
+        Demographics ->
+            "#/people/_demographics"
+
         Billing ->
             "#/people/_insurance"
 
@@ -182,8 +188,38 @@ routeToString route =
         Error t ->
             "#/Error" ++ t
 
-        _ ->
-            ""
+        Home ->
+            "/"
+
+        Contacts ->
+            "#/people/_contacts"
+
+        SocialHistory ->
+            "#/people/_socialhistory"
+
+        Employment ->
+            "#/people/_employment"
+
+        Insurance ->
+            "#/people/_insurance"
+
+        Services ->
+            "#/people/_ccm"
+
+        CCM ->
+            "#/people/_ccm"
+
+        TCM ->
+            "#/people/_tcm"
+
+        Providers ->
+            "#/people/_careteam"
+
+        Tasks ->
+            "#/people/_tasks"
+
+        Appointments ->
+            "#/people/_appointments"
 
 
 routeHash : Parser (Route -> a) a
