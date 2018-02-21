@@ -216,7 +216,9 @@ setRoute maybeRoute model =
 
             Just _ ->
                 -- TODO, dangerous, don't leave this
-                model ! []
+                Debug.log "miss"
+                    model
+                    ! []
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []

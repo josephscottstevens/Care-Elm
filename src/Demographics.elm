@@ -51,7 +51,9 @@ subscriptions =
 
 init : Int -> Cmd Msg
 init patientId =
-    Cmd.none
+    decodeServerResponse
+        |> Http.get ("/People/GetDemographicsInformation?patientId=" ++ toString patientId)
+        |> Http.send Load
 
 
 
@@ -342,7 +344,7 @@ viewAddress dropdownItems address =
 
 
 type Msg
-    = Load ServerResponse
+    = Load (Result Http.Error ServerResponse)
     | UpdateDemographics SfData
     | InitDemographicsDone String
     | Save Bool
@@ -445,7 +447,7 @@ togglePreferred nodeId t =
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
-        Load serverResponse ->
+        Load (Ok serverResponse) ->
             let
                 newModel =
                     updateModelFromServerMessage serverResponse model
@@ -478,6 +480,9 @@ update msg model patientId =
                     , nodeCounter = 3
                 }
                     ! [ initDemographics newModel.sfData, Functions.setLoadingStatus False ]
+
+        Load (Err t) ->
+            model ! [ Functions.displayErrorMessage (toString t) ]
 
         InitDemographicsDone _ ->
             model ! [ initContactHours model.contactHoursModel ]

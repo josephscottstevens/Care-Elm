@@ -186,11 +186,12 @@ routeToString route =
             ""
 
 
-route : Parser (Route -> a) a
-route =
+routeHash : Parser (Route -> a) a
+routeHash =
     oneOf
         [ -- Clinical Summary
-          Url.map ClinicalSummary (s "people" </> s "_clinicalsummary")
+          Url.map Demographics (s "people")
+        , Url.map ClinicalSummary (s "people" </> s "_clinicalsummary")
         , Url.map PastMedicalHistory (s "people" </> s "_pastmedicalhistory")
         , Url.map Hospitilizations (s "people" </> s "_hospitalizations")
         , Url.map Allergies (s "people" </> s "_allergies")
@@ -209,6 +210,13 @@ route =
         , Url.map (Records Common.PreviousHistories) (s "people" </> s "_previoushistoryrecords")
         , Url.map (Records Common.Enrollment) (s "people" </> s "_enrollmentrecords")
         , Url.map (Records Common.Misc) (s "people" </> s "_miscrecords")
+        ]
+
+
+routeUrl : Parser (Route -> a) a
+routeUrl =
+    oneOf
+        [ Url.map Demographics (s "people")
         ]
 
 
@@ -237,6 +245,6 @@ back =
 fromLocation : Navigation.Location -> Maybe Route
 fromLocation location =
     if String.isEmpty location.hash then
-        Just None
+        parsePath routeUrl location
     else
-        parseHash route location
+        parseHash routeHash location
