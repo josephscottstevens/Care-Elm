@@ -189,6 +189,11 @@ view model =
                         , width fill
                         ]
                         (text navText)
+
+        sideNav =
+            Route.getSideNav
+                |> List.filter (\t -> t.depth /= -1.0)
+                |> List.map toSideUrl
     in
         Element.layout stylesheet <|
             column None
@@ -239,7 +244,7 @@ view model =
                     []
                     [ column None
                         [ fr 2 ]
-                        (List.map toSideUrl Route.getSideNav)
+                        sideNav
                     , column None
                         [ fr 10 ]
                         []

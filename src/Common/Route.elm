@@ -85,7 +85,6 @@ getSideNav : List RouteDesc
 getSideNav =
     flattenWithDepth -1.0 nodes
         |> List.map routeToSideNav
-        |> List.filter (\t -> t.depth /= -1.0)
 
 
 type Route
