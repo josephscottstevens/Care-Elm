@@ -3,7 +3,7 @@ port module Records exposing (Msg, Model, emptyModel, subscriptions, init, updat
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, type_, id, value)
 import Html.Events exposing (onClick)
-import Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn)
+import Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn, htmlColumn)
 import Common.Types as Common exposing (RequiredType(Required, Optional), AddEditDataSource, RecordType, DropdownItem)
 import Common.Functions as Functions exposing (sendMenuMessage, displaySuccessMessage, displayErrorMessage, maybeVal, defaultString, maybeToDateString)
 import Common.Html
@@ -384,7 +384,7 @@ getColumns recordType =
             [ dateTimeColumn "Date Collected" .date
             , stringColumn "Doctor of Visit" .provider
             , stringColumn "Specialty" .specialty
-            , stringColumn "Comments" .comments
+            , htmlColumn "Comments" .comments
             ]
 
         firstColumns =
@@ -400,7 +400,7 @@ getColumns recordType =
                     , dateTimeColumn "Date Accessioned" .dateAccessed
                     , stringColumn "Name of Lab" .title
                     , stringColumn "Provider" .provider
-                    , stringColumn "Comments" .comments
+                    , htmlColumn "Comments" .comments
                     ]
 
                 Common.Radiology ->
@@ -408,7 +408,7 @@ getColumns recordType =
                     , dateTimeColumn "Date Accessioned" .dateAccessed
                     , stringColumn "Name of Study" .title
                     , stringColumn "Provider" .provider
-                    , stringColumn "Comments" .comments
+                    , htmlColumn "Comments" .comments
                     ]
 
                 Common.Hospitalizations ->
@@ -419,12 +419,12 @@ getColumns recordType =
                     , stringColumn "Service Type" .hospitalizationServiceType
                     , stringColumn "Discharge Recommendations" .recommendations
                     , stringColumn "Discharge Physician" .dischargePhysician
-                    , stringColumn "Comments" .comments
+                    , htmlColumn "Comments" .comments
                     ]
 
                 Common.Legal ->
                     [ dateTimeColumn "Date Collected" .date
-                    , stringColumn "Comments" .comments
+                    , htmlColumn "Comments" .comments
                     ]
 
                 Common.CallRecordings ->
@@ -440,12 +440,12 @@ getColumns recordType =
                     [ dateTimeColumn "Date Collected" .date
                     , stringColumn "File Name" .fileName
                     , dateColumn "Report Date" .reportDate
-                    , stringColumn "Comments" .comments
+                    , htmlColumn "Comments" .comments
                     ]
 
                 Common.Enrollment ->
                     [ dateTimeColumn "Date Collected" .date
-                    , stringColumn "Comments" .comments
+                    , htmlColumn "Comments" .comments
                     ]
 
                 Common.Misc ->

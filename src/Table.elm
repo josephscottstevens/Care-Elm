@@ -13,12 +13,14 @@ module Table
         , hrefColumn
         , hrefColumnExtra
         , checkColumn
+        , htmlColumn
         )
 
 import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
 import Html.Attributes exposing (class, id, style, type_, target, colspan, classList, href, disabled, checked)
 import Html.Events as Events
 import Common.Functions as Functions
+import Json.Encode as Encode
 
 
 -- Data Types
@@ -50,6 +52,7 @@ type Column data msg
     | HrefColumnExtra String ({ data | id : Int } -> Html msg)
     | CheckColumn String ({ data | id : Int } -> Bool) (Sorter data)
     | DropdownColumn (List ( String, String, Int -> msg ))
+    | HtmlColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
 
 
 intColumn : String -> ({ data | id : Int } -> Maybe Int) -> Column data msg
@@ -90,6 +93,11 @@ checkColumn str data =
 dropdownColumn : List ( String, String, Int -> msg ) -> Column data msg
 dropdownColumn items =
     DropdownColumn items
+
+
+htmlColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+htmlColumn name data =
+    HtmlColumn name data (defaultSort data)
 
 
 type alias Config data msg =
@@ -264,7 +272,19 @@ viewTd state row config column =
 
                 DropdownColumn dropDownItems ->
                     rowDropDownDiv state config.toMsg row dropDownItems
+
+                HtmlColumn _ dataToString _ ->
+                    textHtml (Maybe.withDefault "" (dataToString row))
             ]
+
+
+textHtml : String -> Html msg
+textHtml t =
+    div
+        [ Encode.string t
+            |> Html.Attributes.property "innerHTML"
+        ]
+        []
 
 
 getColumnName : Column { data | id : Int } msg -> String
@@ -293,6 +313,9 @@ getColumnName column =
 
         DropdownColumn _ ->
             ""
+
+        HtmlColumn name _ _ ->
+            name
 
 
 
@@ -569,6 +592,12 @@ findSorter selectedColumn columnData =
 
                 DropdownColumn _ ->
                     Nothing
+
+                HtmlColumn name _ sorter ->
+                    if name == selectedColumn then
+                        Just sorter
+                    else
+                        findSorter selectedColumn remainingColumnData
 
 
 increasingOrDecreasingBy : ({ data | id : Int } -> comparable) -> Sorter data

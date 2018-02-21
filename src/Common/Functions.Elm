@@ -3,7 +3,6 @@ port module Common.Functions
         ( setLoadingStatus
         , displaySuccessMessage
         , displayErrorMessage
-          -- , error
         , isAlpha
         , defaultMaybeMsg
         , defaultString
