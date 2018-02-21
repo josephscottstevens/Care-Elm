@@ -38,11 +38,11 @@ subscriptions =
 type alias Model =
     { id : Maybe Int
     , facilityId : Maybe Int
-    , summary : String
-    , carePlan : String
-    , codeLegalStatus : String
-    , impairment : String
-    , comments : String
+    , summary : Maybe String
+    , carePlan : Maybe String
+    , codeLegalStatus : Maybe String
+    , impairment : Maybe String
+    , comments : Maybe String
     , syncfusionData : SyncfusionData
     }
 
@@ -106,7 +106,7 @@ update msg model patientId =
             { model | syncfusionData = t } ! []
 
         UpdateClinicalSummary t ->
-            { model | summary = t } ! []
+            { model | summary = Just t } ! []
 
         GenerateInstructions ->
             model ! [ generateInstructions model.syncfusionData ]
@@ -128,19 +128,19 @@ update msg model patientId =
             model ! [ displayErrorMessage (toString t) ]
 
         UpdateSummary str ->
-            { model | summary = str } ! []
+            { model | summary = Just str } ! []
 
         UpdateCarePlan str ->
-            { model | carePlan = str } ! []
+            { model | carePlan = Just str } ! []
 
         UpdateCodeLegalStatus str ->
-            { model | codeLegalStatus = str } ! []
+            { model | codeLegalStatus = Just str } ! []
 
         UpdateImpairment str ->
-            { model | impairment = str } ! []
+            { model | impairment = Just str } ! []
 
         UpdateComments str ->
-            { model | comments = str } ! []
+            { model | comments = Just str } ! []
 
 
 generateSummaryDiv : Html Msg
@@ -181,11 +181,11 @@ decodeClinicalSummary =
     decode ClinicalSummaryResponseData
         |> required "Id" (Decode.maybe Decode.int)
         |> required "FacilityId" (Decode.maybe Decode.int)
-        |> required "Summary" Decode.string
-        |> required "CarePlan" Decode.string
-        |> required "CodeLegalStatus" Decode.string
-        |> required "Impairment" Decode.string
-        |> required "Comments" Decode.string
+        |> required "Summary" (Decode.maybe Decode.string)
+        |> required "CarePlan" (Decode.maybe Decode.string)
+        |> required "CodeLegalStatus" (Decode.maybe Decode.string)
+        |> required "Impairment" (Decode.maybe Decode.string)
+        |> required "Comments" (Decode.maybe Decode.string)
 
 
 encodeClinicalSummary : Model -> Int -> Encode.Value
@@ -193,22 +193,22 @@ encodeClinicalSummary model patientId =
     Encode.object
         [ ( "Id", maybeVal Encode.int <| model.id )
         , ( "PatientId", Encode.int <| patientId )
-        , ( "Summary", Encode.string <| model.summary )
-        , ( "CarePlan", Encode.string <| model.carePlan )
-        , ( "Impairment", Encode.string <| model.impairment )
-        , ( "CodeLegalStatus", Encode.string <| model.codeLegalStatus )
-        , ( "Comments", Encode.string <| model.comments )
+        , ( "Summary", maybeVal Encode.string <| model.summary )
+        , ( "CarePlan", maybeVal Encode.string <| model.carePlan )
+        , ( "Impairment", maybeVal Encode.string <| model.impairment )
+        , ( "CodeLegalStatus", maybeVal Encode.string <| model.codeLegalStatus )
+        , ( "Comments", maybeVal Encode.string <| model.comments )
         ]
 
 
 type alias ClinicalSummaryResponseData =
     { id : Maybe Int
     , facilityId : Maybe Int
-    , summary : String
-    , carePlan : String
-    , codeLegalStatus : String
-    , impairment : String
-    , comments : String
+    , summary : Maybe String
+    , carePlan : Maybe String
+    , codeLegalStatus : Maybe String
+    , impairment : Maybe String
+    , comments : Maybe String
     }
 
 
@@ -224,10 +224,10 @@ emptyModel : Model
 emptyModel =
     { id = Nothing
     , facilityId = Nothing
-    , comments = ""
-    , carePlan = ""
-    , codeLegalStatus = ""
-    , impairment = ""
-    , summary = ""
+    , comments = Nothing
+    , carePlan = Nothing
+    , codeLegalStatus = Nothing
+    , impairment = Nothing
+    , summary = Nothing
     , syncfusionData = SyncfusionData monthDropdown yearDropdown 0 0
     }

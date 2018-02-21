@@ -197,7 +197,8 @@ getColumns : Maybe AddEditDataSource -> List (Table.Column Row Msg)
 getColumns addEditDataSource =
     [ --checkColumn "" ,
       stringColumn "Facility" .facility
-    , stringColumn "Billing Date" (\t -> Functions.dateFormat "MMMM YYYY" t.billingDate)
+
+    -- , stringColumn "Billing Date" (\t -> Functions.dateFormat "MMMM YYYY" t.billingDate)
     , stringColumn "Main Provider" .mainProvider
     , stringColumn "Patient Name" .patientName
     , dateColumn "DOB" .dob

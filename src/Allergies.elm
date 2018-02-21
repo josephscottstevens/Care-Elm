@@ -3,8 +3,6 @@ module Allergies exposing (Msg, Model, emptyModel, subscriptions, init, update, 
 import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
-import Common.Table as Table exposing (defaultCustomizations)
-import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters)
 import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), AddEditDataSource)
 import Common.Functions as Functions exposing (defaultString, sendMenuMessage, setUnsavedChanges, maybeVal)
 import Common.Html exposing (InputControlType(TextInput), getValidationErrors, defaultConfig, fullWidth, makeControls)
@@ -12,6 +10,7 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Common.Table as Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn)
 
 
 subscriptions : Sub Msg
@@ -36,14 +35,14 @@ type alias Model =
 
 type alias EditData =
     { id : Maybe Int
-    , allergy : String
-    , reaction : String
+    , allergy : Maybe String
+    , reaction : Maybe String
     }
 
 
 type alias Row =
     { id : Int
-    , allergy : String
+    , allergy : Maybe String
     , reaction : Maybe String
     }
 
@@ -62,7 +61,7 @@ view model _ =
             div []
                 [ h4 [] [ text "Allergies" ]
                 , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config model.tableState) model.tableState model.rows ]
+                    [ Table.view model.tableState model.rows gridConfig Nothing ]
                 ]
 
         Just editData ->
@@ -91,7 +90,7 @@ view model _ =
 type Msg
     = Load (Result Http.Error (List Row))
     | SetTableState Table.State
-    | DeletePrompt Int
+    | DeletePrompt Row
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | Add
@@ -123,8 +122,8 @@ update msg model patientId =
             SendMenuMessage recordId messageType ->
                 model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
-            DeletePrompt rowId ->
-                model ! [ Functions.deletePrompt rowId ]
+            DeletePrompt row ->
+                model ! [ Functions.deletePrompt row.id ]
 
             DeleteConfirmed rowId ->
                 let
@@ -186,50 +185,35 @@ update msg model patientId =
                 { model | editData = Nothing } ! [ setUnsavedChanges False ]
 
             UpdateAllergy editData t ->
-                updateAddNew { model | editData = Just { editData | allergy = t } }
+                updateAddNew { model | editData = Just { editData | allergy = Just t } }
 
             UpdateReaction editData t ->
-                updateAddNew { model | editData = Just { editData | reaction = t } }
+                updateAddNew { model | editData = Just { editData | reaction = Just t } }
 
 
-getColumns : Table.State -> List (Table.Column Row Msg)
-getColumns state =
-    let
-        dropDownItems row =
-            [ ( "e-edit", "Edit", onClick (Edit row) )
-            , ( "e-contextdelete", "Delete", onClick (DeletePrompt row.id) )
-            ]
-    in
-        [ Table.stringColumn "Allergy" (\t -> t.allergy)
-        , Table.stringColumn "Reaction" (\t -> defaultString t.reaction)
-        , Table.dropdownColumn (\t -> Table.dropdownDetails (dropDownItems t) t.id state SetTableState)
+gridConfig : Table.Config Row Msg
+gridConfig =
+    { domTableId = "AllergyTable"
+    , toolbar =
+        [ ( "e-addnew", Add ) ]
+    , toMsg = SetTableState
+    , columns =
+        [ stringColumn "Allergy" (\t -> t.allergy)
+        , stringColumn "Reaction" (\t -> t.reaction)
+        , dropdownColumn
+            ([ ( "e-edit", "Edit", Edit )
+             , ( "e-contextdelete", "Delete", DeletePrompt )
+             ]
+            )
         ]
-
-
-config : Table.State -> Table.Config Row Msg
-config state =
-    let
-        buttons =
-            [ ( "e-addnew", onClick Add ) ]
-    in
-        Table.customConfig
-            { toId = \t -> toString t.id
-            , toMsg = SetTableState
-            , columns = getColumns state
-            , customizations =
-                { defaultCustomizations
-                    | tableAttrs = standardTableAttrs "RecordTable"
-                    , thead = standardTheadNoFilters
-                    , theadButtons = buttons
-                }
-            }
+    }
 
 
 emptyModel : Model
 emptyModel =
     { editData = Nothing
     , rows = []
-    , tableState = Table.initialSort "Date"
+    , tableState = Table.init "Date"
     , showValidationErrors = False
     }
 
@@ -240,13 +224,13 @@ getEditData maybeRow =
         Just row ->
             { id = Just row.id
             , allergy = row.allergy
-            , reaction = defaultString row.reaction
+            , reaction = row.reaction
             }
 
         Nothing ->
             { id = Nothing
-            , allergy = ""
-            , reaction = ""
+            , allergy = Nothing
+            , reaction = Nothing
             }
 
 
@@ -255,8 +239,8 @@ encodeEditData newRecord patientId =
     Encode.object
         [ ( "Id", maybeVal Encode.int <| newRecord.id )
         , ( "PatientId", Encode.int <| patientId )
-        , ( "Allergy", Encode.string <| newRecord.allergy )
-        , ( "Reaction", Encode.string <| newRecord.reaction )
+        , ( "Allergy", maybeVal Encode.string <| newRecord.allergy )
+        , ( "Reaction", maybeVal Encode.string <| newRecord.reaction )
         ]
 
 
@@ -264,7 +248,7 @@ decodeHospitilizationsRow : Decode.Decoder Row
 decodeHospitilizationsRow =
     Pipeline.decode Row
         |> Pipeline.required "Id" Decode.int
-        |> Pipeline.required "Allergy" Decode.string
+        |> Pipeline.required "Allergy" (Decode.maybe Decode.string)
         |> Pipeline.required "Reaction" (Decode.maybe Decode.string)
 
 

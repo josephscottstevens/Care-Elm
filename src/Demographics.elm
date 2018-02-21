@@ -10,7 +10,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 import Http
-import Http.Progress as Progress exposing (Progress(..))
 import Char
 import MaskedInput.Number as MaskedNumber
 
@@ -30,9 +29,6 @@ port updateDemographics : (SfData -> msg) -> Sub msg
 port startSave : (Bool -> msg) -> Sub msg
 
 
-port cancel : (Bool -> msg) -> Sub msg
-
-
 port save : Encode.Value -> Cmd msg
 
 
@@ -44,27 +40,18 @@ scrollToError =
     scrollTo "#ErrorDiv"
 
 
-subscriptions : Model -> Int -> Sub Msg
-subscriptions model patientId =
+subscriptions : Sub Msg
+subscriptions =
     Sub.batch
         [ updateDemographics UpdateDemographics
         , initDemographicsDone InitDemographicsDone
         , startSave Save
-        , cancel Cancel
-        , case model.demographicsUrl of
-            Just demographicsUrl ->
-                decodeServerResponse
-                    |> Http.get demographicsUrl
-                    |> Progress.track demographicsUrl Load
-
-            Nothing ->
-                Sub.none
         ]
 
 
-init : Model -> Int -> Model
-init model patientId =
-    { model | demographicsUrl = Just (getDemographicsUrl patientId) }
+init : Int -> Cmd Msg
+init patientId =
+    Cmd.none
 
 
 
@@ -106,8 +93,6 @@ type alias Model =
     , ethnicityId : Maybe Int
     , ethnicityDropState : Dropdown.DropState
     , nodeCounter : Int
-    , progress : Progress ServerResponse
-    , demographicsUrl : Maybe String
     , drops : DropdownSource
     }
 
@@ -357,12 +342,11 @@ viewAddress dropdownItems address =
 
 
 type Msg
-    = Load (Progress ServerResponse)
+    = Load ServerResponse
     | UpdateDemographics SfData
     | InitDemographicsDone String
     | Save Bool
     | SaveCompleted (Result Http.Error String)
-    | Cancel Bool
     | AddNewLanguage
     | RemoveLanguage PatientLanguagesMap
     | AddNewPhone
@@ -458,10 +442,10 @@ togglePreferred nodeId t =
         { t | isPreferred = False }
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> Int -> ( Model, Cmd Msg )
+update msg model patientId =
     case msg of
-        Load (Done serverResponse) ->
+        Load serverResponse ->
             let
                 newModel =
                     updateModelFromServerMessage serverResponse model
@@ -492,16 +476,8 @@ update msg model =
                     , patientPhoneNumbers = newPatientPhoneNumber
                     , patientAddresses = newPatientAddress
                     , nodeCounter = 3
-                    , demographicsUrl = Nothing
                 }
                     ! [ initDemographics newModel.sfData, Functions.setLoadingStatus False ]
-
-        Load (Fail t) ->
-            { model | progress = Done (ServerFail ""), demographicsUrl = Nothing }
-                ! [ Functions.displayErrorMessage (toString t), Functions.setLoadingStatus False ]
-
-        Load progress ->
-            { model | progress = progress } ! []
 
         InitDemographicsDone _ ->
             model ! [ initContactHours model.contactHoursModel ]
@@ -544,9 +520,6 @@ update msg model =
 
         SaveCompleted (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
-
-        Cancel _ ->
-            { model | demographicsUrl = Just (getDemographicsUrl model.patientId) } ! [ Functions.setLoadingStatus True ]
 
         AddNewLanguage ->
             { model
@@ -1052,15 +1025,8 @@ emptyModel patientId =
     , ethnicityId = Nothing
     , ethnicityDropState = Dropdown.init "ethnicityDropdown"
     , nodeCounter = 0
-    , progress = Progress.None
-    , demographicsUrl = Just (getDemographicsUrl patientId)
     , drops = emptyDrops
     }
-
-
-getDemographicsUrl : Int -> String
-getDemographicsUrl patientId =
-    "/People/GetDemographicsInformation?patientId=" ++ toString patientId
 
 
 emptySfData : SfData

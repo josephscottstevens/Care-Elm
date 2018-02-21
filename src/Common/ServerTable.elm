@@ -1,8 +1,9 @@
-module Common.Table
+module Common.ServerTable
     exposing
         ( State
         , Column
         , Config
+        , GridOperations
         , init
         , view
         , intColumn
@@ -13,13 +14,18 @@ module Common.Table
         , hrefColumn
         , hrefColumnExtra
         , checkColumn
-        , htmlColumn
+        , decodeGridOperations
+        , encodeGridOperations
+        , defaultGridOperations
+        , getGridOperations
         )
 
 import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
 import Html.Attributes exposing (class, id, style, type_, target, colspan, classList, href, disabled, checked)
 import Html.Events as Events
-import Common.Functions as Functions
+import Common.Functions as Functions exposing (maybeVal)
+import Json.Decode as Decode
+import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 
 
@@ -28,56 +34,94 @@ import Json.Encode as Encode
 
 type alias State =
     { selectedId : Maybe Int
-    , isReversed : Bool
-    , sortedColumnName : String
     , openDropdownId : Maybe Int
+    , pageIndex : Int
+    , rowsPerPage : Int
+    , pagesPerBlock : Int
+    , totalRows : Int
+    , sortField : Maybe String
+    , sortAscending : Bool
     }
+
+
+type alias GridOperations =
+    { pageIndex : Int
+    , rowsPerPage : Int
+    , pagesPerBlock : Int
+    , totalRows : Int
+    , sortField : Maybe String
+    , sortAscending : Bool
+    }
+
+
+getGridOperations : State -> GridOperations
+getGridOperations state =
+    { pageIndex = state.pageIndex
+    , rowsPerPage = state.rowsPerPage
+    , pagesPerBlock = state.pagesPerBlock
+    , totalRows = state.totalRows
+    , sortField = state.sortField
+    , sortAscending = state.sortAscending
+    }
+
+
+type Page
+    = First
+    | Previous
+    | PreviousBlock
+    | Index Int
+    | NextBlock
+    | Next
+    | Last
 
 
 init : String -> State
 init sortedColumnName =
     { selectedId = Nothing
-    , isReversed = False
-    , sortedColumnName = sortedColumnName
     , openDropdownId = Nothing
+    , pageIndex = 0
+    , rowsPerPage = 20
+    , pagesPerBlock = 15
+    , totalRows = -1
+    , sortField = Just "DoB"
+    , sortAscending = False
     }
 
 
 type Column data msg
-    = IntColumn String ({ data | id : Int } -> Maybe Int) (Sorter data)
-    | StringColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
-    | DateTimeColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
-    | DateColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
-    | HrefColumn String String ({ data | id : Int } -> Maybe String) (Sorter data)
+    = IntColumn String ({ data | id : Int } -> Maybe Int) String String
+    | StringColumn String ({ data | id : Int } -> Maybe String) String String
+    | DateTimeColumn String ({ data | id : Int } -> Maybe String) String String
+    | DateColumn String ({ data | id : Int } -> Maybe String) String String
+    | HrefColumn String String ({ data | id : Int } -> Maybe String) String String
     | HrefColumnExtra String ({ data | id : Int } -> Html msg)
-    | CheckColumn String ({ data | id : Int } -> Bool) (Sorter data)
-    | DropdownColumn (List ( String, String, data -> msg ))
-    | HtmlColumn String ({ data | id : Int } -> Maybe String) (Sorter data)
+    | CheckColumn String ({ data | id : Int } -> Bool) String String
+    | DropdownColumn (List ( String, String, Int -> msg ))
 
 
 intColumn : String -> ({ data | id : Int } -> Maybe Int) -> Column data msg
 intColumn name data =
-    IntColumn name data (defaultIntSort data)
+    IntColumn name data name ""
 
 
 stringColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
 stringColumn name data =
-    StringColumn name data (defaultSort data)
+    StringColumn name data name ""
 
 
 dateTimeColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
 dateTimeColumn name data =
-    DateTimeColumn name data (defaultSort data)
+    DateTimeColumn name data name ""
 
 
 dateColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
 dateColumn name data =
-    DateColumn name data (defaultSort data)
+    DateColumn name data name ""
 
 
 hrefColumn : String -> String -> ({ data | id : Int } -> Maybe String) -> Column data msg
-hrefColumn url displayStr data =
-    HrefColumn url displayStr data (defaultSort data)
+hrefColumn name displayStr data =
+    HrefColumn name displayStr data name ""
 
 
 hrefColumnExtra : String -> ({ data | id : Int } -> Html msg) -> Column data msg
@@ -86,18 +130,13 @@ hrefColumnExtra name toNode =
 
 
 checkColumn : String -> ({ data | id : Int } -> Bool) -> Column data msg
-checkColumn str data =
-    CheckColumn str data (defaultBoolSort data)
+checkColumn name data =
+    CheckColumn name data name ""
 
 
-dropdownColumn : List ( String, String, data -> msg ) -> Column data msg
+dropdownColumn : List ( String, String, Int -> msg ) -> Column data msg
 dropdownColumn items =
     DropdownColumn items
-
-
-htmlColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
-htmlColumn name data =
-    HtmlColumn name data (defaultSort data)
 
 
 type alias Config data msg =
@@ -119,22 +158,18 @@ type Sorter data
 
 view : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> Html msg
 view state rows config maybeCustomRow =
-    let
-        sortedRows =
-            sort state config.columns rows
-    in
-        div [ class "e-grid e-js e-waitingpopup" ]
-            [ viewToolbar config.toolbar
-            , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
-                [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                    [ tr []
-                        (List.map (viewTh state config) config.columns)
-                    ]
-                , tbody []
-                    (viewTr state sortedRows config maybeCustomRow)
+    div [ class "e-grid e-js e-waitingpopup" ]
+        [ viewToolbar config.toolbar
+        , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
+            [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
+                [ tr [] (List.map (viewTh state config) config.columns)
+                , tr [] (List.map (viewThFilter state config) config.columns)
                 ]
-            , pagingView 0 (List.length sortedRows)
+            , tbody []
+                (viewTr state rows config maybeCustomRow)
             ]
+        , pagingView state config.toMsg
+        ]
 
 
 viewTr : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> List (Html msg)
@@ -206,20 +241,43 @@ viewTh state config column =
             getColumnName column
 
         headerContent =
-            if state.sortedColumnName == name then
-                if state.isReversed then
-                    [ text name, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
-                else
-                    [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
-            else
-                [ text name ]
+            case state.sortField of
+                Just t ->
+                    if t == name then
+                        if state.sortAscending then
+                            [ text name, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
+                        else
+                            [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
+                    else
+                        [ text name ]
+
+                Nothing ->
+                    [ text name ]
+
+        newSortDirection =
+            case state.sortField of
+                Just t ->
+                    (not state.sortAscending)
+
+                Nothing ->
+                    state.sortAscending
 
         sortClick =
-            Events.onClick (config.toMsg { state | isReversed = not state.isReversed, sortedColumnName = name })
+            Events.onClick (config.toMsg { state | sortAscending = newSortDirection, sortField = Just name })
     in
         th [ class ("e-headercell e-default " ++ name), sortClick ]
             [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
             ]
+
+
+viewThFilter : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
+viewThFilter state config column =
+    th [ class ("e-filterbarcell") ]
+        [ div [ class "e-filterdiv e-fltrinputdiv" ]
+            [ input [ class "e-ejinputtext e-filtertext" ] []
+            , span [ class "e-cancel e-icon" ] []
+            ]
+        ]
 
 
 viewTd : State -> { data | id : Int } -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
@@ -244,26 +302,26 @@ viewTd state row config column =
     in
         td [ tdClass, tdStyle, tdClick ]
             [ case column of
-                IntColumn _ dataToInt _ ->
+                IntColumn _ dataToInt _ _ ->
                     text (Functions.defaultIntToString (dataToInt row))
 
-                StringColumn _ dataToString _ ->
+                StringColumn _ dataToString _ _ ->
                     text (Maybe.withDefault "" (dataToString row))
 
-                DateTimeColumn _ dataToString _ ->
+                DateTimeColumn _ dataToString _ _ ->
                     text (Functions.defaultDateTime (dataToString row))
 
-                DateColumn _ dataToString _ ->
+                DateColumn _ dataToString _ _ ->
                     text (Functions.defaultDate (dataToString row))
 
-                HrefColumn _ displayText dataToString _ ->
+                HrefColumn _ displayText dataToString _ _ ->
                     --TODO, how do I want to display empty? I think.. it is hide the href, not go to an empty url right?
                     a [ href (Maybe.withDefault "" (dataToString row)), target "_blank" ] [ text displayText ]
 
                 HrefColumnExtra _ toNode ->
                     toNode row
 
-                CheckColumn _ dataToString _ ->
+                CheckColumn _ dataToString _ _ ->
                     div [ class "e-checkcell" ]
                         [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
                             [ input [ type_ "checkbox", disabled True, checked (dataToString row) ] []
@@ -272,63 +330,48 @@ viewTd state row config column =
 
                 DropdownColumn dropDownItems ->
                     rowDropDownDiv state config.toMsg row dropDownItems
-
-                HtmlColumn _ dataToString _ ->
-                    textHtml (Maybe.withDefault "" (dataToString row))
             ]
-
-
-textHtml : String -> Html msg
-textHtml t =
-    div
-        [ Encode.string t
-            |> Html.Attributes.property "innerHTML"
-        ]
-        []
 
 
 getColumnName : Column { data | id : Int } msg -> String
 getColumnName column =
     case column of
-        IntColumn name _ _ ->
+        IntColumn name _ _ _ ->
             name
 
-        StringColumn name _ _ ->
+        StringColumn name _ _ _ ->
             name
 
-        DateTimeColumn name _ _ ->
+        DateTimeColumn name _ _ _ ->
             name
 
-        DateColumn name _ _ ->
+        DateColumn name _ _ _ ->
             name
 
-        HrefColumn name _ _ _ ->
+        HrefColumn name _ _ _ _ ->
             name
 
         HrefColumnExtra name _ ->
             name
 
-        CheckColumn name _ _ ->
+        CheckColumn name _ _ _ ->
             name
 
         DropdownColumn _ ->
             ""
-
-        HtmlColumn name _ _ ->
-            name
 
 
 
 -- Custom
 
 
-rowDropDownDiv : State -> (State -> msg) -> { data | id : Int } -> List ( String, String, { data | id : Int } -> msg ) -> Html msg
+rowDropDownDiv : State -> (State -> msg) -> { data | id : Int } -> List ( String, String, Int -> msg ) -> Html msg
 rowDropDownDiv state toMsg row dropDownItems =
     let
         dropClickEvent event =
-            Events.onClick (event row)
+            Events.onClick (event row.id)
 
-        dropDownMenuItem : ( String, String, { data | id : Int } -> msg ) -> Html msg
+        dropDownMenuItem : ( String, String, Int -> msg ) -> Html msg
         dropDownMenuItem ( iconClass, displayText, event ) =
             li [ class "e-content e-list", dropClickEvent event ]
                 [ a [ class "e-menulink", target "_blank" ]
@@ -409,80 +452,104 @@ toolbarHelper ( iconStr, event ) =
         iconClass =
             "e-addnewitem e-toolbaricons e-icon " ++ iconStr
     in
-        a [ class iconClass, Events.onClick event, iconStyle, id "btnNewRecord" ] []
+        a [ class iconClass, Events.onClick event, iconStyle ] []
 
 
 
 -- paging
 
 
-itemsPerPage : Int
-itemsPerPage =
-    10
+setPagingState : State -> (State -> msg) -> Page -> Html.Attribute msg
+setPagingState state toMsg page =
+    let
+        newIndex =
+            case page of
+                First ->
+                    0
+
+                Previous ->
+                    if state.pageIndex > 0 then
+                        state.pageIndex - 1
+                    else
+                        0
+
+                PreviousBlock ->
+                    0
+
+                Index t ->
+                    t
+
+                NextBlock ->
+                    0
+
+                Next ->
+                    state.pageIndex + 1
+
+                Last ->
+                    (state.totalRows // state.rowsPerPage) - 1
+    in
+        Events.onClick (toMsg { state | pageIndex = newIndex })
 
 
-pagesPerBlock : Int
-pagesPerBlock =
-    8
-
-
-pagingView : Int -> Int -> Html msg
-pagingView currentPage totalVisiblePages =
+pagingView : State -> (State -> msg) -> Html msg
+pagingView state toMsg =
     let
         totalPages =
-            totalVisiblePages // itemsPerPage
+            (state.totalRows // state.rowsPerPage) - 1
+
+        pagingStateClick page =
+            setPagingState state toMsg page
 
         activeOrNot pageIndex =
             let
                 activeOrNotText =
-                    if pageIndex == currentPage then
+                    if pageIndex == state.pageIndex then
                         "e-currentitem e-active"
                     else
                         "e-default"
             in
                 div
-                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText) ]
-                    -- onClick (SetPagingState (Index pageIndex))
+                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), pagingStateClick (Index pageIndex) ]
                     [ text (toString (pageIndex + 1)) ]
 
         rng =
             List.range 0 totalPages
-                |> List.drop (currentPage // pagesPerBlock * pagesPerBlock)
-                |> List.take pagesPerBlock
+                |> List.drop ((state.pageIndex // state.pagesPerBlock) * state.pagesPerBlock)
+                |> List.take state.pagesPerBlock
                 |> List.map activeOrNot
 
         firstPageClass =
-            if currentPage >= pagesPerBlock then
+            if state.pageIndex >= state.rowsPerPage then
                 "e-icon e-mediaback e-firstpage e-default"
             else
                 "e-icon e-mediaback e-firstpagedisabled e-disable"
 
         leftPageClass =
-            if currentPage > 0 then
+            if state.pageIndex > 0 then
                 "e-icon e-arrowheadleft-2x e-prevpage e-default"
             else
                 "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
 
         leftPageBlockClass =
-            if currentPage >= pagesPerBlock then
+            if state.pageIndex >= state.pagesPerBlock then
                 "e-link e-spacing e-PP e-numericitem e-default"
             else
                 "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
 
         rightPageBlockClass =
-            if currentPage < totalPages - pagesPerBlock then
+            if state.pageIndex < totalPages - state.pagesPerBlock then
                 "e-link e-NP e-spacing e-numericitem e-default"
             else
                 "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
 
         rightPageClass =
-            if currentPage < totalPages then
+            if state.pageIndex < totalPages then
                 "e-nextpage e-icon e-arrowheadright-2x e-default"
             else
                 "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
 
         lastPageClass =
-            if currentPage < totalPages - pagesPerBlock then
+            if state.pageIndex < totalPages - state.pagesPerBlock then
                 "e-lastpage e-icon e-mediaforward e-default"
             else
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
@@ -490,25 +557,25 @@ pagingView currentPage totalVisiblePages =
         pagerText =
             let
                 currentPageText =
-                    toString (currentPage + 1)
+                    toString (state.pageIndex + 1)
 
                 totalPagesText =
                     toString (totalPages + 1)
 
                 totalItemsText =
-                    toString totalVisiblePages
+                    toString state.totalRows
             in
                 currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
     in
         div [ class "e-pager e-js e-pager" ]
             [ div [ class "e-pagercontainer" ]
-                [ div [ class firstPageClass ] [] --, onClick (SetPagingState First) ] []
-                , div [ class leftPageClass ] [] --, onClick (SetPagingState Previous) ] []
-                , a [ class leftPageBlockClass ] [] --, onClick (SetPagingState PreviousBlock) ] [ text "..." ]
+                [ div [ class firstPageClass, pagingStateClick First ] []
+                , div [ class leftPageClass, pagingStateClick Previous ] []
+                , a [ class leftPageBlockClass, pagingStateClick PreviousBlock ] [ text "..." ]
                 , div [ class "e-numericcontainer e-default" ] rng
-                , a [ class rightPageBlockClass ] [] --, onClick (SetPagingState NextBlock) ] [ text "..." ]
-                , div [ class rightPageClass ] [] --, onClick (SetPagingState Next) ] []
-                , div [ class lastPageClass ] [] --, onClick (SetPagingState Last) ] []
+                , a [ class rightPageBlockClass, pagingStateClick NextBlock ] [ text "..." ]
+                , div [ class rightPageClass, pagingStateClick Next ] []
+                , div [ class lastPageClass, pagingStateClick Last ] []
                 ]
             , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
                 [ span [ class "e-pagermsg" ] [ text pagerText ]
@@ -517,104 +584,38 @@ pagingView currentPage totalVisiblePages =
 
 
 
--- Sorting
+--Server Stuff
 
 
-sort : State -> List (Column { data | id : Int } msg) -> List { data | id : Int } -> List { data | id : Int }
-sort state columnData data =
-    case findSorter state.sortedColumnName columnData of
-        Nothing ->
-            data
-
-        Just sorter ->
-            applySorter state.isReversed sorter data
-
-
-applySorter : Bool -> Sorter { data | id : Int } -> List { data | id : Int } -> List { data | id : Int }
-applySorter isReversed sorter data =
-    case sorter of
-        None ->
-            data
-
-        IncOrDec sort ->
-            if isReversed then
-                List.reverse (sort data)
-            else
-                sort data
+defaultGridOperations : GridOperations
+defaultGridOperations =
+    { pageIndex = -1
+    , rowsPerPage = 12
+    , pagesPerBlock = 15
+    , totalRows = -1
+    , sortField = Nothing
+    , sortAscending = False
+    }
 
 
-findSorter : String -> List (Column { data | id : Int } msg) -> Maybe (Sorter { data | id : Int })
-findSorter selectedColumn columnData =
-    case columnData of
-        [] ->
-            Nothing
-
-        column :: remainingColumnData ->
-            case column of
-                IntColumn name _ sorter ->
-                    if name == selectedColumn then
-                        Just sorter
-                    else
-                        findSorter selectedColumn remainingColumnData
-
-                StringColumn name _ sorter ->
-                    if name == selectedColumn then
-                        Just sorter
-                    else
-                        findSorter selectedColumn remainingColumnData
-
-                DateTimeColumn name _ sorter ->
-                    if name == selectedColumn then
-                        Just sorter
-                    else
-                        findSorter selectedColumn remainingColumnData
-
-                DateColumn name _ sorter ->
-                    if name == selectedColumn then
-                        Just sorter
-                    else
-                        findSorter selectedColumn remainingColumnData
-
-                HrefColumn name _ _ sorter ->
-                    if name == selectedColumn then
-                        Just sorter
-                    else
-                        findSorter selectedColumn remainingColumnData
-
-                HrefColumnExtra _ _ ->
-                    Nothing
-
-                CheckColumn name _ sorter ->
-                    if name == selectedColumn then
-                        Just sorter
-                    else
-                        findSorter selectedColumn remainingColumnData
-
-                DropdownColumn _ ->
-                    Nothing
-
-                HtmlColumn name _ sorter ->
-                    if name == selectedColumn then
-                        Just sorter
-                    else
-                        findSorter selectedColumn remainingColumnData
+encodeGridOperations : GridOperations -> Encode.Value
+encodeGridOperations gridOperations =
+    Encode.object
+        [ ( "Skip", Encode.int gridOperations.pageIndex )
+        , ( "RowsPerPage", Encode.int gridOperations.rowsPerPage )
+        , ( "PageSize", Encode.int gridOperations.pagesPerBlock )
+        , ( "TotalRows", Encode.int gridOperations.totalRows )
+        , ( "SortField", maybeVal Encode.string gridOperations.sortField )
+        , ( "SortAscending", Encode.bool gridOperations.sortAscending )
+        ]
 
 
-increasingOrDecreasingBy : ({ data | id : Int } -> comparable) -> Sorter data
-increasingOrDecreasingBy toComparable =
-    IncOrDec (List.sortBy toComparable)
-
-
-defaultSort : ({ data | id : Int } -> Maybe String) -> Sorter data
-defaultSort t =
-    increasingOrDecreasingBy (Functions.defaultString << t)
-
-
-defaultIntSort : ({ data | id : Int } -> Maybe Int) -> Sorter data
-defaultIntSort t =
-    increasingOrDecreasingBy (Functions.defaultIntToString << t)
-
-
-defaultBoolSort : ({ data | id : Int } -> Bool) -> Sorter data
-defaultBoolSort t =
-    increasingOrDecreasingBy (toString << t)
+decodeGridOperations : Decode.Decoder GridOperations
+decodeGridOperations =
+    Pipeline.decode GridOperations
+        |> Pipeline.required "Skip" Decode.int
+        |> Pipeline.required "RowsPerPage" Decode.int
+        |> Pipeline.required "PageSize" Decode.int
+        |> Pipeline.required "TotalRows" Decode.int
+        |> Pipeline.required "SortField" (Decode.maybe Decode.string)
+        |> Pipeline.required "SortAscending" Decode.bool

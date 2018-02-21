@@ -11,6 +11,7 @@ module Common.Route
             , Allergies
             , Immunizations
             , LastKnownVitals
+            , Demographics
             )
         , getPatientId
         , fromLocation

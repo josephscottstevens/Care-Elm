@@ -53,11 +53,11 @@ type Msg
     | SendMenuMessage Int
       -- Updates
     | NoOp
-    | UpdateDescription NewRecord (Maybe String)
-    | UpdateYear NewRecord (Maybe String)
-    | UpdateFacility NewRecord (Maybe String)
+    | UpdateDescription NewRecord String
+    | UpdateYear NewRecord String
+    | UpdateFacility NewRecord String
     | UpdateProvider NewRecord Dropdown.Msg
-    | UpdateNotes NewRecord (Maybe String)
+    | UpdateNotes NewRecord String
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -95,7 +95,7 @@ update msg model patientId =
         Edit addEditDataSource rowId ->
             let
                 row =
-                    model.rows |> List.filter (\t -> t.id == rowId) |> List.head
+                    model.rows |> List.filter (\t -> Just t.id == rowId) |> List.head
             in
                 { model | state = AddEdit (newRecord addEditDataSource row) } ! []
 
@@ -106,7 +106,7 @@ update msg model patientId =
             model ! [ Functions.deletePrompt rowId ]
 
         DeletePastMedicalHistoryConfirmed rowId ->
-            { model | rows = model.rows |> List.filter (\t -> t.id /= Just rowId) }
+            { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
                 ! [ deletePastMedicalHistoryRequest rowId ]
 
         DeleteCompleted (Ok responseMsg) ->
@@ -128,13 +128,13 @@ update msg model patientId =
 
         -- Updates
         UpdateDescription newRecord str ->
-            { model | state = AddEdit { newRecord | description = str } } ! []
+            { model | state = AddEdit { newRecord | description = Just str } } ! []
 
         UpdateYear newRecord str ->
-            { model | state = AddEdit { newRecord | year = str } } ! []
+            { model | state = AddEdit { newRecord | year = Just str } } ! []
 
         UpdateFacility newRecord str ->
-            { model | state = AddEdit { newRecord | facility = str } } ! []
+            { model | state = AddEdit { newRecord | facility = Just str } } ! []
 
         UpdateProvider newRecord dropdownMsg ->
             let
@@ -144,7 +144,7 @@ update msg model patientId =
                 { model | state = AddEdit { newRecord | providerDropState = newDropState, providerId = newId } } ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateNotes newRecord str ->
-            { model | state = AddEdit { newRecord | notes = str } } ! []
+            { model | state = AddEdit { newRecord | notes = Just str } } ! []
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
@@ -207,10 +207,10 @@ formInputs newRecord =
     [ HtmlElement "" (div [ noteStyle ] [ text "*Records added from the problem list cannot be edited." ])
     , AreaInput "Description" Required newRecord.description (UpdateDescription newRecord)
     , TextInput "Year" Optional newRecord.year (UpdateYear newRecord)
-    , Dropdown "Provider" Optional newRecord.providerDropdown (UpdateProvider newRecord)
+    , Dropdown "Provider" Optional newRecord.providerDropState (UpdateProvider newRecord)
     , TextInput "Facility" Optional newRecord.facility (UpdateFacility newRecord)
     , TextInput "Notes" Optional newRecord.notes (UpdateNotes newRecord)
-    , HtmlElement "Treatment" (input [ type_ "textbox", class "e-textbox", disabled True, value newRecord.treatment ] [])
+    , HtmlElement "Treatment" (input [ type_ "textbox", class "e-textbox", disabled True, value (Maybe.withDefault "" newRecord.treatment) ] [])
     , HtmlElement "" (div [ noteStyle ] [ text "*Treatment is deprecated." ])
     ]
 
@@ -242,7 +242,7 @@ gridConfig addEditDataSource =
 decodePastMedicalHistoryRow : Decode.Decoder PastMedicalHistoryRow
 decodePastMedicalHistoryRow =
     decode PastMedicalHistoryRow
-        |> required "Id" (Decode.maybe Decode.int)
+        |> required "Id" Decode.int
         |> required "Description" (Decode.maybe Decode.string)
         |> required "Year" (Decode.maybe Decode.string)
         |> required "Treatment" (Decode.maybe Decode.string)
@@ -269,7 +269,7 @@ encodeNewRow newRecord patientId =
 
 
 type alias PastMedicalHistoryRow =
-    { id : Maybe Int
+    { id : Int
     , description : Maybe String
     , year : Maybe String
     , treatment : Maybe String
@@ -299,7 +299,7 @@ newRecord : AddEditDataSource -> Maybe PastMedicalHistoryRow -> NewRecord
 newRecord addEditDataSource pastMedicalHistoryRow =
     case pastMedicalHistoryRow of
         Just row ->
-            { id = row.id
+            { id = Just row.id
             , description = row.description
             , year = row.year
             , facility = row.facility

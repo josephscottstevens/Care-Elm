@@ -43,29 +43,22 @@ subscriptions =
         ]
 
 
-init : Maybe Int -> Int -> Cmd Msg
-init recordTypeId patientId =
-    case recordTypeId of
-        Just t ->
-            Cmd.batch
-                [ loadRecords t patientId
-                , getDropDowns patientId AddEditDataSourceLoaded
-                ]
-
-        Nothing ->
-            displayErrorMessage "Invalid recordTypeId"
+init : Common.RecordType -> Int -> Cmd Msg
+init recordType patientId =
+    loadRecords recordType patientId
 
 
 type alias Model =
-    { rows : List RecordRow
+    { rows : List Row
     , dropDownState : Int
+    , recordType : RecordType
     , tableState : Table.State
     , addEditDataSource : Maybe AddEditDataSource
     , editData : Maybe EditData
     }
 
 
-type alias RecordRow =
+type alias Row =
     { id : Int
     , date : Maybe String
     , specialty : Maybe String
@@ -140,39 +133,34 @@ type alias EditData =
     { recordType : RecordType
     , isExistingHospitilization : Bool
     , patientReported : Bool
-    , dischargeDiagnosis : String
+    , dischargeDiagnosis : Maybe String
 
     -- Hospitilizations
     , showValidationErrors : Bool
     , recordId : Maybe Int
-    , title : String
-    , specialty : String
-    , provider : String
-    , comments : String
-    , recording : String
-    , callSid : String
+    , title : Maybe String
+    , specialty : Maybe String
+    , provider : Maybe String
+    , comments : Maybe String
+    , recording : Maybe String
+    , callSid : Maybe String
     , duration : Int
     , sfData : SfData
     }
 
 
-view : Model -> Maybe Int -> Html Msg
-view model recordTypeId =
-    case Functions.getRecordTypeById recordTypeId of
-        Just recordType ->
-            let
-                config =
-                    gridConfig recordType model.addEditDataSource
-            in
-                case model.editData of
-                    Just editData ->
-                        Table.view model.tableState model.rows config (Just <| viewEditData editData)
+view : Model -> Html Msg
+view model =
+    let
+        config =
+            gridConfig model.recordType model.addEditDataSource
+    in
+        case model.editData of
+            Just editData ->
+                Table.view model.tableState model.rows config (Just <| viewEditData editData)
 
-                    Nothing ->
-                        Table.view model.tableState model.rows config Nothing
-
-        Nothing ->
-            text "Error invalid recordState"
+            Nothing ->
+                Table.view model.tableState model.rows config Nothing
 
 
 viewEditData : EditData -> Html Msg
@@ -210,10 +198,10 @@ viewEditData editData =
 
 
 type Msg
-    = Load (Result Http.Error (List RecordRow))
+    = Load (Result Http.Error (List Row))
     | SetTableState Table.State
     | Add AddEditDataSource RecordType
-    | SendMenuMessage Common.RecordType String Int
+    | SendMenuMessage Common.RecordType String Row
     | EditTask Int
     | DeletePrompt Int
     | DeleteConfirmed Int
@@ -264,9 +252,9 @@ update msg model patientId =
             SetTableState newState ->
                 { model | tableState = newState } ! []
 
-            SendMenuMessage recordType messageType recordId ->
-                { model | rows = flipConsent model.rows recordId recordType }
-                    ! [ sendMenuMessage (getMenuMessage model.rows recordType recordId messageType) ]
+            SendMenuMessage recordType messageType row ->
+                { model | rows = flipConsent model.rows row.id recordType }
+                    ! [ sendMenuMessage (getMenuMessage model.rows recordType row.id messageType) ]
 
             DeletePrompt rowId ->
                 model ! [ Functions.deletePrompt rowId ]
@@ -328,7 +316,7 @@ update msg model patientId =
                     Nothing ->
                         { model | editData = Nothing }
                             ! [ displaySuccessMessage "Save completed successfully!"
-                              , loadRecords (Functions.getId recordType) patientId
+                              , loadRecords model.recordType patientId
                               ]
 
             SaveCompleted _ (Err t) ->
@@ -346,22 +334,22 @@ update msg model patientId =
                         model ! [ displayErrorMessage "Cannot update edit data while null" ]
 
             UpdateTitle editData str ->
-                updateAddNew { editData | title = str }
+                updateAddNew { editData | title = Just str }
 
             UpdateSpecialty editData str ->
-                updateAddNew { editData | specialty = str }
+                updateAddNew { editData | specialty = Just str }
 
             UpdateProvider editData str ->
-                updateAddNew { editData | provider = str }
+                updateAddNew { editData | provider = Just str }
 
             UpdateComments editData str ->
-                updateAddNew { editData | comments = str }
+                updateAddNew { editData | comments = Just str }
 
             UpdateCallSid editData str ->
-                updateAddNew { editData | callSid = str }
+                updateAddNew { editData | callSid = Just str }
 
             UpdateRecordingSid editData str ->
-                updateAddNew { editData | recording = str }
+                updateAddNew { editData | recording = Just str }
 
             UpdateDuration editData str ->
                 updateAddNew { editData | duration = Functions.defaultIntStr str }
@@ -374,10 +362,10 @@ update msg model patientId =
                 updateAddNew { editData | patientReported = bool }
 
             UpdateDischargeDiagnosis editData str ->
-                updateAddNew { editData | dischargeDiagnosis = str }
+                updateAddNew { editData | dischargeDiagnosis = Just str }
 
 
-getColumns : RecordType -> List (Table.Column RecordRow Msg)
+getColumns : RecordType -> List (Table.Column Row Msg)
 getColumns recordType =
     let
         commonColumns =
@@ -468,9 +456,9 @@ hrefCustom row =
             div [] []
 
 
-decodeRecordRow : Decoder RecordRow
-decodeRecordRow =
-    decode RecordRow
+decodeRow : Decoder Row
+decodeRow =
+    decode Row
         |> required "Id" Decode.int
         |> required "Date" (maybe Decode.string)
         |> required "Specialty" (maybe Decode.string)
@@ -501,18 +489,21 @@ decodeRecordRow =
         |> required "HasVerbalConsent" Decode.bool
 
 
-loadRecords : Int -> Int -> Cmd Msg
-loadRecords recordTypeId patientId =
+loadRecords : Common.RecordType -> Int -> Cmd Msg
+loadRecords recordType patientId =
     let
+        recordTypeId =
+            Functions.getId recordType
+
         url =
             "/People/PatientRecordsGrid?patientId=" ++ toString patientId ++ "&recordTypeId=" ++ toString recordTypeId
     in
-        Decode.field "list" (Decode.list decodeRecordRow)
+        Decode.field "list" (Decode.list decodeRow)
             |> Http.get url
             |> Http.send Load
 
 
-getMenuMessage : List RecordRow -> Common.RecordType -> Int -> String -> Common.MenuMessage
+getMenuMessage : List Row -> Common.RecordType -> Int -> String -> Common.MenuMessage
 getMenuMessage rows recordType recordId messageType =
     let
         maybeVerbalConsent =
@@ -527,7 +518,7 @@ getMenuMessage rows recordType recordId messageType =
         Common.MenuMessage messageType recordId recordTypeId maybeVerbalConsent
 
 
-flipConsent : List RecordRow -> Int -> Common.RecordType -> List RecordRow
+flipConsent : List Row -> Int -> Common.RecordType -> List Row
 flipConsent rows recordId recordType =
     case recordType of
         Common.CallRecordings ->
@@ -668,7 +659,7 @@ formInputs editData =
         columns
 
 
-gridConfig : RecordType -> Maybe AddEditDataSource -> Table.Config RecordRow Msg
+gridConfig : RecordType -> Maybe AddEditDataSource -> Table.Config Row Msg
 gridConfig recordType addEditDataSource =
     { domTableId = "RecordTable"
     , toolbar =
@@ -683,7 +674,7 @@ gridConfig recordType addEditDataSource =
     }
 
 
-dropdownItems : RecordType -> List ( String, String, Int -> Msg )
+dropdownItems : RecordType -> List ( String, String, Row -> Msg )
 dropdownItems recordType =
     case recordType of
         Common.CallRecordings ->
@@ -704,18 +695,18 @@ encodeRecord editData patientId =
     Encode.object
         [ ( "RecordId", maybeVal Encode.int <| editData.recordId )
         , ( "PatientId", Encode.int <| patientId )
-        , ( "Title", Encode.string <| editData.title )
+        , ( "Title", maybeVal Encode.string <| editData.title )
         , ( "RecordTypeId", Encode.int <| Functions.getId editData.recordType )
-        , ( "Specialty", Encode.string <| editData.specialty )
-        , ( "Provider", Encode.string <| editData.provider )
+        , ( "Specialty", maybeVal Encode.string <| editData.specialty )
+        , ( "Provider", maybeVal Encode.string <| editData.provider )
         , ( "TimeVisit", maybeVal Encode.string <| maybeToDateString <| editData.sfData.timeVisit )
         , ( "TimeAcc", maybeVal Encode.string <| maybeToDateString <| editData.sfData.timeAcc )
         , ( "RecordFile", Encode.string <| editData.sfData.fileName )
-        , ( "Comments", Encode.string <| editData.comments )
+        , ( "Comments", maybeVal Encode.string <| editData.comments )
         , ( "FacilityId", maybeVal Encode.int <| editData.sfData.facilityId )
         , ( "ReportDate", maybeVal Encode.string <| maybeToDateString <| editData.sfData.reportDate )
-        , ( "CallSid", Encode.string <| editData.callSid )
-        , ( "RecordingSid", Encode.string <| editData.recording )
+        , ( "CallSid", maybeVal Encode.string <| editData.callSid )
+        , ( "RecordingSid", maybeVal Encode.string <| editData.recording )
         , ( "RecordingDuration", Encode.int <| editData.duration )
         , ( "RecordingDate", maybeVal Encode.string <| maybeToDateString <| editData.sfData.recordingDate )
         , ( "StaffId", maybeVal Encode.int <| editData.sfData.userId )
@@ -730,20 +721,21 @@ encodeRecord editData patientId =
         , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| editData.sfData.dateOfAdmission2 )
         , ( "DateOfDischarge2", maybeVal Encode.string <| maybeToDateString <| editData.sfData.dateOfDischarge2 )
         , ( "HospitalServiceTypeId", maybeVal Encode.int <| editData.sfData.hospitalServiceTypeId )
-        , ( "DischargeRecommendations", Encode.string <| editData.dischargeDiagnosis )
+        , ( "DischargeRecommendations", maybeVal Encode.string <| editData.dischargeDiagnosis )
         , ( "DischargePhysicianId", maybeVal Encode.int <| editData.sfData.dischargePhysicianId )
         , ( "AdmitDiagnosisId", maybeVal Encode.int <| editData.sfData.admitDiagnosisId )
         , ( "DischargeDiagnosisId", maybeVal Encode.int <| editData.sfData.dischargeDiagnosisId )
         ]
 
 
-emptyModel : Model
-emptyModel =
+emptyModel : RecordType -> Model
+emptyModel recordType =
     { rows = []
     , dropDownState = -1
     , tableState = Table.init "Date"
     , addEditDataSource = Nothing
     , editData = Nothing
+    , recordType = recordType
     }
 
 
@@ -752,17 +744,17 @@ createEditData addEditDataSource recordType =
     { recordType = recordType
     , isExistingHospitilization = False
     , patientReported = False
-    , dischargeDiagnosis = ""
+    , dischargeDiagnosis = Nothing
 
     -- Hospitilizations
     , showValidationErrors = False
     , recordId = Nothing
-    , title = ""
-    , specialty = ""
-    , provider = ""
-    , comments = ""
-    , recording = ""
-    , callSid = ""
+    , title = Nothing
+    , specialty = Nothing
+    , provider = Nothing
+    , comments = Nothing
+    , recording = Nothing
+    , callSid = Nothing
     , duration = 0
     , sfData = createSfData addEditDataSource recordType
     }

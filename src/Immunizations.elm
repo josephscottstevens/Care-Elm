@@ -3,8 +3,6 @@ module Immunizations exposing (Msg, Model, emptyModel, subscriptions, init, upda
 import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
-import Common.Table as Table exposing (defaultCustomizations)
-import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters)
 import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), AddEditDataSource)
 import Common.Functions as Functions exposing (defaultString, sendMenuMessage, setUnsavedChanges, maybeVal)
 import Common.Html exposing (InputControlType(TextInput), getValidationErrors, defaultConfig, fullWidth, makeControls)
@@ -12,6 +10,7 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Common.Table as Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn)
 
 
 subscriptions : Sub Msg
@@ -36,16 +35,16 @@ type alias Model =
 
 type alias EditData =
     { id : Maybe Int
-    , vaccination : String
-    , year : String
-    , facility : String
-    , notes : String
+    , vaccination : Maybe String
+    , year : Maybe String
+    , facility : Maybe String
+    , notes : Maybe String
     }
 
 
 type alias Row =
     { id : Int
-    , vaccination : String
+    , vaccination : Maybe String
     , year : Maybe String
     , facility : Maybe String
     , notes : Maybe String
@@ -68,7 +67,7 @@ view model _ =
             div []
                 [ h4 [] [ text "Immunizations & Preventative Screenings" ]
                 , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config model.tableState) model.tableState model.rows ]
+                    [ Table.view model.tableState model.rows gridConfig Nothing ]
                 ]
 
         Just editData ->
@@ -97,7 +96,7 @@ view model _ =
 type Msg
     = Load (Result Http.Error (List Row))
     | SetTableState Table.State
-    | DeletePrompt Int
+    | DeletePrompt Row
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | Add
@@ -131,8 +130,8 @@ update msg model patientId =
             SendMenuMessage recordId messageType ->
                 model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
-            DeletePrompt rowId ->
-                model ! [ Functions.deletePrompt rowId ]
+            DeletePrompt row ->
+                model ! [ Functions.deletePrompt row.id ]
 
             DeleteConfirmed rowId ->
                 let
@@ -194,58 +193,46 @@ update msg model patientId =
                 { model | editData = Nothing } ! [ setUnsavedChanges False ]
 
             UpdateVaccination editData t ->
-                updateAddNew { model | editData = Just { editData | vaccination = t } }
+                updateAddNew { model | editData = Just { editData | vaccination = Just t } }
 
             UpdateYear editData t ->
-                updateAddNew { model | editData = Just { editData | year = t } }
+                updateAddNew { model | editData = Just { editData | year = Just t } }
 
             UpdateFacility editData t ->
-                updateAddNew { model | editData = Just { editData | facility = t } }
+                updateAddNew { model | editData = Just { editData | facility = Just t } }
 
             UpdateNotes editData t ->
-                updateAddNew { model | editData = Just { editData | notes = t } }
+                updateAddNew { model | editData = Just { editData | notes = Just t } }
 
 
-getColumns : Table.State -> List (Table.Column Row Msg)
-getColumns state =
-    let
-        dropDownItems row =
-            [ ( "e-edit", "Edit", onClick (Edit row) )
-            , ( "e-contextdelete", "Delete", onClick (DeletePrompt row.id) )
-            ]
-    in
-        [ Table.stringColumn "Vaccination" (\t -> t.vaccination)
-        , Table.stringColumn "Year" (\t -> defaultString t.year)
-        , Table.stringColumn "Facilit" (\t -> defaultString t.facility)
-        , Table.stringColumn "Notes" (\t -> defaultString t.notes)
-        , Table.dropdownColumn (\t -> Table.dropdownDetails (dropDownItems t) t.id state SetTableState)
+getColumns : List (Table.Column Row Msg)
+getColumns =
+    [ Table.stringColumn "Vaccination" (\t -> t.vaccination)
+    , Table.stringColumn "Year" (\t -> t.year)
+    , Table.stringColumn "Facilit" (\t -> t.facility)
+    , Table.stringColumn "Notes" (\t -> t.notes)
+    , Table.dropdownColumn
+        [ ( "e-edit", "Edit", Edit )
+        , ( "e-contextdelete", "Delete", DeletePrompt )
         ]
+    ]
 
 
-config : Table.State -> Table.Config Row Msg
-config state =
-    let
-        buttons =
-            [ ( "e-addnew", onClick Add ) ]
-    in
-        Table.customConfig
-            { toId = \t -> toString t.id
-            , toMsg = SetTableState
-            , columns = getColumns state
-            , customizations =
-                { defaultCustomizations
-                    | tableAttrs = standardTableAttrs "RecordTable"
-                    , thead = standardTheadNoFilters
-                    , theadButtons = buttons
-                }
-            }
+gridConfig : Table.Config Row Msg
+gridConfig =
+    { domTableId = "ImmunizationsTable"
+    , toolbar =
+        [ ( "e-addnew", Add ) ]
+    , toMsg = SetTableState
+    , columns = getColumns
+    }
 
 
 emptyModel : Model
 emptyModel =
     { editData = Nothing
     , rows = []
-    , tableState = Table.initialSort "Date"
+    , tableState = Table.init "Date"
     , showValidationErrors = False
     }
 
@@ -256,17 +243,17 @@ getEditData maybeRow =
         Just row ->
             { id = Just row.id
             , vaccination = row.vaccination
-            , year = defaultString row.year
-            , facility = defaultString row.facility
-            , notes = defaultString row.notes
+            , year = row.year
+            , facility = row.facility
+            , notes = row.notes
             }
 
         Nothing ->
             { id = Nothing
-            , vaccination = ""
-            , year = ""
-            , facility = ""
-            , notes = ""
+            , vaccination = Nothing
+            , year = Nothing
+            , facility = Nothing
+            , notes = Nothing
             }
 
 
@@ -275,10 +262,10 @@ encodeEditData newRecord patientId =
     Encode.object
         [ ( "Id", maybeVal Encode.int <| newRecord.id )
         , ( "PatientId", Encode.int <| patientId )
-        , ( "Vaccination", Encode.string <| newRecord.vaccination )
-        , ( "Year", Encode.string <| newRecord.year )
-        , ( "Facility", Encode.string <| newRecord.facility )
-        , ( "Notes", Encode.string <| newRecord.notes )
+        , ( "Vaccination", maybeVal Encode.string <| newRecord.vaccination )
+        , ( "Year", maybeVal Encode.string <| newRecord.year )
+        , ( "Facility", maybeVal Encode.string <| newRecord.facility )
+        , ( "Notes", maybeVal Encode.string <| newRecord.notes )
         ]
 
 
@@ -286,7 +273,7 @@ decodeHospitilizationsRow : Decode.Decoder Row
 decodeHospitilizationsRow =
     Pipeline.decode Row
         |> Pipeline.required "Id" Decode.int
-        |> Pipeline.required "Vaccination" Decode.string
+        |> Pipeline.required "Vaccination" (Decode.maybe Decode.string)
         |> Pipeline.required "Year" (Decode.maybe Decode.string)
         |> Pipeline.required "Facility" (Decode.maybe Decode.string)
         |> Pipeline.required "Notes" (Decode.maybe Decode.string)

@@ -3,8 +3,6 @@ port module LastKnownVitals exposing (Msg, Model, emptyModel, subscriptions, ini
 import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
-import Common.Table as Table exposing (defaultCustomizations)
-import Common.Grid exposing (standardTableAttrs, standardTheadNoFilters)
 import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), AddEditDataSource)
 import Common.Functions as Functions exposing (sendMenuMessage, setUnsavedChanges, maybeVal, defaultDate)
 import Common.Html exposing (InputControlType(TextInput, DateInput), getValidationErrors, defaultConfig, fullWidth, makeControls)
@@ -12,6 +10,7 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Common.Table as Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn)
 
 
 port initLastKnownVitals : Maybe String -> Cmd msg
@@ -43,28 +42,28 @@ type alias Model =
 
 type alias EditData =
     { id : Maybe Int
-    , bp : String
-    , hr : String
-    , r : String
-    , t : String
-    , o2 : String
-    , wt : String
-    , ht : String
-    , bmi : String
+    , bp : Maybe String
+    , hr : Maybe String
+    , r : Maybe String
+    , t : Maybe String
+    , o2 : Maybe String
+    , wt : Maybe String
+    , ht : Maybe String
+    , bmi : Maybe String
     , date : Maybe String
     }
 
 
 type alias Row =
     { id : Int
-    , bp : String
-    , hr : String
-    , r : String
-    , t : String
-    , o2 : String
-    , wt : String
-    , ht : String
-    , bmi : String
+    , bp : Maybe String
+    , hr : Maybe String
+    , r : Maybe String
+    , t : Maybe String
+    , o2 : Maybe String
+    , wt : Maybe String
+    , ht : Maybe String
+    , bmi : Maybe String
     , date : Maybe String
     }
 
@@ -90,7 +89,7 @@ view model _ =
             div []
                 [ h4 [] [ text "LastKnownVitals" ]
                 , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config model.tableState) model.tableState model.rows ]
+                    [ Table.view model.tableState model.rows gridConfig Nothing ]
                 ]
 
         Just editData ->
@@ -119,7 +118,7 @@ view model _ =
 type Msg
     = Load (Result Http.Error (List Row))
     | SetTableState Table.State
-    | DeletePrompt Int
+    | DeletePrompt Row
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | Add
@@ -158,8 +157,8 @@ update msg model patientId =
             SendMenuMessage recordId messageType ->
                 model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
-            DeletePrompt rowId ->
-                model ! [ Functions.deletePrompt rowId ]
+            DeletePrompt row ->
+                model ! [ Functions.deletePrompt row.id ]
 
             DeleteConfirmed rowId ->
                 let
@@ -225,28 +224,28 @@ update msg model patientId =
                 { model | editData = Nothing } ! [ setUnsavedChanges False ]
 
             UpdateBp editData t ->
-                updateAddNew { model | editData = Just { editData | bp = t } }
+                updateAddNew { model | editData = Just { editData | bp = Just t } }
 
             UpdateHr editData t ->
-                updateAddNew { model | editData = Just { editData | hr = t } }
+                updateAddNew { model | editData = Just { editData | hr = Just t } }
 
             UpdateR editData t ->
-                updateAddNew { model | editData = Just { editData | r = t } }
+                updateAddNew { model | editData = Just { editData | r = Just t } }
 
-            UpdateT editData t2 ->
-                updateAddNew { model | editData = Just { editData | t = t2 } }
+            UpdateT editData t ->
+                updateAddNew { model | editData = Just { editData | t = Just t } }
 
             UpdateO2 editData t ->
-                updateAddNew { model | editData = Just { editData | o2 = t } }
+                updateAddNew { model | editData = Just { editData | o2 = Just t } }
 
             UpdateWt editData t ->
-                updateAddNew { model | editData = Just { editData | wt = t } }
+                updateAddNew { model | editData = Just { editData | wt = Just t } }
 
             UpdateHt editData t ->
-                updateAddNew { model | editData = Just { editData | ht = t } }
+                updateAddNew { model | editData = Just { editData | ht = Just t } }
 
             UpdateBmi editData t ->
-                updateAddNew { model | editData = Just { editData | bmi = t } }
+                updateAddNew { model | editData = Just { editData | bmi = Just t } }
 
             UpdateDate t ->
                 case model.editData of
@@ -257,51 +256,37 @@ update msg model patientId =
                         Debug.crash "whoops"
 
 
-getColumns : Table.State -> List (Table.Column Row Msg)
-getColumns state =
-    let
-        dropDownItems row =
-            [ ( "e-edit", "Edit", onClick (Edit row) )
-            , ( "e-contextdelete", "Delete", onClick (DeletePrompt row.id) )
-            ]
-    in
-        [ Table.stringColumn "BP" (\t -> t.bp)
-        , Table.stringColumn "HR" (\t -> t.hr)
-        , Table.stringColumn "R" (\t -> t.r)
-        , Table.stringColumn "T" (\t2 -> t2.t)
-        , Table.stringColumn "O2" (\t -> t.o2)
-        , Table.stringColumn "WT" (\t -> t.wt)
-        , Table.stringColumn "HT" (\t -> t.ht)
-        , Table.stringColumn "BMI" (\t -> t.bmi)
-        , Table.stringColumn "Date" (\t -> defaultDate t.date)
-        , Table.dropdownColumn (\t -> Table.dropdownDetails (dropDownItems t) t.id state SetTableState)
+getColumns =
+    [ Table.stringColumn "BP" (\t -> t.bp)
+    , Table.stringColumn "HR" (\t -> t.hr)
+    , Table.stringColumn "R" (\t -> t.r)
+    , Table.stringColumn "T" (\t2 -> t2.t)
+    , Table.stringColumn "O2" (\t -> t.o2)
+    , Table.stringColumn "WT" (\t -> t.wt)
+    , Table.stringColumn "HT" (\t -> t.ht)
+    , Table.stringColumn "BMI" (\t -> t.bmi)
+    , Table.dateColumn "Date" (\t -> t.date)
+    , Table.dropdownColumn
+        [ ( "e-edit", "Edit", Edit )
+        , ( "e-contextdelete", "Delete", DeletePrompt )
         ]
+    ]
 
 
-config : Table.State -> Table.Config Row Msg
-config state =
-    let
-        buttons =
-            [ ( "e-addnew", onClick Add ) ]
-    in
-        Table.customConfig
-            { toId = \t -> toString t.id
-            , toMsg = SetTableState
-            , columns = getColumns state
-            , customizations =
-                { defaultCustomizations
-                    | tableAttrs = standardTableAttrs "RecordTable"
-                    , thead = standardTheadNoFilters
-                    , theadButtons = buttons
-                }
-            }
+gridConfig =
+    { domTableId = "LastKnownVitalsTable"
+    , toolbar =
+        [ ( "e-addnew", Add ) ]
+    , toMsg = SetTableState
+    , columns = getColumns
+    }
 
 
 emptyModel : Model
 emptyModel =
     { editData = Nothing
     , rows = []
-    , tableState = Table.initialSort "Date"
+    , tableState = Table.init "Date"
     , showValidationErrors = False
     }
 
@@ -324,14 +309,14 @@ getEditData maybeRow =
 
         Nothing ->
             { id = Nothing
-            , bp = ""
-            , hr = ""
-            , r = ""
-            , t = ""
-            , o2 = ""
-            , wt = ""
-            , ht = ""
-            , bmi = ""
+            , bp = Nothing
+            , hr = Nothing
+            , r = Nothing
+            , t = Nothing
+            , o2 = Nothing
+            , wt = Nothing
+            , ht = Nothing
+            , bmi = Nothing
             , date = Nothing
             }
 
@@ -341,14 +326,14 @@ encodeEditData newRecord patientId =
     Encode.object
         [ ( "Id", maybeVal Encode.int <| newRecord.id )
         , ( "PatientId", Encode.int <| patientId )
-        , ( "BP", Encode.string <| newRecord.bp )
-        , ( "HR", Encode.string <| newRecord.hr )
-        , ( "R", Encode.string <| newRecord.r )
-        , ( "T", Encode.string <| newRecord.t )
-        , ( "O2", Encode.string <| newRecord.o2 )
-        , ( "WT", Encode.string <| newRecord.wt )
-        , ( "HT", Encode.string <| newRecord.ht )
-        , ( "BMI", Encode.string <| newRecord.bmi )
+        , ( "BP", maybeVal Encode.string <| newRecord.bp )
+        , ( "HR", maybeVal Encode.string <| newRecord.hr )
+        , ( "R", maybeVal Encode.string <| newRecord.r )
+        , ( "T", maybeVal Encode.string <| newRecord.t )
+        , ( "O2", maybeVal Encode.string <| newRecord.o2 )
+        , ( "WT", maybeVal Encode.string <| newRecord.wt )
+        , ( "HT", maybeVal Encode.string <| newRecord.ht )
+        , ( "BMI", maybeVal Encode.string <| newRecord.bmi )
         , ( "Date", maybeVal Encode.string <| Functions.maybeToDateString <| newRecord.date )
         ]
 
@@ -357,14 +342,14 @@ decodeHospitilizationsRow : Decode.Decoder Row
 decodeHospitilizationsRow =
     Pipeline.decode Row
         |> Pipeline.required "Id" Decode.int
-        |> Pipeline.required "BP" Decode.string
-        |> Pipeline.required "HR" Decode.string
-        |> Pipeline.required "R" Decode.string
-        |> Pipeline.required "T" Decode.string
-        |> Pipeline.required "O2" Decode.string
-        |> Pipeline.required "WT" Decode.string
-        |> Pipeline.required "HT" Decode.string
-        |> Pipeline.required "BMI" Decode.string
+        |> Pipeline.required "BP" (Decode.maybe Decode.string)
+        |> Pipeline.required "HR" (Decode.maybe Decode.string)
+        |> Pipeline.required "R" (Decode.maybe Decode.string)
+        |> Pipeline.required "T" (Decode.maybe Decode.string)
+        |> Pipeline.required "O2" (Decode.maybe Decode.string)
+        |> Pipeline.required "WT" (Decode.maybe Decode.string)
+        |> Pipeline.required "HT" (Decode.maybe Decode.string)
+        |> Pipeline.required "BMI" (Decode.maybe Decode.string)
         |> Pipeline.required "Date" (Decode.maybe Decode.string)
 
 

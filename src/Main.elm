@@ -10,6 +10,7 @@ import Allergies
 import Immunizations
 import LastKnownVitals
 import Billing
+import Demographics
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Common.Route as Route exposing (Route)
@@ -31,7 +32,6 @@ type Page
     = None
     | Billing Billing.Model
     | ClinicalSummary ClinicalSummary.Model
-    | Records Records.Model
     | PastMedicalHistory PastMedicalHistory.Model
     | Hospitilizations Hospitilizations.Model
     | Allergies Allergies.Model
@@ -75,20 +75,17 @@ view model =
         None ->
             div [] [ text "no view here" ]
 
-        RecordsPage ->
-            Html.map RecordsMsg (Records.view model.recordsState model.flags.recordType)
+        Records subModel ->
+            Html.map RecordsMsg (Records.view subModel)
 
-        DemographicsPage ->
-            Html.map DemographicsMsg (Demographics.view model.demographicsState)
+        Demographics subModel ->
+            Html.map DemographicsMsg (Demographics.view subModel)
 
         Billing subModel ->
             Html.map BillingMsg (Billing.view subModel model.addEditDataSource)
 
         ClinicalSummary subModel ->
             Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel model.patientId)
-
-        Records subModel ->
-            Html.map RecordsMsg (Records.view subModel model.addEditDataSource)
 
         PastMedicalHistory subModel ->
             Html.map PastMedicalHistoryMsg (PastMedicalHistory.view subModel model.addEditDataSource)
@@ -119,16 +116,13 @@ pageSubscriptions page =
             Sub.map RecordsMsg Records.subscriptions
 
         Demographics _ ->
-            Sub.map DemographicsMsg (Demographics.subscriptions model.demographicsState model.flags.patientId)
+            Sub.map DemographicsMsg Demographics.subscriptions
 
         Billing _ ->
             Sub.map BillingMsg Billing.subscriptions
 
         ClinicalSummary _ ->
             Sub.map ClinicalSummaryMsg ClinicalSummary.subscriptions
-
-        Records _ ->
-            Sub.map RecordsMsg Records.subscriptions
 
         PastMedicalHistory _ ->
             Sub.map PastMedicalHistoryMsg PastMedicalHistory.subscriptions
@@ -153,7 +147,6 @@ type Msg
     = SetRoute (Maybe Route)
     | BillingMsg Billing.Msg
     | ClinicalSummaryMsg ClinicalSummary.Msg
-    | RecordsMsg Records.Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | PastMedicalHistoryMsg PastMedicalHistory.Msg
     | HospitilizationsMsg Hospitilizations.Msg
@@ -180,7 +173,7 @@ setRoute maybeRoute model =
     in
         case maybeRoute of
             Just Route.Demographics ->
-                { model | page = Demographics Demographics.emptyModel }
+                { model | page = Demographics (Demographics.emptyModel model.patientId) }
                     ! cmds [ Cmd.map DemographicsMsg (Demographics.init model.patientId) ]
 
             Just Route.Billing ->
@@ -200,7 +193,7 @@ setRoute maybeRoute model =
                     ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
 
             Just (Route.Records t) ->
-                { model | page = Records (Records.emptyModel t model.addEditDataSource) }
+                { model | page = Records (Records.emptyModel t) }
                     ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
 
             Just Route.Allergies ->
@@ -220,6 +213,10 @@ setRoute maybeRoute model =
 
             Just (Route.Error str) ->
                 { model | page = Error str } ! []
+
+            Just _ ->
+                -- TODO, dangerous, don't leave this
+                model ! []
 
             Nothing ->
                 { model | page = Error "no route provided" } ! []

@@ -26,6 +26,7 @@ port module Common.Functions
         , getResponseError
         , decodeDropdownItem
         , postRequest
+        , postJsonRequest
         , getDesc
         , getRecordTypeById
         , getId
@@ -260,6 +261,19 @@ postRequest body url =
     Http.request
         { body = body |> Http.jsonBody
         , expect = Http.expectString
+        , headers = []
+        , method = "POST"
+        , timeout = Nothing
+        , url = url
+        , withCredentials = False
+        }
+
+
+postJsonRequest : Encode.Value -> String -> Decoder a -> Http.Request a
+postJsonRequest body url decoder =
+    Http.request
+        { body = body |> Http.jsonBody
+        , expect = Http.expectJson decoder
         , headers = []
         , method = "POST"
         , timeout = Nothing

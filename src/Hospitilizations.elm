@@ -3,8 +3,6 @@ port module Hospitilizations exposing (Msg, Model, emptyModel, subscriptions, in
 import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
-import Common.Table as Table exposing (defaultCustomizations)
-import Common.Grid exposing (checkColumn, standardTableAttrs, standardTheadNoFilters)
 import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), DropdownItem, AddEditDataSource)
 import Common.Functions as Functions exposing (defaultString, defaultDate, sendMenuMessage, setUnsavedChanges, maybeVal, maybeToDateString)
 import Common.Route as Route
@@ -20,6 +18,7 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Common.Table as Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn, htmlColumn)
 
 
 port initHospitilizations : SyncfusionData -> Cmd msg
@@ -42,7 +41,7 @@ init patientId =
 
 
 type alias Model =
-    { rows : List HospitilizationsRow
+    { rows : List Row
     , facilityId : Maybe Int
     , tableState : Table.State
     , editData : Maybe EditData
@@ -53,8 +52,8 @@ type alias Model =
 type alias EditData =
     { sfData : SyncfusionData
     , patientReported : Bool
-    , chiefComplaint : String
-    , dischargeRecommendations : String
+    , chiefComplaint : Maybe String
+    , dischargeRecommendations : Maybe String
     }
 
 
@@ -76,7 +75,7 @@ type alias SyncfusionData =
     }
 
 
-type alias HospitilizationsRow =
+type alias Row =
     { id : Int
     , facilityName : Maybe String
     , dateOfAdmission : Maybe String
@@ -93,10 +92,10 @@ type alias HospitilizationsRow =
     , facilityId : Maybe Int
     , patientReported : Bool
     , hospitalServiceTypeId : Maybe Int
-    , chiefComplaint : String
+    , chiefComplaint : Maybe String
     , admitDiagnosisId : Maybe Int
     , dischargeDiagnosisId : Maybe Int
-    , dischargeRecommendations : String
+    , dischargeRecommendations : Maybe String
     , dischargePhysicianId : Maybe Int
     , facilityId2 : Maybe Int
     , dateOfAdmission2 : Maybe String
@@ -129,7 +128,7 @@ view model addEditDataSource =
             div []
                 [ h4 [] [ text "Hospitilizations" ]
                 , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view (config addEditDataSource model.tableState) model.tableState model.rows ]
+                    [ Table.view model.tableState model.rows (gridConfig addEditDataSource) Nothing ]
                 ]
 
         Just editData ->
@@ -156,16 +155,17 @@ view model addEditDataSource =
 
 
 type Msg
-    = Load (Result Http.Error (List HospitilizationsRow))
+    = Load (Result Http.Error (List Row))
     | SetTableState Table.State
-    | DeletePrompt Int
+    | DeletePrompt Row
     | DeleteHospitilizationConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | Add AddEditDataSource
-    | Edit HospitilizationsRow AddEditDataSource
+    | Edit AddEditDataSource Row
     | SendMenuMessage Int String
     | Save EditData
     | SaveCompleted (Result Http.Error String)
+    | NoOp
     | Cancel
     | UpdateHospitilizationsInitData SyncfusionData
     | UpdatePatientReported EditData Bool
@@ -192,8 +192,8 @@ update msg model patientId =
             SendMenuMessage recordId messageType ->
                 model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
-            DeletePrompt rowId ->
-                model ! [ Functions.deletePrompt rowId ]
+            DeletePrompt row ->
+                model ! [ Functions.deletePrompt row.id ]
 
             DeleteHospitilizationConfirmed rowId ->
                 let
@@ -221,7 +221,7 @@ update msg model patientId =
                 in
                     { model | editData = Just editData } ! [ initHospitilizations editData.sfData ]
 
-            Edit row addEditDataSource ->
+            Edit addEditDataSource row ->
                 let
                     editData =
                         getEditData addEditDataSource (Just row)
@@ -254,6 +254,9 @@ update msg model patientId =
             SaveCompleted (Err t) ->
                 model ! [ Functions.displayErrorMessage (toString t) ]
 
+            NoOp ->
+                model ! []
+
             Cancel ->
                 model ! [ setUnsavedChanges False, Route.modifyUrl Route.Hospitilizations ]
 
@@ -273,86 +276,63 @@ update msg model patientId =
                 updateAddNew { model | editData = Just { editData | patientReported = t } }
 
             UpdateChiefComplaint editData t ->
-                updateAddNew { model | editData = Just { editData | chiefComplaint = t } }
+                updateAddNew { model | editData = Just { editData | chiefComplaint = Just t } }
 
             UpdateDischargeRecommendations editData t ->
-                updateAddNew { model | editData = Just { editData | dischargeRecommendations = t } }
+                updateAddNew { model | editData = Just { editData | dischargeRecommendations = Just t } }
 
 
-getColumns : Maybe AddEditDataSource -> Table.State -> List (Table.Column HospitilizationsRow Msg)
-getColumns addEditDataSource state =
+getColumns addEditDataSource =
     let
-        dropDownItems row =
+        dropDownItems =
             case addEditDataSource of
                 Just t ->
-                    [ ( "e-edit", "Edit", onClick (Edit row t) )
-                    , ( "e-contextdelete", "Delete", onClick (DeletePrompt row.id) )
+                    [ ( "e-edit", "Edit", Edit t )
+                    , ( "e-contextdelete", "Delete", DeletePrompt )
                     ]
 
                 Nothing ->
                     []
     in
-        [ Table.stringColumn "ID" (\t -> toString t.id)
-        , Table.stringColumn "Facility Name" (\t -> defaultString t.facilityName)
-        , Table.stringColumn "Date Of Admission" (\t -> defaultDate t.dateOfAdmission)
-        , Table.stringColumn "Admit Problem" (\t -> defaultString t.admitProblem)
-        , Table.stringColumn "Date Of Discharge" (\t -> defaultDate t.dateOfDischarge)
-        , Table.stringColumn "Discharge Problem" (\t -> defaultString t.dischargeProblem)
-        , Table.stringColumn "Svc Type" (\t -> defaultString t.serviceType)
+        [ Table.stringColumn "ID" (\t -> Just <| toString t.id)
+        , Table.stringColumn "Facility Name" (\t -> t.facilityName)
+        , Table.stringColumn "Date Of Admission" (\t -> t.dateOfAdmission)
+        , Table.stringColumn "Admit Problem" (\t -> t.admitProblem)
+        , Table.stringColumn "Date Of Discharge" (\t -> t.dateOfDischarge)
+        , Table.stringColumn "Discharge Problem" (\t -> t.dischargeProblem)
+        , Table.stringColumn "Svc Type" (\t -> t.serviceType)
         , checkColumn "Is From TCM" (\t -> t.fromTcm)
-        , customColumn
-        , Table.dropdownColumn (\t -> Table.dropdownDetails (dropDownItems t) t.id state SetTableState)
+        , Table.hrefColumnExtra "File" hrefCustom
+        , Table.dropdownColumn dropDownItems
         ]
 
 
-customColumn : Table.Column HospitilizationsRow Msg
-customColumn =
-    Table.veryCustomColumn
-        { name = "Has File"
-        , viewData = viewCustomColumn
-        , sorter = Table.unsortable
-        }
+hrefCustom row =
+    case row.recordId of
+        Just t ->
+            div [ class "RecordTableHref", onClick (SendMenuMessage t "ViewFile") ] [ text "File" ]
+
+        Nothing ->
+            div [] []
 
 
-viewCustomColumn : HospitilizationsRow -> Table.HtmlDetails Msg
-viewCustomColumn { recordId } =
-    Table.HtmlDetails []
-        [ case recordId of
+gridConfig addEditDataSource =
+    { domTableId = "HospitilizationsTable"
+    , toolbar =
+        case addEditDataSource of
             Just t ->
-                div [ class "RecordTableHref", onClick (SendMenuMessage t "ViewFile") ] [ text "File" ]
+                [ ( "e-addnew e-loaded", Add t ) ]
 
             Nothing ->
-                div [] []
-        ]
+                [ ( "e-addnew e-disable", NoOp ) ]
+    , toMsg = SetTableState
+    , columns = getColumns addEditDataSource
+    }
 
 
-config : Maybe AddEditDataSource -> Table.State -> Table.Config HospitilizationsRow Msg
-config addEditDataSource state =
-    let
-        buttons =
-            case addEditDataSource of
-                Just t ->
-                    [ ( "e-addnew", onClick (Add t) ) ]
-
-                Nothing ->
-                    []
-    in
-        Table.customConfig
-            { toId = \t -> toString t.id
-            , toMsg = SetTableState
-            , columns = getColumns addEditDataSource state
-            , customizations =
-                { defaultCustomizations
-                    | tableAttrs = standardTableAttrs "RecordTable"
-                    , thead = standardTheadNoFilters
-                    , theadButtons = buttons
-                }
-            }
-
-
-decodeHospitilizationsRow : Decode.Decoder HospitilizationsRow
-decodeHospitilizationsRow =
-    Pipeline.decode HospitilizationsRow
+decodeRow : Decode.Decoder Row
+decodeRow =
+    Pipeline.decode Row
         |> Pipeline.required "Id" Decode.int
         |> Pipeline.required "FacilityName" (Decode.maybe Decode.string)
         |> Pipeline.required "DateOfAdmission" (Decode.maybe Decode.string)
@@ -368,10 +348,10 @@ decodeHospitilizationsRow =
         |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
         |> Pipeline.required "PatientReported" Decode.bool
         |> Pipeline.required "HospitalServiceTypeId" (Decode.maybe Decode.int)
-        |> Pipeline.required "ChiefComplaint" Decode.string
+        |> Pipeline.required "ChiefComplaint" (Decode.maybe Decode.string)
         |> Pipeline.required "AdmitDiagnosisId" (Decode.maybe Decode.int)
         |> Pipeline.required "DischargeDiagnosisId" (Decode.maybe Decode.int)
-        |> Pipeline.required "DischargeRecommendations" Decode.string
+        |> Pipeline.required "DischargeRecommendations" (Decode.maybe Decode.string)
         |> Pipeline.required "DischargePhysicianId" (Decode.maybe Decode.int)
         |> Pipeline.required "FacilityId2" (Decode.maybe Decode.int)
         |> Pipeline.required "DateOfAdmission2" (Decode.maybe Decode.string)
@@ -383,9 +363,9 @@ deleteHospitilization rowId deleteCompleted =
     Http.send deleteCompleted <| Http.getString ("/People/DeleteHospitilization?id=" ++ toString rowId)
 
 
-getLoadedState : Model -> List HospitilizationsRow -> Model
-getLoadedState model hospitilizationsRow =
-    { model | rows = hospitilizationsRow }
+getLoadedState : Model -> List Row -> Model
+getLoadedState model rows =
+    { model | rows = rows }
 
 
 emptyModel : Model
@@ -393,13 +373,13 @@ emptyModel =
     { editData = Nothing
     , rows = []
     , facilityId = Nothing
-    , tableState = Table.initialSort "Date"
+    , tableState = Table.init "Date"
     , showValidationErrors = False
     }
 
 
-emptyHospitilizationRow : HospitilizationsRow
-emptyHospitilizationRow =
+emptyRow : Row
+emptyRow =
     { id = -1
     , facilityName = Nothing
     , dateOfAdmission = Nothing
@@ -416,10 +396,10 @@ emptyHospitilizationRow =
     , facilityId = Nothing
     , patientReported = False
     , hospitalServiceTypeId = Nothing
-    , chiefComplaint = ""
+    , chiefComplaint = Nothing
     , admitDiagnosisId = Nothing
     , dischargeDiagnosisId = Nothing
-    , dischargeRecommendations = ""
+    , dischargeRecommendations = Nothing
     , dischargePhysicianId = Nothing
     , facilityId2 = Nothing
     , dateOfAdmission2 = Nothing
@@ -427,7 +407,7 @@ emptyHospitilizationRow =
     }
 
 
-getEditData : AddEditDataSource -> Maybe HospitilizationsRow -> EditData
+getEditData : AddEditDataSource -> Maybe Row -> EditData
 getEditData addEditDataSource maybeRow =
     case maybeRow of
         Just row ->
@@ -440,35 +420,35 @@ getEditData addEditDataSource maybeRow =
         Nothing ->
             { sfData = getHospitilizationsInitData addEditDataSource maybeRow
             , patientReported = False
-            , chiefComplaint = ""
-            , dischargeRecommendations = ""
+            , chiefComplaint = Nothing
+            , dischargeRecommendations = Nothing
             }
 
 
-getHospitilizationsInitData : AddEditDataSource -> Maybe HospitilizationsRow -> SyncfusionData
-getHospitilizationsInitData addEditDataSource maybeHospitilizationsRow =
+getHospitilizationsInitData : AddEditDataSource -> Maybe Row -> SyncfusionData
+getHospitilizationsInitData addEditDataSource maybeRow =
     let
-        hospitilizationsRow =
-            Maybe.withDefault emptyHospitilizationRow maybeHospitilizationsRow
+        row =
+            Maybe.withDefault emptyRow maybeRow
     in
         { id =
-            if hospitilizationsRow.id == -1 then
+            if row.id == -1 then
                 Nothing
             else
-                Just hospitilizationsRow.id
+                Just row.id
         , facilities = addEditDataSource.facilities
         , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
         , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
         , facilityId = addEditDataSource.facilityId
-        , admitDiagnosisId = hospitilizationsRow.admitDiagnosisId
-        , dischargeDiagnosisId = hospitilizationsRow.dischargeDiagnosisId
-        , facilityId2 = hospitilizationsRow.facilityId2
-        , hospitalServiceTypeId = hospitilizationsRow.hospitalServiceTypeId
-        , dischargePhysicianId = hospitilizationsRow.dischargePhysicianId
-        , dateOfAdmission = hospitilizationsRow.dateOfAdmission
-        , dateOfDischarge = hospitilizationsRow.dateOfDischarge
-        , dateOfAdmission2 = hospitilizationsRow.dateOfAdmission2
-        , dateOfDischarge2 = hospitilizationsRow.dateOfDischarge2
+        , admitDiagnosisId = row.admitDiagnosisId
+        , dischargeDiagnosisId = row.dischargeDiagnosisId
+        , facilityId2 = row.facilityId2
+        , hospitalServiceTypeId = row.hospitalServiceTypeId
+        , dischargePhysicianId = row.dischargePhysicianId
+        , dateOfAdmission = row.dateOfAdmission
+        , dateOfDischarge = row.dateOfDischarge
+        , dateOfAdmission2 = row.dateOfAdmission2
+        , dateOfDischarge2 = row.dateOfDischarge2
         }
 
 
@@ -482,10 +462,10 @@ encodeEditData newRecord patientId =
         , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfAdmission )
         , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfDischarge )
         , ( "HospitalServiceTypeId", maybeVal Encode.int <| newRecord.sfData.hospitalServiceTypeId )
-        , ( "ChiefComplaint", Encode.string <| newRecord.chiefComplaint )
+        , ( "ChiefComplaint", maybeVal Encode.string <| newRecord.chiefComplaint )
         , ( "AdmitDiagnosisId", maybeVal Encode.int <| newRecord.sfData.admitDiagnosisId )
         , ( "DischargeDiagnosisId", maybeVal Encode.int <| newRecord.sfData.dischargeDiagnosisId )
-        , ( "DischargeRecommendations", Encode.string <| newRecord.dischargeRecommendations )
+        , ( "DischargeRecommendations", maybeVal Encode.string <| newRecord.dischargeRecommendations )
         , ( "DischargePhysicianId", maybeVal Encode.int <| newRecord.sfData.dischargePhysicianId )
         , ( "FacilityId2", maybeVal Encode.int <| newRecord.sfData.facilityId2 )
         , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfAdmission2 )
@@ -495,6 +475,6 @@ encodeEditData newRecord patientId =
 
 load : Int -> Cmd Msg
 load patientId =
-    Decode.list decodeHospitilizationsRow
+    Decode.list decodeRow
         |> Http.get ("/People/HospitilizationsGrid?patientId=" ++ toString patientId)
         |> Http.send Load
