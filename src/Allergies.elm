@@ -4,13 +4,13 @@ import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), AddEditDataSource)
-import Common.Functions as Functions exposing (defaultString, sendMenuMessage, setUnsavedChanges, maybeVal)
+import Common.Functions as Functions exposing (sendMenuMessage, setUnsavedChanges, maybeVal)
 import Common.Html exposing (InputControlType(TextInput), getValidationErrors, defaultConfig, fullWidth, makeControls)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
-import Common.Table as Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn)
+import Common.Table as Table
 
 
 subscriptions : Sub Msg
@@ -198,13 +198,12 @@ gridConfig =
         [ ( "e-addnew", Add ) ]
     , toMsg = SetTableState
     , columns =
-        [ stringColumn "Allergy" (\t -> t.allergy)
-        , stringColumn "Reaction" (\t -> t.reaction)
-        , dropdownColumn
-            ([ ( "e-edit", "Edit", Edit )
-             , ( "e-contextdelete", "Delete", DeletePrompt )
-             ]
-            )
+        [ Table.stringColumn "Allergy" .allergy
+        , Table.stringColumn "Reaction" .reaction
+        , Table.dropdownColumn
+            [ ( "e-edit", "Edit", Edit )
+            , ( "e-contextdelete", "Delete", DeletePrompt )
+            ]
         ]
     }
 

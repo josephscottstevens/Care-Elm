@@ -4,13 +4,13 @@ import Html exposing (Html, text, div, button, input, h4)
 import Html.Attributes exposing (class, style, type_, disabled, value)
 import Html.Events exposing (onClick)
 import Common.Html exposing (InputControlType(TextInput, AreaInput, Dropdown, HtmlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
-import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage, DropdownItem)
+import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
 import Common.Dropdown as Dropdown
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required)
-import Common.Table as Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn)
+import Common.Table as Table
 import Http
 
 
@@ -141,7 +141,11 @@ update msg model patientId =
                 ( newDropState, newId, newMsg ) =
                     Dropdown.update dropdownMsg newRecord.providerDropState newRecord.providerId newRecord.addEditDataSource.providers
             in
-                { model | state = AddEdit { newRecord | providerDropState = newDropState, providerId = newId } } ! [ newMsg, Functions.setUnsavedChanges True ]
+                { model
+                    | state =
+                        AddEdit { newRecord | providerDropState = newDropState, providerId = newId }
+                }
+                    ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateNotes newRecord str ->
             { model | state = AddEdit { newRecord | notes = Just str } } ! []
@@ -210,7 +214,15 @@ formInputs newRecord =
     , Dropdown "Provider" Optional newRecord.providerDropState (UpdateProvider newRecord)
     , TextInput "Facility" Optional newRecord.facility (UpdateFacility newRecord)
     , TextInput "Notes" Optional newRecord.notes (UpdateNotes newRecord)
-    , HtmlElement "Treatment" (input [ type_ "textbox", class "e-textbox", disabled True, value (Maybe.withDefault "" newRecord.treatment) ] [])
+    , HtmlElement "Treatment"
+        (input
+            [ type_ "textbox"
+            , class "e-textbox"
+            , disabled True
+            , value (Maybe.withDefault "" newRecord.treatment)
+            ]
+            []
+        )
     , HtmlElement "" (div [ noteStyle ] [ text "*Treatment is deprecated." ])
     ]
 
@@ -227,11 +239,11 @@ gridConfig addEditDataSource =
                 [ ( "e-addnew e-disable", NoOp ) ]
     , toMsg = SetTableState
     , columns =
-        [ stringColumn "Description" .description
-        , stringColumn "Year" .year
-        , stringColumn "Facility" .facility
-        , stringColumn "Provider" .provider
-        , stringColumn "Notes" .notes
+        [ Table.stringColumn "Description" .description
+        , Table.stringColumn "Year" .year
+        , Table.stringColumn "Facility" .facility
+        , Table.stringColumn "Provider" .provider
+        , Table.stringColumn "Notes" .notes
 
         -- TODO, verify dropdown is present
         -- , Table.dropdownColumn (\t -> Table.dropdownDetails (menuItems t) t.id state SetTableState)

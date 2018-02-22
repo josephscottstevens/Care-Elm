@@ -4,7 +4,7 @@ import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), DropdownItem, AddEditDataSource)
-import Common.Functions as Functions exposing (defaultString, defaultDate, sendMenuMessage, setUnsavedChanges, maybeVal, maybeToDateString)
+import Common.Functions as Functions exposing (defaultString, sendMenuMessage, setUnsavedChanges, maybeVal, maybeToDateString)
 import Common.Route as Route
 import Common.Html
     exposing
@@ -18,7 +18,7 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
-import Common.Table as Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn, htmlColumn)
+import Common.Table as Table
 
 
 port initHospitilizations : SyncfusionData -> Cmd msg
@@ -282,6 +282,7 @@ update msg model patientId =
                 updateAddNew { model | editData = Just { editData | dischargeRecommendations = Just t } }
 
 
+getColumns : Maybe AddEditDataSource -> List (Table.Column Row Msg)
 getColumns addEditDataSource =
     let
         dropDownItems =
@@ -294,19 +295,20 @@ getColumns addEditDataSource =
                 Nothing ->
                     []
     in
-        [ Table.stringColumn "ID" (\t -> Just <| toString t.id)
+        [ Table.intColumn "ID" (\t -> Just <| t.id)
         , Table.stringColumn "Facility Name" (\t -> t.facilityName)
         , Table.stringColumn "Date Of Admission" (\t -> t.dateOfAdmission)
         , Table.stringColumn "Admit Problem" (\t -> t.admitProblem)
         , Table.stringColumn "Date Of Discharge" (\t -> t.dateOfDischarge)
         , Table.stringColumn "Discharge Problem" (\t -> t.dischargeProblem)
         , Table.stringColumn "Svc Type" (\t -> t.serviceType)
-        , checkColumn "Is From TCM" (\t -> t.fromTcm)
+        , Table.checkColumn "Is From TCM" (\t -> t.fromTcm)
         , Table.hrefColumnExtra "File" hrefCustom
         , Table.dropdownColumn dropDownItems
         ]
 
 
+hrefCustom : { a | recordId : Maybe Int } -> Html Msg
 hrefCustom row =
     case row.recordId of
         Just t ->
@@ -316,6 +318,7 @@ hrefCustom row =
             div [] []
 
 
+gridConfig : Maybe AddEditDataSource -> Table.Config Row Msg
 gridConfig addEditDataSource =
     { domTableId = "HospitilizationsTable"
     , toolbar =

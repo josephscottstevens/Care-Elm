@@ -1,9 +1,9 @@
-port module Demographics exposing (..)
+port module Demographics exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
 import Html exposing (Html, text, div, span, input, label, h4)
 import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name)
 import Html.Events exposing (onClick, onInput, onCheck)
-import Common.Types exposing (DropdownItem, Flags)
+import Common.Types exposing (DropdownItem)
 import Common.Dropdown as Dropdown
 import Common.Functions as Functions exposing (decodeDropdownItem)
 import Json.Decode as Decode
@@ -257,11 +257,31 @@ maybeToInt maybeStr =
 viewLanguages : List DropdownItem -> PatientLanguagesMap -> Html Msg
 viewLanguages dropdownItems lang =
     div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
-        [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
-            [ input [ type_ "radio", checked lang.isPreferred, name "languageGroup", onCheck (UpdatePreferredLanguage lang) ] [] ]
-        , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ], title "Choose language" ]
+        [ div
+            [ class "inline-block "
+            , style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ]
+            , title "Mark as preferred"
+            ]
+            [ input
+                [ type_ "radio"
+                , checked lang.isPreferred
+                , name "languageGroup"
+                , onCheck (UpdatePreferredLanguage lang)
+                ]
+                []
+            ]
+        , div
+            [ class "inline-block"
+            , style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ]
+            , title "Choose language"
+            ]
             [ Html.map (UpdateLanguage lang) <| Dropdown.view lang.dropState dropdownItems lang.languageId ]
-        , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "Remove", onClick (RemoveLanguage lang) ]
+        , div
+            [ class "inline-block"
+            , style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ]
+            , title "Remove"
+            , onClick (RemoveLanguage lang)
+            ]
             [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
             ]
         ]
@@ -270,13 +290,29 @@ viewLanguages dropdownItems lang =
 viewPhones : List DropdownItem -> PatientPhoneNumber -> Html Msg
 viewPhones dropdownItems phone =
     div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
-        [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
+        [ div
+            [ class "inline-block "
+            , style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ]
+            , title "Mark as preferred"
+            ]
             [ input [ type_ "radio", checked phone.isPreferred, name "phoneGroup", onCheck (UpdatePreferredPhone phone) ] [] ]
-        , div [ class "inline-block", style [ ( "width", "100px" ), ( "vertical-align", "middle" ) ], title "Mark as primary" ]
+        , div
+            [ class "inline-block"
+            , style [ ( "width", "100px" ), ( "vertical-align", "middle" ) ]
+            , title "Mark as primary"
+            ]
             [ Html.map (UpdatePhoneType phone) <| Dropdown.view phone.dropState dropdownItems phone.phoneNumberTypeId ]
-        , div [ class "inline-block", style [ ( "width", "calc(100% - 155px)" ), ( "vertical-align", "middle" ) ] ]
+        , div
+            [ class "inline-block"
+            , style [ ( "width", "calc(100% - 155px)" ), ( "vertical-align", "middle" ) ]
+            ]
             [ MaskedNumber.input (inputOptions phone) [ class "e-textbox", maskStyle ] phone.maskState (maybeToInt phone.phoneNumber) ]
-        , div [ class "inline-block", style [ ( "width", "32px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemovePhone phone) ]
+        , div
+            [ class "inline-block"
+            , style [ ( "width", "32px" ), ( "vertical-align", "middle" ) ]
+            , title "remove"
+            , onClick (RemovePhone phone)
+            ]
             [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
             ]
         ]
@@ -287,11 +323,22 @@ viewAddress dropdownItems address =
     div [ class "multi-address-template" ]
         [ div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
             [ div [ title "Mark as primary", class "col-xs-6 padding-h-0 inline-block" ]
-                [ input [ type_ "radio", checked address.isPreferred, style [ ( "margin-top", "0px" ), vertCent ], onCheck (UpdatePreferredAddress address), name "addressGroup" ] []
+                [ input
+                    [ type_ "radio"
+                    , checked address.isPreferred
+                    , style [ ( "margin-top", "0px" ), vertCent ]
+                    , onCheck (UpdatePreferredAddress address)
+                    , name "addressGroup"
+                    ]
+                    []
                 , label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Primary" ]
                 ]
             , div [ class "col-xs-6 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address) ]
-                [ span [ style [ ( "padding-right", "20px" ), ( "padding-top", "5px" ) ], class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer pull-right" ] []
+                [ span
+                    [ style [ ( "padding-right", "20px" ), ( "padding-top", "5px" ) ]
+                    , class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer pull-right"
+                    ]
+                    []
                 ]
             ]
         , div [ class "col-xs-12 padding-h-0", style [ ( "padding-bottom", "20px" ) ] ]
@@ -299,19 +346,37 @@ viewAddress dropdownItems address =
                 [ div []
                     [ label [ class "required" ] [ text "Address Line 1:" ]
                     , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine1, onInput (UpdateAddressLine1 address) ] []
+                        [ input
+                            [ class "e-textbox"
+                            , type_ "text"
+                            , maybeValue address.addressLine1
+                            , onInput (UpdateAddressLine1 address)
+                            ]
+                            []
                         ]
                     ]
                 , div []
                     [ label [] [ text "Address Line 2:" ]
                     , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine2, onInput (UpdateAddressLine2 address) ] []
+                        [ input
+                            [ class "e-textbox"
+                            , type_ "text"
+                            , maybeValue address.addressLine2
+                            , onInput (UpdateAddressLine2 address)
+                            ]
+                            []
                         ]
                     ]
                 , div []
                     [ label [] [ text "Apt./Room No.:" ]
                     , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine3, onInput (UpdateAddressLine3 address) ] []
+                        [ input
+                            [ class "e-textbox"
+                            , type_ "text"
+                            , maybeValue address.addressLine3
+                            , onInput (UpdateAddressLine3 address)
+                            ]
+                            []
                         ]
                     ]
                 ]
@@ -319,7 +384,13 @@ viewAddress dropdownItems address =
                 [ div []
                     [ label [ class "required" ] [ text "City:" ]
                     , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.city, onInput (UpdateCity address) ] []
+                        [ input
+                            [ class "e-textbox"
+                            , type_ "text"
+                            , maybeValue address.city
+                            , onInput (UpdateCity address)
+                            ]
+                            []
                         ]
                     ]
                 , div [ class "margin-bottom-5" ]
@@ -331,7 +402,14 @@ viewAddress dropdownItems address =
                 , div []
                     [ label [ class "required" ] [ text "Zip Code:" ]
                     , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.zipCode, onInput (UpdateZipcode address), maxlength 5 ] []
+                        [ input
+                            [ class "e-textbox"
+                            , type_ "text"
+                            , maybeValue address.zipCode
+                            , onInput (UpdateZipcode address)
+                            , maxlength 5
+                            ]
+                            []
                         ]
                     ]
                 ]
@@ -445,7 +523,7 @@ togglePreferred nodeId t =
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
-update msg model patientId =
+update msg model _ =
     case msg of
         Load (Ok serverResponse) ->
             let
@@ -663,8 +741,8 @@ update msg model patientId =
                 updateLanguage model { t | dropState = newDropState, languageId = newId }
                     ! [ newMsg, Functions.setUnsavedChanges True ]
 
-        InputChanged patientPhoneNumber value ->
-            updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString value } ! [ Functions.setUnsavedChanges True ]
+        InputChanged patientPhoneNumber t ->
+            updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString t } ! [ Functions.setUnsavedChanges True ]
 
         InputStateChanged patientPhoneNumber maskState ->
             updatePhones model { patientPhoneNumber | maskState = maskState } ! [ Functions.setUnsavedChanges True ]

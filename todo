@@ -11,6 +11,9 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO: 
+
+Demographics sfcheckbox isn't used?
+
 validation errors don't have . at the end
 validation error for phone numbers aren't formatted
 

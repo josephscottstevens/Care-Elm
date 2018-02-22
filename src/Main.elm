@@ -1,6 +1,7 @@
-port module Main exposing (main)
+module Main exposing (main)
 
 import Html exposing (Html, text, div)
+import Billing
 import Demographics
 import ClinicalSummary
 import Records
@@ -9,8 +10,6 @@ import Hospitilizations
 import Allergies
 import Immunizations
 import LastKnownVitals
-import Billing
-import Demographics
 import Common.SharedView as SharedView
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)

@@ -182,12 +182,6 @@ gridConfig : Maybe AddEditDataSource -> Table.Config Row Msg
 gridConfig addEditDataSource =
     { domTableId = "RecordTable"
     , toolbar = []
-
-    -- case addEditDataSource of
-    --     Just t ->
-    --         [ ( "e-addnew", Add t recordType ) ]
-    --     Nothing ->
-    --         [ ( "e-addnew e-disable", NoOp ) ]
     , toMsg = SetTableState
     , columns = getColumns addEditDataSource
     }

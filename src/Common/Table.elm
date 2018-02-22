@@ -16,7 +16,7 @@ module Common.Table
         , htmlColumn
         )
 
-import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
+import Html exposing (Html, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
 import Html.Attributes exposing (class, id, style, type_, target, colspan, classList, href, disabled, checked)
 import Html.Events as Events
 import Common.Functions as Functions

@@ -21,8 +21,8 @@ module Common.Html
         , defaultConfig
         )
 
-import Html exposing (Html, text, div, button, input, label, textarea, i)
-import Html.Attributes exposing (class, type_, id, value, for, name, readonly, style, checked)
+import Html exposing (Html, text, div, button, input, label, textarea)
+import Html.Attributes exposing (class, type_, id, value, for, name, style, checked)
 import Html.Events exposing (onInput, onCheck)
 import Common.Functions exposing (isAlpha)
 import Common.Types as Common
@@ -98,7 +98,15 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ input [ type_ "textbox", class "e-textbox", nameAttr labelText, idAttr labelText, onInput event, value (Maybe.withDefault "" displayValue) ] []
+                            [ input
+                                [ type_ "textbox"
+                                , class "e-textbox"
+                                , nameAttr labelText
+                                , idAttr labelText
+                                , onInput event
+                                , value (Maybe.withDefault "" displayValue)
+                                ]
+                                []
                             ]
                         ]
 
@@ -106,7 +114,15 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ input [ type_ "number", class "e-textbox", nameAttr labelText, idAttr labelText, onInput event, value <| toString displayValue ] []
+                            [ input
+                                [ type_ "number"
+                                , class "e-textbox"
+                                , nameAttr labelText
+                                , idAttr labelText
+                                , onInput event
+                                , value <| toString displayValue
+                                ]
+                                []
                             ]
                         ]
 
@@ -114,7 +130,15 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ input [ type_ "checkbox", checkStyle, nameAttr labelText, idAttr labelText, onCheck event, checked displayValue ] []
+                            [ input
+                                [ type_ "checkbox"
+                                , checkStyle
+                                , nameAttr labelText
+                                , idAttr labelText
+                                , onCheck event
+                                , checked displayValue
+                                ]
+                                []
                             ]
                         ]
 
@@ -122,14 +146,26 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ textarea [ idAttr labelText, class "e-textbox", onInput event, value (Maybe.withDefault "" displayValue) ] [] ]
+                            [ textarea
+                                [ idAttr labelText
+                                , class "e-textbox"
+                                , onInput event
+                                , value (Maybe.withDefault "" displayValue)
+                                ]
+                                []
+                            ]
                         ]
 
                 DropInput labelText requiredType _ syncfusionId ->
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ input [ type_ "text", id syncfusionId ] [] ]
+                            [ input
+                                [ type_ "text"
+                                , id syncfusionId
+                                ]
+                                []
+                            ]
                         ]
 
                 KnockInput _ _ syncfusionId ->

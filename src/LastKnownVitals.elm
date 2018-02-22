@@ -10,7 +10,7 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
-import Common.Table as Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn)
+import Common.Table as Table
 
 
 port initLastKnownVitals : Maybe String -> Cmd msg
@@ -256,29 +256,27 @@ update msg model patientId =
                         Debug.crash "whoops"
 
 
-getColumns =
-    [ Table.stringColumn "BP" (\t -> t.bp)
-    , Table.stringColumn "HR" (\t -> t.hr)
-    , Table.stringColumn "R" (\t -> t.r)
-    , Table.stringColumn "T" (\t2 -> t2.t)
-    , Table.stringColumn "O2" (\t -> t.o2)
-    , Table.stringColumn "WT" (\t -> t.wt)
-    , Table.stringColumn "HT" (\t -> t.ht)
-    , Table.stringColumn "BMI" (\t -> t.bmi)
-    , Table.dateColumn "Date" (\t -> t.date)
-    , Table.dropdownColumn
-        [ ( "e-edit", "Edit", Edit )
-        , ( "e-contextdelete", "Delete", DeletePrompt )
-        ]
-    ]
-
-
+gridConfig : Table.Config Row Msg
 gridConfig =
     { domTableId = "LastKnownVitalsTable"
     , toolbar =
         [ ( "e-addnew", Add ) ]
     , toMsg = SetTableState
-    , columns = getColumns
+    , columns =
+        [ Table.stringColumn "BP" (\t -> t.bp)
+        , Table.stringColumn "HR" (\t -> t.hr)
+        , Table.stringColumn "R" (\t -> t.r)
+        , Table.stringColumn "T" (\t2 -> t2.t)
+        , Table.stringColumn "O2" (\t -> t.o2)
+        , Table.stringColumn "WT" (\t -> t.wt)
+        , Table.stringColumn "HT" (\t -> t.ht)
+        , Table.stringColumn "BMI" (\t -> t.bmi)
+        , Table.dateColumn "Date" (\t -> t.date)
+        , Table.dropdownColumn
+            [ ( "e-edit", "Edit", Edit )
+            , ( "e-contextdelete", "Delete", DeletePrompt )
+            ]
+        ]
     }
 
 

@@ -1,6 +1,6 @@
 port module Common.Dropdown exposing (DropState, Msg, init, update, view)
 
-import Html exposing (Html, Attribute, div, span, text, li, ul, input)
+import Html exposing (Html, div, span, text, li, ul, input)
 import Html.Attributes exposing (style, value, class, readonly, placeholder, tabindex, disabled)
 import Html.Events as Events
 import Json.Decode
@@ -199,7 +199,7 @@ view dropdown dropdownItems selectedId =
 
         biggestStrLength =
             dropdownItems
-                |> List.map (\t -> (String.length t.name) * 7)
+                |> List.map (\t -> String.length t.name * 7)
                 |> List.sortBy identity
                 |> List.reverse
                 |> List.head
@@ -306,7 +306,13 @@ updateSearchString searchChar dropdown dropdownItems selectedId =
     in
         case maybeSelectedItem of
             Just t ->
-                ( { dropdown | searchString = searchString, keyboardSelectedIndex = getIndex t.id dropdownItems }, t.id, scrollToDomId dropdown.domId t.id )
+                ( { dropdown
+                    | searchString = searchString
+                    , keyboardSelectedIndex = getIndex t.id dropdownItems
+                  }
+                , t.id
+                , scrollToDomId dropdown.domId t.id
+                )
 
             Nothing ->
                 ( dropdown, selectedId, Cmd.none )

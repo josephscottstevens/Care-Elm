@@ -1,13 +1,6 @@
 module Common.Types exposing (..)
 
 
-type alias Flags =
-    { pageFlag : String
-    , patientId : Int
-    , recordType : Maybe Int
-    }
-
-
 type alias FilterState =
     { name : String
     , value : String
