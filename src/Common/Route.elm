@@ -20,6 +20,8 @@ module Common.Route
         , back
         , getSideNav
         , RouteDesc
+        , Breadcrumb
+        , getBreadcrumbsFromRoute
         )
 
 import Navigation
@@ -86,6 +88,59 @@ getSideNav : List RouteDesc
 getSideNav =
     flattenWithDepth -1.0 nodes
         |> List.map routeToSideNav
+
+
+type alias Breadcrumb =
+    { depth : Float
+    , route : Route
+    , idx : Int
+    }
+
+
+items : List Breadcrumb
+items =
+    nodes
+        |> flattenWithDepth 0
+        |> List.reverse
+        |> List.indexedMap (\idx ( t, depth ) -> Breadcrumb depth t idx)
+
+
+getBreadcrumb : Route -> Maybe Breadcrumb
+getBreadcrumb route =
+    items
+        |> List.map
+            (\t ->
+                if t.route == route then
+                    Just t
+                else
+                    Nothing
+            )
+        |> List.filterMap identity
+        |> List.head
+
+
+getParent : Breadcrumb -> Maybe Breadcrumb
+getParent breadCrumb =
+    items
+        |> List.drop (breadCrumb.idx + 1)
+        |> List.filter (\t -> t.depth < breadCrumb.depth)
+        |> List.head
+
+
+getBreadcrumbs : Maybe Breadcrumb -> List Breadcrumb
+getBreadcrumbs maybeBreadCrumb =
+    case maybeBreadCrumb of
+        Just breadCrumb ->
+            breadCrumb :: (getBreadcrumbs (getParent breadCrumb))
+
+        Nothing ->
+            []
+
+
+getBreadcrumbsFromRoute : Route -> List Breadcrumb
+getBreadcrumbsFromRoute route =
+    getBreadcrumbs (getBreadcrumb route)
+        |> List.reverse
 
 
 type Route
