@@ -74,10 +74,10 @@ view innerView location =
         activeRoute =
             case Route.fromLocation location of
                 Just route ->
-                    toString route
+                    route
 
                 Nothing ->
-                    ""
+                    Route.None
 
         fr amount =
             width <| fillPortion amount
@@ -96,7 +96,7 @@ view innerView location =
         toSideUrl { depth, url, navText } =
             let
                 activeClass =
-                    if navText == activeRoute then
+                    if navText == toString activeRoute then
                         SideNavActive
                     else
                         SideNav
@@ -117,6 +117,14 @@ view innerView location =
             Route.getSideNav
                 |> List.filter (\t -> t.depth /= -1.0)
                 |> List.map toSideUrl
+
+        toBreadCrumbs { route } =
+            el HeaderNavActive [] <| link (Route.routeToString route) <| el None [] (text (toString route))
+
+        headerBreakQuick =
+            Route.getBreadcrumbsFromRoute activeRoute
+                |> List.map toBreadCrumbs
+                |> List.intersperse (el HeaderNavActive [] (text "|"))
     in
         Element.layout stylesheet <|
             column None
@@ -147,22 +155,8 @@ view innerView location =
                         ]
                     ]
                 , row HeaderBreadQuick
-                    []
-                    [ column None
-                        []
-                        [ row None
-                            []
-                            [ text "Home..Profile..Dem"
-                            ]
-                        ]
-                    , column None
-                        []
-                        [ row None
-                            []
-                            [ text "Home..Profile..Dem"
-                            ]
-                        ]
-                    ]
+                    [ spacing 6, paddingTop 9, paddingBottom 9, paddingLeft 10 ]
+                    headerBreakQuick
                 , row None
                     []
                     [ column None

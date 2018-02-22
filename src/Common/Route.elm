@@ -22,6 +22,7 @@ module Common.Route
         , RouteDesc
         , Breadcrumb
         , getBreadcrumbsFromRoute
+        , routeToString
         )
 
 import Navigation
