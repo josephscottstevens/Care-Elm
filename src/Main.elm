@@ -1,6 +1,7 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Html exposing (Html, text, div)
+import Html.Attributes exposing (class)
 import Billing
 import Demographics
 import ClinicalSummary
@@ -18,6 +19,9 @@ import Navigation
 import Http exposing (Error)
 import Json.Decode as Decode exposing (maybe, int, list)
 import Json.Decode.Pipeline exposing (required, decode)
+
+
+port loadPage : String -> Cmd msg
 
 
 type alias Model =
@@ -75,7 +79,7 @@ view model =
         innerView =
             case model.page of
                 None ->
-                    text ""
+                    div [ class "body-content" ] []
 
                 Records subModel ->
                     Html.map RecordsMsg (Records.view subModel)
@@ -218,12 +222,14 @@ setRoute maybeRoute model =
             Just (Route.Error str) ->
                 { model | page = Error str } ! []
 
+            Just Route.Contacts ->
+                model ! [ loadPage "/people/_contacts" ]
+
             Just _ ->
-                -- TODO, dangerous, don't leave this
-                Debug.crash ""
+                model ! []
 
             Nothing ->
-                { model | page = Error "no route provided" } ! []
+                { model | page = Error "no route provided, map me in Route.routeHash" } ! []
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

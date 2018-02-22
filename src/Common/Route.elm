@@ -1,18 +1,6 @@
 module Common.Route
     exposing
-        ( Route
-            ( None
-            , Billing
-            , ClinicalSummary
-            , Records
-            , Hospitilizations
-            , PastMedicalHistory
-            , Error
-            , Allergies
-            , Immunizations
-            , LastKnownVitals
-            , Demographics
-            )
+        ( Route(..)
         , getPatientId
         , fromLocation
         , href
@@ -302,6 +290,10 @@ routeHash =
         , Url.map (Records Common.PreviousHistories) (s "people" </> s "_previoushistoryrecords")
         , Url.map (Records Common.Enrollment) (s "people" </> s "_enrollmentrecords")
         , Url.map (Records Common.Misc) (s "people" </> s "_miscrecords")
+        , Url.map Demographics (s "people" </> s "_demographics")
+
+        --Non Elm pages
+        , Url.map Contacts (s "people" </> s "_contacts")
         ]
 
 
