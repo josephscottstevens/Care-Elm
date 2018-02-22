@@ -9,6 +9,7 @@ import Style.Border as Border
 import Style.Color as Color
 import Style.Font as Font
 import Common.Route as Route
+import Navigation
 
 
 type MyStyles
@@ -22,14 +23,17 @@ type MyStyles
     | None
 
 
+navBlue : Color.Color
 navBlue =
     Color.rgb 51 122 183
 
 
+navBlueActive : Color.Color
 navBlueActive =
     Color.rgb 187 217 238
 
 
+stylesheet : Style.StyleSheet MyStyles variation
 stylesheet =
     styleSheet
         [ style Root
@@ -64,20 +68,25 @@ stylesheet =
         ]
 
 
-view : Html msg -> Html msg
-view innerView =
+view : Html msg -> Navigation.Location -> Html msg
+view innerView location =
     let
-        --     pageBody =
-        --         case model.page of
-        --             NoPage ->
-        --                 div [] []
+        activeRoute =
+            case Route.fromLocation location of
+                Just route ->
+                    toString route
+
+                Nothing ->
+                    ""
+
         fr amount =
             width <| fillPortion amount
 
         toTopUrl navUrl navText =
             let
                 activeClass =
-                    if navText == "Search" then
+                    -- TODO, this needs to bubble up to the parent
+                    if navText == "Home" then
                         HeaderNavActive
                     else
                         HeaderNav
@@ -87,7 +96,7 @@ view innerView =
         toSideUrl { depth, url, navText } =
             let
                 activeClass =
-                    if navText == "Profile" then
+                    if navText == activeRoute then
                         SideNavActive
                     else
                         SideNav

@@ -797,20 +797,3 @@ createSfData addEditDataSource _ =
     , dischargePhysicianId = Nothing
     , dischargePhysicianText = ""
     }
-
-
-getDropDowns : Int -> (Result Http.Error AddEditDataSource -> msg) -> Cmd msg
-getDropDowns patientId t =
-    decode AddEditDataSource
-        |> required "facilityId" (maybe Decode.int)
-        |> required "patientId" Decode.int
-        |> required "facilityDropdown" (Decode.list Functions.decodeDropdownItem)
-        |> required "providersDropdown" (Decode.list Functions.decodeDropdownItem)
-        |> required "recordTypeDropdown" (Decode.list Functions.decodeDropdownItem)
-        |> required "userDropDown" (Decode.list Functions.decodeDropdownItem)
-        |> required "taskDropDown" (Decode.list Functions.decodeDropdownItem)
-        |> required "hospitilizationServiceTypeDropdown" (Decode.list Functions.decodeDropdownItem)
-        |> required "hospitalizationDischargePhysicianDropdown" (Decode.list Functions.decodeDropdownItem)
-        |> required "hospitilizations" (Decode.list Functions.decodeDropdownItem)
-        |> Http.get ("/People/PatientRecordsDropdowns?patientId=" ++ toString patientId)
-        |> Http.send t

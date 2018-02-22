@@ -14,9 +14,9 @@ import Common.SharedView as SharedView
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Common.Route as Route exposing (Route)
-import Navigation exposing (Location)
+import Navigation
 import Http exposing (Error)
-import Json.Decode exposing (maybe, int, list)
+import Json.Decode as Decode exposing (maybe, int, list)
 import Json.Decode.Pipeline exposing (required, decode)
 
 
@@ -24,7 +24,7 @@ type alias Model =
     { patientId : Int
     , page : Page
     , addEditDataSource : Maybe AddEditDataSource
-    , location : Location
+    , location : Navigation.Location
     }
 
 
@@ -42,7 +42,7 @@ type Page
     | Error String
 
 
-init : Location -> ( Model, Cmd Msg )
+init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
     case Route.getPatientId location of
         Just patientId ->
@@ -55,7 +55,7 @@ init location =
 
         Nothing ->
             { patientId = 0
-            , page = Error "Cannot load page without patientId"
+            , page = None
             , addEditDataSource = Nothing
             , location = location
             }
@@ -75,7 +75,7 @@ view model =
         innerView =
             case model.page of
                 None ->
-                    div [] [ text "no view here" ]
+                    text ""
 
                 Records subModel ->
                     Html.map RecordsMsg (Records.view subModel)
@@ -107,7 +107,7 @@ view model =
                 Error str ->
                     div [] [ text str ]
     in
-        SharedView.view innerView
+        SharedView.view innerView model.location
 
 
 pageSubscriptions : Page -> Sub Msg
@@ -287,16 +287,16 @@ updatePage page msg model =
 getDropDowns : Int -> (Result Http.Error AddEditDataSource -> msg) -> Cmd msg
 getDropDowns patientId t =
     decode AddEditDataSource
-        |> required "facilityId" (maybe int)
-        |> required "patientId" int
-        |> required "facilityDropdown" (list Functions.decodeDropdownItem)
-        |> required "providersDropdown" (list Functions.decodeDropdownItem)
-        |> required "recordTypeDropdown" (list Functions.decodeDropdownItem)
-        |> required "userDropDown" (list Functions.decodeDropdownItem)
-        |> required "taskDropDown" (list Functions.decodeDropdownItem)
-        |> required "hospitilizationServiceTypeDropdown" (list Functions.decodeDropdownItem)
-        |> required "hospitalizationDischargePhysicianDropdown" (list Functions.decodeDropdownItem)
-        |> required "hospitilizations" (list Functions.decodeDropdownItem)
+        |> required "facilityId" (maybe Decode.int)
+        |> required "patientId" Decode.int
+        |> required "facilityDropdown" (Decode.list Functions.decodeDropdownItem)
+        |> required "providersDropdown" (Decode.list Functions.decodeDropdownItem)
+        |> required "recordTypeDropdown" (Decode.list Functions.decodeDropdownItem)
+        |> required "userDropDown" (Decode.list Functions.decodeDropdownItem)
+        |> required "taskDropDown" (Decode.list Functions.decodeDropdownItem)
+        |> required "hospitilizationServiceTypeDropdown" (Decode.list Functions.decodeDropdownItem)
+        |> required "hospitalizationDischargePhysicianDropdown" (Decode.list Functions.decodeDropdownItem)
+        |> required "hospitilizations" (Decode.list Functions.decodeDropdownItem)
         |> Http.get ("/People/PatientRecordsDropdowns?patientId=" ++ toString patientId)
         |> Http.send t
 
