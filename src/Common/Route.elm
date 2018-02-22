@@ -10,7 +10,8 @@ module Common.Route
         , RouteDesc
         , Breadcrumb
         , getBreadcrumbsFromRoute
-        , routeToString
+        , routeUrl
+        , routeDescription
         )
 
 import Navigation
@@ -49,8 +50,14 @@ nodes =
         , Parent Providers
             []
         , Parent ClinicalSummary
-            [ Child Tasks
-            , Child Appointments
+            [ Child ClinicalSummary
+            , Child ProblemList
+            , Child Medications
+            , Child PastMedicalHistory
+            , Child Hospitilizations
+            , Child Immunizations
+            , Child Allergies
+            , Child LastKnownVitals
             ]
         ]
 
@@ -68,8 +75,8 @@ flattenWithDepth depth tree =
 routeToSideNav : ( Route, Float ) -> RouteDesc
 routeToSideNav ( route, depth ) =
     { depth = depth
-    , url = routeToString route
-    , navText = toString route
+    , url = routeUrl route
+    , navText = routeDescription route
     }
 
 
@@ -157,6 +164,8 @@ type Route
     | Providers
     | Tasks
     | Appointments
+    | ProblemList
+    | Medications
 
 
 recordTypeToString : Common.RecordType -> String
@@ -193,8 +202,8 @@ recordTypeToString recordType =
             "_miscrecords"
 
 
-routeToString : Route -> String
-routeToString route =
+routeUrl : Route -> String
+routeUrl route =
     case route of
         None ->
             "#"
@@ -265,9 +274,15 @@ routeToString route =
         Appointments ->
             "#/people/_appointments"
 
+        ProblemList ->
+            "#/people/_problemlist"
 
-routeHash : Parser (Route -> a) a
-routeHash =
+        Medications ->
+            "#/people/_medications"
+
+
+routeByHash : Parser (Route -> a) a
+routeByHash =
     oneOf
         [ -- Clinical Summary
           Url.map Demographics (s "people")
@@ -297,8 +312,8 @@ routeHash =
         ]
 
 
-routeUrl : Parser (Route -> a) a
-routeUrl =
+routeByUrl : Parser (Route -> a) a
+routeByUrl =
     oneOf
         [ Url.map Demographics (s "people")
         ]
@@ -313,12 +328,12 @@ getPatientId location =
 
 href : Route -> Attribute msg
 href route =
-    Attr.href (routeToString route)
+    Attr.href (routeUrl route)
 
 
 modifyUrl : Route -> Cmd msg
 modifyUrl =
-    routeToString >> Navigation.newUrl
+    routeUrl >> Navigation.newUrl
 
 
 back : Cmd msg
@@ -329,6 +344,120 @@ back =
 fromLocation : Navigation.Location -> Maybe Route
 fromLocation location =
     if String.isEmpty location.hash then
-        parsePath routeUrl location
+        parsePath routeByUrl location
     else
-        parseHash routeHash location
+        parseHash routeByHash location
+
+
+routeDescription : Route -> String
+routeDescription route =
+    case route of
+        Home ->
+            "Home"
+
+        -- Patients\Profile
+        Profile ->
+            "Profile"
+
+        Demographics ->
+            "Demographic Information"
+
+        Contacts ->
+            "Contacts"
+
+        SocialHistory ->
+            "Social History"
+
+        Employment ->
+            "EmploymentInformation"
+
+        Insurance ->
+            "Insurance Information"
+
+        -- People/Services
+        Services ->
+            "Services"
+
+        CCM ->
+            "CCM"
+
+        TCM ->
+            "TCM"
+
+        -- People/Providers
+        Providers ->
+            "Providers"
+
+        --People/ClinicalSummary
+        ClinicalSummary ->
+            "Clinical Summary"
+
+        ProblemList ->
+            "Problem List"
+
+        Medications ->
+            "Medications"
+
+        PastMedicalHistory ->
+            "Past Medical History"
+
+        Hospitilizations ->
+            "Hospitilizations"
+
+        Immunizations ->
+            "Immunizations & Preventative Screenings"
+
+        Allergies ->
+            "Allergies"
+
+        LastKnownVitals ->
+            "Last Known Vitals"
+
+        --People/Tasks
+        Tasks ->
+            "aaaaaaaaaaaaaa"
+
+        --People/Appointments
+        Appointments ->
+            "Appointments"
+
+        --People/Records
+        Records Common.PrimaryCare ->
+            "Primary Care"
+
+        Records Common.Specialty ->
+            "Specialty"
+
+        Records Common.Labs ->
+            "Labs"
+
+        Records Common.Radiology ->
+            "Radiology / Gen. Study"
+
+        Records Common.Hospitalizations ->
+            "Hospitalizations"
+
+        Records Common.Legal ->
+            "Legal"
+
+        Records Common.CallRecordings ->
+            "Call Recordings"
+
+        Records Common.PreviousHistories ->
+            "Previous Histories"
+
+        Records Common.Enrollment ->
+            "Enrollment"
+
+        Records Common.Misc ->
+            "Miscellaneous"
+
+        --Other
+        None ->
+            ""
+
+        Error t ->
+            t
+
+        Billing ->
+            "Billing"

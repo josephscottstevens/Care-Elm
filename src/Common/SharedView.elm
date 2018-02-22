@@ -96,7 +96,7 @@ view innerView location =
         toSideUrl { depth, url, navText } =
             let
                 activeClass =
-                    if navText == toString activeRoute then
+                    if navText == Route.routeDescription activeRoute then
                         SideNavActive
                     else
                         SideNav
@@ -119,7 +119,7 @@ view innerView location =
                 |> List.map toSideUrl
 
         toBreadCrumbs { route } =
-            el HeaderNavActive [] <| link (Route.routeToString route) <| el None [] (text (toString route))
+            el HeaderNavActive [] <| link (Route.routeUrl route) <| el None [] (text (Route.routeDescription route))
 
         headerBreakQuick =
             Route.getBreadcrumbsFromRoute activeRoute
