@@ -21,7 +21,11 @@ import Json.Decode as Decode exposing (maybe, int, list)
 import Json.Decode.Pipeline exposing (required, decode)
 
 
-port loadPage : String -> Cmd msg
+type alias PageInfo =
+    { action : String, patientId : Int }
+
+
+port loadPage : PageInfo -> Cmd msg
 
 
 type alias Model =
@@ -283,7 +287,9 @@ setRoute maybeRoute model =
             { model | page = page, route = route }
 
         jsLoad route page =
-            { model | page = page, route = route } ! [ loadPage <| String.dropLeft 1 <| Route.routeUrl route ]
+            { model | page = page, route = route }
+                ! [ loadPage { action = String.dropLeft 1 <| Route.routeUrl route, patientId = model.patientId }
+                  ]
     in
         case maybeRoute of
             Just Route.Home ->

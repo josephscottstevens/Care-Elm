@@ -168,6 +168,57 @@ type Route
     | Medications
 
 
+routeByHash : Parser (Route -> a) a
+routeByHash =
+    oneOf
+        [ -- Clinical Summary
+          Url.map Demographics (s "people")
+        , Url.map ClinicalSummary (s "people" </> s "_clinicalsummary")
+        , Url.map PastMedicalHistory (s "people" </> s "_pastmedicalhistory")
+        , Url.map Hospitilizations (s "people" </> s "_hospitalizations")
+        , Url.map Allergies (s "people" </> s "_allergies")
+        , Url.map Immunizations (s "people" </> s "_immunizations")
+        , Url.map LastKnownVitals (s "people" </> s "_vitals")
+
+        -- Records Grid
+        , Url.map (Records Common.PrimaryCare) (s "people" </> s "_primarycarerecords")
+        , Url.map (Records Common.Specialty) (s "people" </> s "_specialtyrecords")
+        , Url.map (Records Common.Labs) (s "people" </> s "_labrecords")
+        , Url.map (Records Common.Radiology) (s "people" </> s "_radiologyrecords")
+        , Url.map (Records Common.Hospitalizations) (s "people" </> s "_hospitalizationrecords")
+        , Url.map (Records Common.Legal) (s "people" </> s "_legalrecords")
+        , Url.map (Records Common.CallRecordings) (s "people" </> s "_callrecordingrecords")
+        , Url.map (Records Common.PreviousHistories) (s "people" </> s "_previoushistoryrecords")
+        , Url.map (Records Common.Enrollment) (s "people" </> s "_enrollmentrecords")
+        , Url.map (Records Common.Misc) (s "people" </> s "_miscrecords")
+        , Url.map Demographics (s "people" </> s "_demographics")
+
+        --Non Elm pages
+        , Url.map Contacts (s "people" </> s "_contacts")
+        , Url.map SocialHistory (s "people" </> s "_socialhistory")
+        , Url.map Employment (s "people" </> s "_employment")
+        , Url.map Insurance (s "people" </> s "_insurance")
+        , Url.map CCM (s "people" </> s "_ccm")
+        , Url.map TCM (s "people" </> s "_tcm")
+        , Url.map Providers (s "people" </> s "_careteam")
+        , Url.map Tasks (s "people" </> s "_tasks")
+        , Url.map Appointments (s "people" </> s "_appointments")
+        , Url.map ProblemList (s "people" </> s "_problemlist")
+        , Url.map Medications (s "people" </> s "_medications")
+
+        -- Other
+        , Url.map Billing (s "people" </> s "_insurance")
+        ]
+
+
+routeByUrl : Parser (Route -> a) a
+routeByUrl =
+    oneOf
+        [ Url.map Home (s "")
+        , Url.map Demographics (s "people")
+        ]
+
+
 routeUrl : Route -> String
 routeUrl route =
     case route of
@@ -282,44 +333,6 @@ routeUrl route =
             "#/people/_insurance"
 
 
-routeByHash : Parser (Route -> a) a
-routeByHash =
-    oneOf
-        [ -- Clinical Summary
-          Url.map Demographics (s "people")
-        , Url.map ClinicalSummary (s "people" </> s "_clinicalsummary")
-        , Url.map PastMedicalHistory (s "people" </> s "_pastmedicalhistory")
-        , Url.map Hospitilizations (s "people" </> s "_hospitalizations")
-        , Url.map Allergies (s "people" </> s "_allergies")
-        , Url.map Immunizations (s "people" </> s "_immunizations")
-        , Url.map LastKnownVitals (s "people" </> s "_vitals")
-        , Url.map Billing (s "people" </> s "_insurance")
-
-        -- Records Grid
-        , Url.map (Records Common.PrimaryCare) (s "people" </> s "_primarycarerecords")
-        , Url.map (Records Common.Specialty) (s "people" </> s "_specialtyrecords")
-        , Url.map (Records Common.Labs) (s "people" </> s "_labrecords")
-        , Url.map (Records Common.Radiology) (s "people" </> s "_radiologyrecords")
-        , Url.map (Records Common.Hospitalizations) (s "people" </> s "_hospitalizationrecords")
-        , Url.map (Records Common.Legal) (s "people" </> s "_legalrecords")
-        , Url.map (Records Common.CallRecordings) (s "people" </> s "_callrecordingrecords")
-        , Url.map (Records Common.PreviousHistories) (s "people" </> s "_previoushistoryrecords")
-        , Url.map (Records Common.Enrollment) (s "people" </> s "_enrollmentrecords")
-        , Url.map (Records Common.Misc) (s "people" </> s "_miscrecords")
-        , Url.map Demographics (s "people" </> s "_demographics")
-
-        --Non Elm pages
-        , Url.map Contacts (s "people" </> s "_contacts")
-        ]
-
-
-routeByUrl : Parser (Route -> a) a
-routeByUrl =
-    oneOf
-        [ Url.map Demographics (s "people")
-        ]
-
-
 getPatientId : Navigation.Location -> Maybe Int
 getPatientId location =
     location
@@ -370,7 +383,7 @@ routeDescription route =
             "Social History"
 
         Employment ->
-            "EmploymentInformation"
+            "Employment Information"
 
         Insurance ->
             "Insurance Information"

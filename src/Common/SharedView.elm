@@ -155,7 +155,7 @@ view innerView activeRoute =
                         [ fr 2 ]
                         sideNav
                     , column None
-                        [ fr 10 ]
+                        [ fr 10, paddingLeft 10, paddingTop 10 ]
                         [ Element.html innerView ]
                     ]
                 ]

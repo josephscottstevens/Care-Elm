@@ -11,7 +11,7 @@ QUESTIONS:
 ===========================================================================================================
 
 TODO: 
-
+re-org routeByHash similar to routeDescription's organization
 Demographics sfcheckbox isn't used?
 demographics is the oddball here with it getting patient ID in init, instead of being passed in update\view
 re-add hover effects for outer shell
