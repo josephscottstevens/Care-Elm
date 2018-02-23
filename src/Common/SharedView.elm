@@ -68,17 +68,9 @@ stylesheet =
         ]
 
 
-view : Html msg -> Navigation.Location -> Html msg
-view innerView location =
+view : Html msg -> Route.Route -> Html msg
+view innerView activeRoute =
     let
-        activeRoute =
-            case Route.fromLocation location of
-                Just route ->
-                    route
-
-                Nothing ->
-                    Route.None
-
         fr amount =
             width <| fillPortion amount
 

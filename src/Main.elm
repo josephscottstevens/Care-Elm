@@ -28,7 +28,7 @@ type alias Model =
     { patientId : Int
     , page : Page
     , addEditDataSource : Maybe AddEditDataSource
-    , location : Navigation.Location
+    , route : Route
     }
 
 
@@ -54,14 +54,14 @@ init location =
                 { patientId = patientId
                 , page = None
                 , addEditDataSource = Nothing
-                , location = location
+                , route = Route.None
                 }
 
         Nothing ->
             { patientId = 0
             , page = None
             , addEditDataSource = Nothing
-            , location = location
+            , route = Route.None
             }
                 ! [ Functions.setLoadingStatus False ]
 
@@ -111,7 +111,7 @@ view model =
                 Error str ->
                     div [] [ text str ]
     in
-        SharedView.view innerView model.location
+        SharedView.view innerView model.route
 
 
 pageSubscriptions : Page -> Sub Msg
@@ -179,8 +179,11 @@ setRoute maybeRoute model =
         cmds t =
             [ getDropdownsCmd, Functions.setLoadingStatus False ] ++ t
 
+        setModel route page =
+            { model | page = page, route = route }
+
         jsLoad t =
-            model ! [ loadPage <| String.dropLeft 1 <| Route.routeUrl t ]
+            { model | route = t } ! [ loadPage <| String.dropLeft 1 <| Route.routeUrl t ]
     in
         case maybeRoute of
             Just Route.Home ->
@@ -191,7 +194,7 @@ setRoute maybeRoute model =
                 jsLoad Route.Profile
 
             Just Route.Demographics ->
-                { model | page = Demographics (Demographics.emptyModel model.patientId) }
+                setModel Route.Demographics (Demographics (Demographics.emptyModel model.patientId))
                     ! cmds [ Cmd.map DemographicsMsg (Demographics.init model.patientId) ]
 
             Just Route.Contacts ->
@@ -222,7 +225,7 @@ setRoute maybeRoute model =
 
             --People/ClinicalSummary
             Just Route.ClinicalSummary ->
-                { model | page = ClinicalSummary ClinicalSummary.emptyModel }
+                setModel Route.ClinicalSummary (ClinicalSummary ClinicalSummary.emptyModel)
                     ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
 
             Just Route.ProblemList ->
@@ -232,23 +235,23 @@ setRoute maybeRoute model =
                 jsLoad Route.Medications
 
             Just Route.PastMedicalHistory ->
-                { model | page = PastMedicalHistory PastMedicalHistory.emptyModel }
+                setModel Route.PastMedicalHistory (PastMedicalHistory PastMedicalHistory.emptyModel)
                     ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
 
             Just Route.Hospitilizations ->
-                { model | page = Hospitilizations Hospitilizations.emptyModel }
+                setModel Route.Hospitilizations (Hospitilizations Hospitilizations.emptyModel)
                     ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
             Just Route.Immunizations ->
-                { model | page = Immunizations Immunizations.emptyModel }
+                setModel Route.Immunizations (Immunizations Immunizations.emptyModel)
                     ! cmds [ Cmd.map ImmunizationsMsg (Immunizations.init model.patientId) ]
 
             Just Route.Allergies ->
-                { model | page = Allergies Allergies.emptyModel }
+                setModel Route.Allergies (Allergies Allergies.emptyModel)
                     ! cmds [ Cmd.map AllergiesMsg (Allergies.init model.patientId) ]
 
             Just Route.LastKnownVitals ->
-                { model | page = LastKnownVitals LastKnownVitals.emptyModel }
+                setModel Route.LastKnownVitals (LastKnownVitals LastKnownVitals.emptyModel)
                     ! cmds [ Cmd.map LastKnownVitalsMsg (LastKnownVitals.init model.patientId) ]
 
             --People/Tasks
@@ -261,22 +264,26 @@ setRoute maybeRoute model =
 
             --People/Records
             Just (Route.Records t) ->
-                { model | page = Records (Records.emptyModel t) }
+                setModel (Route.Records t) (Records (Records.emptyModel t))
                     ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
 
             --Other
             Just Route.Billing ->
-                { model | page = Billing Billing.emptyModel }
+                setModel Route.Billing (Billing Billing.emptyModel)
                     ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
 
             Just Route.None ->
-                model ! []
+                setModel Route.None None
+                    ! []
 
             Just (Route.Error str) ->
-                { model | page = Error str } ! []
+                setModel (Route.Error str) (Error str)
+                    ! []
 
             Nothing ->
-                { model | page = Error "no route provided, map me in Route.routeHash" } ! []
+                setModel (Route.Error "no route provided, map me in Route.routeHash")
+                    (Error "no route provided, map me in Route.routeHash")
+                    ! []
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
