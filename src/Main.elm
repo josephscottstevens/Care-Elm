@@ -1,7 +1,6 @@
 port module Main exposing (main)
 
 import Html exposing (Html, text, div)
-import Html.Attributes exposing (class)
 import Billing
 import Demographics
 import ClinicalSummary
@@ -96,7 +95,7 @@ view : Model -> Html Msg
 view model =
     let
         jsView =
-            div [ class "body-content" ] []
+            div [] []
 
         innerView =
             case model.page of

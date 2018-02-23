@@ -59,7 +59,9 @@ stylesheet =
     styleSheet
         [ style Root
             [ --Font.typeface [ Font.importUrl { url = "https://fonts.googleapis.com/css", name = "eb garamond" } ]
-              Font.size 20
+              Font.size 14
+            , Border.left 1.0
+            , Color.border Color.lightGray
             ]
         , style HeaderNav
             [ Color.text navBlue
@@ -180,7 +182,7 @@ view innerView activeRoute =
                 |> List.intersperse (el HeaderNavActive [] (text "|"))
     in
         Element.layout stylesheet <|
-            column None
+            column Root
                 [ clipX ]
                 [ row None
                     [ width fill, height <| px 59 ]
@@ -219,7 +221,7 @@ view innerView activeRoute =
                         [ fr 2 ]
                         sideNav
                     , column None
-                        [ fr 10, paddingLeft 10, paddingTop 10 ]
-                        [ Element.html innerView ]
+                        [ fr 10, paddingLeft 10, paddingTop 10, paddingRight 10 ]
+                        [ el None [ class "body-content" ] <| Element.html innerView ]
                     ]
                 ]
