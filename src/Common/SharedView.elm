@@ -2,7 +2,7 @@ module Common.SharedView exposing (view)
 
 import Html exposing (Html)
 import Element exposing (column, el, image, row, text, link, empty)
-import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter, spacingXY, paddingLeft, paddingRight, paddingBottom, paddingTop, hidden)
+import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter, spacingXY, paddingLeft, paddingRight, paddingBottom, paddingTop, hidden, alignRight, clipX)
 import Color
 import Style exposing (style, styleSheet)
 import Style.Border as Border
@@ -44,6 +44,11 @@ veryLightBlue =
     Color.rgb 235 244 250
 
 
+veryLightGray : Color.Color
+veryLightGray =
+    Color.rgb 238 238 238
+
+
 navBlueActiveText : Color.Color
 navBlueActiveText =
     Color.rgb 135 206 250
@@ -59,6 +64,8 @@ stylesheet =
         , style HeaderNav
             [ Color.text navBlue
             , Color.background Color.white
+            , Border.rounded 4.0
+            , Style.hover [ Color.background veryLightGray ]
             ]
         , style HeaderNavActive
             [ Color.text Color.white
@@ -128,7 +135,13 @@ view innerView activeRoute =
                     else
                         HeaderNav
             in
-                el activeClass [] <| link navUrl <| el None [] (text navText)
+                el activeClass
+                    [ paddingLeft 7
+                    , paddingRight 7
+                    , paddingTop 10
+                    , paddingBottom 10
+                    ]
+                    (link navUrl <| el None [] (text navText))
 
         toSideUrl t =
             link t.url <|
@@ -168,7 +181,7 @@ view innerView activeRoute =
     in
         Element.layout stylesheet <|
             column None
-                []
+                [ clipX ]
                 [ row None
                     [ width fill, height <| px 59 ]
                     [ column None
@@ -178,9 +191,9 @@ view innerView activeRoute =
                             [ image None [ class "pointer" ] { src = "/Images/Logos/Logo-ncn.png", caption = "" } ]
                         ]
                     , column None
-                        [ fr 6 ]
+                        [ fr 6, alignRight ]
                         [ row None
-                            [ spacing 14 ]
+                            []
                             [ toTopUrl "/" "Home"
                             , toTopUrl "/search" "Search"
                             , toTopUrl "/enrollment" "Enrollment"
@@ -191,6 +204,9 @@ view innerView activeRoute =
                             , toTopUrl "/admin" "Admin"
                             , toTopUrl "/resources" "Resources"
                             , toTopUrl "/account" "Account"
+
+                            --TODO, I think special logic goes here
+                            , toTopUrl "/logout" "Logout"
                             ]
                         ]
                     ]
