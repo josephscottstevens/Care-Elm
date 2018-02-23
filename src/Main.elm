@@ -282,46 +282,47 @@ setRoute maybeRoute model =
         setModel route page =
             { model | page = page, route = route }
 
-        jsLoad t =
-            { model | route = t } ! [ loadPage <| String.dropLeft 1 <| Route.routeUrl t ]
+        jsLoad route page =
+            { model | page = page, route = route } ! [ loadPage <| String.dropLeft 1 <| Route.routeUrl route ]
     in
         case maybeRoute of
             Just Route.Home ->
-                jsLoad Route.Home
+                jsLoad Route.Home Home
 
             -- Patients\Profile
             Just Route.Profile ->
-                jsLoad Route.Profile
+                setModel Route.Demographics (Demographics (Demographics.emptyModel model.patientId))
+                    ! cmds [ Cmd.map DemographicsMsg (Demographics.init model.patientId) ]
 
             Just Route.Demographics ->
                 setModel Route.Demographics (Demographics (Demographics.emptyModel model.patientId))
                     ! cmds [ Cmd.map DemographicsMsg (Demographics.init model.patientId) ]
 
             Just Route.Contacts ->
-                jsLoad Route.Contacts
+                jsLoad Route.Contacts Contacts
 
             Just Route.SocialHistory ->
-                jsLoad Route.SocialHistory
+                jsLoad Route.SocialHistory SocialHistory
 
             Just Route.Employment ->
-                jsLoad Route.Employment
+                jsLoad Route.Employment Employment
 
             Just Route.Insurance ->
-                jsLoad Route.Insurance
+                jsLoad Route.Insurance Insurance
 
             -- People/Services
             Just Route.Services ->
-                jsLoad Route.Services
+                jsLoad Route.Services Services
 
             Just Route.CCM ->
-                jsLoad Route.CCM
+                jsLoad Route.CCM CCM
 
             Just Route.TCM ->
-                jsLoad Route.TCM
+                jsLoad Route.TCM TCM
 
             -- People/Providers
             Just Route.Providers ->
-                jsLoad Route.Providers
+                jsLoad Route.Providers Providers
 
             --People/ClinicalSummary
             Just Route.ClinicalSummary ->
@@ -329,10 +330,10 @@ setRoute maybeRoute model =
                     ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
 
             Just Route.ProblemList ->
-                jsLoad Route.ProblemList
+                jsLoad Route.ProblemList ProblemList
 
             Just Route.Medications ->
-                jsLoad Route.Medications
+                jsLoad Route.Medications Medications
 
             Just Route.PastMedicalHistory ->
                 setModel Route.PastMedicalHistory (PastMedicalHistory PastMedicalHistory.emptyModel)
@@ -356,11 +357,11 @@ setRoute maybeRoute model =
 
             --People/Tasks
             Just Route.Tasks ->
-                jsLoad Route.Tasks
+                jsLoad Route.Tasks Tasks
 
             --People/Appointments
             Just Route.Appointments ->
-                jsLoad Route.Appointments
+                jsLoad Route.Appointments Appointments
 
             --People/Records
             Just (Route.Records t) ->
