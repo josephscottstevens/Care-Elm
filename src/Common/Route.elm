@@ -168,81 +168,18 @@ type Route
     | Medications
 
 
-recordTypeToString : Common.RecordType -> String
-recordTypeToString recordType =
-    case recordType of
-        Common.PrimaryCare ->
-            "_primarycarerecords"
-
-        Common.Specialty ->
-            "_specialtyrecords"
-
-        Common.Labs ->
-            "_labrecords"
-
-        Common.Radiology ->
-            "_radiologyrecords"
-
-        Common.Hospitalizations ->
-            "_hospitalizationrecords"
-
-        Common.Legal ->
-            "_legalrecords"
-
-        Common.CallRecordings ->
-            "_callrecordingrecords"
-
-        Common.PreviousHistories ->
-            "_previoushistoryrecords"
-
-        Common.Enrollment ->
-            "_enrollmentrecords"
-
-        Common.Misc ->
-            "_miscrecords"
-
-
 routeUrl : Route -> String
 routeUrl route =
     case route of
-        None ->
-            "#"
+        Home ->
+            "/"
 
+        -- Patients\Profile
         Profile ->
             "#/people/_demographics"
 
         Demographics ->
             "#/people/_demographics"
-
-        Billing ->
-            "#/people/_insurance"
-
-        ClinicalSummary ->
-            "#/people/_clinicalsummary"
-
-        Records recordType ->
-            "#/people/" ++ recordTypeToString recordType
-
-        PastMedicalHistory ->
-            "#/people/_pastmedicalhistory"
-
-        Hospitilizations ->
-            "#/people/_hospitalizations"
-
-        Allergies ->
-            "#/people/_allergies"
-
-        Immunizations ->
-            "#/people/_immunizations"
-
-        LastKnownVitals ->
-            "#/people/_vitals"
-
-        Error t ->
-            "#/Error" ++ t
-
-        Home ->
-            "/"
 
         Contacts ->
             "#/people/_contacts"
@@ -256,6 +193,7 @@ routeUrl route =
         Insurance ->
             "#/people/_insurance"
 
+        -- People/Services
         Services ->
             "#/people/_ccm"
 
@@ -265,20 +203,83 @@ routeUrl route =
         TCM ->
             "#/people/_tcm"
 
+        -- People/Providers
         Providers ->
             "#/people/_careteam"
 
-        Tasks ->
-            "#/people/_tasks"
-
-        Appointments ->
-            "#/people/_appointments"
+        --People/ClinicalSummary
+        ClinicalSummary ->
+            "#/people/_clinicalsummary"
 
         ProblemList ->
             "#/people/_problemlist"
 
         Medications ->
             "#/people/_medications"
+
+        PastMedicalHistory ->
+            "#/people/_pastmedicalhistory"
+
+        Hospitilizations ->
+            "#/people/_hospitalizations"
+
+        Immunizations ->
+            "#/people/_immunizations"
+
+        Allergies ->
+            "#/people/_allergies"
+
+        LastKnownVitals ->
+            "#/people/_vitals"
+
+        --People/Tasks
+        Tasks ->
+            "#/people/_tasks"
+
+        --People/Appointments
+        Appointments ->
+            "#/people/_appointments"
+
+        --People/Records
+        Records Common.PrimaryCare ->
+            "#/people/_primarycarerecords"
+
+        Records Common.Specialty ->
+            "#/people/_specialtyrecords"
+
+        Records Common.Labs ->
+            "#/people/_labrecords"
+
+        Records Common.Radiology ->
+            "#/people/_radiologyrecords"
+
+        Records Common.Hospitalizations ->
+            "#/people/_hospitalizationrecords"
+
+        Records Common.Legal ->
+            "#/people/_legalrecords"
+
+        Records Common.CallRecordings ->
+            "#/people/_callrecordingrecords"
+
+        Records Common.PreviousHistories ->
+            "#/people/_previoushistoryrecords"
+
+        Records Common.Enrollment ->
+            "#/people/_enrollmentrecords"
+
+        Records Common.Misc ->
+            "#/people/_miscrecords"
+
+        -- Other
+        None ->
+            "#"
+
+        Error t ->
+            "#/Error" ++ t
+
+        Billing ->
+            "#/people/_insurance"
 
 
 routeByHash : Parser (Route -> a) a

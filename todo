@@ -13,7 +13,6 @@ QUESTIONS:
 TODO: 
 
 Demographics sfcheckbox isn't used?
-organize Route code similar to how routeDescription is organized
 demographics is the oddball here with it getting patient ID in init, instead of being passed in update\view
 re-add hover effects for outer shell
 

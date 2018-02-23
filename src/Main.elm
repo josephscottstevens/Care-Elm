@@ -33,16 +33,31 @@ type alias Model =
 
 
 type Page
-    = None
+    = Demographics Demographics.Model
     | Billing Billing.Model
     | ClinicalSummary ClinicalSummary.Model
-    | PastMedicalHistory PastMedicalHistory.Model
+    | Records Records.Model
     | Hospitilizations Hospitilizations.Model
+    | PastMedicalHistory PastMedicalHistory.Model
     | Allergies Allergies.Model
     | Immunizations Immunizations.Model
     | LastKnownVitals LastKnownVitals.Model
-    | Records Records.Model
-    | Demographics Demographics.Model
+      -- Non Elm Routes
+    | Home
+    | Contacts
+    | SocialHistory
+    | Employment
+    | Insurance
+    | Services
+    | CCM
+    | TCM
+    | Providers
+    | Tasks
+    | Appointments
+    | ProblemList
+    | Medications
+      -- Other
+    | None
     | Error String
 
 
@@ -76,11 +91,11 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     let
+        jsView =
+            div [ class "body-content" ] []
+
         innerView =
             case model.page of
-                None ->
-                    div [ class "body-content" ] []
-
                 Records subModel ->
                     Html.map RecordsMsg (Records.view subModel)
 
@@ -108,6 +123,50 @@ view model =
                 LastKnownVitals subModel ->
                     Html.map LastKnownVitalsMsg (LastKnownVitals.view subModel model.addEditDataSource)
 
+                -- Non Elm Pages
+                Home ->
+                    jsView
+
+                Contacts ->
+                    jsView
+
+                SocialHistory ->
+                    jsView
+
+                Employment ->
+                    jsView
+
+                Insurance ->
+                    jsView
+
+                Services ->
+                    jsView
+
+                CCM ->
+                    jsView
+
+                TCM ->
+                    jsView
+
+                Providers ->
+                    jsView
+
+                Tasks ->
+                    jsView
+
+                Appointments ->
+                    jsView
+
+                ProblemList ->
+                    jsView
+
+                Medications ->
+                    jsView
+
+                -- Other
+                None ->
+                    jsView
+
                 Error str ->
                     div [] [ text str ]
     in
@@ -117,17 +176,8 @@ view model =
 pageSubscriptions : Page -> Sub Msg
 pageSubscriptions page =
     case page of
-        None ->
-            Sub.none
-
-        Records _ ->
-            Sub.map RecordsMsg Records.subscriptions
-
         Demographics _ ->
             Sub.map DemographicsMsg Demographics.subscriptions
-
-        Billing _ ->
-            Sub.map BillingMsg Billing.subscriptions
 
         ClinicalSummary _ ->
             Sub.map ClinicalSummaryMsg ClinicalSummary.subscriptions
@@ -146,6 +196,56 @@ pageSubscriptions page =
 
         LastKnownVitals _ ->
             Sub.map LastKnownVitalsMsg LastKnownVitals.subscriptions
+
+        Records _ ->
+            Sub.map RecordsMsg Records.subscriptions
+
+        Billing _ ->
+            Sub.map BillingMsg Billing.subscriptions
+
+        --Non Elm Subs
+        Home ->
+            Sub.none
+
+        Contacts ->
+            Sub.none
+
+        SocialHistory ->
+            Sub.none
+
+        Employment ->
+            Sub.none
+
+        Insurance ->
+            Sub.none
+
+        Services ->
+            Sub.none
+
+        CCM ->
+            Sub.none
+
+        TCM ->
+            Sub.none
+
+        Providers ->
+            Sub.none
+
+        Tasks ->
+            Sub.none
+
+        Appointments ->
+            Sub.none
+
+        ProblemList ->
+            Sub.none
+
+        Medications ->
+            Sub.none
+
+        -- Other
+        None ->
+            Sub.none
 
         Error _ ->
             Sub.none
