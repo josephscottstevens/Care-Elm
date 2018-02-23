@@ -2,14 +2,13 @@ module Common.SharedView exposing (view)
 
 import Html exposing (Html)
 import Element exposing (column, el, image, row, text, link, empty)
-import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter, spacingXY, paddingLeft, paddingRight, paddingBottom, paddingTop)
+import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter, spacingXY, paddingLeft, paddingRight, paddingBottom, paddingTop, hidden)
 import Color
 import Style exposing (style, styleSheet)
 import Style.Border as Border
 import Style.Color as Color
 import Style.Font as Font
 import Common.Route as Route
-import Navigation
 
 
 type MyStyles
@@ -19,6 +18,8 @@ type MyStyles
     | HeaderBreadQuick
     | SideNav
     | SideNavActive
+    | SideNavParentActive
+    | SideNavChildActive
     | Body
     | None
 
@@ -28,9 +29,24 @@ navBlue =
     Color.rgb 51 122 183
 
 
+navLightBlue : Color.Color
+navLightBlue =
+    Color.rgb 160 216 250
+
+
 navBlueActive : Color.Color
 navBlueActive =
     Color.rgb 187 217 238
+
+
+veryLightBlue : Color.Color
+veryLightBlue =
+    Color.rgb 235 244 250
+
+
+navBlueActiveText : Color.Color
+navBlueActiveText =
+    Color.rgb 135 206 250
 
 
 stylesheet : Style.StyleSheet MyStyles variation
@@ -56,16 +72,45 @@ stylesheet =
         , style SideNav
             [ Color.text navBlue
             , Color.background Color.white
+            , Style.hover [ Color.background navLightBlue ]
             ]
         , style SideNavActive
             [ Color.text navBlue
+            , Color.background navLightBlue
+            , Style.hover [ Color.background navLightBlue ]
+            ]
+        , style SideNavParentActive
+            [ Color.text navBlue
             , Color.background navBlueActive
+            , Style.hover [ Color.background navLightBlue ]
+            ]
+        , style SideNavChildActive
+            [ Color.text navBlue
+            , Color.background veryLightBlue
+            , Style.hover [ Color.background navLightBlue ]
             ]
         , style Body
             [ Color.text Color.black
             ]
         , style None []
         ]
+
+
+findActiveClass : Route.RouteDesc -> Route.Route -> MyStyles
+findActiveClass { depth, url, navText, route } activeRoute =
+    let
+        parentText =
+            Route.getParentFromRoute activeRoute
+                |> Maybe.map Route.routeDescription
+    in
+        if navText == Route.routeDescription activeRoute then
+            SideNavActive
+        else if Just navText == parentText then
+            SideNavParentActive
+        else if Route.getParentFromRoute route == Route.getParentFromRoute activeRoute then
+            SideNavChildActive
+        else
+            SideNav
 
 
 view : Html msg -> Route.Route -> Html msg
@@ -85,29 +130,32 @@ view innerView activeRoute =
             in
                 el activeClass [] <| link navUrl <| el None [] (text navText)
 
-        toSideUrl { depth, url, navText } =
-            let
-                activeClass =
-                    if navText == Route.routeDescription activeRoute then
-                        SideNavActive
-                    else
-                        SideNav
-            in
-                link url <|
-                    el activeClass
-                        [ height <| px 40
-                        , verticalCenter
-                        , paddingLeft (10 + (depth * 15))
-                        , paddingTop 10.0
-                        , paddingBottom 10.0
-                        , paddingRight 0.0
-                        , width fill
-                        ]
-                        (text navText)
+        toSideUrl t =
+            link t.url <|
+                el (findActiveClass t activeRoute)
+                    [ height <| px 40
+                    , verticalCenter
+                    , paddingLeft (10 + (t.depth * 15))
+                    , paddingTop 10.0
+                    , paddingBottom 10.0
+                    , paddingRight 0.0
+                    , width fill
+                    ]
+                    (text t.navText)
 
         sideNav =
             Route.getSideNav
-                |> List.filter (\t -> t.depth /= -1.0)
+                |> List.filter
+                    (\t ->
+                        t.depth
+                            == 0.0
+                            || case findActiveClass t activeRoute of
+                                SideNav ->
+                                    False
+
+                                _ ->
+                                    True
+                    )
                 |> List.map toSideUrl
 
         toBreadCrumbs { route } =

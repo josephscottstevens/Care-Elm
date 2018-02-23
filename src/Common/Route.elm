@@ -10,6 +10,7 @@ module Common.Route
         , RouteDesc
         , Breadcrumb
         , getBreadcrumbsFromRoute
+        , getParentFromRoute
         , routeUrl
         , routeDescription
         )
@@ -30,6 +31,7 @@ type alias RouteDesc =
     { depth : Float
     , url : String
     , navText : String
+    , route : Route
     }
 
 
@@ -77,6 +79,7 @@ routeToSideNav ( route, depth ) =
     { depth = depth
     , url = routeUrl route
     , navText = routeDescription route
+    , route = route
     }
 
 
@@ -131,6 +134,14 @@ getBreadcrumbs maybeBreadCrumb =
 
         Nothing ->
             []
+
+
+getParentFromRoute : Route -> Maybe Route
+getParentFromRoute route =
+    route
+        |> getBreadcrumb
+        |> Maybe.andThen getParent
+        |> Maybe.map .route
 
 
 getBreadcrumbsFromRoute : Route -> List Breadcrumb
