@@ -222,6 +222,11 @@ view innerView activeRoute =
                         sideNav
                     , column None
                         [ fr 10, paddingLeft 10, paddingTop 10, paddingRight 10 ]
-                        [ el None [ class "body-content" ] <| Element.html innerView ]
+                        [ row None
+                            []
+                            [ el None [] (text "") -- header
+                            , el None [ class "body-content" ] <| Element.html innerView
+                            ]
+                        ]
                     ]
                 ]
