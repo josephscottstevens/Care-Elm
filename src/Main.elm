@@ -59,6 +59,7 @@ type Page
     | Appointments
     | ProblemList
     | Medications
+    | Notes
       -- Other
     | None
     | Error String
@@ -166,6 +167,9 @@ view model =
                 Medications ->
                     jsView
 
+                Notes ->
+                    jsView
+
                 -- Other
                 None ->
                     jsView
@@ -244,6 +248,9 @@ pageSubscriptions page =
             Sub.none
 
         Medications ->
+            Sub.none
+
+        Notes ->
             Sub.none
 
         -- Other
@@ -372,6 +379,10 @@ setRoute maybeRoute model =
             Just (Route.Records t) ->
                 setModel (Route.Records t) (Records (Records.emptyModel t))
                     ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
+
+            --People/Notes
+            Just Route.Notes ->
+                jsLoad Route.Notes Notes
 
             --Other
             Just Route.Billing ->

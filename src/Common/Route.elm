@@ -35,6 +35,36 @@ type alias RouteDesc =
     }
 
 
+type Route
+    = None
+    | Profile
+    | Demographics
+    | Billing
+    | ClinicalSummary
+    | Records Common.RecordType
+    | Hospitilizations
+    | PastMedicalHistory
+    | Allergies
+    | Immunizations
+    | LastKnownVitals
+    | Error String
+      -- Non Elm Routes
+    | Home
+    | Contacts
+    | SocialHistory
+    | Employment
+    | Insurance
+    | Services
+    | CCM
+    | TCM
+    | Providers
+    | Tasks
+    | Appointments
+    | ProblemList
+    | Medications
+    | Notes
+
+
 nodes : Tree Route
 nodes =
     Parent Home
@@ -61,6 +91,20 @@ nodes =
             , Child Allergies
             , Child LastKnownVitals
             ]
+        , Parent (Records Common.Root)
+            [ Child (Records Common.PrimaryCare)
+            , Child (Records Common.Specialty)
+            , Child (Records Common.Labs)
+            , Child (Records Common.Radiology)
+            , Child (Records Common.Hospitalizations)
+            , Child (Records Common.Legal)
+            , Child (Records Common.CallRecordings)
+            , Child (Records Common.PreviousHistories)
+            , Child (Records Common.Enrollment)
+            , Child (Records Common.Misc)
+            ]
+        , Parent Notes
+            []
         ]
 
 
@@ -148,35 +192,6 @@ getBreadcrumbsFromRoute : Route -> List Breadcrumb
 getBreadcrumbsFromRoute route =
     getBreadcrumbs (getBreadcrumb route)
         |> List.reverse
-
-
-type Route
-    = None
-    | Profile
-    | Demographics
-    | Billing
-    | ClinicalSummary
-    | Records Common.RecordType
-    | Hospitilizations
-    | PastMedicalHistory
-    | Allergies
-    | Immunizations
-    | LastKnownVitals
-    | Error String
-      -- Non Elm Routes
-    | Home
-    | Contacts
-    | SocialHistory
-    | Employment
-    | Insurance
-    | Services
-    | CCM
-    | TCM
-    | Providers
-    | Tasks
-    | Appointments
-    | ProblemList
-    | Medications
 
 
 routeByHash : Parser (Route -> a) a
@@ -303,6 +318,9 @@ routeUrl route =
             "#/people/_appointments"
 
         --People/Records
+        Records Common.Root ->
+            "#/people/_primarycarerecords"
+
         Records Common.PrimaryCare ->
             "#/people/_primarycarerecords"
 
@@ -332,6 +350,10 @@ routeUrl route =
 
         Records Common.Misc ->
             "#/people/_miscrecords"
+
+        --People/Notes
+        Notes ->
+            "#/people/_notes"
 
         -- Other
         None ->
@@ -440,13 +462,16 @@ routeDescription route =
 
         --People/Tasks
         Tasks ->
-            "aaaaaaaaaaaaaa"
+            "Tasks"
 
         --People/Appointments
         Appointments ->
             "Appointments"
 
         --People/Records
+        Records Common.Root ->
+            "Records"
+
         Records Common.PrimaryCare ->
             "Primary Care"
 
@@ -476,6 +501,10 @@ routeDescription route =
 
         Records Common.Misc ->
             "Miscellaneous"
+
+        --People/Notes
+        Notes ->
+            "Notes"
 
         --Other
         None ->

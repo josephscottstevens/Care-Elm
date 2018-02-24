@@ -27,7 +27,8 @@ type alias MenuMessage =
 
 
 type RecordType
-    = PrimaryCare
+    = Root
+    | PrimaryCare
     | Specialty
     | Labs
     | Radiology
