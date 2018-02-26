@@ -236,6 +236,7 @@ routeByHash =
         , Url.map Appointments (s "people" </> s "_appointments")
         , Url.map ProblemList (s "people" </> s "_problemlist")
         , Url.map Medications (s "people" </> s "_medications")
+        , Url.map Notes (s "people" </> s "_notes")
 
         -- Other
         , Url.map Billing (s "people" </> s "_insurance")
