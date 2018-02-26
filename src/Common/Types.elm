@@ -20,20 +20,22 @@ type alias DropdownItem =
 
 type alias ActivePerson =
     { patientId : Int
-    , dateOfBirth : Maybe String
-    , age : Maybe Int
-    , preferredLanguage : Maybe String
-    , facilityId : Maybe Int
-    , facilityText : Maybe String
-    , mainProviderId : Maybe Int
-    , mainProviderText : Maybe String
-    , careCoordinatorId : Maybe Int
-    , careCoordinatorText : Maybe String
-    , medicalRecordNo : Maybe String
-    , patientsFacilityIdNo : Maybe Int
+    , firstName : String
+    , lastName : String
+    , dateOfBirth : String
+    , age : Int
+    , preferredLanguage : String
+    , facilityId : Int
+    , facilityText : String
+    , mainProviderId : Int
+    , mainProviderText : String
+    , careCoordinatorId : Int
+    , careCoordinatorText : String
+    , medicalRecordNo : String
+    , patientsFacilityIdNo : Int
 
     --todo, More than just a string here
-    , currentService : Maybe String
+    , currentService : String
     }
 
 

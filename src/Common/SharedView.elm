@@ -9,6 +9,7 @@ import Style.Border as Border
 import Style.Color as Color
 import Style.Font as Font
 import Common.Route as Route
+import Common.Types
 
 
 type MyStyles
@@ -20,6 +21,8 @@ type MyStyles
     | SideNavActive
     | SideNavParentActive
     | SideNavChildActive
+    | HeaderPatient
+    | HeaderPatientLarge
     | Body
     | None
 
@@ -98,6 +101,14 @@ stylesheet =
             , Color.background veryLightBlue
             , Style.hover [ Color.background navLightBlue ]
             ]
+        , style HeaderPatient
+            [ Color.background (Color.rgb 245 245 220)
+            ]
+        , style HeaderPatientLarge
+            [ Font.size 24
+            , Font.weight 600
+            , Color.text (Color.rgb 51 51 51)
+            ]
         , style Body
             [ Color.text Color.black
             ]
@@ -123,8 +134,8 @@ findActiveClass route activeRoute =
             SideNav
 
 
-view : Html msg -> Route.Route -> Html msg
-view innerView activeRoute =
+view : Html msg -> Route.Route -> Common.Types.ActivePerson -> Html msg
+view innerView activeRoute activePerson =
     let
         fr amount =
             width <| fillPortion amount
@@ -222,11 +233,16 @@ view innerView activeRoute =
                         [ fr 2 ]
                         sideNav
                     , column None
-                        [ fr 10, paddingLeft 10, paddingTop 10, paddingRight 10 ]
-                        [ row None
-                            []
-                            [ el None [] (text "") -- header
-                            , el None [ class "body-content" ] <| Element.html innerView
+                        [ fr 10 ]
+                        [ row HeaderPatient
+                            [ width fill ]
+                            [ el HeaderPatientLarge [] <| text (activePerson.firstName ++ " " ++ activePerson.lastName) ]
+                        , row HeaderPatient
+                            [ width fill ]
+                            [ el None [] <| text (activePerson.dateOfBirth ++ " " ++ activePerson.preferredLanguage) ]
+                        , row None
+                            [ paddingLeft 10, paddingTop 10, paddingRight 10 ]
+                            [ el None [ class "body-content" ] <| Element.html innerView
                             ]
                         ]
                     ]

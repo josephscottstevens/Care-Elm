@@ -32,6 +32,7 @@ type alias Model =
     , page : Page
     , addEditDataSource : Maybe AddEditDataSource
     , route : Route
+    , activePerson : Common.Types.ActivePerson
     }
 
 
@@ -65,6 +66,28 @@ type Page
     | Error String
 
 
+examplePerson : Common.Types.ActivePerson
+examplePerson =
+    { patientId = 11934
+    , firstName = "testFirstNameA"
+    , lastName = "testLastNameA"
+    , dateOfBirth = "2/1/2018"
+    , age = 0
+    , preferredLanguage = "Spanish; Castilian"
+    , facilityId = 0
+    , facilityText = "Advanced Internal Medicine"
+    , mainProviderId = 0
+    , mainProviderText = "Abbot, Joel"
+    , careCoordinatorId = 0
+    , careCoordinatorText = "Rayos CMA, Kellie"
+    , medicalRecordNo = "1241240124"
+    , patientsFacilityIdNo = 12345
+
+    --todo, More than just a string here
+    , currentService = "No Current Service"
+    }
+
+
 init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
     case Route.getPatientId location of
@@ -74,6 +97,7 @@ init location =
                 , page = None
                 , addEditDataSource = Nothing
                 , route = Route.None
+                , activePerson = examplePerson
                 }
 
         Nothing ->
@@ -81,6 +105,7 @@ init location =
             , page = None
             , addEditDataSource = Nothing
             , route = Route.None
+            , activePerson = examplePerson
             }
                 ! [ Functions.setLoadingStatus False ]
 
@@ -177,7 +202,7 @@ view model =
                 Error str ->
                     div [] [ text str ]
     in
-        SharedView.view innerView model.route
+        SharedView.view innerView model.route model.activePerson
 
 
 pageSubscriptions : Page -> Sub Msg
