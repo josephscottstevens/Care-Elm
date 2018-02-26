@@ -37,7 +37,7 @@ type alias State =
 init : String -> State
 init sortedColumnName =
     { selectedId = Nothing
-    , isReversed = False
+    , isReversed = True
     , sortedColumnName = sortedColumnName
     , openDropdownId = Nothing
     }
