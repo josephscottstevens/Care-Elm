@@ -380,6 +380,10 @@ setRoute maybeRoute model =
                 jsLoad Route.Appointments Appointments
 
             --People/Records
+            Just Route.RecordsRoot ->
+                setModel (Route.Records Common.Types.PrimaryCare) (Records (Records.emptyModel Common.Types.PrimaryCare))
+                    ! cmds [ Cmd.map RecordsMsg (Records.init Common.Types.PrimaryCare model.patientId) ]
+
             Just (Route.Records t) ->
                 setModel (Route.Records t) (Records (Records.emptyModel t))
                     ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]

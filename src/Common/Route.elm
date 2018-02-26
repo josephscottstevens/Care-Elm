@@ -44,6 +44,7 @@ type Route
     | Billing
     | ClinicalSummaryRoot
     | ClinicalSummary
+    | RecordsRoot
     | Records Common.RecordType
     | Hospitilizations
     | PastMedicalHistory
@@ -94,7 +95,7 @@ nodes =
             , Child Allergies
             , Child LastKnownVitals
             ]
-        , Parent (Records Common.Root)
+        , Parent RecordsRoot
             [ Child (Records Common.PrimaryCare)
             , Child (Records Common.Specialty)
             , Child (Records Common.Labs)
@@ -325,7 +326,7 @@ routeUrl route =
             "#/people/_appointments"
 
         --People/Records
-        Records Common.Root ->
+        RecordsRoot ->
             "#/people/_primarycarerecords"
 
         Records Common.PrimaryCare ->
@@ -449,7 +450,7 @@ routeId route =
             34
 
         --People/Records
-        Records Common.Root ->
+        RecordsRoot ->
             35
 
         Records Common.PrimaryCare ->
@@ -604,7 +605,7 @@ routeDescription route =
             "Appointments"
 
         --People/Records
-        Records Common.Root ->
+        RecordsRoot ->
             "Records"
 
         Records Common.PrimaryCare ->

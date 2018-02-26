@@ -52,8 +52,7 @@ import Common.Types
         , AddEditDataSource
         , MenuMessage
         , RecordType
-            ( Root
-            , PrimaryCare
+            ( PrimaryCare
             , Specialty
             , Labs
             , Radiology
@@ -290,9 +289,6 @@ postJsonRequest body url decoder =
 getDesc : RecordType -> String
 getDesc recordType =
     case recordType of
-        Root ->
-            "Records"
-
         PrimaryCare ->
             "Primary Care Records"
 
@@ -369,9 +365,6 @@ getRecordTypeById maybeInt =
 getId : RecordType -> Int
 getId recordType =
     case recordType of
-        Root ->
-            1
-
         PrimaryCare ->
             1
 

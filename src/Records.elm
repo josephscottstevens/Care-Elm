@@ -377,9 +377,6 @@ getColumns recordType =
 
         firstColumns =
             case recordType of
-                Common.Root ->
-                    commonColumns
-
                 Common.PrimaryCare ->
                     commonColumns
 
@@ -560,9 +557,6 @@ formInputs editData =
 
         columns =
             case editData.recordType of
-                Common.Root ->
-                    defaultFields
-
                 Common.PrimaryCare ->
                     defaultFields
 
