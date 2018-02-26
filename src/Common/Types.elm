@@ -18,6 +18,25 @@ type alias DropdownItem =
     }
 
 
+type alias ActivePerson =
+    { patientId : Int
+    , dateOfBirth : Maybe String
+    , age : Maybe Int
+    , preferredLanguage : Maybe String
+    , facilityId : Maybe Int
+    , facilityText : Maybe String
+    , mainProviderId : Maybe Int
+    , mainProviderText : Maybe String
+    , careCoordinatorId : Maybe Int
+    , careCoordinatorText : Maybe String
+    , medicalRecordNo : Maybe String
+    , patientsFacilityIdNo : Maybe Int
+
+    --todo, More than just a string here
+    , currentService : Maybe String
+    }
+
+
 type alias MenuMessage =
     { name : String
     , recordId : Int
