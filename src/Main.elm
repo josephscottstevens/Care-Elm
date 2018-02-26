@@ -337,6 +337,10 @@ setRoute maybeRoute model =
                 jsLoad Route.Providers Providers
 
             --People/ClinicalSummary
+            Just Route.ClinicalSummaryRoot ->
+                setModel Route.ClinicalSummaryRoot (ClinicalSummary ClinicalSummary.emptyModel)
+                    ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
+
             Just Route.ClinicalSummary ->
                 setModel Route.ClinicalSummary (ClinicalSummary ClinicalSummary.emptyModel)
                     ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]

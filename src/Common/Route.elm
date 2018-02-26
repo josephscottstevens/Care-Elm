@@ -13,6 +13,7 @@ module Common.Route
         , getParentFromRoute
         , routeUrl
         , routeDescription
+        , routeId
         )
 
 import Navigation
@@ -32,6 +33,7 @@ type alias RouteDesc =
     , url : String
     , navText : String
     , route : Route
+    , id : Int
     }
 
 
@@ -40,6 +42,7 @@ type Route
     | Profile
     | Demographics
     | Billing
+    | ClinicalSummaryRoot
     | ClinicalSummary
     | Records Common.RecordType
     | Hospitilizations
@@ -81,7 +84,7 @@ nodes =
             ]
         , Parent Providers
             []
-        , Parent ClinicalSummary
+        , Parent ClinicalSummaryRoot
             [ Child ClinicalSummary
             , Child ProblemList
             , Child Medications
@@ -124,6 +127,7 @@ routeToSideNav ( route, depth ) =
     , url = routeUrl route
     , navText = routeDescription route
     , route = route
+    , id = routeId route
     }
 
 
@@ -285,6 +289,9 @@ routeUrl route =
             "#/people/_careteam"
 
         --People/ClinicalSummary
+        ClinicalSummaryRoot ->
+            "#/people/_clinicalsummary"
+
         ClinicalSummary ->
             "#/people/_clinicalsummary"
 
@@ -366,6 +373,131 @@ routeUrl route =
             "#/people/_insurance"
 
 
+routeId : Route -> Int
+routeId route =
+    case route of
+        Home ->
+            3
+
+        -- Patients\Profile
+        Profile ->
+            15
+
+        Demographics ->
+            16
+
+        Contacts ->
+            17
+
+        SocialHistory ->
+            18
+
+        Employment ->
+            68
+
+        Insurance ->
+            69
+
+        -- People/Services
+        Services ->
+            19
+
+        CCM ->
+            20
+
+        TCM ->
+            21
+
+        -- People/Providers
+        Providers ->
+            22
+
+        --People/ClinicalSummary
+        ClinicalSummaryRoot ->
+            23
+
+        ClinicalSummary ->
+            25
+
+        ProblemList ->
+            26
+
+        Medications ->
+            27
+
+        PastMedicalHistory ->
+            28
+
+        Hospitilizations ->
+            29
+
+        Immunizations ->
+            30
+
+        Allergies ->
+            31
+
+        LastKnownVitals ->
+            32
+
+        --People/Tasks
+        Tasks ->
+            33
+
+        --People/Appointments
+        Appointments ->
+            34
+
+        --People/Records
+        Records Common.Root ->
+            35
+
+        Records Common.PrimaryCare ->
+            55
+
+        Records Common.Specialty ->
+            56
+
+        Records Common.Labs ->
+            57
+
+        Records Common.Radiology ->
+            58
+
+        Records Common.Hospitalizations ->
+            59
+
+        Records Common.Legal ->
+            60
+
+        Records Common.CallRecordings ->
+            62
+
+        Records Common.PreviousHistories ->
+            63
+
+        Records Common.Enrollment ->
+            64
+
+        Records Common.Misc ->
+            65
+
+        --People/Notes
+        Notes ->
+            36
+
+        --Other
+        --TODO, pretty clunky here
+        None ->
+            0
+
+        Error t ->
+            0
+
+        Billing ->
+            0
+
+
 getPatientId : Navigation.Location -> Maybe Int
 getPatientId location =
     location
@@ -436,6 +568,9 @@ routeDescription route =
             "Providers"
 
         --People/ClinicalSummary
+        ClinicalSummaryRoot ->
+            "Clinical Summary"
+
         ClinicalSummary ->
             "Clinical Summary"
 

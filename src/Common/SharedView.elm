@@ -106,17 +106,18 @@ stylesheet =
 
 
 findActiveClass : Route.RouteDesc -> Route.Route -> MyStyles
-findActiveClass { depth, url, navText, route } activeRoute =
+findActiveClass route activeRoute =
     let
-        parentText =
+        parentId : Maybe Int
+        parentId =
             Route.getParentFromRoute activeRoute
-                |> Maybe.map Route.routeDescription
+                |> Maybe.map Route.routeId
     in
-        if navText == Route.routeDescription activeRoute then
+        if route.id == Route.routeId activeRoute then
             SideNavActive
-        else if Just navText == parentText then
+        else if Just route.id == parentId then
             SideNavParentActive
-        else if Route.getParentFromRoute route == Route.getParentFromRoute activeRoute then
+        else if Route.getParentFromRoute route.route == Route.getParentFromRoute activeRoute then
             SideNavChildActive
         else
             SideNav
