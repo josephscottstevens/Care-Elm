@@ -101,7 +101,7 @@ view model =
         innerView =
             case model.page of
                 Records subModel ->
-                    Html.map RecordsMsg (Records.view subModel)
+                    Html.map RecordsMsg (Records.view subModel model.addEditDataSource)
 
                 Demographics subModel ->
                     Html.map DemographicsMsg (Demographics.view subModel)

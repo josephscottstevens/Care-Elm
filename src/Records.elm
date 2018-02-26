@@ -53,7 +53,6 @@ type alias Model =
     , dropDownState : Int
     , recordType : RecordType
     , tableState : Table.State
-    , addEditDataSource : Maybe AddEditDataSource
     , editData : Maybe EditData
     }
 
@@ -149,11 +148,11 @@ type alias EditData =
     }
 
 
-view : Model -> Html Msg
-view model =
+view : Model -> Maybe AddEditDataSource -> Html Msg
+view model addEditDataSource =
     let
         config =
-            gridConfig model.recordType model.addEditDataSource
+            gridConfig model.recordType addEditDataSource
     in
         case model.editData of
             Just editData ->
@@ -206,7 +205,6 @@ type Msg
     | DeletePrompt Int
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
-    | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | NoOp
       -- Edit Messages
     | AddNewFacility
@@ -278,14 +276,6 @@ update msg model patientId =
 
             EditTask taskId ->
                 model ! [ editTask taskId ]
-
-            AddEditDataSourceLoaded response ->
-                case response of
-                    Ok t ->
-                        { model | addEditDataSource = Just t } ! []
-
-                    Err t ->
-                        model ! [ displayErrorMessage ("Error loading edit data source" ++ toString t) ]
 
             NoOp ->
                 model ! []
@@ -733,7 +723,6 @@ emptyModel recordType =
     { rows = []
     , dropDownState = -1
     , tableState = Table.init "Date"
-    , addEditDataSource = Nothing
     , editData = Nothing
     , recordType = recordType
     }
