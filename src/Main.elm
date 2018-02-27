@@ -12,12 +12,12 @@ import Immunizations
 import LastKnownVitals
 import Common.SharedView as SharedView
 import Common.Functions as Functions
-import Common.Types exposing (AddEditDataSource)
+import Common.Types as Common exposing (AddEditDataSource)
 import Common.Route as Route exposing (Route)
 import Navigation
 import Http exposing (Error)
 import Json.Decode as Decode exposing (maybe, int, list)
-import Json.Decode.Pipeline exposing (required, decode)
+import Json.Decode.Pipeline as Pipeline exposing (required, decode)
 
 
 type alias PageInfo =
@@ -32,7 +32,7 @@ type alias Model =
     , page : Page
     , addEditDataSource : Maybe AddEditDataSource
     , route : Route
-    , activePerson : Common.Types.ActivePerson
+    , activePerson : Maybe Common.PersonHeaderDetails
     }
 
 
@@ -66,28 +66,6 @@ type Page
     | Error String
 
 
-examplePerson : Common.Types.ActivePerson
-examplePerson =
-    { patientId = 11934
-    , firstName = "testFirstNameA"
-    , lastName = "testLastNameA"
-    , dateOfBirth = "2/1/2018"
-    , age = 0
-    , preferredLanguage = "Spanish; Castilian"
-    , facilityId = 0
-    , facilityText = "Advanced Internal Medicine"
-    , mainProviderId = 0
-    , mainProviderText = "Abbot, Joel"
-    , careCoordinatorId = 0
-    , careCoordinatorText = "Rayos CMA, Kellie"
-    , medicalRecordNo = "1241240124"
-    , patientsFacilityIdNo = 12345
-
-    --todo, More than just a string here
-    , currentService = "No Current Service"
-    }
-
-
 init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
     case Route.getPatientId location of
@@ -97,7 +75,7 @@ init location =
                 , page = None
                 , addEditDataSource = Nothing
                 , route = Route.None
-                , activePerson = examplePerson
+                , activePerson = Nothing
                 }
 
         Nothing ->
@@ -105,7 +83,7 @@ init location =
             , page = None
             , addEditDataSource = Nothing
             , route = Route.None
-            , activePerson = examplePerson
+            , activePerson = Nothing
             }
                 ! [ Functions.setLoadingStatus False ]
 
@@ -290,7 +268,6 @@ type Msg
     = SetRoute (Maybe Route)
     | BillingMsg Billing.Msg
     | ClinicalSummaryMsg ClinicalSummary.Msg
-    | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | PastMedicalHistoryMsg PastMedicalHistory.Msg
     | HospitilizationsMsg Hospitilizations.Msg
     | AllergiesMsg Allergies.Msg
@@ -298,6 +275,8 @@ type Msg
     | LastKnownVitalsMsg LastKnownVitals.Msg
     | RecordsMsg Records.Msg
     | DemographicsMsg Demographics.Msg
+    | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
+    | PersonHeaderLoaded (Result Http.Error Common.PersonHeaderDetails)
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -309,10 +288,22 @@ setRoute maybeRoute model =
                     Cmd.none
 
                 Nothing ->
-                    getDropDowns model.patientId AddEditDataSourceLoaded
+                    getDropDowns model.patientId
+
+        getPersonHeaderDetailsCmd =
+            case model.activePerson of
+                Just _ ->
+                    Cmd.none
+
+                Nothing ->
+                    getPersonHeaderDetails model.patientId
 
         cmds t =
-            [ getDropdownsCmd, Functions.setLoadingStatus False ] ++ t
+            [ getDropdownsCmd
+            , getPersonHeaderDetailsCmd
+            , Functions.setLoadingStatus False
+            ]
+                ++ t
 
         setModel route page =
             { model | page = page, route = route }
@@ -406,8 +397,8 @@ setRoute maybeRoute model =
 
             --People/Records
             Just Route.RecordsRoot ->
-                setModel (Route.Records Common.Types.PrimaryCare) (Records (Records.emptyModel Common.Types.PrimaryCare))
-                    ! cmds [ Cmd.map RecordsMsg (Records.init Common.Types.PrimaryCare model.patientId) ]
+                setModel (Route.Records Common.PrimaryCare) (Records (Records.emptyModel Common.PrimaryCare))
+                    ! cmds [ Cmd.map RecordsMsg (Records.init Common.PrimaryCare model.patientId) ]
 
             Just (Route.Records t) ->
                 setModel (Route.Records t) (Records (Records.emptyModel t))
@@ -463,6 +454,14 @@ updatePage page msg model =
                     Err t ->
                         { model | page = Error (toString t) } ! []
 
+            ( PersonHeaderLoaded response, _ ) ->
+                case response of
+                    Ok t ->
+                        { model | activePerson = Just t } ! []
+
+                    Err t ->
+                        { model | page = Error (toString t) } ! []
+
             ( DemographicsMsg subMsg, Demographics subModel ) ->
                 toPage Demographics DemographicsMsg Demographics.update subMsg subModel
 
@@ -494,8 +493,8 @@ updatePage page msg model =
                 { model | page = Error <| "Missing Page\\Message " ++ toString page ++ " !!!__-__!!! " ++ toString msg } ! []
 
 
-getDropDowns : Int -> (Result Http.Error AddEditDataSource -> msg) -> Cmd msg
-getDropDowns patientId t =
+getDropDowns : Int -> Cmd Msg
+getDropDowns patientId =
     decode AddEditDataSource
         |> required "facilityId" (maybe Decode.int)
         |> required "patientId" Decode.int
@@ -508,7 +507,33 @@ getDropDowns patientId t =
         |> required "hospitalizationDischargePhysicianDropdown" (Decode.list Functions.decodeDropdownItem)
         |> required "hospitilizations" (Decode.list Functions.decodeDropdownItem)
         |> Http.get ("/People/PatientRecordsDropdowns?patientId=" ++ toString patientId)
-        |> Http.send t
+        |> Http.send AddEditDataSourceLoaded
+
+
+getPersonHeaderDetails : Int -> Cmd Msg
+getPersonHeaderDetails patientId =
+    Pipeline.decode Common.PersonHeaderDetails
+        |> Pipeline.required "Id" Decode.int
+        |> Pipeline.required "FullName" (Decode.maybe Decode.string)
+        |> Pipeline.required "DateOfBirth" (Decode.maybe Decode.string)
+        |> Pipeline.required "Age" (Decode.maybe Decode.int)
+        |> Pipeline.required "Nickname" (Decode.maybe Decode.string)
+        |> Pipeline.required "FacilityName" (Decode.maybe Decode.string)
+        |> Pipeline.required "IsVIP" Decode.bool
+        |> Pipeline.required "HasNDA" Decode.bool
+        |> Pipeline.required "ContactHours" (Decode.list Decode.string)
+        |> Pipeline.required "MRN" (Decode.maybe Decode.string)
+        |> Pipeline.required "PAN" (Decode.maybe Decode.string)
+        |> Pipeline.required "PFID" (Decode.maybe Decode.string)
+        |> Pipeline.required "PrimaryResource" (Decode.maybe Decode.string)
+        |> Pipeline.required "RestrictionsCount" Decode.int
+        |> Pipeline.required "EmailAddress" (Decode.maybe Decode.string)
+        |> Pipeline.required "PreferredLanguage" (Decode.maybe Decode.string)
+        |> Pipeline.required "FacilityId" Decode.int
+        |> Pipeline.required "DateOfDeath" (Decode.maybe Decode.string)
+        |> Pipeline.required "MainProvider" (Decode.maybe Decode.string)
+        |> Http.get ("/People/GetPersonHeaderDetails?patientId=" ++ toString patientId)
+        |> Http.send PersonHeaderLoaded
 
 
 main : Program Never Model Msg

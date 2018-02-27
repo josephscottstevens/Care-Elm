@@ -2,14 +2,14 @@ module Common.SharedView exposing (view)
 
 import Html exposing (Html)
 import Element exposing (column, el, image, row, text, link, empty)
-import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter, spacingXY, paddingLeft, paddingRight, paddingBottom, paddingTop, hidden, alignRight, clipX)
+import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter, spacingXY, paddingLeft, paddingRight, paddingBottom, paddingTop, hidden, alignRight, clipX, id)
 import Color
 import Style exposing (style, styleSheet)
 import Style.Border as Border
 import Style.Color as Color
 import Style.Font as Font
 import Common.Route as Route
-import Common.Types
+import Common.Types as Common
 
 
 type MyStyles
@@ -138,7 +138,7 @@ findActiveClass route activeRoute =
             SideNav
 
 
-view : Html msg -> Route.Route -> Common.Types.ActivePerson -> Html msg
+view : Html msg -> Route.Route -> Maybe Common.PersonHeaderDetails -> Html msg
 view innerView activeRoute activePerson =
     let
         fr amount =
@@ -238,22 +238,34 @@ view innerView activeRoute activePerson =
                         sideNav
                     , column None
                         [ fr 10 ]
-                        [ row HeaderPatient
-                            [ width fill, paddingLeft 10 ]
-                            (viewPatientHeaderLine1 activePerson)
-                        , row HeaderPatient
-                            [ width fill, paddingLeft 10 ]
-                            (viewPatientHeaderLine2 activePerson)
-                        , row HeaderPatient
-                            [ width fill, paddingLeft 10 ]
-                            (viewPatientHeaderLine3 activePerson)
-                        , row None
-                            [ paddingLeft 10, paddingTop 10, paddingRight 10 ]
-                            [ el None [ class "body-content" ] <| Element.html innerView
-                            ]
-                        ]
+                        (viewPatientHeader activePerson
+                            ++ [ row None
+                                    [ paddingLeft 10, paddingTop 10, paddingRight 10 ]
+                                    [ el None [ class "body-content" ] <| Element.html innerView
+                                    ]
+                               ]
+                        )
                     ]
                 ]
+
+
+viewPatientHeader : Maybe Common.PersonHeaderDetails -> List (Element.Element MyStyles variation msg)
+viewPatientHeader maybeActivePerson =
+    case maybeActivePerson of
+        Just activePerson ->
+            [ row HeaderPatient
+                [ width fill, paddingLeft 10 ]
+                (viewPatientHeaderLine1 activePerson)
+            , row HeaderPatient
+                [ width fill, paddingLeft 10 ]
+                (viewPatientHeaderLine2 activePerson)
+            , row HeaderPatient
+                [ width fill, paddingLeft 10 ]
+                (viewPatientHeaderLine3 activePerson)
+            ]
+
+        Nothing ->
+            []
 
 
 headerPad : List (Element.Attribute variation msg)
@@ -266,22 +278,35 @@ headerPadRight =
     [ paddingTop 5, paddingBottom 5, paddingRight 10 ]
 
 
-viewPatientHeaderLine1 : Common.Types.ActivePerson -> List (Element.Element MyStyles variation msg)
+maybeText : Maybe String -> Element.Element style variation msg
+maybeText t =
+    text <| Maybe.withDefault "" t
+
+
+viewPatientHeaderLine1 : Common.PersonHeaderDetails -> List (Element.Element MyStyles variation msg)
 viewPatientHeaderLine1 p =
-    [ el HeaderPatientLarge [] <| text (p.firstName ++ " " ++ p.lastName) ]
+    [ el HeaderPatientLarge [] <| maybeText p.fullName ]
 
 
-viewPatientHeaderLine2 : Common.Types.ActivePerson -> List (Element.Element MyStyles variation msg)
+viewPatientHeaderLine2 : Common.PersonHeaderDetails -> List (Element.Element MyStyles variation msg)
 viewPatientHeaderLine2 p =
     [ el BoldText headerPad <| text "Date of Birth: "
-    , el None headerPadRight <| text p.dateOfBirth
+    , el None headerPadRight <| maybeText p.dateOfBirth
     , el BoldText headerPad <| text "Age: "
     , el None headerPadRight <| text (toString p.age)
     ]
 
 
-viewPatientHeaderLine3 : Common.Types.ActivePerson -> List (Element.Element MyStyles variation msg)
+viewPatientHeaderLine3 : Common.PersonHeaderDetails -> List (Element.Element MyStyles variation msg)
 viewPatientHeaderLine3 p =
-    [ el BoldText headerPad <| text "Current Service: "
-    , el None headerPadRight <| text p.currentService
-    ]
+    let
+        contactHoursFormat t =
+            Html.li [] [ Html.text t ]
+
+        contactHours =
+            List.map contactHoursFormat p.contactHours
+    in
+        [ el BoldText headerPad <| text "Current Service: "
+        , el None headerPadRight <| el None [ id "bob" ] empty
+        , Element.html <| Html.ul [] contactHours
+        ]

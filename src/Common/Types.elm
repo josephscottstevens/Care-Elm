@@ -1,5 +1,8 @@
 module Common.Types exposing (..)
 
+import Json.Decode as Decode
+import Json.Decode.Pipeline as Pipeline
+
 
 type alias FilterState =
     { name : String
@@ -15,27 +18,6 @@ type RequiredType
 type alias DropdownItem =
     { id : Maybe Int
     , name : String
-    }
-
-
-type alias ActivePerson =
-    { patientId : Int
-    , firstName : String
-    , lastName : String
-    , dateOfBirth : String
-    , age : Int
-    , preferredLanguage : String
-    , facilityId : Int
-    , facilityText : String
-    , mainProviderId : Int
-    , mainProviderText : String
-    , careCoordinatorId : Int
-    , careCoordinatorText : String
-    , medicalRecordNo : String
-    , patientsFacilityIdNo : Int
-
-    --todo, More than just a string here
-    , currentService : String
     }
 
 
@@ -111,3 +93,30 @@ yearDropdown =
     , DropdownItem (Just 2024) "2024"
     , DropdownItem (Just 2025) "2025"
     ]
+
+
+
+-- PersonHeaderDetails Section
+
+
+type alias PersonHeaderDetails =
+    { patientId : Int
+    , fullName : Maybe String
+    , dateOfBirth : Maybe String
+    , age : Maybe Int
+    , nickname : Maybe String
+    , facilityName : Maybe String
+    , isVIP : Bool
+    , hasNDA : Bool
+    , contactHours : List String
+    , mRN : Maybe String
+    , pAN : Maybe String
+    , pFID : Maybe String
+    , primaryResource : Maybe String
+    , restrictionsCount : Int
+    , emailAddress : Maybe String
+    , preferredLanguage : Maybe String
+    , facilityId : Int
+    , dateOfDeath : Maybe String
+    , mainProvider : Maybe String
+    }
