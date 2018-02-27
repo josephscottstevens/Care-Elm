@@ -27,6 +27,9 @@ type alias PageInfo =
 port loadPage : PageInfo -> Cmd msg
 
 
+port initHeader : Common.PersonHeaderDetails -> Cmd msg
+
+
 type alias Model =
     { patientId : Int
     , page : Page
@@ -457,7 +460,7 @@ updatePage page msg model =
             ( PersonHeaderLoaded response, _ ) ->
                 case response of
                     Ok t ->
-                        { model | activePerson = Just t } ! []
+                        { model | activePerson = Just t } ! [ initHeader t ]
 
                     Err t ->
                         { model | page = Error (toString t) } ! []
