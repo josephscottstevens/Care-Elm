@@ -120,3 +120,27 @@ type alias PersonHeaderDetails =
     , dateOfDeath : Maybe String
     , mainProvider : Maybe String
     }
+
+
+emptyPersonHeaderDetails : PersonHeaderDetails
+emptyPersonHeaderDetails =
+    { patientId = 0
+    , fullName = Nothing
+    , dateOfBirth = Nothing
+    , age = Nothing
+    , nickname = Nothing
+    , facilityName = Nothing
+    , isVIP = False
+    , hasNDA = False
+    , contactHours = []
+    , mRN = Nothing
+    , pAN = Nothing
+    , pFID = Nothing
+    , primaryResource = Nothing
+    , restrictionsCount = 0
+    , emailAddress = Nothing
+    , preferredLanguage = Nothing
+    , facilityId = 0
+    , dateOfDeath = Nothing
+    , mainProvider = Nothing
+    }

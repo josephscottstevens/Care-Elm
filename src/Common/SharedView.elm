@@ -252,61 +252,40 @@ view innerView activeRoute activePerson =
 viewPatientHeader : Maybe Common.PersonHeaderDetails -> List (Element.Element MyStyles variation msg)
 viewPatientHeader maybeActivePerson =
     case maybeActivePerson of
-        Just activePerson ->
-            [ row HeaderPatient
-                [ width fill, paddingLeft 10 ]
-                (viewPatientHeaderLine1 activePerson)
-            , row HeaderPatient
-                [ width fill, paddingLeft 10 ]
-                (viewPatientHeaderLine2 activePerson)
-            , row HeaderPatient
-                [ width fill, paddingLeft 10 ]
-                (viewPatientHeaderLine3 activePerson)
-            ]
+        Just p ->
+            let
+                headerPad =
+                    [ paddingTop 5, paddingBottom 5 ]
+
+                headerPadRight =
+                    [ paddingTop 5, paddingBottom 5, paddingRight 10 ]
+
+                maybeText t =
+                    text <| Maybe.withDefault "" t
+
+                contactHoursFormat t =
+                    Html.li [] [ Html.text t ]
+
+                contactHours =
+                    List.map contactHoursFormat p.contactHours
+            in
+                [ row HeaderPatient
+                    [ width fill, paddingLeft 10 ]
+                    [ el HeaderPatientLarge [] <| maybeText p.fullName ]
+                , row HeaderPatient
+                    [ width fill, paddingLeft 10 ]
+                    [ el BoldText headerPad <| text "Date of Birth: "
+                    , el None headerPadRight <| maybeText p.dateOfBirth
+                    , el BoldText headerPad <| text "Age: "
+                    , el None headerPadRight <| text (toString p.age)
+                    ]
+                , row HeaderPatient
+                    [ width fill, paddingLeft 10 ]
+                    [ el BoldText headerPad <| text "Current Service: "
+                    , el None headerPadRight <| el None [ id "bob" ] empty
+                    , Element.html <| Html.ul [] contactHours
+                    ]
+                ]
 
         Nothing ->
             []
-
-
-headerPad : List (Element.Attribute variation msg)
-headerPad =
-    [ paddingTop 5, paddingBottom 5 ]
-
-
-headerPadRight : List (Element.Attribute variation msg)
-headerPadRight =
-    [ paddingTop 5, paddingBottom 5, paddingRight 10 ]
-
-
-maybeText : Maybe String -> Element.Element style variation msg
-maybeText t =
-    text <| Maybe.withDefault "" t
-
-
-viewPatientHeaderLine1 : Common.PersonHeaderDetails -> List (Element.Element MyStyles variation msg)
-viewPatientHeaderLine1 p =
-    [ el HeaderPatientLarge [] <| maybeText p.fullName ]
-
-
-viewPatientHeaderLine2 : Common.PersonHeaderDetails -> List (Element.Element MyStyles variation msg)
-viewPatientHeaderLine2 p =
-    [ el BoldText headerPad <| text "Date of Birth: "
-    , el None headerPadRight <| maybeText p.dateOfBirth
-    , el BoldText headerPad <| text "Age: "
-    , el None headerPadRight <| text (toString p.age)
-    ]
-
-
-viewPatientHeaderLine3 : Common.PersonHeaderDetails -> List (Element.Element MyStyles variation msg)
-viewPatientHeaderLine3 p =
-    let
-        contactHoursFormat t =
-            Html.li [] [ Html.text t ]
-
-        contactHours =
-            List.map contactHoursFormat p.contactHours
-    in
-        [ el BoldText headerPad <| text "Current Service: "
-        , el None headerPadRight <| el None [ id "bob" ] empty
-        , Element.html <| Html.ul [] contactHours
-        ]
