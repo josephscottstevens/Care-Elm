@@ -244,6 +244,9 @@ view innerView activeRoute activePerson =
                         , row HeaderPatient
                             [ width fill, paddingLeft 10 ]
                             (viewPatientHeaderLine2 activePerson)
+                        , row HeaderPatient
+                            [ width fill, paddingLeft 10 ]
+                            (viewPatientHeaderLine3 activePerson)
                         , row None
                             [ paddingLeft 10, paddingTop 10, paddingRight 10 ]
                             [ el None [ class "body-content" ] <| Element.html innerView
@@ -253,17 +256,19 @@ view innerView activeRoute activePerson =
                 ]
 
 
-viewPatientHeaderLine1 : Common.Types.ActivePerson -> List (Element.Element MyStyles variation msg)
-viewPatientHeaderLine1 p =
-    [ el HeaderPatientLarge [] <| text (p.firstName ++ " " ++ p.lastName) ]
-
-
+headerPad : List (Element.Attribute variation msg)
 headerPad =
     [ paddingTop 5, paddingBottom 5 ]
 
 
+headerPadRight : List (Element.Attribute variation msg)
 headerPadRight =
     [ paddingTop 5, paddingBottom 5, paddingRight 10 ]
+
+
+viewPatientHeaderLine1 : Common.Types.ActivePerson -> List (Element.Element MyStyles variation msg)
+viewPatientHeaderLine1 p =
+    [ el HeaderPatientLarge [] <| text (p.firstName ++ " " ++ p.lastName) ]
 
 
 viewPatientHeaderLine2 : Common.Types.ActivePerson -> List (Element.Element MyStyles variation msg)
@@ -272,4 +277,11 @@ viewPatientHeaderLine2 p =
     , el None headerPadRight <| text p.dateOfBirth
     , el BoldText headerPad <| text "Age: "
     , el None headerPadRight <| text (toString p.age)
+    ]
+
+
+viewPatientHeaderLine3 : Common.Types.ActivePerson -> List (Element.Element MyStyles variation msg)
+viewPatientHeaderLine3 p =
+    [ el BoldText headerPad <| text "Current Service: "
+    , el None headerPadRight <| text p.currentService
     ]
