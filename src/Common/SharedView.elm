@@ -23,6 +23,7 @@ type MyStyles
     | SideNavChildActive
     | HeaderPatient
     | HeaderPatientLarge
+    | BoldText
     | Body
     | None
 
@@ -108,6 +109,9 @@ stylesheet =
             [ Font.size 24
             , Font.weight 600
             , Color.text (Color.rgb 51 51 51)
+            ]
+        , style BoldText
+            [ Font.bold
             ]
         , style Body
             [ Color.text Color.black
@@ -235,11 +239,11 @@ view innerView activeRoute activePerson =
                     , column None
                         [ fr 10 ]
                         [ row HeaderPatient
-                            [ width fill ]
-                            [ el HeaderPatientLarge [] <| text (activePerson.firstName ++ " " ++ activePerson.lastName) ]
+                            [ width fill, paddingLeft 10 ]
+                            (viewPatientHeaderLine1 activePerson)
                         , row HeaderPatient
-                            [ width fill ]
-                            [ el None [] <| text (activePerson.dateOfBirth ++ " " ++ activePerson.preferredLanguage) ]
+                            [ width fill, paddingLeft 10 ]
+                            (viewPatientHeaderLine2 activePerson)
                         , row None
                             [ paddingLeft 10, paddingTop 10, paddingRight 10 ]
                             [ el None [ class "body-content" ] <| Element.html innerView
@@ -247,3 +251,25 @@ view innerView activeRoute activePerson =
                         ]
                     ]
                 ]
+
+
+viewPatientHeaderLine1 : Common.Types.ActivePerson -> List (Element.Element MyStyles variation msg)
+viewPatientHeaderLine1 p =
+    [ el HeaderPatientLarge [] <| text (p.firstName ++ " " ++ p.lastName) ]
+
+
+headerPad =
+    [ paddingTop 5, paddingBottom 5 ]
+
+
+headerPadRight =
+    [ paddingTop 5, paddingBottom 5, paddingRight 10 ]
+
+
+viewPatientHeaderLine2 : Common.Types.ActivePerson -> List (Element.Element MyStyles variation msg)
+viewPatientHeaderLine2 p =
+    [ el BoldText headerPad <| text "Date of Birth: "
+    , el None headerPadRight <| text p.dateOfBirth
+    , el BoldText headerPad <| text "Age: "
+    , el None headerPadRight <| text (toString p.age)
+    ]
