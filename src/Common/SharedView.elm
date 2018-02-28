@@ -1,8 +1,7 @@
 module Common.SharedView exposing (view)
 
 import Html exposing (Html)
-import Html.Attributes as Attributes
-import Element exposing (column, el, image, row, text, link, empty)
+import Element exposing (column, el, image, row, text, link, empty, below)
 import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter, spacingXY, paddingLeft, paddingRight, paddingBottom, paddingTop, hidden, alignRight, clipX, id)
 import Color
 import Style exposing (style, styleSheet)
@@ -280,11 +279,22 @@ viewPatientHeader maybeActivePerson =
                     , el BoldText headerPad <| text "Age: "
                     , el None headerPadRight <| text (toString p.age)
                     ]
-                , row HeaderPatient
-                    [ width fill, paddingLeft 10 ]
+                , row None
+                    []
                     [ el BoldText headerPad <| text "Current Service: "
                     , el None headerPadRight <| el None [ id "bob" ] empty
-                    , Element.html <| Html.ul [ Attributes.id "contactHoursMenu" ] contactHours
+                    ]
+                , row HeaderPatient
+                    [ width fill, paddingLeft 10 ]
+                    [ el None [] (text "hours")
+                        |> below
+                            [ column HeaderPatient
+                                [ spacing 20 ]
+                                [ el None [] (text "a")
+                                , el None [] (text "b")
+                                , el None [] (text "c")
+                                ]
+                            ]
                     ]
                 ]
 
