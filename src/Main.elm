@@ -682,6 +682,7 @@ stylesheet =
             ]
         , style ContactHours
             [ Color.background Color.white
+            , Font.weight 400
             ]
         , style None []
         ]
@@ -845,7 +846,7 @@ viewPatientHeader model =
                     , column None
                         [ fr 1 ]
                         [ row None
-                            [ paddingTop 10, paddingRight 5 ]
+                            [ paddingTop 10, paddingRight 5, spacing 10 ]
                             [ el None [] <|
                                 Element.html <|
                                     Html.button
@@ -854,11 +855,16 @@ viewPatientHeader model =
                             , el None [] <|
                                 Element.html <|
                                     Html.button
-                                        [ Attribute.class "btn btn-default btn-sm fa fa-phone margin-bottom-5 header-button" ]
+                                        [ Attribute.class "btn btn-default btn-sm fa fa-phone margin-bottom-5 header-button"
+                                        , Attribute.style [ ( "color", "green" ), ( "padding-top", "7px" ), ( "padding-bottom", "7px" ) ]
+                                        ]
                                         []
                             , Input.select ContactHours
                                 [ spacing 10
-                                , paddingRight 15
+                                , paddingRight 10
+                                , paddingTop 10
+                                , paddingLeft 5
+                                , paddingBottom 7
                                 ]
                                 { label = Input.hiddenLabel ""
                                 , with = model.selectMenu
