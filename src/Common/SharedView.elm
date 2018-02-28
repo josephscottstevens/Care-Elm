@@ -266,7 +266,7 @@ viewPatientHeader maybeActivePerson =
                     text <| Maybe.withDefault "" t
 
                 contactHoursFormat t =
-                    Html.li [] [ Html.text t ]
+                    el None [] (text t)
 
                 contactHours =
                     List.map contactHoursFormat p.contactHours
@@ -279,14 +279,11 @@ viewPatientHeader maybeActivePerson =
                         ]
                     , column None
                         [ fr 3, alignRight ]
-                        [ el None [] (text "hours")
+                        [ el None [ width <| px 125, paddingRight 10 ] (text "hours")
                             |> below
                                 [ column HeaderPatient
                                     [ spacing 20 ]
-                                    [ el None [] (text "a")
-                                    , el None [] (text "b")
-                                    , el None [] (text "c")
-                                    ]
+                                    contactHours
                                 ]
                         ]
                     ]
