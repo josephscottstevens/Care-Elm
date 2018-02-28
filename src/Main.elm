@@ -121,6 +121,7 @@ view model =
         jsView =
             div [] []
 
+        innerView : Html Msg
         innerView =
             case model.page of
                 Records subModel ->
@@ -200,7 +201,7 @@ view model =
                 Error str ->
                     div [] [ Html.text str ]
     in
-        viewHeader innerView model.route model
+        viewHeader innerView model
 
 
 pageSubscriptions : Page -> Sub Msg
@@ -711,7 +712,8 @@ fr amount =
     width <| fillPortion amount
 
 
-viewHeader innerView activeRoute model =
+viewHeader : Html Msg -> Model -> Html Msg
+viewHeader innerView model =
     let
         toTopUrl navUrl navText =
             let
@@ -732,7 +734,7 @@ viewHeader innerView activeRoute model =
 
         toSideUrl t =
             link t.url <|
-                el (findActiveClass t activeRoute)
+                el (findActiveClass t model.route)
                     [ height <| px 40
                     , verticalCenter
                     , paddingLeft (10 + (t.depth * 15))
@@ -749,7 +751,7 @@ viewHeader innerView activeRoute model =
                     (\t ->
                         t.depth
                             == 0.0
-                            || case findActiveClass t activeRoute of
+                            || case findActiveClass t model.route of
                                 SideNav ->
                                     False
 
@@ -762,7 +764,7 @@ viewHeader innerView activeRoute model =
             el HeaderNavActive [] <| link (Route.routeUrl route) <| el None [] (text (Route.routeDescription route))
 
         headerBreakQuick =
-            Route.getBreadcrumbsFromRoute activeRoute
+            Route.getBreadcrumbsFromRoute model.route
                 |> List.map toBreadCrumbs
                 |> List.intersperse (el HeaderNavActive [] (text "|"))
     in
@@ -818,6 +820,7 @@ viewHeader innerView activeRoute model =
                 ]
 
 
+viewPatientHeader : Model -> List (Element.Element MyStyles variation Msg)
 viewPatientHeader model =
     case model.activePerson of
         Just p ->
