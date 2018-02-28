@@ -96,7 +96,7 @@ init location =
             , addEditDataSource = Nothing
             , route = Route.None
             , activePerson = Nothing
-            , selectMenu = Input.dropMenu Nothing SelectOne
+            , selectMenu = Input.dropMenu (Just "aa") SelectOne
             }
                 ! [ Functions.setLoadingStatus False ]
 
@@ -824,9 +824,6 @@ viewPatientHeader model =
 
                 contactHours =
                     List.map contactHoursFormat p.contactHours
-
-                x =
-                    0
             in
                 [ row HeaderPatient
                     [ paddingLeft 10 ]
@@ -840,16 +837,12 @@ viewPatientHeader model =
                             [ padding 10
                             , spacing 20
                             ]
-                            { label = Input.labelAbove <| text "Lunch"
-
-                            -- model.selection is some state(value, a Msg constructor, and the focus) we store in our model.
-                            -- It can be created using Input.autocomplete or Input.dropMenu
-                            -- Check out the Form.elm example to see a complete version.
+                            { label = Input.labelLeft <| text "Lunch"
                             , with = model.selectMenu
-                            , max = 5
+                            , max = 20
                             , options = []
                             , menu =
-                                Input.menuAbove None
+                                Input.menu None
                                     []
                                     [ Input.choice "1" (text "Taco!")
                                     , Input.choice "2" (text "Gyro")
