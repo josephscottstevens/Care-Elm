@@ -1,6 +1,7 @@
 port module Main exposing (main)
 
 import Html exposing (Html, div)
+import Html.Attributes as Attribute
 import Billing
 import Demographics
 import ClinicalSummary
@@ -93,7 +94,7 @@ init location =
                 , addEditDataSource = Nothing
                 , route = Route.None
                 , activePerson = Nothing
-                , selectMenu = Input.dropMenu Nothing SelectOne
+                , selectMenu = Input.dropMenu (Just "Contact Hours") SelectOne
                 }
 
         Nothing ->
@@ -826,7 +827,7 @@ viewPatientHeader model =
                     text <| Maybe.withDefault "" t
 
                 contactHoursFormat t =
-                    Html.li [] [ Html.text t ]
+                    Input.choice t (text t)
 
                 contactHours =
                     List.map contactHoursFormat p.contactHours
@@ -834,37 +835,37 @@ viewPatientHeader model =
                 [ row HeaderPatient
                     [ paddingLeft 10 ]
                     [ column None
-                        [ fr 2 ]
+                        [ fr 5 ]
                         [ el HeaderPatientLarge [] <| maybeText p.fullName
                         ]
                     , column None
-                        [ fr 3, alignRight ]
-                        [ Input.select None
-                            [ padding 10
-                            , spacing 20
+                        [ fr 1 ]
+                        [ row None
+                            []
+                            [ Html.button
+                                [ Attribute.class "btn btn-danger btn-sm margin-bottom-5 header-button" ]
+                                [ Html.text "Restrictions (0)" ]
+                                |> Element.html
+                            , Html.button
+                                [ Attribute.class "btn btn-default btn-sm fa fa-phone margin-bottom-5 header-button" ]
+                                []
+                                |> Element.html
+                            , Input.select None
+                                [ padding 10
+                                , spacing 20
+                                ]
+                                { label = Input.hiddenLabel ""
+                                , with = model.selectMenu
+                                , max = 20
+                                , options = []
+                                , menu =
+                                    Input.menu None
+                                        []
+                                        ([ Input.choice "Contact Hours" (text "Contact Hours") ]
+                                            ++ contactHours
+                                        )
+                                }
                             ]
-                            { label = Input.labelLeft <| text "Lunch"
-                            , with = model.selectMenu
-                            , max = 20
-                            , options = []
-                            , menu =
-                                Input.menu None
-                                    []
-                                    [ Input.choice "1" (text "Taco!")
-                                    , Input.choice "2" (text "Gyro")
-                                    , Input.styledChoice "3" <|
-                                        \selected ->
-                                            Element.row None
-                                                [ spacing 5 ]
-                                                [ el None [] <|
-                                                    if selected then
-                                                        text ":D"
-                                                    else
-                                                        text ":("
-                                                , text "burrito"
-                                                ]
-                                    ]
-                            }
                         ]
                     ]
                 , row HeaderPatient
@@ -883,7 +884,3 @@ viewPatientHeader model =
 
         Nothing ->
             []
-
-
-
---                            (Element.html (Html.ul [ Attributes.id "contactHoursMenu" ] contactHours))
