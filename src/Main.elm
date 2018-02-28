@@ -803,56 +803,60 @@ viewHeader innerView model =
                 |> List.map toBreadCrumbs
                 |> List.intersperse (el HeaderNavActive [] (text "|"))
     in
-        Element.layout stylesheet <|
-            column Root
-                [ clipX ]
-                [ row None
-                    [ width fill, height <| px 52 ]
-                    [ column None
-                        [ fr 5 ]
-                        [ row None
-                            []
-                            [ image None [ class "pointer" ] { src = "/Images/Logos/Logo-ncn.png", caption = "" } ]
-                        ]
-                    , column None
-                        [ fr 6, alignRight ]
-                        [ row None
-                            []
-                            [ toTopUrl "/" "Home"
-                            , toTopUrl "/search" "Search"
-                            , toTopUrl "/enrollment" "Enrollment"
-                            , toTopUrl "/communications" "Communications"
-                            , toTopUrl "/records" "Records"
-                            , toTopUrl "/billing" "Billing"
-                            , toTopUrl "/settings" "Settings"
-                            , toTopUrl "/admin" "Admin"
-                            , toTopUrl "/resources" "Resources"
-                            , toTopUrl "/account" "Account"
+        div []
+            [ Element.layout stylesheet <|
+                column Root
+                    [ clipX ]
+                    [ row None
+                        [ width fill, height <| px 52 ]
+                        [ column None
+                            [ fr 5 ]
+                            [ row None
+                                []
+                                [ image None [ class "pointer" ] { src = "/Images/Logos/Logo-ncn.png", caption = "" } ]
+                            ]
+                        , column None
+                            [ fr 6, alignRight ]
+                            [ row None
+                                []
+                                [ toTopUrl "/" "Home"
+                                , toTopUrl "/search" "Search"
+                                , toTopUrl "/enrollment" "Enrollment"
+                                , toTopUrl "/communications" "Communications"
+                                , toTopUrl "/records" "Records"
+                                , toTopUrl "/billing" "Billing"
+                                , toTopUrl "/settings" "Settings"
+                                , toTopUrl "/admin" "Admin"
+                                , toTopUrl "/resources" "Resources"
+                                , toTopUrl "/account" "Account"
 
-                            --TODO, I think special logic goes here
-                            , toTopUrl "/logout" "Logout"
+                                --TODO, I think special logic goes here
+                                , toTopUrl "/logout" "Logout"
+                                ]
                             ]
                         ]
+                    , row HeaderBreadQuick
+                        [ spacing 6, paddingTop 9, paddingBottom 9, paddingLeft 10 ]
+                        headerBreakQuick
+                    , row None
+                        []
+                        [ column None
+                            [ fr 2 ]
+                            sideNav
+                        , column None
+                            [ fr 10 ]
+                            (viewPatientHeader model
+                                ++ [ row None
+                                        [ paddingLeft 10, paddingTop 10, paddingRight 10 ]
+                                        [ el None [ class "body-content" ] <| Element.html innerView
+                                        ]
+                                   ]
+                            )
+                        ]
                     ]
-                , row HeaderBreadQuick
-                    [ spacing 6, paddingTop 9, paddingBottom 9, paddingLeft 10 ]
-                    headerBreakQuick
-                , row None
-                    []
-                    [ column None
-                        [ fr 2 ]
-                        sideNav
-                    , column None
-                        [ fr 10 ]
-                        (viewPatientHeader model
-                            ++ [ row None
-                                    [ paddingLeft 10, paddingTop 10, paddingRight 10 ]
-                                    [ el None [ class "body-content" ] <| Element.html innerView
-                                    ]
-                               ]
-                        )
-                    ]
-                ]
+            , div [ Attribute.id "restrictions", Attribute.style [ ( "display", "none" ) ] ] []
+            , div [ Attribute.id "patientServiceHistory", Attribute.style [ ( "display", "none" ) ] ] []
+            ]
 
 
 viewPatientHeader : Model -> List (Element.Element MyStyles variation Msg)
