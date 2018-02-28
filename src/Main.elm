@@ -588,6 +588,7 @@ type MyStyles
     | HeaderPatientLarge
     | BoldText
     | Body
+    | ContactHours
     | None
 
 
@@ -678,6 +679,9 @@ stylesheet =
             ]
         , style Body
             [ Color.text Color.black
+            ]
+        , style ContactHours
+            [ Color.background Color.white
             ]
         , style None []
         ]
@@ -841,18 +845,20 @@ viewPatientHeader model =
                     , column None
                         [ fr 1 ]
                         [ row None
-                            []
-                            [ Html.button
-                                [ Attribute.class "btn btn-danger btn-sm margin-bottom-5 header-button" ]
-                                [ Html.text "Restrictions (0)" ]
-                                |> Element.html
-                            , Html.button
-                                [ Attribute.class "btn btn-default btn-sm fa fa-phone margin-bottom-5 header-button" ]
-                                []
-                                |> Element.html
-                            , Input.select None
-                                [ padding 10
-                                , spacing 20
+                            [ paddingTop 10, paddingRight 5 ]
+                            [ el None [] <|
+                                Element.html <|
+                                    Html.button
+                                        [ Attribute.class "btn btn-danger btn-sm margin-bottom-5 header-button" ]
+                                        [ Html.text "Restrictions (0)" ]
+                            , el None [] <|
+                                Element.html <|
+                                    Html.button
+                                        [ Attribute.class "btn btn-default btn-sm fa fa-phone margin-bottom-5 header-button" ]
+                                        []
+                            , Input.select ContactHours
+                                [ spacing 10
+                                , paddingRight 15
                                 ]
                                 { label = Input.hiddenLabel ""
                                 , with = model.selectMenu
