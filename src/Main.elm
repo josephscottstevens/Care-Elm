@@ -2,6 +2,7 @@ port module Main exposing (main)
 
 import Html exposing (Html, div)
 import Html.Attributes as Attribute
+import Html.Events as Events
 import Billing
 import Demographics
 import ClinicalSummary
@@ -18,6 +19,7 @@ import Navigation
 import Http exposing (Error)
 import Json.Decode as Decode exposing (maybe, int, list)
 import Json.Decode.Pipeline as Pipeline exposing (required, decode)
+import Json.Encode as Encode
 import Element exposing (column, el, image, row, text, link, empty, below)
 import Element.Input as Input
 import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter, spacingXY, paddingLeft, paddingRight, paddingBottom, paddingTop, hidden, alignRight, clipX, id)
@@ -26,6 +28,7 @@ import Style exposing (style, styleSheet)
 import Style.Border as Border
 import Style.Color as Color
 import Style.Font as Font
+import Element.Events exposing (onClick)
 
 
 type alias PageInfo =
@@ -38,10 +41,10 @@ port loadPage : PageInfo -> Cmd msg
 port initHeader : PersonHeaderDetails -> Cmd msg
 
 
-type alias ContactHour =
-    { displayValue : String
-    , insideValue : String
-    }
+port openServiceHistory : String -> Cmd msg
+
+
+port openRestrictions : String -> Cmd msg
 
 
 type alias Model =
@@ -51,6 +54,9 @@ type alias Model =
     , route : Route
     , activePerson : Maybe PersonHeaderDetails
     , selectMenu : Input.SelectWith String Msg
+    , restrictions : List RestrictionDetail
+    , serviceDetails : List ServiceDetail
+    , currentServiceDetail : ServiceDetail
     }
 
 
@@ -74,6 +80,19 @@ type alias PersonHeaderDetails =
     , facilityId : Int
     , dateOfDeath : Maybe String
     , mainProvider : Maybe String
+    }
+
+
+type alias RestrictionDetail =
+    { contactName : Maybe String
+    , roleTypeName : Maybe String
+    }
+
+
+type alias ServiceDetail =
+    { serviceType : Maybe String
+    , serviceStart : Maybe String
+    , serviceEnd : Maybe String
     }
 
 
@@ -109,26 +128,40 @@ type Page
 
 init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
-    case Route.getPatientId location of
-        Just patientId ->
-            setRoute (Route.fromLocation location)
-                { patientId = patientId
+    let
+        maybePatientId =
+            Route.getPatientId location
+    in
+        case maybePatientId of
+            Just patientId ->
+                setRoute (Route.fromLocation location)
+                    { patientId = patientId
+                    , page = NoPage
+                    , addEditDataSource = Nothing
+                    , route = Route.None
+                    , activePerson = Nothing
+                    , selectMenu = Input.dropMenu (Just "Contact Hours") SelectOne
+                    , restrictions = []
+                    , serviceDetails = []
+                    , currentServiceDetail = emptyCurrentServiceDetail
+                    }
+
+            Nothing ->
+                { patientId = 0
                 , page = NoPage
                 , addEditDataSource = Nothing
                 , route = Route.None
                 , activePerson = Nothing
                 , selectMenu = Input.dropMenu (Just "Contact Hours") SelectOne
+                , restrictions = []
+                , serviceDetails = []
+                , currentServiceDetail = emptyCurrentServiceDetail
                 }
-
-        Nothing ->
-            { patientId = 0
-            , page = NoPage
-            , addEditDataSource = Nothing
-            , route = Route.None
-            , activePerson = Nothing
-            , selectMenu = Input.dropMenu (Just "Contact Hours") SelectOne
-            }
-                ! [ Functions.setLoadingStatus False ]
+                    ! [ Functions.setLoadingStatus False
+                      , getRestrictionDetail (Maybe.withDefault 0 maybePatientId)
+                      , getServiceDetails (Maybe.withDefault 0 maybePatientId)
+                      , getCurrentServiceDetail (Maybe.withDefault 0 maybePatientId)
+                      ]
 
 
 subscriptions : Model -> Sub Msg
@@ -319,8 +352,13 @@ type Msg
     | LastKnownVitalsMsg LastKnownVitals.Msg
     | RecordsMsg Records.Msg
     | DemographicsMsg Demographics.Msg
+    | OpenServiceHistory
+    | OpenRestrictions
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | PersonHeaderLoaded (Result Http.Error PersonHeaderDetails)
+    | RestrictionLoaded (Result Http.Error (List RestrictionDetail))
+    | ServiceDetailsLoaded (Result Http.Error (List ServiceDetail))
+    | CurrentServiceDetailLoaded (Result Http.Error ServiceDetail)
     | SelectOne (Input.SelectMsg String)
 
 
@@ -491,6 +529,12 @@ updatePage page msg model =
             ( SetRoute route, _ ) ->
                 setRoute route model
 
+            ( OpenServiceHistory, _ ) ->
+                model ! [ openServiceHistory "" ]
+
+            ( OpenRestrictions, _ ) ->
+                model ! [ openRestrictions "" ]
+
             ( AddEditDataSourceLoaded response, _ ) ->
                 case response of
                     Ok t ->
@@ -503,6 +547,30 @@ updatePage page msg model =
                 case response of
                     Ok t ->
                         { model | activePerson = Just t } ! [ initHeader t ]
+
+                    Err t ->
+                        { model | page = Error (toString t) } ! []
+
+            ( RestrictionLoaded response, _ ) ->
+                case response of
+                    Ok t ->
+                        { model | restrictions = t } ! []
+
+                    Err t ->
+                        { model | page = Error (toString t) } ! []
+
+            ( ServiceDetailsLoaded response, _ ) ->
+                case response of
+                    Ok t ->
+                        { model | serviceDetails = t } ! []
+
+                    Err t ->
+                        { model | page = Error (toString t) } ! []
+
+            ( CurrentServiceDetailLoaded response, _ ) ->
+                case response of
+                    Ok t ->
+                        { model | currentServiceDetail = t } ! []
 
                     Err t ->
                         { model | page = Error (toString t) } ! []
@@ -585,6 +653,45 @@ getPersonHeaderDetails patientId =
         |> Http.send PersonHeaderLoaded
 
 
+decodeRestrictionDetail : Decode.Decoder RestrictionDetail
+decodeRestrictionDetail =
+    Pipeline.decode RestrictionDetail
+        |> Pipeline.required "ContactName" (Decode.maybe Decode.string)
+        |> Pipeline.required "RoleTypeName" (Decode.maybe Decode.string)
+
+
+decodeServiceDetail : Decode.Decoder ServiceDetail
+decodeServiceDetail =
+    Pipeline.decode ServiceDetail
+        |> Pipeline.required "ServiceType" (Decode.maybe Decode.string)
+        |> Pipeline.required "ServiceStart" (Decode.maybe Decode.string)
+        |> Pipeline.required "ServiceEnd" (Decode.maybe Decode.string)
+
+
+getRestrictionDetail : Int -> Cmd Msg
+getRestrictionDetail patientId =
+    Decode.list decodeRestrictionDetail
+        |> Http.get ("/People/getrestrictions?patientId=" ++ toString patientId)
+        |> Http.send RestrictionLoaded
+
+
+getServiceDetails : Int -> Cmd Msg
+getServiceDetails patientId =
+    Decode.list decodeServiceDetail
+        |> Http.get ("/People/GetPatientServiceHistory?patientId=" ++ toString patientId)
+        |> Http.send ServiceDetailsLoaded
+
+
+getCurrentServiceDetail : Int -> Cmd Msg
+getCurrentServiceDetail patientId =
+    Pipeline.decode ServiceDetail
+        |> Pipeline.requiredAt [ "ServiceInfo", "ServiceType" ] (Decode.maybe Decode.string)
+        |> Pipeline.requiredAt [ "ServiceInfo", "ServiceStart" ] (Decode.maybe Decode.string)
+        |> Pipeline.requiredAt [ "ServiceInfo", "ServiceEnd" ] (Decode.maybe Decode.string)
+        |> Http.get ("/People/getcurrentservicedetails?patientId=" ++ toString patientId)
+        |> Http.send CurrentServiceDetailLoaded
+
+
 main : Program Never Model Msg
 main =
     Navigation.program (Route.fromLocation >> SetRoute)
@@ -613,6 +720,7 @@ type MyStyles
     | HeaderPatientText
     | HeaderPatientLarge
     | Body
+    | Hyperlink
     | ContactHours
     | None
 
@@ -711,6 +819,10 @@ stylesheet =
         , style Body
             [ Color.text Color.black
             ]
+        , style Hyperlink
+            [ Color.text <| Color.rgb 51 122 183
+            , Style.cursor "pointer"
+            ]
         , style ContactHours
             [ Color.background Color.white
             , [ "Arial" ] |> List.map Font.font |> Font.typeface
@@ -802,6 +914,31 @@ viewHeader innerView model =
             Route.getBreadcrumbsFromRoute model.route
                 |> List.map toBreadCrumbs
                 |> List.intersperse (el HeaderNavActive [] (text "|"))
+
+        findServiceStatus maybeServiceType =
+            case maybeServiceType of
+                Just serviceType ->
+                    if String.contains "CCM" serviceType then
+                        model.serviceDetails
+                            |> List.filterMap
+                                (\t ->
+                                    case ( t.serviceType, t.serviceEnd ) of
+                                        ( Just serviceType, Nothing ) ->
+                                            if String.contains "TCM" serviceType then
+                                                Just "Pending TCM Discharge"
+                                            else
+                                                Nothing
+
+                                        _ ->
+                                            Nothing
+                                )
+                            |> List.head
+                            |> Maybe.withDefault "Present"
+                    else
+                        "Present"
+
+                Nothing ->
+                    "Present"
     in
         div []
             [ Element.layout stylesheet <|
@@ -854,8 +991,42 @@ viewHeader innerView model =
                             )
                         ]
                     ]
-            , div [ Attribute.id "restrictions", Attribute.style [ ( "display", "none" ) ] ] []
-            , div [ Attribute.id "patientServiceHistory", Attribute.style [ ( "display", "none" ) ] ] []
+            , div
+                [ Attribute.id "restrictions"
+                , Attribute.style [ ( "display", "none" ) ]
+                ]
+                (List.map
+                    (\t ->
+                        div [ Attribute.class "padding-top-5 padding-bottom-5" ]
+                            [ Html.label [] [ Html.text <| Functions.defaultString t.roleTypeName ]
+                            , Html.span [] [ Html.text <| Functions.defaultString t.contactName ]
+                            ]
+                    )
+                    model.restrictions
+                )
+            , div
+                [ Attribute.id "patientServiceHistory"
+                , Attribute.style [ ( "display", "none" ) ]
+                ]
+                ((List.map
+                    (\t ->
+                        div [ Attribute.class "padding-top-5 padding-bottom-5" ]
+                            [ Html.span [ Attribute.class "col-xs-6 text-align-right" ]
+                                [ Html.span [] [ Html.text <| Functions.defaultString t.serviceType ]
+                                , Html.span [ Encode.string "&nbsp;-&nbsp;" |> Attribute.property "innerHTML" ] []
+                                , case t.serviceEnd of
+                                    Just serviceEnd ->
+                                        Html.span [] [ Html.text serviceEnd ]
+
+                                    Nothing ->
+                                        Html.span [] [ Html.text <| findServiceStatus t.serviceType ]
+                                ]
+                            ]
+                    )
+                    model.serviceDetails
+                 )
+                    ++ [ Html.br [] [], Html.br [] [], Html.br [] [] ]
+                )
             ]
 
 
@@ -881,6 +1052,14 @@ viewPatientHeader model =
 
                 value displayValue =
                     el HeaderPatientText headerPadRight <| text <| displayValue
+
+                currentServiceDetailComputed =
+                    case model.currentServiceDetail.serviceType of
+                        Just serviceType ->
+                            serviceType ++ ": Started " ++ (Functions.defaultString model.currentServiceDetail.serviceStart)
+
+                        Nothing ->
+                            "No current service"
             in
                 [ row HeaderPatient
                     [ paddingLeft 10 ]
@@ -897,7 +1076,9 @@ viewPatientHeader model =
                             [ el None [] <|
                                 Element.html <|
                                     Html.button
-                                        [ Attribute.class "btn btn-danger btn-sm margin-bottom-5 header-button" ]
+                                        [ Attribute.class "btn btn-danger btn-sm margin-bottom-5 header-button"
+                                        , Events.onClick OpenRestrictions
+                                        ]
                                         [ Html.text "Restrictions (0)" ]
 
                             --TODO, count of actual restrictions
@@ -961,6 +1142,11 @@ viewPatientHeader model =
                     [ width fill, paddingLeft 10 ]
                     [ label "Current Service"
                     , value "No current service"
+                    , el Hyperlink
+                        (headerPadRight ++ [ onClick OpenServiceHistory ])
+                      <|
+                        text <|
+                            currentServiceDetailComputed
                     ]
                 ]
 
@@ -989,4 +1175,12 @@ emptyPersonHeaderDetails =
     , facilityId = 0
     , dateOfDeath = Nothing
     , mainProvider = Nothing
+    }
+
+
+emptyCurrentServiceDetail : ServiceDetail
+emptyCurrentServiceDetail =
+    { serviceType = Nothing
+    , serviceStart = Nothing
+    , serviceEnd = Nothing
     }
