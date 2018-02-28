@@ -1,6 +1,6 @@
 port module Main exposing (main)
 
-import Html exposing (Html, text, div)
+import Html exposing (Html, div)
 import Billing
 import Demographics
 import ClinicalSummary
@@ -10,7 +10,6 @@ import Hospitilizations
 import Allergies
 import Immunizations
 import LastKnownVitals
-import Common.SharedView as SharedView
 import Common.Functions as Functions
 import Common.Types as Common exposing (AddEditDataSource)
 import Common.Route as Route exposing (Route)
@@ -18,6 +17,14 @@ import Navigation
 import Http exposing (Error)
 import Json.Decode as Decode exposing (maybe, int, list)
 import Json.Decode.Pipeline as Pipeline exposing (required, decode)
+import Element exposing (column, el, image, row, text, link, empty, below)
+import Element.Input as Input
+import Element.Attributes exposing (center, fill, fillPortion, width, height, class, padding, spacing, px, verticalCenter, spacingXY, paddingLeft, paddingRight, paddingBottom, paddingTop, hidden, alignRight, clipX, id)
+import Color
+import Style exposing (style, styleSheet)
+import Style.Border as Border
+import Style.Color as Color
+import Style.Font as Font
 
 
 type alias PageInfo =
@@ -36,6 +43,7 @@ type alias Model =
     , addEditDataSource : Maybe AddEditDataSource
     , route : Route
     , activePerson : Maybe Common.PersonHeaderDetails
+    , selectMenu : Input.SelectWith String Msg
     }
 
 
@@ -65,7 +73,7 @@ type Page
     | Medications
     | Notes
       -- Other
-    | None
+    | NoPage
     | Error String
 
 
@@ -75,18 +83,20 @@ init location =
         Just patientId ->
             setRoute (Route.fromLocation location)
                 { patientId = patientId
-                , page = None
+                , page = NoPage
                 , addEditDataSource = Nothing
                 , route = Route.None
                 , activePerson = Nothing
+                , selectMenu = Input.dropMenu Nothing SelectOne
                 }
 
         Nothing ->
             { patientId = 0
-            , page = None
+            , page = NoPage
             , addEditDataSource = Nothing
             , route = Route.None
             , activePerson = Nothing
+            , selectMenu = Input.dropMenu Nothing SelectOne
             }
                 ! [ Functions.setLoadingStatus False ]
 
@@ -177,13 +187,13 @@ view model =
                     jsView
 
                 -- Other
-                None ->
+                NoPage ->
                     jsView
 
                 Error str ->
-                    div [] [ text str ]
+                    div [] [ Html.text str ]
     in
-        SharedView.view innerView model.route model.activePerson
+        viewHeader innerView model.route model
 
 
 pageSubscriptions : Page -> Sub Msg
@@ -260,7 +270,7 @@ pageSubscriptions page =
             Sub.none
 
         -- Other
-        None ->
+        NoPage ->
             Sub.none
 
         Error _ ->
@@ -280,6 +290,7 @@ type Msg
     | DemographicsMsg Demographics.Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
     | PersonHeaderLoaded (Result Http.Error Common.PersonHeaderDetails)
+    | SelectOne (Input.SelectMsg String)
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -417,7 +428,7 @@ setRoute maybeRoute model =
                     ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
 
             Just Route.None ->
-                setModel Route.None None
+                setModel Route.None NoPage
                     ! []
 
             Just (Route.Error str) ->
@@ -492,6 +503,10 @@ updatePage page msg model =
             ( LastKnownVitalsMsg subMsg, LastKnownVitals subModel ) ->
                 toPage LastKnownVitals LastKnownVitalsMsg LastKnownVitals.update subMsg subModel
 
+            ( SelectOne searchMsg, _ ) ->
+                { model | selectMenu = Input.updateSelection searchMsg model.selectMenu }
+                    ! []
+
             _ ->
                 { model | page = Error <| "Missing Page\\Message " ++ toString page ++ " !!!__-__!!! " ++ toString msg } ! []
 
@@ -547,3 +562,329 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+
+-- Style STuff
+
+
+type MyStyles
+    = Root
+    | HeaderNav
+    | HeaderNavActive
+    | HeaderBreadQuick
+    | SideNav
+    | SideNavActive
+    | SideNavParentActive
+    | SideNavChildActive
+    | HeaderPatient
+    | HeaderPatientLarge
+    | BoldText
+    | Body
+    | None
+
+
+navBlue : Color.Color
+navBlue =
+    Color.rgb 51 122 183
+
+
+navLightBlue : Color.Color
+navLightBlue =
+    Color.rgb 160 216 250
+
+
+navBlueActive : Color.Color
+navBlueActive =
+    Color.rgb 187 217 238
+
+
+veryLightBlue : Color.Color
+veryLightBlue =
+    Color.rgb 235 244 250
+
+
+veryLightGray : Color.Color
+veryLightGray =
+    Color.rgb 238 238 238
+
+
+navBlueActiveText : Color.Color
+navBlueActiveText =
+    Color.rgb 135 206 250
+
+
+stylesheet : Style.StyleSheet MyStyles variation
+stylesheet =
+    styleSheet
+        [ style Root
+            [ --Font.typeface [ Font.importUrl { url = "https://fonts.googleapis.com/css", name = "eb garamond" } ]
+              Font.size 14
+            , Border.left 1.0
+            , Color.border Color.lightGray
+            ]
+        , style HeaderNav
+            [ Color.text navBlue
+            , Color.background Color.white
+            , Border.rounded 4.0
+            , Style.hover [ Color.background veryLightGray ]
+            ]
+        , style HeaderNavActive
+            [ Color.text Color.white
+            , Color.background navBlue
+            , Border.rounded 4.0
+            ]
+        , style HeaderBreadQuick
+            [ Color.text Color.white
+            , Color.background navBlue
+            ]
+        , style SideNav
+            [ Color.text navBlue
+            , Color.background Color.white
+            , Style.hover [ Color.background navLightBlue ]
+            ]
+        , style SideNavActive
+            [ Color.text navBlue
+            , Color.background navLightBlue
+            , Style.hover [ Color.background navLightBlue ]
+            ]
+        , style SideNavParentActive
+            [ Color.text navBlue
+            , Color.background navBlueActive
+            , Style.hover [ Color.background navLightBlue ]
+            ]
+        , style SideNavChildActive
+            [ Color.text navBlue
+            , Color.background veryLightBlue
+            , Style.hover [ Color.background navLightBlue ]
+            ]
+        , style HeaderPatient
+            [ Color.background (Color.rgb 245 245 220)
+            ]
+        , style HeaderPatientLarge
+            [ Font.size 24
+            , Font.weight 600
+            , Color.text (Color.rgb 51 51 51)
+            ]
+        , style BoldText
+            [ Font.bold
+            ]
+        , style Body
+            [ Color.text Color.black
+            ]
+        , style None []
+        ]
+
+
+findActiveClass : Route.RouteDesc -> Route.Route -> MyStyles
+findActiveClass route activeRoute =
+    let
+        parentId : Maybe Int
+        parentId =
+            Route.getParentFromRoute activeRoute
+                |> Maybe.map Route.routeId
+    in
+        if route.id == Route.routeId activeRoute then
+            SideNavActive
+        else if Just route.id == parentId then
+            SideNavParentActive
+        else if Route.getParentFromRoute route.route == Route.getParentFromRoute activeRoute then
+            SideNavChildActive
+        else
+            SideNav
+
+
+fr : Int -> Element.Attribute variation msg
+fr amount =
+    width <| fillPortion amount
+
+
+viewHeader innerView activeRoute model =
+    let
+        toTopUrl navUrl navText =
+            let
+                activeClass =
+                    -- TODO, this needs to bubble up to the parent
+                    if navText == "Home" then
+                        HeaderNavActive
+                    else
+                        HeaderNav
+            in
+                el activeClass
+                    [ paddingLeft 7
+                    , paddingRight 7
+                    , paddingTop 10
+                    , paddingBottom 10
+                    ]
+                    (link navUrl <| el None [] (text navText))
+
+        toSideUrl t =
+            link t.url <|
+                el (findActiveClass t activeRoute)
+                    [ height <| px 40
+                    , verticalCenter
+                    , paddingLeft (10 + (t.depth * 15))
+                    , paddingTop 10.0
+                    , paddingBottom 10.0
+                    , paddingRight 0.0
+                    , width fill
+                    ]
+                    (text t.navText)
+
+        sideNav =
+            Route.getSideNav
+                |> List.filter
+                    (\t ->
+                        t.depth
+                            == 0.0
+                            || case findActiveClass t activeRoute of
+                                SideNav ->
+                                    False
+
+                                _ ->
+                                    True
+                    )
+                |> List.map toSideUrl
+
+        toBreadCrumbs { route } =
+            el HeaderNavActive [] <| link (Route.routeUrl route) <| el None [] (text (Route.routeDescription route))
+
+        headerBreakQuick =
+            Route.getBreadcrumbsFromRoute activeRoute
+                |> List.map toBreadCrumbs
+                |> List.intersperse (el HeaderNavActive [] (text "|"))
+    in
+        Element.layout stylesheet <|
+            column Root
+                [ clipX ]
+                [ row None
+                    [ width fill, height <| px 59 ]
+                    [ column None
+                        [ fr 5 ]
+                        [ row None
+                            []
+                            [ image None [ class "pointer" ] { src = "/Images/Logos/Logo-ncn.png", caption = "" } ]
+                        ]
+                    , column None
+                        [ fr 6, alignRight ]
+                        [ row None
+                            []
+                            [ toTopUrl "/" "Home"
+                            , toTopUrl "/search" "Search"
+                            , toTopUrl "/enrollment" "Enrollment"
+                            , toTopUrl "/communications" "Communications"
+                            , toTopUrl "/records" "Records"
+                            , toTopUrl "/billing" "Billing"
+                            , toTopUrl "/settings" "Settings"
+                            , toTopUrl "/admin" "Admin"
+                            , toTopUrl "/resources" "Resources"
+                            , toTopUrl "/account" "Account"
+
+                            --TODO, I think special logic goes here
+                            , toTopUrl "/logout" "Logout"
+                            ]
+                        ]
+                    ]
+                , row HeaderBreadQuick
+                    [ spacing 6, paddingTop 9, paddingBottom 9, paddingLeft 10 ]
+                    headerBreakQuick
+                , row None
+                    []
+                    [ column None
+                        [ fr 2 ]
+                        sideNav
+                    , column None
+                        [ fr 10 ]
+                        (viewPatientHeader model
+                            ++ [ row None
+                                    [ paddingLeft 10, paddingTop 10, paddingRight 10 ]
+                                    [ el None [ class "body-content" ] <| Element.html innerView
+                                    ]
+                               ]
+                        )
+                    ]
+                ]
+
+
+viewPatientHeader model =
+    case model.activePerson of
+        Just p ->
+            let
+                headerPad =
+                    [ paddingTop 5, paddingBottom 5 ]
+
+                headerPadRight =
+                    [ paddingTop 5, paddingBottom 5, paddingRight 10 ]
+
+                maybeText t =
+                    text <| Maybe.withDefault "" t
+
+                contactHoursFormat t =
+                    Html.li [] [ Html.text t ]
+
+                contactHours =
+                    List.map contactHoursFormat p.contactHours
+
+                x =
+                    0
+            in
+                [ row HeaderPatient
+                    [ paddingLeft 10 ]
+                    [ column None
+                        [ fr 2 ]
+                        [ el HeaderPatientLarge [] <| maybeText p.fullName
+                        ]
+                    , column None
+                        [ fr 3, alignRight ]
+                        [ Input.select None
+                            [ padding 10
+                            , spacing 20
+                            ]
+                            { label = Input.labelAbove <| text "Lunch"
+
+                            -- model.selection is some state(value, a Msg constructor, and the focus) we store in our model.
+                            -- It can be created using Input.autocomplete or Input.dropMenu
+                            -- Check out the Form.elm example to see a complete version.
+                            , with = model.selectMenu
+                            , max = 5
+                            , options = []
+                            , menu =
+                                Input.menuAbove None
+                                    []
+                                    [ Input.choice "1" (text "Taco!")
+                                    , Input.choice "2" (text "Gyro")
+                                    , Input.styledChoice "3" <|
+                                        \selected ->
+                                            Element.row None
+                                                [ spacing 5 ]
+                                                [ el None [] <|
+                                                    if selected then
+                                                        text ":D"
+                                                    else
+                                                        text ":("
+                                                , text "burrito"
+                                                ]
+                                    ]
+                            }
+                        ]
+                    ]
+                , row HeaderPatient
+                    [ width fill, paddingLeft 10 ]
+                    [ el BoldText headerPad <| text "Date of Birth: "
+                    , el None headerPadRight <| maybeText p.dateOfBirth
+                    , el BoldText headerPad <| text "Age: "
+                    , el None headerPadRight <| text (toString p.age)
+                    ]
+                , row HeaderPatient
+                    []
+                    [ el BoldText headerPad <| text "Current Service: "
+                    , el None headerPadRight <| el None [ id "bob" ] empty
+                    ]
+                ]
+
+        Nothing ->
+            []
+
+
+
+--                            (Element.html (Html.ul [ Attributes.id "contactHoursMenu" ] contactHours))
