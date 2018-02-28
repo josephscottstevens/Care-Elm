@@ -35,7 +35,7 @@ type alias PageInfo =
 port loadPage : PageInfo -> Cmd msg
 
 
-port initHeader : Common.PersonHeaderDetails -> Cmd msg
+port initHeader : PersonHeaderDetails -> Cmd msg
 
 
 type alias ContactHour =
@@ -49,7 +49,7 @@ type alias Model =
     , page : Page
     , addEditDataSource : Maybe AddEditDataSource
     , route : Route
-    , activePerson : Maybe Common.PersonHeaderDetails
+    , activePerson : Maybe PersonHeaderDetails
     , selectMenu : Input.SelectWith String Msg
     }
 
@@ -297,7 +297,7 @@ type Msg
     | RecordsMsg Records.Msg
     | DemographicsMsg Demographics.Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
-    | PersonHeaderLoaded (Result Http.Error Common.PersonHeaderDetails)
+    | PersonHeaderLoaded (Result Http.Error PersonHeaderDetails)
     | SelectOne (Input.SelectMsg String)
 
 
@@ -538,7 +538,7 @@ getDropDowns patientId =
 
 getPersonHeaderDetails : Int -> Cmd Msg
 getPersonHeaderDetails patientId =
-    Pipeline.decode Common.PersonHeaderDetails
+    Pipeline.decode PersonHeaderDetails
         |> Pipeline.required "Id" Decode.int
         |> Pipeline.required "FullName" (Decode.maybe Decode.string)
         |> Pipeline.required "DateOfBirth" (Decode.maybe Decode.string)
@@ -779,7 +779,7 @@ viewHeader innerView model =
             column Root
                 [ clipX ]
                 [ row None
-                    [ width fill, height <| px 59 ]
+                    [ width fill, height <| px 52 ]
                     [ column None
                         [ fr 5 ]
                         [ row None
@@ -838,20 +838,25 @@ viewPatientHeader model =
                 headerPadRight =
                     [ paddingTop 5, paddingBottom 5, paddingRight 10 ]
 
-                maybeText t =
-                    text <| Maybe.withDefault "" t
-
                 contactHoursFormat t =
                     Input.choice t (text t)
 
                 contactHours =
                     List.map contactHoursFormat p.contactHours
+
+                label displayText =
+                    el HeaderPatientLabel headerPad <| text (displayText ++ ": ")
+
+                value displayValue =
+                    el HeaderPatientText headerPadRight <| text <| displayValue
             in
                 [ row HeaderPatient
                     [ paddingLeft 10 ]
                     [ column None
                         [ fr 5 ]
-                        [ el HeaderPatientLarge [] <| maybeText p.fullName
+                        [ row None
+                            [ paddingTop 10 ]
+                            [ el HeaderPatientLarge [] <| text <| Functions.defaultString p.fullName ]
                         ]
                     , column None
                         [ fr 1 ]
@@ -892,17 +897,79 @@ viewPatientHeader model =
                     ]
                 , row HeaderPatient
                     [ width fill, paddingLeft 10 ]
-                    [ el HeaderPatientLabel headerPad <| text "Date of Birth: "
-                    , el HeaderPatientText headerPadRight <| maybeText p.dateOfBirth
-                    , el HeaderPatientLabel headerPad <| text "Age: "
-                    , el HeaderPatientText headerPadRight <| text (toString p.age)
+                    [ label "Date of Birth"
+                    , value (Functions.defaultString p.dateOfBirth)
+                    , label "Age"
+                    , value (Functions.defaultIntToString p.age)
+                    , label "Preferred Language"
+                    , value (Functions.defaultString p.preferredLanguage)
                     ]
                 , row HeaderPatient
                     [ width fill, paddingLeft 10 ]
-                    [ el HeaderPatientLabel headerPad <| text "Current Service: "
-                    , el HeaderPatientText headerPadRight <| el None [ id "bob" ] empty
+                    [ label "Facility"
+                    , value (Functions.defaultString p.facilityName)
+                    , label "Main Provider"
+                    , value (Functions.defaultString p.mainProvider)
+                    , label "Care Coordinator"
+                    , value (Functions.defaultString p.primaryResource)
+                    , label "Medical Record No"
+                    , value (Functions.defaultString p.mRN)
+                    , label "Patient's Facility ID No"
+                    , value (Functions.defaultString p.pFID)
+                    ]
+                , row HeaderPatient
+                    [ width fill, paddingLeft 10 ]
+                    [ label "Current Service"
+                    , value "No current service"
                     ]
                 ]
 
         Nothing ->
             []
+
+
+type alias PersonHeaderDetails =
+    { patientId : Int
+    , fullName : Maybe String
+    , dateOfBirth : Maybe String
+    , age : Maybe Int
+    , nickname : Maybe String
+    , facilityName : Maybe String
+    , isVIP : Bool
+    , hasNDA : Bool
+    , contactHours : List String
+    , mRN : Maybe String
+    , pAN : Maybe String
+    , pFID : Maybe String
+    , primaryResource : Maybe String
+    , restrictionsCount : Int
+    , emailAddress : Maybe String
+    , preferredLanguage : Maybe String
+    , facilityId : Int
+    , dateOfDeath : Maybe String
+    , mainProvider : Maybe String
+    }
+
+
+emptyPersonHeaderDetails : PersonHeaderDetails
+emptyPersonHeaderDetails =
+    { patientId = 0
+    , fullName = Nothing
+    , dateOfBirth = Nothing
+    , age = Nothing
+    , nickname = Nothing
+    , facilityName = Nothing
+    , isVIP = False
+    , hasNDA = False
+    , contactHours = []
+    , mRN = Nothing
+    , pAN = Nothing
+    , pFID = Nothing
+    , primaryResource = Nothing
+    , restrictionsCount = 0
+    , emailAddress = Nothing
+    , preferredLanguage = Nothing
+    , facilityId = 0
+    , dateOfDeath = Nothing
+    , mainProvider = Nothing
+    }
