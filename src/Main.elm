@@ -54,6 +54,29 @@ type alias Model =
     }
 
 
+type alias PersonHeaderDetails =
+    { patientId : Int
+    , fullName : Maybe String
+    , dateOfBirth : Maybe String
+    , age : Maybe Int
+    , nickname : Maybe String
+    , facilityName : Maybe String
+    , isVIP : Bool
+    , hasNDA : Bool
+    , contactHours : List String
+    , mRN : Maybe String
+    , pAN : Maybe String
+    , pFID : Maybe String
+    , primaryResource : Maybe String
+    , restrictionsCount : Int
+    , emailAddress : Maybe String
+    , preferredLanguage : Maybe String
+    , facilityId : Int
+    , dateOfDeath : Maybe String
+    , mainProvider : Maybe String
+    }
+
+
 type Page
     = Demographics Demographics.Model
     | Billing Billing.Model
@@ -690,7 +713,12 @@ stylesheet =
             ]
         , style ContactHours
             [ Color.background Color.white
+            , [ "Arial" ] |> List.map Font.font |> Font.typeface
             , Font.weight 400
+            , Font.size 13.0
+            , Border.all 1.0
+            , Border.solid
+            , Color.border <| Color.rgb 206 206 206
             ]
         , style None []
         ]
@@ -861,24 +889,26 @@ viewPatientHeader model =
                     , column None
                         [ fr 1 ]
                         [ row None
-                            [ paddingTop 10, paddingRight 5, spacing 10 ]
+                            [ paddingTop 10, paddingRight 5, spacing 5 ]
                             [ el None [] <|
                                 Element.html <|
                                     Html.button
                                         [ Attribute.class "btn btn-danger btn-sm margin-bottom-5 header-button" ]
                                         [ Html.text "Restrictions (0)" ]
+
+                            --TODO, count of actual restrictions
                             , el None [] <|
                                 Element.html <|
                                     Html.button
                                         [ Attribute.class "btn btn-default btn-sm fa fa-phone margin-bottom-5 header-button"
-                                        , Attribute.style [ ( "color", "green" ), ( "padding-top", "7px" ), ( "padding-bottom", "7px" ) ]
+                                        , Attribute.style [ ( "color", "green" ), ( "padding-top", "8px" ), ( "padding-bottom", "7px" ) ]
                                         ]
                                         []
                             , Input.select ContactHours
-                                [ spacing 10
-                                , paddingRight 10
-                                , paddingTop 10
-                                , paddingLeft 5
+                                [ spacing 5
+                                , paddingRight 9
+                                , paddingTop 7
+                                , paddingLeft 9
                                 , paddingBottom 7
                                 ]
                                 { label = Input.hiddenLabel ""
@@ -888,7 +918,13 @@ viewPatientHeader model =
                                 , menu =
                                     Input.menu HeaderPatientText
                                         []
-                                        ([ Input.choice "Contact Hours" (text "Contact Hours") ]
+                                        ([ Input.styledChoice "Contact Hours" <|
+                                            \t ->
+                                                row None
+                                                    [ paddingRight 7 ]
+                                                    [ el None [] (text "Contact Hours")
+                                                    ]
+                                         ]
                                             ++ contactHours
                                         )
                                 }
@@ -926,29 +962,6 @@ viewPatientHeader model =
 
         Nothing ->
             []
-
-
-type alias PersonHeaderDetails =
-    { patientId : Int
-    , fullName : Maybe String
-    , dateOfBirth : Maybe String
-    , age : Maybe Int
-    , nickname : Maybe String
-    , facilityName : Maybe String
-    , isVIP : Bool
-    , hasNDA : Bool
-    , contactHours : List String
-    , mRN : Maybe String
-    , pAN : Maybe String
-    , pFID : Maybe String
-    , primaryResource : Maybe String
-    , restrictionsCount : Int
-    , emailAddress : Maybe String
-    , preferredLanguage : Maybe String
-    , facilityId : Int
-    , dateOfDeath : Maybe String
-    , mainProvider : Maybe String
-    }
 
 
 emptyPersonHeaderDetails : PersonHeaderDetails
