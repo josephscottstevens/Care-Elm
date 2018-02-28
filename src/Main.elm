@@ -586,8 +586,9 @@ type MyStyles
     | SideNavParentActive
     | SideNavChildActive
     | HeaderPatient
+    | HeaderPatientLabel
+    | HeaderPatientText
     | HeaderPatientLarge
-    | BoldText
     | Body
     | ContactHours
     | None
@@ -628,7 +629,8 @@ stylesheet =
     styleSheet
         [ style Root
             [ --Font.typeface [ Font.importUrl { url = "https://fonts.googleapis.com/css", name = "eb garamond" } ]
-              Font.size 14
+              [ "Helvetica Neue", "Helvetica", "Arial", "sans-serif" ] |> List.map Font.font |> Font.typeface
+            , Font.size 14
             , Border.left 1.0
             , Color.border Color.lightGray
             ]
@@ -670,13 +672,18 @@ stylesheet =
         , style HeaderPatient
             [ Color.background (Color.rgb 245 245 220)
             ]
+        , style HeaderPatientLabel
+            [ Font.weight 600
+            , Font.size 12.0
+            ]
+        , style HeaderPatientText
+            [ Font.weight 400
+            , Font.size 12.0
+            ]
         , style HeaderPatientLarge
             [ Font.size 24
-            , Font.weight 600
+            , Font.weight 500
             , Color.text (Color.rgb 51 51 51)
-            ]
-        , style BoldText
-            [ Font.bold
             ]
         , style Body
             [ Color.text Color.black
@@ -874,7 +881,7 @@ viewPatientHeader model =
                                 , max = 20
                                 , options = []
                                 , menu =
-                                    Input.menu None
+                                    Input.menu HeaderPatientText
                                         []
                                         ([ Input.choice "Contact Hours" (text "Contact Hours") ]
                                             ++ contactHours
@@ -885,15 +892,15 @@ viewPatientHeader model =
                     ]
                 , row HeaderPatient
                     [ width fill, paddingLeft 10 ]
-                    [ el BoldText headerPad <| text "Date of Birth: "
-                    , el None headerPadRight <| maybeText p.dateOfBirth
-                    , el BoldText headerPad <| text "Age: "
-                    , el None headerPadRight <| text (toString p.age)
+                    [ el HeaderPatientLabel headerPad <| text "Date of Birth: "
+                    , el HeaderPatientText headerPadRight <| maybeText p.dateOfBirth
+                    , el HeaderPatientLabel headerPad <| text "Age: "
+                    , el HeaderPatientText headerPadRight <| text (toString p.age)
                     ]
                 , row HeaderPatient
-                    []
-                    [ el BoldText headerPad <| text "Current Service: "
-                    , el None headerPadRight <| el None [ id "bob" ] empty
+                    [ width fill, paddingLeft 10 ]
+                    [ el HeaderPatientLabel headerPad <| text "Current Service: "
+                    , el HeaderPatientText headerPadRight <| el None [ id "bob" ] empty
                     ]
                 ]
 
