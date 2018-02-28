@@ -138,12 +138,14 @@ findActiveClass route activeRoute =
             SideNav
 
 
+fr : Int -> Element.Attribute variation msg
+fr amount =
+    width <| fillPortion amount
+
+
 view : Html msg -> Route.Route -> Maybe Common.PersonHeaderDetails -> Html msg
 view innerView activeRoute activePerson =
     let
-        fr amount =
-            width <| fillPortion amount
-
         toTopUrl navUrl navText =
             let
                 activeClass =
@@ -270,8 +272,24 @@ viewPatientHeader maybeActivePerson =
                     List.map contactHoursFormat p.contactHours
             in
                 [ row HeaderPatient
-                    [ width fill, paddingLeft 10 ]
-                    [ el HeaderPatientLarge [] <| maybeText p.fullName ]
+                    [ paddingLeft 10 ]
+                    [ column None
+                        [ fr 2 ]
+                        [ el HeaderPatientLarge [] <| maybeText p.fullName
+                        ]
+                    , column None
+                        [ fr 3, alignRight ]
+                        [ el None [] (text "hours")
+                            |> below
+                                [ column HeaderPatient
+                                    [ spacing 20 ]
+                                    [ el None [] (text "a")
+                                    , el None [] (text "b")
+                                    , el None [] (text "c")
+                                    ]
+                                ]
+                        ]
+                    ]
                 , row HeaderPatient
                     [ width fill, paddingLeft 10 ]
                     [ el BoldText headerPad <| text "Date of Birth: "
@@ -279,22 +297,10 @@ viewPatientHeader maybeActivePerson =
                     , el BoldText headerPad <| text "Age: "
                     , el None headerPadRight <| text (toString p.age)
                     ]
-                , row None
+                , row HeaderPatient
                     []
                     [ el BoldText headerPad <| text "Current Service: "
                     , el None headerPadRight <| el None [ id "bob" ] empty
-                    ]
-                , row HeaderPatient
-                    [ width fill, paddingLeft 10 ]
-                    [ el None [] (text "hours")
-                        |> below
-                            [ column HeaderPatient
-                                [ spacing 20 ]
-                                [ el None [] (text "a")
-                                , el None [] (text "b")
-                                , el None [] (text "c")
-                                ]
-                            ]
                     ]
                 ]
 
