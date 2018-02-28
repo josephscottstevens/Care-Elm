@@ -37,6 +37,12 @@ port loadPage : PageInfo -> Cmd msg
 port initHeader : Common.PersonHeaderDetails -> Cmd msg
 
 
+type alias ContactHour =
+    { displayValue : String
+    , insideValue : String
+    }
+
+
 type alias Model =
     { patientId : Int
     , page : Page
@@ -96,7 +102,7 @@ init location =
             , addEditDataSource = Nothing
             , route = Route.None
             , activePerson = Nothing
-            , selectMenu = Input.dropMenu (Just "aa") SelectOne
+            , selectMenu = Input.dropMenu (Just "Contact Hours") SelectOne
             }
                 ! [ Functions.setLoadingStatus False ]
 
