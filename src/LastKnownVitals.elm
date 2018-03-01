@@ -88,8 +88,7 @@ view model _ =
         Nothing ->
             div []
                 [ h4 [] [ text "LastKnownVitals" ]
-                , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view model.tableState model.rows gridConfig Nothing ]
+                , Table.view model.tableState model.rows gridConfig Nothing
                 ]
 
         Just editData ->

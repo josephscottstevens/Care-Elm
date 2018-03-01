@@ -127,8 +127,7 @@ view model addEditDataSource =
         Nothing ->
             div []
                 [ h4 [] [ text "Hospitilizations" ]
-                , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view model.tableState model.rows (gridConfig addEditDataSource) Nothing ]
+                , Table.view model.tableState model.rows (gridConfig addEditDataSource) Nothing
                 ]
 
         Just editData ->

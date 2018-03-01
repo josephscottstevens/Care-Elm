@@ -985,7 +985,7 @@ viewHeader innerView model =
                             (viewPatientHeader model
                                 ++ [ row None
                                         [ paddingLeft 10, paddingTop 10, paddingRight 10 ]
-                                        [ el None [ class "body-content" ] <| Element.html innerView
+                                        [ el None [ class "body-content", width fill ] <| Element.html innerView
                                         ]
                                    ]
                             )

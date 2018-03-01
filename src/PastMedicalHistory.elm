@@ -157,8 +157,7 @@ view model addEditDataSource =
         Grid ->
             div []
                 [ h4 [] [ text "Past Medical History" ]
-                , div [ class "e-grid e-js e-waitingpopup" ]
-                    [ Table.view model.tableState model.rows (gridConfig addEditDataSource) Nothing ]
+                , Table.view model.tableState model.rows (gridConfig addEditDataSource) Nothing
                 ]
 
         AddEdit newRecord ->
