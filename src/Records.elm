@@ -397,7 +397,6 @@ getColumns recordType =
 
                 Common.Labs ->
                     [ dateTimeColumn "Date Collected" .date
-                    , dateTimeColumn "Date Accessioned" .dateAccessed
                     , stringColumn "Name of Lab" .title
                     , stringColumn "Provider" .provider
                     , htmlColumn "Comments" .comments
