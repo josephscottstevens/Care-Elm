@@ -574,7 +574,7 @@ formInputs editData =
                 Common.Labs ->
                     firstColumns
                         ++ [ DateInput "Date of Labs Collected" Required (defaultString editData.sfData.timeVisit) "TimeVisitId"
-                           , DateInput "Date of Labs Accessioned" Required (defaultString editData.sfData.timeAcc) "TimeAccId"
+                           , DateInput "Date of Labs Accessioned" Optional (defaultString editData.sfData.timeAcc) "TimeAccId"
                            , TextInput "Name of Lab" Optional editData.title (UpdateTitle editData)
                            , TextInput "Provider of Lab" Optional editData.provider (UpdateProvider editData)
                            ]
