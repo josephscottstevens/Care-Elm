@@ -1,7 +1,7 @@
 port module Demographics exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
-import Html exposing (Html, text, div, span, input, label, h4, table, tbody, tr, td, option, select)
-import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name)
+import Html exposing (Html, text, div, span, input, label, h4, table, tbody, tr, td, option, select, b)
+import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name, colspan, checked, attribute)
 import Html.Events exposing (onClick, onInput, onCheck)
 import Common.Types exposing (DropdownItem)
 import Common.Dropdown as Dropdown
@@ -12,6 +12,11 @@ import Json.Encode as Encode
 import Http
 import Char
 import MaskedInput.Number as MaskedNumber
+
+
+dataBind : String -> Html.Attribute msg
+dataBind =
+    attribute "data-bind"
 
 
 port initDemographics : SfData -> Cmd msg
@@ -239,7 +244,7 @@ view model =
                     [ h4 [] [ text "Contact Hours" ]
                     , div [ class "col-xs-12 padding-h-0 col-sm-12 col-md-12 padding-h-0" ]
                         [ div [ id "MasterPCHError", class "error", style [ ( "display", "none" ) ] ] [ text "Errors with contact hours must be corrected before submission" ]
-                        , table [ class "PatientContactHoursGrid" ] []
+                        , table [ class "PatientContactHoursGrid" ] [ contactHoursBody model.contactHoursModel ]
                         ]
                     ]
                 ]
@@ -248,6 +253,75 @@ view model =
                     [ input [ type_ "button", class "btn btn-sm btn-success" ] [] -- , onClick Save
                     , input [ type_ "button", class "btn btn-sm btn-default margin-left-5" ] [] -- onClick Cancel
                     ]
+                ]
+            ]
+        ]
+
+
+type alias ContactHoursModel =
+    { tz : SelectList
+    , weekData : List DayData
+    , selectedTimeZoneId : Int
+    }
+
+
+type alias DayData =
+    { weekDay : Maybe String
+    , preferredDay : Bool
+    , timingInstructions : SelectList
+    , beginTime : SelectList
+    , endTime : SelectList
+    }
+
+
+type alias SelectList =
+    { value : String
+    , text : String
+    }
+
+
+contactHoursBody : ContactHoursModel -> Html Msg
+contactHoursBody contactHoursModel =
+    tbody []
+        [ tr [ class "padding-h-0" ]
+            [ td [ colspan 1, style [ ( "display", "block" ), ( "width", "250px" ), ( "padding-top", "10px" ), ( "padding-bottom", "10px" ) ] ]
+                [ input [ type_ "text", class "required", id "TZLabel", dataBind "ejDropDownList: { dataSource: vmContactHours.weekDataObservable().TZ, value: vmContactHours.SelectedTimeZoneId, watermarkText: 'Choose...', fields: { text: 'Text', value: 'Value' }, width: '100%', change: function() { hasChanges(true); } }" ] []
+                ]
+            ]
+        , tr [ class "col-xs-12 padding-h-0" ]
+            [ td [ class "Day" ] [ b [] [ text "Day" ] ]
+            , td [ class "Preferred", dataBind "attr: { id: '#Day_' + $index() + '_Preferred' }, checked: PreferredDay, click: function() { $parent.hasChanges(true); return true; }" ] [ b [] [ text "Preferred" ] ]
+            , td [ class "TimingOptions" ] [ b [] [ text "Timing Options" ] ]
+            , td [ class "Times" ] [ b [] [ text "Begin Time" ] ]
+            , td [ class "Times" ] [ b [] [ text "Begin Time" ] ]
+            ]
+        , tr [ class "col-xs-12 padding-h-0" ] (List.indexedMap viewContactHours contactHoursModel.weekData)
+        ]
+
+
+viewContactHours : Int -> DayData -> Html Msg
+viewContactHours idx dayData =
+    tr [ class "Day" ]
+        [ td [ style [ ( "text-align", "right" ) ] ] [ b [] [ text <| Functions.defaultString dayData.weekDay ] ]
+        , td [ class "Preferred" ] [ input [ type_ "checkbox", id ("#Day_" ++ (toString idx) ++ "_Preferred"), checked dayData.preferredDay ] [] ]
+        , td [ class "TimingOptions" ]
+            [ -- The following works except for the 'selected' option. The json object has the selected variable defined yet this continuously kicks back errors.
+              -- I believe that the checkbox must be enabled for this to work but I do not want that
+              input [ dataBind "ejDropDownList: {dataSource: $data.TimingInstructions, fields: { text:'Text', value:'Value', selected: Selected}, watermarkText:'Select Mapped Item', width:'290px'}, attr: { id: 'Day_' + $index() + '_TimingOption_1' }" ] []
+            , option [ dataBind "text: $data.Text, value: $data.Value" ] []
+            ]
+        , td [ class "Times" ]
+            [ select [ dataBind "attr: { id: 'Day_' + $index() + '_BeginTime', 'data-id': $index }" ]
+                [ option [ dataBind "text: $data.Text, value: $data.Value" ] []
+                ]
+            , div [ dataBind "attr: { id: 'Day_' + $index() + '_Err'}" ]
+                [ b [ style [ ( "color", "red" ), ( "font-size", "0.75em;" ) ] ] [ text "Must fall before End Time" ]
+                ]
+            ]
+        , td [ class "Times" ]
+            [ select [ dataBind "attr: { id: 'Day_' + $index() + '_EndTime', 'data-id': $index }" ]
+                [ --<!-- ko foreach:$data.EndTime -->
+                  option [ dataBind "text: $data.Text, value: $data.Value" ] []
                 ]
             ]
         ]
