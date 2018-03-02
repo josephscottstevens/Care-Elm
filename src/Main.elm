@@ -158,9 +158,9 @@ init location =
                 , currentServiceDetail = emptyCurrentServiceDetail
                 }
                     ! [ Functions.setLoadingStatus False
-                      , getRestrictionDetail (Maybe.withDefault 0 maybePatientId)
-                      , getServiceDetails (Maybe.withDefault 0 maybePatientId)
-                      , getCurrentServiceDetail (Maybe.withDefault 0 maybePatientId)
+                      , getRestrictionDetail maybePatientId
+                      , getServiceDetails maybePatientId
+                      , getCurrentServiceDetail maybePatientId
                       ]
 
 
@@ -668,28 +668,43 @@ decodeServiceDetail =
         |> Pipeline.required "ServiceEnd" (Decode.maybe Decode.string)
 
 
-getRestrictionDetail : Int -> Cmd Msg
-getRestrictionDetail patientId =
-    Decode.list decodeRestrictionDetail
-        |> Http.get ("/People/getrestrictions?patientId=" ++ toString patientId)
-        |> Http.send RestrictionLoaded
+getRestrictionDetail : Maybe Int -> Cmd Msg
+getRestrictionDetail maybePatientId =
+    case maybePatientId of
+        Just patientId ->
+            Decode.list decodeRestrictionDetail
+                |> Http.get ("/People/getrestrictions?patientId=" ++ toString patientId)
+                |> Http.send RestrictionLoaded
+
+        Nothing ->
+            Cmd.none
 
 
-getServiceDetails : Int -> Cmd Msg
-getServiceDetails patientId =
-    Decode.list decodeServiceDetail
-        |> Http.get ("/People/GetPatientServiceHistory?patientId=" ++ toString patientId)
-        |> Http.send ServiceDetailsLoaded
+getServiceDetails : Maybe Int -> Cmd Msg
+getServiceDetails maybePatientId =
+    case maybePatientId of
+        Just patientId ->
+            Decode.list decodeServiceDetail
+                |> Http.get ("/People/GetPatientServiceHistory?patientId=" ++ toString patientId)
+                |> Http.send ServiceDetailsLoaded
+
+        Nothing ->
+            Cmd.none
 
 
-getCurrentServiceDetail : Int -> Cmd Msg
-getCurrentServiceDetail patientId =
-    Pipeline.decode ServiceDetail
-        |> Pipeline.requiredAt [ "ServiceInfo", "ServiceType" ] (Decode.maybe Decode.string)
-        |> Pipeline.requiredAt [ "ServiceInfo", "ServiceStart" ] (Decode.maybe Decode.string)
-        |> Pipeline.requiredAt [ "ServiceInfo", "ServiceEnd" ] (Decode.maybe Decode.string)
-        |> Http.get ("/People/getcurrentservicedetails?patientId=" ++ toString patientId)
-        |> Http.send CurrentServiceDetailLoaded
+getCurrentServiceDetail : Maybe Int -> Cmd Msg
+getCurrentServiceDetail maybePatientId =
+    case maybePatientId of
+        Just patientId ->
+            Pipeline.decode ServiceDetail
+                |> Pipeline.requiredAt [ "ServiceInfo", "ServiceType" ] (Decode.maybe Decode.string)
+                |> Pipeline.requiredAt [ "ServiceInfo", "ServiceStart" ] (Decode.maybe Decode.string)
+                |> Pipeline.requiredAt [ "ServiceInfo", "ServiceEnd" ] (Decode.maybe Decode.string)
+                |> Http.get ("/People/getcurrentservicedetails?patientId=" ++ toString patientId)
+                |> Http.send CurrentServiceDetailLoaded
+
+        Nothing ->
+            Cmd.none
 
 
 main : Program Never Model Msg
