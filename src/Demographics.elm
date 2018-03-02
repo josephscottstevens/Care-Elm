@@ -1,7 +1,7 @@
 port module Demographics exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
 import Html exposing (Html, text, div, span, input, label, h4, table, tbody, tr, td, option, select, b)
-import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name, colspan, checked, attribute)
+import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name, colspan, checked)
 import Html.Events exposing (onClick, onInput, onCheck)
 import Common.Types exposing (DropdownItem)
 import Common.Dropdown as Dropdown
@@ -12,11 +12,6 @@ import Json.Encode as Encode
 import Http
 import Char
 import MaskedInput.Number as MaskedNumber
-
-
-dataBind : String -> Html.Attribute msg
-dataBind =
-    attribute "data-bind"
 
 
 port initDemographics : SfData -> Cmd msg
@@ -89,7 +84,7 @@ type alias Model =
     , preferredLanguageIndex : Int
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
-    , contactHoursModel : Maybe Decode.Value
+    , contactHoursModel : ContactHoursModel
     , showValidationErrors : Bool
     , suffixId : Maybe Int
     , suffixDropState : Dropdown.DropState
@@ -275,13 +270,28 @@ type alias DayData =
 
 
 type alias SelectList =
-    { value : String
-    , text : String
+    { value : Maybe String
+    , text : Maybe String
     }
 
 
-contactHoursBody : ContactHoursModel -> Html Msg
-contactHoursBody contactHoursModel =
+emptyContactHoursModel : ContactHoursModel
+emptyContactHoursModel =
+    { tz = emptySelectList
+    , weekData = []
+    , selectedTimeZoneId = -1
+    }
+
+
+emptySelectList : SelectList
+emptySelectList =
+    { value = Nothing
+    , text = Nothing
+    }
+
+
+contactHoursBody : Int -> ContactHoursModel -> Html Msg
+contactHoursBody idx contactHoursModel =
     tbody []
         [ tr [ class "padding-h-0" ]
             [ td [ colspan 1, style [ ( "display", "block" ), ( "width", "250px" ), ( "padding-top", "10px" ), ( "padding-bottom", "10px" ) ] ]
@@ -290,7 +300,7 @@ contactHoursBody contactHoursModel =
             ]
         , tr [ class "col-xs-12 padding-h-0" ]
             [ td [ class "Day" ] [ b [] [ text "Day" ] ]
-            , td [ class "Preferred", dataBind "attr: { id: '#Day_' + $index() + '_Preferred' }, checked: PreferredDay, click: function() { $parent.hasChanges(true); return true; }" ] [ b [] [ text "Preferred" ] ]
+            , td [ class "Preferred" ] [ b [] [ text "Preferred" ] ]
             , td [ class "TimingOptions" ] [ b [] [ text "Timing Options" ] ]
             , td [ class "Times" ] [ b [] [ text "Begin Time" ] ]
             , td [ class "Times" ] [ b [] [ text "Begin Time" ] ]
@@ -1190,7 +1200,7 @@ emptyModel patientId =
     , stateDropdown = []
     , primaryAddressIndex = 0
     , preferredPhoneIndex = 0
-    , contactHoursModel = Nothing
+    , contactHoursModel = emptyContactHoursModel
     , showValidationErrors = False
     , suffixId = Nothing
     , suffixDropState = Dropdown.init "suffixDropdown"
@@ -1306,7 +1316,7 @@ updateModelFromServerMessage serverResponse model =
                     , patientAddresses = c.patientAddresses
                     , primaryAddressIndex = c.primaryAddressIndex
                     , preferredPhoneIndex = c.preferredPhoneIndex
-                    , contactHoursModel = Just h
+                    , contactHoursModel = h
                     , suffixId = d.suffixId
                     , prefixId = d.prefixId
                     , raceId = d.raceId
@@ -1360,7 +1370,7 @@ type alias ContactInformationModel =
 
 
 type ServerResponse
-    = ServerSuccess DemographicsInformationModel ContactInformationModel Decode.Value DropdownSource
+    = ServerSuccess DemographicsInformationModel ContactInformationModel ContactHoursModel DropdownSource
     | ServerFail String
 
 
@@ -1369,8 +1379,33 @@ decodeServerResponse =
     Pipeline.decode ServerSuccess
         |> Pipeline.required "demographicsInformationModel" decodeDemographicsInformationModel
         |> Pipeline.required "contactInformationModel" decodeContactInformationModel
-        |> Pipeline.required "contactHoursModel" Decode.value
+        |> Pipeline.required "contactHoursModel" decodeContactHoursModel
         |> Pipeline.required "demographicLists" decodeLists
+
+
+decodeContactHoursModel : Decode.Decoder ContactHoursModel
+decodeContactHoursModel =
+    Pipeline.decode ContactHoursModel
+        |> Pipeline.required "TZ" decodeSelectList
+        |> Pipeline.required "WeekData" (Decode.list decodeDayData)
+        |> Pipeline.required "SelectedTimeZoneId" Decode.int
+
+
+decodeSelectList : Decode.Decoder SelectList
+decodeSelectList =
+    Pipeline.decode SelectList
+        |> Pipeline.required "Value" (Decode.maybe Decode.string)
+        |> Pipeline.required "Text" (Decode.maybe Decode.string)
+
+
+decodeDayData : Decode.Decoder DayData
+decodeDayData =
+    Pipeline.decode DayData
+        |> Pipeline.required "WeekDay" (Decode.maybe Decode.string)
+        |> Pipeline.required "PreferredDay" Decode.bool
+        |> Pipeline.required "TimingInstructions" decodeSelectList
+        |> Pipeline.required "BeginTime" decodeSelectList
+        |> Pipeline.required "EndTime" decodeSelectList
 
 
 decodeDemographicsInformationModel : Decode.Decoder DemographicsInformationModel
