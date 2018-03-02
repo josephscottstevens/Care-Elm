@@ -1,6 +1,6 @@
 port module Demographics exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
-import Html exposing (Html, text, div, span, input, label, h4)
+import Html exposing (Html, text, div, span, input, label, h4, table, tbody, tr, td, option, select)
 import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name)
 import Html.Events exposing (onClick, onInput, onCheck)
 import Common.Types exposing (DropdownItem)
@@ -229,6 +229,25 @@ view model =
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
                 , div [] (List.map (viewAddress model.stateDropdown) model.patientAddresses)
+                ]
+            ]
+
+        -- Contacts page below
+        , div []
+            [ div []
+                [ div [ class "col-xs-12 padding-h-0 padding-top-10", style [ ( "margin-top", "-20px" ), ( "margin-bottom", "0" ) ] ]
+                    [ h4 [] [ text "Contact Hours" ]
+                    , div [ class "col-xs-12 padding-h-0 col-sm-12 col-md-12 padding-h-0" ]
+                        [ div [ id "MasterPCHError", class "error", style [ ( "display", "none" ) ] ] [ text "Errors with contact hours must be corrected before submission" ]
+                        , table [ class "PatientContactHoursGrid" ] []
+                        ]
+                    ]
+                ]
+            , div [ class "col-xs-12 padding-h-0 padding-top-10 padding-bottom-10" ]
+                [ div [ class "col-xs-12 padding-h-0 padding-top-10" ]
+                    [ input [ type_ "button", class "btn btn-sm btn-success" ] [] -- , onClick Save
+                    , input [ type_ "button", class "btn btn-sm btn-default margin-left-5" ] [] -- onClick Cancel
+                    ]
                 ]
             ]
         ]
