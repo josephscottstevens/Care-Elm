@@ -1,7 +1,7 @@
 port module Demographics exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
 import Html exposing (Html, text, div, span, input, label, h4, table, tbody, tr, td, option, select, b)
-import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name, colspan, checked)
+import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name, colspan, checked, attribute)
 import Html.Events exposing (onClick, onInput, onCheck)
 import Common.Types exposing (DropdownItem)
 import Common.Dropdown as Dropdown
@@ -20,7 +20,7 @@ port initDemographics : SfData -> Cmd msg
 port initDemographicsDone : (String -> msg) -> Sub msg
 
 
-port initContactHours : Maybe Decode.Value -> Cmd msg
+port initContactHours : ContactHoursModel -> Cmd msg
 
 
 port updateDemographics : (SfData -> msg) -> Sub msg
@@ -33,6 +33,11 @@ port save : Encode.Value -> Cmd msg
 
 
 port scrollTo : String -> Cmd msg
+
+
+dataId : String -> Html.Attribute msg
+dataId =
+    attribute "data-id"
 
 
 scrollToError : Cmd msg
@@ -233,10 +238,10 @@ view model =
             ]
 
         -- Contacts page below
-        , div []
+        , div [ id "DemographicsForm", class "col-xs-12 col-sm-8 col-md-10 padding-h-0" ]
             [ div []
-                [ div [ class "col-xs-12 padding-h-0 padding-top-10", style [ ( "margin-top", "-20px" ), ( "margin-bottom", "0" ) ] ]
-                    [ h4 [] [ text "Contact Hours" ]
+                [ div [ id "PatientContactHours", class "col-xs-12 padding-h-0 padding-top-10", style [ ( "margin-top", "-20px" ), ( "margin-bottom", "0" ) ] ]
+                    [ h4 [ class "col-xs-12 padding-h-0 padding-top-10" ] [ text "Contact Hours" ]
                     , div [ class "col-xs-12 padding-h-0 col-sm-12 col-md-12 padding-h-0" ]
                         [ div [ id "MasterPCHError", class "error", style [ ( "display", "none" ) ] ] [ text "Errors with contact hours must be corrected before submission" ]
                         , table [ class "PatientContactHoursGrid" ] [ contactHoursBody model.contactHoursModel ]
@@ -245,8 +250,12 @@ view model =
                 ]
             , div [ class "col-xs-12 padding-h-0 padding-top-10 padding-bottom-10" ]
                 [ div [ class "col-xs-12 padding-h-0 padding-top-10" ]
-                    [ input [ type_ "button", class "btn btn-sm btn-success" ] [] -- , onClick Save
-                    , input [ type_ "button", class "btn btn-sm btn-default margin-left-5" ] [] -- onClick Cancel
+                    [ input [ type_ "button", class "btn btn-sm btn-success" ] []
+
+                    -- todo, onClick Save
+                    , input [ type_ "button", class "btn btn-sm btn-default margin-left-5" ] []
+
+                    --todo, onClick Cancel
                     ]
                 ]
             ]
@@ -254,7 +263,7 @@ view model =
 
 
 type alias ContactHoursModel =
-    { tz : SelectList
+    { tz : List SelectList
     , weekData : List DayData
     , selectedTimeZoneId : Int
     }
@@ -263,39 +272,38 @@ type alias ContactHoursModel =
 type alias DayData =
     { weekDay : Maybe String
     , preferredDay : Bool
-    , timingInstructions : SelectList
-    , beginTime : SelectList
-    , endTime : SelectList
+    , timingInstructions : List SelectList
+    , beginTime : List SelectList
+    , endTime : List SelectList
     }
 
 
 type alias SelectList =
     { value : Maybe String
     , text : Maybe String
+    , selected : Bool
     }
 
 
 emptyContactHoursModel : ContactHoursModel
 emptyContactHoursModel =
-    { tz = emptySelectList
+    { tz = []
     , weekData = []
     , selectedTimeZoneId = -1
     }
 
 
-emptySelectList : SelectList
-emptySelectList =
-    { value = Nothing
-    , text = Nothing
-    }
-
-
-contactHoursBody : Int -> ContactHoursModel -> Html Msg
-contactHoursBody idx contactHoursModel =
+contactHoursBody : ContactHoursModel -> Html Msg
+contactHoursBody contactHoursModel =
     tbody []
         [ tr [ class "padding-h-0" ]
             [ td [ colspan 1, style [ ( "display", "block" ), ( "width", "250px" ), ( "padding-top", "10px" ), ( "padding-bottom", "10px" ) ] ]
-                [ input [ type_ "text", class "required", id "TZLabel", dataBind "ejDropDownList: { dataSource: vmContactHours.weekDataObservable().TZ, value: vmContactHours.SelectedTimeZoneId, watermarkText: 'Choose...', fields: { text: 'Text', value: 'Value' }, width: '100%', change: function() { hasChanges(true); } }" ] []
+                [ input
+                    [ type_ "text"
+                    , class "required"
+                    , id "TZLabel"
+                    ]
+                    []
                 ]
             ]
         , tr [ class "col-xs-12 padding-h-0" ]
@@ -312,32 +320,38 @@ contactHoursBody idx contactHoursModel =
 viewContactHours : Int -> DayData -> Html Msg
 viewContactHours idx dayData =
     --<!-- ko foreach:vmContactHours.weekDataObservable().WeekData -->
-    tr [ class "Day" ]
-        [ td [ style [ ( "text-align", "right" ) ] ] [ b [] [ text <| Functions.defaultString dayData.weekDay ] ]
-        , td [ class "Preferred" ] [ input [ type_ "checkbox", id ("#Day_" ++ (toString idx) ++ "_Preferred"), checked dayData.preferredDay ] [] ]
-        , td [ class "TimingOptions" ]
-            [ -- The following works except for the 'selected' option. The json object has the selected variable defined yet this continuously kicks back errors.
-              -- I believe that the checkbox must be enabled for this to work but I do not want that
-              -- <!-- ko foreach:$data.TimingInstructions -->
-              input [ dataBind "ejDropDownList: {dataSource: $data.TimingInstructions, fields: { text:'Text', value:'Value', selected: Selected}, watermarkText:'Select Mapped Item', width:'290px'}, attr: { id: 'Day_' + $index() + '_TimingOption_1' }" ] []
-            , option [ dataBind "text: $data.Text, value: $data.Value" ] []
-            ]
-        , td [ class "Times" ]
-            [ select [ dataBind "attr: { id: 'Day_' + $index() + '_BeginTime', 'data-id': $index }" ]
-                [ -- <!-- ko foreach:$data.BeginTime -->
-                  option [ dataBind "text: $data.Text, value: $data.Value" ] []
+    let
+        idxStr =
+            toString idx
+    in
+        tr [ class "Day" ]
+            [ td [ style [ ( "text-align", "right" ) ] ] [ b [] [ text <| Functions.defaultString dayData.weekDay ] ]
+            , td [ class "Preferred" ]
+                [ input [ type_ "checkbox", id ("Day_" ++ idxStr ++ "_Preferred"), checked dayData.preferredDay ] [] ]
+            , td [ class "TimingOptions" ]
+                [ -- The following works except for the 'selected' option. The json object has the selected variable defined yet this continuously kicks back errors.
+                  -- I believe that the checkbox must be enabled for this to work but I do not want that
+                  select [ id ("Day_" ++ idxStr ++ "_TimingOption"), dataId idxStr ]
+                    (List.map makeOption dayData.timingInstructions)
                 ]
-            , div [ dataBind "attr: { id: 'Day_' + $index() + '_Err'}" ]
-                [ b [ style [ ( "color", "red" ), ( "font-size", "0.75em;" ) ] ] [ text "Must fall before End Time" ]
+            , td [ class "Times" ]
+                [ select [ id ("Day_" ++ idxStr ++ "_BeginTime"), dataId idxStr ]
+                    (List.map makeOption dayData.beginTime)
+                , div [ id ("Day_" ++ idxStr ++ "_Err") ]
+                    [ b [ style [ ( "color", "red" ), ( "font-size", "0.75em;" ) ] ] [ text "Must fall before End Time" ]
+                    ]
+                ]
+            , td [ class "Times" ]
+                [ select [ id ("Day_" ++ idxStr ++ "_EndTime"), dataId idxStr ]
+                    (List.map makeOption dayData.endTime)
                 ]
             ]
-        , td [ class "Times" ]
-            [ select [ dataBind "attr: { id: 'Day_' + $index() + '_EndTime', 'data-id': $index }" ]
-                [ --<!-- ko foreach:$data.EndTime -->
-                  option [ dataBind "text: $data.Text, value: $data.Value" ] []
-                ]
-            ]
-        ]
+
+
+makeOption : SelectList -> Html Msg
+makeOption selectList =
+    option [ value <| Functions.defaultString selectList.value ]
+        [ text <| Functions.defaultString selectList.text ]
 
 
 vertCent : ( String, String )
@@ -1389,7 +1403,7 @@ decodeServerResponse =
 decodeContactHoursModel : Decode.Decoder ContactHoursModel
 decodeContactHoursModel =
     Pipeline.decode ContactHoursModel
-        |> Pipeline.required "TZ" decodeSelectList
+        |> Pipeline.required "TZ" (Decode.list decodeSelectList)
         |> Pipeline.required "WeekData" (Decode.list decodeDayData)
         |> Pipeline.required "SelectedTimeZoneId" Decode.int
 
@@ -1399,6 +1413,7 @@ decodeSelectList =
     Pipeline.decode SelectList
         |> Pipeline.required "Value" (Decode.maybe Decode.string)
         |> Pipeline.required "Text" (Decode.maybe Decode.string)
+        |> Pipeline.required "Selected" Decode.bool
 
 
 decodeDayData : Decode.Decoder DayData
@@ -1406,9 +1421,9 @@ decodeDayData =
     Pipeline.decode DayData
         |> Pipeline.required "WeekDay" (Decode.maybe Decode.string)
         |> Pipeline.required "PreferredDay" Decode.bool
-        |> Pipeline.required "TimingInstructions" decodeSelectList
-        |> Pipeline.required "BeginTime" decodeSelectList
-        |> Pipeline.required "EndTime" decodeSelectList
+        |> Pipeline.required "TimingInstructions" (Decode.list decodeSelectList)
+        |> Pipeline.required "BeginTime" (Decode.list decodeSelectList)
+        |> Pipeline.required "EndTime" (Decode.list decodeSelectList)
 
 
 decodeDemographicsInformationModel : Decode.Decoder DemographicsInformationModel
