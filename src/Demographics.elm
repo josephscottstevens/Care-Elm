@@ -250,10 +250,10 @@ view model =
                 ]
             , div [ class "col-xs-12 padding-h-0 padding-top-10 padding-bottom-10" ]
                 [ div [ class "col-xs-12 padding-h-0 padding-top-10" ]
-                    [ input [ type_ "button", class "btn btn-sm btn-success" ] []
+                    [ input [ type_ "button", class "btn btn-sm btn-success", value "Save" ] []
 
                     -- todo, onClick Save
-                    , input [ type_ "button", class "btn btn-sm btn-default margin-left-5" ] []
+                    , input [ type_ "button", class "btn btn-sm btn-default margin-left-5", value "Cancel" ] []
 
                     --todo, onClick Cancel
                     ]
@@ -295,7 +295,7 @@ emptyContactHoursModel =
 
 contactHoursBody : ContactHoursModel -> Html Msg
 contactHoursBody contactHoursModel =
-    tbody []
+    tbody [] <|
         [ tr [ class "padding-h-0" ]
             [ td [ colspan 1, style [ ( "display", "block" ), ( "width", "250px" ), ( "padding-top", "10px" ), ( "padding-bottom", "10px" ) ] ]
                 [ input
@@ -313,8 +313,8 @@ contactHoursBody contactHoursModel =
             , td [ class "Times" ] [ b [] [ text "Begin Time" ] ]
             , td [ class "Times" ] [ b [] [ text "Begin Time" ] ]
             ]
-        , tr [ class "col-xs-12 padding-h-0" ] (List.indexedMap viewContactHours contactHoursModel.weekData)
         ]
+            ++ (List.indexedMap viewContactHours contactHoursModel.weekData)
 
 
 viewContactHours : Int -> DayData -> Html Msg
@@ -324,8 +324,8 @@ viewContactHours idx dayData =
         idxStr =
             toString idx
     in
-        tr [ class "Day" ]
-            [ td [ style [ ( "text-align", "right" ) ] ] [ b [] [ text <| Functions.defaultString dayData.weekDay ] ]
+        tr [ class "col-xs-12 padding-h-0" ]
+            [ td [ class "Day" ] [ b [ style [ ( "text-align", "right" ) ] ] [ text <| Functions.defaultString dayData.weekDay ] ]
             , td [ class "Preferred" ]
                 [ input [ type_ "checkbox", id ("Day_" ++ idxStr ++ "_Preferred"), checked dayData.preferredDay ] [] ]
             , td [ class "TimingOptions" ]
