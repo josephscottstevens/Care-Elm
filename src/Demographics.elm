@@ -311,18 +311,21 @@ contactHoursBody idx contactHoursModel =
 
 viewContactHours : Int -> DayData -> Html Msg
 viewContactHours idx dayData =
+    --<!-- ko foreach:vmContactHours.weekDataObservable().WeekData -->
     tr [ class "Day" ]
         [ td [ style [ ( "text-align", "right" ) ] ] [ b [] [ text <| Functions.defaultString dayData.weekDay ] ]
         , td [ class "Preferred" ] [ input [ type_ "checkbox", id ("#Day_" ++ (toString idx) ++ "_Preferred"), checked dayData.preferredDay ] [] ]
         , td [ class "TimingOptions" ]
             [ -- The following works except for the 'selected' option. The json object has the selected variable defined yet this continuously kicks back errors.
               -- I believe that the checkbox must be enabled for this to work but I do not want that
+              -- <!-- ko foreach:$data.TimingInstructions -->
               input [ dataBind "ejDropDownList: {dataSource: $data.TimingInstructions, fields: { text:'Text', value:'Value', selected: Selected}, watermarkText:'Select Mapped Item', width:'290px'}, attr: { id: 'Day_' + $index() + '_TimingOption_1' }" ] []
             , option [ dataBind "text: $data.Text, value: $data.Value" ] []
             ]
         , td [ class "Times" ]
             [ select [ dataBind "attr: { id: 'Day_' + $index() + '_BeginTime', 'data-id': $index }" ]
-                [ option [ dataBind "text: $data.Text, value: $data.Value" ] []
+                [ -- <!-- ko foreach:$data.BeginTime -->
+                  option [ dataBind "text: $data.Text, value: $data.Value" ] []
                 ]
             , div [ dataBind "attr: { id: 'Day_' + $index() + '_Err'}" ]
                 [ b [ style [ ( "color", "red" ), ( "font-size", "0.75em;" ) ] ] [ text "Must fall before End Time" ]
