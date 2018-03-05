@@ -131,23 +131,10 @@ init location =
     let
         maybePatientId =
             Route.getPatientId location
-    in
-        case maybePatientId of
-            Just patientId ->
-                setRoute (Route.fromLocation location)
-                    { patientId = patientId
-                    , page = NoPage
-                    , addEditDataSource = Nothing
-                    , route = Route.None
-                    , activePerson = Nothing
-                    , selectMenu = Input.dropMenu (Just "Contact Hours") SelectOne
-                    , restrictions = []
-                    , serviceDetails = []
-                    , currentServiceDetail = emptyCurrentServiceDetail
-                    }
 
-            Nothing ->
-                { patientId = 0
+        ( model, cmds ) =
+            setRoute (Route.fromLocation location)
+                { patientId = Maybe.withDefault -1 maybePatientId
                 , page = NoPage
                 , addEditDataSource = Nothing
                 , route = Route.None
@@ -157,11 +144,20 @@ init location =
                 , serviceDetails = []
                 , currentServiceDetail = emptyCurrentServiceDetail
                 }
-                    ! [ Functions.setLoadingStatus False
-                      , getRestrictionDetail maybePatientId
-                      , getServiceDetails maybePatientId
-                      , getCurrentServiceDetail maybePatientId
-                      ]
+    in
+        model
+            ! [ Functions.setLoadingStatus False
+              , case maybePatientId of
+                    Just patientId ->
+                        getPersonHeaderDetails patientId
+
+                    Nothing ->
+                        Cmd.none
+              , getRestrictionDetail maybePatientId
+              , getServiceDetails maybePatientId
+              , getCurrentServiceDetail maybePatientId
+              , cmds
+              ]
 
 
 subscriptions : Model -> Sub Msg
@@ -284,17 +280,8 @@ setRoute maybeRoute model =
                 Nothing ->
                     getDropDowns model.patientId
 
-        getPersonHeaderDetailsCmd =
-            case model.activePerson of
-                Just _ ->
-                    Cmd.none
-
-                Nothing ->
-                    getPersonHeaderDetails model.patientId
-
         cmds t =
             [ getDropdownsCmd
-            , getPersonHeaderDetailsCmd
             , Functions.setLoadingStatus False
             ]
                 ++ t
@@ -909,23 +896,6 @@ view model =
 viewHeader : Html Msg -> Model -> Html Msg
 viewHeader innerView model =
     let
-        toTopUrl navUrl navText =
-            let
-                activeClass =
-                    -- TODO, this needs to bubble up to the parent
-                    if navText == "Home" then
-                        HeaderNavActive
-                    else
-                        HeaderNav
-            in
-                el activeClass
-                    [ paddingLeft 7
-                    , paddingRight 7
-                    , paddingTop 10
-                    , paddingBottom 10
-                    ]
-                    (link navUrl <| el None [] (text navText))
-
         toSideUrl t =
             link t.url <|
                 el (findActiveClass t model.route)
@@ -995,36 +965,8 @@ viewHeader innerView model =
         div []
             [ Element.layout stylesheet <|
                 column Root
-                    [ clipX ]
-                    [ row None
-                        [ width fill, height <| px 52 ]
-                        [ column None
-                            [ fr 5 ]
-                            [ row None
-                                []
-                                [ image None [ class "pointer" ] { src = "/Images/Logos/Logo-ncn.png", caption = "" } ]
-                            ]
-                        , column None
-                            [ fr 6, alignRight ]
-                            [ row None
-                                []
-                                [ toTopUrl "/" "Home"
-                                , toTopUrl "/search" "Search"
-                                , toTopUrl "/enrollment" "Enrollment"
-                                , toTopUrl "/communications" "Communications"
-                                , toTopUrl "/records" "Records"
-                                , toTopUrl "/billing" "Billing"
-                                , toTopUrl "/settings" "Settings"
-                                , toTopUrl "/admin" "Admin"
-                                , toTopUrl "/resources" "Resources"
-                                , toTopUrl "/account" "Account"
-
-                                --TODO, I think special logic goes here
-                                , toTopUrl "/logout" "Logout"
-                                ]
-                            ]
-                        ]
-                    , row HeaderBreadQuick
+                    [ clipX, width fill ]
+                    [ row HeaderBreadQuick
                         [ spacing 6, paddingTop 9, paddingBottom 9, paddingLeft 10 ]
                         headerBreakQuick
                     , row None

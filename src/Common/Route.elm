@@ -366,7 +366,7 @@ routeUrl route =
 
         -- Other
         None ->
-            "#"
+            ""
 
         Error t ->
             "#/Error" ++ t
