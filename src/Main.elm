@@ -393,7 +393,7 @@ setRoute maybeRoute model =
 
         jsLoad route page =
             { model | page = page, route = route }
-                ! [ loadPage { action = String.dropLeft 1 <| Route.routeUrl route, patientId = model.patientId }
+                ! [ loadPage { action = String.filter Functions.noHash <| Route.routeUrl route, patientId = model.patientId }
                   ]
     in
         case maybeRoute of
@@ -908,19 +908,24 @@ viewHeader innerView model =
                     (text t.navText)
 
         sideNav =
-            Route.getSideNav
-                |> List.filter
-                    (\t ->
-                        t.depth
-                            == 0.0
-                            || case findActiveClass t model.route of
-                                SideNav ->
-                                    False
+            case model.activePerson of
+                Just _ ->
+                    Route.getSideNav
+                        |> List.filter
+                            (\t ->
+                                t.depth
+                                    == 0.0
+                                    || case findActiveClass t model.route of
+                                        SideNav ->
+                                            False
 
-                                _ ->
-                                    True
-                    )
-                |> List.map toSideUrl
+                                        _ ->
+                                            True
+                            )
+                        |> List.map toSideUrl
+
+                Nothing ->
+                    []
 
         toBreadCrumbs { route } =
             el HeaderNavActive [] <| link (Route.routeUrl route) <| el None [] (text (Route.routeDescription route))

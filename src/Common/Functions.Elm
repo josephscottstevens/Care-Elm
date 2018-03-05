@@ -5,6 +5,7 @@ port module Common.Functions
         , displayErrorMessage
           -- , error
         , isAlpha
+        , noHash
         , defaultMaybeMsg
         , defaultString
         , defaultLower
@@ -99,6 +100,11 @@ port deleteConfirmed : (Int -> msg) -> Sub msg
 isAlpha : Char -> Bool
 isAlpha char =
     isLower char || isUpper char
+
+
+noHash : Char -> Bool
+noHash char =
+    char == '#'
 
 
 defaultMaybeMsg : (Maybe String -> msg) -> String -> msg

@@ -182,7 +182,7 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ input [ type_ "text", id syncfusionId, value displayValue, value displayValue ] [] ]
+                            [ input [ type_ "text", id syncfusionId, value displayValue ] [] ]
                         ]
 
                 FileInput labelText requiredType displayValue ->
@@ -202,7 +202,7 @@ makeControls config controls =
                             [ htmlElement ]
                         ]
 
-                Dropdown labelText requiredType displayValue event ->
+                Dropdown labelText requiredType _ event ->
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
