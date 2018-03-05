@@ -171,95 +171,6 @@ subscriptions model =
         ]
 
 
-view : Model -> Html Msg
-view model =
-    let
-        jsView =
-            div [] []
-
-        innerView : Html Msg
-        innerView =
-            case model.page of
-                Records subModel ->
-                    Html.map RecordsMsg (Records.view subModel model.addEditDataSource)
-
-                Demographics subModel ->
-                    Html.map DemographicsMsg (Demographics.view subModel)
-
-                Billing subModel ->
-                    Html.map BillingMsg (Billing.view subModel model.addEditDataSource)
-
-                ClinicalSummary subModel ->
-                    Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel model.patientId)
-
-                PastMedicalHistory subModel ->
-                    Html.map PastMedicalHistoryMsg (PastMedicalHistory.view subModel model.addEditDataSource)
-
-                Hospitilizations subModel ->
-                    Html.map HospitilizationsMsg (Hospitilizations.view subModel model.addEditDataSource)
-
-                Allergies subModel ->
-                    Html.map AllergiesMsg (Allergies.view subModel model.addEditDataSource)
-
-                Immunizations subModel ->
-                    Html.map ImmunizationsMsg (Immunizations.view subModel model.addEditDataSource)
-
-                LastKnownVitals subModel ->
-                    Html.map LastKnownVitalsMsg (LastKnownVitals.view subModel model.addEditDataSource)
-
-                -- Non Elm Pages
-                Home ->
-                    jsView
-
-                Contacts ->
-                    jsView
-
-                SocialHistory ->
-                    jsView
-
-                Employment ->
-                    jsView
-
-                Insurance ->
-                    jsView
-
-                Services ->
-                    jsView
-
-                CCM ->
-                    jsView
-
-                TCM ->
-                    jsView
-
-                Providers ->
-                    jsView
-
-                Tasks ->
-                    jsView
-
-                Appointments ->
-                    jsView
-
-                ProblemList ->
-                    jsView
-
-                Medications ->
-                    jsView
-
-                Notes ->
-                    jsView
-
-                -- Other
-                NoPage ->
-                    jsView
-
-                Error str ->
-                    div [] [ Html.text str ]
-    in
-        viewHeader innerView model
-
-
 pageSubscriptions : Page -> Sub Msg
 pageSubscriptions page =
     case page of
@@ -668,6 +579,38 @@ decodeServiceDetail =
         |> Pipeline.required "ServiceEnd" (Decode.maybe Decode.string)
 
 
+emptyPersonHeaderDetails : PersonHeaderDetails
+emptyPersonHeaderDetails =
+    { patientId = 0
+    , fullName = Nothing
+    , dateOfBirth = Nothing
+    , age = Nothing
+    , nickname = Nothing
+    , facilityName = Nothing
+    , isVIP = False
+    , hasNDA = False
+    , contactHours = []
+    , mRN = Nothing
+    , pAN = Nothing
+    , pFID = Nothing
+    , primaryResource = Nothing
+    , restrictionsCount = 0
+    , emailAddress = Nothing
+    , preferredLanguage = Nothing
+    , facilityId = 0
+    , dateOfDeath = Nothing
+    , mainProvider = Nothing
+    }
+
+
+emptyCurrentServiceDetail : ServiceDetail
+emptyCurrentServiceDetail =
+    { serviceType = Nothing
+    , serviceStart = Nothing
+    , serviceEnd = Nothing
+    }
+
+
 getRestrictionDetail : Maybe Int -> Cmd Msg
 getRestrictionDetail maybePatientId =
     case maybePatientId of
@@ -874,6 +817,95 @@ fr amount =
     width <| fillPortion amount
 
 
+view : Model -> Html Msg
+view model =
+    let
+        jsView =
+            div [ Attribute.class "body-content" ] []
+
+        innerView : Html Msg
+        innerView =
+            case model.page of
+                Records subModel ->
+                    Html.map RecordsMsg (Records.view subModel model.addEditDataSource)
+
+                Demographics subModel ->
+                    Html.map DemographicsMsg (Demographics.view subModel)
+
+                Billing subModel ->
+                    Html.map BillingMsg (Billing.view subModel model.addEditDataSource)
+
+                ClinicalSummary subModel ->
+                    Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel model.patientId)
+
+                PastMedicalHistory subModel ->
+                    Html.map PastMedicalHistoryMsg (PastMedicalHistory.view subModel model.addEditDataSource)
+
+                Hospitilizations subModel ->
+                    Html.map HospitilizationsMsg (Hospitilizations.view subModel model.addEditDataSource)
+
+                Allergies subModel ->
+                    Html.map AllergiesMsg (Allergies.view subModel model.addEditDataSource)
+
+                Immunizations subModel ->
+                    Html.map ImmunizationsMsg (Immunizations.view subModel model.addEditDataSource)
+
+                LastKnownVitals subModel ->
+                    Html.map LastKnownVitalsMsg (LastKnownVitals.view subModel model.addEditDataSource)
+
+                -- Non Elm Pages
+                Home ->
+                    jsView
+
+                Contacts ->
+                    jsView
+
+                SocialHistory ->
+                    jsView
+
+                Employment ->
+                    jsView
+
+                Insurance ->
+                    jsView
+
+                Services ->
+                    jsView
+
+                CCM ->
+                    jsView
+
+                TCM ->
+                    jsView
+
+                Providers ->
+                    jsView
+
+                Tasks ->
+                    jsView
+
+                Appointments ->
+                    jsView
+
+                ProblemList ->
+                    jsView
+
+                Medications ->
+                    jsView
+
+                Notes ->
+                    jsView
+
+                -- Other
+                NoPage ->
+                    jsView
+
+                Error str ->
+                    div [] [ Html.text str ]
+    in
+        viewHeader innerView model
+
+
 viewHeader : Html Msg -> Model -> Html Msg
 viewHeader innerView model =
     let
@@ -1005,7 +1037,7 @@ viewHeader innerView model =
                             (viewPatientHeader model
                                 ++ [ row None
                                         [ paddingLeft 10, paddingTop 10, paddingRight 10 ]
-                                        [ el None [ class "body-content", width fill ] <| Element.html innerView
+                                        [ el None [ width fill, height fill ] <| Element.html innerView
                                         ]
                                    ]
                             )
@@ -1172,35 +1204,3 @@ viewPatientHeader model =
 
         Nothing ->
             []
-
-
-emptyPersonHeaderDetails : PersonHeaderDetails
-emptyPersonHeaderDetails =
-    { patientId = 0
-    , fullName = Nothing
-    , dateOfBirth = Nothing
-    , age = Nothing
-    , nickname = Nothing
-    , facilityName = Nothing
-    , isVIP = False
-    , hasNDA = False
-    , contactHours = []
-    , mRN = Nothing
-    , pAN = Nothing
-    , pFID = Nothing
-    , primaryResource = Nothing
-    , restrictionsCount = 0
-    , emailAddress = Nothing
-    , preferredLanguage = Nothing
-    , facilityId = 0
-    , dateOfDeath = Nothing
-    , mainProvider = Nothing
-    }
-
-
-emptyCurrentServiceDetail : ServiceDetail
-emptyCurrentServiceDetail =
-    { serviceType = Nothing
-    , serviceStart = Nothing
-    , serviceEnd = Nothing
-    }
