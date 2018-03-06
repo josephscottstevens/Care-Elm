@@ -6,11 +6,6 @@ module Common.Route
         , href
         , modifyUrl
         , back
-        , getSideNav
-        , RouteDesc
-        , Breadcrumb
-        , getBreadcrumbsFromRoute
-        , getParentFromRoute
         , routeUrl
         , routeDescription
         , routeId
@@ -21,20 +16,6 @@ import Common.Types as Common
 import Html exposing (Attribute)
 import Html.Attributes as Attr
 import UrlParser as Url exposing ((</>), (<?>), Parser, oneOf, parseHash, s, parsePath, intParam)
-
-
-type Tree a
-    = Child a
-    | Parent a (List (Tree a))
-
-
-type alias RouteDesc =
-    { depth : Float
-    , url : String
-    , navText : String
-    , route : Route
-    , id : Int
-    }
 
 
 type Route
@@ -52,151 +33,6 @@ type Route
     | Immunizations
     | LastKnownVitals
     | Error String
-      -- Non Elm Routes
-    | Home
-    | Contacts
-    | SocialHistory
-    | Employment
-    | Insurance
-    | Services
-    | CCM
-    | TCM
-    | Providers
-    | Tasks
-    | Appointments
-    | ProblemList
-    | Medications
-    | Notes
-
-
-nodes : Tree Route
-nodes =
-    Parent Home
-        [ Parent Profile
-            [ Child Demographics
-            , Child Contacts
-            , Child SocialHistory
-            , Child Employment
-            , Child Insurance
-            ]
-        , Parent Services
-            [ Child CCM
-            , Child TCM
-            ]
-        , Parent Providers
-            []
-        , Parent ClinicalSummaryRoot
-            [ Child ClinicalSummary
-            , Child ProblemList
-            , Child Medications
-            , Child PastMedicalHistory
-            , Child Hospitilizations
-            , Child Immunizations
-            , Child Allergies
-            , Child LastKnownVitals
-            ]
-        , Parent RecordsRoot
-            [ Child (Records Common.PrimaryCare)
-            , Child (Records Common.Specialty)
-            , Child (Records Common.Labs)
-            , Child (Records Common.Radiology)
-            , Child (Records Common.Hospitalizations)
-            , Child (Records Common.Legal)
-            , Child (Records Common.CallRecordings)
-            , Child (Records Common.PreviousHistories)
-            , Child (Records Common.Enrollment)
-            , Child (Records Common.Misc)
-            ]
-        , Parent Notes
-            []
-        ]
-
-
-flattenWithDepth : Float -> Tree Route -> List ( Route, Float )
-flattenWithDepth depth tree =
-    case tree of
-        Child t ->
-            [ ( t, depth ) ]
-
-        Parent t y ->
-            ( t, depth ) :: List.concatMap (flattenWithDepth (depth + 1.0)) y
-
-
-routeToSideNav : ( Route, Float ) -> RouteDesc
-routeToSideNav ( route, depth ) =
-    { depth = depth
-    , url = routeUrl route
-    , navText = routeDescription route
-    , route = route
-    , id = routeId route
-    }
-
-
-getSideNav : List RouteDesc
-getSideNav =
-    flattenWithDepth -1.0 nodes
-        |> List.map routeToSideNav
-
-
-type alias Breadcrumb =
-    { depth : Float
-    , route : Route
-    , idx : Int
-    }
-
-
-items : List Breadcrumb
-items =
-    nodes
-        |> flattenWithDepth 0
-        |> List.reverse
-        |> List.indexedMap (\idx ( t, depth ) -> Breadcrumb depth t idx)
-
-
-getBreadcrumb : Route -> Maybe Breadcrumb
-getBreadcrumb route =
-    items
-        |> List.map
-            (\t ->
-                if t.route == route then
-                    Just t
-                else
-                    Nothing
-            )
-        |> List.filterMap identity
-        |> List.head
-
-
-getParent : Breadcrumb -> Maybe Breadcrumb
-getParent breadCrumb =
-    items
-        |> List.drop (breadCrumb.idx + 1)
-        |> List.filter (\t -> t.depth < breadCrumb.depth)
-        |> List.head
-
-
-getBreadcrumbs : Maybe Breadcrumb -> List Breadcrumb
-getBreadcrumbs maybeBreadCrumb =
-    case maybeBreadCrumb of
-        Just breadCrumb ->
-            breadCrumb :: (getBreadcrumbs (getParent breadCrumb))
-
-        Nothing ->
-            []
-
-
-getParentFromRoute : Route -> Maybe Route
-getParentFromRoute route =
-    route
-        |> getBreadcrumb
-        |> Maybe.andThen getParent
-        |> Maybe.map .route
-
-
-getBreadcrumbsFromRoute : Route -> List Breadcrumb
-getBreadcrumbsFromRoute route =
-    getBreadcrumbs (getBreadcrumb route)
-        |> List.reverse
 
 
 routeByHash : Parser (Route -> a) a
@@ -224,20 +60,6 @@ routeByHash =
         , Url.map (Records Common.Misc) (s "people" </> s "_miscrecords")
         , Url.map Demographics (s "people" </> s "_demographics")
 
-        --Non Elm pages
-        , Url.map Contacts (s "people" </> s "_contacts")
-        , Url.map SocialHistory (s "people" </> s "_socialhistory")
-        , Url.map Employment (s "people" </> s "_employment")
-        , Url.map Insurance (s "people" </> s "_insurance")
-        , Url.map CCM (s "people" </> s "_ccm")
-        , Url.map TCM (s "people" </> s "_tcm")
-        , Url.map Providers (s "people" </> s "_careteam")
-        , Url.map Tasks (s "people" </> s "_tasks")
-        , Url.map Appointments (s "people" </> s "_appointments")
-        , Url.map ProblemList (s "people" </> s "_problemlist")
-        , Url.map Medications (s "people" </> s "_medications")
-        , Url.map Notes (s "people" </> s "_notes")
-
         -- Other
         , Url.map Billing (s "people" </> s "_insurance")
         ]
@@ -246,17 +68,13 @@ routeByHash =
 routeByUrl : Parser (Route -> a) a
 routeByUrl =
     oneOf
-        [ Url.map Home (s "")
-        , Url.map Demographics (s "people")
+        [ Url.map Demographics (s "people")
         ]
 
 
 routeUrl : Route -> String
 routeUrl route =
     case route of
-        Home ->
-            "/"
-
         -- Patients\Profile
         Profile ->
             "#/people/_demographics"
@@ -264,44 +82,12 @@ routeUrl route =
         Demographics ->
             "#/people/_demographics"
 
-        Contacts ->
-            "#/people/_contacts"
-
-        SocialHistory ->
-            "#/people/_socialhistory"
-
-        Employment ->
-            "#/people/_employment"
-
-        Insurance ->
-            "#/people/_insurance"
-
-        -- People/Services
-        Services ->
-            "#/people/_ccm"
-
-        CCM ->
-            "#/people/_ccm"
-
-        TCM ->
-            "#/people/_tcm"
-
-        -- People/Providers
-        Providers ->
-            "#/people/_careteam"
-
         --People/ClinicalSummary
         ClinicalSummaryRoot ->
             "#/people/_clinicalsummary"
 
         ClinicalSummary ->
             "#/people/_clinicalsummary"
-
-        ProblemList ->
-            "#/people/_problemlist"
-
-        Medications ->
-            "#/people/_medications"
 
         PastMedicalHistory ->
             "#/people/_pastmedicalhistory"
@@ -317,14 +103,6 @@ routeUrl route =
 
         LastKnownVitals ->
             "#/people/_vitals"
-
-        --People/Tasks
-        Tasks ->
-            "#/people/_tasks"
-
-        --People/Appointments
-        Appointments ->
-            "#/people/_appointments"
 
         --People/Records
         RecordsRoot ->
@@ -361,9 +139,6 @@ routeUrl route =
             "#/people/_miscrecords"
 
         --People/Notes
-        Notes ->
-            "#/people/_notes"
-
         -- Other
         None ->
             ""
@@ -378,9 +153,6 @@ routeUrl route =
 routeId : Route -> Int
 routeId route =
     case route of
-        Home ->
-            3
-
         -- Patients\Profile
         Profile ->
             15
@@ -388,44 +160,14 @@ routeId route =
         Demographics ->
             16
 
-        Contacts ->
-            17
-
-        SocialHistory ->
-            18
-
-        Employment ->
-            68
-
-        Insurance ->
-            69
-
         -- People/Services
-        Services ->
-            19
-
-        CCM ->
-            20
-
-        TCM ->
-            21
-
         -- People/Providers
-        Providers ->
-            22
-
         --People/ClinicalSummary
         ClinicalSummaryRoot ->
             23
 
         ClinicalSummary ->
             25
-
-        ProblemList ->
-            26
-
-        Medications ->
-            27
 
         PastMedicalHistory ->
             28
@@ -441,14 +183,6 @@ routeId route =
 
         LastKnownVitals ->
             32
-
-        --People/Tasks
-        Tasks ->
-            33
-
-        --People/Appointments
-        Appointments ->
-            34
 
         --People/Records
         RecordsRoot ->
@@ -483,10 +217,6 @@ routeId route =
 
         Records Common.Misc ->
             65
-
-        --People/Notes
-        Notes ->
-            36
 
         --Other
         --TODO, pretty clunky here
@@ -533,9 +263,6 @@ fromLocation location =
 routeDescription : Route -> String
 routeDescription route =
     case route of
-        Home ->
-            "Home"
-
         -- Patients\Profile
         Profile ->
             "Profile"
@@ -543,44 +270,12 @@ routeDescription route =
         Demographics ->
             "Demographic Information"
 
-        Contacts ->
-            "Contacts"
-
-        SocialHistory ->
-            "Social History"
-
-        Employment ->
-            "Employment Information"
-
-        Insurance ->
-            "Insurance Information"
-
-        -- People/Services
-        Services ->
-            "Services"
-
-        CCM ->
-            "CCM"
-
-        TCM ->
-            "TCM"
-
-        -- People/Providers
-        Providers ->
-            "Providers"
-
         --People/ClinicalSummary
         ClinicalSummaryRoot ->
             "Clinical Summary"
 
         ClinicalSummary ->
             "Clinical Summary"
-
-        ProblemList ->
-            "Problem List"
-
-        Medications ->
-            "Medications"
 
         PastMedicalHistory ->
             "Past Medical History"
@@ -596,14 +291,6 @@ routeDescription route =
 
         LastKnownVitals ->
             "Last Known Vitals"
-
-        --People/Tasks
-        Tasks ->
-            "Tasks"
-
-        --People/Appointments
-        Appointments ->
-            "Appointments"
 
         --People/Records
         RecordsRoot ->
@@ -638,10 +325,6 @@ routeDescription route =
 
         Records Common.Misc ->
             "Miscellaneous"
-
-        --People/Notes
-        Notes ->
-            "Notes"
 
         --Other
         None ->
