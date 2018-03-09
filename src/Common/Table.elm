@@ -491,66 +491,59 @@ pagingView state toMsg =
         totalPages =
             (state.totalRows // state.rowsPerPage) - 1
 
-        currentPage =
-            0
-
-        totalVisiblePages =
-            0
-
         pagingStateClick page =
             setPagingState state toMsg page
 
         activeOrNot pageIndex =
             let
                 activeOrNotText =
-                    if pageIndex == currentPage then
+                    if pageIndex == state.pageIndex then
                         "e-currentitem e-active"
                     else
                         "e-default"
             in
                 div
-                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText) ]
-                    -- onClick (SetPagingState (Index pageIndex))
+                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), pagingStateClick (Index pageIndex) ]
                     [ text (toString (pageIndex + 1)) ]
 
         rng =
             List.range 0 totalPages
-                |> List.drop (currentPage // pagesPerBlock * pagesPerBlock)
-                |> List.take pagesPerBlock
+                |> List.drop ((state.pageIndex // state.pagesPerBlock) * state.pagesPerBlock)
+                |> List.take state.pagesPerBlock
                 |> List.map activeOrNot
 
         firstPageClass =
-            if currentPage >= pagesPerBlock then
+            if state.pageIndex >= state.rowsPerPage then
                 "e-icon e-mediaback e-firstpage e-default"
             else
                 "e-icon e-mediaback e-firstpagedisabled e-disable"
 
         leftPageClass =
-            if currentPage > 0 then
+            if state.pageIndex > 0 then
                 "e-icon e-arrowheadleft-2x e-prevpage e-default"
             else
                 "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
 
         leftPageBlockClass =
-            if currentPage >= pagesPerBlock then
+            if state.pageIndex >= state.pagesPerBlock then
                 "e-link e-spacing e-PP e-numericitem e-default"
             else
                 "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
 
         rightPageBlockClass =
-            if currentPage < totalPages - pagesPerBlock then
+            if state.pageIndex < totalPages - state.pagesPerBlock then
                 "e-link e-NP e-spacing e-numericitem e-default"
             else
                 "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
 
         rightPageClass =
-            if currentPage < totalPages then
+            if state.pageIndex < totalPages then
                 "e-nextpage e-icon e-arrowheadright-2x e-default"
             else
                 "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
 
         lastPageClass =
-            if currentPage < totalPages - pagesPerBlock then
+            if state.pageIndex < totalPages - state.pagesPerBlock then
                 "e-lastpage e-icon e-mediaforward e-default"
             else
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
@@ -558,25 +551,25 @@ pagingView state toMsg =
         pagerText =
             let
                 currentPageText =
-                    toString (currentPage + 1)
+                    toString (state.pageIndex + 1)
 
                 totalPagesText =
                     toString (totalPages + 1)
 
                 totalItemsText =
-                    toString totalVisiblePages
+                    toString state.totalRows
             in
                 currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
     in
         div [ class "e-pager e-js e-pager" ]
             [ div [ class "e-pagercontainer" ]
-                [ div [ class firstPageClass ] [] --, setPagingState First
-                , div [ class leftPageClass ] [] --, onClick (SetPagingState Previous) ] []
-                , a [ class leftPageBlockClass ] [] --, onClick (SetPagingState PreviousBlock) ] [ text "..." ]
+                [ div [ class firstPageClass, pagingStateClick First ] []
+                , div [ class leftPageClass, pagingStateClick Previous ] []
+                , a [ class leftPageBlockClass, pagingStateClick PreviousBlock ] [ text "..." ]
                 , div [ class "e-numericcontainer e-default" ] rng
-                , a [ class rightPageBlockClass ] [] --, onClick (SetPagingState NextBlock) ] [ text "..." ]
-                , div [ class rightPageClass ] [] --, onClick (SetPagingState Next) ] []
-                , div [ class lastPageClass ] [] --, onClick (SetPagingState Last) ] []
+                , a [ class rightPageBlockClass, pagingStateClick NextBlock ] [ text "..." ]
+                , div [ class rightPageClass, pagingStateClick Next ] []
+                , div [ class lastPageClass, pagingStateClick Last ] []
                 ]
             , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
                 [ span [ class "e-pagermsg" ] [ text pagerText ]
