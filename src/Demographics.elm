@@ -20,7 +20,7 @@ port initDemographics : SfData -> Cmd msg
 port initDemographicsDone : (String -> msg) -> Sub msg
 
 
-port initContactHours : ContactHoursModel -> Cmd msg
+port initContactHours : Maybe Decode.Value -> Cmd msg
 
 
 port updateDemographics : (SfData -> msg) -> Sub msg
@@ -89,7 +89,7 @@ type alias Model =
     , preferredLanguageIndex : Int
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
-    , contactHoursModel : ContactHoursModel
+    , contactHoursModel : Maybe Decode.Value
     , showValidationErrors : Bool
     , suffixId : Maybe Int
     , suffixDropState : Dropdown.DropState
@@ -236,122 +236,7 @@ view model =
                 , div [] (List.map (viewAddress model.stateDropdown) model.patientAddresses)
                 ]
             ]
-
-        -- Contacts page below
-        , div [ id "DemographicsForm", class "col-xs-12 col-sm-8 col-md-10 padding-h-0" ]
-            [ div []
-                [ div [ id "PatientContactHours", class "col-xs-12 padding-h-0 padding-top-10", style [ ( "margin-top", "-20px" ), ( "margin-bottom", "0" ) ] ]
-                    [ h4 [ class "col-xs-12 padding-h-0 padding-top-10" ] [ text "Contact Hours" ]
-                    , div [ class "col-xs-12 padding-h-0 col-sm-12 col-md-12 padding-h-0" ]
-                        [ div [ id "MasterPCHError", class "error", style [ ( "display", "none" ) ] ] [ text "Errors with contact hours must be corrected before submission" ]
-                        , table [ class "PatientContactHoursGrid" ] [ contactHoursBody model.contactHoursModel ]
-                        ]
-                    ]
-                ]
-            , div [ class "col-xs-12 padding-h-0 padding-top-10 padding-bottom-10" ]
-                [ div [ class "col-xs-12 padding-h-0 padding-top-10" ]
-                    [ input [ type_ "button", class "btn btn-sm btn-success", value "Save" ] []
-
-                    -- todo, onClick Save
-                    , input [ type_ "button", class "btn btn-sm btn-default margin-left-5", value "Cancel" ] []
-
-                    --todo, onClick Cancel
-                    ]
-                ]
-            ]
         ]
-
-
-type alias ContactHoursModel =
-    { tz : List SelectList
-    , weekData : List DayData
-    , selectedTimeZoneId : Int
-    }
-
-
-type alias DayData =
-    { weekDay : Maybe String
-    , preferredDay : Bool
-    , timingInstructions : List SelectList
-    , beginTime : List SelectList
-    , endTime : List SelectList
-    }
-
-
-type alias SelectList =
-    { value : Maybe String
-    , text : Maybe String
-    , selected : Bool
-    }
-
-
-emptyContactHoursModel : ContactHoursModel
-emptyContactHoursModel =
-    { tz = []
-    , weekData = []
-    , selectedTimeZoneId = -1
-    }
-
-
-contactHoursBody : ContactHoursModel -> Html Msg
-contactHoursBody contactHoursModel =
-    tbody [] <|
-        [ tr [ class "padding-h-0" ]
-            [ td [ colspan 1, style [ ( "display", "block" ), ( "width", "250px" ), ( "padding-top", "10px" ), ( "padding-bottom", "10px" ) ] ]
-                [ input
-                    [ type_ "text"
-                    , class "required"
-                    , id "TZLabel"
-                    ]
-                    []
-                ]
-            ]
-        , tr [ class "col-xs-12 padding-h-0" ]
-            [ td [ class "Day" ] [ b [] [ text "Day" ] ]
-            , td [ class "Preferred" ] [ b [] [ text "Preferred" ] ]
-            , td [ class "TimingOptions" ] [ b [] [ text "Timing Options" ] ]
-            , td [ class "Times" ] [ b [] [ text "Begin Time" ] ]
-            , td [ class "Times" ] [ b [] [ text "Begin Time" ] ]
-            ]
-        ]
-            ++ (List.indexedMap viewContactHours contactHoursModel.weekData)
-
-
-viewContactHours : Int -> DayData -> Html Msg
-viewContactHours idx dayData =
-    --<!-- ko foreach:vmContactHours.weekDataObservable().WeekData -->
-    let
-        idxStr =
-            toString idx
-    in
-        tr [ class "col-xs-12 padding-h-0" ]
-            [ td [ class "Day" ] [ b [ style [ ( "text-align", "right" ) ] ] [ text <| Functions.defaultString dayData.weekDay ] ]
-            , td [ class "Preferred" ]
-                [ input [ type_ "checkbox", id ("Day_" ++ idxStr ++ "_Preferred"), checked dayData.preferredDay ] [] ]
-            , td [ class "TimingOptions" ]
-                [ -- The following works except for the 'selected' option. The json object has the selected variable defined yet this continuously kicks back errors.
-                  -- I believe that the checkbox must be enabled for this to work but I do not want that
-                  select [ id ("Day_" ++ idxStr ++ "_TimingOption"), dataId idxStr ]
-                    (List.map makeOption dayData.timingInstructions)
-                ]
-            , td [ class "Times" ]
-                [ select [ id ("Day_" ++ idxStr ++ "_BeginTime"), dataId idxStr ]
-                    (List.map makeOption dayData.beginTime)
-                , div [ id ("Day_" ++ idxStr ++ "_Err") ]
-                    [ b [ style [ ( "color", "red" ), ( "font-size", "0.75em;" ) ] ] [ text "Must fall before End Time" ]
-                    ]
-                ]
-            , td [ class "Times" ]
-                [ select [ id ("Day_" ++ idxStr ++ "_EndTime"), dataId idxStr ]
-                    (List.map makeOption dayData.endTime)
-                ]
-            ]
-
-
-makeOption : SelectList -> Html Msg
-makeOption selectList =
-    option [ value <| Functions.defaultString selectList.value ]
-        [ text <| Functions.defaultString selectList.text ]
 
 
 vertCent : ( String, String )
@@ -1217,7 +1102,7 @@ emptyModel patientId =
     , stateDropdown = []
     , primaryAddressIndex = 0
     , preferredPhoneIndex = 0
-    , contactHoursModel = emptyContactHoursModel
+    , contactHoursModel = Nothing
     , showValidationErrors = False
     , suffixId = Nothing
     , suffixDropState = Dropdown.init "suffixDropdown"
@@ -1333,7 +1218,7 @@ updateModelFromServerMessage serverResponse model =
                     , patientAddresses = c.patientAddresses
                     , primaryAddressIndex = c.primaryAddressIndex
                     , preferredPhoneIndex = c.preferredPhoneIndex
-                    , contactHoursModel = h
+                    , contactHoursModel = Just h
                     , suffixId = d.suffixId
                     , prefixId = d.prefixId
                     , raceId = d.raceId
@@ -1387,7 +1272,7 @@ type alias ContactInformationModel =
 
 
 type ServerResponse
-    = ServerSuccess DemographicsInformationModel ContactInformationModel ContactHoursModel DropdownSource
+    = ServerSuccess DemographicsInformationModel ContactInformationModel Decode.Value DropdownSource
     | ServerFail String
 
 
@@ -1396,34 +1281,8 @@ decodeServerResponse =
     Pipeline.decode ServerSuccess
         |> Pipeline.required "demographicsInformationModel" decodeDemographicsInformationModel
         |> Pipeline.required "contactInformationModel" decodeContactInformationModel
-        |> Pipeline.required "contactHoursModel" decodeContactHoursModel
+        |> Pipeline.required "contactHoursModel" Decode.value
         |> Pipeline.required "demographicLists" decodeLists
-
-
-decodeContactHoursModel : Decode.Decoder ContactHoursModel
-decodeContactHoursModel =
-    Pipeline.decode ContactHoursModel
-        |> Pipeline.required "TZ" (Decode.list decodeSelectList)
-        |> Pipeline.required "WeekData" (Decode.list decodeDayData)
-        |> Pipeline.required "SelectedTimeZoneId" Decode.int
-
-
-decodeSelectList : Decode.Decoder SelectList
-decodeSelectList =
-    Pipeline.decode SelectList
-        |> Pipeline.required "Value" (Decode.maybe Decode.string)
-        |> Pipeline.required "Text" (Decode.maybe Decode.string)
-        |> Pipeline.required "Selected" Decode.bool
-
-
-decodeDayData : Decode.Decoder DayData
-decodeDayData =
-    Pipeline.decode DayData
-        |> Pipeline.required "WeekDay" (Decode.maybe Decode.string)
-        |> Pipeline.required "PreferredDay" Decode.bool
-        |> Pipeline.required "TimingInstructions" (Decode.list decodeSelectList)
-        |> Pipeline.required "BeginTime" (Decode.list decodeSelectList)
-        |> Pipeline.required "EndTime" (Decode.list decodeSelectList)
 
 
 decodeDemographicsInformationModel : Decode.Decoder DemographicsInformationModel
