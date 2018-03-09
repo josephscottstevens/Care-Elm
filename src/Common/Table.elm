@@ -28,18 +28,36 @@ import Json.Encode as Encode
 
 type alias State =
     { selectedId : Maybe Int
-    , isReversed : Bool
-    , sortedColumnName : String
     , openDropdownId : Maybe Int
+    , pageIndex : Int
+    , rowsPerPage : Int
+    , pagesPerBlock : Int
+    , totalRows : Int
+    , sortField : String
+    , sortAscending : Bool
     }
+
+
+type Page
+    = First
+    | Previous
+    | PreviousBlock
+    | Index Int
+    | NextBlock
+    | Next
+    | Last
 
 
 init : String -> State
 init sortedColumnName =
     { selectedId = Nothing
-    , isReversed = False
-    , sortedColumnName = sortedColumnName
     , openDropdownId = Nothing
+    , pageIndex = 0
+    , rowsPerPage = 20
+    , pagesPerBlock = 15
+    , totalRows = -1
+    , sortField = sortedColumnName
+    , sortAscending = False
     }
 
 
@@ -119,22 +137,18 @@ type Sorter data
 
 view : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> Html msg
 view state rows config maybeCustomRow =
-    let
-        sortedRows =
-            sort state config.columns rows
-    in
-        div [ class "e-grid e-js e-waitingpopup" ]
-            [ viewToolbar config.toolbar
-            , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
-                [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                    [ tr []
-                        (List.map (viewTh state config) config.columns)
-                    ]
-                , tbody []
-                    (viewTr state sortedRows config maybeCustomRow)
+    div [ class "e-grid e-js e-waitingpopup" ]
+        [ viewToolbar config.toolbar
+        , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
+            [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
+                [ tr [] (List.map (viewTh state config) config.columns)
+                , tr [] (List.map (viewThFilter state config) config.columns)
                 ]
-            , pagingView 0 (List.length sortedRows)
+            , tbody []
+                (viewTr state rows config maybeCustomRow)
             ]
+        , pagingView state config.toMsg
+        ]
 
 
 viewTr : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> List (Html msg)
@@ -206,20 +220,33 @@ viewTh state config column =
             getColumnName column
 
         headerContent =
-            if state.sortedColumnName == name then
-                if state.isReversed then
+            if state.sortField == name then
+                if state.sortAscending then
                     [ text name, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
                 else
                     [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
             else
                 [ text name ]
 
+        newSortDirection =
+            not state.sortAscending
+
         sortClick =
-            Events.onClick (config.toMsg { state | isReversed = not state.isReversed, sortedColumnName = name })
+            Events.onClick (config.toMsg { state | sortAscending = newSortDirection, sortField = name })
     in
         th [ class ("e-headercell e-default " ++ name), sortClick ]
             [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
             ]
+
+
+viewThFilter : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
+viewThFilter state config column =
+    th [ class ("e-filterbarcell") ]
+        [ div [ class "e-filterdiv e-fltrinputdiv" ]
+            [ input [ class "e-ejinputtext e-filtertext" ] []
+            , span [ class "e-cancel e-icon" ] []
+            ]
+        ]
 
 
 viewTd : State -> { data | id : Int } -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
@@ -426,11 +453,52 @@ pagesPerBlock =
     8
 
 
-pagingView : Int -> Int -> Html msg
-pagingView currentPage totalVisiblePages =
+setPagingState : State -> (State -> msg) -> Page -> Html.Attribute msg
+setPagingState state toMsg page =
+    let
+        newIndex =
+            case page of
+                First ->
+                    0
+
+                Previous ->
+                    if state.pageIndex > 0 then
+                        state.pageIndex - 1
+                    else
+                        0
+
+                PreviousBlock ->
+                    0
+
+                Index t ->
+                    t
+
+                NextBlock ->
+                    0
+
+                Next ->
+                    state.pageIndex + 1
+
+                Last ->
+                    (state.totalRows // state.rowsPerPage) - 1
+    in
+        Events.onClick (toMsg { state | pageIndex = newIndex })
+
+
+pagingView : State -> (State -> msg) -> Html msg
+pagingView state toMsg =
     let
         totalPages =
-            totalVisiblePages // itemsPerPage
+            (state.totalRows // state.rowsPerPage) - 1
+
+        currentPage =
+            0
+
+        totalVisiblePages =
+            0
+
+        pagingStateClick page =
+            setPagingState state toMsg page
 
         activeOrNot pageIndex =
             let
@@ -502,7 +570,7 @@ pagingView currentPage totalVisiblePages =
     in
         div [ class "e-pager e-js e-pager" ]
             [ div [ class "e-pagercontainer" ]
-                [ div [ class firstPageClass ] [] --, onClick (SetPagingState First) ] []
+                [ div [ class firstPageClass ] [] --, setPagingState First
                 , div [ class leftPageClass ] [] --, onClick (SetPagingState Previous) ] []
                 , a [ class leftPageBlockClass ] [] --, onClick (SetPagingState PreviousBlock) ] [ text "..." ]
                 , div [ class "e-numericcontainer e-default" ] rng
@@ -522,12 +590,12 @@ pagingView currentPage totalVisiblePages =
 
 sort : State -> List (Column { data | id : Int } msg) -> List { data | id : Int } -> List { data | id : Int }
 sort state columnData data =
-    case findSorter state.sortedColumnName columnData of
+    case findSorter state.sortField columnData of
         Nothing ->
             data
 
         Just sorter ->
-            applySorter state.isReversed sorter data
+            applySorter state.sortAscending sorter data
 
 
 applySorter : Bool -> Sorter { data | id : Int } -> List { data | id : Int } -> List { data | id : Int }
