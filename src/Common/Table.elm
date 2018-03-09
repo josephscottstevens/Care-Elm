@@ -32,7 +32,6 @@ type alias State =
     , pageIndex : Int
     , rowsPerPage : Int
     , pagesPerBlock : Int
-    , totalRows : Int
     , sortField : String
     , sortAscending : Bool
     }
@@ -55,7 +54,6 @@ init sortedColumnName =
     , pageIndex = 0
     , rowsPerPage = 20
     , pagesPerBlock = 15
-    , totalRows = -1
     , sortField = sortedColumnName
     , sortAscending = False
     }
@@ -137,18 +135,24 @@ type Sorter data
 
 view : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> Html msg
 view state rows config maybeCustomRow =
-    div [ class "e-grid e-js e-waitingpopup" ]
-        [ viewToolbar config.toolbar
-        , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
-            [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                [ tr [] (List.map (viewTh state config) config.columns)
-                , tr [] (List.map (viewThFilter state config) config.columns)
+    let
+        filteredRows =
+            rows
+                |> List.drop ((state.pageIndex // state.pagesPerBlock) * state.pagesPerBlock)
+                |> List.take state.pagesPerBlock
+    in
+        div [ class "e-grid e-js e-waitingpopup" ]
+            [ viewToolbar config.toolbar
+            , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
+                [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
+                    [ tr [] (List.map (viewTh state config) config.columns)
+                    , tr [] (List.map (viewThFilter state config) config.columns)
+                    ]
+                , tbody []
+                    (viewTr state filteredRows config maybeCustomRow)
                 ]
-            , tbody []
-                (viewTr state rows config maybeCustomRow)
+            , pagingView state rows config.toMsg
             ]
-        , pagingView state config.toMsg
-        ]
 
 
 viewTr : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> List (Html msg)
@@ -453,8 +457,8 @@ pagesPerBlock =
     8
 
 
-setPagingState : State -> (State -> msg) -> Page -> Html.Attribute msg
-setPagingState state toMsg page =
+setPagingState : State -> Int -> (State -> msg) -> Page -> Html.Attribute msg
+setPagingState state totalRows toMsg page =
     let
         newIndex =
             case page of
@@ -480,19 +484,22 @@ setPagingState state toMsg page =
                     state.pageIndex + 1
 
                 Last ->
-                    (state.totalRows // state.rowsPerPage) - 1
+                    (totalRows // state.rowsPerPage) - 1
     in
         Events.onClick (toMsg { state | pageIndex = newIndex })
 
 
-pagingView : State -> (State -> msg) -> Html msg
-pagingView state toMsg =
+pagingView : State -> List { data | id : Int } -> (State -> msg) -> Html msg
+pagingView state rows toMsg =
     let
+        totalRows =
+            List.length rows
+
         totalPages =
-            (state.totalRows // state.rowsPerPage) - 1
+            (totalRows // state.rowsPerPage) - 1
 
         pagingStateClick page =
-            setPagingState state toMsg page
+            setPagingState state totalRows toMsg page
 
         activeOrNot pageIndex =
             let
@@ -557,7 +564,7 @@ pagingView state toMsg =
                     toString (totalPages + 1)
 
                 totalItemsText =
-                    toString state.totalRows
+                    toString totalRows
             in
                 currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
     in
