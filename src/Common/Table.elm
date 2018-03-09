@@ -138,7 +138,7 @@ view state rows config maybeCustomRow =
     let
         filteredRows =
             rows
-                |> List.drop ((state.pageIndex // state.pagesPerBlock) * state.pagesPerBlock)
+                |> List.drop (state.pageIndex * state.pagesPerBlock)
                 |> List.take state.pagesPerBlock
     in
         div [ class "e-grid e-js e-waitingpopup" ]
