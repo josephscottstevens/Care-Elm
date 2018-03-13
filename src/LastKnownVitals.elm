@@ -87,7 +87,7 @@ view model _ =
     case model.editData of
         Nothing ->
             div []
-                [ h4 [] [ text "LastKnownVitals" ]
+                [ h4 [] [ text "Last Known Vitals" ]
                 , Table.view model.tableState model.rows gridConfig Nothing
                 ]
 
