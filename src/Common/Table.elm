@@ -55,7 +55,7 @@ init sortedColumnName =
     , rowsPerPage = 20
     , pagesPerBlock = 15
     , sortField = sortedColumnName
-    , sortAscending = False
+    , sortAscending = True
     }
 
 
@@ -136,8 +136,11 @@ type Sorter data
 view : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> Html msg
 view state rows config maybeCustomRow =
     let
+        sortedRows =
+            sort state config.columns rows
+
         filteredRows =
-            rows
+            sortedRows
                 |> List.drop (state.pageIndex * state.pagesPerBlock)
                 |> List.take state.pagesPerBlock
     in
@@ -225,7 +228,7 @@ viewTh state config column =
 
         headerContent =
             if state.sortField == name then
-                if state.sortAscending then
+                if not state.sortAscending then
                     [ text name, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
                 else
                     [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
@@ -496,7 +499,7 @@ pagingView state rows toMsg =
             List.length rows
 
         totalPages =
-            (totalRows // state.rowsPerPage) - 1
+            totalRows // state.rowsPerPage
 
         pagingStateClick page =
             setPagingState state totalRows toMsg page
