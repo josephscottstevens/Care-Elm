@@ -3,7 +3,7 @@ port module Records exposing (Msg, Model, emptyModel, subscriptions, init, updat
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (class, type_, id, value)
 import Html.Events exposing (onClick)
-import Common.Table as Table exposing (stringColumn, dateColumn, intColumn, dateTimeColumn, dropdownColumn, hrefColumn, hrefColumnExtra, checkColumn)
+import Common.Table as Table
 import Common.Types as Common exposing (RequiredType(Required, Optional), AddEditDataSource, RecordType, DropdownItem)
 import Common.Functions as Functions exposing (sendMenuMessage, displaySuccessMessage, displayErrorMessage, maybeVal, defaultString, maybeToDateString)
 import Common.Html
@@ -359,10 +359,10 @@ getColumns : RecordType -> List (Table.Column Row Msg)
 getColumns recordType =
     let
         commonColumns =
-            [ dateTimeColumn "Date Collected" .date
-            , stringColumn "Doctor of Visit" .provider
-            , stringColumn "Specialty" .specialty
-            , stringColumn "Comments" .comments
+            [ Table.dateTimeColumn "Date Collected" .date
+            , Table.stringColumn "Doctor of Visit" .provider
+            , Table.stringColumn "Specialty" .specialty
+            , Table.htmlColumn "Comments" .comments
             ]
 
         firstColumns =
@@ -374,63 +374,63 @@ getColumns recordType =
                     commonColumns
 
                 Common.Labs ->
-                    [ dateTimeColumn "Date Collected" .date
-                    , dateTimeColumn "Date Accessioned" .dateAccessed
-                    , stringColumn "Name of Lab" .title
-                    , stringColumn "Provider" .provider
-                    , stringColumn "Comments" .comments
+                    [ Table.dateTimeColumn "Date Collected" .date
+                    , Table.dateTimeColumn "Date Accessioned" .dateAccessed
+                    , Table.stringColumn "Name of Lab" .title
+                    , Table.stringColumn "Provider" .provider
+                    , Table.htmlColumn "Comments" .comments
                     ]
 
                 Common.Radiology ->
-                    [ dateTimeColumn "Date Collected" .date
-                    , dateTimeColumn "Date Accessioned" .dateAccessed
-                    , stringColumn "Name of Study" .title
-                    , stringColumn "Provider" .provider
-                    , stringColumn "Comments" .comments
+                    [ Table.dateTimeColumn "Date Collected" .date
+                    , Table.dateTimeColumn "Date Accessioned" .dateAccessed
+                    , Table.stringColumn "Name of Study" .title
+                    , Table.stringColumn "Provider" .provider
+                    , Table.htmlColumn "Comments" .comments
                     ]
 
                 Common.Hospitalizations ->
-                    [ dateTimeColumn "Date Collected" .date
-                    , intColumn "Hospitalization ID" .hospitalizationId
-                    , dateTimeColumn "Admin Collected" .dateOfAdmission
-                    , dateTimeColumn "Discharge Date" .dateOfDischarge
-                    , stringColumn "Service Type" .hospitalizationServiceType
-                    , stringColumn "Discharge Recommendations" .recommendations
-                    , stringColumn "Discharge Physician" .dischargePhysician
-                    , stringColumn "Comments" .comments
+                    [ Table.dateTimeColumn "Date Collected" .date
+                    , Table.intColumn "Hospitalization ID" .hospitalizationId
+                    , Table.dateTimeColumn "Admin Collected" .dateOfAdmission
+                    , Table.dateTimeColumn "Discharge Date" .dateOfDischarge
+                    , Table.stringColumn "Service Type" .hospitalizationServiceType
+                    , Table.stringColumn "Discharge Recommendations" .recommendations
+                    , Table.stringColumn "Discharge Physician" .dischargePhysician
+                    , Table.htmlColumn "Comments" .comments
                     ]
 
                 Common.Legal ->
-                    [ dateTimeColumn "Date Collected" .date
-                    , stringColumn "Comments" .comments
+                    [ Table.dateTimeColumn "Date Collected" .date
+                    , Table.htmlColumn "Comments" .comments
                     ]
 
                 Common.CallRecordings ->
-                    [ dateColumn "Date" .recordingDate
-                    , hrefColumn "Recording" "Open" .recording
-                    , hrefColumnExtra "Task" hrefCustom
-                    , checkColumn "During Enrollment" .enrollment
-                    , checkColumn "Consent" .hasVerbalConsent
-                    , stringColumn "User" .staffName
+                    [ Table.dateColumn "Date" .recordingDate
+                    , Table.hrefColumn "Recording" "Open" .recording
+                    , Table.hrefColumnExtra "Task" hrefCustom
+                    , Table.checkColumn "During Enrollment" .enrollment
+                    , Table.checkColumn "Consent" .hasVerbalConsent
+                    , Table.stringColumn "User" .staffName
                     ]
 
                 Common.PreviousHistories ->
-                    [ dateTimeColumn "Date Collected" .date
-                    , stringColumn "File Name" .fileName
-                    , dateColumn "Report Date" .reportDate
-                    , stringColumn "Comments" .comments
+                    [ Table.dateTimeColumn "Date Collected" .date
+                    , Table.stringColumn "File Name" .fileName
+                    , Table.dateColumn "Report Date" .reportDate
+                    , Table.htmlColumn "Comments" .comments
                     ]
 
                 Common.Enrollment ->
-                    [ dateTimeColumn "Date Collected" .date
-                    , stringColumn "Comments" .comments
+                    [ Table.dateTimeColumn "Date Collected" .date
+                    , Table.htmlColumn "Comments" .comments
                     ]
 
                 Common.Misc ->
                     commonColumns
 
         lastColumns =
-            [ dropdownColumn (dropdownItems recordType)
+            [ Table.dropdownColumn (dropdownItems recordType)
             ]
     in
         List.append firstColumns lastColumns

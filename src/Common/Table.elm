@@ -149,7 +149,9 @@ view state rows config maybeCustomRow =
             , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
                 [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
                     [ tr [] (List.map (viewTh state config) config.columns)
-                    , tr [] (List.map (viewThFilter state config) config.columns)
+
+                    -- This is for filters, this can come at a later time
+                    -- , tr [] (List.map (viewThFilter state config) config.columns)
                     ]
                 , tbody []
                     (viewTr state filteredRows config maybeCustomRow)
