@@ -1,6 +1,6 @@
 port module Records exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
-import Html exposing (Html, text, div, button)
+import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_, id, value)
 import Html.Events exposing (onClick)
 import Common.Table as Table
@@ -154,12 +154,15 @@ view model addEditDataSource =
         config =
             gridConfig model.recordType addEditDataSource
     in
-        case model.editData of
-            Just editData ->
-                Table.view model.tableState model.rows config (Just <| viewEditData editData)
+        div []
+            [ h4 [] [ text (Functions.getDesc model.recordType) ]
+            , case model.editData of
+                Just editData ->
+                    Table.view model.tableState model.rows config (Just <| viewEditData editData)
 
-            Nothing ->
-                Table.view model.tableState model.rows config Nothing
+                Nothing ->
+                    Table.view model.tableState model.rows config Nothing
+            ]
 
 
 viewEditData : EditData -> Html Msg
