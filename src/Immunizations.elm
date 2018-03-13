@@ -62,34 +62,34 @@ formInputs editData =
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model _ =
-    case model.editData of
-        Nothing ->
-            div []
-                [ h4 [] [ text "Immunizations & Preventative Screenings" ]
-                , Table.view model.tableState model.rows gridConfig Nothing
-                ]
+    div []
+        [ h4 [] [ text "Immunizations & Preventative Screenings" ]
+        , case model.editData of
+            Nothing ->
+                Table.view model.tableState model.rows gridConfig Nothing
 
-        Just editData ->
-            let
-                errors =
-                    getValidationErrors (formInputs editData)
+            Just editData ->
+                let
+                    errors =
+                        getValidationErrors (formInputs editData)
 
-                validationErrorsDiv =
-                    if model.showValidationErrors == True && List.length errors > 0 then
-                        div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
-                    else
-                        div [] []
-            in
-                div [ class "form-horizontal" ]
-                    [ validationErrorsDiv
-                    , makeControls defaultConfig (formInputs editData)
-                    , div [ class "form-group" ]
-                        [ div [ class fullWidth ]
-                            [ button [ type_ "button", onClick (Save editData), class "btn btn-sm btn-success" ] [ text "Save" ]
-                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
+                    validationErrorsDiv =
+                        if model.showValidationErrors == True && List.length errors > 0 then
+                            div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
+                        else
+                            div [] []
+                in
+                    div [ class "form-horizontal" ]
+                        [ validationErrorsDiv
+                        , makeControls defaultConfig (formInputs editData)
+                        , div [ class "form-group" ]
+                            [ div [ class fullWidth ]
+                                [ button [ type_ "button", onClick (Save editData), class "btn btn-sm btn-success" ] [ text "Save" ]
+                                , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
+                                ]
                             ]
                         ]
-                    ]
+        ]
 
 
 type Msg

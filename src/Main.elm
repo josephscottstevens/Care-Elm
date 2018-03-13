@@ -313,7 +313,10 @@ updatePage page msg model =
                 toPage LastKnownVitals LastKnownVitalsMsg LastKnownVitals.update subMsg subModel
 
             _ ->
-                { model | page = Error <| "Missing Page\\Message " ++ toString page ++ " !!!__-__!!! " ++ toString msg } ! []
+                --{ model | page = Error <| "Missing Page\\Message " ++ toString page ++ " !!!__-__!!! " ++ toString msg } ! []
+                -- above line is useful for debugging, but when releasing, needs to be this
+                -- because, what if you save, move away from the page, then receive confirmation previous thing saved, we don't care at this point
+                model ! []
 
 
 getDropDowns : Int -> Cmd Msg
