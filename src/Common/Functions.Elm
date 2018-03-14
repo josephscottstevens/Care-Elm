@@ -16,6 +16,7 @@ port module Common.Functions
         , dateToString
         , dateTime
         , date
+        , dateIndex
         , defaultDateTime
         , defaultDate
         , defaultLowerDate
@@ -27,7 +28,9 @@ port module Common.Functions
         , getResponseError
         , decodeDropdownItem
         , postRequest
+        , postRequestWithObject
         , postJsonRequest
+        , getRequestWithObject
         , getDesc
         , getRecordTypeById
         , getId
@@ -140,6 +143,46 @@ defaultIntToString int =
 
         Nothing ->
             ""
+
+
+dateIndex : Date.Month -> Int
+dateIndex month =
+    case month of
+        Date.Jan ->
+            0
+
+        Date.Feb ->
+            1
+
+        Date.Mar ->
+            2
+
+        Date.Apr ->
+            3
+
+        Date.May ->
+            4
+
+        Date.Jun ->
+            5
+
+        Date.Jul ->
+            6
+
+        Date.Aug ->
+            7
+
+        Date.Sep ->
+            8
+
+        Date.Oct ->
+            9
+
+        Date.Nov ->
+            10
+
+        Date.Dec ->
+            11
 
 
 dateTimeToString : Date.Date -> String
@@ -275,6 +318,19 @@ postRequest body url =
         }
 
 
+postRequestWithObject : String -> List ( String, Encode.Value ) -> Http.Request String
+postRequestWithObject url object =
+    Http.request
+        { body = Encode.object object |> Http.jsonBody
+        , expect = Http.expectString
+        , headers = []
+        , method = "POST"
+        , timeout = Nothing
+        , url = url
+        , withCredentials = False
+        }
+
+
 postJsonRequest : Encode.Value -> String -> Decoder a -> Http.Request a
 postJsonRequest body url decoder =
     Http.request
@@ -288,7 +344,23 @@ postJsonRequest body url decoder =
         }
 
 
+getRequestWithObject : String -> List ( String, String ) -> Http.Request String
+getRequestWithObject url params =
+    let
+        urlParam =
+            params
+                |> List.map (\( t, y ) -> t ++ "=" ++ y)
+                |> List.foldr (\t y -> t ++ "&" ++ y) ""
+    in
+        Http.getString <|
+            if urlParam == "" then
+                url
+            else
+                url ++ "?" ++ urlParam
 
+
+
+--
 -- Record helpers
 
 

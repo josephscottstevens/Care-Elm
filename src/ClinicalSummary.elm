@@ -1,38 +1,23 @@
 port module ClinicalSummary exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
 
+import Date exposing (Date)
+import Task exposing (Task)
 import Html exposing (Html, text, div, button, h4, input)
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
+import Common.Dropdown as Dropdown
 import Common.Html exposing (InputControlType(HtmlElement, AreaInput), makeControls)
 import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown, DropdownItem)
-import Common.Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, postRequest)
+import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required)
 
 
-port updateSyncfusionData : (SyncfusionData -> msg) -> Sub msg
-
-
-port clinicalSummaryUpdate : (String -> msg) -> Sub msg
-
-
-port clinicalSummaryInit : SyncfusionData -> Cmd msg
-
-
-port generateInstructions : SyncfusionData -> Cmd msg
-
-
-port generateCarePlanLetter : Maybe Int -> Cmd msg
-
-
 subscriptions : Sub Msg
 subscriptions =
-    Sub.batch
-        [ updateSyncfusionData UpdateSyncfusionData
-        , clinicalSummaryUpdate UpdateClinicalSummary
-        ]
+    Sub.none
 
 
 type alias Model =
@@ -43,22 +28,18 @@ type alias Model =
     , codeLegalStatus : Maybe String
     , impairment : Maybe String
     , comments : Maybe String
-    , syncfusionData : SyncfusionData
+    , currentMonth : Maybe Int
+    , currentYear : Maybe Int
+    , monthDropState : Dropdown.DropState
+    , yearDropState : Dropdown.DropState
     }
 
 
 init : Int -> Cmd Msg
 init patientId =
-    let
-        getInitData =
-            decodeClinicalSummary
-                |> Http.get ("/People/ClinicalSummary?patientId=" ++ toString patientId)
-                |> Http.send LoadData
-
-        loadDropdowns =
-            clinicalSummaryInit (SyncfusionData monthDropdown yearDropdown 0 0)
-    in
-        Cmd.batch [ getInitData, loadDropdowns ]
+    decodeClinicalSummary
+        |> Http.get ("/People/ClinicalSummary?patientId=" ++ toString patientId)
+        |> Http.send LoadData
 
 
 type Msg
@@ -69,11 +50,13 @@ type Msg
     | UpdateImpairment String
     | UpdateComments String
     | UpdateClinicalSummary String
-    | UpdateSyncfusionData SyncfusionData
-    | GenerateInstructions
     | Save
     | SaveCompleted (Result Http.Error String)
     | GenerateCarePlanLetter
+    | GenerateCarePlanLetterCompleted (Result Http.Error String)
+    | UpdateMonth Dropdown.Msg
+    | UpdateYear Dropdown.Msg
+    | GetDate Date
 
 
 view : Model -> Int -> Html Msg
@@ -97,29 +80,72 @@ update msg model patientId =
                 , summary = newData.summary
                 , facilityId = newData.facilityId
             }
-                ! []
+                ! [ Task.perform GetDate Date.now ]
 
         LoadData (Err t) ->
             model ! [ displayErrorMessage (toString t) ]
 
-        UpdateSyncfusionData t ->
-            { model | syncfusionData = t } ! []
+        GetDate dt ->
+            { model
+                | currentMonth = Just (Date.month dt |> Functions.dateIndex)
+                , currentYear = Just (Date.year dt)
+            }
+                ! []
 
         UpdateClinicalSummary t ->
             { model | summary = Just t } ! []
 
-        GenerateInstructions ->
-            model ! [ generateInstructions model.syncfusionData ]
-
         GenerateCarePlanLetter ->
-            model ! [ generateCarePlanLetter model.facilityId ]
+            model
+                ! [ Functions.getRequestWithObject
+                        "/People/GetCarePlanFromTasks"
+                        [ ( "patientId", toString patientId )
+                        , ( "year", model.currentYear |> Maybe.withDefault 0 |> toString )
+                        , ( "month", model.currentMonth |> Maybe.map (\t -> t + 1) |> Maybe.withDefault 0 |> toString )
+                        ]
+                        |> Http.send GenerateCarePlanLetterCompleted
+                  ]
+
+        GenerateCarePlanLetterCompleted (Ok newData) ->
+            { model
+                | summary =
+                    newData
+                        |> Decode.decodeString (Decode.at [ "AdditionalData", "carePlan" ] Decode.string)
+                        |> Result.toMaybe
+            }
+                ! []
+
+        GenerateCarePlanLetterCompleted (Err t) ->
+            model ! [ displayErrorMessage (toString t) ]
 
         Save ->
             model
-                ! [ "People/UpdateClinicalSummary"
-                        |> postRequest (encodeClinicalSummary model patientId)
+                ! [ Functions.postRequestWithObject
+                        "/People/UpdateClinicalSummary"
+                        [ ( "Id", maybeVal Encode.int <| model.id )
+                        , ( "PatientId", Encode.int <| patientId )
+                        , ( "Summary", maybeVal Encode.string <| model.summary )
+                        , ( "CarePlan", maybeVal Encode.string <| model.carePlan )
+                        , ( "Impairment", maybeVal Encode.string <| model.impairment )
+                        , ( "CodeLegalStatus", maybeVal Encode.string <| model.codeLegalStatus )
+                        , ( "Comments", maybeVal Encode.string <| model.comments )
+                        ]
                         |> Http.send SaveCompleted
                   ]
+
+        UpdateMonth dropdownMsg ->
+            let
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg model.monthDropState model.currentMonth monthDropdown
+            in
+                { model | monthDropState = newDropState, currentMonth = newId } ! [ newMsg ]
+
+        UpdateYear dropdownMsg ->
+            let
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg model.yearDropState model.currentYear yearDropdown
+            in
+                { model | yearDropState = newDropState, currentYear = newId } ! [ newMsg ]
 
         SaveCompleted (Ok _) ->
             model ! [ displaySuccessMessage "Clinical Summary Saved Successfully!" ]
@@ -143,8 +169,20 @@ update msg model patientId =
             { model | comments = Just str } ! []
 
 
-generateSummaryDiv : Html Msg
-generateSummaryDiv =
+formInputs : Model -> List (InputControlType Msg)
+formInputs model =
+    [ AreaInput "Clinical Summary" Optional model.summary UpdateSummary
+    , HtmlElement "" (generateSummaryDiv model)
+    , AreaInput "Instructions and Care Plan" Optional model.carePlan UpdateCarePlan
+    , AreaInput "Code/Legal Status" Optional model.codeLegalStatus UpdateCodeLegalStatus
+    , AreaInput "Impairment" Optional model.impairment UpdateImpairment
+    , AreaInput "Comments" Optional model.comments UpdateComments
+    , HtmlElement "" (button [ class "btn btn-sm btn-primary", onClick Save ] [ text "Update" ])
+    ]
+
+
+generateSummaryDiv : Model -> Html Msg
+generateSummaryDiv model =
     let
         inline widthPercent topPadding =
             [ style
@@ -157,23 +195,16 @@ generateSummaryDiv =
     in
         div []
             [ div (inline "34%" "5px") [ text "Generate Summary from Tasks Outcome:" ]
-            , div (inline "18%" "") [ input [ id "MonthId" ] [] ]
-            , div (inline "18%" "") [ input [ id "YearId" ] [] ]
-            , div (inline "20%" "") [ button [ class "btn btn-sm btn-default", onClick GenerateInstructions ] [ text "Generate" ] ]
+            , div (inline "18%" "")
+                [ Html.map UpdateMonth <|
+                    Dropdown.view model.monthDropState monthDropdown model.currentMonth
+                ]
+            , div (inline "18%" "")
+                [ Html.map UpdateYear <|
+                    Dropdown.view model.yearDropState yearDropdown model.currentYear
+                ]
+            , div (inline "20%" "") [ button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate" ] ]
             ]
-
-
-formInputs : Model -> List (InputControlType Msg)
-formInputs { summary, carePlan, codeLegalStatus, impairment, comments } =
-    [ HtmlElement "" (button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate Care Plan Letter" ])
-    , AreaInput "Clinical Summary" Optional summary UpdateSummary
-    , HtmlElement "" generateSummaryDiv
-    , AreaInput "Instructions and Care Plan" Optional carePlan UpdateCarePlan
-    , AreaInput "Code/Legal Status" Optional codeLegalStatus UpdateCodeLegalStatus
-    , AreaInput "Impairment" Optional impairment UpdateImpairment
-    , AreaInput "Comments" Optional comments UpdateComments
-    , HtmlElement "" (button [ class "btn btn-sm btn-primary", onClick Save ] [ text "Update" ])
-    ]
 
 
 decodeClinicalSummary : Decode.Decoder ClinicalSummaryResponseData
@@ -188,19 +219,6 @@ decodeClinicalSummary =
         |> required "Comments" (Decode.maybe Decode.string)
 
 
-encodeClinicalSummary : Model -> Int -> Encode.Value
-encodeClinicalSummary model patientId =
-    Encode.object
-        [ ( "Id", maybeVal Encode.int <| model.id )
-        , ( "PatientId", Encode.int <| patientId )
-        , ( "Summary", maybeVal Encode.string <| model.summary )
-        , ( "CarePlan", maybeVal Encode.string <| model.carePlan )
-        , ( "Impairment", maybeVal Encode.string <| model.impairment )
-        , ( "CodeLegalStatus", maybeVal Encode.string <| model.codeLegalStatus )
-        , ( "Comments", maybeVal Encode.string <| model.comments )
-        ]
-
-
 type alias ClinicalSummaryResponseData =
     { id : Maybe Int
     , facilityId : Maybe Int
@@ -209,14 +227,6 @@ type alias ClinicalSummaryResponseData =
     , codeLegalStatus : Maybe String
     , impairment : Maybe String
     , comments : Maybe String
-    }
-
-
-type alias SyncfusionData =
-    { months : List DropdownItem
-    , years : List DropdownItem
-    , currentMonth : Int
-    , currentYear : Int
     }
 
 
@@ -229,5 +239,8 @@ emptyModel =
     , codeLegalStatus = Nothing
     , impairment = Nothing
     , summary = Nothing
-    , syncfusionData = SyncfusionData monthDropdown yearDropdown 0 0
+    , currentMonth = Nothing
+    , currentYear = Nothing
+    , monthDropState = Dropdown.init "monthDropdown"
+    , yearDropState = Dropdown.init "yearDropdown"
     }
