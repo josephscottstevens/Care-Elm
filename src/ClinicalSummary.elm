@@ -1,4 +1,4 @@
-port module ClinicalSummary exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
+module ClinicalSummary exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
 
 import Date exposing (Date)
 import Task exposing (Task)
