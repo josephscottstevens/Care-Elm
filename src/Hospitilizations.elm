@@ -296,9 +296,9 @@ getColumns addEditDataSource =
     in
         [ Table.intColumn "ID" (\t -> Just <| t.id)
         , Table.stringColumn "Facility Name" (\t -> t.facilityName)
-        , Table.stringColumn "Date Of Admission" (\t -> t.dateOfAdmission)
+        , Table.dateColumn "Date Of Admission" (\t -> t.dateOfAdmission)
         , Table.stringColumn "Admit Problem" (\t -> t.admitProblem)
-        , Table.stringColumn "Date Of Discharge" (\t -> t.dateOfDischarge)
+        , Table.dateColumn "Date Of Discharge" (\t -> t.dateOfDischarge)
         , Table.stringColumn "Discharge Problem" (\t -> t.dischargeProblem)
         , Table.stringColumn "Svc Type" (\t -> t.serviceType)
         , Table.checkColumn "Is From TCM" (\t -> t.fromTcm)
