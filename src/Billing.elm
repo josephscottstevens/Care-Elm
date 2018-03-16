@@ -9,11 +9,12 @@ import Common.Types exposing (AddEditDataSource)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
+import Json.Encode as Encode
 
 
 init : Int -> Cmd Msg
 init patientId =
-    load patientId (Table.init "facility")
+    load patientId <| Table.init emptyRow "facility"
 
 
 subscriptions : Sub msg
@@ -23,7 +24,7 @@ subscriptions =
 
 type alias Model =
     { rows : List Row
-    , gridOperations : Table.GridOperations
+    , gridOperations : Table.GridOperations Row
     , query : String
     }
 
@@ -77,7 +78,7 @@ view model addEditDataSource =
 
 type Msg
     = Load (Result Http.Error LoadResult)
-    | SetGridOperations Table.GridOperations
+    | SetGridOperations (Table.GridOperations Row)
     | Reset
 
 
@@ -85,7 +86,7 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
         Load (Ok t) ->
-            { model | rows = t.result, gridOperations = t.gridOperations } ! []
+            { model | rows = t.result, gridOperations = Table.updateFromServer t.serverData model.gridOperations } ! []
 
         Load (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
@@ -148,7 +149,7 @@ decodeBillingCcm =
 
 type alias LoadResult =
     { result : List Row
-    , gridOperations : Table.GridOperations
+    , serverData : Table.ServerData
     }
 
 
@@ -159,17 +160,72 @@ jsonDecodeLoad =
         |> Pipeline.required "GridOperations" Table.decodeGridOperations
 
 
-load : Int -> Table.GridOperations -> Cmd Msg
+encodeEditData : Row -> Encode.Value
+encodeEditData newRecord =
+    Encode.object
+        [ ( "ID", Encode.int <| newRecord.id )
+        , ( "Facility", (maybeVal Encode.string) <| newRecord.facility )
+        , ( "FacilityId", Encode.int <| newRecord.facilityId )
+        , ( "PracticeLocation", (maybeVal Encode.string) <| newRecord.practiceLocation )
+        , ( "MainProvider", (maybeVal Encode.string) <| newRecord.mainProvider )
+        , ( "ProviderId", (Encode.int) <| newRecord.providerId )
+        , ( "PatientName", (maybeVal Encode.string) <| newRecord.patientName )
+        , ( "PatientId", (Encode.int) <| newRecord.patientId )
+        , ( "DoB", (maybeVal Encode.string) <| newRecord.dob )
+        , ( "PatientFacilityIdNo", (maybeVal Encode.string) <| newRecord.patientFacilityIdNo )
+        , ( "Phone", (maybeVal Encode.string) <| newRecord.phone )
+        , ( "AssignedTo", (maybeVal Encode.string) <| newRecord.assignedTo )
+        , ( "StaffId", (maybeVal Encode.int) <| newRecord.staffId )
+        , ( "OpenTasks", (Encode.int) <| newRecord.openTasks )
+        , ( "TotalTimeSpent", (maybeVal Encode.int) <| newRecord.totalTimeSpent )
+        , ( "CcmRegistrationDate", (maybeVal Encode.string) <| newRecord.ccmRegistrationDate )
+        , ( "DateOfService", (maybeVal Encode.string) <| newRecord.dateOfService )
+        , ( "BillingDate", (maybeVal Encode.string) <| newRecord.billingDate )
+        , ( "BillingMonth", (Encode.int) <| newRecord.billingMonth )
+        , ( "BillingYear", (Encode.int) <| newRecord.billingYear )
+        , ( "IsClosed", (Encode.bool) <| newRecord.isClosed )
+        , ( "TocId", (maybeVal Encode.int) <| newRecord.tocId )
+        , ( "Readmission", (Encode.bool) <| newRecord.readmission )
+        , ( "IsComplexCCM", (Encode.bool) <| newRecord.isComplexCCM )
+        , ( "BatchCloseOnInvoiceCompletion", (Encode.bool) <| newRecord.batchCloseOnInvoiceCompletion )
+        , ( "ReviewedByStaffName", (maybeVal Encode.string) <| newRecord.reviewedByStaffName )
+        , ( "CanModifyReviewedStatus", (Encode.bool) <| newRecord.canModifyReviewedStatus )
+        , ( "IsReviewed", (Encode.bool) <| newRecord.isReviewed )
+        , ( "DxPresent", (Encode.bool) <| newRecord.dxPresent )
+        , ( "CarePlanPresent", (Encode.bool) <| newRecord.carePlanPresent )
+        , ( "MedsPresent", (Encode.bool) <| newRecord.medsPresent )
+        , ( "AllergiesPresent", (Encode.bool) <| newRecord.allergiesPresent )
+        , ( "VitalsPresent", (Encode.bool) <| newRecord.vitalsPresent )
+        , ( "RecordingPresent", Encode.bool <| newRecord.recordingPresent )
+        , ( "ChartComplete", (Encode.bool) <| newRecord.chartComplete )
+        , ( "Status", (maybeVal Encode.string) <| newRecord.status )
+        ]
+
+
+load : Int -> Table.GridOperations Row -> Cmd Msg
 load patientId gridOperations =
-    jsonDecodeLoad
-        |> Functions.postJsonRequest (Table.encodeGridOperations gridOperations) ("/People/BillingTest?patientId=" ++ toString patientId)
+    Http.request
+        { body =
+            Encode.object
+                [ ( "patientId", Encode.int <| patientId )
+                , ( "gridOperations", Table.encodeGridOperations gridOperations )
+                , ( "filters", encodeEditData gridOperations.filters )
+                ]
+                |> Http.jsonBody
+        , expect = Http.expectJson jsonDecodeLoad
+        , headers = []
+        , method = "POST"
+        , timeout = Nothing
+        , url = "/People/BillingTest"
+        , withCredentials = False
+        }
         |> Http.send Load
 
 
 emptyModel : Model
 emptyModel =
     { rows = []
-    , gridOperations = Table.init "Date"
+    , gridOperations = Table.init emptyRow "Date"
     , query = ""
     }
 
@@ -195,3 +251,46 @@ getColumns addEditDataSource =
     , stringColumn "Id No" .patientFacilityIdNo
     , stringColumn "AssignedTo" .assignedTo
     ]
+
+
+emptyRow : Row
+emptyRow =
+    { id = 0
+    , facility = Nothing
+    , facilityId = 0
+    , practiceLocation = Nothing
+    , mainProvider = Nothing
+    , providerId = 0
+    , patientName = Nothing
+    , patientId = 0
+    , dob = Nothing
+    , patientFacilityIdNo = Nothing
+    , phone = Nothing
+    , assignedTo = Nothing
+    , staffId = Nothing
+    , openTasks = 0
+    , totalTimeSpent = Nothing
+    , ccmRegistrationDate = Nothing
+    , dateOfService = Nothing
+    , billingDate = Nothing
+    , billingMonth = 0
+    , billingYear = 0
+    , isClosed = False
+    , tocId = Nothing
+    , readmission = False
+    , isComplexCCM = False
+    , batchCloseOnInvoiceCompletion = False
+    , reviewedByStaffName = Nothing
+    , canModifyReviewedStatus = False
+    , isReviewed = False
+    , dxPresent = False
+    , carePlanPresent = False
+    , medsPresent = False
+    , allergiesPresent = False
+    , vitalsPresent = False
+    , recordingPresent = False
+    , chartComplete = False
+    , status = Nothing
+
+    --, is24HoursSinceBilled = False
+    }

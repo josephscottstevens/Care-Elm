@@ -1,6 +1,7 @@
 module Common.ServerTable
     exposing
         ( GridOperations
+        , ServerData
         , Column
         , Config
         , init
@@ -13,6 +14,7 @@ module Common.ServerTable
         , hrefColumn
         , hrefColumnExtra
         , checkColumn
+        , updateFromServer
         , decodeGridOperations
         , encodeGridOperations
         )
@@ -29,16 +31,21 @@ import Json.Encode as Encode
 -- Data Types
 
 
-type alias FilterField =
-    { columnName : String
-    , columnValue : String
-    }
-
-
-type alias GridOperations =
+type alias GridOperations data =
     { selectedId : Maybe Int
     , openDropdownId : Maybe Int
     , skip : Int
+    , pageSize : Int
+    , rowsPerPage : Int
+    , totalRows : Int
+    , sortField : Maybe String
+    , sortAscending : Bool
+    , filters : data
+    }
+
+
+type alias ServerData =
+    { skip : Int
     , pageSize : Int
     , rowsPerPage : Int
     , totalRows : Int
@@ -57,8 +64,8 @@ type Page
     | Last
 
 
-init : String -> GridOperations
-init sortedColumnName =
+init : data -> String -> GridOperations data
+init t sortedColumnName =
     { selectedId = Nothing
     , openDropdownId = Nothing
     , skip = 0
@@ -67,6 +74,7 @@ init sortedColumnName =
     , totalRows = -1
     , sortField = Just "DoB"
     , sortAscending = False
+    , filters = t
     }
 
 
@@ -124,7 +132,7 @@ dropdownColumn items =
 type alias Config data msg =
     { domTableId : String
     , toolbar : List ( String, msg )
-    , toMsg : GridOperations -> msg
+    , toMsg : GridOperations data -> msg
     , columns : List (Column data msg)
     }
 
@@ -138,7 +146,7 @@ type Sorter data
 -- VIEW
 
 
-view : GridOperations -> List data -> Config data msg -> Maybe (Html msg) -> Html msg
+view : GridOperations data -> List data -> Config data msg -> Maybe (Html msg) -> Html msg
 view gridOperations rows config maybeCustomRow =
     div [ class "e-grid e-js e-waitingpopup" ]
         [ viewToolbar config.toolbar
@@ -154,7 +162,7 @@ view gridOperations rows config maybeCustomRow =
         ]
 
 
-viewTr : GridOperations -> List data -> Config data msg -> Maybe (Html msg) -> List (Html msg)
+viewTr : GridOperations data -> List data -> Config data msg -> Maybe (Html msg) -> List (Html msg)
 viewTr gridOperations rows config maybeCustomRow =
     let
         selectedStyle idx row =
@@ -216,7 +224,7 @@ viewTr gridOperations rows config maybeCustomRow =
                     List.indexedMap standardTr rows
 
 
-viewTh : GridOperations -> Config data msg -> Column data msg -> Html msg
+viewTh : GridOperations data -> Config data msg -> Column data msg -> Html msg
 viewTh gridOperations config column =
     let
         name =
@@ -252,7 +260,7 @@ viewTh gridOperations config column =
             ]
 
 
-viewThFilter : GridOperations -> Config data msg -> Column data msg -> Html msg
+viewThFilter : GridOperations data -> Config data msg -> Column data msg -> Html msg
 viewThFilter gridOperations config column =
     th [ class ("e-filterbarcell") ]
         [ div [ class "e-filterdiv e-fltrinputdiv" ]
@@ -262,7 +270,7 @@ viewThFilter gridOperations config column =
         ]
 
 
-viewTd : Int -> GridOperations -> data -> Config data msg -> Column data msg -> Html msg
+viewTd : Int -> GridOperations data -> data -> Config data msg -> Column data msg -> Html msg
 viewTd idx gridOperations row config column =
     let
         tdClass =
@@ -347,7 +355,7 @@ getColumnName column =
 -- Custom
 
 
-rowDropDownDiv : Int -> GridOperations -> (GridOperations -> msg) -> data -> List ( String, String, Int -> msg ) -> Html msg
+rowDropDownDiv : Int -> GridOperations data -> (GridOperations data -> msg) -> data -> List ( String, String, Int -> msg ) -> Html msg
 rowDropDownDiv idx gridOperations toMsg row dropDownItems =
     let
         dropClickEvent event =
@@ -441,7 +449,7 @@ toolbarHelper ( iconStr, event ) =
 -- paging
 
 
-setPagingState : GridOperations -> (GridOperations -> msg) -> Page -> Html.Attribute msg
+setPagingState : GridOperations data -> (GridOperations data -> msg) -> Page -> Html.Attribute msg
 setPagingState gridOperations toMsg page =
     let
         newIndex =
@@ -473,7 +481,7 @@ setPagingState gridOperations toMsg page =
         Events.onClick (toMsg { gridOperations | skip = newIndex })
 
 
-pagingView : GridOperations -> (GridOperations -> msg) -> Html msg
+pagingView : GridOperations data -> (GridOperations data -> msg) -> Html msg
 pagingView gridOperations toMsg =
     let
         totalPages =
@@ -569,22 +577,19 @@ pagingView gridOperations toMsg =
 --Server Stuff
 
 
-encodeFilterField : FilterField -> Encode.Value
-encodeFilterField filterField =
-    Encode.object
-        [ ( "ColumnName", Encode.string filterField.columnName )
-        , ( "ColumnValue", Encode.string filterField.columnValue )
-        ]
+updateFromServer : ServerData -> GridOperations data -> GridOperations data
+updateFromServer serverData dt =
+    { dt
+        | skip = serverData.skip
+        , pageSize = serverData.pageSize
+        , rowsPerPage = serverData.rowsPerPage
+        , totalRows = serverData.totalRows
+        , sortField = serverData.sortField
+        , sortAscending = serverData.sortAscending
+    }
 
 
-decodeFilterField : Decode.Decoder FilterField
-decodeFilterField =
-    Pipeline.decode FilterField
-        |> Pipeline.required "ColumnName" Decode.string
-        |> Pipeline.required "ColumnValue" Decode.string
-
-
-encodeGridOperations : GridOperations -> Encode.Value
+encodeGridOperations : GridOperations data -> Encode.Value
 encodeGridOperations gridOperations =
     Encode.object
         [ ( "SelectedId", maybeVal Encode.int gridOperations.selectedId )
@@ -598,11 +603,9 @@ encodeGridOperations gridOperations =
         ]
 
 
-decodeGridOperations : Decode.Decoder GridOperations
+decodeGridOperations : Decode.Decoder ServerData
 decodeGridOperations =
-    Pipeline.decode GridOperations
-        |> Pipeline.required "SelectedId" (Decode.maybe Decode.int)
-        |> Pipeline.required "OpenDropdownId" (Decode.maybe Decode.int)
+    Pipeline.decode ServerData
         |> Pipeline.required "Skip" Decode.int
         |> Pipeline.required "PageSize" Decode.int
         |> Pipeline.required "RowsPerPage" Decode.int
