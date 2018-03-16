@@ -44,7 +44,6 @@ type alias GridOperations =
     , totalRows : Int
     , sortField : Maybe String
     , sortAscending : Bool
-    , filterFields : List FilterField
     }
 
 
@@ -68,52 +67,51 @@ init sortedColumnName =
     , totalRows = -1
     , sortField = Just "DoB"
     , sortAscending = False
-    , filterFields = []
     }
 
 
 type Column data msg
-    = IntColumn String ({ data | id : Int } -> Maybe Int) String String
-    | StringColumn String ({ data | id : Int } -> Maybe String) String String
-    | DateTimeColumn String ({ data | id : Int } -> Maybe String) String String
-    | DateColumn String ({ data | id : Int } -> Maybe String) String String
-    | HrefColumn String String ({ data | id : Int } -> Maybe String) String String
-    | HrefColumnExtra String ({ data | id : Int } -> Html msg)
-    | CheckColumn String ({ data | id : Int } -> Bool) String String
+    = IntColumn String (data -> Maybe Int) String String
+    | StringColumn String (data -> Maybe String) String String
+    | DateTimeColumn String (data -> Maybe String) String String
+    | DateColumn String (data -> Maybe String) String String
+    | HrefColumn String String (data -> Maybe String) String String
+    | HrefColumnExtra String (data -> Html msg)
+    | CheckColumn String (data -> Bool) String String
     | DropdownColumn (List ( String, String, Int -> msg ))
 
 
-intColumn : String -> ({ data | id : Int } -> Maybe Int) -> Column data msg
+intColumn : String -> (data -> Maybe Int) -> Column data msg
 intColumn name data =
     IntColumn name data name ""
 
 
-stringColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+stringColumn : String -> (data -> Maybe String) -> Column data msg
 stringColumn name data =
     StringColumn name data name ""
 
 
-dateTimeColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+dateTimeColumn : String -> (data -> Maybe String) -> Column data msg
 dateTimeColumn name data =
     DateTimeColumn name data name ""
 
 
-dateColumn : String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+dateColumn : String -> (data -> Maybe String) -> Column data msg
 dateColumn name data =
     DateColumn name data name ""
 
 
-hrefColumn : String -> String -> ({ data | id : Int } -> Maybe String) -> Column data msg
+hrefColumn : String -> String -> (data -> Maybe String) -> Column data msg
 hrefColumn name displayStr data =
     HrefColumn name displayStr data name ""
 
 
-hrefColumnExtra : String -> ({ data | id : Int } -> Html msg) -> Column data msg
+hrefColumnExtra : String -> (data -> Html msg) -> Column data msg
 hrefColumnExtra name toNode =
     HrefColumnExtra name toNode
 
 
-checkColumn : String -> ({ data | id : Int } -> Bool) -> Column data msg
+checkColumn : String -> (data -> Bool) -> Column data msg
 checkColumn name data =
     CheckColumn name data name ""
 
@@ -127,20 +125,20 @@ type alias Config data msg =
     { domTableId : String
     , toolbar : List ( String, msg )
     , toMsg : GridOperations -> msg
-    , columns : List (Column { data | id : Int } msg)
+    , columns : List (Column data msg)
     }
 
 
 type Sorter data
     = None
-    | IncOrDec (List { data | id : Int } -> List { data | id : Int })
+    | IncOrDec (List data -> List data)
 
 
 
 -- VIEW
 
 
-view : GridOperations -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> Html msg
+view : GridOperations -> List data -> Config data msg -> Maybe (Html msg) -> Html msg
 view gridOperations rows config maybeCustomRow =
     div [ class "e-grid e-js e-waitingpopup" ]
         [ viewToolbar config.toolbar
@@ -156,12 +154,12 @@ view gridOperations rows config maybeCustomRow =
         ]
 
 
-viewTr : GridOperations -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> List (Html msg)
+viewTr : GridOperations -> List data -> Config data msg -> Maybe (Html msg) -> List (Html msg)
 viewTr gridOperations rows config maybeCustomRow =
     let
-        selectedStyle row =
+        selectedStyle idx row =
             style
-                (if Just row.id == gridOperations.selectedId then
+                (if Just idx == gridOperations.selectedId then
                     [ ( "background-color", "#66aaff" )
                     , ( "background", "#66aaff" )
                     ]
@@ -178,9 +176,9 @@ viewTr gridOperations rows config maybeCustomRow =
         standardTr ctr row =
             tr
                 [ rowClass ctr
-                , selectedStyle row
+                , selectedStyle ctr row
                 ]
-                (List.map (viewTd gridOperations row config) config.columns)
+                (List.map (viewTd ctr gridOperations row config) config.columns)
 
         customRowStyle =
             if List.length rows == 0 then
@@ -218,7 +216,7 @@ viewTr gridOperations rows config maybeCustomRow =
                     List.indexedMap standardTr rows
 
 
-viewTh : GridOperations -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
+viewTh : GridOperations -> Config data msg -> Column data msg -> Html msg
 viewTh gridOperations config column =
     let
         name =
@@ -254,7 +252,7 @@ viewTh gridOperations config column =
             ]
 
 
-viewThFilter : GridOperations -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
+viewThFilter : GridOperations -> Config data msg -> Column data msg -> Html msg
 viewThFilter gridOperations config column =
     th [ class ("e-filterbarcell") ]
         [ div [ class "e-filterdiv e-fltrinputdiv" ]
@@ -264,13 +262,13 @@ viewThFilter gridOperations config column =
         ]
 
 
-viewTd : GridOperations -> { data | id : Int } -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
-viewTd gridOperations row config column =
+viewTd : Int -> GridOperations -> data -> Config data msg -> Column data msg -> Html msg
+viewTd idx gridOperations row config column =
     let
         tdClass =
             classList
                 [ ( "e-gridtooltip", True )
-                , ( "e-active", Just row.id == gridOperations.selectedId )
+                , ( "e-active", Just idx == gridOperations.selectedId )
                 ]
 
         tdStyle =
@@ -282,7 +280,7 @@ viewTd gridOperations row config column =
                     disabled False
 
                 _ ->
-                    Events.onClick (config.toMsg { gridOperations | selectedId = Just row.id })
+                    Events.onClick (config.toMsg { gridOperations | selectedId = Just idx })
     in
         td [ tdClass, tdStyle, tdClick ]
             [ case column of
@@ -313,11 +311,11 @@ viewTd gridOperations row config column =
                         ]
 
                 DropdownColumn dropDownItems ->
-                    rowDropDownDiv gridOperations config.toMsg row dropDownItems
+                    rowDropDownDiv idx gridOperations config.toMsg row dropDownItems
             ]
 
 
-getColumnName : Column { data | id : Int } msg -> String
+getColumnName : Column data msg -> String
 getColumnName column =
     case column of
         IntColumn name _ _ _ ->
@@ -349,11 +347,11 @@ getColumnName column =
 -- Custom
 
 
-rowDropDownDiv : GridOperations -> (GridOperations -> msg) -> { data | id : Int } -> List ( String, String, Int -> msg ) -> Html msg
-rowDropDownDiv gridOperations toMsg row dropDownItems =
+rowDropDownDiv : Int -> GridOperations -> (GridOperations -> msg) -> data -> List ( String, String, Int -> msg ) -> Html msg
+rowDropDownDiv idx gridOperations toMsg row dropDownItems =
     let
         dropClickEvent event =
-            Events.onClick (event row.id)
+            Events.onClick (event idx)
 
         dropDownMenuItem : ( String, String, Int -> msg ) -> Html msg
         dropDownMenuItem ( iconClass, displayText, event ) =
@@ -377,7 +375,7 @@ rowDropDownDiv gridOperations toMsg row dropDownItems =
         dropMenu =
             case gridOperations.openDropdownId of
                 Just t ->
-                    if row.id == t then
+                    if idx == t then
                         [ ul [ class "e-menu e-js e-widget e-box e-separator" ]
                             (List.map dropDownMenuItem dropDownItems)
                         ]
@@ -399,7 +397,7 @@ rowDropDownDiv gridOperations toMsg row dropDownItems =
                     Events.onClick (toMsg { gridOperations | openDropdownId = Nothing })
 
                 Nothing ->
-                    Events.onClick (toMsg { gridOperations | openDropdownId = Just row.id })
+                    Events.onClick (toMsg { gridOperations | openDropdownId = Just idx })
 
         blurEvent =
             Events.onBlur (toMsg { gridOperations | openDropdownId = Nothing })
@@ -597,7 +595,6 @@ encodeGridOperations gridOperations =
         , ( "TotalRows", Encode.int gridOperations.totalRows )
         , ( "SortField", maybeVal Encode.string gridOperations.sortField )
         , ( "SortAscending", Encode.bool gridOperations.sortAscending )
-        , ( "FilterFields", Encode.list (List.map encodeFilterField gridOperations.filterFields) )
         ]
 
 
@@ -612,4 +609,3 @@ decodeGridOperations =
         |> Pipeline.required "TotalRows" Decode.int
         |> Pipeline.required "SortField" (Decode.maybe Decode.string)
         |> Pipeline.required "SortAscending" Decode.bool
-        |> Pipeline.required "FilterFields" (Decode.list decodeFilterField)
