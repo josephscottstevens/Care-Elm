@@ -89,39 +89,39 @@ type Column data msg
     | DropdownColumn (List ( String, String, Int -> msg ))
 
 
-intColumn : String -> (data -> Maybe Int) -> Column data msg
-intColumn name data =
-    IntColumn name data name ""
+intColumn : String -> (data -> Maybe Int) -> String -> Column data msg
+intColumn displayText data fieldName =
+    IntColumn displayText data fieldName ""
 
 
-stringColumn : String -> (data -> Maybe String) -> Column data msg
-stringColumn name data =
-    StringColumn name data name ""
+stringColumn : String -> (data -> Maybe String) -> String -> Column data msg
+stringColumn displayText data fieldName =
+    StringColumn displayText data fieldName ""
 
 
-dateTimeColumn : String -> (data -> Maybe String) -> Column data msg
-dateTimeColumn name data =
-    DateTimeColumn name data name ""
+dateTimeColumn : String -> (data -> Maybe String) -> String -> Column data msg
+dateTimeColumn displayText data fieldName =
+    DateTimeColumn displayText data fieldName ""
 
 
-dateColumn : String -> (data -> Maybe String) -> Column data msg
-dateColumn name data =
-    DateColumn name data name ""
+dateColumn : String -> (data -> Maybe String) -> String -> Column data msg
+dateColumn displayText data fieldName =
+    DateColumn displayText data fieldName ""
 
 
-hrefColumn : String -> String -> (data -> Maybe String) -> Column data msg
-hrefColumn name displayStr data =
-    HrefColumn name displayStr data name ""
+hrefColumn : String -> String -> (data -> Maybe String) -> String -> Column data msg
+hrefColumn displayText displayStr data fieldName =
+    HrefColumn displayText displayStr data fieldName ""
 
 
 hrefColumnExtra : String -> (data -> Html msg) -> Column data msg
-hrefColumnExtra name toNode =
-    HrefColumnExtra name toNode
+hrefColumnExtra displayText toNode =
+    HrefColumnExtra displayText toNode
 
 
-checkColumn : String -> (data -> Bool) -> Column data msg
-checkColumn name data =
-    CheckColumn name data name ""
+checkColumn : String -> (data -> Bool) -> String -> Column data msg
+checkColumn displayText data fieldName =
+    CheckColumn displayText data fieldName ""
 
 
 dropdownColumn : List ( String, String, Int -> msg ) -> Column data msg
@@ -260,8 +260,8 @@ viewTh gridOperations config column =
             ]
 
 
-inputHelper : GridOperations data -> Config data msg -> String -> msg
-inputHelper gridOperations config str =
+inputHelper : GridOperations data -> Config data msg -> Column data msg -> String -> msg
+inputHelper gridOperations config str column =
     config.toMsg { gridOperations | sortAscending = False }
 
 
@@ -271,7 +271,7 @@ viewThFilter gridOperations config column =
         [ div [ class "e-filterdiv e-fltrinputdiv" ]
             [ input
                 [ class "e-ejinputtext e-filtertext"
-                , Events.onInput (inputHelper gridOperations config)
+                , Events.onInput (inputHelper gridOperations config column)
                 ]
                 []
             , span [ class "e-cancel e-icon" ] []
@@ -335,26 +335,26 @@ viewTd idx gridOperations row config column =
 getColumnName : Column data msg -> String
 getColumnName column =
     case column of
-        IntColumn name _ _ _ ->
-            name
+        IntColumn displayText _ _ _ ->
+            displayText
 
-        StringColumn name _ _ _ ->
-            name
+        StringColumn displayText _ _ _ ->
+            displayText
 
-        DateTimeColumn name _ _ _ ->
-            name
+        DateTimeColumn displayText _ _ _ ->
+            displayText
 
-        DateColumn name _ _ _ ->
-            name
+        DateColumn displayText _ _ _ ->
+            displayText
 
-        HrefColumn name _ _ _ _ ->
-            name
+        HrefColumn displayText _ _ _ _ ->
+            displayText
 
-        HrefColumnExtra name _ ->
-            name
+        HrefColumnExtra displayText _ ->
+            displayText
 
-        CheckColumn name _ _ _ ->
-            name
+        CheckColumn displayText _ _ _ ->
+            displayText
 
         DropdownColumn _ ->
             ""
