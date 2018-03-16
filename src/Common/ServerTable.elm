@@ -1,9 +1,8 @@
 module Common.ServerTable
     exposing
-        ( State
+        ( GridOperations
         , Column
         , Config
-        , GridOperations
         , init
         , view
         , intColumn
@@ -16,8 +15,6 @@ module Common.ServerTable
         , checkColumn
         , decodeGridOperations
         , encodeGridOperations
-        , defaultGridOperations
-        , getGridOperations
         )
 
 import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
@@ -32,36 +29,22 @@ import Json.Encode as Encode
 -- Data Types
 
 
-type alias State =
-    { selectedId : Maybe Int
-    , openDropdownId : Maybe Int
-    , pageIndex : Int
-    , rowsPerPage : Int
-    , pagesPerBlock : Int
-    , totalRows : Int
-    , sortField : Maybe String
-    , sortAscending : Bool
+type alias FilterField =
+    { columnName : String
+    , columnValue : String
     }
 
 
 type alias GridOperations =
-    { pageIndex : Int
+    { selectedId : Maybe Int
+    , openDropdownId : Maybe Int
+    , skip : Int
+    , pageSize : Int
     , rowsPerPage : Int
-    , pagesPerBlock : Int
     , totalRows : Int
     , sortField : Maybe String
     , sortAscending : Bool
-    }
-
-
-getGridOperations : State -> GridOperations
-getGridOperations state =
-    { pageIndex = state.pageIndex
-    , rowsPerPage = state.rowsPerPage
-    , pagesPerBlock = state.pagesPerBlock
-    , totalRows = state.totalRows
-    , sortField = state.sortField
-    , sortAscending = state.sortAscending
+    , filterFields : List FilterField
     }
 
 
@@ -75,16 +58,17 @@ type Page
     | Last
 
 
-init : String -> State
+init : String -> GridOperations
 init sortedColumnName =
     { selectedId = Nothing
     , openDropdownId = Nothing
-    , pageIndex = 0
-    , rowsPerPage = 20
-    , pagesPerBlock = 15
+    , skip = 0
+    , pageSize = 20
+    , rowsPerPage = 15
     , totalRows = -1
     , sortField = Just "DoB"
     , sortAscending = False
+    , filterFields = []
     }
 
 
@@ -142,7 +126,7 @@ dropdownColumn items =
 type alias Config data msg =
     { domTableId : String
     , toolbar : List ( String, msg )
-    , toMsg : State -> msg
+    , toMsg : GridOperations -> msg
     , columns : List (Column { data | id : Int } msg)
     }
 
@@ -156,28 +140,28 @@ type Sorter data
 -- VIEW
 
 
-view : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> Html msg
-view state rows config maybeCustomRow =
+view : GridOperations -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> Html msg
+view gridOperations rows config maybeCustomRow =
     div [ class "e-grid e-js e-waitingpopup" ]
         [ viewToolbar config.toolbar
         , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
             [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                [ tr [] (List.map (viewTh state config) config.columns)
-                , tr [] (List.map (viewThFilter state config) config.columns)
+                [ tr [] (List.map (viewTh gridOperations config) config.columns)
+                , tr [] (List.map (viewThFilter gridOperations config) config.columns)
                 ]
             , tbody []
-                (viewTr state rows config maybeCustomRow)
+                (viewTr gridOperations rows config maybeCustomRow)
             ]
-        , pagingView state config.toMsg
+        , pagingView gridOperations config.toMsg
         ]
 
 
-viewTr : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> List (Html msg)
-viewTr state rows config maybeCustomRow =
+viewTr : GridOperations -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> List (Html msg)
+viewTr gridOperations rows config maybeCustomRow =
     let
         selectedStyle row =
             style
-                (if Just row.id == state.selectedId then
+                (if Just row.id == gridOperations.selectedId then
                     [ ( "background-color", "#66aaff" )
                     , ( "background", "#66aaff" )
                     ]
@@ -196,7 +180,7 @@ viewTr state rows config maybeCustomRow =
                 [ rowClass ctr
                 , selectedStyle row
                 ]
-                (List.map (viewTd state row config) config.columns)
+                (List.map (viewTd gridOperations row config) config.columns)
 
         customRowStyle =
             if List.length rows == 0 then
@@ -234,17 +218,17 @@ viewTr state rows config maybeCustomRow =
                     List.indexedMap standardTr rows
 
 
-viewTh : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
-viewTh state config column =
+viewTh : GridOperations -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
+viewTh gridOperations config column =
     let
         name =
             getColumnName column
 
         headerContent =
-            case state.sortField of
+            case gridOperations.sortField of
                 Just t ->
                     if t == name then
-                        if state.sortAscending then
+                        if gridOperations.sortAscending then
                             [ text name, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
                         else
                             [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
@@ -255,23 +239,23 @@ viewTh state config column =
                     [ text name ]
 
         newSortDirection =
-            case state.sortField of
+            case gridOperations.sortField of
                 Just t ->
-                    (not state.sortAscending)
+                    (not gridOperations.sortAscending)
 
                 Nothing ->
-                    state.sortAscending
+                    gridOperations.sortAscending
 
         sortClick =
-            Events.onClick (config.toMsg { state | sortAscending = newSortDirection, sortField = Just name })
+            Events.onClick (config.toMsg { gridOperations | sortAscending = newSortDirection, sortField = Just name })
     in
         th [ class ("e-headercell e-default " ++ name), sortClick ]
             [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
             ]
 
 
-viewThFilter : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
-viewThFilter state config column =
+viewThFilter : GridOperations -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
+viewThFilter gridOperations config column =
     th [ class ("e-filterbarcell") ]
         [ div [ class "e-filterdiv e-fltrinputdiv" ]
             [ input [ class "e-ejinputtext e-filtertext" ] []
@@ -280,13 +264,13 @@ viewThFilter state config column =
         ]
 
 
-viewTd : State -> { data | id : Int } -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
-viewTd state row config column =
+viewTd : GridOperations -> { data | id : Int } -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
+viewTd gridOperations row config column =
     let
         tdClass =
             classList
                 [ ( "e-gridtooltip", True )
-                , ( "e-active", Just row.id == state.selectedId )
+                , ( "e-active", Just row.id == gridOperations.selectedId )
                 ]
 
         tdStyle =
@@ -298,7 +282,7 @@ viewTd state row config column =
                     disabled False
 
                 _ ->
-                    Events.onClick (config.toMsg { state | selectedId = Just row.id })
+                    Events.onClick (config.toMsg { gridOperations | selectedId = Just row.id })
     in
         td [ tdClass, tdStyle, tdClick ]
             [ case column of
@@ -329,7 +313,7 @@ viewTd state row config column =
                         ]
 
                 DropdownColumn dropDownItems ->
-                    rowDropDownDiv state config.toMsg row dropDownItems
+                    rowDropDownDiv gridOperations config.toMsg row dropDownItems
             ]
 
 
@@ -365,8 +349,8 @@ getColumnName column =
 -- Custom
 
 
-rowDropDownDiv : State -> (State -> msg) -> { data | id : Int } -> List ( String, String, Int -> msg ) -> Html msg
-rowDropDownDiv state toMsg row dropDownItems =
+rowDropDownDiv : GridOperations -> (GridOperations -> msg) -> { data | id : Int } -> List ( String, String, Int -> msg ) -> Html msg
+rowDropDownDiv gridOperations toMsg row dropDownItems =
     let
         dropClickEvent event =
             Events.onClick (event row.id)
@@ -391,7 +375,7 @@ rowDropDownDiv state toMsg row dropDownItems =
                 ]
 
         dropMenu =
-            case state.openDropdownId of
+            case gridOperations.openDropdownId of
                 Just t ->
                     if row.id == t then
                         [ ul [ class "e-menu e-js e-widget e-box e-separator" ]
@@ -410,15 +394,15 @@ rowDropDownDiv state toMsg row dropDownItems =
             style [ ( "position", "relative" ) ]
 
         clickEvent =
-            case state.openDropdownId of
+            case gridOperations.openDropdownId of
                 Just _ ->
-                    Events.onClick (toMsg { state | openDropdownId = Nothing })
+                    Events.onClick (toMsg { gridOperations | openDropdownId = Nothing })
 
                 Nothing ->
-                    Events.onClick (toMsg { state | openDropdownId = Just row.id })
+                    Events.onClick (toMsg { gridOperations | openDropdownId = Just row.id })
 
         blurEvent =
-            Events.onBlur (toMsg { state | openDropdownId = Nothing })
+            Events.onBlur (toMsg { gridOperations | openDropdownId = Nothing })
     in
         div []
             [ div [ style [ ( "text-align", "right" ) ] ]
@@ -459,8 +443,8 @@ toolbarHelper ( iconStr, event ) =
 -- paging
 
 
-setPagingState : State -> (State -> msg) -> Page -> Html.Attribute msg
-setPagingState state toMsg page =
+setPagingState : GridOperations -> (GridOperations -> msg) -> Page -> Html.Attribute msg
+setPagingState gridOperations toMsg page =
     let
         newIndex =
             case page of
@@ -468,8 +452,8 @@ setPagingState state toMsg page =
                     0
 
                 Previous ->
-                    if state.pageIndex > 0 then
-                        state.pageIndex - 1
+                    if gridOperations.skip > 0 then
+                        gridOperations.skip - 1
                     else
                         0
 
@@ -483,73 +467,73 @@ setPagingState state toMsg page =
                     0
 
                 Next ->
-                    state.pageIndex + 1
+                    gridOperations.skip + 1
 
                 Last ->
-                    (state.totalRows // state.rowsPerPage) - 1
+                    (gridOperations.totalRows // gridOperations.pageSize) - 1
     in
-        Events.onClick (toMsg { state | pageIndex = newIndex })
+        Events.onClick (toMsg { gridOperations | skip = newIndex })
 
 
-pagingView : State -> (State -> msg) -> Html msg
-pagingView state toMsg =
+pagingView : GridOperations -> (GridOperations -> msg) -> Html msg
+pagingView gridOperations toMsg =
     let
         totalPages =
-            (state.totalRows // state.rowsPerPage) - 1
+            (gridOperations.totalRows // gridOperations.pageSize) - 1
 
         pagingStateClick page =
-            setPagingState state toMsg page
+            setPagingState gridOperations toMsg page
 
-        activeOrNot pageIndex =
+        activeOrNot skip =
             let
                 activeOrNotText =
-                    if pageIndex == state.pageIndex then
+                    if skip == gridOperations.skip then
                         "e-currentitem e-active"
                     else
                         "e-default"
             in
                 div
-                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), pagingStateClick (Index pageIndex) ]
-                    [ text (toString (pageIndex + 1)) ]
+                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), pagingStateClick (Index skip) ]
+                    [ text (toString (skip + 1)) ]
 
         rng =
             List.range 0 totalPages
-                |> List.drop ((state.pageIndex // state.pagesPerBlock) * state.pagesPerBlock)
-                |> List.take state.pagesPerBlock
+                |> List.drop ((gridOperations.skip // gridOperations.rowsPerPage) * gridOperations.rowsPerPage)
+                |> List.take gridOperations.rowsPerPage
                 |> List.map activeOrNot
 
         firstPageClass =
-            if state.pageIndex >= state.rowsPerPage then
+            if gridOperations.skip >= gridOperations.pageSize then
                 "e-icon e-mediaback e-firstpage e-default"
             else
                 "e-icon e-mediaback e-firstpagedisabled e-disable"
 
         leftPageClass =
-            if state.pageIndex > 0 then
+            if gridOperations.skip > 0 then
                 "e-icon e-arrowheadleft-2x e-prevpage e-default"
             else
                 "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
 
         leftPageBlockClass =
-            if state.pageIndex >= state.pagesPerBlock then
+            if gridOperations.skip >= gridOperations.rowsPerPage then
                 "e-link e-spacing e-PP e-numericitem e-default"
             else
                 "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
 
         rightPageBlockClass =
-            if state.pageIndex < totalPages - state.pagesPerBlock then
+            if gridOperations.skip < totalPages - gridOperations.rowsPerPage then
                 "e-link e-NP e-spacing e-numericitem e-default"
             else
                 "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
 
         rightPageClass =
-            if state.pageIndex < totalPages then
+            if gridOperations.skip < totalPages then
                 "e-nextpage e-icon e-arrowheadright-2x e-default"
             else
                 "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
 
         lastPageClass =
-            if state.pageIndex < totalPages - state.pagesPerBlock then
+            if gridOperations.skip < totalPages - gridOperations.rowsPerPage then
                 "e-lastpage e-icon e-mediaforward e-default"
             else
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
@@ -557,13 +541,13 @@ pagingView state toMsg =
         pagerText =
             let
                 currentPageText =
-                    toString (state.pageIndex + 1)
+                    toString (gridOperations.skip + 1)
 
                 totalPagesText =
                     toString (totalPages + 1)
 
                 totalItemsText =
-                    toString state.totalRows
+                    toString gridOperations.totalRows
             in
                 currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
     in
@@ -587,35 +571,45 @@ pagingView state toMsg =
 --Server Stuff
 
 
-defaultGridOperations : GridOperations
-defaultGridOperations =
-    { pageIndex = -1
-    , rowsPerPage = 12
-    , pagesPerBlock = 15
-    , totalRows = -1
-    , sortField = Nothing
-    , sortAscending = False
-    }
+encodeFilterField : FilterField -> Encode.Value
+encodeFilterField filterField =
+    Encode.object
+        [ ( "ColumnName", Encode.string filterField.columnName )
+        , ( "ColumnValue", Encode.string filterField.columnValue )
+        ]
+
+
+decodeFilterField : Decode.Decoder FilterField
+decodeFilterField =
+    Pipeline.decode FilterField
+        |> Pipeline.required "ColumnName" Decode.string
+        |> Pipeline.required "ColumnValue" Decode.string
 
 
 encodeGridOperations : GridOperations -> Encode.Value
 encodeGridOperations gridOperations =
     Encode.object
-        [ ( "Skip", Encode.int gridOperations.pageIndex )
+        [ ( "SelectedId", maybeVal Encode.int gridOperations.selectedId )
+        , ( "OpenDropdownId", maybeVal Encode.int gridOperations.openDropdownId )
+        , ( "Skip", Encode.int gridOperations.skip )
+        , ( "PageSize", Encode.int gridOperations.pageSize )
         , ( "RowsPerPage", Encode.int gridOperations.rowsPerPage )
-        , ( "PageSize", Encode.int gridOperations.pagesPerBlock )
         , ( "TotalRows", Encode.int gridOperations.totalRows )
         , ( "SortField", maybeVal Encode.string gridOperations.sortField )
         , ( "SortAscending", Encode.bool gridOperations.sortAscending )
+        , ( "FilterFields", Encode.list (List.map encodeFilterField gridOperations.filterFields) )
         ]
 
 
 decodeGridOperations : Decode.Decoder GridOperations
 decodeGridOperations =
     Pipeline.decode GridOperations
+        |> Pipeline.required "SelectedId" (Decode.maybe Decode.int)
+        |> Pipeline.required "OpenDropdownId" (Decode.maybe Decode.int)
         |> Pipeline.required "Skip" Decode.int
-        |> Pipeline.required "RowsPerPage" Decode.int
         |> Pipeline.required "PageSize" Decode.int
+        |> Pipeline.required "RowsPerPage" Decode.int
         |> Pipeline.required "TotalRows" Decode.int
         |> Pipeline.required "SortField" (Decode.maybe Decode.string)
         |> Pipeline.required "SortAscending" Decode.bool
+        |> Pipeline.required "FilterFields" (Decode.list decodeFilterField)

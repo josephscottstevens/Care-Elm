@@ -187,12 +187,12 @@ dateIndex month =
 
 dateTimeToString : Date.Date -> String
 dateTimeToString date =
-    Date.Extra.toFormattedString "MM/dd/yyyy hh:mm:ss a" date
+    Date.Extra.toUtcFormattedString "MM/dd/yyyy hh:mm:ss a" date
 
 
 dateToString : Date.Date -> String
 dateToString date =
-    Date.Extra.toFormattedString "MM/dd/yyyy" date
+    Date.Extra.toUtcFormattedString "MM/dd/yyyy" date
 
 
 dateTime : String -> String

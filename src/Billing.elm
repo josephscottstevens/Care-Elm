@@ -13,7 +13,7 @@ import Json.Decode.Pipeline as Pipeline
 
 init : Int -> Cmd Msg
 init patientId =
-    load patientId Table.defaultGridOperations
+    load patientId (Table.init "facility")
 
 
 subscriptions : Sub msg
@@ -23,7 +23,7 @@ subscriptions =
 
 type alias Model =
     { rows : List Row
-    , tableState : Table.State
+    , gridOperations : Table.GridOperations
     , query : String
     }
 
@@ -72,12 +72,12 @@ type alias Row =
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
-    Table.view model.tableState model.rows (gridConfig addEditDataSource) Nothing
+    Table.view model.gridOperations model.rows (gridConfig addEditDataSource) Nothing
 
 
 type Msg
     = Load (Result Http.Error LoadResult)
-    | SetTableState Table.State
+    | SetGridOperations Table.GridOperations
     | Reset
 
 
@@ -85,17 +85,13 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
         Load (Ok t) ->
-            let
-                tableState =
-                    model.tableState
-            in
-                { model | rows = t.result, tableState = { tableState | totalRows = t.totalRows } } ! []
+            { model | rows = t.result, gridOperations = t.gridOperations } ! []
 
         Load (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
 
-        SetTableState newState ->
-            { model | tableState = newState } ! [ load patientId (Table.getGridOperations newState) ]
+        SetGridOperations gridOperations ->
+            { model | gridOperations = gridOperations } ! [ load patientId gridOperations ]
 
         Reset ->
             model ! []
@@ -152,7 +148,7 @@ decodeBillingCcm =
 
 type alias LoadResult =
     { result : List Row
-    , totalRows : Int
+    , gridOperations : Table.GridOperations
     }
 
 
@@ -160,7 +156,7 @@ jsonDecodeLoad : Decode.Decoder LoadResult
 jsonDecodeLoad =
     Pipeline.decode LoadResult
         |> Pipeline.required "Data" (Decode.list decodeBillingCcm)
-        |> Pipeline.required "Count" Decode.int
+        |> Pipeline.required "GridOperations" Table.decodeGridOperations
 
 
 load : Int -> Table.GridOperations -> Cmd Msg
@@ -173,7 +169,7 @@ load patientId gridOperations =
 emptyModel : Model
 emptyModel =
     { rows = []
-    , tableState = Table.init "Date"
+    , gridOperations = Table.init "Date"
     , query = ""
     }
 
@@ -182,7 +178,7 @@ gridConfig : Maybe AddEditDataSource -> Table.Config Row Msg
 gridConfig addEditDataSource =
     { domTableId = "RecordTable"
     , toolbar = []
-    , toMsg = SetTableState
+    , toMsg = SetGridOperations
     , columns = getColumns addEditDataSource
     }
 
