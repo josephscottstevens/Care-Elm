@@ -1,4 +1,4 @@
-module Common.ServerTable
+port module Common.ServerTable
     exposing
         ( GridOperations
         , ServerData
@@ -41,6 +41,8 @@ type alias GridOperations data =
     , sortField : Maybe String
     , sortAscending : Bool
     , filters : data
+    , filterField : Maybe String
+    , filterValue : Maybe String
     }
 
 
@@ -75,43 +77,45 @@ init t sortedColumnName =
     , sortField = Just "DoB"
     , sortAscending = False
     , filters = t
+    , filterField = Nothing
+    , filterValue = Nothing
     }
 
 
 type Column data msg
-    = IntColumn String (data -> Maybe Int) String String
-    | StringColumn String (data -> Maybe String) String String
-    | DateTimeColumn String (data -> Maybe String) String String
-    | DateColumn String (data -> Maybe String) String String
-    | HrefColumn String String (data -> Maybe String) String String
+    = IntColumn String (data -> Maybe Int) String
+    | StringColumn String (data -> Maybe String) String
+    | DateTimeColumn String (data -> Maybe String) String
+    | DateColumn String (data -> Maybe String) String
+    | HrefColumn String String (data -> Maybe String) String
     | HrefColumnExtra String (data -> Html msg)
-    | CheckColumn String (data -> Bool) String String
+    | CheckColumn String (data -> Bool) String
     | DropdownColumn (List ( String, String, Int -> msg ))
 
 
 intColumn : String -> (data -> Maybe Int) -> String -> Column data msg
 intColumn displayText data fieldName =
-    IntColumn displayText data fieldName ""
+    IntColumn displayText data fieldName
 
 
 stringColumn : String -> (data -> Maybe String) -> String -> Column data msg
 stringColumn displayText data fieldName =
-    StringColumn displayText data fieldName ""
+    StringColumn displayText data fieldName
 
 
 dateTimeColumn : String -> (data -> Maybe String) -> String -> Column data msg
 dateTimeColumn displayText data fieldName =
-    DateTimeColumn displayText data fieldName ""
+    DateTimeColumn displayText data fieldName
 
 
 dateColumn : String -> (data -> Maybe String) -> String -> Column data msg
 dateColumn displayText data fieldName =
-    DateColumn displayText data fieldName ""
+    DateColumn displayText data fieldName
 
 
 hrefColumn : String -> String -> (data -> Maybe String) -> String -> Column data msg
 hrefColumn displayText displayStr data fieldName =
-    HrefColumn displayText displayStr data fieldName ""
+    HrefColumn displayText displayStr data fieldName
 
 
 hrefColumnExtra : String -> (data -> Html msg) -> Column data msg
@@ -121,7 +125,7 @@ hrefColumnExtra displayText toNode =
 
 checkColumn : String -> (data -> Bool) -> String -> Column data msg
 checkColumn displayText data fieldName =
-    CheckColumn displayText data fieldName ""
+    CheckColumn displayText data fieldName
 
 
 dropdownColumn : List ( String, String, Int -> msg ) -> Column data msg
@@ -228,7 +232,7 @@ viewTh : GridOperations data -> Config data msg -> Column data msg -> Html msg
 viewTh gridOperations config column =
     let
         name =
-            getColumnName column
+            getColumnDisplayValue column
 
         headerContent =
             case gridOperations.sortField of
@@ -261,8 +265,12 @@ viewTh gridOperations config column =
 
 
 inputHelper : GridOperations data -> Config data msg -> Column data msg -> String -> msg
-inputHelper gridOperations config str column =
-    config.toMsg { gridOperations | sortField = Just (toString gridOperations.filters) }
+inputHelper gridOperations config column str =
+    config.toMsg
+        { gridOperations
+            | filterField = Just (getColumnName column)
+            , filterValue = Just str
+        }
 
 
 viewThFilter : GridOperations data -> Config data msg -> Column data msg -> Html msg
@@ -301,26 +309,26 @@ viewTd idx gridOperations row config column =
     in
         td [ tdClass, tdStyle, tdClick ]
             [ case column of
-                IntColumn _ dataToInt _ _ ->
+                IntColumn _ dataToInt _ ->
                     text (Functions.defaultIntToString (dataToInt row))
 
-                StringColumn _ dataToString _ _ ->
+                StringColumn _ dataToString _ ->
                     text (Maybe.withDefault "" (dataToString row))
 
-                DateTimeColumn _ dataToString _ _ ->
+                DateTimeColumn _ dataToString _ ->
                     text (Functions.defaultDateTime (dataToString row))
 
-                DateColumn _ dataToString _ _ ->
+                DateColumn _ dataToString _ ->
                     text (Functions.defaultDate (dataToString row))
 
-                HrefColumn _ displayText dataToString _ _ ->
+                HrefColumn _ displayText dataToString _ ->
                     --TODO, how do I want to display empty? I think.. it is hide the href, not go to an empty url right?
                     a [ href (Maybe.withDefault "" (dataToString row)), target "_blank" ] [ text displayText ]
 
                 HrefColumnExtra _ toNode ->
                     toNode row
 
-                CheckColumn _ dataToString _ _ ->
+                CheckColumn _ dataToString _ ->
                     div [ class "e-checkcell" ]
                         [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
                             [ input [ type_ "checkbox", disabled True, checked (dataToString row) ] []
@@ -332,29 +340,57 @@ viewTd idx gridOperations row config column =
             ]
 
 
-getColumnName : Column data msg -> String
-getColumnName column =
+getColumnDisplayValue : Column data msg -> String
+getColumnDisplayValue column =
     case column of
-        IntColumn displayText _ _ _ ->
+        IntColumn displayText _ _ ->
             displayText
 
-        StringColumn displayText _ _ _ ->
+        StringColumn displayText _ _ ->
             displayText
 
-        DateTimeColumn displayText _ _ _ ->
+        DateTimeColumn displayText _ _ ->
             displayText
 
-        DateColumn displayText _ _ _ ->
+        DateColumn displayText _ _ ->
             displayText
 
-        HrefColumn displayText _ _ _ _ ->
+        HrefColumn displayText _ _ _ ->
             displayText
 
         HrefColumnExtra displayText _ ->
             displayText
 
-        CheckColumn displayText _ _ _ ->
+        CheckColumn displayText _ _ ->
             displayText
+
+        DropdownColumn _ ->
+            ""
+
+
+getColumnName : Column data msg -> String
+getColumnName column =
+    case column of
+        IntColumn _ _ name ->
+            name
+
+        StringColumn _ _ name ->
+            name
+
+        DateTimeColumn _ _ name ->
+            name
+
+        DateColumn _ _ name ->
+            name
+
+        HrefColumn _ _ _ name ->
+            name
+
+        HrefColumnExtra _ _ ->
+            ""
+
+        CheckColumn _ _ name ->
+            name
 
         DropdownColumn _ ->
             ""
@@ -595,6 +631,8 @@ updateFromServer serverData dt =
         , totalRows = serverData.totalRows
         , sortField = serverData.sortField
         , sortAscending = serverData.sortAscending
+        , filterField = Nothing
+        , filterValue = Nothing
     }
 
 
@@ -609,6 +647,8 @@ encodeGridOperations gridOperations =
         , ( "TotalRows", Encode.int gridOperations.totalRows )
         , ( "SortField", maybeVal Encode.string gridOperations.sortField )
         , ( "SortAscending", Encode.bool gridOperations.sortAscending )
+        , ( "FilterField", maybeVal Encode.string gridOperations.filterField )
+        , ( "FilterValue", maybeVal Encode.string gridOperations.filterValue )
         ]
 
 

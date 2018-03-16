@@ -1,4 +1,4 @@
-module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
+port module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
 import Html exposing (Html, div, input, program, button, select, option, span, a)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
