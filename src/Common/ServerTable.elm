@@ -260,11 +260,20 @@ viewTh gridOperations config column =
             ]
 
 
+inputHelper : GridOperations data -> Config data msg -> String -> msg
+inputHelper gridOperations config str =
+    config.toMsg { gridOperations | sortAscending = False }
+
+
 viewThFilter : GridOperations data -> Config data msg -> Column data msg -> Html msg
 viewThFilter gridOperations config column =
     th [ class ("e-filterbarcell") ]
         [ div [ class "e-filterdiv e-fltrinputdiv" ]
-            [ input [ class "e-ejinputtext e-filtertext" ] []
+            [ input
+                [ class "e-ejinputtext e-filtertext"
+                , Events.onInput (inputHelper gridOperations config)
+                ]
+                []
             , span [ class "e-cancel e-icon" ] []
             ]
         ]
