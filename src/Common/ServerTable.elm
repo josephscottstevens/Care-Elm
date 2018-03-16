@@ -262,7 +262,7 @@ viewTh gridOperations config column =
 
 inputHelper : GridOperations data -> Config data msg -> Column data msg -> String -> msg
 inputHelper gridOperations config str column =
-    config.toMsg { gridOperations | sortAscending = False }
+    config.toMsg { gridOperations | sortField = Just (toString gridOperations.filters) }
 
 
 viewThFilter : GridOperations data -> Config data msg -> Column data msg -> Html msg
