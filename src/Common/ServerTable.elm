@@ -622,8 +622,8 @@ pagingView gridOperations toMsg =
 --Server Stuff
 
 
-updateFromServer : ServerData -> GridOperations data -> GridOperations data
-updateFromServer serverData dt =
+updateFromServer : data -> ServerData -> GridOperations data -> GridOperations data
+updateFromServer filters serverData dt =
     { dt
         | skip = serverData.skip
         , pageSize = serverData.pageSize
@@ -631,6 +631,7 @@ updateFromServer serverData dt =
         , totalRows = serverData.totalRows
         , sortField = serverData.sortField
         , sortAscending = serverData.sortAscending
+        , filters = filters
         , filterField = Nothing
         , filterValue = Nothing
     }

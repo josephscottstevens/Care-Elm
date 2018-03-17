@@ -86,7 +86,7 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
         Load (Ok t) ->
-            { model | rows = t.result, gridOperations = Table.updateFromServer t.serverData model.gridOperations } ! []
+            { model | rows = t.result, gridOperations = Table.updateFromServer t.filters t.serverData model.gridOperations } ! []
 
         Load (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
@@ -150,6 +150,7 @@ decodeBillingCcm =
 type alias LoadResult =
     { result : List Row
     , serverData : Table.ServerData
+    , filters : Row
     }
 
 
@@ -158,6 +159,7 @@ jsonDecodeLoad =
     Pipeline.decode LoadResult
         |> Pipeline.required "Data" (Decode.list decodeBillingCcm)
         |> Pipeline.required "GridOperations" Table.decodeGridOperations
+        |> Pipeline.required "Filters" decodeBillingCcm
 
 
 encodeEditData : Row -> Encode.Value
