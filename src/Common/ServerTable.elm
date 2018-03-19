@@ -74,7 +74,7 @@ init t sortedColumnName =
     , pageSize = 20
     , rowsPerPage = 15
     , totalRows = -1
-    , sortField = Just "DoB"
+    , sortField = Just sortedColumnName
     , sortAscending = False
     , filters = t
     , filterField = Nothing
@@ -91,6 +91,19 @@ type Column data msg
     | HrefColumnExtra String (data -> Html msg)
     | CheckColumn String (data -> Bool) String
     | DropdownColumn (List ( String, String, Int -> msg ))
+
+
+type alias Config data msg =
+    { domTableId : String
+    , toolbar : List ( String, msg )
+    , toMsg : GridOperations data -> msg
+    , columns : List (Column data msg)
+    }
+
+
+type Sorter data
+    = None
+    | IncOrDec (List data -> List data)
 
 
 intColumn : String -> (data -> Maybe Int) -> String -> Column data msg
@@ -131,19 +144,6 @@ checkColumn displayText data fieldName =
 dropdownColumn : List ( String, String, Int -> msg ) -> Column data msg
 dropdownColumn items =
     DropdownColumn items
-
-
-type alias Config data msg =
-    { domTableId : String
-    , toolbar : List ( String, msg )
-    , toMsg : GridOperations data -> msg
-    , columns : List (Column data msg)
-    }
-
-
-type Sorter data
-    = None
-    | IncOrDec (List data -> List data)
 
 
 
