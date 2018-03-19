@@ -25,7 +25,6 @@ subscriptions =
 type alias Model =
     { rows : List Row
     , gridOperations : Table.GridOperations Row
-    , query : String
     }
 
 
@@ -228,7 +227,6 @@ emptyModel : Model
 emptyModel =
     { rows = []
     , gridOperations = Table.init emptyRow "Date"
-    , query = ""
     }
 
 
