@@ -3,7 +3,7 @@ port module Billing exposing (Msg, Model, emptyModel, subscriptions, init, updat
 import Html exposing (Html, div, input, program, button, select, option, span, a)
 import Html.Attributes exposing (style, class, placeholder, id, type_, value, tabindex)
 import Html.Events exposing (onClick, onInput)
-import Common.ServerTable as Table exposing (stringColumn, dateColumn)
+import Common.ServerTable as Table
 import Common.Functions as Functions exposing (maybeVal, defaultString)
 import Common.Types exposing (AddEditDataSource)
 import Http
@@ -65,8 +65,7 @@ type alias Row =
     , recordingPresent : Bool
     , chartComplete : Bool
     , status : Maybe String
-
-    --, is24HoursSinceBilled : Bool
+    , is24HoursSinceBilled : Bool
     }
 
 
@@ -75,10 +74,31 @@ view model addEditDataSource =
     Table.view model.gridOperations model.rows (gridConfig addEditDataSource) Nothing
 
 
+getColumns : Maybe AddEditDataSource -> List (Table.Column Row Msg)
+getColumns addEditDataSource =
+    [ Table.htmlColumn "<= 24 Hrs"
+        (\t ->
+            if t.is24HoursSinceBilled then
+                Just "NEW"
+            else
+                Nothing
+        )
+        "Is24HoursSinceBilled"
+    , Table.checkColumn "Reviewed" .isReviewed "IsReviewed"
+    , Table.stringColumn "Facility" .facility "Facility"
+
+    -- , stringColumn "Billing Date" (\t -> Functions.dateFormat "MMMM YYYY" t.billingDate)
+    , Table.stringColumn "Main Provider" .mainProvider "MainProvider"
+    , Table.stringColumn "Patient Name" .patientName "PatientName"
+    , Table.dateColumn "DOB" .dob "DOB"
+    , Table.stringColumn "Id No" .patientFacilityIdNo "PatientFacilityIdNo"
+    , Table.stringColumn "AssignedTo" .assignedTo "AssignedTo"
+    ]
+
+
 type Msg
     = Load (Result Http.Error LoadResult)
     | SetGridOperations (Table.GridOperations Row)
-    | Reset
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -92,9 +112,6 @@ update msg model patientId =
 
         SetGridOperations gridOperations ->
             { model | gridOperations = gridOperations } ! [ load patientId gridOperations ]
-
-        Reset ->
-            model ! []
 
 
 
@@ -140,6 +157,7 @@ decodeBillingCcm =
         |> Pipeline.required "RecordingPresent" Decode.bool
         |> Pipeline.required "ChartComplete" (Decode.bool)
         |> Pipeline.required "Status" (Decode.maybe Decode.string)
+        |> Pipeline.required "Is24HoursSinceBilled" (Decode.bool)
 
 
 
@@ -232,25 +250,11 @@ emptyModel =
 
 gridConfig : Maybe AddEditDataSource -> Table.Config Row Msg
 gridConfig addEditDataSource =
-    { domTableId = "RecordTable"
+    { domTableId = "BillingTable"
     , toolbar = []
     , toMsg = SetGridOperations
     , columns = getColumns addEditDataSource
     }
-
-
-getColumns : Maybe AddEditDataSource -> List (Table.Column Row Msg)
-getColumns addEditDataSource =
-    [ --checkColumn "" ,
-      stringColumn "Facility" .facility "Facility"
-
-    -- , stringColumn "Billing Date" (\t -> Functions.dateFormat "MMMM YYYY" t.billingDate)
-    , stringColumn "Main Provider" .mainProvider "MainProvider"
-    , stringColumn "Patient Name" .patientName "PatientName"
-    , dateColumn "DOB" .dob "DOB"
-    , stringColumn "Id No" .patientFacilityIdNo "PatientFacilityIdNo"
-    , stringColumn "AssignedTo" .assignedTo "AssignedTo"
-    ]
 
 
 emptyRow : Row
@@ -291,6 +295,7 @@ emptyRow =
     , recordingPresent = False
     , chartComplete = False
     , status = Nothing
+    , is24HoursSinceBilled = False
 
     --, is24HoursSinceBilled = False
     }

@@ -14,6 +14,7 @@ port module Common.ServerTable
         , hrefColumn
         , hrefColumnExtra
         , checkColumn
+        , htmlColumn
         , updateFromServer
         , decodeGridOperations
         , encodeGridOperations
@@ -72,8 +73,8 @@ init t sortedColumnName =
     , openDropdownId = Nothing
     , skip = 0
     , pageSize = 20
-    , rowsPerPage = 15
-    , totalRows = -1
+    , rowsPerPage = 10
+    , totalRows = 0
     , sortField = Just sortedColumnName
     , sortAscending = False
     , filters = t
@@ -91,6 +92,7 @@ type Column data msg
     | HrefColumnExtra String (data -> Html msg)
     | CheckColumn String (data -> Bool) String
     | DropdownColumn (List ( String, String, Int -> msg ))
+    | HtmlColumn String (data -> Maybe String) String
 
 
 type alias Config data msg =
@@ -144,6 +146,11 @@ checkColumn displayText data fieldName =
 dropdownColumn : List ( String, String, Int -> msg ) -> Column data msg
 dropdownColumn items =
     DropdownColumn items
+
+
+htmlColumn : String -> (data -> Maybe String) -> String -> Column data msg
+htmlColumn displayText data fieldName =
+    HtmlColumn displayText data fieldName
 
 
 
@@ -337,7 +344,19 @@ viewTd idx gridOperations row config column =
 
                 DropdownColumn dropDownItems ->
                     rowDropDownDiv idx gridOperations config.toMsg row dropDownItems
+
+                HtmlColumn _ dataToString _ ->
+                    textHtml (Maybe.withDefault "" (dataToString row))
             ]
+
+
+textHtml : String -> Html msg
+textHtml t =
+    div
+        [ Encode.string t
+            |> Html.Attributes.property "innerHTML"
+        ]
+        []
 
 
 getColumnDisplayValue : Column data msg -> String
@@ -367,6 +386,9 @@ getColumnDisplayValue column =
         DropdownColumn _ ->
             ""
 
+        HtmlColumn displayText _ _ ->
+            displayText
+
 
 getColumnName : Column data msg -> String
 getColumnName column =
@@ -394,6 +416,9 @@ getColumnName column =
 
         DropdownColumn _ ->
             ""
+
+        HtmlColumn _ _ name ->
+            name
 
 
 
