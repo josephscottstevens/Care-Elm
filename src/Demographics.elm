@@ -175,8 +175,8 @@ view model =
             ]
         , div rowStyle
             [ sfbox "Facility" True
-            , textbox "Patient's Facility ID No" True model.facilityPtID UpdateFacilityPtID
-            , textbox "Medical Record No" False model.mrn UpdateMedicalRecordNo
+            , textbox "Patient's Facility ID No" False model.facilityPtID UpdateFacilityPtID
+            , textbox "Medical Record No" True model.mrn UpdateMedicalRecordNo
             , textbox "Patient Account No" False model.patientAccountNumber UpdatePatientAccountNo
             ]
         , div rowStyle
@@ -984,7 +984,7 @@ atleast1 items msg =
 validatationErrors : Model -> List String
 validatationErrors model =
     [ requireInt "Facility" model.sfData.facilityId
-    , requireString "Patient's Facility ID No" model.facilityPtID
+    , requireString "Medical Record No" model.mrn
     , requireInt "Main Provider" model.sfData.mainProviderId
     , requireInt "Care Coordinator" model.sfData.careCoordinatorId
     , requireString "First Name" model.firstName
