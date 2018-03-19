@@ -24,7 +24,6 @@ LOW TODO:
 initial sort? Verify if it is just Date on call recordings
 column widths (call recordings, and others?)
 
-PreferredLanguageIndex does nothing, remove it
 change table over to maybe list, (if List is nothing, don't display no records found, but if the list exists and its length == 0 then, display no records found)
 currently, mouse active class shows active row highlight on empty grid
 

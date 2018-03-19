@@ -87,12 +87,13 @@ type alias Model =
     , middle : Maybe String
     , birthPlace : Maybe String
     , mrn : Maybe String
+    , mrnRequired : Bool
     , patientAccountNumber : Maybe String
     , facilityPtID : Maybe String
+    , facilityPtIDRequired : Bool
     , sexualOrientationNote : Maybe String
     , genderIdentityNote : Maybe String
     , email : Maybe String
-    , preferredLanguageIndex : Int
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
     , contactHoursModel : Maybe Decode.Value
@@ -175,8 +176,8 @@ view model =
             ]
         , div rowStyle
             [ sfbox "Facility" True
-            , textbox "Patient's Facility ID No" False model.facilityPtID UpdateFacilityPtID
-            , textbox "Medical Record No" True model.mrn UpdateMedicalRecordNo
+            , textbox "Patient's Facility ID No" model.facilityPtIDRequired model.facilityPtID UpdateFacilityPtID
+            , textbox "Medical Record No" model.mrnRequired model.mrn UpdateMedicalRecordNo
             , textbox "Patient Account No" False model.patientAccountNumber UpdatePatientAccountNo
             ]
         , div rowStyle
@@ -983,26 +984,40 @@ atleast1 items msg =
 
 validatationErrors : Model -> List String
 validatationErrors model =
-    [ requireInt "Facility" model.sfData.facilityId
-    , requireString "Medical Record No" model.mrn
-    , requireInt "Main Provider" model.sfData.mainProviderId
-    , requireInt "Care Coordinator" model.sfData.careCoordinatorId
-    , requireString "First Name" model.firstName
-    , requireString "Last Name" model.lastName
-    , requireString "Date of Birth" model.sfData.dateOfBirth
-    , requireInt "Sex at Birth" model.sfData.sexTypeId
-    , model.patientPhoneNumbers
-        |> Functions.uniqueBy (\t -> Maybe.withDefault "" t.phoneNumber)
-        |> List.filterMap phoneValidation
-        |> List.head
-    , model.patientAddresses
-        |> List.filterMap addressValidation
-        |> List.head
-    , phoneDuplicateValidation model
-    , atleast1 model.patientAddresses "At least one address is required."
-    , atleast1 model.patientPhoneNumbers "At least one phone is required."
-    ]
-        |> List.filterMap identity
+    let
+        maybeRequired1 =
+            if model.mrnRequired then
+                [ requireString "Medical Record No" model.mrn ]
+            else
+                []
+
+        maybeRequired2 =
+            if model.facilityPtIDRequired then
+                [ requireString "Patient's Facility ID No" model.facilityPtID ]
+            else
+                []
+    in
+        maybeRequired1
+            ++ maybeRequired2
+            ++ [ requireInt "Facility" model.sfData.facilityId
+               , requireInt "Main Provider" model.sfData.mainProviderId
+               , requireInt "Care Coordinator" model.sfData.careCoordinatorId
+               , requireString "First Name" model.firstName
+               , requireString "Last Name" model.lastName
+               , requireString "Date of Birth" model.sfData.dateOfBirth
+               , requireInt "Sex at Birth" model.sfData.sexTypeId
+               , model.patientPhoneNumbers
+                    |> Functions.uniqueBy (\t -> Maybe.withDefault "" t.phoneNumber)
+                    |> List.filterMap phoneValidation
+                    |> List.head
+               , model.patientAddresses
+                    |> List.filterMap addressValidation
+                    |> List.head
+               , phoneDuplicateValidation model
+               , atleast1 model.patientAddresses "At least one address is required."
+               , atleast1 model.patientPhoneNumbers "At least one phone is required."
+               ]
+            |> List.filterMap identity
 
 
 viewValidationErrorsDiv : Model -> List String -> Html msg
@@ -1027,12 +1042,13 @@ emptyModel patientId =
     , middle = Nothing
     , birthPlace = Nothing
     , mrn = Nothing
+    , mrnRequired = False
     , patientAccountNumber = Nothing
     , facilityPtID = Nothing
+    , facilityPtIDRequired = False
     , sexualOrientationNote = Nothing
     , genderIdentityNote = Nothing
     , email = Nothing
-    , preferredLanguageIndex = 0
     , sfData = emptySfData
     , patientLanguagesMap = []
     , patientPhoneNumbers = []
@@ -1152,12 +1168,13 @@ updateModelFromServerMessage serverResponse model =
                     , middle = d.middle
                     , birthPlace = d.birthPlace
                     , mrn = d.mrn
+                    , mrnRequired = d.mrnRequired
                     , patientAccountNumber = d.patientAccountNumber
                     , facilityPtID = d.facilityPtID
+                    , facilityPtIDRequired = d.facilityPtIDRequired
                     , sexualOrientationNote = d.sexualOrientationNote
                     , genderIdentityNote = d.genderIdentityNote
                     , email = d.email
-                    , preferredLanguageIndex = d.preferredLanguageIndex
                     , sfData = { sfDrops | drops = ds }
                     , patientLanguagesMap = d.patientLanguagesMap
                     , patientPhoneNumbers = c.patientPhoneNumbers
@@ -1192,12 +1209,13 @@ type alias DemographicsInformationModel =
     , middle : Maybe String
     , birthPlace : Maybe String
     , mrn : Maybe String
+    , mrnRequired : Bool
     , patientAccountNumber : Maybe String
     , facilityPtID : Maybe String
+    , facilityPtIDRequired : Bool
     , sexualOrientationNote : Maybe String
     , genderIdentityNote : Maybe String
     , email : Maybe String
-    , preferredLanguageIndex : Int
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
     , suffixId : Maybe Int
@@ -1243,12 +1261,13 @@ decodeDemographicsInformationModel =
         |> Pipeline.required "Middle" (Decode.maybe Decode.string)
         |> Pipeline.required "BirthPlace" (Decode.maybe Decode.string)
         |> Pipeline.required "MRN" (Decode.maybe Decode.string)
+        |> Pipeline.required "MRNRequired" Decode.bool
         |> Pipeline.required "PatientAccountNumber" (Decode.maybe Decode.string)
         |> Pipeline.required "FacilityPtID" (Decode.maybe Decode.string)
+        |> Pipeline.required "FacilityPtIDRequired" Decode.bool
         |> Pipeline.required "SexualOrientationNote" (Decode.maybe Decode.string)
         |> Pipeline.required "GenderIdentityNote" (Decode.maybe Decode.string)
         |> Pipeline.required "Email" (Decode.maybe Decode.string)
-        |> Pipeline.required "PreferredLanguageIndex" Decode.int
         |> Pipeline.custom decodeSfData
         |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
         |> Pipeline.required "SuffixId" (Decode.maybe Decode.int)
