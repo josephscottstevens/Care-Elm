@@ -12,7 +12,10 @@ import Json.Encode as Encode
 
 init : Int -> Cmd Msg
 init patientId =
-    load patientId Nothing <| Table.init "facility"
+    Cmd.batch
+        [ Table.initFilter columns (encodeEditData emptyRow)
+        , load patientId (encodeEditData emptyRow) <| Table.init "facility"
+        ]
 
 
 subscriptions : Sub Msg
@@ -23,7 +26,7 @@ subscriptions =
 type alias Model =
     { rows : List Row
     , gridOperations : Table.GridOperations
-    , filters : Row
+    , filters : Encode.Value
     }
 
 
@@ -89,7 +92,7 @@ columns =
     -- , stringColumn "Billing Date" (\t -> Functions.dateFormat "MMMM YYYY" t.billingDate)
     , Table.stringColumn "Main Provider" .mainProvider "MainProvider"
     , Table.stringColumn "Patient Name" .patientName "PatientName"
-    , Table.dateColumn "DOB" .dob "DOB"
+    , Table.dateColumn "DOB" .dob "DoB"
     , Table.stringColumn "Id No" .patientFacilityIdNo "PatientFacilityIdNo"
     , Table.stringColumn "AssignedTo" .assignedTo "AssignedTo"
     ]
@@ -98,7 +101,7 @@ columns =
 type Msg
     = Load (Result Http.Error LoadResult)
     | SetGridOperations Table.GridOperations
-    | UpdateFilters String
+    | UpdateFilters Encode.Value
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -106,30 +109,21 @@ update msg model patientId =
     case msg of
         Load (Ok t) ->
             { model | rows = t.result, gridOperations = Table.updateFromServer t.serverData model.gridOperations }
-                ! [ Table.initFilter columns ]
+                ! []
 
         Load (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
 
         SetGridOperations gridOperations ->
             { model | gridOperations = gridOperations }
-                ! [ load patientId (Just model.filters) gridOperations ]
+                ! [ load patientId model.filters gridOperations ]
 
         UpdateFilters filters ->
-            { model
-                | filters =
-                    case Decode.decodeString decodeBillingCcm filters of
-                        Ok t ->
-                            t
-
-                        Err t ->
-                            emptyRow
-            }
-                ! []
+            { model | filters = filters }
+                ! [ load patientId filters model.gridOperations ]
 
 
 
---{ model | gridOperations =  }
 -- Paging stuff
 
 
@@ -182,7 +176,6 @@ decodeBillingCcm =
 type alias LoadResult =
     { result : List Row
     , serverData : Table.ServerData
-    , filters : Row
     }
 
 
@@ -191,7 +184,6 @@ jsonDecodeLoad =
     Pipeline.decode LoadResult
         |> Pipeline.required "Data" (Decode.list decodeBillingCcm)
         |> Pipeline.required "GridOperations" Table.decodeGridOperations
-        |> Pipeline.required "Filters" decodeBillingCcm
 
 
 encodeEditData : Row -> Encode.Value
@@ -236,22 +228,14 @@ encodeEditData newRecord =
         ]
 
 
-load : Int -> Maybe Row -> Table.GridOperations -> Cmd Msg
+load : Int -> Encode.Value -> Table.GridOperations -> Cmd Msg
 load patientId maybeFilters gridOperations =
     Http.request
         { body =
             Encode.object
-                [ ( "patientId", Encode.int <| patientId )
+                [ ( "patientId", Encode.int patientId )
                 , ( "gridOperations", Table.encodeGridOperations gridOperations )
-                , ( "filters"
-                  , encodeEditData <|
-                        case maybeFilters of
-                            Just t ->
-                                t
-
-                            Nothing ->
-                                emptyRow
-                  )
+                , ( "filters", maybeFilters )
                 ]
                 |> Http.jsonBody
         , expect = Http.expectJson jsonDecodeLoad
@@ -268,7 +252,7 @@ emptyModel : Model
 emptyModel =
     { rows = []
     , gridOperations = Table.init "Date"
-    , filters = emptyRow
+    , filters = encodeEditData emptyRow
     }
 
 

@@ -31,29 +31,38 @@ import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 
 
-port initFilters : List Filters -> Cmd msg
+port initFilters : Filters -> Cmd msg
 
 
-port updateFilters : (String -> msg) -> Sub msg
+port updateFilters : (Encode.Value -> msg) -> Sub msg
 
 
 type alias Filters =
+    { filters : List Filter
+    , defaultProperties : Encode.Value
+    }
+
+
+type alias Filter =
     { name : String
     , controlType : String
     , value : String
     }
 
 
-initFilter : List (Column data msg) -> Cmd msg
-initFilter columns =
-    columns
-        |> List.map
-            (\t ->
-                { name = getColumnName t
-                , controlType = getType t
-                , value = ""
-                }
-            )
+initFilter : List (Column data msg) -> Encode.Value -> Cmd msg
+initFilter columns emptyRow =
+    { filters =
+        columns
+            |> List.map
+                (\t ->
+                    { name = getColumnName t
+                    , controlType = getType t
+                    , value = ""
+                    }
+                )
+    , defaultProperties = emptyRow
+    }
         |> initFilters
 
 
