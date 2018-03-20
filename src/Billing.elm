@@ -105,7 +105,8 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
         Load (Ok t) ->
-            { model | rows = t.result, gridOperations = Table.updateFromServer t.filters t.serverData model.gridOperations } ! []
+            { model | rows = t.result, gridOperations = Table.updateFromServer t.filters t.serverData model.gridOperations }
+                ! [ Table.initFilters "" ]
 
         Load (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]

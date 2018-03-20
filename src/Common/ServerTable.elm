@@ -1,4 +1,4 @@
-module Common.ServerTable
+port module Common.ServerTable
     exposing
         ( GridOperations
         , ServerData
@@ -18,6 +18,7 @@ module Common.ServerTable
         , updateFromServer
         , decodeGridOperations
         , encodeGridOperations
+        , initFilters
         )
 
 import Html exposing (Html, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
@@ -27,6 +28,10 @@ import Common.Functions as Functions exposing (maybeVal)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+
+
+port initFilters : String -> Cmd msg
+
 
 
 -- Data Types
@@ -282,16 +287,23 @@ inputHelper gridOperations config column str =
 
 viewThFilter : GridOperations data -> Config data msg -> Column data msg -> Html msg
 viewThFilter gridOperations config column =
-    th [ class "e-filterbarcell" ]
-        [ div [ class "e-filterdiv e-fltrinputdiv" ]
-            [ input
-                [ class "e-ejinputtext e-filtertext"
-                , Events.onInput (inputHelper gridOperations config column)
+    if getColumnName column == "DOB" then
+        th [ class "e-filterbarcell e-fltrtemp" ]
+            [ div [ class "e-filterdiv e-fltrtempdiv" ]
+                [ input [ id "bob" ] []
                 ]
-                []
-            , span [ class "e-cancel e-icon" ] []
             ]
-        ]
+    else
+        th [ class "e-filterbarcell" ]
+            [ div [ class "e-filterdiv e-fltrinputdiv" ]
+                [ input
+                    [ class "e-ejinputtext e-filtertext"
+                    , Events.onInput (inputHelper gridOperations config column)
+                    ]
+                    []
+                , span [ class "e-cancel e-icon" ] []
+                ]
+            ]
 
 
 viewTd : Int -> GridOperations data -> data -> Config data msg -> Column data msg -> Html msg
