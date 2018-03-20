@@ -1,8 +1,5 @@
 module Common.Types exposing (..)
 
-import Json.Decode as Decode
-import Json.Decode.Pipeline as Pipeline
-
 
 type alias FilterState =
     { name : String

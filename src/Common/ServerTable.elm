@@ -1,4 +1,4 @@
-port module Common.ServerTable
+module Common.ServerTable
     exposing
         ( GridOperations
         , ServerData
@@ -20,7 +20,7 @@ port module Common.ServerTable
         , encodeGridOperations
         )
 
-import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
+import Html exposing (Html, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
 import Html.Attributes exposing (class, id, style, type_, target, colspan, classList, href, disabled, checked)
 import Html.Events as Events
 import Common.Functions as Functions exposing (maybeVal)
@@ -282,7 +282,7 @@ inputHelper gridOperations config column str =
 
 viewThFilter : GridOperations data -> Config data msg -> Column data msg -> Html msg
 viewThFilter gridOperations config column =
-    th [ class ("e-filterbarcell") ]
+    th [ class "e-filterbarcell" ]
         [ div [ class "e-filterdiv e-fltrinputdiv" ]
             [ input
                 [ class "e-ejinputtext e-filtertext"

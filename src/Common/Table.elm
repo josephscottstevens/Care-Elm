@@ -250,7 +250,7 @@ viewTh state config column =
 
 viewThFilter : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
 viewThFilter state config column =
-    th [ class ("e-filterbarcell") ]
+    th [ class "e-filterbarcell" ]
         [ div [ class "e-filterdiv e-fltrinputdiv" ]
             [ input [ class "e-ejinputtext e-filtertext" ] []
             , span [ class "e-cancel e-icon" ] []
@@ -450,16 +450,6 @@ toolbarHelper ( iconStr, event ) =
 
 
 -- paging
-
-
-itemsPerPage : Int
-itemsPerPage =
-    10
-
-
-pagesPerBlock : Int
-pagesPerBlock =
-    8
 
 
 setPagingState : State -> Int -> (State -> msg) -> Page -> Html.Attribute msg

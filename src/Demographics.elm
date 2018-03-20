@@ -1,7 +1,7 @@
 port module Demographics exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
-import Html exposing (Html, text, div, span, input, label, h4, table, tbody, tr, td, option, select, b)
-import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name, colspan, checked, attribute)
+import Html exposing (Html, text, div, span, input, label, h4)
+import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name)
 import Html.Events exposing (onClick, onInput, onCheck)
 import Common.Types exposing (DropdownItem)
 import Common.Dropdown as Dropdown
@@ -33,11 +33,6 @@ port save : Encode.Value -> Cmd msg
 
 
 port scrollTo : String -> Cmd msg
-
-
-dataId : String -> Html.Attribute msg
-dataId =
-    attribute "data-id"
 
 
 scrollToError : Cmd msg
@@ -887,11 +882,6 @@ commonStructure displayText isRequired t =
     commonStructureWithCustomAttr displayText isRequired (class "") t
 
 
-onlyNumbers : Html.Attribute msg
-onlyNumbers =
-    attribute "onkeypress" "return event.charCode >= 48 && event.charCode <= 57"
-
-
 noNumbers : Html.Attribute msg
 noNumbers =
     attribute "onkeypress" "return event.charCode < 48 || event.charCode > 57"
@@ -923,17 +913,6 @@ textbox displayText isRequired maybeStr event =
     textboxInner Nothing displayText isRequired maybeStr event
 
 
-textboxWithMax : Int -> String -> Bool -> Maybe String -> (String -> msg) -> Html msg
-textboxWithMax maxLength displayText isRequired maybeStr event =
-    textboxInner (Just maxLength) displayText isRequired maybeStr event
-
-
-numberbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
-numberbox displayText isRequired maybeStr event =
-    commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr, onlyNumbers, class "e-textbox", onInput event ] []
-
-
 nonumberbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
 nonumberbox displayText isRequired maybeStr event =
     commonStructure displayText isRequired <|
@@ -950,12 +929,6 @@ sfbox : String -> Bool -> Html msg
 sfbox displayText isRequired =
     commonStructure displayText isRequired <|
         input [ type_ "text", idAttr displayText, class "e-textbox" ] []
-
-
-sfcheckbox : String -> Bool -> Maybe String -> Html msg
-sfcheckbox displayText isRequired maybeStr =
-    commonStructureWithCustomAttr displayText isRequired (style [ ( "height", "34px" ) ]) <|
-        input [ type_ "checkbox", idAttr displayText, class "e-checkbox" ] []
 
 
 defaultErrorMsg : String

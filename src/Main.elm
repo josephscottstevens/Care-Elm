@@ -1,4 +1,4 @@
-port module Main exposing (main)
+module Main exposing (main)
 
 import Html exposing (Html, div)
 import Billing
@@ -15,8 +15,8 @@ import Common.Types as Common exposing (AddEditDataSource)
 import Common.Route as Route exposing (Route)
 import Navigation
 import Http exposing (Error)
-import Json.Decode as Decode exposing (maybe, int, list)
-import Json.Decode.Pipeline as Pipeline exposing (required, decode)
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (required, decode)
 
 
 type alias Model =
@@ -159,8 +159,6 @@ type Msg
     | LastKnownVitalsMsg LastKnownVitals.Msg
     | RecordsMsg Records.Msg
     | DemographicsMsg Demographics.Msg
-    | OpenServiceHistory
-    | OpenRestrictions
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
 
 
@@ -174,11 +172,6 @@ setRoute maybeRoute model =
 
                 Nothing ->
                     getDropDowns model.patientId
-
-        action =
-            maybeRoute
-                |> Maybe.map Route.routeDescription
-                |> Maybe.withDefault ""
 
         cmds t =
             [ getDropdownsCmd
@@ -322,7 +315,7 @@ updatePage page msg model =
 getDropDowns : Int -> Cmd Msg
 getDropDowns patientId =
     decode AddEditDataSource
-        |> required "facilityId" (maybe Decode.int)
+        |> required "facilityId" (Decode.maybe Decode.int)
         |> required "patientId" Decode.int
         |> required "facilityDropdown" (Decode.list Functions.decodeDropdownItem)
         |> required "providersDropdown" (Decode.list Functions.decodeDropdownItem)

@@ -1,13 +1,13 @@
 module ClinicalSummary exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
 
 import Date exposing (Date)
-import Task exposing (Task)
-import Html exposing (Html, text, div, button, h4, input)
-import Html.Attributes exposing (class, id, style)
+import Task
+import Html exposing (Html, text, div, button, h4)
+import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 import Common.Dropdown as Dropdown
 import Common.Html exposing (InputControlType(HtmlElement, AreaInput), makeControls)
-import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown, DropdownItem)
+import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
 import Http
 import Json.Decode as Decode
