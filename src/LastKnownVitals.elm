@@ -331,7 +331,7 @@ encodeEditData newRecord patientId =
         , ( "WT", maybeVal Encode.string <| newRecord.wt )
         , ( "HT", maybeVal Encode.string <| newRecord.ht )
         , ( "BMI", maybeVal Encode.string <| newRecord.bmi )
-        , ( "Date", maybeVal Encode.string <| Functions.maybeToDateString <| newRecord.date )
+        , ( "Date", maybeVal Encode.string <| newRecord.date )
         ]
 
 

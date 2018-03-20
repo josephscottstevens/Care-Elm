@@ -4,7 +4,7 @@ import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
 import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), DropdownItem, AddEditDataSource)
-import Common.Functions as Functions exposing (defaultString, sendMenuMessage, setUnsavedChanges, maybeVal, maybeToDateString)
+import Common.Functions as Functions exposing (defaultString, sendMenuMessage, setUnsavedChanges, maybeVal)
 import Common.Route as Route
 import Common.Html
     exposing
@@ -461,8 +461,8 @@ encodeEditData newRecord patientId =
         , ( "PatientId", Encode.int <| patientId )
         , ( "FacilityId", maybeVal Encode.int <| newRecord.sfData.facilityId )
         , ( "PatientReported", Encode.bool <| newRecord.patientReported )
-        , ( "DateOfAdmission", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfAdmission )
-        , ( "DateOfDischarge", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfDischarge )
+        , ( "DateOfAdmission", maybeVal Encode.string <| newRecord.sfData.dateOfAdmission )
+        , ( "DateOfDischarge", maybeVal Encode.string <| newRecord.sfData.dateOfDischarge )
         , ( "HospitalServiceTypeId", maybeVal Encode.int <| newRecord.sfData.hospitalServiceTypeId )
         , ( "ChiefComplaint", maybeVal Encode.string <| newRecord.chiefComplaint )
         , ( "AdmitDiagnosisId", maybeVal Encode.int <| newRecord.sfData.admitDiagnosisId )
@@ -470,8 +470,8 @@ encodeEditData newRecord patientId =
         , ( "DischargeRecommendations", maybeVal Encode.string <| newRecord.dischargeRecommendations )
         , ( "DischargePhysicianId", maybeVal Encode.int <| newRecord.sfData.dischargePhysicianId )
         , ( "FacilityId2", maybeVal Encode.int <| newRecord.sfData.facilityId2 )
-        , ( "DateOfAdmission2", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfAdmission2 )
-        , ( "DateOfDischarge2", maybeVal Encode.string <| maybeToDateString <| newRecord.sfData.dateOfDischarge2 )
+        , ( "DateOfAdmission2", maybeVal Encode.string <| newRecord.sfData.dateOfAdmission2 )
+        , ( "DateOfDischarge2", maybeVal Encode.string <| newRecord.sfData.dateOfDischarge2 )
         ]
 
 

@@ -23,7 +23,6 @@ port module Common.Functions
         , defaultLowerDateTime
         , defaultIntStr
         , maybeVal
-        , maybeToDateString
         , maybeStringToInt
         , getResponseError
         , decodeDropdownItem
@@ -248,21 +247,6 @@ defaultIntStr str =
 maybeVal : (a -> Encode.Value) -> Maybe a -> Encode.Value
 maybeVal encoder =
     Maybe.map encoder >> Maybe.withDefault Encode.null
-
-
-maybeToDateString : Maybe String -> Maybe String
-maybeToDateString maybeDateStr =
-    case maybeDateStr of
-        Just dateStr ->
-            case Date.fromString dateStr of
-                Ok date ->
-                    Just (Date.Extra.toUtcIsoString date)
-
-                Err _ ->
-                    Nothing
-
-        Nothing ->
-            Nothing
 
 
 maybeStringToInt : String -> Maybe Int
