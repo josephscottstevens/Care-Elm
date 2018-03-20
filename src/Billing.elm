@@ -1,8 +1,6 @@
 module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
 import Html exposing (Html)
-import Html.Attributes
-import Html.Events
 import Common.ServerTable as Table
 import Common.Functions as Functions exposing (maybeVal)
 import Common.Types exposing (AddEditDataSource)
@@ -14,17 +12,18 @@ import Json.Encode as Encode
 
 init : Int -> Cmd Msg
 init patientId =
-    load patientId <| Table.init emptyRow "facility"
+    load patientId Nothing <| Table.init "facility"
 
 
-subscriptions : Sub msg
+subscriptions : Sub Msg
 subscriptions =
-    Sub.none
+    Table.updateFilters UpdateFilters
 
 
 type alias Model =
     { rows : List Row
-    , gridOperations : Table.GridOperations Row
+    , gridOperations : Table.GridOperations
+    , filters : Row
     }
 
 
@@ -74,8 +73,8 @@ view model addEditDataSource =
     Table.view model.gridOperations model.rows (gridConfig addEditDataSource) Nothing
 
 
-getColumns : Maybe AddEditDataSource -> List (Table.Column Row Msg)
-getColumns addEditDataSource =
+columns : List (Table.Column Row Msg)
+columns =
     [ Table.htmlColumn "<= 24 Hrs"
         (\t ->
             if t.is24HoursSinceBilled then
@@ -98,24 +97,39 @@ getColumns addEditDataSource =
 
 type Msg
     = Load (Result Http.Error LoadResult)
-    | SetGridOperations (Table.GridOperations Row)
+    | SetGridOperations Table.GridOperations
+    | UpdateFilters String
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
         Load (Ok t) ->
-            { model | rows = t.result, gridOperations = Table.updateFromServer t.filters t.serverData model.gridOperations }
-                ! [ Table.initFilters "" ]
+            { model | rows = t.result, gridOperations = Table.updateFromServer t.serverData model.gridOperations }
+                ! [ Table.initFilter columns ]
 
         Load (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
 
         SetGridOperations gridOperations ->
-            { model | gridOperations = gridOperations } ! [ load patientId gridOperations ]
+            { model | gridOperations = gridOperations }
+                ! [ load patientId (Just model.filters) gridOperations ]
+
+        UpdateFilters filters ->
+            { model
+                | filters =
+                    case Decode.decodeString decodeBillingCcm filters of
+                        Ok t ->
+                            t
+
+                        Err t ->
+                            emptyRow
+            }
+                ! []
 
 
 
+--{ model | gridOperations =  }
 -- Paging stuff
 
 
@@ -222,14 +236,22 @@ encodeEditData newRecord =
         ]
 
 
-load : Int -> Table.GridOperations Row -> Cmd Msg
-load patientId gridOperations =
+load : Int -> Maybe Row -> Table.GridOperations -> Cmd Msg
+load patientId maybeFilters gridOperations =
     Http.request
         { body =
             Encode.object
                 [ ( "patientId", Encode.int <| patientId )
                 , ( "gridOperations", Table.encodeGridOperations gridOperations )
-                , ( "filters", encodeEditData gridOperations.filters )
+                , ( "filters"
+                  , encodeEditData <|
+                        case maybeFilters of
+                            Just t ->
+                                t
+
+                            Nothing ->
+                                emptyRow
+                  )
                 ]
                 |> Http.jsonBody
         , expect = Http.expectJson jsonDecodeLoad
@@ -245,7 +267,8 @@ load patientId gridOperations =
 emptyModel : Model
 emptyModel =
     { rows = []
-    , gridOperations = Table.init emptyRow "Date"
+    , gridOperations = Table.init "Date"
+    , filters = emptyRow
     }
 
 
@@ -254,7 +277,7 @@ gridConfig addEditDataSource =
     { domTableId = "BillingTable"
     , toolbar = []
     , toMsg = SetGridOperations
-    , columns = getColumns addEditDataSource
+    , columns = columns
     }
 
 

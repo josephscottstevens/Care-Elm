@@ -18,26 +18,55 @@ port module Common.ServerTable
         , updateFromServer
         , decodeGridOperations
         , encodeGridOperations
-        , initFilters
+        , initFilter
+        , updateFilters
         )
 
 import Html exposing (Html, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
 import Html.Attributes exposing (class, id, style, type_, target, colspan, classList, href, disabled, checked)
 import Html.Events as Events
-import Common.Functions as Functions exposing (maybeVal)
+import Common.Functions as Functions
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 
 
-port initFilters : String -> Cmd msg
+port initFilters : List Filters -> Cmd msg
+
+
+port updateFilters : (String -> msg) -> Sub msg
+
+
+type alias Filters =
+    { name : String
+    , controlType : String
+    , value : String
+    }
+
+
+initFilter : List (Column data msg) -> Cmd msg
+initFilter columns =
+    columns
+        |> List.map
+            (\t ->
+                { name = getColumnName t
+                , controlType = getType t
+                , value = ""
+                }
+            )
+        |> initFilters
+
+
+getTypes : List (Column data msg) -> List String
+getTypes columns =
+    List.map getType columns
 
 
 
 -- Data Types
 
 
-type alias GridOperations data =
+type alias GridOperations =
     { selectedId : Maybe Int
     , openDropdownId : Maybe Int
     , skip : Int
@@ -46,9 +75,6 @@ type alias GridOperations data =
     , totalRows : Int
     , sortField : Maybe String
     , sortAscending : Bool
-    , filters : data
-    , filterField : Maybe String
-    , filterValue : Maybe String
     }
 
 
@@ -72,8 +98,8 @@ type Page
     | Last
 
 
-init : data -> String -> GridOperations data
-init t sortedColumnName =
+init : String -> GridOperations
+init sortedColumnName =
     { selectedId = Nothing
     , openDropdownId = Nothing
     , skip = 0
@@ -82,9 +108,6 @@ init t sortedColumnName =
     , totalRows = 0
     , sortField = Just sortedColumnName
     , sortAscending = False
-    , filters = t
-    , filterField = Nothing
-    , filterValue = Nothing
     }
 
 
@@ -103,7 +126,7 @@ type Column data msg
 type alias Config data msg =
     { domTableId : String
     , toolbar : List ( String, msg )
-    , toMsg : GridOperations data -> msg
+    , toMsg : GridOperations -> msg
     , columns : List (Column data msg)
     }
 
@@ -162,7 +185,7 @@ htmlColumn displayText data fieldName =
 -- VIEW
 
 
-view : GridOperations data -> List data -> Config data msg -> Maybe (Html msg) -> Html msg
+view : GridOperations -> List data -> Config data msg -> Maybe (Html msg) -> Html msg
 view gridOperations rows config maybeCustomRow =
     div [ class "e-grid e-js e-waitingpopup" ]
         [ viewToolbar config.toolbar
@@ -178,7 +201,7 @@ view gridOperations rows config maybeCustomRow =
         ]
 
 
-viewTr : GridOperations data -> List data -> Config data msg -> Maybe (Html msg) -> List (Html msg)
+viewTr : GridOperations -> List data -> Config data msg -> Maybe (Html msg) -> List (Html msg)
 viewTr gridOperations rows config maybeCustomRow =
     let
         selectedStyle idx row =
@@ -240,7 +263,7 @@ viewTr gridOperations rows config maybeCustomRow =
                     List.indexedMap standardTr rows
 
 
-viewTh : GridOperations data -> Config data msg -> Column data msg -> Html msg
+viewTh : GridOperations -> Config data msg -> Column data msg -> Html msg
 viewTh gridOperations config column =
     let
         name =
@@ -276,37 +299,16 @@ viewTh gridOperations config column =
             ]
 
 
-inputHelper : GridOperations data -> Config data msg -> Column data msg -> String -> msg
-inputHelper gridOperations config column str =
-    config.toMsg
-        { gridOperations
-            | filterField = Just (getColumnName column)
-            , filterValue = Just str
-        }
-
-
-viewThFilter : GridOperations data -> Config data msg -> Column data msg -> Html msg
+viewThFilter : GridOperations -> Config data msg -> Column data msg -> Html msg
 viewThFilter gridOperations config column =
-    if getColumnName column == "DOB" then
-        th [ class "e-filterbarcell e-fltrtemp" ]
-            [ div [ class "e-filterdiv e-fltrtempdiv" ]
-                [ input [ id "bob" ] []
-                ]
+    th [ class "e-filterbarcell e-fltrtemp" ]
+        [ div [ class "e-filterdiv e-fltrtempdiv" ]
+            [ input [ id (getColumnName column ++ "_Id") ] []
             ]
-    else
-        th [ class "e-filterbarcell" ]
-            [ div [ class "e-filterdiv e-fltrinputdiv" ]
-                [ input
-                    [ class "e-ejinputtext e-filtertext"
-                    , Events.onInput (inputHelper gridOperations config column)
-                    ]
-                    []
-                , span [ class "e-cancel e-icon" ] []
-                ]
-            ]
+        ]
 
 
-viewTd : Int -> GridOperations data -> data -> Config data msg -> Column data msg -> Html msg
+viewTd : Int -> GridOperations -> data -> Config data msg -> Column data msg -> Html msg
 viewTd idx gridOperations row config column =
     let
         tdClass =
@@ -402,6 +404,37 @@ getColumnDisplayValue column =
             displayText
 
 
+getType : Column data msg -> String
+getType column =
+    case column of
+        IntColumn _ _ name ->
+            "text"
+
+        StringColumn _ _ name ->
+            "text"
+
+        DateTimeColumn _ _ name ->
+            "datetime"
+
+        DateColumn _ _ name ->
+            "date"
+
+        HrefColumn _ _ _ name ->
+            "none"
+
+        HrefColumnExtra _ _ ->
+            "none"
+
+        CheckColumn _ _ name ->
+            "checkbox"
+
+        DropdownColumn _ ->
+            "none"
+
+        HtmlColumn _ _ name ->
+            "none"
+
+
 getColumnName : Column data msg -> String
 getColumnName column =
     case column of
@@ -437,7 +470,7 @@ getColumnName column =
 -- Custom
 
 
-rowDropDownDiv : Int -> GridOperations data -> (GridOperations data -> msg) -> data -> List ( String, String, Int -> msg ) -> Html msg
+rowDropDownDiv : Int -> GridOperations -> (GridOperations -> msg) -> data -> List ( String, String, Int -> msg ) -> Html msg
 rowDropDownDiv idx gridOperations toMsg row dropDownItems =
     let
         dropClickEvent event =
@@ -531,7 +564,7 @@ toolbarHelper ( iconStr, event ) =
 -- paging
 
 
-setPagingState : GridOperations data -> (GridOperations data -> msg) -> Page -> Html.Attribute msg
+setPagingState : GridOperations -> (GridOperations -> msg) -> Page -> Html.Attribute msg
 setPagingState gridOperations toMsg page =
     let
         newIndex =
@@ -563,7 +596,7 @@ setPagingState gridOperations toMsg page =
         Events.onClick (toMsg { gridOperations | skip = newIndex })
 
 
-pagingView : GridOperations data -> (GridOperations data -> msg) -> Html msg
+pagingView : GridOperations -> (GridOperations -> msg) -> Html msg
 pagingView gridOperations toMsg =
     let
         totalPages =
@@ -659,8 +692,8 @@ pagingView gridOperations toMsg =
 --Server Stuff
 
 
-updateFromServer : data -> ServerData -> GridOperations data -> GridOperations data
-updateFromServer filters serverData dt =
+updateFromServer : ServerData -> GridOperations -> GridOperations
+updateFromServer serverData dt =
     { dt
         | skip = serverData.skip
         , pageSize = serverData.pageSize
@@ -668,25 +701,20 @@ updateFromServer filters serverData dt =
         , totalRows = serverData.totalRows
         , sortField = serverData.sortField
         , sortAscending = serverData.sortAscending
-        , filters = filters
-        , filterField = Nothing
-        , filterValue = Nothing
     }
 
 
-encodeGridOperations : GridOperations data -> Encode.Value
+encodeGridOperations : GridOperations -> Encode.Value
 encodeGridOperations gridOperations =
     Encode.object
-        [ ( "SelectedId", maybeVal Encode.int gridOperations.selectedId )
-        , ( "OpenDropdownId", maybeVal Encode.int gridOperations.openDropdownId )
+        [ ( "SelectedId", Functions.maybeVal Encode.int gridOperations.selectedId )
+        , ( "OpenDropdownId", Functions.maybeVal Encode.int gridOperations.openDropdownId )
         , ( "Skip", Encode.int gridOperations.skip )
         , ( "PageSize", Encode.int gridOperations.pageSize )
         , ( "RowsPerPage", Encode.int gridOperations.rowsPerPage )
         , ( "TotalRows", Encode.int gridOperations.totalRows )
-        , ( "SortField", maybeVal Encode.string gridOperations.sortField )
+        , ( "SortField", Functions.maybeVal Encode.string gridOperations.sortField )
         , ( "SortAscending", Encode.bool gridOperations.sortAscending )
-        , ( "FilterField", maybeVal Encode.string gridOperations.filterField )
-        , ( "FilterValue", maybeVal Encode.string gridOperations.filterValue )
         ]
 
 
