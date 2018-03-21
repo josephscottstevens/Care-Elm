@@ -85,6 +85,7 @@ columns =
                 Nothing
         )
         "Is24HoursSinceBilled"
+        "FILTER_IS_NEW"
     , Table.checkColumn "Reviewed" .isReviewed "IsReviewed"
     , Table.stringColumn "Facility" .facility "Facility"
 

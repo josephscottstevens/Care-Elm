@@ -150,7 +150,7 @@ type Column data msg
     | HrefColumnExtra String (data -> Html msg)
     | CheckColumn String (data -> Bool) String
     | DropdownColumn (List ( String, String, Int -> msg ))
-    | HtmlColumn String (data -> Maybe String) String
+    | HtmlColumn String (data -> Maybe String) String String
 
 
 intColumn : String -> (data -> Maybe Int) -> String -> Column data msg
@@ -193,9 +193,9 @@ dropdownColumn items =
     DropdownColumn items
 
 
-htmlColumn : String -> (data -> Maybe String) -> String -> Column data msg
-htmlColumn displayText data fieldName =
-    HtmlColumn displayText data fieldName
+htmlColumn : String -> (data -> Maybe String) -> String -> String -> Column data msg
+htmlColumn displayText data fieldName filterType =
+    HtmlColumn displayText data fieldName filterType
 
 
 
@@ -331,7 +331,7 @@ viewTd idx gridOperations toMsg row column =
                 DropdownColumn dropDownItems ->
                     rowDropDownDiv idx gridOperations toMsg dropDownItems
 
-                HtmlColumn _ dataToString _ ->
+                HtmlColumn _ dataToString _ _ ->
                     textHtml (Maybe.withDefault "" (dataToString row))
             ]
 
@@ -420,7 +420,7 @@ getColumnDisplayValue column =
         DropdownColumn _ ->
             ""
 
-        HtmlColumn displayText _ _ ->
+        HtmlColumn displayText _ _ _ ->
             displayText
 
 
@@ -451,8 +451,8 @@ getControlType column =
         DropdownColumn _ ->
             "none"
 
-        HtmlColumn _ _ _ ->
-            "none"
+        HtmlColumn _ _ _ filterType ->
+            filterType
 
 
 getColumnName : Column data msg -> String
@@ -482,7 +482,7 @@ getColumnName column =
         DropdownColumn _ ->
             ""
 
-        HtmlColumn _ _ name ->
+        HtmlColumn _ _ name _ ->
             name
 
 
