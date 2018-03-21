@@ -2,7 +2,7 @@ module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, vi
 
 import Html exposing (Html)
 import Common.ServerTable as Table
-import Common.Functions as Functions exposing (maybeVal)
+import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Http
 import Json.Decode as Decode
@@ -14,7 +14,7 @@ init : Int -> Cmd Msg
 init patientId =
     Cmd.batch
         [ Table.initFilter columns
-        , load patientId <| Table.init (gridConfig Nothing)
+        , load patientId <| Table.init gridConfig
         ]
 
 
@@ -71,7 +71,7 @@ type alias Row =
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
-view model addEditDataSource =
+view model _ =
     Table.view model.gridOperations SetGridOperations model.rows Nothing
 
 
@@ -189,48 +189,6 @@ jsonDecodeLoad =
         |> Pipeline.required "GridOperations" Table.decodeGridOperations
 
 
-encodeEditData : Row -> Encode.Value
-encodeEditData newRecord =
-    Encode.object
-        [ ( "ID", Encode.int <| newRecord.id )
-        , ( "Facility", maybeVal Encode.string <| newRecord.facility )
-        , ( "FacilityId", Encode.int <| newRecord.facilityId )
-        , ( "PracticeLocation", maybeVal Encode.string <| newRecord.practiceLocation )
-        , ( "MainProvider", maybeVal Encode.string <| newRecord.mainProvider )
-        , ( "ProviderId", Encode.int <| newRecord.providerId )
-        , ( "PatientName", maybeVal Encode.string <| newRecord.patientName )
-        , ( "PatientId", Encode.int <| newRecord.patientId )
-        , ( "DoB", maybeVal Encode.string <| newRecord.dob )
-        , ( "PatientFacilityIdNo", maybeVal Encode.string <| newRecord.patientFacilityIdNo )
-        , ( "Phone", maybeVal Encode.string <| newRecord.phone )
-        , ( "AssignedTo", maybeVal Encode.string <| newRecord.assignedTo )
-        , ( "StaffId", maybeVal Encode.int <| newRecord.staffId )
-        , ( "OpenTasks", Encode.int <| newRecord.openTasks )
-        , ( "TotalTimeSpent", maybeVal Encode.int <| newRecord.totalTimeSpent )
-        , ( "CcmRegistrationDate", maybeVal Encode.string <| newRecord.ccmRegistrationDate )
-        , ( "DateOfService", maybeVal Encode.string <| newRecord.dateOfService )
-        , ( "BillingDate", maybeVal Encode.string <| newRecord.billingDate )
-        , ( "BillingMonth", Encode.int <| newRecord.billingMonth )
-        , ( "BillingYear", Encode.int <| newRecord.billingYear )
-        , ( "IsClosed", Encode.bool <| newRecord.isClosed )
-        , ( "TocId", maybeVal Encode.int <| newRecord.tocId )
-        , ( "Readmission", Encode.bool <| newRecord.readmission )
-        , ( "IsComplexCCM", Encode.bool <| newRecord.isComplexCCM )
-        , ( "BatchCloseOnInvoiceCompletion", Encode.bool <| newRecord.batchCloseOnInvoiceCompletion )
-        , ( "ReviewedByStaffName", maybeVal Encode.string <| newRecord.reviewedByStaffName )
-        , ( "CanModifyReviewedStatus", Encode.bool <| newRecord.canModifyReviewedStatus )
-        , ( "IsReviewed", Encode.bool <| newRecord.isReviewed )
-        , ( "DxPresent", Encode.bool <| newRecord.dxPresent )
-        , ( "CarePlanPresent", Encode.bool <| newRecord.carePlanPresent )
-        , ( "MedsPresent", Encode.bool <| newRecord.medsPresent )
-        , ( "AllergiesPresent", Encode.bool <| newRecord.allergiesPresent )
-        , ( "VitalsPresent", Encode.bool <| newRecord.vitalsPresent )
-        , ( "RecordingPresent", Encode.bool <| newRecord.recordingPresent )
-        , ( "ChartComplete", Encode.bool <| newRecord.chartComplete )
-        , ( "Status", maybeVal Encode.string <| newRecord.status )
-        ]
-
-
 load : Int -> Table.GridOperations Row Msg -> Cmd Msg
 load patientId gridOperations =
     Http.request
@@ -253,58 +211,14 @@ load patientId gridOperations =
 emptyModel : Model
 emptyModel =
     { rows = []
-    , gridOperations = Table.init (gridConfig Nothing)
+    , gridOperations = Table.init gridConfig
     }
 
 
-gridConfig : Maybe AddEditDataSource -> Table.Config Row Msg
-gridConfig addEditDataSource =
+gridConfig : Table.Config Row Msg
+gridConfig =
     { domTableId = "BillingTable"
     , sortField = Just "DOB"
     , toolbar = []
     , columns = columns
-    }
-
-
-emptyRow : Row
-emptyRow =
-    { id = 0
-    , facility = Nothing
-    , facilityId = 0
-    , practiceLocation = Nothing
-    , mainProvider = Nothing
-    , providerId = 0
-    , patientName = Nothing
-    , patientId = 0
-    , dob = Nothing
-    , patientFacilityIdNo = Nothing
-    , phone = Nothing
-    , assignedTo = Nothing
-    , staffId = Nothing
-    , openTasks = 0
-    , totalTimeSpent = Nothing
-    , ccmRegistrationDate = Nothing
-    , dateOfService = Nothing
-    , billingDate = Nothing
-    , billingMonth = 0
-    , billingYear = 0
-    , isClosed = False
-    , tocId = Nothing
-    , readmission = False
-    , isComplexCCM = False
-    , batchCloseOnInvoiceCompletion = False
-    , reviewedByStaffName = Nothing
-    , canModifyReviewedStatus = False
-    , isReviewed = False
-    , dxPresent = False
-    , carePlanPresent = False
-    , medsPresent = False
-    , allergiesPresent = False
-    , vitalsPresent = False
-    , recordingPresent = False
-    , chartComplete = False
-    , status = Nothing
-    , is24HoursSinceBilled = False
-
-    --, is24HoursSinceBilled = False
     }

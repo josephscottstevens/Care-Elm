@@ -52,7 +52,7 @@ buildFilter columns =
         |> List.map
             (\t ->
                 { name = getColumnName t
-                , controlType = getType t
+                , controlType = getControlType t
                 , value = ""
                 }
             )
@@ -64,7 +64,7 @@ initFilter columns =
         |> List.map
             (\t ->
                 { name = getColumnName t
-                , controlType = getType t
+                , controlType = getControlType t
                 , value = ""
                 }
             )
@@ -153,11 +153,6 @@ type Column data msg
     | HtmlColumn String (data -> Maybe String) String
 
 
-type Sorter data
-    = None
-    | IncOrDec (List data -> List data)
-
-
 intColumn : String -> (data -> Maybe Int) -> String -> Column data msg
 intColumn displayText data fieldName =
     IntColumn displayText data fieldName
@@ -214,7 +209,7 @@ view gridOperations toMsg rows maybeCustomRow =
         , table [ id gridOperations.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
             [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
                 [ tr [] (List.map (viewTh gridOperations toMsg) gridOperations.columns)
-                , tr [] (List.map (viewThFilter gridOperations) gridOperations.columns)
+                , tr [] (List.map viewThFilter gridOperations.columns)
                 ]
             , tbody []
                 (viewTr gridOperations toMsg rows maybeCustomRow)
@@ -226,7 +221,7 @@ view gridOperations toMsg rows maybeCustomRow =
 viewTr : GridOperations data msg -> (GridOperations data msg -> msg) -> List data -> Maybe (Html msg) -> List (Html msg)
 viewTr gridOperations toMsg rows maybeCustomRow =
     let
-        selectedStyle idx row =
+        selectedStyle idx =
             style
                 (if Just idx == gridOperations.selectedId then
                     [ ( "background-color", "#66aaff" )
@@ -245,7 +240,7 @@ viewTr gridOperations toMsg rows maybeCustomRow =
         standardTr ctr row =
             tr
                 [ rowClass ctr
-                , selectedStyle ctr row
+                , selectedStyle ctr
                 ]
                 (List.map (viewTd ctr gridOperations toMsg row) gridOperations.columns)
 
@@ -334,7 +329,7 @@ viewTd idx gridOperations toMsg row column =
                         ]
 
                 DropdownColumn dropDownItems ->
-                    rowDropDownDiv idx gridOperations toMsg row dropDownItems
+                    rowDropDownDiv idx gridOperations toMsg dropDownItems
 
                 HtmlColumn _ dataToString _ ->
                     textHtml (Maybe.withDefault "" (dataToString row))
@@ -345,6 +340,9 @@ viewTh : GridOperations data msg -> (GridOperations data msg -> msg) -> Column d
 viewTh gridOperations toMsg column =
     let
         name =
+            getColumnName column
+
+        displayValue =
             getColumnDisplayValue column
 
         headerContent =
@@ -352,18 +350,18 @@ viewTh gridOperations toMsg column =
                 Just t ->
                     if t == name then
                         if gridOperations.sortAscending then
-                            [ text name, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
+                            [ text displayValue, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
                         else
-                            [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
+                            [ text displayValue, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
                     else
-                        [ text name ]
+                        [ text displayValue ]
 
                 Nothing ->
-                    [ text name ]
+                    [ text displayValue ]
 
         newSortDirection =
             case gridOperations.sortField of
-                Just t ->
+                Just _ ->
                     (not gridOperations.sortAscending)
 
                 Nothing ->
@@ -377,8 +375,8 @@ viewTh gridOperations toMsg column =
             ]
 
 
-viewThFilter : GridOperations data msg -> Column data msg -> Html msg
-viewThFilter gridOperations column =
+viewThFilter : Column data msg -> Html msg
+viewThFilter column =
     th [ class "e-filterbarcell e-fltrtemp" ]
         [ div [ class "e-filterdiv e-fltrtempdiv" ]
             [ input [ id (getColumnName column ++ "_Id") ] []
@@ -426,34 +424,34 @@ getColumnDisplayValue column =
             displayText
 
 
-getType : Column data msg -> String
-getType column =
+getControlType : Column data msg -> String
+getControlType column =
     case column of
-        IntColumn _ _ name ->
+        IntColumn _ _ _ ->
             "text"
 
-        StringColumn _ _ name ->
+        StringColumn _ _ _ ->
             "text"
 
-        DateTimeColumn _ _ name ->
+        DateTimeColumn _ _ _ ->
             "datetime"
 
-        DateColumn _ _ name ->
+        DateColumn _ _ _ ->
             "date"
 
-        HrefColumn _ _ _ name ->
+        HrefColumn _ _ _ _ ->
             "none"
 
         HrefColumnExtra _ _ ->
             "none"
 
-        CheckColumn _ _ name ->
+        CheckColumn _ _ _ ->
             "checkbox"
 
         DropdownColumn _ ->
             "none"
 
-        HtmlColumn _ _ name ->
+        HtmlColumn _ _ _ ->
             "none"
 
 
@@ -492,8 +490,8 @@ getColumnName column =
 -- Custom
 
 
-rowDropDownDiv : Int -> GridOperations data msg -> (GridOperations data msg -> msg) -> data -> List ( String, String, Int -> msg ) -> Html msg
-rowDropDownDiv idx gridOperations toMsg row dropDownItems =
+rowDropDownDiv : Int -> GridOperations data msg -> (GridOperations data msg -> msg) -> List ( String, String, Int -> msg ) -> Html msg
+rowDropDownDiv idx gridOperations toMsg dropDownItems =
     let
         dropClickEvent event =
             Events.onClick (event idx)
