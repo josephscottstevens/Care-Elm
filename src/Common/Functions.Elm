@@ -12,6 +12,7 @@ port module Common.Functions
         , defaultBool
         , defaultInt
         , defaultIntToString
+        , formatDateTime
         , dateTimeToString
         , dateToString
         , dateTime
@@ -182,6 +183,21 @@ dateIndex month =
 
         Date.Dec ->
             11
+
+
+formatDateTime : String -> Maybe String -> Maybe String
+formatDateTime format maybeStr =
+    case maybeStr of
+        Just str ->
+            case Date.fromString str of
+                Ok date ->
+                    Just (Date.Extra.toUtcFormattedString format date)
+
+                Err _ ->
+                    Nothing
+
+        Nothing ->
+            Nothing
 
 
 dateTimeToString : Date.Date -> String

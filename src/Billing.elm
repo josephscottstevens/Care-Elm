@@ -87,9 +87,9 @@ columns =
         "Is24HoursSinceBilled"
         "FILTER_IS_NEW"
     , Table.checkColumn "Reviewed" .isReviewed "IsReviewed"
+    , Table.checkColumn "Batch Close" .batchCloseOnInvoiceCompletion "BatchCloseOnInvoiceCompletion"
     , Table.stringColumn "Facility" .facility "Facility"
-
-    -- , stringColumn "Billing Date" (\t -> Functions.dateFormat "MMMM YYYY" t.billingDate)
+    , Table.stringColumn "Billing Date" (\t -> Functions.formatDateTime "MMMM YYYY" t.billingDate) "BillingDate"
     , Table.stringColumn "Main Provider" .mainProvider "MainProvider"
     , Table.stringColumn "Patient Name" .patientName "PatientName"
     , Table.dateColumn "DOB" .dob "DoB"
