@@ -5,6 +5,8 @@ port module Common.ServerTable
         , Config
         , Filter
         , Column
+        , Operator(..)
+        , Control(..)
         , init
         , view
         , intColumn
@@ -39,10 +41,58 @@ port initFilters : List Filter -> Cmd msg
 port updateFilters : (List Filter -> msg) -> Sub msg
 
 
+type Operator
+    = Equals
+    | Between
+
+
+type Control
+    = Text
+    | Date
+    | DateTime
+    | NoControl
+    | CheckBox
+    | Custom String
+
+
+getControlString : Control -> String
+getControlString control =
+    case control of
+        Text ->
+            "text"
+
+        Date ->
+            "date"
+
+        DateTime ->
+            "datetime"
+
+        NoControl ->
+            "none"
+
+        CheckBox ->
+            "checkbox"
+
+        Custom t ->
+            t
+
+
+getOperatorString : Operator -> String
+getOperatorString operator =
+    case operator of
+        Equals ->
+            "equals"
+
+        Between ->
+            "between"
+
+
 type alias Filter =
     { name : String
     , controlType : String
     , value : String
+    , value2 : String
+    , expression : String
     }
 
 
@@ -50,24 +100,49 @@ buildFilter : List (Column data msg) -> List Filter
 buildFilter columns =
     columns
         |> List.map
-            (\t ->
-                { name = getColumnName t
-                , controlType = getControlType t
-                , value = ""
-                }
+            (\column ->
+                let
+                    defaultFilter expression control =
+                        { name = getColumnName column
+                        , controlType = getControlString control
+                        , value = ""
+                        , value2 = ""
+                        , expression = getOperatorString expression
+                        }
+                in
+                    case column of
+                        IntColumn _ _ _ ->
+                            defaultFilter Equals Text
+
+                        StringColumn _ _ _ ->
+                            defaultFilter Equals Text
+
+                        DateTimeColumn _ _ _ ->
+                            defaultFilter Equals DateTime
+
+                        DateColumn _ _ _ ->
+                            defaultFilter Equals Date
+
+                        HrefColumn _ _ _ _ ->
+                            defaultFilter Equals NoControl
+
+                        HrefColumnExtra _ _ ->
+                            defaultFilter Equals NoControl
+
+                        CheckColumn _ _ _ ->
+                            defaultFilter Equals CheckBox
+
+                        DropdownColumn _ ->
+                            defaultFilter Equals NoControl
+
+                        HtmlColumn _ _ _ operator control ->
+                            defaultFilter operator control
             )
 
 
 initFilter : List (Column data msg) -> Cmd msg
 initFilter columns =
-    columns
-        |> List.map
-            (\t ->
-                { name = getColumnName t
-                , controlType = getControlType t
-                , value = ""
-                }
-            )
+    buildFilter columns
         |> initFilters
 
 
@@ -150,7 +225,7 @@ type Column data msg
     | HrefColumnExtra String (data -> Html msg)
     | CheckColumn String (data -> Bool) String
     | DropdownColumn (List ( String, String, Int -> msg ))
-    | HtmlColumn String (data -> Maybe String) String String
+    | HtmlColumn String (data -> Maybe String) String Operator Control
 
 
 intColumn : String -> (data -> Maybe Int) -> String -> Column data msg
@@ -193,9 +268,9 @@ dropdownColumn items =
     DropdownColumn items
 
 
-htmlColumn : String -> (data -> Maybe String) -> String -> String -> Column data msg
-htmlColumn displayText data fieldName filterType =
-    HtmlColumn displayText data fieldName filterType
+htmlColumn : String -> (data -> Maybe String) -> String -> Operator -> String -> Column data msg
+htmlColumn displayText data fieldName operator control =
+    HtmlColumn displayText data fieldName operator (Custom control)
 
 
 
@@ -331,7 +406,7 @@ viewTd idx gridOperations toMsg row column =
                 DropdownColumn dropDownItems ->
                     rowDropDownDiv idx gridOperations toMsg dropDownItems
 
-                HtmlColumn _ dataToString _ _ ->
+                HtmlColumn _ dataToString _ _ _ ->
                     textHtml (Maybe.withDefault "" (dataToString row))
             ]
 
@@ -420,39 +495,8 @@ getColumnDisplayValue column =
         DropdownColumn _ ->
             ""
 
-        HtmlColumn displayText _ _ _ ->
+        HtmlColumn displayText _ _ _ _ ->
             displayText
-
-
-getControlType : Column data msg -> String
-getControlType column =
-    case column of
-        IntColumn _ _ _ ->
-            "text"
-
-        StringColumn _ _ _ ->
-            "text"
-
-        DateTimeColumn _ _ _ ->
-            "datetime"
-
-        DateColumn _ _ _ ->
-            "date"
-
-        HrefColumn _ _ _ _ ->
-            "none"
-
-        HrefColumnExtra _ _ ->
-            "none"
-
-        CheckColumn _ _ _ ->
-            "checkbox"
-
-        DropdownColumn _ ->
-            "none"
-
-        HtmlColumn _ _ _ filterType ->
-            filterType
 
 
 getColumnName : Column data msg -> String
@@ -482,7 +526,7 @@ getColumnName column =
         DropdownColumn _ ->
             ""
 
-        HtmlColumn _ _ name _ ->
+        HtmlColumn _ _ name _ _ ->
             name
 
 
@@ -730,6 +774,8 @@ encodeFilter filter =
         [ ( "name", Encode.string filter.name )
         , ( "controlType", Encode.string filter.controlType )
         , ( "value", Encode.string filter.value )
+        , ( "value2", Encode.string filter.value2 )
+        , ( "expression", Encode.string filter.expression )
         ]
 
 
