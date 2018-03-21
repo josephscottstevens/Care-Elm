@@ -13,8 +13,8 @@ import Json.Encode as Encode
 init : Int -> Cmd Msg
 init patientId =
     Cmd.batch
-        [ Table.initFilter columns (encodeEditData emptyRow)
-        , load patientId (encodeEditData emptyRow) <| Table.init "facility"
+        [ Table.initFilter columns
+        , load patientId <| Table.init (gridConfig Nothing)
         ]
 
 
@@ -25,8 +25,7 @@ subscriptions =
 
 type alias Model =
     { rows : List Row
-    , gridOperations : Table.GridOperations
-    , filters : Encode.Value
+    , gridOperations : Table.GridOperations Row Msg
     }
 
 
@@ -73,7 +72,7 @@ type alias Row =
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model addEditDataSource =
-    Table.view model.gridOperations model.rows (gridConfig addEditDataSource) Nothing
+    Table.view model.gridOperations SetGridOperations model.rows Nothing
 
 
 columns : List (Table.Column Row Msg)
@@ -100,8 +99,8 @@ columns =
 
 type Msg
     = Load (Result Http.Error LoadResult)
-    | SetGridOperations Table.GridOperations
-    | UpdateFilters Encode.Value
+    | SetGridOperations (Table.GridOperations Row Msg)
+    | UpdateFilters (List Table.Filter)
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -116,11 +115,15 @@ update msg model patientId =
 
         SetGridOperations gridOperations ->
             { model | gridOperations = gridOperations }
-                ! [ load patientId model.filters gridOperations ]
+                ! [ load patientId gridOperations ]
 
         UpdateFilters filters ->
-            { model | filters = filters }
-                ! [ load patientId filters model.gridOperations ]
+            let
+                gridOperations =
+                    Table.updateFilter filters model.gridOperations
+            in
+                { model | gridOperations = gridOperations }
+                    ! [ load patientId gridOperations ]
 
 
 
@@ -228,14 +231,13 @@ encodeEditData newRecord =
         ]
 
 
-load : Int -> Encode.Value -> Table.GridOperations -> Cmd Msg
-load patientId maybeFilters gridOperations =
+load : Int -> Table.GridOperations Row Msg -> Cmd Msg
+load patientId gridOperations =
     Http.request
         { body =
             Encode.object
                 [ ( "patientId", Encode.int patientId )
                 , ( "gridOperations", Table.encodeGridOperations gridOperations )
-                , ( "filters", maybeFilters )
                 ]
                 |> Http.jsonBody
         , expect = Http.expectJson jsonDecodeLoad
@@ -251,16 +253,15 @@ load patientId maybeFilters gridOperations =
 emptyModel : Model
 emptyModel =
     { rows = []
-    , gridOperations = Table.init "Date"
-    , filters = encodeEditData emptyRow
+    , gridOperations = Table.init (gridConfig Nothing)
     }
 
 
 gridConfig : Maybe AddEditDataSource -> Table.Config Row Msg
 gridConfig addEditDataSource =
     { domTableId = "BillingTable"
+    , sortField = Just "DOB"
     , toolbar = []
-    , toMsg = SetGridOperations
     , columns = columns
     }
 
