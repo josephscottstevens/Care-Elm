@@ -47,34 +47,38 @@ type Operator
 
 
 type Control
-    = Text
-    | Date
-    | DateTime
+    = TextControl
+    | DateControl
+    | DateTimeControl
     | NoControl
-    | CheckBox
-    | Custom String
+    | CheckBoxControl
+    | FilterIsNewControl
+    | Last60MonthsControl
 
 
 getControlString : Control -> String
 getControlString control =
     case control of
-        Text ->
+        TextControl ->
             "text"
 
-        Date ->
+        DateControl ->
             "date"
 
-        DateTime ->
+        DateTimeControl ->
             "datetime"
 
         NoControl ->
             "none"
 
-        CheckBox ->
+        CheckBoxControl ->
             "checkbox"
 
-        Custom t ->
-            t
+        FilterIsNewControl ->
+            "filterIsNew"
+
+        Last60MonthsControl ->
+            "last60Months"
 
 
 getOperatorString : Operator -> String
@@ -102,41 +106,41 @@ buildFilter columns =
         |> List.map
             (\column ->
                 let
-                    defaultFilter expression control =
+                    defaultFilter control operator =
                         { name = getColumnName column
                         , controlType = getControlString control
                         , value = ""
                         , value2 = ""
-                        , expression = getOperatorString expression
+                        , expression = getOperatorString operator
                         }
                 in
                     case column of
                         IntColumn _ _ _ ->
-                            defaultFilter Equals Text
+                            defaultFilter TextControl Equals
 
                         StringColumn _ _ _ ->
-                            defaultFilter Equals Text
+                            defaultFilter TextControl Equals
 
                         DateTimeColumn _ _ _ ->
-                            defaultFilter Equals DateTime
+                            defaultFilter DateTimeControl Equals
 
                         DateColumn _ _ _ ->
-                            defaultFilter Equals Date
+                            defaultFilter DateControl Equals
 
                         HrefColumn _ _ _ _ ->
-                            defaultFilter Equals NoControl
+                            defaultFilter NoControl Equals
 
                         HrefColumnExtra _ _ ->
-                            defaultFilter Equals NoControl
+                            defaultFilter NoControl Equals
 
                         CheckColumn _ _ _ ->
-                            defaultFilter Equals CheckBox
+                            defaultFilter CheckBoxControl Equals
 
                         DropdownColumn _ ->
-                            defaultFilter Equals NoControl
+                            defaultFilter NoControl Equals
 
-                        HtmlColumn _ _ _ operator control ->
-                            defaultFilter operator control
+                        HtmlColumn _ _ _ control operator ->
+                            defaultFilter control operator
             )
 
 
@@ -225,7 +229,7 @@ type Column data msg
     | HrefColumnExtra String (data -> Html msg)
     | CheckColumn String (data -> Bool) String
     | DropdownColumn (List ( String, String, Int -> msg ))
-    | HtmlColumn String (data -> Maybe String) String Operator Control
+    | HtmlColumn String (data -> Maybe String) String Control Operator
 
 
 intColumn : String -> (data -> Maybe Int) -> String -> Column data msg
@@ -268,9 +272,9 @@ dropdownColumn items =
     DropdownColumn items
 
 
-htmlColumn : String -> (data -> Maybe String) -> String -> Operator -> String -> Column data msg
-htmlColumn displayText data fieldName operator control =
-    HtmlColumn displayText data fieldName operator (Custom control)
+htmlColumn : String -> (data -> Maybe String) -> String -> Control -> Operator -> Column data msg
+htmlColumn displayText data fieldName control operator =
+    HtmlColumn displayText data fieldName control operator
 
 
 

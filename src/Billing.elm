@@ -85,12 +85,12 @@ columns =
                 Nothing
         )
         "Is24HoursSinceBilled"
+        Table.FilterIsNewControl
         Table.Equals
-        "FILTER_IS_NEW"
     , Table.checkColumn "Reviewed" .isReviewed "IsReviewed"
     , Table.checkColumn "Batch Close" .batchCloseOnInvoiceCompletion "BatchCloseOnInvoiceCompletion"
     , Table.stringColumn "Facility" .facility "Facility"
-    , Table.htmlColumn "Billing Date" (\t -> Functions.formatDateTime "MMMM YYYY" t.billingDate) "BillingDate" Table.Between "LAST_60_MONTHS"
+    , Table.htmlColumn "Billing Date" (\t -> Functions.formatDateTime "MMMM YYYY" t.billingDate) "BillingDate" Table.Last60MonthsControl Table.Between
     , Table.stringColumn "Main Provider" .mainProvider "MainProvider"
     , Table.stringColumn "Patient Name" .patientName "PatientName"
     , Table.dateColumn "DOB" .dob "DoB"
