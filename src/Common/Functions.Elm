@@ -22,6 +22,8 @@ port module Common.Functions
         , defaultDate
         , defaultLowerDate
         , defaultLowerDateTime
+        , ticksToSeconds
+        , secondsToHHMMSS
         , defaultIntStr
         , maybeVal
         , maybeStringToInt
@@ -248,6 +250,39 @@ defaultLowerDate str =
 defaultLowerDateTime : Maybe String -> String
 defaultLowerDateTime str =
     String.toLower (dateTime (defaultString str))
+
+
+ticksToSeconds : Int -> Int
+ticksToSeconds t =
+    t // 10000000
+
+
+secondsToHHMMSS : Int -> String
+secondsToHHMMSS t =
+    let
+        hours =
+            t // 3600
+
+        minutes =
+            (t - (hours * 3600)) // 60
+
+        seconds =
+            t - (hours * 3600) - (minutes * 60)
+
+        toSpacedString int =
+            if int < 10 then
+                "0" ++ toString int
+            else
+                toString int
+
+        pad str =
+            "[" ++ str ++ "]"
+    in
+        [ hours, minutes, seconds ]
+            |> List.map toSpacedString
+            |> List.foldr (\t y -> t ++ ":" ++ y) ""
+            |> String.dropRight 1
+            |> pad
 
 
 defaultIntStr : String -> Int

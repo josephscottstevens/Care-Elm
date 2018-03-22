@@ -1,7 +1,7 @@
 module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
 import Html exposing (Html)
-import Common.ServerTable as Table
+import Common.ServerTable as Table exposing (ColumnStyle(Width))
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Http
@@ -48,8 +48,6 @@ type alias Row =
     , ccmRegistrationDate : Maybe String
     , dateOfService : Maybe String
     , billingDate : Maybe String
-    , billingMonth : Int
-    , billingYear : Int
     , isClosed : Bool
     , tocId : Maybe Int
     , readmission : Bool
@@ -65,8 +63,8 @@ type alias Row =
     , vitalsPresent : Bool
     , recordingPresent : Bool
     , chartComplete : Bool
-    , status : Maybe String
     , is24HoursSinceBilled : Bool
+    , billingCode : Maybe String
     }
 
 
@@ -75,27 +73,71 @@ view model _ =
     Table.view model.gridOperations SetGridOperations model.rows Nothing
 
 
+isNew : Row -> Maybe String
+isNew t =
+    if t.is24HoursSinceBilled then
+        Just "NEW"
+    else
+        Nothing
+
+
+billingDate : Row -> Maybe String
+billingDate t =
+    Functions.formatDateTime "MMMM YYYY" t.billingDate
+
+
+timeSpent : Row -> Maybe String
+timeSpent t =
+    t.totalTimeSpent
+        |> Maybe.map Functions.ticksToSeconds
+        |> Maybe.map Functions.secondsToHHMMSS
+
+
+openTasks : Row -> Maybe String
+openTasks t =
+    Just (toString t.openTasks ++ " Tasks")
+
+
+dxCpRcAlRxVs : Row -> Maybe String
+dxCpRcAlRxVs t =
+    -- let
+    --     fullCircle =
+    --         div [] []
+    -- in
+    -- [ t.dxPresent, t.carePlanPresent, t.recordingPresent, t.allergiesPresent, t.medsPresent, t.vitalsPresent ]
+    --     |> List.map (\t -> if t then )
+    Just """ <div class="circleMargin">
+    <div title="Chronic Diagnoses present?" class="circle" style="background-color: currentColor"></div>
+    <div title="Care Plan present?" class="circle" style="background-color: currentColor"></div>
+    <div title="Recorded call present?" class="circle" style="background-color: white; border: 1.4px solid;"></div>
+    <div title="Allergies present?" class="circle" style="background-color: currentColor"></div>
+    <div title="Medication present?" class="circle" style="background-color: currentColor"></div>
+    <div title="Vitals Signs present?" class="circle" style="background-color: currentColor"></div>
+    </div>"""
+
+
 columns : List (Table.Column Row Msg)
 columns =
-    [ Table.htmlColumn "<= 24 Hrs"
-        (\t ->
-            if t.is24HoursSinceBilled then
-                Just "NEW"
-            else
-                Nothing
-        )
-        "Is24HoursSinceBilled"
-        Table.FilterIsNewControl
-        Table.Equals
-    , Table.checkColumn "Reviewed" .isReviewed "IsReviewed"
-    , Table.checkColumn "Batch Close" .batchCloseOnInvoiceCompletion "BatchCloseOnInvoiceCompletion"
-    , Table.stringColumn "Facility" .facility "Facility"
-    , Table.htmlColumn "Billing Date" (\t -> Functions.formatDateTime "MMMM YYYY" t.billingDate) "BillingDate" Table.Last60MonthsControl Table.Between
-    , Table.stringColumn "Main Provider" .mainProvider "MainProvider"
-    , Table.stringColumn "Patient Name" .patientName "PatientName"
-    , Table.dateColumn "DOB" .dob "DoB"
-    , Table.stringColumn "Id No" .patientFacilityIdNo "PatientFacilityIdNo"
-    , Table.stringColumn "AssignedTo" .assignedTo "AssignedTo"
+    [ Table.htmlColumn "<= 24 Hrs" (Width 4) isNew "Is24HoursSinceBilled" Table.FilterIsNewControl Table.Equals
+    , Table.checkColumn "Reviewed" (Width 4) .isReviewed "IsReviewed"
+    , Table.checkColumn "Batch Close" (Width 4) .batchCloseOnInvoiceCompletion "BatchCloseOnInvoiceCompletion"
+    , Table.stringColumn "Facility" (Width 9) .facility "Facility"
+    , Table.htmlColumn "Billing Date" (Width 5) billingDate "BillingDate" Table.Last60MonthsControl Table.Between
+    , Table.stringColumn "Main Provider" (Width 5) .mainProvider "MainProvider"
+    , Table.stringColumn "Patient Name" (Width 5) .patientName "PatientName"
+    , Table.dateColumn "DOB" (Width 5) .dob "DoB"
+    , Table.stringColumn "Patient's Facility Id" (Width 5) .patientFacilityIdNo "PatientFacilityIdNo"
+    , Table.stringColumn "AssignedTo" (Width 5) .assignedTo "AssignedTo"
+    , Table.stringColumn "Time Spent" (Width 4) timeSpent "TotalTimeSpent"
+    , Table.hrefColumn "Open Tasks" (Width 3) openTasks (\_ -> Just "#/people/_tasks") "OpenTasks"
+    , Table.dateColumn "CCM Enrollment" (Width 5) .ccmRegistrationDate "CcmRegistrationDate"
+    , Table.stringColumn "Billing Codes" (Width 3) .billingCode "BillingCode"
+    , Table.htmlColumn "Dx CP RC Al Rx VS" (Width 7) dxCpRcAlRxVs "" Table.FilterIsNewControl Table.Equals
+    , Table.dropdownColumn (Width 2)
+        [ ( "", "Generate Summary Report", GenerateSummaryReport )
+        , ( "", "Save Summary Report to Client Portal", SaveSummaryReportToClientPortal )
+        , ( "", "Close Billing Session", CloseBillingSession )
+        ]
     ]
 
 
@@ -103,6 +145,9 @@ type Msg
     = Load (Result Http.Error LoadResult)
     | SetGridOperations (Table.GridOperations Row Msg)
     | UpdateFilters (List Table.Filter)
+    | GenerateSummaryReport Row
+    | SaveSummaryReportToClientPortal Row
+    | CloseBillingSession Row
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -126,6 +171,15 @@ update msg model patientId =
             in
                 { model | gridOperations = gridOperations }
                     ! [ load patientId gridOperations ]
+
+        GenerateSummaryReport row ->
+            Debug.crash "todo"
+
+        SaveSummaryReportToClientPortal row ->
+            Debug.crash "todo"
+
+        CloseBillingSession row ->
+            Debug.crash "todo"
 
 
 
@@ -153,8 +207,6 @@ decodeBillingCcm =
         |> Pipeline.required "CcmRegistrationDate" (Decode.maybe Decode.string)
         |> Pipeline.required "DateOfService" (Decode.maybe Decode.string)
         |> Pipeline.required "BillingDate" (Decode.maybe Decode.string)
-        |> Pipeline.required "BillingMonth" Decode.int
-        |> Pipeline.required "BillingYear" Decode.int
         |> Pipeline.required "IsClosed" Decode.bool
         |> Pipeline.required "TocId" (Decode.maybe Decode.int)
         |> Pipeline.required "Readmission" Decode.bool
@@ -170,8 +222,8 @@ decodeBillingCcm =
         |> Pipeline.required "VitalsPresent" Decode.bool
         |> Pipeline.required "RecordingPresent" Decode.bool
         |> Pipeline.required "ChartComplete" Decode.bool
-        |> Pipeline.required "Status" (Decode.maybe Decode.string)
         |> Pipeline.required "Is24HoursSinceBilled" Decode.bool
+        |> Pipeline.required "BillingCode" (Decode.maybe Decode.string)
 
 
 
