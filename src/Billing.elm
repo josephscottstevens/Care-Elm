@@ -1,7 +1,7 @@
 module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
 import Html exposing (Html)
-import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle))
+import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..))
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Http
@@ -73,6 +73,36 @@ view model _ =
     Table.view model.gridOperations SetGridOperations model.rows Nothing
 
 
+dxCpRcAlRxVsOperator : Operator
+dxCpRcAlRxVsOperator =
+    CustomSingleOperator "Equals" [ "DxPresent", "CarePlanPresent", "RecordingPresent", "AllergiesPresent", "MedsPresent", "VitalsPresent" ]
+
+
+columns : List (Table.Column Row Msg)
+columns =
+    [ Table.htmlColumn "<= 24 Hrs" (Width 4) isNew Table.FilterIsNewControl (Contains "Is24HoursSinceBilled")
+    , Table.checkColumn "Reviewed" (Width 4) .isReviewed (Table.Equals "IsReviewed")
+    , Table.checkColumn "Batch Close" (Width 4) .batchCloseOnInvoiceCompletion (Equals "BatchCloseOnInvoiceCompletion")
+    , Table.stringColumn "Facility" (Width 9) .facility (Table.Contains "Facility")
+    , Table.htmlColumn "Billing Date" (Width 5) billingDate Table.Last60MonthsControl (Equals "BillingDate")
+    , Table.stringColumn "Main Provider" (Width 5) .mainProvider (Contains "MainProvider")
+    , Table.stringColumn "Patient Name" (Width 5) .patientName (Contains "PatientName")
+    , Table.dateColumn "DOB" (Width 5) .dob (Contains "DoB")
+    , Table.stringColumn "Patient's Facility Id" (Width 5) .patientFacilityIdNo (Contains "PatientFacilityIdNo")
+    , Table.stringColumn "AssignedTo" (Width 5) .assignedTo (Contains "AssignedTo")
+    , Table.stringColumn "Time Spent" (Width 4) timeSpent (Contains "TotalTimeSpent")
+    , Table.hrefColumn "Open Tasks" (Width 3) openTasks (\_ -> Just "#/people/_tasks") (Equals "OpenTasks")
+    , Table.dateColumn "CCM Enrollment" (Width 5) .ccmRegistrationDate (Contains "CcmRegistrationDate")
+    , Table.stringColumn "Billing Codes" (Width 3) .billingCode (Contains "BillingCode")
+    , Table.htmlColumn "Dx CP RC Al Rx VS" filterStyle dxCpRcAlRxVs Table.SixCirclesControl dxCpRcAlRxVsOperator
+    , Table.dropdownColumn (Width 2)
+        [ ( "", "Generate Summary Report", GenerateSummaryReport )
+        , ( "", "Save Summary Report to Client Portal", SaveSummaryReportToClientPortal )
+        , ( "", "Close Billing Session", CloseBillingSession )
+        ]
+    ]
+
+
 isNew : Row -> Maybe String
 isNew t =
     if t.is24HoursSinceBilled then
@@ -122,31 +152,6 @@ filterStyle =
         [ ( "width", "100px" )
         , ( "padding-left", "10px" )
         ]
-
-
-columns : List (Table.Column Row Msg)
-columns =
-    [ Table.htmlColumn "<= 24 Hrs" (Width 4) isNew "Is24HoursSinceBilled" Table.FilterIsNewControl Table.Equals
-    , Table.checkColumn "Reviewed" (Width 4) .isReviewed "IsReviewed"
-    , Table.checkColumn "Batch Close" (Width 4) .batchCloseOnInvoiceCompletion "BatchCloseOnInvoiceCompletion"
-    , Table.stringColumn "Facility" (Width 9) .facility "Facility"
-    , Table.htmlColumn "Billing Date" (Width 5) billingDate "BillingDate" Table.Last60MonthsControl Table.Between
-    , Table.stringColumn "Main Provider" (Width 5) .mainProvider "MainProvider"
-    , Table.stringColumn "Patient Name" (Width 5) .patientName "PatientName"
-    , Table.dateColumn "DOB" (Width 5) .dob "DoB"
-    , Table.stringColumn "Patient's Facility Id" (Width 5) .patientFacilityIdNo "PatientFacilityIdNo"
-    , Table.stringColumn "AssignedTo" (Width 5) .assignedTo "AssignedTo"
-    , Table.stringColumn "Time Spent" (Width 4) timeSpent "TotalTimeSpent"
-    , Table.hrefColumn "Open Tasks" (Width 3) openTasks (\_ -> Just "#/people/_tasks") "OpenTasks"
-    , Table.dateColumn "CCM Enrollment" (Width 5) .ccmRegistrationDate "CcmRegistrationDate"
-    , Table.stringColumn "Billing Codes" (Width 3) .billingCode "BillingCode"
-    , Table.htmlColumn "Dx CP RC Al Rx VS" filterStyle dxCpRcAlRxVs "Sixer_Not_For_Filter" Table.SixCirclesControl Table.Sixer
-    , Table.dropdownColumn (Width 2)
-        [ ( "", "Generate Summary Report", GenerateSummaryReport )
-        , ( "", "Save Summary Report to Client Portal", SaveSummaryReportToClientPortal )
-        , ( "", "Close Billing Session", CloseBillingSession )
-        ]
-    ]
 
 
 type Msg

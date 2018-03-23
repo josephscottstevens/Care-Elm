@@ -43,9 +43,11 @@ port updateFilters : (List Filter -> msg) -> Sub msg
 
 
 type Operator
-    = Equals
-    | Between
-    | Sixer
+    = NoOperator
+    | Equals String
+    | Contains String
+    | Between String String
+    | CustomSingleOperator String (List String)
 
 
 type Control
@@ -63,6 +65,63 @@ type ColumnStyle
     = NoStyle
     | Width Int
     | CustomStyle (List ( String, String ))
+
+
+type Column data msg
+    = IntColumn String ColumnStyle (data -> Maybe Int) Operator
+    | StringColumn String ColumnStyle (data -> Maybe String) Operator
+    | DateTimeColumn String ColumnStyle (data -> Maybe String) Operator
+    | DateColumn String ColumnStyle (data -> Maybe String) Operator
+    | HrefColumn String ColumnStyle (data -> Maybe String) (data -> Maybe String) Operator
+    | HrefColumnExtra String ColumnStyle (data -> Html msg)
+    | CheckColumn String ColumnStyle (data -> Bool) Operator
+    | DropdownColumn ColumnStyle (List ( String, String, data -> msg ))
+    | HtmlColumn String ColumnStyle (data -> Maybe String) Control Operator
+
+
+intColumn : String -> ColumnStyle -> (data -> Maybe Int) -> Operator -> Column data msg
+intColumn displayText columnStyle data operator =
+    IntColumn displayText columnStyle data operator
+
+
+stringColumn : String -> ColumnStyle -> (data -> Maybe String) -> Operator -> Column data msg
+stringColumn displayText columnStyle data operator =
+    StringColumn displayText columnStyle data operator
+
+
+dateTimeColumn : String -> ColumnStyle -> (data -> Maybe String) -> Operator -> Column data msg
+dateTimeColumn displayText columnStyle data operator =
+    DateTimeColumn displayText columnStyle data operator
+
+
+dateColumn : String -> ColumnStyle -> (data -> Maybe String) -> Operator -> Column data msg
+dateColumn displayText columnStyle data operator =
+    DateColumn displayText columnStyle data operator
+
+
+hrefColumn : String -> ColumnStyle -> (data -> Maybe String) -> (data -> Maybe String) -> Operator -> Column data msg
+hrefColumn displayText columnStyle displayStr data operator =
+    HrefColumn displayText columnStyle displayStr data operator
+
+
+hrefColumnExtra : String -> ColumnStyle -> (data -> Html msg) -> Column data msg
+hrefColumnExtra displayText columnStyle toNode =
+    HrefColumnExtra displayText columnStyle toNode
+
+
+checkColumn : String -> ColumnStyle -> (data -> Bool) -> Operator -> Column data msg
+checkColumn displayText columnStyle data operator =
+    CheckColumn displayText columnStyle data operator
+
+
+dropdownColumn : ColumnStyle -> List ( String, String, data -> msg ) -> Column data msg
+dropdownColumn columnStyle items =
+    DropdownColumn columnStyle items
+
+
+htmlColumn : String -> ColumnStyle -> (data -> Maybe String) -> Control -> Operator -> Column data msg
+htmlColumn displayText columnStyle data control operator =
+    HtmlColumn displayText columnStyle data control operator
 
 
 getControlString : Control -> String
@@ -93,29 +152,49 @@ getControlString control =
             "sixCirclesControl"
 
 
-getOperatorString : Operator -> String
-getOperatorString operator =
+getNames : Operator -> List String
+getNames operator =
     case operator of
-        Equals ->
-            "equals"
+        NoOperator ->
+            []
 
-        Between ->
-            "between"
+        Equals str ->
+            [ str ]
 
-        Sixer ->
-            "sixer"
+        Contains str ->
+            [ str ]
+
+        Between str1 str2 ->
+            [ str1, str2 ]
+
+        CustomSingleOperator _ items ->
+            items
+
+
+getOperators : Operator -> List String
+getOperators operator =
+    case operator of
+        NoOperator ->
+            []
+
+        Equals str ->
+            [ "Equals" ]
+
+        Contains str ->
+            [ "Contains" ]
+
+        Between str1 str2 ->
+            [ "GreaterThanOrEquals", "LessThanOrEquals" ]
+
+        CustomSingleOperator singleOperator items ->
+            List.map (\t -> singleOperator) items
 
 
 type alias Filter =
-    { name : String
-    , controlType : String
-    , value : String
-    , value2 : String
-    , value3 : String
-    , value4 : String
-    , value5 : String
-    , value6 : String
-    , expression : String
+    { controlType : String
+    , names : List String
+    , values : List String
+    , expressions : List String
     }
 
 
@@ -125,44 +204,39 @@ buildFilter columns =
         |> List.map
             (\column ->
                 let
-                    defaultFilter control operator =
-                        { name = getColumnName column
-                        , controlType = getControlString control
-                        , value = ""
-                        , value2 = ""
-                        , value3 = ""
-                        , value4 = ""
-                        , value5 = ""
-                        , value6 = ""
-                        , expression = getOperatorString operator
+                    defaultFilter t operator =
+                        { controlType = getControlString t
+                        , names = getNames operator
+                        , values = List.map (\t -> "") (getNames operator)
+                        , expressions = getOperators operator
                         }
                 in
                     case column of
-                        IntColumn _ _ _ _ ->
-                            defaultFilter TextControl Equals
+                        IntColumn _ _ _ operator ->
+                            defaultFilter TextControl operator
 
-                        StringColumn _ _ _ _ ->
-                            defaultFilter TextControl Equals
+                        StringColumn _ _ _ operator ->
+                            defaultFilter TextControl operator
 
-                        DateTimeColumn _ _ _ _ ->
-                            defaultFilter DateTimeControl Equals
+                        DateTimeColumn _ _ _ operator ->
+                            defaultFilter DateTimeControl operator
 
-                        DateColumn _ _ _ _ ->
-                            defaultFilter DateControl Equals
+                        DateColumn _ _ _ operator ->
+                            defaultFilter DateControl operator
 
-                        HrefColumn _ _ _ _ _ ->
-                            defaultFilter TextControl Equals
+                        HrefColumn _ _ _ _ operator ->
+                            defaultFilter TextControl operator
 
                         HrefColumnExtra _ _ _ ->
-                            defaultFilter NoControl Equals
+                            Debug.crash "todo"
 
-                        CheckColumn _ _ _ _ ->
-                            defaultFilter CheckBoxControl Equals
+                        CheckColumn _ _ _ operator ->
+                            defaultFilter CheckBoxControl operator
 
                         DropdownColumn _ _ ->
-                            defaultFilter NoControl Equals
+                            defaultFilter NoControl NoOperator
 
-                        HtmlColumn _ _ _ _ control operator ->
+                        HtmlColumn _ _ _ control operator ->
                             defaultFilter control operator
             )
 
@@ -241,63 +315,6 @@ init config =
     , toolbar = config.toolbar
     , columns = config.columns
     }
-
-
-type Column data msg
-    = IntColumn String ColumnStyle (data -> Maybe Int) String
-    | StringColumn String ColumnStyle (data -> Maybe String) String
-    | DateTimeColumn String ColumnStyle (data -> Maybe String) String
-    | DateColumn String ColumnStyle (data -> Maybe String) String
-    | HrefColumn String ColumnStyle (data -> Maybe String) (data -> Maybe String) String
-    | HrefColumnExtra String ColumnStyle (data -> Html msg)
-    | CheckColumn String ColumnStyle (data -> Bool) String
-    | DropdownColumn ColumnStyle (List ( String, String, data -> msg ))
-    | HtmlColumn String ColumnStyle (data -> Maybe String) String Control Operator
-
-
-intColumn : String -> ColumnStyle -> (data -> Maybe Int) -> String -> Column data msg
-intColumn displayText columnStyle data fieldName =
-    IntColumn displayText columnStyle data fieldName
-
-
-stringColumn : String -> ColumnStyle -> (data -> Maybe String) -> String -> Column data msg
-stringColumn displayText columnStyle data fieldName =
-    StringColumn displayText columnStyle data fieldName
-
-
-dateTimeColumn : String -> ColumnStyle -> (data -> Maybe String) -> String -> Column data msg
-dateTimeColumn displayText columnStyle data fieldName =
-    DateTimeColumn displayText columnStyle data fieldName
-
-
-dateColumn : String -> ColumnStyle -> (data -> Maybe String) -> String -> Column data msg
-dateColumn displayText columnStyle data fieldName =
-    DateColumn displayText columnStyle data fieldName
-
-
-hrefColumn : String -> ColumnStyle -> (data -> Maybe String) -> (data -> Maybe String) -> String -> Column data msg
-hrefColumn displayText columnStyle displayStr data fieldName =
-    HrefColumn displayText columnStyle displayStr data fieldName
-
-
-hrefColumnExtra : String -> ColumnStyle -> (data -> Html msg) -> Column data msg
-hrefColumnExtra displayText columnStyle toNode =
-    HrefColumnExtra displayText columnStyle toNode
-
-
-checkColumn : String -> ColumnStyle -> (data -> Bool) -> String -> Column data msg
-checkColumn displayText columnStyle data fieldName =
-    CheckColumn displayText columnStyle data fieldName
-
-
-dropdownColumn : ColumnStyle -> List ( String, String, data -> msg ) -> Column data msg
-dropdownColumn columnStyle items =
-    DropdownColumn columnStyle items
-
-
-htmlColumn : String -> ColumnStyle -> (data -> Maybe String) -> String -> Control -> Operator -> Column data msg
-htmlColumn displayText columnStyle data fieldName control operator =
-    HtmlColumn displayText columnStyle data fieldName control operator
 
 
 
@@ -434,7 +451,7 @@ viewTd idx gridOperations toMsg row column =
                 DropdownColumn _ dropDownItems ->
                     rowDropDownDiv idx gridOperations toMsg row dropDownItems
 
-                HtmlColumn _ _ dataToString _ _ _ ->
+                HtmlColumn _ _ dataToString _ _ ->
                     textHtml (Maybe.withDefault "" (dataToString row))
             ]
 
@@ -525,7 +542,7 @@ columnStyle column =
                 DropdownColumn columnStyle _ ->
                     columnStyle
 
-                HtmlColumn _ columnStyle _ _ _ _ ->
+                HtmlColumn _ columnStyle _ _ _ ->
                     columnStyle
     in
         case t of
@@ -566,39 +583,60 @@ getColumnDisplayValue column =
         DropdownColumn _ _ ->
             ""
 
-        HtmlColumn displayText _ _ _ _ _ ->
+        HtmlColumn displayText _ _ _ _ ->
             displayText
+
+
+getSingleName : Operator -> String
+getSingleName operator =
+    case operator of
+        NoOperator ->
+            "dropdownCustom"
+
+        Equals str ->
+            str
+
+        Contains str ->
+            str
+
+        Between str1 str2 ->
+            str1 ++ "-" ++ str2
+
+        CustomSingleOperator _ names ->
+            names
+                |> List.foldr (\t y -> t ++ "-" ++ y) ""
+                |> String.dropRight 1
 
 
 getColumnName : Column data msg -> String
 getColumnName column =
     case column of
-        IntColumn _ _ _ name ->
-            name
+        IntColumn _ _ _ operator ->
+            getSingleName operator
 
-        StringColumn _ _ _ name ->
-            name
+        StringColumn _ _ _ operator ->
+            getSingleName operator
 
-        DateTimeColumn _ _ _ name ->
-            name
+        DateTimeColumn _ _ _ operator ->
+            getSingleName operator
 
-        DateColumn _ _ _ name ->
-            name
+        DateColumn _ _ _ operator ->
+            getSingleName operator
 
-        HrefColumn _ _ _ _ name ->
-            name
+        HrefColumn _ _ _ _ operator ->
+            getSingleName operator
 
         HrefColumnExtra _ _ _ ->
-            ""
+            Debug.crash "todo"
 
-        CheckColumn _ _ _ name ->
-            name
+        CheckColumn _ _ _ operator ->
+            getSingleName operator
 
         DropdownColumn _ _ ->
             "menuDropdown"
 
-        HtmlColumn _ _ _ name _ _ ->
-            name
+        HtmlColumn _ _ _ _ operator ->
+            getSingleName operator
 
 
 
@@ -842,11 +880,10 @@ updateFromServer serverData dt =
 encodeFilter : Filter -> Encode.Value
 encodeFilter filter =
     Encode.object
-        [ ( "name", Encode.string filter.name )
+        [ ( "names", Encode.list (List.map Encode.string filter.names) )
         , ( "controlType", Encode.string filter.controlType )
-        , ( "value", Encode.string filter.value )
-        , ( "value2", Encode.string filter.value2 )
-        , ( "expression", Encode.string filter.expression )
+        , ( "values", Encode.list (List.map Encode.string filter.values) )
+        , ( "expressions", Encode.list (List.map Encode.string filter.expressions) )
         ]
 
 
