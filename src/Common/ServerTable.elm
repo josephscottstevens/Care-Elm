@@ -587,27 +587,6 @@ getColumnDisplayValue column =
             displayText
 
 
-getSingleName : Operator -> String
-getSingleName operator =
-    case operator of
-        NoOperator str ->
-            str
-
-        Equals str ->
-            str
-
-        Contains str ->
-            str
-
-        Between str _ ->
-            str
-
-        CustomSingleOperator _ names ->
-            names
-                |> List.foldr (\t y -> t ++ "-" ++ y) ""
-                |> String.dropRight 1
-
-
 getColumnName : Column data msg -> String
 getColumnName column =
     case column of
@@ -636,7 +615,21 @@ getColumnName column =
             "menuDropdown"
 
         HtmlColumn _ _ _ _ operator ->
-            getSingleName operator
+            case operator of
+                NoOperator str ->
+                    str
+
+                Equals str ->
+                    str
+
+                Contains str ->
+                    str
+
+                Between str _ ->
+                    str
+
+                CustomSingleOperator name _ ->
+                    name
 
 
 

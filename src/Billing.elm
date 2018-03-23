@@ -75,7 +75,7 @@ view model _ =
 
 dxCpRcAlRxVsOperator : Operator
 dxCpRcAlRxVsOperator =
-    CustomSingleOperator "Equals" [ "DxPresent", "CarePlanPresent", "RecordingPresent", "AllergiesPresent", "MedsPresent", "VitalsPresent" ]
+    CustomSingleOperator "DxPresent" [ "DxPresent", "CarePlanPresent", "RecordingPresent", "AllergiesPresent", "MedsPresent", "VitalsPresent" ]
 
 
 columns : List (Table.Column Row Msg)
