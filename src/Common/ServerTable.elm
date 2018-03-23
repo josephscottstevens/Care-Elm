@@ -45,6 +45,7 @@ port updateFilters : (List Filter -> msg) -> Sub msg
 type Operator
     = Equals
     | Between
+    | Sixer
 
 
 type Control
@@ -55,6 +56,7 @@ type Control
     | CheckBoxControl
     | FilterIsNewControl
     | Last60MonthsControl
+    | SixCirclesControl
 
 
 type ColumnStyle
@@ -87,6 +89,9 @@ getControlString control =
         Last60MonthsControl ->
             "last60Months"
 
+        SixCirclesControl ->
+            "sixCirclesControl"
+
 
 getOperatorString : Operator -> String
 getOperatorString operator =
@@ -97,12 +102,19 @@ getOperatorString operator =
         Between ->
             "between"
 
+        Sixer ->
+            "sixer"
+
 
 type alias Filter =
     { name : String
     , controlType : String
     , value : String
     , value2 : String
+    , value3 : String
+    , value4 : String
+    , value5 : String
+    , value6 : String
     , expression : String
     }
 
@@ -118,6 +130,10 @@ buildFilter columns =
                         , controlType = getControlString control
                         , value = ""
                         , value2 = ""
+                        , value3 = ""
+                        , value4 = ""
+                        , value5 = ""
+                        , value6 = ""
                         , expression = getOperatorString operator
                         }
                 in

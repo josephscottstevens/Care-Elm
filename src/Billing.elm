@@ -1,7 +1,7 @@
 module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
 import Html exposing (Html)
-import Common.ServerTable as Table exposing (ColumnStyle(Width))
+import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle))
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Http
@@ -116,6 +116,14 @@ dxCpRcAlRxVs t =
     </div>"""
 
 
+filterStyle : ColumnStyle
+filterStyle =
+    CustomStyle
+        [ ( "width", "100px" )
+        , ( "padding-left", "10px" )
+        ]
+
+
 columns : List (Table.Column Row Msg)
 columns =
     [ Table.htmlColumn "<= 24 Hrs" (Width 4) isNew "Is24HoursSinceBilled" Table.FilterIsNewControl Table.Equals
@@ -132,7 +140,7 @@ columns =
     , Table.hrefColumn "Open Tasks" (Width 3) openTasks (\_ -> Just "#/people/_tasks") "OpenTasks"
     , Table.dateColumn "CCM Enrollment" (Width 5) .ccmRegistrationDate "CcmRegistrationDate"
     , Table.stringColumn "Billing Codes" (Width 3) .billingCode "BillingCode"
-    , Table.htmlColumn "Dx CP RC Al Rx VS" (Width 7) dxCpRcAlRxVs "" Table.FilterIsNewControl Table.Equals
+    , Table.htmlColumn "Dx CP RC Al Rx VS" filterStyle dxCpRcAlRxVs "Sixer_Not_For_Filter" Table.SixCirclesControl Table.Sixer
     , Table.dropdownColumn (Width 2)
         [ ( "", "Generate Summary Report", GenerateSummaryReport )
         , ( "", "Save Summary Report to Client Portal", SaveSummaryReportToClientPortal )
