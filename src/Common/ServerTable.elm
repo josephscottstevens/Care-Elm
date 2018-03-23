@@ -16,9 +16,9 @@ port module Common.ServerTable
         , dropdownColumn
         , dateColumn
         , hrefColumn
-        , hrefColumnExtra
         , checkColumn
         , htmlColumn
+        , textHtml
         , updateFromServer
         , decodeGridOperations
         , encodeGridOperations
@@ -73,10 +73,9 @@ type Column data msg
     | DateTimeColumn String ColumnStyle (data -> Maybe String) String
     | DateColumn String ColumnStyle (data -> Maybe String) String
     | HrefColumn String ColumnStyle (data -> Maybe String) (data -> Maybe String) String
-    | HrefColumnExtra String ColumnStyle (data -> Html msg)
     | CheckColumn String ColumnStyle (data -> Bool) String
     | DropdownColumn ColumnStyle (List ( String, String, data -> msg ))
-    | HtmlColumn String ColumnStyle (data -> Maybe String) Control Operator
+    | HtmlColumn String ColumnStyle (data -> Html msg) Control Operator
 
 
 intColumn : String -> ColumnStyle -> (data -> Maybe Int) -> String -> Column data msg
@@ -104,11 +103,6 @@ hrefColumn displayText columnStyle displayStr data dataField =
     HrefColumn displayText columnStyle displayStr data dataField
 
 
-hrefColumnExtra : String -> ColumnStyle -> (data -> Html msg) -> Column data msg
-hrefColumnExtra displayText columnStyle toNode =
-    HrefColumnExtra displayText columnStyle toNode
-
-
 checkColumn : String -> ColumnStyle -> (data -> Bool) -> String -> Column data msg
 checkColumn displayText columnStyle data dataField =
     CheckColumn displayText columnStyle data dataField
@@ -119,7 +113,7 @@ dropdownColumn columnStyle items =
     DropdownColumn columnStyle items
 
 
-htmlColumn : String -> ColumnStyle -> (data -> Maybe String) -> Control -> Operator -> Column data msg
+htmlColumn : String -> ColumnStyle -> (data -> Html msg) -> Control -> Operator -> Column data msg
 htmlColumn displayText columnStyle data control operator =
     HtmlColumn displayText columnStyle data control operator
 
@@ -186,8 +180,8 @@ getOperators operator =
         Between str1 str2 ->
             [ "GreaterThanOrEquals", "LessThanOrEquals" ]
 
-        CustomSingleOperator singleOperator items ->
-            List.map (\t -> singleOperator) items
+        CustomSingleOperator _ items ->
+            List.map (\t -> "Equals") items
 
 
 type alias Filter =
@@ -226,9 +220,6 @@ buildFilter columns =
 
                         HrefColumn _ _ _ _ dataField ->
                             defaultFilter TextControl (Equals dataField)
-
-                        HrefColumnExtra _ _ _ ->
-                            Debug.crash "todo"
 
                         CheckColumn _ _ _ dataField ->
                             defaultFilter CheckBoxControl (Equals dataField)
@@ -438,9 +429,6 @@ viewTd idx gridOperations toMsg row column =
                     a [ href (Maybe.withDefault "" (dataToString row)), target "_blank" ]
                         [ text (Maybe.withDefault "" (dataTodisplayText row)) ]
 
-                HrefColumnExtra _ _ toNode ->
-                    toNode row
-
                 CheckColumn _ _ dataToString _ ->
                     div [ class "e-checkcell" ]
                         [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
@@ -451,8 +439,8 @@ viewTd idx gridOperations toMsg row column =
                 DropdownColumn _ dropDownItems ->
                     rowDropDownDiv idx gridOperations toMsg row dropDownItems
 
-                HtmlColumn _ _ dataToString _ _ ->
-                    textHtml (Maybe.withDefault "" (dataToString row))
+                HtmlColumn _ _ toNode _ _ ->
+                    toNode row
             ]
 
 
@@ -533,9 +521,6 @@ columnStyle column =
                 HrefColumn _ columnStyle _ _ _ ->
                     columnStyle
 
-                HrefColumnExtra _ columnStyle _ ->
-                    columnStyle
-
                 CheckColumn _ columnStyle _ _ ->
                     columnStyle
 
@@ -574,9 +559,6 @@ getColumnDisplayValue column =
         HrefColumn displayText _ _ _ _ ->
             displayText
 
-        HrefColumnExtra displayText _ _ ->
-            displayText
-
         CheckColumn displayText _ _ _ ->
             displayText
 
@@ -604,9 +586,6 @@ getColumnName column =
 
         HrefColumn _ _ _ _ dataField ->
             dataField
-
-        HrefColumnExtra _ _ _ ->
-            Debug.crash "todo"
 
         CheckColumn _ _ _ dataField ->
             dataField

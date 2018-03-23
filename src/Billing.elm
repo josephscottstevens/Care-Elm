@@ -1,6 +1,7 @@
 module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
-import Html exposing (Html)
+import Html exposing (Html, div, text)
+import Html.Attributes exposing (class, title, style)
 import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..))
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
@@ -103,17 +104,20 @@ columns =
     ]
 
 
-isNew : Row -> Maybe String
+isNew : Row -> Html msg
 isNew t =
     if t.is24HoursSinceBilled then
-        Just "NEW"
+        text "NEW"
     else
-        Nothing
+        text ""
 
 
-billingDate : Row -> Maybe String
+billingDate : Row -> Html msg
 billingDate t =
-    Functions.formatDateTime "MMMM YYYY" t.billingDate
+    t.billingDate
+        |> Functions.formatDateTime "MMMM YYYY"
+        |> Maybe.withDefault ""
+        |> text
 
 
 timeSpent : Row -> Maybe String
@@ -128,22 +132,39 @@ openTasks t =
     Just (toString t.openTasks ++ " Tasks")
 
 
-dxCpRcAlRxVs : Row -> Maybe String
+dxCpRcAlRxVs : Row -> Html msg
 dxCpRcAlRxVs t =
-    -- let
-    --     fullCircle =
-    --         div [] []
-    -- in
-    -- [ t.dxPresent, t.carePlanPresent, t.recordingPresent, t.allergiesPresent, t.medsPresent, t.vitalsPresent ]
-    --     |> List.map (\t -> if t then )
-    Just """ <div class="circleMargin">
-    <div title="Chronic Diagnoses present?" class="circle" style="background-color: currentColor"></div>
-    <div title="Care Plan present?" class="circle" style="background-color: currentColor"></div>
-    <div title="Recorded call present?" class="circle" style="background-color: white; border: 1.4px solid;"></div>
-    <div title="Allergies present?" class="circle" style="background-color: currentColor"></div>
-    <div title="Medication present?" class="circle" style="background-color: currentColor"></div>
-    <div title="Vitals Signs present?" class="circle" style="background-color: currentColor"></div>
-    </div>"""
+    let
+        getStyle t =
+            if t then
+                style [ ( "background-color", "currentColor" ) ]
+            else
+                style [ ( "background-color", "white" ), ( "border", "1.4px solid" ) ]
+
+        fullCircle ( t, titleText ) =
+            div [ title titleText, class "circle", getStyle t ] []
+    in
+        [ ( t.dxPresent, "Chronic Diagnoses present?" )
+        , ( t.carePlanPresent, "Care Plan present?" )
+        , ( t.recordingPresent, "Recorded call present?" )
+        , ( t.allergiesPresent, "Allergies present?" )
+        , ( t.medsPresent, "Medication present?" )
+        , ( t.vitalsPresent, "Vitals Signs present?" )
+        ]
+            |> List.map fullCircle
+            |> div [ class "circleMargin" ]
+
+
+
+-- Just """
+--<div class="circleMargin">
+-- <div title="Chronic Diagnoses present?" class="circle" style="background-color: currentColor"></div>
+-- <div title="Care Plan present?" class="circle" style="background-color: currentColor"></div>
+-- <div title="Recorded call present?" class="circle" style="background-color: white; border: 1.4px solid;"></div>
+-- <div title="Allergies present?" class="circle" style="background-color: currentColor"></div>
+-- <div title="Medication present?" class="circle" style="background-color: currentColor"></div>
+-- <div title="Vitals Signs present?" class="circle" style="background-color: currentColor"></div>
+-- </div>"""
 
 
 filterStyle : ColumnStyle
