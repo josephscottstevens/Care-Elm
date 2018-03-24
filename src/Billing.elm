@@ -34,28 +34,35 @@ type alias Row =
     { id : Int
     , facility : Maybe String
     , facilityId : Int
-    , practiceLocation : Maybe String
+
+    -- , practiceLocation : Maybe String
     , mainProvider : Maybe String
-    , providerId : Int
+
+    -- , providerId : Int
     , patientName : Maybe String
     , patientId : Int
     , dob : Maybe String
     , patientFacilityIdNo : Maybe String
-    , phone : Maybe String
+
+    -- , phone : Maybe String
     , assignedTo : Maybe String
-    , staffId : Maybe Int
+
+    -- , staffId : Maybe Int
     , openTasks : Int
     , totalTimeSpent : Maybe Int
     , ccmRegistrationDate : Maybe String
-    , dateOfService : Maybe String
+
+    -- , dateOfService : Maybe String
     , billingDate : Maybe String
     , isClosed : Bool
-    , tocId : Maybe Int
-    , readmission : Bool
-    , isComplexCCM : Bool
+
+    -- , tocId : Maybe Int
+    -- , readmission : Bool
+    -- , isComplexCCM : Bool
     , batchCloseOnInvoiceCompletion : Bool
-    , reviewedByStaffName : Maybe String
-    , canModifyReviewedStatus : Bool
+
+    -- , reviewedByStaffName : Maybe String
+    -- , canModifyReviewedStatus : Bool
     , isReviewed : Bool
     , dxPresent : Bool
     , carePlanPresent : Bool
@@ -226,28 +233,28 @@ decodeBillingCcm =
         |> Pipeline.required "ID" Decode.int
         |> Pipeline.required "Facility" (Decode.maybe Decode.string)
         |> Pipeline.required "FacilityId" Decode.int
-        |> Pipeline.required "PracticeLocation" (Decode.maybe Decode.string)
+        -- |> Pipeline.required "PracticeLocation" (Decode.maybe Decode.string)
         |> Pipeline.required "MainProvider" (Decode.maybe Decode.string)
-        |> Pipeline.required "ProviderId" Decode.int
+        -- |> Pipeline.required "ProviderId" Decode.int
         |> Pipeline.required "PatientName" (Decode.maybe Decode.string)
         |> Pipeline.required "PatientId" Decode.int
         |> Pipeline.required "DoB" (Decode.maybe Decode.string)
         |> Pipeline.required "PatientFacilityIdNo" (Decode.maybe Decode.string)
-        |> Pipeline.required "Phone" (Decode.maybe Decode.string)
+        -- |> Pipeline.required "Phone" (Decode.maybe Decode.string)
         |> Pipeline.required "AssignedTo" (Decode.maybe Decode.string)
-        |> Pipeline.required "StaffId" (Decode.maybe Decode.int)
+        -- |> Pipeline.required "StaffId" (Decode.maybe Decode.int)
         |> Pipeline.required "OpenTasks" Decode.int
         |> Pipeline.required "TotalTimeSpent" (Decode.maybe Decode.int)
         |> Pipeline.required "CcmRegistrationDate" (Decode.maybe Decode.string)
-        |> Pipeline.required "DateOfService" (Decode.maybe Decode.string)
+        -- |> Pipeline.required "DateOfService" (Decode.maybe Decode.string)
         |> Pipeline.required "BillingDate" (Decode.maybe Decode.string)
         |> Pipeline.required "IsClosed" Decode.bool
-        |> Pipeline.required "TocId" (Decode.maybe Decode.int)
-        |> Pipeline.required "Readmission" Decode.bool
-        |> Pipeline.required "IsComplexCCM" Decode.bool
+        -- |> Pipeline.required "TocId" (Decode.maybe Decode.int)
+        -- |> Pipeline.required "Readmission" Decode.bool
+        -- |> Pipeline.required "IsComplexCCM" Decode.bool
         |> Pipeline.required "BatchCloseOnInvoiceCompletion" Decode.bool
-        |> Pipeline.required "ReviewedByStaffName" (Decode.maybe Decode.string)
-        |> Pipeline.required "CanModifyReviewedStatus" Decode.bool
+        -- |> Pipeline.required "ReviewedByStaffName" (Decode.maybe Decode.string)
+        -- |> Pipeline.required "CanModifyReviewedStatus" Decode.bool
         |> Pipeline.required "IsReviewed" Decode.bool
         |> Pipeline.required "DxPresent" Decode.bool
         |> Pipeline.required "CarePlanPresent" Decode.bool
