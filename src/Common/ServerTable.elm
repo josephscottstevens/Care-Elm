@@ -714,7 +714,11 @@ pagingView gridOperations toMsg =
                     toString (gridOperations.skip + 1)
 
                 totalPagesText =
-                    toString (totalPages + 1)
+                    toString <|
+                        if totalPages < 1 then
+                            1
+                        else
+                            totalPages
 
                 totalItemsText =
                     toString gridOperations.totalRows

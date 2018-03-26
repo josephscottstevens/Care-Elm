@@ -556,7 +556,11 @@ pagingView state rows toMsg =
                     toString (state.pageIndex + 1)
 
                 totalPagesText =
-                    toString (totalPages + 1)
+                    toString <|
+                        if totalPages < 1 then
+                            1
+                        else
+                            totalPages
 
                 totalItemsText =
                     toString totalRows
