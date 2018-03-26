@@ -43,7 +43,7 @@ port updateFilters : (List Filter -> msg) -> Sub msg
 
 
 type Operator
-    = NoOperator String
+    = NoOperator
     | Equals String
     | Contains String
     | Between String String
@@ -340,7 +340,7 @@ viewTh gridOperations toMsg column =
         headerContent =
             case gridOperations.sortField of
                 Just t ->
-                    if t == name then
+                    if Just t == name then
                         if gridOperations.sortAscending then
                             [ text displayValue, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
                         else
@@ -360,9 +360,9 @@ viewTh gridOperations toMsg column =
                     gridOperations.sortAscending
 
         sortClick =
-            Events.onClick (toMsg { gridOperations | sortAscending = newSortDirection, sortField = Just name })
+            Events.onClick (toMsg { gridOperations | sortAscending = newSortDirection, sortField = name })
     in
-        th [ class ("e-headercell e-default " ++ name), sortClick, getColumnStyle column ]
+        th [ class ("e-headercell e-default " ++ Functions.defaultString name), sortClick, getColumnStyle column ]
             [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
             ]
 
@@ -453,46 +453,37 @@ getColumnDisplayValue column =
             displayText
 
 
-getServerField : Column data msg -> String
+getServerField : Column data msg -> Maybe String
 getServerField column =
     case column of
         IntColumn _ _ _ _ dataField ->
-            dataField
+            Just dataField
 
         StringColumn _ _ _ _ dataField ->
-            dataField
+            Just dataField
 
         DateTimeColumn _ _ _ _ dataField ->
-            dataField
+            Just dataField
 
         DateColumn _ _ _ _ dataField ->
-            dataField
+            Just dataField
 
         HrefColumn _ _ _ _ _ dataField ->
-            dataField
+            Just dataField
 
         CheckColumn _ _ _ _ dataField ->
-            dataField
+            Just dataField
 
         DropdownColumn _ _ _ ->
-            "menuDropdown"
+            Nothing
 
         HtmlColumn _ _ _ _ _ operator ->
             case operator of
-                NoOperator str ->
-                    str
+                CustomSingleOperator op _ ->
+                    Just op
 
-                Equals str ->
-                    str
-
-                Contains str ->
-                    str
-
-                Between str _ ->
-                    str
-
-                CustomSingleOperator name _ ->
-                    name
+                _ ->
+                    Nothing
 
 
 getColumnIdAttr : Column data msg -> String
@@ -833,8 +824,8 @@ getControlString control =
 getNames : Operator -> List String
 getNames operator =
     case operator of
-        NoOperator str ->
-            [ str ]
+        NoOperator ->
+            []
 
         Equals str ->
             [ str ]
@@ -852,7 +843,7 @@ getNames operator =
 getOperators : Operator -> List String
 getOperators operator =
     case operator of
-        NoOperator _ ->
+        NoOperator ->
             []
 
         Equals _ ->
@@ -902,7 +893,7 @@ buildFilter columns =
                             defaultFilter CheckBoxControl (Equals dataField)
 
                         DropdownColumn _ _ _ ->
-                            defaultFilter NoControl (NoOperator "menuDropdown")
+                            defaultFilter NoControl NoOperator
 
                         HtmlColumn _ _ _ _ control operator ->
                             defaultFilter control operator
