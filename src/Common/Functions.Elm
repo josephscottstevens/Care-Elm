@@ -4,7 +4,9 @@ port module Common.Functions
         , displaySuccessMessage
         , displayErrorMessage
           -- , error
+        , idAttr
         , isAlpha
+        , isNumber
         , noHash
         , defaultMaybeMsg
         , defaultString
@@ -105,6 +107,16 @@ port deleteConfirmed : (Int -> msg) -> Sub msg
 isAlpha : Char -> Bool
 isAlpha char =
     isLower char || isUpper char
+
+
+isNumber : Char -> Bool
+isNumber char =
+    Char.isDigit char
+
+
+idAttr : String -> String
+idAttr str =
+    String.filter isAlpha str ++ "Id"
 
 
 noHash : Char -> Bool

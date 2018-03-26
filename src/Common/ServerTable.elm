@@ -63,6 +63,7 @@ type Control
 
 type alias Filter =
     { controlType : String
+    , columnId : String
     , names : List String
     , values : List String
     , expressions : List String
@@ -76,54 +77,54 @@ type ColumnStyle
 
 
 type Column data msg
-    = IntColumn String ColumnStyle (data -> Maybe Int) String
-    | StringColumn String ColumnStyle (data -> Maybe String) String
-    | DateTimeColumn String ColumnStyle (data -> Maybe String) String
-    | DateColumn String ColumnStyle (data -> Maybe String) String
-    | HrefColumn String ColumnStyle (data -> Maybe String) (data -> Maybe String) String
-    | CheckColumn String ColumnStyle (data -> Bool) String
-    | DropdownColumn ColumnStyle (List ( String, String, data -> msg ))
-    | HtmlColumn String ColumnStyle (data -> Html msg) Control Operator
+    = IntColumn String String ColumnStyle (data -> Maybe Int) String
+    | StringColumn String String ColumnStyle (data -> Maybe String) String
+    | DateTimeColumn String String ColumnStyle (data -> Maybe String) String
+    | DateColumn String String ColumnStyle (data -> Maybe String) String
+    | HrefColumn String String ColumnStyle (data -> Maybe String) (data -> Maybe String) String
+    | CheckColumn String String ColumnStyle (data -> Bool) String
+    | DropdownColumn String ColumnStyle (List ( String, String, data -> msg ))
+    | HtmlColumn String String ColumnStyle (data -> Html msg) Control Operator
 
 
 intColumn : String -> ColumnStyle -> (data -> Maybe Int) -> String -> Column data msg
 intColumn displayText columnStyle data dataField =
-    IntColumn displayText columnStyle data dataField
+    IntColumn displayText (Functions.idAttr displayText) columnStyle data dataField
 
 
 stringColumn : String -> ColumnStyle -> (data -> Maybe String) -> String -> Column data msg
 stringColumn displayText columnStyle data dataField =
-    StringColumn displayText columnStyle data dataField
+    StringColumn displayText (Functions.idAttr displayText) columnStyle data dataField
 
 
 dateTimeColumn : String -> ColumnStyle -> (data -> Maybe String) -> String -> Column data msg
 dateTimeColumn displayText columnStyle data dataField =
-    DateTimeColumn displayText columnStyle data dataField
+    DateTimeColumn displayText (Functions.idAttr displayText) columnStyle data dataField
 
 
 dateColumn : String -> ColumnStyle -> (data -> Maybe String) -> String -> Column data msg
 dateColumn displayText columnStyle data dataField =
-    DateColumn displayText columnStyle data dataField
+    DateColumn displayText (Functions.idAttr displayText) columnStyle data dataField
 
 
 hrefColumn : String -> ColumnStyle -> (data -> Maybe String) -> (data -> Maybe String) -> String -> Column data msg
 hrefColumn displayText columnStyle displayStr data dataField =
-    HrefColumn displayText columnStyle displayStr data dataField
+    HrefColumn displayText (Functions.idAttr displayText) columnStyle displayStr data dataField
 
 
 checkColumn : String -> ColumnStyle -> (data -> Bool) -> String -> Column data msg
 checkColumn displayText columnStyle data dataField =
-    CheckColumn displayText columnStyle data dataField
+    CheckColumn displayText (Functions.idAttr displayText) columnStyle data dataField
 
 
 dropdownColumn : ColumnStyle -> List ( String, String, data -> msg ) -> Column data msg
 dropdownColumn columnStyle items =
-    DropdownColumn columnStyle items
+    DropdownColumn "dropdownColumn" columnStyle items
 
 
-htmlColumn : String -> ColumnStyle -> (data -> Html msg) -> Control -> Operator -> Column data msg
-htmlColumn displayText columnStyle data control operator =
-    HtmlColumn displayText columnStyle data control operator
+htmlColumn : String -> String -> ColumnStyle -> (data -> Html msg) -> Control -> Operator -> Column data msg
+htmlColumn displayText idAttr columnStyle data control operator =
+    HtmlColumn displayText idAttr columnStyle data control operator
 
 
 
@@ -287,7 +288,7 @@ viewTd idx gridOperations toMsg row column =
 
         tdClick =
             case column of
-                DropdownColumn _ _ ->
+                DropdownColumn _ _ _ ->
                     disabled False
 
                 _ ->
@@ -295,34 +296,34 @@ viewTd idx gridOperations toMsg row column =
     in
         td [ tdClass, tdStyle, tdClick ]
             [ case column of
-                IntColumn _ _ dataToInt _ ->
+                IntColumn _ _ _ dataToInt _ ->
                     text (Functions.defaultIntToString (dataToInt row))
 
-                StringColumn _ _ dataToString _ ->
+                StringColumn _ _ _ dataToString _ ->
                     text (Maybe.withDefault "" (dataToString row))
 
-                DateTimeColumn _ _ dataToString _ ->
+                DateTimeColumn _ _ _ dataToString _ ->
                     text (Functions.defaultDateTime (dataToString row))
 
-                DateColumn _ _ dataToString _ ->
+                DateColumn _ _ _ dataToString _ ->
                     text (Functions.defaultDate (dataToString row))
 
-                HrefColumn _ _ dataTodisplayText dataToString _ ->
+                HrefColumn _ _ _ dataTodisplayText dataToString _ ->
                     --TODO, how do I want to display empty? I think.. it is hide the href, not go to an empty url right?
                     a [ href (Maybe.withDefault "" (dataToString row)), target "_blank" ]
                         [ text (Maybe.withDefault "" (dataTodisplayText row)) ]
 
-                CheckColumn _ _ dataToString _ ->
+                CheckColumn _ _ _ dataToString _ ->
                     div [ class "e-checkcell" ]
                         [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
                             [ input [ type_ "checkbox", disabled True, checked (dataToString row) ] []
                             ]
                         ]
 
-                DropdownColumn _ dropDownItems ->
+                DropdownColumn _ _ dropDownItems ->
                     rowDropDownDiv idx gridOperations toMsg row dropDownItems
 
-                HtmlColumn _ _ toNode _ _ ->
+                HtmlColumn _ _ _ toNode _ _ ->
                     toNode row
             ]
 
@@ -331,7 +332,7 @@ viewTh : GridOperations data msg -> (GridOperations data msg -> msg) -> Column d
 viewTh gridOperations toMsg column =
     let
         name =
-            getColumnName column
+            getServerField column
 
         displayValue =
             getColumnDisplayValue column
@@ -370,7 +371,7 @@ viewThFilter : Column data msg -> Html msg
 viewThFilter column =
     th [ class "e-filterbarcell e-fltrtemp" ]
         [ div [ class "e-filterdiv e-fltrtempdiv" ]
-            [ input [ id (getColumnName column ++ "_Id") ] []
+            [ input [ id (getColumnIdAttr column) ] []
             ]
         ]
 
@@ -389,28 +390,28 @@ getColumnStyle column =
     let
         t =
             case column of
-                IntColumn _ columnStyle _ _ ->
+                IntColumn _ _ columnStyle _ _ ->
                     columnStyle
 
-                StringColumn _ columnStyle _ _ ->
+                StringColumn _ _ columnStyle _ _ ->
                     columnStyle
 
-                DateTimeColumn _ columnStyle _ _ ->
+                DateTimeColumn _ _ columnStyle _ _ ->
                     columnStyle
 
-                DateColumn _ columnStyle _ _ ->
+                DateColumn _ _ columnStyle _ _ ->
                     columnStyle
 
-                HrefColumn _ columnStyle _ _ _ ->
+                HrefColumn _ _ columnStyle _ _ _ ->
                     columnStyle
 
-                CheckColumn _ columnStyle _ _ ->
+                CheckColumn _ _ columnStyle _ _ ->
                     columnStyle
 
-                DropdownColumn columnStyle _ ->
+                DropdownColumn _ columnStyle _ ->
                     columnStyle
 
-                HtmlColumn _ columnStyle _ _ _ ->
+                HtmlColumn _ _ columnStyle _ _ _ ->
                     columnStyle
     in
         case t of
@@ -427,56 +428,56 @@ getColumnStyle column =
 getColumnDisplayValue : Column data msg -> String
 getColumnDisplayValue column =
     case column of
-        IntColumn displayText _ _ _ ->
+        IntColumn displayText _ _ _ _ ->
             displayText
 
-        StringColumn displayText _ _ _ ->
+        StringColumn displayText _ _ _ _ ->
             displayText
 
-        DateTimeColumn displayText _ _ _ ->
+        DateTimeColumn displayText _ _ _ _ ->
             displayText
 
-        DateColumn displayText _ _ _ ->
+        DateColumn displayText _ _ _ _ ->
             displayText
 
-        HrefColumn displayText _ _ _ _ ->
+        HrefColumn displayText _ _ _ _ _ ->
             displayText
 
-        CheckColumn displayText _ _ _ ->
+        CheckColumn displayText _ _ _ _ ->
             displayText
 
-        DropdownColumn _ _ ->
+        DropdownColumn _ _ _ ->
             ""
 
-        HtmlColumn displayText _ _ _ _ ->
+        HtmlColumn displayText _ _ _ _ _ ->
             displayText
 
 
-getColumnName : Column data msg -> String
-getColumnName column =
+getServerField : Column data msg -> String
+getServerField column =
     case column of
-        IntColumn _ _ _ dataField ->
+        IntColumn _ _ _ _ dataField ->
             dataField
 
-        StringColumn _ _ _ dataField ->
+        StringColumn _ _ _ _ dataField ->
             dataField
 
-        DateTimeColumn _ _ _ dataField ->
+        DateTimeColumn _ _ _ _ dataField ->
             dataField
 
-        DateColumn _ _ _ dataField ->
+        DateColumn _ _ _ _ dataField ->
             dataField
 
-        HrefColumn _ _ _ _ dataField ->
+        HrefColumn _ _ _ _ _ dataField ->
             dataField
 
-        CheckColumn _ _ _ dataField ->
+        CheckColumn _ _ _ _ dataField ->
             dataField
 
-        DropdownColumn _ _ ->
+        DropdownColumn _ _ _ ->
             "menuDropdown"
 
-        HtmlColumn _ _ _ _ operator ->
+        HtmlColumn _ _ _ _ _ operator ->
             case operator of
                 NoOperator str ->
                     str
@@ -492,6 +493,35 @@ getColumnName column =
 
                 CustomSingleOperator name _ ->
                     name
+
+
+getColumnIdAttr : Column data msg -> String
+getColumnIdAttr column =
+    case column of
+        IntColumn _ idAttr _ _ _ ->
+            idAttr
+
+        StringColumn _ idAttr _ _ _ ->
+            idAttr
+
+        DateTimeColumn _ idAttr _ _ _ ->
+            idAttr
+
+        DateColumn _ idAttr _ _ _ ->
+            idAttr
+
+        HrefColumn _ idAttr _ _ _ _ ->
+            idAttr
+
+        CheckColumn _ idAttr _ _ _ ->
+            idAttr
+
+        DropdownColumn idAttr _ _ ->
+            idAttr
+
+        HtmlColumn _ idAttr _ _ _ _ ->
+            idAttr
+                |> Functions.idAttr
 
 
 
@@ -846,34 +876,35 @@ buildFilter columns =
                 let
                     defaultFilter t operator =
                         { controlType = getControlString t
+                        , columnId = getColumnIdAttr column
                         , names = getNames operator
                         , values = List.map (\_ -> "") (getNames operator)
                         , expressions = getOperators operator
                         }
                 in
                     case column of
-                        IntColumn _ _ _ dataField ->
+                        IntColumn _ _ _ _ dataField ->
                             defaultFilter TextControl (Equals dataField)
 
-                        StringColumn _ _ _ dataField ->
+                        StringColumn _ _ _ _ dataField ->
                             defaultFilter TextControl (Contains dataField)
 
-                        DateTimeColumn _ _ _ dataField ->
+                        DateTimeColumn _ _ _ _ dataField ->
                             defaultFilter DateTimeControl (Equals dataField)
 
-                        DateColumn _ _ _ dataField ->
+                        DateColumn _ _ _ _ dataField ->
                             defaultFilter DateControl (Equals dataField)
 
-                        HrefColumn _ _ _ _ dataField ->
+                        HrefColumn _ _ _ _ _ dataField ->
                             defaultFilter TextControl (Equals dataField)
 
-                        CheckColumn _ _ _ dataField ->
+                        CheckColumn _ _ _ _ dataField ->
                             defaultFilter CheckBoxControl (Equals dataField)
 
-                        DropdownColumn _ _ ->
+                        DropdownColumn _ _ _ ->
                             defaultFilter NoControl (NoOperator "menuDropdown")
 
-                        HtmlColumn _ _ _ control operator ->
+                        HtmlColumn _ _ _ _ control operator ->
                             defaultFilter control operator
             )
 

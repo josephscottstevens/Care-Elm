@@ -243,7 +243,7 @@ maybeToInt : Maybe String -> Maybe Int
 maybeToInt maybeStr =
     case maybeStr of
         Just str ->
-            case String.filter isNumber str |> String.toInt of
+            case String.filter Functions.isNumber str |> String.toInt of
                 Ok t ->
                     Just t
 
@@ -843,21 +843,6 @@ rowStyle =
     [ class "col-xs-12 col-sm-12 col-md-5 col-lg-4 padding-left-0" ]
 
 
-idAttr : String -> Html.Attribute msg
-idAttr str =
-    id (String.filter isAlpha str ++ "Id")
-
-
-isAlpha : Char -> Bool
-isAlpha char =
-    Char.isLower char || Char.isUpper char
-
-
-isNumber : Char -> Bool
-isNumber char =
-    Char.isDigit char
-
-
 isRequiredClass : Bool -> Html.Attribute msg
 isRequiredClass isRequired =
     case isRequired of
@@ -905,7 +890,7 @@ maxLength maybeMax =
 textboxInner : Maybe Int -> String -> Bool -> Maybe String -> (String -> msg) -> Html msg
 textboxInner maybeMax displayText isRequired maybeStr event =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr, class "e-textbox", onInput event, maxLength maybeMax ] []
+        input [ type_ "text", id (Functions.idAttr displayText), maybeValue maybeStr, class "e-textbox", onInput event, maxLength maybeMax ] []
 
 
 textbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
@@ -916,7 +901,7 @@ textbox displayText isRequired maybeStr event =
 nonumberbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
 nonumberbox displayText isRequired maybeStr event =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr, noNumbers, class "e-textbox", onInput event ] []
+        input [ type_ "text", id (Functions.idAttr displayText), maybeValue maybeStr, noNumbers, class "e-textbox", onInput event ] []
 
 
 dropbox : String -> Bool -> Html msg -> Html msg
@@ -928,7 +913,7 @@ dropbox displayText isRequired t =
 sfbox : String -> Bool -> Html msg
 sfbox displayText isRequired =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, class "e-textbox" ] []
+        input [ type_ "text", id (Functions.idAttr displayText), class "e-textbox" ] []
 
 
 defaultErrorMsg : String

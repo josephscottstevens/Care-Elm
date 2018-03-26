@@ -83,16 +83,16 @@ view model _ =
 
 dxCpRcAlRxVsOperator : Operator
 dxCpRcAlRxVsOperator =
-    CustomSingleOperator "DxPresent" [ "DxPresent", "CarePlanPresent", "RecordingPresent", "AllergiesPresent", "MedsPresent", "VitalsPresent" ]
+    CustomSingleOperator "Equals" [ "DxPresent", "CarePlanPresent", "RecordingPresent", "AllergiesPresent", "MedsPresent", "VitalsPresent" ]
 
 
 columns : List (Table.Column Row Msg)
 columns =
-    [ Table.htmlColumn "<= 24 Hrs" (Width 4) isNew Table.FilterIsNewControl (Equals "Is24HoursSinceBilled")
+    [ Table.htmlColumn "<= 24 Hrs" "lessThan24HoursColumn" (Width 4) isNew Table.FilterIsNewControl (Equals "Is24HoursSinceBilled")
     , Table.checkColumn "Reviewed" (Width 4) .isReviewed "IsReviewed"
     , Table.checkColumn "Batch Close" (Width 4) .batchCloseOnInvoiceCompletion "BatchCloseOnInvoiceCompletion"
     , Table.stringColumn "Facility" (Width 9) .facility "Facility"
-    , Table.htmlColumn "Billing Date" (Width 5) billingDate Table.Last60MonthsControl (Between "BillingDate" "BillingDate")
+    , Table.htmlColumn "Billing Date" "billingDateColumn" (Width 5) billingDate Table.Last60MonthsControl (Between "BillingDate" "BillingDate")
     , Table.stringColumn "Main Provider" (Width 5) .mainProvider "MainProvider"
     , Table.stringColumn "Patient Name" (Width 5) .patientName "PatientName"
     , Table.dateColumn "DOB" (Width 5) .dob "DoB"
@@ -102,7 +102,7 @@ columns =
     , Table.hrefColumn "Open Tasks" (Width 3) openTasks (\_ -> Just "#/people/_tasks") "OpenTasks"
     , Table.dateColumn "CCM Enrollment" (Width 5) .ccmRegistrationDate "CcmRegistrationDate"
     , Table.stringColumn "Billing Codes" (Width 3) .billingCode "BillingCode"
-    , Table.htmlColumn "Dx CP RC Al Rx VS" filterStyle dxCpRcAlRxVs Table.SixCirclesControl dxCpRcAlRxVsOperator
+    , Table.htmlColumn "Dx CP RC Al Rx VS" "presentFlagsColumn" filterStyle dxCpRcAlRxVs Table.SixCirclesControl dxCpRcAlRxVsOperator
     , Table.dropdownColumn (Width 2)
         [ ( "", "Generate Summary Report", GenerateSummaryReport )
         , ( "", "Save Summary Report to Client Portal", SaveSummaryReportToClientPortal )
@@ -160,18 +160,6 @@ dxCpRcAlRxVs row =
         ]
             |> List.map fullCircle
             |> div [ class "circleMargin" ]
-
-
-
--- Just """
---<div class="circleMargin">
--- <div title="Chronic Diagnoses present?" class="circle" style="background-color: currentColor"></div>
--- <div title="Care Plan present?" class="circle" style="background-color: currentColor"></div>
--- <div title="Recorded call present?" class="circle" style="background-color: white; border: 1.4px solid;"></div>
--- <div title="Allergies present?" class="circle" style="background-color: currentColor"></div>
--- <div title="Medication present?" class="circle" style="background-color: currentColor"></div>
--- <div title="Vitals Signs present?" class="circle" style="background-color: currentColor"></div>
--- </div>"""
 
 
 filterStyle : ColumnStyle
