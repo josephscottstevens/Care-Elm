@@ -140,7 +140,7 @@ openTasks t =
 
 
 dxCpRcAlRxVs : Row -> Html msg
-dxCpRcAlRxVs t =
+dxCpRcAlRxVs row =
     let
         getStyle t =
             if t then
@@ -151,12 +151,12 @@ dxCpRcAlRxVs t =
         fullCircle ( t, titleText ) =
             div [ title titleText, class "circle", getStyle t ] []
     in
-        [ ( t.dxPresent, "Chronic Diagnoses present?" )
-        , ( t.carePlanPresent, "Care Plan present?" )
-        , ( t.recordingPresent, "Recorded call present?" )
-        , ( t.allergiesPresent, "Allergies present?" )
-        , ( t.medsPresent, "Medication present?" )
-        , ( t.vitalsPresent, "Vitals Signs present?" )
+        [ ( row.dxPresent, "Chronic Diagnoses present?" )
+        , ( row.carePlanPresent, "Care Plan present?" )
+        , ( row.recordingPresent, "Recorded call present?" )
+        , ( row.allergiesPresent, "Allergies present?" )
+        , ( row.medsPresent, "Medication present?" )
+        , ( row.vitalsPresent, "Vitals Signs present?" )
         ]
             |> List.map fullCircle
             |> div [ class "circleMargin" ]

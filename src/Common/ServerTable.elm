@@ -61,6 +61,14 @@ type Control
     | SixCirclesControl
 
 
+type alias Filter =
+    { controlType : String
+    , names : List String
+    , values : List String
+    , expressions : List String
+    }
+
+
 type ColumnStyle
     = NoStyle
     | Width Int
@@ -116,131 +124,6 @@ dropdownColumn columnStyle items =
 htmlColumn : String -> ColumnStyle -> (data -> Html msg) -> Control -> Operator -> Column data msg
 htmlColumn displayText columnStyle data control operator =
     HtmlColumn displayText columnStyle data control operator
-
-
-getControlString : Control -> String
-getControlString control =
-    case control of
-        TextControl ->
-            "text"
-
-        DateControl ->
-            "date"
-
-        DateTimeControl ->
-            "datetime"
-
-        NoControl ->
-            "none"
-
-        CheckBoxControl ->
-            "checkbox"
-
-        FilterIsNewControl ->
-            "filterIsNew"
-
-        Last60MonthsControl ->
-            "last60Months"
-
-        SixCirclesControl ->
-            "sixCirclesControl"
-
-
-getNames : Operator -> List String
-getNames operator =
-    case operator of
-        NoOperator str ->
-            [ str ]
-
-        Equals str ->
-            [ str ]
-
-        Contains str ->
-            [ str ]
-
-        Between str1 str2 ->
-            [ str1, str2 ]
-
-        CustomSingleOperator _ items ->
-            items
-
-
-getOperators : Operator -> List String
-getOperators operator =
-    case operator of
-        NoOperator _ ->
-            []
-
-        Equals str ->
-            [ "Equals" ]
-
-        Contains str ->
-            [ "Contains" ]
-
-        Between str1 str2 ->
-            [ "GreaterThanOrEquals", "LessThanOrEquals" ]
-
-        CustomSingleOperator _ items ->
-            List.map (\t -> "Equals") items
-
-
-type alias Filter =
-    { controlType : String
-    , names : List String
-    , values : List String
-    , expressions : List String
-    }
-
-
-buildFilter : List (Column data msg) -> List Filter
-buildFilter columns =
-    columns
-        |> List.map
-            (\column ->
-                let
-                    defaultFilter t operator =
-                        { controlType = getControlString t
-                        , names = getNames operator
-                        , values = List.map (\t -> "") (getNames operator)
-                        , expressions = getOperators operator
-                        }
-                in
-                    case column of
-                        IntColumn _ _ _ dataField ->
-                            defaultFilter TextControl (Equals dataField)
-
-                        StringColumn _ _ _ dataField ->
-                            defaultFilter TextControl (Contains dataField)
-
-                        DateTimeColumn _ _ _ dataField ->
-                            defaultFilter DateTimeControl (Equals dataField)
-
-                        DateColumn _ _ _ dataField ->
-                            defaultFilter DateControl (Equals dataField)
-
-                        HrefColumn _ _ _ _ dataField ->
-                            defaultFilter TextControl (Equals dataField)
-
-                        CheckColumn _ _ _ dataField ->
-                            defaultFilter CheckBoxControl (Equals dataField)
-
-                        DropdownColumn _ _ ->
-                            defaultFilter NoControl (NoOperator "menuDropdown")
-
-                        HtmlColumn _ _ _ control operator ->
-                            defaultFilter control operator
-            )
-
-
-initFilter : List (Column data msg) -> Cmd msg
-initFilter columns =
-    buildFilter columns
-        |> initFilters
-
-
-updateFilter : List Filter -> GridOperations data msg -> GridOperations data msg
-updateFilter filters gridOperations =
-    { gridOperations | filters = filters }
 
 
 
@@ -478,7 +361,7 @@ viewTh gridOperations toMsg column =
         sortClick =
             Events.onClick (toMsg { gridOperations | sortAscending = newSortDirection, sortField = Just name })
     in
-        th [ class ("e-headercell e-default " ++ name), sortClick, columnStyle column ]
+        th [ class ("e-headercell e-default " ++ name), sortClick, getColumnStyle column ]
             [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
             ]
 
@@ -501,8 +384,8 @@ textHtml t =
         []
 
 
-columnStyle : Column data msg -> Html.Attribute msg1
-columnStyle column =
+getColumnStyle : Column data msg -> Html.Attribute msg1
+getColumnStyle column =
     let
         t =
             case column of
@@ -883,3 +766,124 @@ decodeGridOperations =
         |> Pipeline.required "TotalRows" Decode.int
         |> Pipeline.required "SortField" (Decode.maybe Decode.string)
         |> Pipeline.required "SortAscending" Decode.bool
+
+
+
+-- filter stuff
+
+
+getControlString : Control -> String
+getControlString control =
+    case control of
+        TextControl ->
+            "text"
+
+        DateControl ->
+            "date"
+
+        DateTimeControl ->
+            "datetime"
+
+        NoControl ->
+            "none"
+
+        CheckBoxControl ->
+            "checkbox"
+
+        FilterIsNewControl ->
+            "filterIsNew"
+
+        Last60MonthsControl ->
+            "last60Months"
+
+        SixCirclesControl ->
+            "sixCirclesControl"
+
+
+getNames : Operator -> List String
+getNames operator =
+    case operator of
+        NoOperator str ->
+            [ str ]
+
+        Equals str ->
+            [ str ]
+
+        Contains str ->
+            [ str ]
+
+        Between str1 str2 ->
+            [ str1, str2 ]
+
+        CustomSingleOperator _ items ->
+            items
+
+
+getOperators : Operator -> List String
+getOperators operator =
+    case operator of
+        NoOperator _ ->
+            []
+
+        Equals _ ->
+            [ "Equals" ]
+
+        Contains _ ->
+            [ "Contains" ]
+
+        Between _ _ ->
+            [ "GreaterThanOrEquals", "LessThanOrEquals" ]
+
+        CustomSingleOperator op items ->
+            List.map (\_ -> op) items
+
+
+buildFilter : List (Column data msg) -> List Filter
+buildFilter columns =
+    columns
+        |> List.map
+            (\column ->
+                let
+                    defaultFilter t operator =
+                        { controlType = getControlString t
+                        , names = getNames operator
+                        , values = List.map (\_ -> "") (getNames operator)
+                        , expressions = getOperators operator
+                        }
+                in
+                    case column of
+                        IntColumn _ _ _ dataField ->
+                            defaultFilter TextControl (Equals dataField)
+
+                        StringColumn _ _ _ dataField ->
+                            defaultFilter TextControl (Contains dataField)
+
+                        DateTimeColumn _ _ _ dataField ->
+                            defaultFilter DateTimeControl (Equals dataField)
+
+                        DateColumn _ _ _ dataField ->
+                            defaultFilter DateControl (Equals dataField)
+
+                        HrefColumn _ _ _ _ dataField ->
+                            defaultFilter TextControl (Equals dataField)
+
+                        CheckColumn _ _ _ dataField ->
+                            defaultFilter CheckBoxControl (Equals dataField)
+
+                        DropdownColumn _ _ ->
+                            defaultFilter NoControl (NoOperator "menuDropdown")
+
+                        HtmlColumn _ _ _ control operator ->
+                            defaultFilter control operator
+            )
+
+
+initFilter : List (Column data msg) -> Cmd msg
+initFilter columns =
+    buildFilter columns
+        |> initFilters
+
+
+updateFilter : List Filter -> GridOperations data msg -> GridOperations data msg
+updateFilter filters gridOperations =
+    { gridOperations | filters = filters }
