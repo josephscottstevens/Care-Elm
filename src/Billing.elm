@@ -198,23 +198,12 @@ update msg model patientId =
             Debug.crash "todo"
 
         ToggleBatchClose row ->
-            let
-                rows =
-                    model.rows
-                        |> List.map
-                            (\t ->
-                                if t.id == row.id then
-                                    { t | batchCloseOnInvoiceCompletion = not row.batchCloseOnInvoiceCompletion }
-                                else
-                                    t
-                            )
-            in
-                { model | rows = rows }
-                    ! [ "/Billing/ToggleBatchInvoice"
-                            |> Functions.postRequest
-                                (Encode.object [ ( "billingId", Encode.int row.id ) ])
-                            |> Http.send ToggleBatchCloseDone
-                      ]
+            model
+                ! [ "/Billing/ToggleBatchInvoice"
+                        |> Functions.postRequest
+                            (Encode.object [ ( "billingId", Encode.int row.id ) ])
+                        |> Http.send ToggleBatchCloseDone
+                  ]
 
         ToggleBatchCloseDone (Ok t) ->
             model ! []
