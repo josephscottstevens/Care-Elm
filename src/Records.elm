@@ -205,7 +205,7 @@ type Msg
     | Add AddEditDataSource RecordType
     | SendMenuMessage Common.RecordType String Row
     | EditTask Int
-    | DeletePrompt Int
+    | DeletePrompt Row
     | DeleteConfirmed Int
     | DeleteCompleted (Result Http.Error String)
     | NoOp
@@ -257,8 +257,8 @@ update msg model patientId =
                 { model | rows = flipConsent model.rows row.id recordType }
                     ! [ sendMenuMessage (getMenuMessage model.rows recordType row.id messageType) ]
 
-            DeletePrompt rowId ->
-                model ! [ Functions.deleteDialogShow rowId ]
+            DeletePrompt row ->
+                model ! [ Functions.deleteDialogShow row.id ]
 
             DeleteConfirmed rowId ->
                 { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
@@ -679,7 +679,7 @@ dropdownItems recordType =
             , ( "e-mail", "Send By Email", SendMenuMessage recordType "SendByEmail" )
             , ( "e-print_01", "Send By Fax", SendMenuMessage recordType "SendByFax" )
             , ( "e-save", "Save To Client Portal", SendMenuMessage recordType "SaveToClientPortal" )
-            , ( "e-contextdelete", "Delete", SendMenuMessage recordType "Delete" )
+            , ( "e-contextdelete", "Delete", DeletePrompt )
             ]
 
 
