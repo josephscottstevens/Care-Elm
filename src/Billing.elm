@@ -68,16 +68,26 @@ view model _ =
 columns : List (Table.Column Row Msg)
 columns =
     let
-        batchClose row =
+        checkHelper t =
             div [ class "e-checkcell" ]
                 [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
-                    [ input
-                        [ type_ "checkbox"
-                        , checked row.batchCloseOnInvoiceCompletion
-                        , onClick (ToggleBatchClose row)
-                        ]
-                        []
+                    [ input (type_ "checkbox" :: t) []
                     ]
+                ]
+
+        batchClose row =
+            checkHelper
+                [ checked row.batchCloseOnInvoiceCompletion
+                , onClick (ToggleBatchClose row)
+                ]
+
+        toggleReviewed row =
+            checkHelper
+                [ checked row.isReviewed
+                , if row.isReviewed == True then
+                    onClick (ToggleReviewed row)
+                  else
+                    onClick (ConfirmDialogShow row.id)
                 ]
 
         dxCpRcAlRxVsOperator =
@@ -110,7 +120,7 @@ columns =
                 ]
     in
         [ Table.htmlColumn "<= 24 Hrs" "lessThan24HoursColumn" (Width 4) isNew Table.FilterIsNewControl (Equals "Is24HoursSinceBilled")
-        , Table.checkColumn "Reviewed" (Width 4) .isReviewed "IsReviewed"
+        , Table.htmlColumn "Reviewed" "reviewedColumn" (Width 4) toggleReviewed Table.CheckBoxControl (Equals "IsReviewed")
         , Table.htmlColumn "Batch Close" "batchCloseColumn" (Width 4) batchClose Table.CheckBoxControl (Equals "BatchCloseOnInvoiceCompletion")
         , Table.stringColumn "Facility" (Width 9) .facility "Facility"
         , Table.htmlColumn "Billing Date" "billingDateColumn" (Width 5) billingDate Table.Last60MonthsControl (Between "BillingDate" "BillingDate")
@@ -164,6 +174,18 @@ type Msg
     | CloseBillingSession Row
     | ToggleBatchClose Row
     | ToggleBatchCloseDone (Result Http.Error String)
+    | ToggleReviewed Row
+    | ToggleReviewedDone (Result Http.Error String)
+    | ConfirmDialogShow Int
+    | ConfirmDialogConfirmed Int
+
+
+toggleReviewed : Row -> Cmd Msg
+toggleReviewed row =
+    "/Billing/ToggleBillingRecordReviewed"
+        |> Functions.postRequest
+            (Encode.object [ ( "billingId", Encode.int row.id ) ])
+        |> Http.send ToggleReviewedDone
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -210,6 +232,41 @@ update msg model patientId =
 
         ToggleBatchCloseDone (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
+
+        ToggleReviewed row ->
+            model ! [ toggleReviewed row ]
+
+        ToggleReviewedDone (Ok t) ->
+            model ! []
+
+        ToggleReviewedDone (Err t) ->
+            model ! [ Functions.displayErrorMessage (toString t) ]
+
+        ConfirmDialogShow id ->
+            model
+                ! [ Functions.customDialogShow
+                        { message = "Are you sure you wish to change the reviewed status?"
+                        , submitText = "Ok"
+                        , title = "Confirm"
+                        , id = id
+                        }
+                  ]
+
+        ConfirmDialogConfirmed id ->
+            let
+                row =
+                    model.rows
+                        |> List.filter (\t -> t.id == id)
+                        |> List.head
+            in
+                model
+                    ! [ case row of
+                            Just t ->
+                                toggleReviewed t
+
+                            Nothing ->
+                                Functions.displayErrorMessage "Error toggling reviewed status, please try again later"
+                      ]
 
 
 

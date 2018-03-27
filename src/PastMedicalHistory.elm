@@ -22,7 +22,7 @@ port updatePastMedicalHistory : (SfData -> msg) -> Sub msg
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
-        [ Functions.deleteConfirmed DeletePastMedicalHistoryConfirmed
+        [ Functions.dialogConfirmed DeletePastMedicalHistoryConfirmed
         , updatePastMedicalHistory UpdatePastMedicalHistory
         ]
 
@@ -139,7 +139,7 @@ update msg model patientId =
             { model | tableState = newState } ! []
 
         DeletePrompt row ->
-            model ! [ Functions.deletePrompt row.id ]
+            model ! [ Functions.deleteDialogShow row.id ]
 
         DeletePastMedicalHistoryConfirmed rowId ->
             { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }

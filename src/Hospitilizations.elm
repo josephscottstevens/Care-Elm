@@ -30,7 +30,7 @@ port updateHospitilizations : (SyncfusionData -> msg) -> Sub msg
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
-        [ Functions.deleteConfirmed DeleteHospitilizationConfirmed
+        [ Functions.dialogConfirmed DeleteHospitilizationConfirmed
         , updateHospitilizations UpdateHospitilizationsInitData
         ]
 
@@ -192,7 +192,7 @@ update msg model patientId =
                 model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
             DeletePrompt row ->
-                model ! [ Functions.deletePrompt row.id ]
+                model ! [ Functions.deleteDialogShow row.id ]
 
             DeleteHospitilizationConfirmed rowId ->
                 let

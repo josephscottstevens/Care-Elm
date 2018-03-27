@@ -16,7 +16,7 @@ import Common.Table as Table
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
-        [ Functions.deleteConfirmed DeleteConfirmed
+        [ Functions.dialogConfirmed DeleteConfirmed
         ]
 
 
@@ -130,7 +130,7 @@ update msg model patientId =
                 model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
             DeletePrompt row ->
-                model ! [ Functions.deletePrompt row.id ]
+                model ! [ Functions.deleteDialogShow row.id ]
 
             DeleteConfirmed rowId ->
                 let

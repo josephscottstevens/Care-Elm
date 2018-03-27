@@ -135,7 +135,6 @@ type alias GridOperations data msg =
     { selectedId : Maybe Int
     , openDropdownId : Maybe Int
     , skip : Int
-    , pageSize : Int
     , rowsPerPage : Int
     , totalRows : Int
     , sortField : Maybe String
@@ -180,7 +179,6 @@ init config =
     { selectedId = Nothing
     , openDropdownId = Nothing
     , skip = 0
-    , pageSize = 20
     , rowsPerPage = 10
     , totalRows = 0
     , sortField = config.sortField
@@ -639,7 +637,7 @@ setPagingState gridOperations toMsg page =
                     gridOperations.skip + 1
 
                 Last ->
-                    (gridOperations.totalRows // gridOperations.pageSize) - 1
+                    (gridOperations.totalRows // gridOperations.rowsPerPage) - 1
     in
         Events.onClick (toMsg { gridOperations | skip = newIndex })
 
@@ -648,7 +646,7 @@ pagingView : GridOperations data msg -> (GridOperations data msg -> msg) -> Html
 pagingView gridOperations toMsg =
     let
         totalPages =
-            (gridOperations.totalRows // gridOperations.pageSize) - 1
+            gridOperations.totalRows // gridOperations.rowsPerPage
 
         pagingStateClick page =
             setPagingState gridOperations toMsg page
@@ -667,12 +665,12 @@ pagingView gridOperations toMsg =
 
         rng =
             List.range 0 totalPages
-                |> List.drop ((gridOperations.skip // gridOperations.rowsPerPage) * gridOperations.rowsPerPage)
-                |> List.take gridOperations.rowsPerPage
+                |> List.drop ((gridOperations.skip // 15) * 15)
+                |> List.take 15
                 |> List.map activeOrNot
 
         firstPageClass =
-            if gridOperations.skip >= gridOperations.pageSize then
+            if gridOperations.skip >= 15 then
                 "e-icon e-mediaback e-firstpage e-default"
             else
                 "e-icon e-mediaback e-firstpagedisabled e-disable"
@@ -684,13 +682,13 @@ pagingView gridOperations toMsg =
                 "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
 
         leftPageBlockClass =
-            if gridOperations.skip >= gridOperations.rowsPerPage then
+            if gridOperations.skip >= 15 then
                 "e-link e-spacing e-PP e-numericitem e-default"
             else
                 "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
 
         rightPageBlockClass =
-            if gridOperations.skip < totalPages - gridOperations.rowsPerPage then
+            if gridOperations.skip < totalPages - 15 then
                 "e-link e-NP e-spacing e-numericitem e-default"
             else
                 "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
@@ -702,7 +700,7 @@ pagingView gridOperations toMsg =
                 "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
 
         lastPageClass =
-            if gridOperations.skip < totalPages - gridOperations.rowsPerPage then
+            if gridOperations.skip < totalPages - 15 then
                 "e-lastpage e-icon e-mediaforward e-default"
             else
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
@@ -717,7 +715,7 @@ pagingView gridOperations toMsg =
                         if totalPages < 1 then
                             1
                         else
-                            totalPages
+                            totalPages + 1
 
                 totalItemsText =
                     toString gridOperations.totalRows
@@ -748,7 +746,6 @@ updateFromServer : ServerData -> GridOperations data msg -> GridOperations data 
 updateFromServer serverData dt =
     { dt
         | skip = serverData.skip
-        , pageSize = serverData.pageSize
         , rowsPerPage = serverData.rowsPerPage
         , totalRows = serverData.totalRows
         , sortField = serverData.sortField
@@ -772,7 +769,6 @@ encodeGridOperations gridOperations =
         [ ( "SelectedId", Functions.maybeVal Encode.int gridOperations.selectedId )
         , ( "OpenDropdownId", Functions.maybeVal Encode.int gridOperations.openDropdownId )
         , ( "Skip", Encode.int gridOperations.skip )
-        , ( "PageSize", Encode.int gridOperations.pageSize )
         , ( "RowsPerPage", Encode.int gridOperations.rowsPerPage )
         , ( "TotalRows", Encode.int gridOperations.totalRows )
         , ( "SortField", Functions.maybeVal Encode.string gridOperations.sortField )

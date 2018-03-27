@@ -38,7 +38,7 @@ port editTask : Int -> Cmd msg
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
-        [ Functions.deleteConfirmed DeleteConfirmed
+        [ Functions.dialogConfirmed DeleteConfirmed
         , updateRecordAddNew UpdateRecordAddNew
         ]
 
@@ -258,7 +258,7 @@ update msg model patientId =
                     ! [ sendMenuMessage (getMenuMessage model.rows recordType row.id messageType) ]
 
             DeletePrompt rowId ->
-                model ! [ Functions.deletePrompt rowId ]
+                model ! [ Functions.deleteDialogShow rowId ]
 
             DeleteConfirmed rowId ->
                 { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }

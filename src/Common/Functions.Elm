@@ -40,8 +40,10 @@ port module Common.Functions
         , getId
         , sendMenuMessage
         , setUnsavedChanges
-        , deletePrompt
-        , deleteConfirmed
+        , CustomDialog
+        , customDialogShow
+        , deleteDialogShow
+        , dialogConfirmed
         , uniqueBy
         , getAt
         )
@@ -92,10 +94,33 @@ port sendMenuMessage : MenuMessage -> Cmd msg
 port setUnsavedChanges : Bool -> Cmd msg
 
 
-port deletePrompt : Int -> Cmd msg
+type alias CustomDialog =
+    { message : String
+    , submitText : String
+    , title : String
+    , id : Int
+    }
 
 
-port deleteConfirmed : (Int -> msg) -> Sub msg
+port customDialogShow : CustomDialog -> Cmd msg
+
+
+port customDialogConfirmed : (CustomDialog -> msg) -> Sub msg
+
+
+dialogConfirmed : (Int -> msg) -> Sub msg
+dialogConfirmed msg =
+    customDialogConfirmed (\t -> msg t.id)
+
+
+deleteDialogShow : Int -> Cmd msg
+deleteDialogShow id =
+    customDialogShow
+        { message = "Are you sure you wish to delete this record?"
+        , submitText = "Delete"
+        , title = "Confirm Delete"
+        , id = id
+        }
 
 
 isAlpha : Char -> Bool

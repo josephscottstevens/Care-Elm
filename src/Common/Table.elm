@@ -31,7 +31,6 @@ type alias State =
     , openDropdownId : Maybe Int
     , pageIndex : Int
     , rowsPerPage : Int
-    , pagesPerBlock : Int
     , sortField : String
     , sortAscending : Bool
     }
@@ -53,7 +52,6 @@ init sortedColumnName =
     , openDropdownId = Nothing
     , pageIndex = 0
     , rowsPerPage = 20
-    , pagesPerBlock = 15
     , sortField = sortedColumnName
     , sortAscending = True
     }
@@ -141,8 +139,11 @@ view state rows config maybeCustomRow =
 
         filteredRows =
             sortedRows
-                |> List.drop (state.pageIndex * state.pagesPerBlock)
-                |> List.take state.pagesPerBlock
+                |> List.drop (state.pageIndex * state.rowsPerPage)
+                |> List.take state.rowsPerPage
+
+        totalRows =
+            List.length rows
     in
         div [ class "e-grid e-js e-waitingpopup" ]
             [ viewToolbar config.toolbar
@@ -156,7 +157,7 @@ view state rows config maybeCustomRow =
                 , tbody []
                     (viewTr state filteredRows config maybeCustomRow)
                 ]
-            , pagingView state rows config.toMsg
+            , pagingView state totalRows filteredRows config.toMsg
             ]
 
 
@@ -484,12 +485,9 @@ setPagingState state totalRows toMsg page =
         Events.onClick (toMsg { state | pageIndex = newIndex })
 
 
-pagingView : State -> List { data | id : Int } -> (State -> msg) -> Html msg
-pagingView state rows toMsg =
+pagingView : State -> Int -> List { data | id : Int } -> (State -> msg) -> Html msg
+pagingView state totalRows rows toMsg =
     let
-        totalRows =
-            List.length rows
-
         totalPages =
             totalRows // state.rowsPerPage
 
@@ -510,12 +508,12 @@ pagingView state rows toMsg =
 
         rng =
             List.range 0 totalPages
-                |> List.drop ((state.pageIndex // state.pagesPerBlock) * state.pagesPerBlock)
-                |> List.take state.pagesPerBlock
+                |> List.drop ((state.pageIndex // 15) * 15)
+                |> List.take 15
                 |> List.map activeOrNot
 
         firstPageClass =
-            if state.pageIndex >= state.rowsPerPage then
+            if state.pageIndex >= 15 then
                 "e-icon e-mediaback e-firstpage e-default"
             else
                 "e-icon e-mediaback e-firstpagedisabled e-disable"
@@ -527,13 +525,13 @@ pagingView state rows toMsg =
                 "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
 
         leftPageBlockClass =
-            if state.pageIndex >= state.pagesPerBlock then
+            if state.pageIndex >= 15 then
                 "e-link e-spacing e-PP e-numericitem e-default"
             else
                 "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
 
         rightPageBlockClass =
-            if state.pageIndex < totalPages - state.pagesPerBlock then
+            if state.pageIndex < totalPages - 15 then
                 "e-link e-NP e-spacing e-numericitem e-default"
             else
                 "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
@@ -545,7 +543,7 @@ pagingView state rows toMsg =
                 "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
 
         lastPageClass =
-            if state.pageIndex < totalPages - state.pagesPerBlock then
+            if state.pageIndex < totalPages - 15 then
                 "e-lastpage e-icon e-mediaforward e-default"
             else
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
@@ -560,7 +558,7 @@ pagingView state rows toMsg =
                         if totalPages < 1 then
                             1
                         else
-                            totalPages
+                            totalPages + 1
 
                 totalItemsText =
                     toString totalRows
