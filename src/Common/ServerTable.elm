@@ -259,8 +259,7 @@ viewTr gridOperations toMsg rows maybeCustomRow =
             Just customRow ->
                 tr [ customRowStyle ]
                     [ td [ colspan (List.length gridOperations.columns), customCellStyle ]
-                        [ customRow
-                        ]
+                        [ customRow ]
                     ]
                     :: List.indexedMap standardTr rows
 

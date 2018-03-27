@@ -98,12 +98,6 @@ port deletePrompt : Int -> Cmd msg
 port deleteConfirmed : (Int -> msg) -> Sub msg
 
 
-
--- error : Http.Error -> Maybe Route
--- error httpError =
---     Just (Route.Error (toString httpError))
-
-
 isAlpha : Char -> Bool
 isAlpha char =
     isLower char || isUpper char
