@@ -213,7 +213,7 @@ type Msg
     = Load (Result Http.Error (List RecordRow))
     | SetTableState Table.State
     | Add AddEditDataSource RecordType
-    | SendMenuMessage Common.RecordType String Int
+    | SendMenuMessage Common.RecordType String RecordRow
     | EditTask Int
     | DeletePrompt Int
     | DeleteConfirmed Int
@@ -264,9 +264,9 @@ update msg model patientId =
             SetTableState newState ->
                 { model | tableState = newState } ! []
 
-            SendMenuMessage recordType messageType recordId ->
-                { model | rows = flipConsent model.rows recordId recordType }
-                    ! [ sendMenuMessage (getMenuMessage model.rows recordType recordId messageType) ]
+            SendMenuMessage recordType messageType row ->
+                { model | rows = flipConsent model.rows row.id recordType }
+                    ! [ sendMenuMessage (getMenuMessage model.rows recordType row.id messageType) ]
 
             DeletePrompt rowId ->
                 model ! [ Functions.deletePrompt rowId ]
@@ -682,7 +682,7 @@ gridConfig recordType addEditDataSource =
     }
 
 
-dropdownItems : RecordType -> List ( String, String, Int -> Msg )
+dropdownItems : RecordType -> List ( String, String, RecordRow -> Msg )
 dropdownItems recordType =
     case recordType of
         Common.CallRecordings ->
