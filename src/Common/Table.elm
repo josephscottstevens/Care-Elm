@@ -501,7 +501,7 @@ setPagingState state totalRows toMsg page =
 pagingView : State -> Int -> List { data | id : Int } -> (State -> msg) -> Html msg
 pagingView state totalRows rows toMsg =
     let
-        totalPages =
+        lastIndex =
             totalRows // state.rowsPerPage
 
         pagingStateClick page =
@@ -516,17 +516,19 @@ pagingView state totalRows rows toMsg =
                         "e-default"
             in
                 div
-                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), pagingStateClick (Index pageIndex) ]
+                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText)
+                    , pagingStateClick (Index pageIndex)
+                    ]
                     [ text (toString (pageIndex + 1)) ]
 
         rng =
-            List.range 0 totalPages
+            List.range 0 lastIndex
                 |> List.drop ((state.pageIndex // blockSize) * blockSize)
                 |> List.take blockSize
                 |> List.map activeOrNot
 
         firstPageClass =
-            if state.pageIndex >= blockSize then
+            if state.pageIndex > 1 then
                 "e-icon e-mediaback e-firstpage e-default"
             else
                 "e-icon e-mediaback e-firstpagedisabled e-disable"
@@ -544,19 +546,19 @@ pagingView state totalRows rows toMsg =
                 "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
 
         rightPageBlockClass =
-            if state.pageIndex < totalPages - blockSize then
+            if state.pageIndex < lastIndex - blockSize then
                 "e-link e-NP e-spacing e-numericitem e-default"
             else
                 "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
 
         rightPageClass =
-            if state.pageIndex < totalPages then
+            if state.pageIndex < lastIndex then
                 "e-nextpage e-icon e-arrowheadright-2x e-default"
             else
                 "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
 
         lastPageClass =
-            if state.pageIndex < totalPages - blockSize then
+            if state.pageIndex < lastIndex then
                 "e-lastpage e-icon e-mediaforward e-default"
             else
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
@@ -568,10 +570,10 @@ pagingView state totalRows rows toMsg =
 
                 totalPagesText =
                     toString <|
-                        if totalPages < 1 then
+                        if lastIndex < 1 then
                             1
                         else
-                            totalPages + 1
+                            lastIndex + 1
 
                 totalItemsText =
                     toString totalRows
