@@ -56,7 +56,7 @@ init sortedColumnName =
     { selectedId = Nothing
     , openDropdownId = Nothing
     , pageIndex = 0
-    , rowsPerPage = 2
+    , rowsPerPage = 20
     , sortField = sortedColumnName
     , sortAscending = False
     }
