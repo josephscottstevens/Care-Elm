@@ -26,6 +26,11 @@ import Json.Encode as Encode
 -- Data Types
 
 
+blockSize : Int
+blockSize =
+    15
+
+
 type alias State =
     { selectedId : Maybe Int
     , openDropdownId : Maybe Int
@@ -456,31 +461,39 @@ toolbarHelper ( iconStr, event ) =
 setPagingState : State -> Int -> (State -> msg) -> Page -> Html.Attribute msg
 setPagingState state totalRows toMsg page =
     let
+        lastIndex =
+            totalRows // state.rowsPerPage
+
+        bounded t =
+            if t > lastIndex then
+                lastIndex
+            else if t < 0 then
+                0
+            else
+                t
+
         newIndex =
             case page of
                 First ->
                     0
 
                 Previous ->
-                    if state.pageIndex > 0 then
-                        state.pageIndex - 1
-                    else
-                        0
+                    bounded (state.pageIndex - 1)
 
                 PreviousBlock ->
-                    0
+                    bounded (state.pageIndex - blockSize)
 
                 Index t ->
-                    t
+                    bounded t
 
                 NextBlock ->
-                    0
+                    bounded (state.pageIndex + blockSize)
 
                 Next ->
-                    state.pageIndex + 1
+                    bounded (state.pageIndex + 1)
 
                 Last ->
-                    (totalRows // state.rowsPerPage) - 1
+                    lastIndex
     in
         Events.onClick (toMsg { state | pageIndex = newIndex })
 
@@ -508,12 +521,12 @@ pagingView state totalRows rows toMsg =
 
         rng =
             List.range 0 totalPages
-                |> List.drop ((state.pageIndex // 15) * 15)
-                |> List.take 15
+                |> List.drop ((state.pageIndex // blockSize) * blockSize)
+                |> List.take blockSize
                 |> List.map activeOrNot
 
         firstPageClass =
-            if state.pageIndex >= 15 then
+            if state.pageIndex >= blockSize then
                 "e-icon e-mediaback e-firstpage e-default"
             else
                 "e-icon e-mediaback e-firstpagedisabled e-disable"
@@ -525,13 +538,13 @@ pagingView state totalRows rows toMsg =
                 "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
 
         leftPageBlockClass =
-            if state.pageIndex >= 15 then
+            if state.pageIndex >= blockSize then
                 "e-link e-spacing e-PP e-numericitem e-default"
             else
                 "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
 
         rightPageBlockClass =
-            if state.pageIndex < totalPages - 15 then
+            if state.pageIndex < totalPages - blockSize then
                 "e-link e-NP e-spacing e-numericitem e-default"
             else
                 "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
@@ -543,7 +556,7 @@ pagingView state totalRows rows toMsg =
                 "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
 
         lastPageClass =
-            if state.pageIndex < totalPages - 15 then
+            if state.pageIndex < totalPages - blockSize then
                 "e-lastpage e-icon e-mediaforward e-default"
             else
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
