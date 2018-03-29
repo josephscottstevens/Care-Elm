@@ -29,7 +29,7 @@ type alias Model =
 
 type Page
     = Demographics Demographics.Model
-    | Billing Billing.Model
+      -- | Billing Billing.Model
     | ClinicalSummary ClinicalSummary.Model
     | Records Records.Model
     | Hospitilizations Hospitilizations.Model
@@ -99,9 +99,8 @@ pageSubscriptions page =
         Records _ ->
             Sub.map RecordsMsg Records.subscriptions
 
-        Billing _ ->
-            Sub.map BillingMsg Billing.subscriptions
-
+        -- Billing _ ->
+        --     Sub.map BillingMsg Billing.subscriptions
         -- Other
         NoPage ->
             Sub.none
@@ -119,9 +118,8 @@ view model =
         Demographics subModel ->
             Html.map DemographicsMsg (Demographics.view subModel)
 
-        Billing subModel ->
-            Html.map BillingMsg (Billing.view subModel model.addEditDataSource)
-
+        -- Billing subModel ->
+        --     Html.map BillingMsg (Billing.view subModel model.addEditDataSource)
         ClinicalSummary subModel ->
             Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel model.patientId)
 
@@ -150,7 +148,7 @@ view model =
 
 type Msg
     = SetRoute (Maybe Route)
-    | BillingMsg Billing.Msg
+      -- | BillingMsg Billing.Msg
     | ClinicalSummaryMsg ClinicalSummary.Msg
     | PastMedicalHistoryMsg PastMedicalHistory.Msg
     | HospitilizationsMsg Hospitilizations.Msg
@@ -231,10 +229,9 @@ setRoute maybeRoute model =
                     ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
 
             --Other
-            Just Route.Billing ->
-                setModel Route.Billing (Billing Billing.emptyModel)
-                    ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
-
+            -- Just Route.Billing ->
+            --     setModel Route.Billing (Billing Billing.emptyModel)
+            --         ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
             Just Route.None ->
                 setModel Route.None NoPage
                     ! []
@@ -284,9 +281,8 @@ updatePage page msg model =
             ( PastMedicalHistoryMsg subMsg, PastMedicalHistory subModel ) ->
                 toPage PastMedicalHistory PastMedicalHistoryMsg PastMedicalHistory.update subMsg subModel
 
-            ( BillingMsg subMsg, Billing subModel ) ->
-                toPage Billing BillingMsg Billing.update subMsg subModel
-
+            -- ( BillingMsg subMsg, Billing subModel ) ->
+            --     toPage Billing BillingMsg Billing.update subMsg subModel
             ( HospitilizationsMsg subMsg, Hospitilizations subModel ) ->
                 toPage Hospitilizations HospitilizationsMsg Hospitilizations.update subMsg subModel
 
