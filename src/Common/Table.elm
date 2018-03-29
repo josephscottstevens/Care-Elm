@@ -299,8 +299,13 @@ viewTd state row config column =
                     text (Functions.defaultDate (dataToString row))
 
                 HrefColumn _ displayText dataToString _ ->
-                    --TODO, how do I want to display empty? I think.. it is hide the href, not go to an empty url right?
-                    a [ href (Maybe.withDefault "" (dataToString row)), target "_blank" ] [ text displayText ]
+                    case dataToString row of
+                        Just t ->
+                            a [ href t, target "_blank" ]
+                                [ text t ]
+
+                        Nothing ->
+                            text ""
 
                 HrefColumnExtra _ toNode ->
                     toNode row

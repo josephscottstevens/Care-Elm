@@ -10,7 +10,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 import Http
-import Char
 import MaskedInput.Number as MaskedNumber
 
 
@@ -81,7 +80,6 @@ type alias Model =
     , sexualOrientationNote : Maybe String
     , genderIdentityNote : Maybe String
     , email : Maybe String
-    , preferredLanguageIndex : Int
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
     , contactHoursModel : Maybe Decode.Value
@@ -1051,7 +1049,6 @@ emptyModel patientId =
     , sexualOrientationNote = Nothing
     , genderIdentityNote = Nothing
     , email = Nothing
-    , preferredLanguageIndex = 0
     , sfData = emptySfData
     , patientLanguagesMap = []
     , patientPhoneNumbers = []
@@ -1169,7 +1166,6 @@ updateModelFromServerMessage serverResponse model =
                     , sexualOrientationNote = d.sexualOrientationNote
                     , genderIdentityNote = d.genderIdentityNote
                     , email = d.email
-                    , preferredLanguageIndex = d.preferredLanguageIndex
                     , sfData = { sfDrops | drops = ds }
                     , patientLanguagesMap = d.patientLanguagesMap
                     , patientPhoneNumbers = c.patientPhoneNumbers
@@ -1209,7 +1205,6 @@ type alias DemographicsInformationModel =
     , sexualOrientationNote : Maybe String
     , genderIdentityNote : Maybe String
     , email : Maybe String
-    , preferredLanguageIndex : Int
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
     , suffixId : Maybe Int
@@ -1260,7 +1255,6 @@ decodeDemographicsInformationModel =
         |> Pipeline.required "SexualOrientationNote" (Decode.maybe Decode.string)
         |> Pipeline.required "GenderIdentityNote" (Decode.maybe Decode.string)
         |> Pipeline.required "Email" (Decode.maybe Decode.string)
-        |> Pipeline.required "PreferredLanguageIndex" Decode.int
         |> Pipeline.custom decodeSfData
         |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
         |> Pipeline.required "SuffixId" (Decode.maybe Decode.int)
