@@ -1,9 +1,9 @@
 port module Demographics exposing (..)
 
-import Html exposing (Html, text, div, span, input, label, h4)
+import Html exposing (Html, text, div, span, input, label, h4, textarea)
 import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name)
 import Html.Events exposing (onClick, onInput, onCheck)
-import Common.Types exposing (DropdownItem, Flags)
+import Common.Types as Types exposing (DropdownItem, Flags)
 import Common.Dropdown as Dropdown
 import Common.Functions as Functions exposing (decodeDropdownItem)
 import Json.Decode as Decode
@@ -76,6 +76,8 @@ type alias Model =
     , patientAddresses : List PatientAddress
     , phoneNumberTypeDropdown : List DropdownItem
     , stateDropdown : List DropdownItem
+    , relationshipsDropdown : List DropdownItem
+    , acuityLevelDropdown : List DropdownItem
     , primaryAddressIndex : Int
     , preferredPhoneIndex : Int
     , patientId : Int
@@ -96,6 +98,7 @@ type alias Model =
     , email : Maybe String
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
+    , householdMembers : List HouseholdMember
     , contactHoursModel : Maybe Decode.Value
     , showValidationErrors : Bool
     , suffixId : Maybe Int
@@ -106,6 +109,8 @@ type alias Model =
     , raceDropState : Dropdown.DropState
     , ethnicityId : Maybe Int
     , ethnicityDropState : Dropdown.DropState
+    , acuityLevelId : Maybe Int
+    , acuityLevelDropState : Dropdown.DropState
     , nodeCounter : Int
     , progress : Progress ServerResponse
     , demographicsUrl : Maybe String
@@ -138,6 +143,15 @@ type alias PatientLanguagesMap =
     }
 
 
+type alias HouseholdMember =
+    { name : Maybe String
+    , relationshipId : Maybe Int
+    , comments : Maybe String
+    , dropState : Dropdown.DropState
+    , nodeId : Int
+    }
+
+
 type alias PatientPhoneNumber =
     { id : Maybe Int
     , phoneNumber : Maybe String
@@ -158,6 +172,9 @@ type alias PatientAddress =
     , stateId : Maybe Int
     , zipCode : Maybe String
     , isPreferred : Bool
+    , startDate : Maybe String
+    , endDate : Maybe String
+    , addressType : Maybe Int
     , dropState : Dropdown.DropState
     , nodeId : Int
     }
@@ -200,6 +217,9 @@ view model =
             , textbox "Birth Place" False model.birthPlace UpdateBirthPlace
             , sfbox "Date of Death" False
             , textbox "SSN" False model.ssn UpdateSSN
+            , dropbox "Acuity Level" False <|
+                Html.map UpdateAcuityLevel <|
+                    Dropdown.view model.acuityLevelDropState model.acuityLevelDropdown model.acuityLevelId
             ]
         , div rowStyle
             [ sfbox "VIP" False
@@ -243,6 +263,15 @@ view model =
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
                 , div [] (List.map (viewAddress model.stateDropdown) model.patientAddresses)
+                ]
+            ]
+        , div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
+            [ div [ class "col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-h-0" ]
+                [ h4 [ class "inline-block required" ] [ text "Household Members" ]
+                , div [ class "inline-block e-tooltxt pointer", title "Add new household member", onClick AddNewHouseholdMember ]
+                    [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
+                    ]
+                , div [] (List.map (viewHouseholdMembers model.relationshipsDropdown) model.householdMembers)
                 ]
             ]
         ]
@@ -353,6 +382,44 @@ viewAddress dropdownItems address =
         ]
 
 
+viewHouseholdMembers : List DropdownItem -> HouseholdMember -> Html Msg
+viewHouseholdMembers dropdownItems householdMember =
+    div [ class "multi-address-template" ]
+        [ div [ class "col-xs-12 col-sm-6 padding-h-0" ]
+            [ div []
+                [ label [ class "required" ] [ text "Name:" ]
+                , div [ class "form-column" ]
+                    [ input [ class "e-textbox", type_ "text", maybeValue householdMember.name, onInput (UpdateHouseholdMemberName householdMember) ] []
+                    ]
+                ]
+            ]
+        , div [ class "col-xs-12 col-sm-6 padding-h-0" ]
+            [ div []
+                [ label [ class "required" ] [ text "Relationships:" ]
+                , div [ class "form-column" ]
+                    [ Html.map (UpdateHouseholdMemberRelationship householdMember) <|
+                        Dropdown.view householdMember.dropState dropdownItems householdMember.relationshipId
+                    ]
+                ]
+            ]
+        , div []
+            [ div []
+                [ div [ class "form-column" ]
+                    [ label [ class "required" ] [ text "Comments:" ]
+                    ]
+                ]
+            ]
+        , div [ class "col-xs-12 col-sm-12 padding-h-0" ]
+            [ textarea
+                [ maybeValue householdMember.name
+                , onInput (UpdateHouseholdMemberName householdMember)
+                , style [ ( "min-width", "99%" ) ]
+                ]
+                []
+            ]
+        ]
+
+
 
 --UPDATE
 
@@ -370,6 +437,8 @@ type Msg
     | RemovePhone PatientPhoneNumber
     | AddNewAddress
     | RemoveAddress PatientAddress
+    | AddNewHouseholdMember
+    | RemoveHouseholdMember HouseholdMember
       -- Nested Controls
     | UpdateAddressLine1 PatientAddress String
     | UpdateAddressLine2 PatientAddress String
@@ -382,6 +451,8 @@ type Msg
     | UpdateState PatientAddress Dropdown.Msg
     | UpdatePhoneType PatientPhoneNumber Dropdown.Msg
     | UpdateLanguage PatientLanguagesMap Dropdown.Msg
+    | UpdateHouseholdMemberName HouseholdMember String
+    | UpdateHouseholdMemberRelationship HouseholdMember Dropdown.Msg
       -- Edit
     | UpdateFacilityPtID String
     | UpdateMedicalRecordNo String
@@ -392,6 +463,7 @@ type Msg
     | UpdateNickname String
     | UpdateBirthPlace String
     | UpdateSSN String
+    | UpdateAcuityLevel Dropdown.Msg
     | UpdateSexualOrientationNote String
     | UpdateGenderIdentityNote String
     | UpdateEmail String
@@ -451,6 +523,22 @@ updateLanguage model patientLanguagesMap =
         { model | patientLanguagesMap = newPatientLanguagesMap }
 
 
+updateHouseholdMembers : Model -> HouseholdMember -> Model
+updateHouseholdMembers model householdMember =
+    let
+        newHouseholdMembers =
+            List.map
+                (\t ->
+                    if t.nodeId == householdMember.nodeId then
+                        householdMember
+                    else
+                        t
+                )
+                model.householdMembers
+    in
+        { model | householdMembers = newHouseholdMembers }
+
+
 togglePreferred : Int -> { c | nodeId : Int, isPreferred : a } -> { c | isPreferred : Bool, nodeId : Int }
 togglePreferred nodeId t =
     if t.nodeId == nodeId then
@@ -487,12 +575,20 @@ update msg model =
                     else
                         newModel.patientAddresses
                             |> List.indexedMap (\idx t -> { t | nodeId = idx })
+
+                newHouseholdMembers =
+                    if List.length newModel.householdMembers == 0 then
+                        [ emptyHouseholdMembers 0 ]
+                    else
+                        newModel.householdMembers
+                            |> List.indexedMap (\idx t -> { t | nodeId = idx })
             in
                 { newModel
                     | patientLanguagesMap = newPatientLanguagesMap
                     , patientPhoneNumbers = newPatientPhoneNumber
                     , patientAddresses = newPatientAddress
-                    , nodeCounter = 3
+                    , householdMembers = newHouseholdMembers
+                    , nodeCounter = 4
                     , demographicsUrl = Nothing
                 }
                     ! [ initDemographics newModel.sfData, Functions.setLoadingStatus False ]
@@ -639,6 +735,21 @@ update msg model =
             in
                 { model | patientAddresses = updatedAddress } ! [ Functions.setUnsavedChanges True ]
 
+        AddNewHouseholdMember ->
+            { model
+                | householdMembers = model.householdMembers ++ [ emptyHouseholdMembers model.nodeCounter ]
+                , nodeCounter = model.nodeCounter + 1
+            }
+                ! [ Functions.setUnsavedChanges True ]
+
+        RemoveHouseholdMember householdMember ->
+            let
+                newHouseholdMembers =
+                    model.householdMembers
+                        |> List.filter (\t -> t.nodeId /= householdMember.nodeId)
+            in
+                { model | householdMembers = newHouseholdMembers } ! [ Functions.setUnsavedChanges True ]
+
         -- Nested Controls
         UpdateAddressLine1 patientAddress str ->
             updateAddress model { patientAddress | addressLine1 = Just str } ! [ Functions.setUnsavedChanges True ]
@@ -664,6 +775,9 @@ update msg model =
         UpdatePreferredLanguage language _ ->
             { model | patientLanguagesMap = List.map (togglePreferred language.nodeId) model.patientLanguagesMap } ! [ Functions.setUnsavedChanges True ]
 
+        UpdateHouseholdMemberName householdMember str ->
+            updateHouseholdMembers model { householdMember | name = Just str } ! [ Functions.setUnsavedChanges True ]
+
         UpdateState t dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
@@ -684,6 +798,14 @@ update msg model =
                     Dropdown.update dropdownMsg t.dropState t.languageId model.drops.languageDropdown
             in
                 updateLanguage model { t | dropState = newDropState, languageId = newId }
+                    ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateHouseholdMemberRelationship t dropdownMsg ->
+            let
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg t.dropState t.relationshipId model.relationshipsDropdown
+            in
+                updateHouseholdMembers model { t | dropState = newDropState, relationshipId = newId }
                     ! [ newMsg, Functions.setUnsavedChanges True ]
 
         InputChanged patientPhoneNumber value ->
@@ -719,6 +841,14 @@ update msg model =
 
         UpdateSSN str ->
             { model | ssn = Just str } ! [ Functions.setUnsavedChanges True ]
+
+        UpdateAcuityLevel dropdownMsg ->
+            let
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg model.prefixDropState model.prefixId model.drops.prefixDropdown
+            in
+                { model | acuityLevelDropState = newDropState, acuityLevelId = newId }
+                    ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateSexualOrientationNote str ->
             { model | sexualOrientationNote = Just str } ! [ Functions.setUnsavedChanges True ]
@@ -1051,10 +1181,13 @@ emptyModel patientId =
     , email = Nothing
     , sfData = emptySfData
     , patientLanguagesMap = []
+    , householdMembers = []
     , patientPhoneNumbers = []
     , patientAddresses = []
     , phoneNumberTypeDropdown = []
     , stateDropdown = []
+    , relationshipsDropdown = Types.relationshipsDropdown
+    , acuityLevelDropdown = Types.acuityLevelDropdown
     , primaryAddressIndex = 0
     , preferredPhoneIndex = 0
     , contactHoursModel = Nothing
@@ -1067,6 +1200,8 @@ emptyModel patientId =
     , raceDropState = Dropdown.init "raceDropdown"
     , ethnicityId = Nothing
     , ethnicityDropState = Dropdown.init "ethnicityDropdown"
+    , acuityLevelId = Nothing
+    , acuityLevelDropState = Dropdown.init "acuityLevelDropdown"
     , nodeCounter = 0
     , progress = Progress.None
     , demographicsUrl = Just (getDemographicsUrl patientId)
@@ -1106,6 +1241,16 @@ emptyPatientLanguagesMap nodeCounter isPreferred =
     }
 
 
+emptyHouseholdMembers : Int -> HouseholdMember
+emptyHouseholdMembers nodeCounter =
+    { name = Nothing
+    , relationshipId = Nothing
+    , comments = Nothing
+    , dropState = Dropdown.init "householdMembersDropdown"
+    , nodeId = nodeCounter
+    }
+
+
 emptyPatientPhoneNumber : Int -> Bool -> PatientPhoneNumber
 emptyPatientPhoneNumber nodeCounter isPreferred =
     { id = Nothing
@@ -1130,6 +1275,9 @@ emptyPatientAddress nodeCounter isPreferred =
     , isPreferred = isPreferred
     , dropState = Dropdown.init "stateDropdown"
     , nodeId = nodeCounter
+    , startDate = Nothing
+    , endDate = Nothing
+    , addressType = Nothing
     }
 
 
@@ -1177,6 +1325,7 @@ updateModelFromServerMessage serverResponse model =
                     , email = d.email
                     , sfData = { sfDrops | drops = ds }
                     , patientLanguagesMap = d.patientLanguagesMap
+                    , householdMembers = d.householdMembers
                     , patientPhoneNumbers = c.patientPhoneNumbers
                     , patientAddresses = c.patientAddresses
                     , primaryAddressIndex = c.primaryAddressIndex
@@ -1186,6 +1335,7 @@ updateModelFromServerMessage serverResponse model =
                     , prefixId = d.prefixId
                     , raceId = d.raceId
                     , ethnicityId = d.ethnicityId
+                    , acuityLevelId = d.acuityLevelId
                     , stateDropdown = c.stateDropdown
                     , phoneNumberTypeDropdown = c.phoneNumberTypeDropdown
                     , drops = ds
@@ -1218,10 +1368,12 @@ type alias DemographicsInformationModel =
     , email : Maybe String
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
+    , householdMembers : List HouseholdMember
     , suffixId : Maybe Int
     , prefixId : Maybe Int
     , raceId : Maybe Int
     , ethnicityId : Maybe Int
+    , acuityLevelId : Maybe Int
     }
 
 
@@ -1232,6 +1384,15 @@ type alias ContactInformationModel =
     , stateDropdown : List DropdownItem
     , primaryAddressIndex : Int
     , preferredPhoneIndex : Int
+    }
+
+
+type alias FacilityAddress =
+    { id : Maybe Int
+    , address : Maybe String
+    , city : Maybe String
+    , stateId : Maybe Int
+    , zipCode : Maybe String
     }
 
 
@@ -1270,10 +1431,12 @@ decodeDemographicsInformationModel =
         |> Pipeline.required "Email" (Decode.maybe Decode.string)
         |> Pipeline.custom decodeSfData
         |> Pipeline.required "PatientLanguagesMap" (Decode.list decodePatientLanguagesMap)
+        |> Pipeline.required "HouseholdMembers" (Decode.list decodeHouseholdMembers)
         |> Pipeline.required "SuffixId" (Decode.maybe Decode.int)
         |> Pipeline.required "PrefixId" (Decode.maybe Decode.int)
         |> Pipeline.required "RaceId" (Decode.maybe Decode.int)
         |> Pipeline.required "EthnicityId" (Decode.maybe Decode.int)
+        |> Pipeline.required "AcuityLevelId" (Decode.maybe Decode.int)
 
 
 decodeContactInformationModel : Decode.Decoder ContactInformationModel
@@ -1294,6 +1457,16 @@ decodePatientLanguagesMap =
         |> Pipeline.required "LanguageId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
         |> Pipeline.hardcoded (Dropdown.init "languageDropdown")
+        |> Pipeline.hardcoded 0
+
+
+decodeHouseholdMembers : Decode.Decoder HouseholdMember
+decodeHouseholdMembers =
+    Pipeline.decode HouseholdMember
+        |> Pipeline.required "Name" (Decode.maybe Decode.string)
+        |> Pipeline.required "RelationshipId" (Decode.maybe Decode.int)
+        |> Pipeline.required "Comments" (Decode.maybe Decode.string)
+        |> Pipeline.hardcoded (Dropdown.init "householdMembersDropdown")
         |> Pipeline.hardcoded 0
 
 
@@ -1320,6 +1493,9 @@ decodePatientAddress =
         |> Pipeline.required "StateId" (Decode.maybe Decode.int)
         |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
         |> Pipeline.required "IsPrimary" Decode.bool
+        |> Pipeline.required "StartDate" (Decode.maybe Decode.string)
+        |> Pipeline.required "EndDate" (Decode.maybe Decode.string)
+        |> Pipeline.required "AddressType" (Decode.maybe Decode.int)
         |> Pipeline.hardcoded (Dropdown.init "stateDropdown")
         |> Pipeline.hardcoded 0
 
@@ -1339,6 +1515,16 @@ decodeSfData =
         |> Pipeline.required "DateOfDeath" (Decode.maybe Decode.string)
         |> Pipeline.required "VIP" (Decode.maybe Decode.bool)
         |> Pipeline.hardcoded emptyDrops
+
+
+decodeFacilityAddress : Decode.Decoder FacilityAddress
+decodeFacilityAddress =
+    Pipeline.decode FacilityAddress
+        |> Pipeline.required "Id" (Decode.maybe Decode.int)
+        |> Pipeline.required "Address" (Decode.maybe Decode.string)
+        |> Pipeline.required "City" (Decode.maybe Decode.string)
+        |> Pipeline.required "StateId" (Decode.maybe Decode.int)
+        |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
 
 
 type alias DropdownSource =

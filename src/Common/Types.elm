@@ -60,6 +60,22 @@ type alias AddEditDataSource =
     }
 
 
+relationshipsDropdown : List DropdownItem
+relationshipsDropdown =
+    [ DropdownItem Nothing ""
+    , DropdownItem (Just 0) "January"
+    ]
+
+
+acuityLevelDropdown : List DropdownItem
+acuityLevelDropdown =
+    [ DropdownItem Nothing ""
+    , DropdownItem (Just 0) "High"
+    , DropdownItem (Just 1) "Medium"
+    , DropdownItem (Just 2) "Low"
+    ]
+
+
 monthDropdown : List DropdownItem
 monthDropdown =
     [ DropdownItem Nothing ""
