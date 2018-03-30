@@ -387,15 +387,21 @@ viewHouseholdMembers dropdownItems householdMember =
     div [ class "multi-address-template" ]
         [ div [ class "col-xs-12 col-sm-6 padding-h-0" ]
             [ div []
-                [ label [ class "required" ] [ text "Name:" ]
+                [ label [] [ text "Name:" ]
                 , div [ class "form-column" ]
-                    [ input [ class "e-textbox", type_ "text", maybeValue householdMember.name, onInput (UpdateHouseholdMemberName householdMember) ] []
+                    [ input
+                        [ class "e-textbox"
+                        , type_ "text"
+                        , maybeValue householdMember.name
+                        , onInput (UpdateHouseholdMemberName householdMember)
+                        ]
+                        []
                     ]
                 ]
             ]
         , div [ class "col-xs-12 col-sm-6 padding-h-0" ]
             [ div []
-                [ label [ class "required" ] [ text "Relationships:" ]
+                [ label [] [ text "Relationships:" ]
                 , div [ class "form-column" ]
                     [ Html.map (UpdateHouseholdMemberRelationship householdMember) <|
                         Dropdown.view householdMember.dropState dropdownItems householdMember.relationshipId
@@ -405,14 +411,14 @@ viewHouseholdMembers dropdownItems householdMember =
         , div []
             [ div []
                 [ div [ class "form-column" ]
-                    [ label [ class "required" ] [ text "Comments:" ]
+                    [ label [] [ text "Comments:" ]
                     ]
                 ]
             ]
         , div [ class "col-xs-12 col-sm-12 padding-h-0" ]
             [ textarea
-                [ maybeValue householdMember.name
-                , onInput (UpdateHouseholdMemberName householdMember)
+                [ maybeValue householdMember.comments
+                , onInput (UpdateHouseholdMemberComments householdMember)
                 , style [ ( "min-width", "99%" ) ]
                 ]
                 []
@@ -452,6 +458,7 @@ type Msg
     | UpdatePhoneType PatientPhoneNumber Dropdown.Msg
     | UpdateLanguage PatientLanguagesMap Dropdown.Msg
     | UpdateHouseholdMemberName HouseholdMember String
+    | UpdateHouseholdMemberComments HouseholdMember String
     | UpdateHouseholdMemberRelationship HouseholdMember Dropdown.Msg
       -- Edit
     | UpdateFacilityPtID String
@@ -777,6 +784,9 @@ update msg model =
 
         UpdateHouseholdMemberName householdMember str ->
             updateHouseholdMembers model { householdMember | name = Just str } ! [ Functions.setUnsavedChanges True ]
+
+        UpdateHouseholdMemberComments householdMember str ->
+            updateHouseholdMembers model { householdMember | comments = Just str } ! [ Functions.setUnsavedChanges True ]
 
         UpdateState t dropdownMsg ->
             let

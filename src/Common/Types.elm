@@ -63,7 +63,22 @@ type alias AddEditDataSource =
 relationshipsDropdown : List DropdownItem
 relationshipsDropdown =
     [ DropdownItem Nothing ""
-    , DropdownItem (Just 0) "January"
+    , DropdownItem (Just 0) "Spouse"
+    , DropdownItem (Just 1) "Natural Child"
+    , DropdownItem (Just 2) "Step Child"
+    , DropdownItem (Just 3) "Foster Child"
+    , DropdownItem (Just 4) "Grand Child"
+    , DropdownItem (Just 5) "Niece/Nephew"
+    , DropdownItem (Just 6) "Life partner"
+    , DropdownItem (Just 7) "Significant other"
+    , DropdownItem (Just 8) "Parent"
+    , DropdownItem (Just 9) "Grandparent"
+    , DropdownItem (Just 10) "Brother"
+    , DropdownItem (Just 11) "Sister"
+    , DropdownItem (Just 12) "Friend"
+    , DropdownItem (Just 13) "Other"
+    , DropdownItem (Just 14) "Ward of the court"
+
     ]
 
 
