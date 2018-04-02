@@ -1,7 +1,7 @@
 port module Demographics exposing (..)
 
 import Html exposing (Html, text, div, span, input, label, h4, textarea)
-import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name)
+import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name, disabled)
 import Html.Events exposing (onClick, onInput, onCheck)
 import Common.Types as Types exposing (DropdownItem, Flags)
 import Common.Dropdown as Dropdown
@@ -339,13 +339,19 @@ viewPhones dropdownItems phone =
 viewAddress : List DropdownItem -> List DropdownItem -> PatientAddress -> Html Msg
 viewAddress stateDropdownItems facilityDropdownItems address =
     let
+        pre val =
+            if address.addressType == Just 1 then
+                Nothing
+            else
+                val
+
         addressLine1 =
             case address.facilityAddress of
                 Just t ->
                     t.address
 
                 Nothing ->
-                    address.addressLine1
+                    pre address.addressLine1
 
         addressLine2 =
             case address.facilityAddress of
@@ -353,7 +359,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     Nothing
 
                 Nothing ->
-                    address.addressLine2
+                    pre address.addressLine2
 
         addressLine3 =
             case address.facilityAddress of
@@ -361,7 +367,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     Nothing
 
                 Nothing ->
-                    address.addressLine3
+                    pre address.addressLine3
 
         city =
             case address.facilityAddress of
@@ -369,7 +375,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     t.city
 
                 Nothing ->
-                    address.city
+                    pre address.city
 
         stateId =
             case address.facilityAddress of
@@ -377,7 +383,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     t.stateId
 
                 Nothing ->
-                    address.stateId
+                    pre address.stateId
 
         zipCode =
             case address.facilityAddress of
@@ -385,7 +391,18 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     t.zipCode
 
                 Nothing ->
-                    address.zipCode
+                    pre address.zipCode
+
+        isDisabled =
+            case address.addressType of
+                Nothing ->
+                    False
+
+                Just addressType ->
+                    if addressType == 1 then
+                        True
+                    else
+                        False
 
         addressDiv =
             case address.addressType of
@@ -434,19 +451,19 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     [ div []
                         [ label [ class "required" ] [ text "Address Line 1:" ]
                         , div [ class "form-column" ]
-                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine1, onInput (UpdateAddressLine1 address) ] []
+                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine1, disabled isDisabled, onInput (UpdateAddressLine1 address) ] []
                             ]
                         ]
                     , div []
                         [ label [] [ text "Address Line 2:" ]
                         , div [ class "form-column" ]
-                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine2, onInput (UpdateAddressLine2 address) ] []
+                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine2, disabled isDisabled, onInput (UpdateAddressLine2 address) ] []
                             ]
                         ]
                     , div []
                         [ label [] [ text "Apt./Room No.:" ]
                         , div [ class "form-column" ]
-                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine3, onInput (UpdateAddressLine3 address) ] []
+                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine3, disabled isDisabled, onInput (UpdateAddressLine3 address) ] []
                             ]
                         ]
                     ]
@@ -454,19 +471,22 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     [ div []
                         [ label [ class "required" ] [ text "City:" ]
                         , div [ class "form-column" ]
-                            [ input [ class "e-textbox", type_ "text", maybeValue city, onInput (UpdateCity address) ] []
+                            [ input [ class "e-textbox", type_ "text", maybeValue city, disabled isDisabled, onInput (UpdateCity address) ] []
                             ]
                         ]
                     , div [ class "margin-bottom-5" ]
                         [ label [ class "required" ] [ text "State:" ]
                         , div [ class "form-column" ]
-                            [ Html.map (UpdateState address) <| Dropdown.view address.addressStateDropState stateDropdownItems stateId
+                            [ if isDisabled then
+                                input [ class "e-textbox", type_ "text", value (Dropdown.getDropdownText stateDropdownItems stateId), disabled True ] []
+                              else
+                                Html.map (UpdateState address) <| Dropdown.view address.addressStateDropState stateDropdownItems stateId
                             ]
                         ]
                     , div []
                         [ label [ class "required" ] [ text "Zip Code:" ]
                         , div [ class "form-column" ]
-                            [ input [ class "e-textbox", type_ "text", maybeValue zipCode, onInput (UpdateZipcode address), maxlength 5 ] []
+                            [ input [ class "e-textbox", type_ "text", maybeValue zipCode, disabled isDisabled, onInput (UpdateZipcode address), maxlength 5 ] []
                             ]
                         ]
                     ]
@@ -476,7 +496,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
 
 viewHouseholdMembers : HouseholdMember -> Html Msg
 viewHouseholdMembers householdMember =
-    div [ class "multi-address-template" ]
+    div [ class "multi-address-template", style [ ( "padding-bottom", "20px" ) ] ]
         [ div [ class "col-xs-12 col-sm-6 padding-h-0" ]
             [ div []
                 [ label [] [ text "Name:" ]
@@ -552,7 +572,7 @@ type Msg
     | UpdateState PatientAddress Dropdown.Msg
     | UpdateAddressType PatientAddress Dropdown.Msg
     | UpdateFacilityAddress PatientAddress Dropdown.Msg
-    | GetFacilityAddress PatientAddress (Result Http.Error FacilityAddress)
+    | GetFacilityAddress PatientAddress (Result Http.Error (Maybe FacilityAddress))
     | UpdatePhoneType PatientPhoneNumber Dropdown.Msg
     | UpdateLanguage PatientLanguagesMap Dropdown.Msg
     | UpdateHouseholdMemberName HouseholdMember String
@@ -897,8 +917,19 @@ update msg model =
             let
                 ( newDropState, newId, newMsg ) =
                     Dropdown.update dropdownMsg t.addressTypeDropState t.addressType Types.addressTypeDropdown
+
+                newAddress =
+                    case newId of
+                        Just _ ->
+                            { t
+                                | addressTypeDropState = newDropState
+                                , addressType = newId
+                            }
+
+                        Nothing ->
+                            { t | addressTypeDropState = newDropState, addressType = newId }
             in
-                updateAddress model { t | addressTypeDropState = newDropState, addressType = newId }
+                updateAddress model newAddress
                     ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateFacilityAddress t dropdownMsg ->
@@ -914,7 +945,7 @@ update msg model =
                       , Functions.setUnsavedChanges True
                       , case newId of
                             Just id ->
-                                decodeFacilityAddress
+                                (Decode.maybe decodeFacilityAddress)
                                     |> Http.get ("/People/GetFacilityAddress?facilityId=" ++ toString id)
                                     |> Http.send (GetFacilityAddress newAddress)
 
@@ -924,7 +955,7 @@ update msg model =
                       ]
 
         GetFacilityAddress patientAddress (Ok t) ->
-            updateAddress model { patientAddress | facilityAddress = Just t } ! []
+            updateAddress model { patientAddress | facilityAddress = t } ! []
 
         GetFacilityAddress _ (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]

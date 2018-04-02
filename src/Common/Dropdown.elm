@@ -1,4 +1,4 @@
-port module Common.Dropdown exposing (DropState, Msg, init, update, view)
+port module Common.Dropdown exposing (DropState, Msg, init, update, getDropdownText, view)
 
 import Html exposing (Html, Attribute, div, span, text, li, ul, input)
 import Html.Attributes exposing (style, value, class, readonly, placeholder, tabindex, disabled)
@@ -176,6 +176,15 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
             ( newDropdown, Just newIndex, Cmd.none )
 
 
+getDropdownText : List DropdownItem -> Maybe Int -> String
+getDropdownText dropdownItems selectedId =
+    dropdownItems
+        |> List.filter (\t -> t.id == selectedId)
+        |> List.map .name
+        |> List.head
+        |> Maybe.withDefault ""
+
+
 view : DropState -> List DropdownItem -> Maybe Int -> Html Msg
 view dropdown dropdownItems selectedId =
     let
@@ -189,13 +198,6 @@ view dropdown dropdownItems selectedId =
             Events.keyCode
                 |> Json.Decode.andThen (keyDecoder dropdown)
                 |> Json.Decode.map OnKey
-
-        getDropdownText =
-            dropdownItems
-                |> List.filter (\t -> t.id == selectedId)
-                |> List.map .name
-                |> List.head
-                |> Maybe.withDefault ""
 
         biggestStrLength =
             dropdownItems
@@ -248,7 +250,7 @@ view dropdown dropdownItems selectedId =
                     [ input
                         [ class "noselect e-input"
                         , readonly True
-                        , value getDropdownText
+                        , value (getDropdownText dropdownItems selectedId)
                         , tabindex -1 -- Make it so you cannot set focus via tabbing, we need root div to have the focus
                         , disabled True -- Make it so you cannot click to set focus, we need root div to have the focus
                         , placeholder "Choose..."
