@@ -907,14 +907,30 @@ update msg model =
                 { model | patientPhoneNumbers = updatedPatientPhoneNumber } ! [ Functions.setUnsavedChanges True ]
 
         AddNewAddress ->
-            { model
-                | patientAddresses = model.patientAddresses ++ [ emptyPatientAddress model.nodeCounter False ]
-                , nodeCounter = model.nodeCounter + 1
-            }
-                ! [ Functions.setUnsavedChanges True
-                  , addNewAddress (Address model.nodeCounter "#BeginDate" (Just ""))
-                  , addNewAddress (Address model.nodeCounter "#EndDate" (Just ""))
-                  ]
+            let
+                maybeNewAddress =
+                    model.patientAddresses
+                        |> List.head
+
+                emptyAddress =
+                    emptyPatientAddress model.nodeCounter False
+
+                newPatientAddress =
+                    case maybeNewAddress of
+                        Just t ->
+                            { emptyAddress | startDate = t.endDate }
+
+                        Nothing ->
+                            emptyAddress
+            in
+                { model
+                    | patientAddresses = model.patientAddresses ++ [ newPatientAddress ]
+                    , nodeCounter = model.nodeCounter + 1
+                }
+                    ! [ Functions.setUnsavedChanges True
+                      , addNewAddress (Address model.nodeCounter "#BeginDate" newPatientAddress.startDate)
+                      , addNewAddress (Address model.nodeCounter "#EndDate" newPatientAddress.endDate)
+                      ]
 
         RemoveAddress address ->
             let
