@@ -329,11 +329,24 @@ viewAddress : List DropdownItem -> PatientAddress -> Html Msg
 viewAddress dropdownItems address =
     div [ class "multi-address-template" ]
         [ div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
-            [ div [ title "Mark as primary", class "col-xs-6 padding-h-0 inline-block" ]
-                [ input [ type_ "radio", checked address.isPreferred, style [ ( "margin-top", "0px" ), vertCent ], onCheck (UpdatePreferredAddress address), name "addressGroup" ] []
+            [ div [ title "Mark as primary", class "col-xs-3 padding-h-0 inline-block" ]
+                [ input
+                    [ type_ "radio"
+                    , checked address.isPreferred
+                    , style [ ( "margin-top", "0px" ), vertCent ]
+                    , onCheck (UpdatePreferredAddress address)
+                    , name "addressGroup"
+                    ]
+                    []
                 , label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Primary" ]
                 ]
-            , div [ class "col-xs-6 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address) ]
+            , div [ title "Mark as primary", class "col-xs-2 padding-h-0 inline-block" ]
+                [ label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Address Type" ]
+                ]
+            , div [ title "Mark as primary", class "col-xs-3 padding-h-0 inline-block" ]
+                [ Html.map (UpdateState address) <| Dropdown.view address.dropState dropdownItems address.stateId
+                ]
+            , div [ class "col-xs-4 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address) ]
                 [ span [ style [ ( "padding-right", "20px" ), ( "padding-top", "5px" ) ], class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer pull-right" ] []
                 ]
             ]
