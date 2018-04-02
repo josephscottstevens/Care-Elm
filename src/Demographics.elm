@@ -342,7 +342,7 @@ viewAddress dropdownItems address =
                 , label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Primary" ]
                 ]
             , div [ title "Mark as primary", class "col-xs-2 padding-h-0 inline-block", style [ ( "width", "120px" ) ] ]
-                [ label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Address Type" ]
+                [ label [] [ text "Address Type" ]
                 ]
             , div [ title "Mark as primary", class "col-xs-3 padding-h-0 inline-block", style [ ( "width", "300px" ) ] ]
                 [ Html.map (UpdateAddressType address) <|
@@ -414,7 +414,7 @@ viewHouseholdMembers dropdownItems householdMember =
                     ]
                 ]
             ]
-        , div [ class "col-xs-12 col-sm-6 padding-h-0" ]
+        , div [ class "col-xs-12 col-sm-5 padding-h-0" ]
             [ div []
                 [ label [] [ text "Relationships:" ]
                 , div [ class "form-column" ]
@@ -422,6 +422,9 @@ viewHouseholdMembers dropdownItems householdMember =
                         Dropdown.view householdMember.dropState dropdownItems householdMember.relationshipId
                     ]
                 ]
+            ]
+        , div [ class "col-xs-12 col-sm-1 padding-h-0", style [ vertCent ], title "Remove", onClick (RemoveHouseholdMember householdMember) ]
+            [ span [ style [ ( "padding-right", "20px" ), ( "padding-top", "5px" ) ], class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer pull-right" ] []
             ]
         , div []
             [ div []
