@@ -76,8 +76,6 @@ type alias Model =
     , patientAddresses : List PatientAddress
     , phoneNumberTypeDropdown : List DropdownItem
     , stateDropdown : List DropdownItem
-    , relationshipsDropdown : List DropdownItem
-    , acuityLevelDropdown : List DropdownItem
     , primaryAddressIndex : Int
     , preferredPhoneIndex : Int
     , patientId : Int
@@ -220,7 +218,7 @@ view model =
             , textbox "SSN" False model.ssn UpdateSSN
             , dropbox "Acuity Level" False <|
                 Html.map UpdateAcuityLevel <|
-                    Dropdown.view model.acuityLevelDropState model.acuityLevelDropdown model.acuityLevelId
+                    Dropdown.view model.acuityLevelDropState Types.acuityLevelDropdown model.acuityLevelId
             ]
         , div rowStyle
             [ sfbox "VIP" False
@@ -272,7 +270,7 @@ view model =
                 , div [ class "inline-block e-tooltxt pointer", title "Add new household member", onClick AddNewHouseholdMember ]
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
-                , div [] (List.map (viewHouseholdMembers model.relationshipsDropdown) model.householdMembers)
+                , div [] (List.map viewHouseholdMembers model.householdMembers)
                 ]
             ]
         ]
@@ -397,8 +395,8 @@ viewAddress dropdownItems address =
         ]
 
 
-viewHouseholdMembers : List DropdownItem -> HouseholdMember -> Html Msg
-viewHouseholdMembers dropdownItems householdMember =
+viewHouseholdMembers : HouseholdMember -> Html Msg
+viewHouseholdMembers householdMember =
     div [ class "multi-address-template" ]
         [ div [ class "col-xs-12 col-sm-6 padding-h-0" ]
             [ div []
@@ -419,7 +417,7 @@ viewHouseholdMembers dropdownItems householdMember =
                 [ label [] [ text "Relationships:" ]
                 , div [ class "form-column" ]
                     [ Html.map (UpdateHouseholdMemberRelationship householdMember) <|
-                        Dropdown.view householdMember.dropState dropdownItems householdMember.relationshipId
+                        Dropdown.view householdMember.dropState Types.relationshipsDropdown householdMember.relationshipId
                     ]
                 ]
             ]
@@ -839,7 +837,7 @@ update msg model =
         UpdateHouseholdMemberRelationship t dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg t.dropState t.relationshipId model.relationshipsDropdown
+                    Dropdown.update dropdownMsg t.dropState t.relationshipId Types.relationshipsDropdown
             in
                 updateHouseholdMembers model { t | dropState = newDropState, relationshipId = newId }
                     ! [ newMsg, Functions.setUnsavedChanges True ]
@@ -881,7 +879,7 @@ update msg model =
         UpdateAcuityLevel dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg model.prefixDropState model.prefixId model.drops.prefixDropdown
+                    Dropdown.update dropdownMsg model.acuityLevelDropState model.acuityLevelId Types.acuityLevelDropdown
             in
                 { model | acuityLevelDropState = newDropState, acuityLevelId = newId }
                     ! [ newMsg, Functions.setUnsavedChanges True ]
@@ -1222,8 +1220,6 @@ emptyModel patientId =
     , patientAddresses = []
     , phoneNumberTypeDropdown = []
     , stateDropdown = []
-    , relationshipsDropdown = Types.relationshipsDropdown
-    , acuityLevelDropdown = Types.acuityLevelDropdown
     , primaryAddressIndex = 0
     , preferredPhoneIndex = 0
     , contactHoursModel = Nothing
