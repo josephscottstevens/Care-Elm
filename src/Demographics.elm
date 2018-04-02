@@ -173,9 +173,21 @@ type alias PatientAddress =
     , startDate : Maybe String
     , endDate : Maybe String
     , addressType : Maybe Int
-    , dropState : Dropdown.DropState
-    , addressDropState : Dropdown.DropState
+    , facilityAddress : Maybe FacilityAddress
+    , facilityAddressId : Maybe Int
+    , facilityAddressDropState : Dropdown.DropState
+    , addressTypeDropState : Dropdown.DropState
+    , addressStateDropState : Dropdown.DropState
     , nodeId : Int
+    }
+
+
+type alias FacilityAddress =
+    { id : Maybe Int
+    , address : Maybe String
+    , city : Maybe String
+    , stateId : Maybe Int
+    , zipCode : Maybe String
     }
 
 
@@ -261,7 +273,7 @@ view model =
                 , div [ class "inline-block e-tooltxt pointer", title "Add new address", onClick AddNewAddress ]
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
-                , div [] (List.map (viewAddress model.stateDropdown) model.patientAddresses)
+                , div [] (List.map (viewAddress model.stateDropdown model.drops.facilityDropdown) model.patientAddresses)
                 ]
             ]
         , div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
@@ -324,75 +336,142 @@ viewPhones dropdownItems phone =
         ]
 
 
-viewAddress : List DropdownItem -> PatientAddress -> Html Msg
-viewAddress dropdownItems address =
-    div [ class "multi-address-template" ]
-        [ div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
-            [ div [ title "Mark as primary", class "col-xs-6 padding-h-0 inline-block" ]
-                [ input
-                    [ type_ "radio"
-                    , checked address.isPreferred
-                    , style [ ( "margin-top", "0px" ), vertCent ]
-                    , onCheck (UpdatePreferredAddress address)
-                    , name "addressGroup"
+viewAddress : List DropdownItem -> List DropdownItem -> PatientAddress -> Html Msg
+viewAddress stateDropdownItems facilityDropdownItems address =
+    let
+        addressLine1 =
+            case address.facilityAddress of
+                Just t ->
+                    t.address
+
+                Nothing ->
+                    address.addressLine1
+
+        addressLine2 =
+            case address.facilityAddress of
+                Just _ ->
+                    Nothing
+
+                Nothing ->
+                    address.addressLine2
+
+        addressLine3 =
+            case address.facilityAddress of
+                Just _ ->
+                    Nothing
+
+                Nothing ->
+                    address.addressLine3
+
+        city =
+            case address.facilityAddress of
+                Just t ->
+                    t.city
+
+                Nothing ->
+                    address.city
+
+        stateId =
+            case address.facilityAddress of
+                Just t ->
+                    t.stateId
+
+                Nothing ->
+                    address.stateId
+
+        zipCode =
+            case address.facilityAddress of
+                Just t ->
+                    t.zipCode
+
+                Nothing ->
+                    address.zipCode
+
+        addressDiv =
+            case address.addressType of
+                Nothing ->
+                    text ""
+
+                Just addressType ->
+                    if addressType == 0 then
+                        text ""
+                    else
+                        div [ class "col-xs-12 padding-h-0", style [ ( "padding-bottom", "5px" ) ] ]
+                            [ label [ class "required" ] [ text "Facility:" ]
+                            , div [ class "form-column" ]
+                                [ Html.map (UpdateFacilityAddress address) <|
+                                    Dropdown.view address.facilityAddressDropState facilityDropdownItems address.facilityAddressId
+                                ]
+                            ]
+    in
+        div [ class "multi-address-template" ]
+            [ div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
+                [ div [ title "Mark as primary", class "col-xs-6 padding-h-0 inline-block" ]
+                    [ input
+                        [ type_ "radio"
+                        , checked address.isPreferred
+                        , style [ ( "margin-top", "0px" ), vertCent ]
+                        , onCheck (UpdatePreferredAddress address)
+                        , name "addressGroup"
+                        ]
+                        []
+                    , label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Primary" ]
                     ]
-                    []
-                , label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Primary" ]
+                , div [ title "Mark as primary", class "col-xs-2 padding-h-0 inline-block", style [ ( "width", "120px" ) ] ]
+                    [ label [] [ text "Address Type" ]
+                    ]
+                , div [ title "Mark as primary", class "col-xs-3 padding-h-0 inline-block", style [ ( "width", "300px" ) ] ]
+                    [ Html.map (UpdateAddressType address) <|
+                        Dropdown.view address.addressTypeDropState Types.addressTypeDropdown address.addressType
+                    ]
+                , div [ class "col-xs-1 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address) ]
+                    [ span [ style [ ( "padding-right", "20px" ), ( "padding-top", "5px" ) ], class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer pull-right" ] []
+                    ]
                 ]
-            , div [ title "Mark as primary", class "col-xs-2 padding-h-0 inline-block", style [ ( "width", "120px" ) ] ]
-                [ label [] [ text "Address Type" ]
-                ]
-            , div [ title "Mark as primary", class "col-xs-3 padding-h-0 inline-block", style [ ( "width", "300px" ) ] ]
-                [ Html.map (UpdateAddressType address) <|
-                    Dropdown.view address.addressDropState Types.addressTypeDropdown address.addressType
-                ]
-            , div [ class "col-xs-1 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address) ]
-                [ span [ style [ ( "padding-right", "20px" ), ( "padding-top", "5px" ) ], class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer pull-right" ] []
+            , addressDiv
+            , div [ class "col-xs-12 padding-h-0", style [ ( "padding-bottom", "20px" ) ] ]
+                [ div [ class "col-xs-12 col-sm-6 padding-h-0" ]
+                    [ div []
+                        [ label [ class "required" ] [ text "Address Line 1:" ]
+                        , div [ class "form-column" ]
+                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine1, onInput (UpdateAddressLine1 address) ] []
+                            ]
+                        ]
+                    , div []
+                        [ label [] [ text "Address Line 2:" ]
+                        , div [ class "form-column" ]
+                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine2, onInput (UpdateAddressLine2 address) ] []
+                            ]
+                        ]
+                    , div []
+                        [ label [] [ text "Apt./Room No.:" ]
+                        , div [ class "form-column" ]
+                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine3, onInput (UpdateAddressLine3 address) ] []
+                            ]
+                        ]
+                    ]
+                , div [ class "col-xs-12 col-sm-6 padding-h-0" ]
+                    [ div []
+                        [ label [ class "required" ] [ text "City:" ]
+                        , div [ class "form-column" ]
+                            [ input [ class "e-textbox", type_ "text", maybeValue city, onInput (UpdateCity address) ] []
+                            ]
+                        ]
+                    , div [ class "margin-bottom-5" ]
+                        [ label [ class "required" ] [ text "State:" ]
+                        , div [ class "form-column" ]
+                            [ Html.map (UpdateState address) <| Dropdown.view address.addressStateDropState stateDropdownItems stateId
+                            ]
+                        ]
+                    , div []
+                        [ label [ class "required" ] [ text "Zip Code:" ]
+                        , div [ class "form-column" ]
+                            [ input [ class "e-textbox", type_ "text", maybeValue zipCode, onInput (UpdateZipcode address), maxlength 5 ] []
+                            ]
+                        ]
+                    ]
                 ]
             ]
-        , div [ class "col-xs-12 padding-h-0", style [ ( "padding-bottom", "20px" ) ] ]
-            [ div [ class "col-xs-12 col-sm-6 padding-h-0" ]
-                [ div []
-                    [ label [ class "required" ] [ text "Address Line 1:" ]
-                    , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine1, onInput (UpdateAddressLine1 address) ] []
-                        ]
-                    ]
-                , div []
-                    [ label [] [ text "Address Line 2:" ]
-                    , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine2, onInput (UpdateAddressLine2 address) ] []
-                        ]
-                    ]
-                , div []
-                    [ label [] [ text "Apt./Room No.:" ]
-                    , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.addressLine3, onInput (UpdateAddressLine3 address) ] []
-                        ]
-                    ]
-                ]
-            , div [ class "col-xs-12 col-sm-6 padding-h-0" ]
-                [ div []
-                    [ label [ class "required" ] [ text "City:" ]
-                    , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.city, onInput (UpdateCity address) ] []
-                        ]
-                    ]
-                , div [ class "margin-bottom-5" ]
-                    [ label [ class "required" ] [ text "State:" ]
-                    , div [ class "form-column" ]
-                        [ Html.map (UpdateState address) <| Dropdown.view address.dropState dropdownItems address.stateId
-                        ]
-                    ]
-                , div []
-                    [ label [ class "required" ] [ text "Zip Code:" ]
-                    , div [ class "form-column" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue address.zipCode, onInput (UpdateZipcode address), maxlength 5 ] []
-                        ]
-                    ]
-                ]
-            ]
-        ]
 
 
 viewHouseholdMembers : HouseholdMember -> Html Msg
@@ -472,6 +551,8 @@ type Msg
     | UpdatePreferredLanguage PatientLanguagesMap Bool
     | UpdateState PatientAddress Dropdown.Msg
     | UpdateAddressType PatientAddress Dropdown.Msg
+    | UpdateFacilityAddress PatientAddress Dropdown.Msg
+    | GetFacilityAddress PatientAddress (Result Http.Error FacilityAddress)
     | UpdatePhoneType PatientPhoneNumber Dropdown.Msg
     | UpdateLanguage PatientLanguagesMap Dropdown.Msg
     | UpdateHouseholdMemberName HouseholdMember String
@@ -808,16 +889,45 @@ update msg model =
         UpdateState t dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg t.dropState t.stateId model.stateDropdown
+                    Dropdown.update dropdownMsg t.addressStateDropState t.stateId model.stateDropdown
             in
-                updateAddress model { t | dropState = newDropState, stateId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+                updateAddress model { t | addressStateDropState = newDropState, stateId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateAddressType t dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg t.dropState t.addressType Types.addressTypeDropdown
+                    Dropdown.update dropdownMsg t.addressTypeDropState t.addressType Types.addressTypeDropdown
             in
-                updateAddress model { t | addressDropState = newDropState, addressType = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+                updateAddress model { t | addressTypeDropState = newDropState, addressType = newId }
+                    ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateFacilityAddress t dropdownMsg ->
+            let
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg t.facilityAddressDropState t.facilityAddressId model.drops.facilityDropdown
+
+                newAddress =
+                    { t | facilityAddressDropState = newDropState, facilityAddressId = newId }
+            in
+                updateAddress model newAddress
+                    ! [ newMsg
+                      , Functions.setUnsavedChanges True
+                      , case newId of
+                            Just id ->
+                                decodeFacilityAddress
+                                    |> Http.get ("/People/GetFacilityAddress?facilityId=" ++ toString id)
+                                    |> Http.send (GetFacilityAddress newAddress)
+
+                            Nothing ->
+                                --TODO, clear facility address?
+                                Cmd.none
+                      ]
+
+        GetFacilityAddress patientAddress (Ok t) ->
+            updateAddress model { patientAddress | facilityAddress = Just t } ! []
+
+        GetFacilityAddress _ (Err t) ->
+            model ! [ Functions.displayErrorMessage (toString t) ]
 
         UpdatePhoneType t dropdownMsg ->
             let
@@ -1305,12 +1415,15 @@ emptyPatientAddress nodeCounter isPreferred =
     , stateId = Nothing
     , zipCode = Nothing
     , isPreferred = isPreferred
-    , dropState = Dropdown.init "stateDropdown"
-    , nodeId = nodeCounter
     , startDate = Nothing
     , endDate = Nothing
+    , facilityAddress = Nothing
+    , facilityAddressId = Nothing
     , addressType = Nothing
-    , addressDropState = Dropdown.init "addressDropdown"
+    , facilityAddressDropState = Dropdown.init "facilityAddressDropdown"
+    , addressTypeDropState = Dropdown.init "addressDropdown"
+    , addressStateDropState = Dropdown.init "stateDropdown"
+    , nodeId = nodeCounter
     }
 
 
@@ -1420,15 +1533,6 @@ type alias ContactInformationModel =
     }
 
 
-type alias FacilityAddress =
-    { id : Maybe Int
-    , address : Maybe String
-    , city : Maybe String
-    , stateId : Maybe Int
-    , zipCode : Maybe String
-    }
-
-
 type ServerResponse
     = ServerSuccess DemographicsInformationModel ContactInformationModel Decode.Value DropdownSource
     | ServerFail String
@@ -1529,6 +1633,9 @@ decodePatientAddress =
         |> Pipeline.required "StartDate" (Decode.maybe Decode.string)
         |> Pipeline.required "EndDate" (Decode.maybe Decode.string)
         |> Pipeline.required "AddressType" (Decode.maybe Decode.int)
+        |> Pipeline.required "FacilityAddress" (Decode.maybe decodeFacilityAddress)
+        |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
+        |> Pipeline.hardcoded (Dropdown.init "facilityAddressDropdown")
         |> Pipeline.hardcoded (Dropdown.init "stateDropdown")
         |> Pipeline.hardcoded (Dropdown.init "addressDropdown")
         |> Pipeline.hardcoded 0
