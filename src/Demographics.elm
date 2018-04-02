@@ -176,6 +176,7 @@ type alias PatientAddress =
     , endDate : Maybe String
     , addressType : Maybe Int
     , dropState : Dropdown.DropState
+    , addressDropState : Dropdown.DropState
     , nodeId : Int
     }
 
@@ -329,7 +330,7 @@ viewAddress : List DropdownItem -> PatientAddress -> Html Msg
 viewAddress dropdownItems address =
     div [ class "multi-address-template" ]
         [ div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
-            [ div [ title "Mark as primary", class "col-xs-3 padding-h-0 inline-block" ]
+            [ div [ title "Mark as primary", class "col-xs-6 padding-h-0 inline-block" ]
                 [ input
                     [ type_ "radio"
                     , checked address.isPreferred
@@ -340,13 +341,14 @@ viewAddress dropdownItems address =
                     []
                 , label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Primary" ]
                 ]
-            , div [ title "Mark as primary", class "col-xs-2 padding-h-0 inline-block" ]
+            , div [ title "Mark as primary", class "col-xs-2 padding-h-0 inline-block", style [ ( "width", "120px" ) ] ]
                 [ label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Address Type" ]
                 ]
-            , div [ title "Mark as primary", class "col-xs-3 padding-h-0 inline-block" ]
-                [ Html.map (UpdateState address) <| Dropdown.view address.dropState dropdownItems address.stateId
+            , div [ title "Mark as primary", class "col-xs-3 padding-h-0 inline-block", style [ ( "width", "300px" ) ] ]
+                [ Html.map (UpdateAddressType address) <|
+                    Dropdown.view address.addressDropState Types.addressTypeDropdown address.addressType
                 ]
-            , div [ class "col-xs-4 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address) ]
+            , div [ class "col-xs-1 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address) ]
                 [ span [ style [ ( "padding-right", "20px" ), ( "padding-top", "5px" ) ], class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer pull-right" ] []
                 ]
             ]
@@ -468,6 +470,7 @@ type Msg
     | UpdatePreferredPhone PatientPhoneNumber Bool
     | UpdatePreferredLanguage PatientLanguagesMap Bool
     | UpdateState PatientAddress Dropdown.Msg
+    | UpdateAddressType PatientAddress Dropdown.Msg
     | UpdatePhoneType PatientPhoneNumber Dropdown.Msg
     | UpdateLanguage PatientLanguagesMap Dropdown.Msg
     | UpdateHouseholdMemberName HouseholdMember String
@@ -807,6 +810,13 @@ update msg model =
                     Dropdown.update dropdownMsg t.dropState t.stateId model.stateDropdown
             in
                 updateAddress model { t | dropState = newDropState, stateId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateAddressType t dropdownMsg ->
+            let
+                ( newDropState, newId, newMsg ) =
+                    Dropdown.update dropdownMsg t.dropState t.addressType Types.addressTypeDropdown
+            in
+                updateAddress model { t | addressDropState = newDropState, addressType = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdatePhoneType t dropdownMsg ->
             let
@@ -1301,6 +1311,7 @@ emptyPatientAddress nodeCounter isPreferred =
     , startDate = Nothing
     , endDate = Nothing
     , addressType = Nothing
+    , addressDropState = Dropdown.init "addressDropdown"
     }
 
 
@@ -1520,6 +1531,7 @@ decodePatientAddress =
         |> Pipeline.required "EndDate" (Decode.maybe Decode.string)
         |> Pipeline.required "AddressType" (Decode.maybe Decode.int)
         |> Pipeline.hardcoded (Dropdown.init "stateDropdown")
+        |> Pipeline.hardcoded (Dropdown.init "addressDropdown")
         |> Pipeline.hardcoded 0
 
 

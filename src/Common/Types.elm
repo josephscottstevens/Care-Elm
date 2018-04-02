@@ -78,7 +78,6 @@ relationshipsDropdown =
     , DropdownItem (Just 12) "Friend"
     , DropdownItem (Just 13) "Other"
     , DropdownItem (Just 14) "Ward of the court"
-
     ]
 
 
@@ -88,6 +87,14 @@ acuityLevelDropdown =
     , DropdownItem (Just 0) "High"
     , DropdownItem (Just 1) "Medium"
     , DropdownItem (Just 2) "Low"
+    ]
+
+
+addressTypeDropdown : List DropdownItem
+addressTypeDropdown =
+    [ DropdownItem Nothing ""
+    , DropdownItem (Just 0) "Home"
+    , DropdownItem (Just 1) "Facility"
     ]
 
 
