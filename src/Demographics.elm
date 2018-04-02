@@ -21,6 +21,25 @@ port initDemographics : SfData -> Cmd msg
 port initDemographicsDone : (String -> msg) -> Sub msg
 
 
+type alias Address =
+    { nodeId : Int
+    , node : String
+    , dt : Maybe String
+    }
+
+
+port initDemographicsAddress : List Address -> Cmd msg
+
+
+port addNewAddress : Address -> Cmd msg
+
+
+port updateDemographicsAddressStart : (Address -> msg) -> Sub msg
+
+
+port updateDemographicsAddressEnd : (Address -> msg) -> Sub msg
+
+
 port initContactHours : Maybe Decode.Value -> Cmd msg
 
 
@@ -49,6 +68,8 @@ subscriptions model patientId =
     Sub.batch
         [ updateDemographics UpdateDemographics
         , initDemographicsDone InitDemographicsDone
+        , updateDemographicsAddressStart UpdateDemographicsAddressStart
+        , updateDemographicsAddressEnd UpdateDemographicsAddressEnd
         , startSave Save
         , cancel Cancel
         , case model.demographicsUrl of
@@ -466,6 +487,12 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                             [ input [ class "e-textbox", type_ "text", maybeValue addressLine3, disabled isDisabled, onInput (UpdateAddressLine3 address) ] []
                             ]
                         ]
+                    , div []
+                        [ label [] [ text "Begin Date:" ]
+                        , div [ class "form-column" ]
+                            [ input [ type_ "text", id ("BeginDate" ++ toString address.nodeId) ] []
+                            ]
+                        ]
                     ]
                 , div [ class "col-xs-12 col-sm-6 padding-h-0" ]
                     [ div []
@@ -487,6 +514,12 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                         [ label [ class "required" ] [ text "Zip Code:" ]
                         , div [ class "form-column" ]
                             [ input [ class "e-textbox", type_ "text", maybeValue zipCode, disabled isDisabled, onInput (UpdateZipcode address), maxlength 5 ] []
+                            ]
+                        ]
+                    , div []
+                        [ label [] [ text "End Date:" ]
+                        , div [ class "form-column" ]
+                            [ input [ type_ "text", id ("EndDate" ++ toString address.nodeId) ] []
                             ]
                         ]
                     ]
@@ -549,6 +582,8 @@ type Msg
     = Load (Progress ServerResponse)
     | UpdateDemographics SfData
     | InitDemographicsDone String
+    | UpdateDemographicsAddressStart Address
+    | UpdateDemographicsAddressEnd Address
     | Save Bool
     | SaveCompleted (Result Http.Error String)
     | Cancel Bool
@@ -707,6 +742,10 @@ update msg model =
                     else
                         newModel.householdMembers
                             |> List.indexedMap (\idx t -> { t | nodeId = idx })
+
+                addresses =
+                    newPatientAddress
+                        |> List.map (\t -> Address t.nodeId "" (Just ""))
             in
                 { newModel
                     | patientLanguagesMap = newPatientLanguagesMap
@@ -716,17 +755,54 @@ update msg model =
                     , nodeCounter = 4
                     , demographicsUrl = Nothing
                 }
-                    ! [ initDemographics newModel.sfData, Functions.setLoadingStatus False ]
+                    ! [ initDemographics newModel.sfData
+                      , Functions.setLoadingStatus False
+                      , initDemographicsAddress addresses
+                      ]
 
         Load (Fail t) ->
             { model | progress = Done (ServerFail ""), demographicsUrl = Nothing }
-                ! [ Functions.displayErrorMessage (toString t), Functions.setLoadingStatus False ]
+                ! [ Functions.displayErrorMessage (toString t)
+                  , Functions.setLoadingStatus False
+                  ]
 
         Load progress ->
             { model | progress = progress } ! []
 
         InitDemographicsDone _ ->
             model ! [ initContactHours model.contactHoursModel ]
+
+        UpdateDemographicsAddressStart address ->
+            let
+                patientAddresses =
+                    model.patientAddresses
+                        |> List.map
+                            (\t ->
+                                if t.nodeId == address.nodeId then
+                                    { t
+                                        | startDate = address.dt
+                                    }
+                                else
+                                    t
+                            )
+            in
+                { model | patientAddresses = patientAddresses } ! []
+
+        UpdateDemographicsAddressEnd address ->
+            let
+                patientAddresses =
+                    model.patientAddresses
+                        |> List.map
+                            (\t ->
+                                if t.nodeId == address.nodeId then
+                                    { t
+                                        | endDate = address.dt
+                                    }
+                                else
+                                    t
+                            )
+            in
+                { model | patientAddresses = patientAddresses } ! []
 
         UpdateDemographics sfData ->
             { model | sfData = sfData } ! []
@@ -835,7 +911,10 @@ update msg model =
                 | patientAddresses = model.patientAddresses ++ [ emptyPatientAddress model.nodeCounter False ]
                 , nodeCounter = model.nodeCounter + 1
             }
-                ! [ Functions.setUnsavedChanges True ]
+                ! [ Functions.setUnsavedChanges True
+                  , addNewAddress (Address model.nodeCounter "#BeginDate" (Just ""))
+                  , addNewAddress (Address model.nodeCounter "#EndDate" (Just ""))
+                  ]
 
         RemoveAddress address ->
             let
