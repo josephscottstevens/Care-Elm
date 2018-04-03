@@ -425,18 +425,25 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     else
                         False
 
+        emptyAddress =
+            div []
+                [ label [] [ text "" ]
+                , div [ class "form-column margin-bottom-5", style [ ( "height", "30px" ) ] ]
+                    []
+                ]
+
         addressDiv =
             case address.addressType of
                 Nothing ->
-                    text ""
+                    emptyAddress
 
                 Just addressType ->
                     if addressType == 0 then
-                        text ""
+                        emptyAddress
                     else
-                        div [ class "col-xs-12 padding-h-0", style [ ( "padding-bottom", "5px" ) ] ]
-                            [ label [ class "required" ] [ text "Facility:" ]
-                            , div [ class "form-column" ]
+                        div []
+                            [ label [] [ text "Facility Address:" ]
+                            , div [ class "form-column margin-bottom-5" ]
                                 [ Html.map (UpdateFacilityAddress address) <|
                                     Dropdown.view address.facilityAddressDropState facilityDropdownItems address.facilityAddressId
                                 ]
@@ -455,21 +462,21 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                         []
                     , label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Primary" ]
                     ]
-                , div [ title "Mark as primary", class "col-xs-2 padding-h-0 inline-block", style [ ( "width", "120px" ) ] ]
-                    [ label [] [ text "Address Type" ]
-                    ]
-                , div [ title "Mark as primary", class "col-xs-3 padding-h-0 inline-block", style [ ( "width", "300px" ) ] ]
-                    [ Html.map (UpdateAddressType address) <|
-                        Dropdown.view address.addressTypeDropState Types.addressTypeDropdown address.addressType
-                    ]
-                , div [ class "col-xs-1 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address) ]
+                , div [ class "col-xs-6 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address) ]
                     [ span [ style [ ( "padding-right", "20px" ), ( "padding-top", "5px" ) ], class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer pull-right" ] []
                     ]
                 ]
-            , addressDiv
             , div [ class "col-xs-12 padding-h-0", style [ ( "padding-bottom", "20px" ) ] ]
                 [ div [ class "col-xs-12 col-sm-6 padding-h-0" ]
-                    [ div []
+                    [ div
+                        []
+                        [ label [ class "required" ] [ text "Address Type:" ]
+                        , div [ class "form-column margin-bottom-5" ]
+                            [ Html.map (UpdateAddressType address) <|
+                                Dropdown.view address.addressTypeDropState Types.addressTypeDropdown address.addressType
+                            ]
+                        ]
+                    , div []
                         [ label [ class "required" ] [ text "Address Line 1:" ]
                         , div [ class "form-column" ]
                             [ input [ class "e-textbox", type_ "text", maybeValue addressLine1, disabled isDisabled, onInput (UpdateAddressLine1 address) ] []
@@ -495,20 +502,23 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                         ]
                     ]
                 , div [ class "col-xs-12 col-sm-6 padding-h-0" ]
-                    [ div []
+                    [ addressDiv
+                    , div []
                         [ label [ class "required" ] [ text "City:" ]
                         , div [ class "form-column" ]
                             [ input [ class "e-textbox", type_ "text", maybeValue city, disabled isDisabled, onInput (UpdateCity address) ] []
                             ]
                         ]
-                    , div [ class "margin-bottom-5" ]
+                    , div []
                         [ label [ class "required" ] [ text "State:" ]
-                        , div [ class "form-column" ]
-                            [ if isDisabled then
-                                input [ class "e-textbox", type_ "text", value (Dropdown.getDropdownText stateDropdownItems stateId), disabled True ] []
-                              else
-                                Html.map (UpdateState address) <| Dropdown.view address.addressStateDropState stateDropdownItems stateId
-                            ]
+                        , if isDisabled then
+                            div [ class "form-column" ]
+                                [ input [ class "e-textbox", type_ "text", value (Dropdown.getDropdownText stateDropdownItems stateId), disabled True ] []
+                                ]
+                          else
+                            div [ class "form-column margin-bottom-5" ]
+                                [ Html.map (UpdateState address) <| Dropdown.view address.addressStateDropState stateDropdownItems stateId
+                                ]
                         ]
                     , div []
                         [ label [ class "required" ] [ text "Zip Code:" ]
