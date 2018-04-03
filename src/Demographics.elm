@@ -425,29 +425,31 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     else
                         False
 
-        emptyAddress =
-            div []
-                [ label [] [ text "" ]
-                , div [ class "form-column margin-bottom-5", style [ ( "height", "30px" ) ] ]
-                    []
-                ]
-
         addressDiv =
             case address.addressType of
                 Nothing ->
-                    emptyAddress
+                    text ""
 
                 Just addressType ->
                     if addressType == 0 then
-                        emptyAddress
+                        text ""
                     else
                         div []
-                            [ label [] [ text "Facility Address:" ]
+                            [ label [ labelPad ] [ text "Facility Address:" ]
                             , div [ class "form-column margin-bottom-5" ]
                                 [ Html.map (UpdateFacilityAddress address) <|
                                     Dropdown.view address.facilityAddressDropState facilityDropdownItems address.facilityAddressId
                                 ]
                             ]
+
+        sm6 =
+            class "col-xs-8 col-sm-6 padding-h-0"
+
+        sm12 =
+            class "col-xs-12 col-sm-12 padding-h-0"
+
+        labelPad =
+            style [ ( "padding-left", "10px" ) ]
     in
         div [ class "multi-address-template" ]
             [ div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
@@ -467,69 +469,70 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     ]
                 ]
             , div [ class "col-xs-12 padding-h-0", style [ ( "padding-bottom", "20px" ) ] ]
-                [ div [ class "col-xs-12 col-sm-6 padding-h-0" ]
-                    [ div
-                        []
-                        [ label [ class "required" ] [ text "Address Type:" ]
-                        , div [ class "form-column margin-bottom-5" ]
+                [ div [ class "row" ]
+                    [ div [ sm6 ]
+                        [ label [ labelPad ] [ text "Address Type:" ]
+                        , div [ class "DemographicsInputDiv" ]
                             [ Html.map (UpdateAddressType address) <|
                                 Dropdown.view address.addressTypeDropState Types.addressTypeDropdown address.addressType
                             ]
                         ]
-                    , div []
-                        [ label [ class "required" ] [ text "Address Line 1:" ]
-                        , div [ class "form-column" ]
-                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine1, disabled isDisabled, onInput (UpdateAddressLine1 address) ] []
-                            ]
-                        ]
-                    , div []
-                        [ label [] [ text "Address Line 2:" ]
-                        , div [ class "form-column" ]
-                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine2, disabled isDisabled, onInput (UpdateAddressLine2 address) ] []
-                            ]
-                        ]
-                    , div []
-                        [ label [] [ text "Apt./Room No.:" ]
-                        , div [ class "form-column" ]
-                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine3, disabled isDisabled, onInput (UpdateAddressLine3 address) ] []
-                            ]
-                        ]
-                    , div []
-                        [ label [] [ text "Begin Date:" ]
-                        , div [ class "form-column" ]
+                    , div [ sm6 ]
+                        [ label [ labelPad ] [ text "Move in Date:" ]
+                        , div [ class "DemographicsInputDiv" ]
                             [ input [ type_ "text", id ("BeginDate" ++ toString address.nodeId) ] []
                             ]
                         ]
                     ]
-                , div [ class "col-xs-12 col-sm-6 padding-h-0" ]
-                    [ addressDiv
-                    , div []
-                        [ label [ class "required" ] [ text "City:" ]
-                        , div [ class "form-column" ]
+                , div [ class "row" ]
+                    [ div [ sm12 ]
+                        [ addressDiv
+                        ]
+                    ]
+                , div [ class "row" ]
+                    [ div [ sm6 ]
+                        [ label [ labelPad, class "required" ] [ text "Address Line 1:" ]
+                        , div [ class "DemographicsInputDiv" ]
+                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine1, disabled isDisabled, onInput (UpdateAddressLine1 address) ] []
+                            ]
+                        ]
+                    , div [ sm6 ]
+                        [ label [ labelPad, class "required" ] [ text "City:" ]
+                        , div [ class "DemographicsInputDiv" ]
                             [ input [ class "e-textbox", type_ "text", maybeValue city, disabled isDisabled, onInput (UpdateCity address) ] []
                             ]
                         ]
-                    , div []
-                        [ label [ class "required" ] [ text "State:" ]
+                    ]
+                , div [ class "row" ]
+                    [ div [ sm6 ]
+                        [ label [ labelPad ] [ text "Address Line 2:" ]
+                        , div [ class "DemographicsInputDiv" ]
+                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine2, disabled isDisabled, onInput (UpdateAddressLine2 address) ] []
+                            ]
+                        ]
+                    , div [ sm6 ]
+                        [ label [ labelPad, class "required" ] [ text "State:" ]
                         , if isDisabled then
-                            div [ class "form-column" ]
+                            div [ class "DemographicsInputDiv" ]
                                 [ input [ class "e-textbox", type_ "text", value (Dropdown.getDropdownText stateDropdownItems stateId), disabled True ] []
                                 ]
                           else
-                            div [ class "form-column margin-bottom-5" ]
+                            div [ class "DemographicsInputDiv margin-bottom-5" ]
                                 [ Html.map (UpdateState address) <| Dropdown.view address.addressStateDropState stateDropdownItems stateId
                                 ]
                         ]
-                    , div []
-                        [ label [ class "required" ] [ text "Zip Code:" ]
-                        , div [ class "form-column" ]
-                            [ input [ class "e-textbox", type_ "text", maybeValue zipCode, disabled isDisabled, onInput (UpdateZipcode address), maxlength 5 ] []
+                    ]
+                , div [ class "row" ]
+                    [ div [ sm6 ]
+                        [ label [ labelPad ] [ text "Apt./Room No.:" ]
+                        , div [ class "DemographicsInputDiv" ]
+                            [ input [ class "e-textbox", type_ "text", maybeValue addressLine3, disabled isDisabled, onInput (UpdateAddressLine3 address) ] []
                             ]
                         ]
-                    , div []
-                        [ label [] [ text "End Date:" ]
-                        , div [ class "form-column" ]
-                            [ input [ type_ "text", id ("EndDate" ++ toString address.nodeId) ] []
+                    , div [ sm6 ]
+                        [ label [ labelPad, class "required" ] [ text "Zip Code:" ]
+                        , div [ class "DemographicsInputDiv" ]
+                            [ input [ class "e-textbox", type_ "text", maybeValue zipCode, disabled isDisabled, onInput (UpdateZipcode address), maxlength 5 ] []
                             ]
                         ]
                     ]
