@@ -23,7 +23,6 @@ port initDemographicsDone : (String -> msg) -> Sub msg
 
 type alias Address =
     { nodeId : Int
-    , node : String
     , dt : Maybe String
     }
 
@@ -34,10 +33,7 @@ port initDemographicsAddress : List Address -> Cmd msg
 port addNewAddress : Address -> Cmd msg
 
 
-port updateDemographicsAddressStart : (Address -> msg) -> Sub msg
-
-
-port updateDemographicsAddressEnd : (Address -> msg) -> Sub msg
+port updateDemographicsAddressMoveInDate : (Address -> msg) -> Sub msg
 
 
 port initContactHours : Maybe Decode.Value -> Cmd msg
@@ -68,8 +64,7 @@ subscriptions model patientId =
     Sub.batch
         [ updateDemographics UpdateDemographics
         , initDemographicsDone InitDemographicsDone
-        , updateDemographicsAddressStart UpdateDemographicsAddressStart
-        , updateDemographicsAddressEnd UpdateDemographicsAddressEnd
+        , updateDemographicsAddressMoveInDate UpdateDemographicsAddressMoveInDate
         , startSave Save
         , cancel Cancel
         , case model.demographicsUrl of
@@ -191,8 +186,7 @@ type alias PatientAddress =
     , stateId : Maybe Int
     , zipCode : Maybe String
     , isPreferred : Bool
-    , startDate : Maybe String
-    , endDate : Maybe String
+    , moveInDate : Maybe String
     , addressType : Maybe Int
     , facilityAddress : Maybe FacilityAddress
     , facilityAddressId : Maybe Int
@@ -480,7 +474,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     , div [ sm6 ]
                         [ label [ labelPad ] [ text "Move in Date:" ]
                         , div [ class "DemographicsInputDiv" ]
-                            [ input [ type_ "text", id ("BeginDate" ++ toString address.nodeId) ] []
+                            [ input [ type_ "text", id ("MoveInDate" ++ toString address.nodeId) ] []
                             ]
                         ]
                     ]
@@ -595,8 +589,7 @@ type Msg
     = Load (Progress ServerResponse)
     | UpdateDemographics SfData
     | InitDemographicsDone String
-    | UpdateDemographicsAddressStart Address
-    | UpdateDemographicsAddressEnd Address
+    | UpdateDemographicsAddressMoveInDate Address
     | Save Bool
     | SaveCompleted (Result Http.Error String)
     | Cancel Bool
@@ -758,7 +751,7 @@ update msg model =
 
                 addresses =
                     newPatientAddress
-                        |> List.map (\t -> Address t.nodeId "" (Just ""))
+                        |> List.map (\t -> Address t.nodeId (Just ""))
             in
                 { newModel
                     | patientLanguagesMap = newPatientLanguagesMap
@@ -785,7 +778,7 @@ update msg model =
         InitDemographicsDone _ ->
             model ! [ initContactHours model.contactHoursModel ]
 
-        UpdateDemographicsAddressStart address ->
+        UpdateDemographicsAddressMoveInDate address ->
             let
                 patientAddresses =
                     model.patientAddresses
@@ -793,23 +786,7 @@ update msg model =
                             (\t ->
                                 if t.nodeId == address.nodeId then
                                     { t
-                                        | startDate = address.dt
-                                    }
-                                else
-                                    t
-                            )
-            in
-                { model | patientAddresses = patientAddresses } ! []
-
-        UpdateDemographicsAddressEnd address ->
-            let
-                patientAddresses =
-                    model.patientAddresses
-                        |> List.map
-                            (\t ->
-                                if t.nodeId == address.nodeId then
-                                    { t
-                                        | endDate = address.dt
+                                        | moveInDate = address.dt
                                     }
                                 else
                                     t
@@ -931,7 +908,7 @@ update msg model =
                 newPatientAddress =
                     case maybeNewAddress of
                         Just t ->
-                            { emptyAddress | startDate = t.endDate }
+                            { emptyAddress | moveInDate = t.moveInDate }
 
                         Nothing ->
                             emptyAddress
@@ -941,8 +918,7 @@ update msg model =
                     , nodeCounter = model.nodeCounter + 1
                 }
                     ! [ Functions.setUnsavedChanges True
-                      , addNewAddress (Address model.nodeCounter "#BeginDate" newPatientAddress.startDate)
-                      , addNewAddress (Address model.nodeCounter "#EndDate" newPatientAddress.endDate)
+                      , addNewAddress (Address model.nodeCounter newPatientAddress.moveInDate)
                       ]
 
         RemoveAddress address ->
@@ -1554,8 +1530,7 @@ emptyPatientAddress nodeCounter isPreferred =
     , stateId = Nothing
     , zipCode = Nothing
     , isPreferred = isPreferred
-    , startDate = Nothing
-    , endDate = Nothing
+    , moveInDate = Nothing
     , facilityAddress = Nothing
     , facilityAddressId = Nothing
     , addressType = Nothing
@@ -1769,8 +1744,7 @@ decodePatientAddress =
         |> Pipeline.required "StateId" (Decode.maybe Decode.int)
         |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
         |> Pipeline.required "IsPrimary" Decode.bool
-        |> Pipeline.required "StartDate" (Decode.maybe Decode.string)
-        |> Pipeline.required "EndDate" (Decode.maybe Decode.string)
+        |> Pipeline.required "MoveInDate" (Decode.maybe Decode.string)
         |> Pipeline.required "AddressType" (Decode.maybe Decode.int)
         |> Pipeline.required "FacilityAddress" (Decode.maybe decodeFacilityAddress)
         |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
