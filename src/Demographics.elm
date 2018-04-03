@@ -293,7 +293,7 @@ view model =
             ]
         , div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
             [ div [ class "col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-h-0" ]
-                [ h4 [ class "inline-block required" ] [ text "Household Members" ]
+                [ h4 [ class "inline-block" ] [ text "Household Members" ]
                 , div [ class "inline-block e-tooltxt pointer", title "Add new household member", onClick AddNewHouseholdMember ]
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
@@ -448,7 +448,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                         ]
                     , div [ sm6 ]
                         [ label [ labelPad ] [ text "Move in Date:" ]
-                        , div [ class "DemographicsInputDiv" ]
+                        , div [ class "DemographicsInputDiv2" ]
                             [ input [ type_ "text", id ("MoveInDate" ++ toString address.nodeId) ] []
                             ]
                         ]
@@ -467,7 +467,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                         ]
                     , div [ sm6 ]
                         [ label [ labelPad, class "required" ] [ text "City:" ]
-                        , div [ class "DemographicsInputDiv" ]
+                        , div [ class "DemographicsInputDiv2" ]
                             [ input [ class "e-textbox", type_ "text", maybeValue city, disabled isDisabled, onInput (UpdateCity address) ] []
                             ]
                         ]
@@ -482,11 +482,11 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     , div [ sm6 ]
                         [ label [ labelPad, class "required" ] [ text "State:" ]
                         , if isDisabled then
-                            div [ class "DemographicsInputDiv" ]
+                            div [ class "DemographicsInputDiv2" ]
                                 [ input [ class "e-textbox", type_ "text", value (Dropdown.getDropdownText stateDropdownItems stateId), disabled True ] []
                                 ]
                           else
-                            div [ class "DemographicsInputDiv margin-bottom-5" ]
+                            div [ class "DemographicsInputDiv2 margin-bottom-5" ]
                                 [ Html.map (UpdateState address) <| Dropdown.view address.addressStateDropState stateDropdownItems stateId
                                 ]
                         ]
@@ -500,7 +500,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                         ]
                     , div [ sm6 ]
                         [ label [ labelPad, class "required" ] [ text "Zip Code:" ]
-                        , div [ class "DemographicsInputDiv" ]
+                        , div [ class "DemographicsInputDiv2" ]
                             [ input [ class "e-textbox", type_ "text", maybeValue zipCode, disabled isDisabled, onInput (UpdateZipcode address), maxlength 5 ] []
                             ]
                         ]
@@ -549,7 +549,7 @@ viewHouseholdMembers householdMember =
             [ textarea
                 [ maybeValue householdMember.comments
                 , onInput (UpdateHouseholdMemberComments householdMember)
-                , style [ ( "min-width", "99%" ) ]
+                , style [ ( "min-width", "99.5%" ) ]
                 ]
                 []
             ]
