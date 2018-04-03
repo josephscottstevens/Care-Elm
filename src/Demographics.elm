@@ -354,59 +354,34 @@ viewPhones dropdownItems phone =
 viewAddress : List DropdownItem -> List DropdownItem -> PatientAddress -> Html Msg
 viewAddress stateDropdownItems facilityDropdownItems address =
     let
-        pre val =
+        helper t =
+            address.facilityAddress
+                |> Maybe.map t
+                |> Maybe.withDefault Nothing
+
+        thisOrThat t y =
             if address.addressType == Just 1 then
-                Nothing
+                helper t
             else
-                val
+                y
 
         addressLine1 =
-            case address.facilityAddress of
-                Just t ->
-                    t.address
-
-                Nothing ->
-                    pre address.addressLine1
+            thisOrThat .address address.addressLine1
 
         addressLine2 =
-            case address.facilityAddress of
-                Just _ ->
-                    Nothing
-
-                Nothing ->
-                    pre address.addressLine2
+            thisOrThat (\t -> Nothing) address.addressLine2
 
         addressLine3 =
-            case address.facilityAddress of
-                Just _ ->
-                    Nothing
-
-                Nothing ->
-                    pre address.addressLine3
+            thisOrThat (\t -> Nothing) address.addressLine3
 
         city =
-            case address.facilityAddress of
-                Just t ->
-                    t.city
-
-                Nothing ->
-                    pre address.city
+            thisOrThat .city address.city
 
         stateId =
-            case address.facilityAddress of
-                Just t ->
-                    t.stateId
-
-                Nothing ->
-                    pre address.stateId
+            thisOrThat .stateId address.stateId
 
         zipCode =
-            case address.facilityAddress of
-                Just t ->
-                    t.zipCode
-
-                Nothing ->
-                    pre address.zipCode
+            thisOrThat .zipCode address.zipCode
 
         isDisabled =
             case address.addressType of
