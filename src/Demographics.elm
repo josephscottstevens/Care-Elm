@@ -24,6 +24,7 @@ port initDemographicsDone : (String -> msg) -> Sub msg
 type alias Address =
     { nodeId : Int
     , dt : Maybe String
+    , removed : Bool
     }
 
 
@@ -158,7 +159,8 @@ type alias PatientLanguagesMap =
 
 
 type alias HouseholdMember =
-    { name : Maybe String
+    { id : Maybe Int
+    , name : Maybe String
     , relationshipId : Maybe Int
     , comments : Maybe String
     , dropState : Dropdown.DropState
@@ -404,7 +406,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                         text ""
                     else
                         div []
-                            [ label [ labelPad ] [ text "Facility Address:" ]
+                            [ label [ labelPad ] [ text "Facility:" ]
                             , div [ class "form-column margin-bottom-5" ]
                                 [ Html.map (UpdateFacilityAddress address) <|
                                     Dropdown.view address.facilityAddressDropState facilityDropdownItems address.facilityAddressId
@@ -449,7 +451,12 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     , div [ sm6 ]
                         [ label [ labelPad ] [ text "Move in Date:" ]
                         , div [ class "DemographicsInputDiv2" ]
-                            [ input [ type_ "text", id ("MoveInDate" ++ toString address.nodeId) ] []
+                            [ input
+                                [ type_ "text"
+                                , id ("MoveInDate" ++ toString address.nodeId)
+                                , value <| Functions.defaultDate address.moveInDate
+                                ]
+                                []
                             ]
                         ]
                     ]
@@ -726,7 +733,7 @@ update msg model =
 
                 addresses =
                     newPatientAddress
-                        |> List.map (\t -> Address t.nodeId (Just ""))
+                        |> List.map (\t -> Address t.nodeId t.moveInDate False)
             in
                 { newModel
                     | patientLanguagesMap = newPatientLanguagesMap
@@ -782,7 +789,18 @@ update msg model =
 
                 newAddresses =
                     model.patientAddresses
-                        |> List.filter (\t -> t.addressLine1 /= Nothing && t.city /= Nothing && t.stateId /= Nothing && t.zipCode /= Nothing)
+                        |> List.filter
+                            (\t ->
+                                if t.addressType == Just 1 then
+                                    case t.facilityAddressId of
+                                        Just _ ->
+                                            True
+
+                                        Nothing ->
+                                            False
+                                else
+                                    t.addressLine1 /= Nothing && t.city /= Nothing && t.stateId /= Nothing && t.zipCode /= Nothing
+                            )
 
                 newModel =
                     { model
@@ -873,27 +891,15 @@ update msg model =
 
         AddNewAddress ->
             let
-                maybeNewAddress =
-                    model.patientAddresses
-                        |> List.head
-
-                emptyAddress =
-                    emptyPatientAddress model.nodeCounter False
-
                 newPatientAddress =
-                    case maybeNewAddress of
-                        Just t ->
-                            { emptyAddress | moveInDate = t.moveInDate }
-
-                        Nothing ->
-                            emptyAddress
+                    emptyPatientAddress model.nodeCounter False
             in
                 { model
                     | patientAddresses = model.patientAddresses ++ [ newPatientAddress ]
                     , nodeCounter = model.nodeCounter + 1
                 }
                     ! [ Functions.setUnsavedChanges True
-                      , addNewAddress (Address model.nodeCounter newPatientAddress.moveInDate)
+                      , addNewAddress (Address model.nodeCounter newPatientAddress.moveInDate False)
                       ]
 
         RemoveAddress address ->
@@ -901,6 +907,10 @@ update msg model =
                 newAddress =
                     model.patientAddresses
                         |> List.filter (\t -> t.nodeId /= address.nodeId)
+
+                jsAddresses =
+                    model.patientAddresses
+                        |> List.map (\t -> Address t.nodeId t.moveInDate (t.nodeId == address.nodeId))
 
                 updatedAddress =
                     case List.any (\t -> t.isPreferred == True) newAddress of
@@ -917,7 +927,8 @@ update msg model =
                                 )
                                 newAddress
             in
-                { model | patientAddresses = updatedAddress } ! [ Functions.setUnsavedChanges True ]
+                { model | patientAddresses = updatedAddress }
+                    ! [ Functions.setUnsavedChanges True, initDemographicsAddress jsAddresses ]
 
         AddNewHouseholdMember ->
             { model
@@ -976,19 +987,8 @@ update msg model =
             let
                 ( newDropState, newId, newMsg ) =
                     Dropdown.update dropdownMsg t.addressTypeDropState t.addressType Types.addressTypeDropdown
-
-                newAddress =
-                    case newId of
-                        Just _ ->
-                            { t
-                                | addressTypeDropState = newDropState
-                                , addressType = newId
-                            }
-
-                        Nothing ->
-                            { t | addressTypeDropState = newDropState, addressType = newId }
             in
-                updateAddress model newAddress
+                updateAddress model { t | addressTypeDropState = newDropState, addressType = newId }
                     ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateFacilityAddress t dropdownMsg ->
@@ -1271,18 +1271,18 @@ requireInt : String -> Maybe Int -> Maybe String
 requireInt fieldName maybeInt =
     case maybeInt of
         Nothing ->
-            -- Just (fieldName ++ " is required")
-            Just defaultErrorMsg
+            Just (fieldName ++ " is required")
 
+        --Just defaultErrorMsg
         Just _ ->
             Nothing
 
 
 requireString : String -> Maybe String -> Maybe String
-requireString _ maybeStr =
+requireString fieldName maybeStr =
     if Maybe.withDefault "" maybeStr == "" then
-        -- Just (fieldName ++ " is required")
-        Just defaultErrorMsg
+        Just (fieldName ++ " is required")
+        --Just defaultErrorMsg
     else
         Nothing
 
@@ -1306,11 +1306,16 @@ phoneValidation phone =
 
 addressValidation : PatientAddress -> Maybe String
 addressValidation address =
-    [ requireString "Address Line 1" address.addressLine1
-    , requireString "City" address.city
-    , requireInt "State" address.stateId
-    , requireString "Zip Code" address.zipCode
-    ]
+    (if address.addressType == Just 1 then
+        [ requireInt "Facility" address.facilityAddressId
+        ]
+     else
+        [ requireString "Address Line 1" address.addressLine1
+        , requireString "City" address.city
+        , requireInt "State" address.stateId
+        , requireString "Zip Code" address.zipCode
+        ]
+    )
         |> List.filterMap identity
         |> List.head
 
@@ -1475,7 +1480,8 @@ emptyPatientLanguagesMap nodeCounter isPreferred =
 
 emptyHouseholdMembers : Int -> HouseholdMember
 emptyHouseholdMembers nodeCounter =
-    { name = Nothing
+    { id = Nothing
+    , name = Nothing
     , relationshipId = Nothing
     , comments = Nothing
     , dropState = Dropdown.init "householdMembersDropdown"
@@ -1689,6 +1695,7 @@ decodePatientLanguagesMap =
 decodeHouseholdMembers : Decode.Decoder HouseholdMember
 decodeHouseholdMembers =
     Pipeline.decode HouseholdMember
+        |> Pipeline.required "Id" (Decode.maybe Decode.int)
         |> Pipeline.required "Name" (Decode.maybe Decode.string)
         |> Pipeline.required "RelationshipId" (Decode.maybe Decode.int)
         |> Pipeline.required "Comments" (Decode.maybe Decode.string)
@@ -1804,6 +1811,16 @@ encodePatientLanguagesMap lang =
         ]
 
 
+encodeHouseholdMembers : HouseholdMember -> Encode.Value
+encodeHouseholdMembers householdMember =
+    Encode.object
+        [ ( "Id", maybeVal Encode.int householdMember.id )
+        , ( "Name", maybeVal Encode.string householdMember.name )
+        , ( "RelationshipId", maybeVal Encode.int householdMember.relationshipId )
+        , ( "Comments", maybeVal Encode.string householdMember.comments )
+        ]
+
+
 maybeVal : (a -> Encode.Value) -> Maybe a -> Encode.Value
 maybeVal encoder =
     Maybe.map encoder >> Maybe.withDefault Encode.null
@@ -1842,6 +1859,8 @@ encodeDemographicsInformationModel model =
         , ( "DateOfDeath", maybeVal Encode.string model.sfData.dateOfDeath )
         , ( "VIP", maybeVal Encode.bool model.sfData.vip )
         , ( "PatientLanguagesMap", Encode.list (List.map encodePatientLanguagesMap model.patientLanguagesMap) )
+        , ( "HouseholdMembers", Encode.list (List.map encodeHouseholdMembers model.householdMembers) )
+        , ( "AcuityLevelId", maybeVal Encode.int model.acuityLevelId )
         ]
 
 
@@ -1850,13 +1869,14 @@ encodeContactInformationModel model =
     Encode.object
         [ ( "PatientAddresses", Encode.list (List.map encodePatientAddress model.patientAddresses) )
         , ( "PatientPhoneNumbers", Encode.list (List.map encodePatientPhoneNumber model.patientPhoneNumbers) )
+        , ( "FacilityId", maybeVal Encode.int model.sfData.facilityId )
         ]
 
 
 encodePatientAddress : PatientAddress -> Encode.Value
 encodePatientAddress address =
     Encode.object
-        [ ( "Id ", maybeVal Encode.int address.id )
+        [ ( "Id", maybeVal Encode.int address.id )
         , ( "AddressLine1", maybeVal Encode.string address.addressLine1 )
         , ( "AddressLine2", maybeVal Encode.string address.addressLine2 )
         , ( "AddressLine3", maybeVal Encode.string address.addressLine3 )
@@ -1864,13 +1884,16 @@ encodePatientAddress address =
         , ( "StateId", maybeVal Encode.int address.stateId )
         , ( "ZipCode", maybeVal Encode.string address.zipCode )
         , ( "IsPrimary", Encode.bool address.isPreferred )
+        , ( "AddressType", maybeVal Encode.int address.addressType )
+        , ( "MoveInDate", maybeVal Encode.string address.moveInDate )
+        , ( "FacilityId", maybeVal Encode.int address.facilityAddressId )
         ]
 
 
 encodePatientPhoneNumber : PatientPhoneNumber -> Encode.Value
 encodePatientPhoneNumber phone =
     Encode.object
-        [ ( "Id ", maybeVal Encode.int phone.id )
+        [ ( "Id", maybeVal Encode.int phone.id )
         , ( "PhoneNumber", maybeVal Encode.string phone.phoneNumber )
         , ( "PhoneNumberTypeId", maybeVal Encode.int phone.phoneNumberTypeId )
         , ( "IsPreferred", Encode.bool phone.isPreferred )
