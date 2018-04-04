@@ -407,7 +407,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                     else
                         div []
                             [ label [ labelPad ] [ text "Facility:" ]
-                            , div [ class "form-column margin-bottom-5" ]
+                            , div [ class "DemographicsInputDiv2" ]
                                 [ Html.map (UpdateFacilityAddress address) <|
                                     Dropdown.view address.facilityAddressDropState facilityDropdownItems address.facilityAddressId
                                 ]
