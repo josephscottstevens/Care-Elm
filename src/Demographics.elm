@@ -21,20 +21,13 @@ port initDemographics : SfData -> Cmd msg
 port initDemographicsDone : (String -> msg) -> Sub msg
 
 
-type alias Address =
-    { nodeId : Int
-    , dt : Maybe String
-    , removed : Bool
-    }
+port initDemographicsAddress : List SfAddress -> Cmd msg
 
 
-port initDemographicsAddress : List Address -> Cmd msg
+port addNewAddress : SfAddress -> Cmd msg
 
 
-port addNewAddress : Address -> Cmd msg
-
-
-port updateDemographicsAddressMoveInDate : (Address -> msg) -> Sub msg
+port updateDemographicsAddressMoveInDate : (SfAddress -> msg) -> Sub msg
 
 
 port initContactHours : Maybe Decode.Value -> Cmd msg
@@ -146,6 +139,13 @@ type alias SfData =
     , dateOfDeath : Maybe String
     , vip : Maybe Bool
     , drops : DropdownSource
+    }
+
+
+type alias SfAddress =
+    { nodeId : Int
+    , dt : Maybe String
+    , removed : Bool
     }
 
 
@@ -571,7 +571,7 @@ type Msg
     = Load (Progress ServerResponse)
     | UpdateDemographics SfData
     | InitDemographicsDone String
-    | UpdateDemographicsAddressMoveInDate Address
+    | UpdateDemographicsAddressMoveInDate SfAddress
     | Save Bool
     | SaveCompleted (Result Http.Error String)
     | Cancel Bool
@@ -733,7 +733,7 @@ update msg model =
 
                 addresses =
                     newPatientAddress
-                        |> List.map (\t -> Address t.nodeId t.moveInDate False)
+                        |> List.map (\t -> SfAddress t.nodeId t.moveInDate False)
             in
                 { newModel
                     | patientLanguagesMap = newPatientLanguagesMap
@@ -899,7 +899,7 @@ update msg model =
                     , nodeCounter = model.nodeCounter + 1
                 }
                     ! [ Functions.setUnsavedChanges True
-                      , addNewAddress (Address model.nodeCounter newPatientAddress.moveInDate False)
+                      , addNewAddress (SfAddress model.nodeCounter newPatientAddress.moveInDate False)
                       ]
 
         RemoveAddress address ->
@@ -910,7 +910,7 @@ update msg model =
 
                 jsAddresses =
                     model.patientAddresses
-                        |> List.map (\t -> Address t.nodeId t.moveInDate (t.nodeId == address.nodeId))
+                        |> List.map (\t -> SfAddress t.nodeId t.moveInDate (t.nodeId == address.nodeId))
 
                 updatedAddress =
                     case List.any (\t -> t.isPreferred == True) newAddress of
@@ -1900,13 +1900,6 @@ encodePatientPhoneNumber phone =
         ]
 
 
-
--- type alias ContactsData =
---     { tZ : String
---     , wDStr : String
---     }
-
-
 encodeBody : Model -> Encode.Value
 encodeBody model =
     Encode.object
@@ -1915,7 +1908,4 @@ encodeBody model =
         , ( "phones", Encode.list (List.map encodePatientPhoneNumber model.patientPhoneNumbers) )
         , ( "addresses", Encode.list (List.map encodePatientAddress model.patientAddresses) )
         , ( "languages", Encode.list (List.map encodePatientLanguagesMap model.patientLanguagesMap) )
-
-        -- , ( "TZ", Encode.string contactsData.tZ )
-        -- , ( "WDStr", Encode.string contactsData.wDStr )
         ]
