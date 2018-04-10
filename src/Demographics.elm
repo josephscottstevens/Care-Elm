@@ -1,7 +1,7 @@
 port module Demographics exposing (..)
 
 import Html exposing (Html, text, div, span, input, label, h4, textarea)
-import Html.Attributes exposing (class, id, type_, style, value, title, checked, hidden, attribute, maxlength, name, disabled)
+import Html.Attributes exposing (class, id, type_, style, defaultValue, title, checked, hidden, attribute, maxlength, name, disabled)
 import Html.Events exposing (onClick, onInput, onCheck)
 import Common.Types as Types exposing (DropdownItem, Flags)
 import Common.Dropdown as Dropdown
@@ -454,7 +454,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                             [ input
                                 [ type_ "text"
                                 , id ("MoveInDate" ++ toString address.nodeId)
-                                , value <| Functions.defaultDate address.moveInDate
+                                , maybeValue <| Just <| Functions.defaultDate address.moveInDate
                                 ]
                                 []
                             ]
@@ -490,7 +490,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                         [ label [ labelPad, class "required" ] [ text "State:" ]
                         , if isDisabled then
                             div [ class "DemographicsInputDiv2" ]
-                                [ input [ class "e-textbox", type_ "text", value (Dropdown.getDropdownText stateDropdownItems stateId), disabled True ] []
+                                [ input [ class "e-textbox", type_ "text", maybeValue <| Just (Dropdown.getDropdownText stateDropdownItems stateId), disabled True ] []
                                 ]
                           else
                             div [ class "DemographicsInputDiv2 margin-bottom-5" ]
@@ -1144,7 +1144,7 @@ inputOptions patientPhoneNumber =
 
 maybeValue : Maybe String -> Html.Attribute msg
 maybeValue str =
-    value (Maybe.withDefault "" str)
+    defaultValue (Maybe.withDefault "" str)
 
 
 rowStyle : List (Html.Attribute msg)
