@@ -22,15 +22,17 @@ type alias DropState =
     , keyboardSelectedIndex : Int
     , searchString : String
     , domId : String
+    , showSearchText : Bool
     }
 
 
-init : String -> DropState
-init domId =
+init : String -> Bool -> DropState
+init domId showSearchText =
     { isOpen = False
     , keyboardSelectedIndex = 0
     , searchString = ""
     , domId = domId
+    , showSearchText = showSearchText
     }
 
 
@@ -197,9 +199,15 @@ view dropdown dropdownItems selectedId =
                 |> List.head
                 |> Maybe.withDefault ""
 
+        dropdownWidthMultiplier =
+            if dropdown.showSearchText then
+                11
+            else
+                7
+
         biggestStrLength =
             dropdownItems
-                |> List.map (\t -> String.length t.name * 7)
+                |> List.map (\t -> String.length t.name * dropdownWidthMultiplier)
                 |> List.sortBy identity
                 |> List.reverse
                 |> List.head
@@ -267,26 +275,53 @@ viewItem : DropState -> List DropdownItem -> List (Html Msg)
 viewItem dropdown dropdownItems =
     let
         commonWidth =
-            [ ( "min-width", "99.7%" )
-            ]
+            ( "min-width", "99.7%" )
 
         keyActive =
-            [ ( "background-color", "#f4f4f4" ), ( "color", "#333" ) ] ++ commonWidth
-    in
-        dropdownItems
-            |> List.map
-                (\item ->
-                    li
-                        [ Events.onClick (ItemClicked item)
-                        , class "noselect dropdown-li"
-                        , if dropdown.keyboardSelectedIndex == getIndex item.id dropdownItems && dropdown.isOpen then
-                            style keyActive
-                          else
-                            style commonWidth
-                        , Html.Attributes.id (dropdown.domId ++ "-" ++ Functions.defaultIntToString item.id)
+            [ ( "background-color", "#f4f4f4" ), ( "color", "#333" ) ] ++ [ commonWidth ]
+
+        searchInput =
+            if dropdown.showSearchText then
+                li
+                    [ class "noselect dropdown-li"
+                    , style
+                        [ commonWidth
+                        , ( "height", "42px" )
+                        , ( "border-bottom-color", "rgb(206, 206, 206)" )
+                        , ( "border-bottom-width", "1px" )
+                        , ( "border-bottom-style", "solid" )
                         ]
-                        [ text item.name ]
-                )
+                    ]
+                    [ span [ class "e-atc e-search" ]
+                        [ span [ class "e-in-wrap" ]
+                            [ input
+                                [ class "noselect e-input"
+                                , value dropdown.searchString
+                                ]
+                                []
+                            , span [ class "e-icon e-search", style [ ( "width", "14px" ), ( "right", "10px" ), ( "color", "#cecece" ), ( "position", "absolute" ) ] ] []
+                            ]
+                        ]
+                    ]
+            else
+                text ""
+    in
+        searchInput
+            :: (dropdownItems
+                    |> List.map
+                        (\item ->
+                            li
+                                [ Events.onClick (ItemClicked item)
+                                , class "noselect dropdown-li"
+                                , if dropdown.keyboardSelectedIndex == getIndex item.id dropdownItems && dropdown.isOpen then
+                                    style keyActive
+                                  else
+                                    style [ commonWidth ]
+                                , Html.Attributes.id (dropdown.domId ++ "-" ++ Functions.defaultIntToString item.id)
+                                ]
+                                [ text item.name ]
+                        )
+               )
 
 
 updateSearchString : Char -> DropState -> List DropdownItem -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )

@@ -241,6 +241,6 @@ emptyModel =
     , summary = Nothing
     , currentMonth = Nothing
     , currentYear = Nothing
-    , monthDropState = Dropdown.init "monthDropdown"
-    , yearDropState = Dropdown.init "yearDropdown"
+    , monthDropState = Dropdown.init "monthDropdown" False
+    , yearDropState = Dropdown.init "yearDropdown" False
     }

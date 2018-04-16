@@ -1060,13 +1060,13 @@ emptyModel patientId =
     , contactHoursModel = Nothing
     , showValidationErrors = False
     , suffixId = Nothing
-    , suffixDropState = Dropdown.init "suffixDropdown"
+    , suffixDropState = Dropdown.init "suffixDropdown" False
     , prefixId = Nothing
-    , prefixDropState = Dropdown.init "prefixDropdown"
+    , prefixDropState = Dropdown.init "prefixDropdown" False
     , raceId = Nothing
-    , raceDropState = Dropdown.init "raceDropdown"
+    , raceDropState = Dropdown.init "raceDropdown" False
     , ethnicityId = Nothing
-    , ethnicityDropState = Dropdown.init "ethnicityDropdown"
+    , ethnicityDropState = Dropdown.init "ethnicityDropdown" False
     , nodeCounter = 0
     , drops = emptyDrops
     }
@@ -1094,7 +1094,7 @@ emptyPatientLanguagesMap nodeCounter isPreferred =
     { id = Nothing
     , languageId = Nothing
     , isPreferred = isPreferred
-    , dropState = Dropdown.init "languageDropdown"
+    , dropState = Dropdown.init "languageDropdown" False
     , nodeId = nodeCounter
     }
 
@@ -1106,7 +1106,7 @@ emptyPatientPhoneNumber nodeCounter isPreferred =
     , phoneNumberTypeId = Nothing
     , isPreferred = isPreferred
     , maskState = MaskedNumber.initialState
-    , dropState = Dropdown.init "phoneDropdown"
+    , dropState = Dropdown.init "phoneDropdown" False
     , nodeId = nodeCounter
     }
 
@@ -1121,7 +1121,7 @@ emptyPatientAddress nodeCounter isPreferred =
     , stateId = Nothing
     , zipCode = Nothing
     , isPreferred = isPreferred
-    , dropState = Dropdown.init "stateDropdown"
+    , dropState = Dropdown.init "stateDropdown" False
     , nodeId = nodeCounter
     }
 
@@ -1280,7 +1280,7 @@ decodePatientLanguagesMap =
         |> Pipeline.required "Id" (Decode.maybe Decode.int)
         |> Pipeline.required "LanguageId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
-        |> Pipeline.hardcoded (Dropdown.init "languageDropdown")
+        |> Pipeline.hardcoded (Dropdown.init "languageDropdown" False)
         |> Pipeline.hardcoded 0
 
 
@@ -1292,7 +1292,7 @@ decodePatientPhoneNumber =
         |> Pipeline.required "PhoneNumberTypeId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
         |> Pipeline.hardcoded MaskedNumber.initialState
-        |> Pipeline.hardcoded (Dropdown.init "phoneTypeDropdown")
+        |> Pipeline.hardcoded (Dropdown.init "phoneTypeDropdown" False)
         |> Pipeline.hardcoded 0
 
 
@@ -1307,7 +1307,7 @@ decodePatientAddress =
         |> Pipeline.required "StateId" (Decode.maybe Decode.int)
         |> Pipeline.required "ZipCode" (Decode.maybe Decode.string)
         |> Pipeline.required "IsPrimary" Decode.bool
-        |> Pipeline.hardcoded (Dropdown.init "stateDropdown")
+        |> Pipeline.hardcoded (Dropdown.init "stateDropdown" False)
         |> Pipeline.hardcoded 0
 
 
