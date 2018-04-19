@@ -221,37 +221,11 @@ view dropdown dropdownItems selectedId =
 
         biggestStrLength =
             dropdownItems
-                |> List.map (\t -> String.length t.name * dropdownWidthMultiplier)
+                |> List.map (\t -> String.length t.name * dropdownWidthMultiplier + 40)
                 |> List.sortBy identity
                 |> List.reverse
                 |> List.head
                 |> Maybe.withDefault 150
-
-        viewSearch =
-            if dropdown.showSearchText then
-                span
-                    [ class "noselect dropdown-li"
-                    , style
-                        [ commonWidth
-                        , ( "height", "42px" )
-                        , ( "border-bottom-color", "rgb(206, 206, 206)" )
-                        , ( "border-bottom-width", "1px" )
-                        , ( "border-bottom-style", "solid" )
-                        ]
-                    ]
-                    [ span [ class "e-atc e-search", style [ commonWidth ] ]
-                        [ span [ class "e-in-wrap" ]
-                            [ input
-                                [ class "noselect e-input"
-                                , value dropdown.searchString
-                                ]
-                                []
-                            , span [ class "e-icon e-search", style [ ( "width", "14px" ), ( "right", "10px" ), ( "color", "#cecece" ), ( "position", "absolute" ) ] ] []
-                            ]
-                        ]
-                    ]
-            else
-                text ""
     in
         div
             [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
@@ -274,7 +248,8 @@ view dropdown dropdownItems selectedId =
                 , style [ ( "width", "100%" ) ]
                 ]
                 [ span
-                    [ class "e-in-wrap e-box" ]
+                    [ class "e-in-wrap e-box"
+                    ]
                     [ input
                         [ class "noselect e-input"
                         , readonly True
@@ -298,8 +273,12 @@ view dropdown dropdownItems selectedId =
                     , ( "width", toString biggestStrLength ++ "px" )
                     , ( "position", "absolute" )
                     , ( "top", "32px" )
-                    , ( "height", "37px" )
-                    , ( "border-radius", "4px" )
+                    , ( "height", "40px" )
+                    , ( "border-top-left-radius", "4px" )
+                    , ( "border-top-right-radius", "4px" )
+                    , ( "border-color", "#cecece" )
+                    , ( "border-style", "solid" )
+                    , ( "border-width", "1px 1px 0 1px" )
                     , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
                     , ( "padding", "0" )
                     , ( "margin", "0" )
@@ -311,7 +290,28 @@ view dropdown dropdownItems selectedId =
                     , ( "min-width", "99.7%" )
                     ]
                 ]
-                [ viewSearch ]
+                [ if dropdown.showSearchText then
+                    span
+                        [ class "e-atc e-search"
+                        , style
+                            [ ( "min-width", "97.7%" )
+                            , ( "margin-left", "8px" )
+                            , ( "margin-right", "6px" )
+                            , ( "margin-top", "6px" )
+                            ]
+                        ]
+                        [ span [ class "e-in-wrap" ]
+                            [ input
+                                [ class "noselect e-input"
+                                , value dropdown.searchString
+                                ]
+                                []
+                            , span [ class "e-icon e-search", style [ ( "width", "14px" ), ( "right", "10px" ), ( "color", "#cecece" ), ( "position", "absolute" ) ] ] []
+                            ]
+                        ]
+                  else
+                    text ""
+                ]
             , div
                 [ style
                     [ if dropdown.isOpen then
@@ -320,8 +320,10 @@ view dropdown dropdownItems selectedId =
                         ( "display", "none" )
                     , ( "width", toString biggestStrLength ++ "px" )
                     , ( "position", "absolute" )
-                    , ( "top", "69px" )
+                    , ( "top", "72px" )
                     , ( "border-radius", "4px" )
+                    , ( "border-top-left-radius", "0" )
+                    , ( "border-top-right-radius", "0" )
                     , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
                     , ( "padding", "0" )
                     , ( "margin", "0" )
