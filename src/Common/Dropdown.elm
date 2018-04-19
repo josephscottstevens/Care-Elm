@@ -230,9 +230,7 @@ view dropdown dropdownItems selectedId =
         div
             [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
             , if dropdown.isOpen then
-                disabled False
-                -- TODO
-                -- Events.onBlur OnBlur
+                Events.onBlur OnBlur
               else
                 disabled False
             , if dropdown.isOpen then
@@ -392,7 +390,7 @@ updateSearchString searchChar dropdown dropdownItems selectedId =
                     | searchString = searchString
                     , keyboardSelectedIndex = getIndex t.id dropdownItems
                   }
-                , t.id
+                , selectedId
                 , scrollToDomId dropdown.domId t.id
                 )
 
