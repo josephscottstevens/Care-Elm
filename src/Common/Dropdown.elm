@@ -221,7 +221,7 @@ view dropdown dropdownItems selectedId =
 
         biggestStrLength =
             dropdownItems
-                |> List.map (\t -> String.length t.name * dropdownWidthMultiplier + 40)
+                |> List.map (\t -> String.length t.name * dropdownWidthMultiplier)
                 |> List.sortBy identity
                 |> List.reverse
                 |> List.head
@@ -273,7 +273,7 @@ view dropdown dropdownItems selectedId =
                     , ( "width", toString biggestStrLength ++ "px" )
                     , ( "position", "absolute" )
                     , ( "top", "32px" )
-                    , ( "height", "40px" )
+                    , ( "height", "42px" )
                     , ( "border-top-left-radius", "4px" )
                     , ( "border-top-right-radius", "4px" )
                     , ( "border-color", "#cecece" )
@@ -294,7 +294,7 @@ view dropdown dropdownItems selectedId =
                     span
                         [ class "e-atc e-search"
                         , style
-                            [ ( "min-width", "97.7%" )
+                            [ ( "min-width", "96%" )
                             , ( "margin-left", "8px" )
                             , ( "margin-right", "6px" )
                             , ( "margin-top", "6px" )
@@ -320,7 +320,7 @@ view dropdown dropdownItems selectedId =
                         ( "display", "none" )
                     , ( "width", toString biggestStrLength ++ "px" )
                     , ( "position", "absolute" )
-                    , ( "top", "72px" )
+                    , ( "top", "74px" )
                     , ( "border-radius", "4px" )
                     , ( "border-top-left-radius", "0" )
                     , ( "border-top-right-radius", "0" )
@@ -339,6 +339,7 @@ view dropdown dropdownItems selectedId =
                 [ ul
                     [ style
                         [ ( "padding-left", "0" )
+                        , ( "padding-right", "1px" )
                         , ( "-webkit-margin-after", "0" )
                         ]
                     ]
