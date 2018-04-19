@@ -1430,15 +1430,15 @@ emptyModel patientId =
     , contactHoursModel = Nothing
     , showValidationErrors = False
     , suffixId = Nothing
-    , suffixDropState = Dropdown.init "suffixDropdown"
+    , suffixDropState = Dropdown.init "suffixDropdown" False
     , prefixId = Nothing
-    , prefixDropState = Dropdown.init "prefixDropdown"
+    , prefixDropState = Dropdown.init "prefixDropdown" False
     , raceId = Nothing
-    , raceDropState = Dropdown.init "raceDropdown"
+    , raceDropState = Dropdown.init "raceDropdown" False
     , ethnicityId = Nothing
-    , ethnicityDropState = Dropdown.init "ethnicityDropdown"
+    , ethnicityDropState = Dropdown.init "ethnicityDropdown" False
     , acuityLevelId = Nothing
-    , acuityLevelDropState = Dropdown.init "acuityLevelDropdown"
+    , acuityLevelDropState = Dropdown.init "acuityLevelDropdown" False
     , nodeCounter = 0
     , progress = Progress.None
     , demographicsUrl = Just (getDemographicsUrl patientId)
@@ -1473,7 +1473,7 @@ emptyPatientLanguagesMap nodeCounter isPreferred =
     { id = Nothing
     , languageId = Nothing
     , isPreferred = isPreferred
-    , dropState = Dropdown.init "languageDropdown"
+    , dropState = Dropdown.init "languageDropdown" False
     , nodeId = nodeCounter
     }
 
@@ -1484,7 +1484,7 @@ emptyHouseholdMembers nodeCounter =
     , name = Nothing
     , relationshipId = Nothing
     , comments = Nothing
-    , dropState = Dropdown.init "householdMembersDropdown"
+    , dropState = Dropdown.init "householdMembersDropdown" False
     , nodeId = nodeCounter
     }
 
@@ -1496,7 +1496,7 @@ emptyPatientPhoneNumber nodeCounter isPreferred =
     , phoneNumberTypeId = Nothing
     , isPreferred = isPreferred
     , maskState = MaskedNumber.initialState
-    , dropState = Dropdown.init "phoneDropdown"
+    , dropState = Dropdown.init "phoneDropdown" False
     , nodeId = nodeCounter
     }
 
@@ -1515,9 +1515,9 @@ emptyPatientAddress nodeCounter isPreferred =
     , facilityAddress = Nothing
     , facilityAddressId = Nothing
     , addressType = Nothing
-    , facilityAddressDropState = Dropdown.init "facilityAddressDropdown"
-    , addressTypeDropState = Dropdown.init "addressDropdown"
-    , addressStateDropState = Dropdown.init "stateDropdown"
+    , facilityAddressDropState = Dropdown.init "facilityAddressDropdown" False
+    , addressTypeDropState = Dropdown.init "addressDropdown" False
+    , addressStateDropState = Dropdown.init "stateDropdown" False
     , nodeId = nodeCounter
     }
 
@@ -1688,7 +1688,7 @@ decodePatientLanguagesMap =
         |> Pipeline.required "Id" (Decode.maybe Decode.int)
         |> Pipeline.required "LanguageId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
-        |> Pipeline.hardcoded (Dropdown.init "languageDropdown")
+        |> Pipeline.hardcoded (Dropdown.init "languageDropdown" False)
         |> Pipeline.hardcoded 0
 
 
@@ -1699,7 +1699,7 @@ decodeHouseholdMembers =
         |> Pipeline.required "Name" (Decode.maybe Decode.string)
         |> Pipeline.required "RelationshipId" (Decode.maybe Decode.int)
         |> Pipeline.required "Comments" (Decode.maybe Decode.string)
-        |> Pipeline.hardcoded (Dropdown.init "householdMembersDropdown")
+        |> Pipeline.hardcoded (Dropdown.init "householdMembersDropdown" False)
         |> Pipeline.hardcoded 0
 
 
@@ -1711,7 +1711,7 @@ decodePatientPhoneNumber =
         |> Pipeline.required "PhoneNumberTypeId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
         |> Pipeline.hardcoded MaskedNumber.initialState
-        |> Pipeline.hardcoded (Dropdown.init "phoneTypeDropdown")
+        |> Pipeline.hardcoded (Dropdown.init "phoneTypeDropdown" False)
         |> Pipeline.hardcoded 0
 
 
@@ -1730,9 +1730,9 @@ decodePatientAddress =
         |> Pipeline.required "AddressType" (Decode.maybe Decode.int)
         |> Pipeline.required "FacilityAddress" (Decode.maybe decodeFacilityAddress)
         |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
-        |> Pipeline.hardcoded (Dropdown.init "facilityAddressDropdown")
-        |> Pipeline.hardcoded (Dropdown.init "stateDropdown")
-        |> Pipeline.hardcoded (Dropdown.init "addressDropdown")
+        |> Pipeline.hardcoded (Dropdown.init "facilityAddressDropdown" False)
+        |> Pipeline.hardcoded (Dropdown.init "stateDropdown" False)
+        |> Pipeline.hardcoded (Dropdown.init "addressDropdown" False)
         |> Pipeline.hardcoded 0
 
 
