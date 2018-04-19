@@ -1,4 +1,4 @@
-port module Common.Dropdown exposing (DropState, Msg, init, update, view)
+port module Common.Dropdown exposing (DropState, Msg, init, update, view, getDropdownText)
 
 import Html exposing (Html, div, span, text, li, ul, input)
 import Html.Attributes exposing (style, value, class, readonly, placeholder, tabindex, disabled)
@@ -178,6 +178,20 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
             ( newDropdown, Just newIndex, Cmd.none )
 
 
+getDropdownText : List DropdownItem -> Maybe Int -> String
+getDropdownText dropdownItems selectedId =
+    dropdownItems
+        |> List.filter (\t -> t.id == selectedId)
+        |> List.map .name
+        |> List.head
+        |> Maybe.withDefault ""
+
+
+commonWidth : ( String, String )
+commonWidth =
+    ( "min-width", "99.7%" )
+
+
 view : DropState -> List DropdownItem -> Maybe Int -> Html Msg
 view dropdown dropdownItems selectedId =
     let
@@ -212,26 +226,6 @@ view dropdown dropdownItems selectedId =
                 |> List.reverse
                 |> List.head
                 |> Maybe.withDefault 150
-
-        dropdownList =
-            [ if dropdown.isOpen then
-                ( "display", "block" )
-              else
-                ( "display", "none" )
-            , ( "width", toString biggestStrLength ++ "px" )
-            , ( "position", "absolute" )
-            , ( "top", "32px" )
-            , ( "border-radius", "4px" )
-            , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
-            , ( "padding", "0" )
-            , ( "margin", "0" )
-            , ( "background-color", "white" )
-            , ( "max-height", "152px" )
-            , ( "overflow-x", "hidden" )
-            , ( "overflow-y", "scroll" )
-            , ( "z-index", "100" )
-            , ( "min-width", "99.7%" )
-            ]
     in
         div
             [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
@@ -252,7 +246,8 @@ view dropdown dropdownItems selectedId =
                 , style [ ( "width", "100%" ) ]
                 ]
                 [ span
-                    [ class "e-in-wrap e-box" ]
+                    [ class "e-in-wrap e-box"
+                    ]
                     [ input
                         [ class "noselect e-input"
                         , readonly True
@@ -267,32 +262,42 @@ view dropdown dropdownItems selectedId =
                         ]
                     ]
                 ]
-            , ul [ style dropdownList, class "dropdown-ul" ] (viewItem dropdown dropdownItems)
-            ]
-
-
-viewItem : DropState -> List DropdownItem -> List (Html Msg)
-viewItem dropdown dropdownItems =
-    let
-        commonWidth =
-            ( "min-width", "99.7%" )
-
-        keyActive =
-            [ ( "background-color", "#f4f4f4" ), ( "color", "#333" ) ] ++ [ commonWidth ]
-
-        searchInput =
-            if dropdown.showSearchText then
-                li
-                    [ class "noselect dropdown-li"
-                    , style
-                        [ commonWidth
-                        , ( "height", "42px" )
-                        , ( "border-bottom-color", "rgb(206, 206, 206)" )
-                        , ( "border-bottom-width", "1px" )
-                        , ( "border-bottom-style", "solid" )
-                        ]
+            , div
+                [ style
+                    [ if dropdown.isOpen then
+                        ( "display", "block" )
+                      else
+                        ( "display", "none" )
+                    , ( "width", toString biggestStrLength ++ "px" )
+                    , ( "position", "absolute" )
+                    , ( "top", "32px" )
+                    , ( "height", "42px" )
+                    , ( "border-top-left-radius", "4px" )
+                    , ( "border-top-right-radius", "4px" )
+                    , ( "border-color", "#cecece" )
+                    , ( "border-style", "solid" )
+                    , ( "border-width", "1px 1px 0 1px" )
+                    , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
+                    , ( "padding", "0" )
+                    , ( "margin", "0" )
+                    , ( "background-color", "white" )
+                    , ( "max-height", "152px" )
+                    , ( "overflow-x", "hidden" )
+                    , ( "overflow-y", "hidden" )
+                    , ( "z-index", "100" )
+                    , ( "min-width", "99.7%" )
                     ]
-                    [ span [ class "e-atc e-search" ]
+                ]
+                [ if dropdown.showSearchText then
+                    span
+                        [ class "e-atc e-search"
+                        , style
+                            [ ( "min-width", "96%" )
+                            , ( "margin-left", "8px" )
+                            , ( "margin-right", "6px" )
+                            , ( "margin-top", "6px" )
+                            ]
+                        ]
                         [ span [ class "e-in-wrap" ]
                             [ input
                                 [ class "noselect e-input"
@@ -302,26 +307,66 @@ viewItem dropdown dropdownItems =
                             , span [ class "e-icon e-search", style [ ( "width", "14px" ), ( "right", "10px" ), ( "color", "#cecece" ), ( "position", "absolute" ) ] ] []
                             ]
                         ]
+                  else
+                    text ""
+                ]
+            , div
+                [ style
+                    [ if dropdown.isOpen then
+                        ( "display", "block" )
+                      else
+                        ( "display", "none" )
+                    , ( "width", toString biggestStrLength ++ "px" )
+                    , ( "position", "absolute" )
+                    , ( "top", "74px" )
+                    , ( "border-radius", "4px" )
+                    , ( "border-top-left-radius", "0" )
+                    , ( "border-top-right-radius", "0" )
+                    , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
+                    , ( "padding", "0" )
+                    , ( "margin", "0" )
+                    , ( "background-color", "white" )
+                    , ( "max-height", "152px" )
+                    , ( "overflow-x", "hidden" )
+                    , ( "overflow-y", "scroll" )
+                    , ( "z-index", "100" )
+                    , ( "min-width", "99.7%" )
                     ]
-            else
-                text ""
+                , class "dropdown-ul"
+                ]
+                [ ul
+                    [ style
+                        [ ( "padding-left", "0" )
+                        , ( "padding-right", "1px" )
+                        , ( "-webkit-margin-after", "0" )
+                        ]
+                    ]
+                    (viewItem dropdown dropdownItems)
+                ]
+            ]
+
+
+viewItem : DropState -> List DropdownItem -> List (Html Msg)
+viewItem dropdown dropdownItems =
+    let
+        keyActive =
+            [ ( "background-color", "#f4f4f4" ), ( "color", "#333" ) ] ++ [ commonWidth ]
     in
-        searchInput
-            :: (dropdownItems
-                    |> List.map
-                        (\item ->
-                            li
-                                [ Events.onClick (ItemClicked item)
-                                , class "noselect dropdown-li"
-                                , if dropdown.keyboardSelectedIndex == getIndex item.id dropdownItems && dropdown.isOpen then
-                                    style keyActive
-                                  else
-                                    style [ commonWidth ]
-                                , Html.Attributes.id (dropdown.domId ++ "-" ++ Functions.defaultIntToString item.id)
-                                ]
-                                [ text item.name ]
-                        )
-               )
+        (dropdownItems
+            |> List.map
+                (\item ->
+                    li
+                        [ Events.onClick (ItemClicked item)
+                        , class "noselect dropdown-li"
+                        , if dropdown.keyboardSelectedIndex == getIndex item.id dropdownItems && dropdown.isOpen then
+                            style keyActive
+                          else
+                            style [ commonWidth ]
+                        , Html.Attributes.id (dropdown.domId ++ "-" ++ Functions.defaultIntToString item.id)
+                        ]
+                        [ text item.name ]
+                )
+        )
 
 
 updateSearchString : Char -> DropState -> List DropdownItem -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
@@ -345,7 +390,7 @@ updateSearchString searchChar dropdown dropdownItems selectedId =
                     | searchString = searchString
                     , keyboardSelectedIndex = getIndex t.id dropdownItems
                   }
-                , t.id
+                , selectedId
                 , scrollToDomId dropdown.domId t.id
                 )
 
