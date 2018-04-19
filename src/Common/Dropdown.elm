@@ -187,6 +187,11 @@ getDropdownText dropdownItems selectedId =
         |> Maybe.withDefault ""
 
 
+commonWidth : ( String, String )
+commonWidth =
+    ( "min-width", "99.7%" )
+
+
 view : DropState -> List DropdownItem -> Maybe Int -> Html Msg
 view dropdown dropdownItems selectedId =
     let
@@ -222,30 +227,38 @@ view dropdown dropdownItems selectedId =
                 |> List.head
                 |> Maybe.withDefault 150
 
-        dropdownList =
-            [ if dropdown.isOpen then
-                ( "display", "block" )
-              else
-                ( "display", "none" )
-            , ( "width", toString biggestStrLength ++ "px" )
-            , ( "position", "absolute" )
-            , ( "top", "32px" )
-            , ( "border-radius", "4px" )
-            , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
-            , ( "padding", "0" )
-            , ( "margin", "0" )
-            , ( "background-color", "white" )
-            , ( "max-height", "152px" )
-            , ( "overflow-x", "hidden" )
-            , ( "overflow-y", "scroll" )
-            , ( "z-index", "100" )
-            , ( "min-width", "99.7%" )
-            ]
+        viewSearch =
+            if dropdown.showSearchText then
+                span
+                    [ class "noselect dropdown-li"
+                    , style
+                        [ commonWidth
+                        , ( "height", "42px" )
+                        , ( "border-bottom-color", "rgb(206, 206, 206)" )
+                        , ( "border-bottom-width", "1px" )
+                        , ( "border-bottom-style", "solid" )
+                        ]
+                    ]
+                    [ span [ class "e-atc e-search", style [ commonWidth ] ]
+                        [ span [ class "e-in-wrap" ]
+                            [ input
+                                [ class "noselect e-input"
+                                , value dropdown.searchString
+                                ]
+                                []
+                            , span [ class "e-icon e-search", style [ ( "width", "14px" ), ( "right", "10px" ), ( "color", "#cecece" ), ( "position", "absolute" ) ] ] []
+                            ]
+                        ]
+                    ]
+            else
+                text ""
     in
         div
             [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
             , if dropdown.isOpen then
-                Events.onBlur OnBlur
+                disabled False
+                -- TODO
+                -- Events.onBlur OnBlur
               else
                 disabled False
             , if dropdown.isOpen then
@@ -276,61 +289,83 @@ view dropdown dropdownItems selectedId =
                         ]
                     ]
                 ]
-            , ul [ style dropdownList, class "dropdown-ul" ] (viewItem dropdown dropdownItems)
+            , div
+                [ style
+                    [ if dropdown.isOpen then
+                        ( "display", "block" )
+                      else
+                        ( "display", "none" )
+                    , ( "width", toString biggestStrLength ++ "px" )
+                    , ( "position", "absolute" )
+                    , ( "top", "32px" )
+                    , ( "height", "37px" )
+                    , ( "border-radius", "4px" )
+                    , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
+                    , ( "padding", "0" )
+                    , ( "margin", "0" )
+                    , ( "background-color", "white" )
+                    , ( "max-height", "152px" )
+                    , ( "overflow-x", "hidden" )
+                    , ( "overflow-y", "hidden" )
+                    , ( "z-index", "100" )
+                    , ( "min-width", "99.7%" )
+                    ]
+                ]
+                [ viewSearch ]
+            , div
+                [ style
+                    [ if dropdown.isOpen then
+                        ( "display", "block" )
+                      else
+                        ( "display", "none" )
+                    , ( "width", toString biggestStrLength ++ "px" )
+                    , ( "position", "absolute" )
+                    , ( "top", "69px" )
+                    , ( "border-radius", "4px" )
+                    , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
+                    , ( "padding", "0" )
+                    , ( "margin", "0" )
+                    , ( "background-color", "white" )
+                    , ( "max-height", "152px" )
+                    , ( "overflow-x", "hidden" )
+                    , ( "overflow-y", "scroll" )
+                    , ( "z-index", "100" )
+                    , ( "min-width", "99.7%" )
+                    ]
+                , class "dropdown-ul"
+                ]
+                [ ul
+                    [ style
+                        [ ( "padding-left", "0" )
+                        , ( "-webkit-margin-after", "0" )
+                        ]
+                    ]
+                    (viewItem dropdown dropdownItems)
+                ]
             ]
 
 
 viewItem : DropState -> List DropdownItem -> List (Html Msg)
 viewItem dropdown dropdownItems =
     let
-        commonWidth =
-            ( "min-width", "99.7%" )
-
         keyActive =
             [ ( "background-color", "#f4f4f4" ), ( "color", "#333" ) ] ++ [ commonWidth ]
-
-        searchInput =
-            if dropdown.showSearchText then
-                li
-                    [ class "noselect dropdown-li"
-                    , style
-                        [ commonWidth
-                        , ( "height", "42px" )
-                        , ( "border-bottom-color", "rgb(206, 206, 206)" )
-                        , ( "border-bottom-width", "1px" )
-                        , ( "border-bottom-style", "solid" )
-                        ]
-                    ]
-                    [ span [ class "e-atc e-search" ]
-                        [ span [ class "e-in-wrap" ]
-                            [ input
-                                [ class "noselect e-input"
-                                , value dropdown.searchString
-                                ]
-                                []
-                            , span [ class "e-icon e-search", style [ ( "width", "14px" ), ( "right", "10px" ), ( "color", "#cecece" ), ( "position", "absolute" ) ] ] []
-                            ]
-                        ]
-                    ]
-            else
-                text ""
     in
-        searchInput
-            :: (dropdownItems
-                    |> List.map
-                        (\item ->
-                            li
-                                [ Events.onClick (ItemClicked item)
-                                , class "noselect dropdown-li"
-                                , if dropdown.keyboardSelectedIndex == getIndex item.id dropdownItems && dropdown.isOpen then
-                                    style keyActive
-                                  else
-                                    style [ commonWidth ]
-                                , Html.Attributes.id (dropdown.domId ++ "-" ++ Functions.defaultIntToString item.id)
-                                ]
-                                [ text item.name ]
-                        )
-               )
+        (dropdownItems
+            |> List.map
+                (\item ->
+                    li
+                        [ Events.onClick (ItemClicked item)
+                        , class "noselect dropdown-li"
+                        , if dropdown.keyboardSelectedIndex == getIndex item.id dropdownItems && dropdown.isOpen then
+                            style keyActive
+                          else
+                            style [ commonWidth ]
+                        , Html.Attributes.id (dropdown.domId ++ "-" ++ Functions.defaultIntToString item.id)
+                        ]
+                        [ text item.name ]
+                )
+        )
 
 
 updateSearchString : Char -> DropState -> List DropdownItem -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
