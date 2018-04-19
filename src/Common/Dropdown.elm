@@ -318,7 +318,10 @@ view dropdown dropdownItems selectedId =
                         ( "display", "none" )
                     , ( "width", toString biggestStrLength ++ "px" )
                     , ( "position", "absolute" )
-                    , ( "top", "74px" )
+                    , if dropdown.showSearchText then
+                        ( "top", "74px" )
+                      else
+                        ( "top", "32px" )
                     , ( "border-radius", "4px" )
                     , ( "border-top-left-radius", "0" )
                     , ( "border-top-right-radius", "0" )
