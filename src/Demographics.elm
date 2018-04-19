@@ -1009,7 +1009,6 @@ update msg model =
                                     |> Http.send (GetFacilityAddress newAddress)
 
                             Nothing ->
-                                --TODO, clear facility address?
                                 Cmd.none
                       ]
 
