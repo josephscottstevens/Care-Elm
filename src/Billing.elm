@@ -184,7 +184,7 @@ type Msg
     | ToggleReviewedDone (Result Http.Error String)
     | ConfirmDialogShow Int
     | ConfirmDialogConfirmed Int
-    | Test Row
+    | Test
     | Test2 Row
 
 
@@ -284,7 +284,7 @@ update msg model patientId =
                                 Functions.displayErrorMessage "Error toggling reviewed status, please try again later"
                       ]
 
-        Test row ->
+        Test ->
             { model | confirmData = Nothing } ! []
 
         Test2 row ->

@@ -333,7 +333,7 @@ type alias ConfirmDialog data =
     }
 
 
-viewConfirm : Maybe (ConfirmDialog data) -> (data -> msg) -> (data -> msg) -> Html msg
+viewConfirm : Maybe (ConfirmDialog data) -> msg -> (data -> msg) -> Html msg
 viewConfirm maybeData cancelMsg confirmMsg =
     div [] <|
         case maybeData of
@@ -369,7 +369,7 @@ viewConfirm maybeData cancelMsg confirmMsg =
                             [ div [ class "col-xs-12 padding-top-10 confirm-message" ] [ text message ]
                             , div [ class "col-xs-12 padding-top-10 padding-bottom-10" ]
                                 [ div [ class "col-xs-12 padding-right-0" ]
-                                    [ input [ type_ "button", class "btn btn-sm btn-default pull-right margin-left-5 confirm-cancel", value "Cancel", onClick (cancelMsg data) ] []
+                                    [ input [ type_ "button", class "btn btn-sm btn-default pull-right margin-left-5 confirm-cancel", value "Cancel", onClick cancelMsg ] []
                                     , input [ type_ "button", class "btn btn-sm btn-danger pull-right confirm-submit", value "Continue", onClick (confirmMsg data) ] []
                                     ]
                                 ]
