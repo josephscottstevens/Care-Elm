@@ -6,6 +6,7 @@ import Html.Events exposing (onClick)
 import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..))
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
+import Common.Html exposing (viewConfirm)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
@@ -28,6 +29,8 @@ subscriptions =
 type alias Model =
     { rows : List Row
     , gridOperations : Table.GridOperations Row Msg
+    , showConfirm : Bool
+    , confirmText : String
     }
 
 
@@ -62,7 +65,10 @@ type alias Row =
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model _ =
-    Table.view model.gridOperations SetGridOperations model.rows Nothing
+    div []
+        [ Table.view model.gridOperations SetGridOperations model.rows Nothing
+        , viewConfirm model.showConfirm model.confirmText Test Test2
+        ]
 
 
 columns : List (Table.Column Row Msg)
@@ -178,6 +184,8 @@ type Msg
     | ToggleReviewedDone (Result Http.Error String)
     | ConfirmDialogShow Int
     | ConfirmDialogConfirmed Int
+    | Test
+    | Test2
 
 
 toggleReviewed : Row -> Cmd Msg
@@ -268,6 +276,12 @@ update msg model patientId =
                                 Functions.displayErrorMessage "Error toggling reviewed status, please try again later"
                       ]
 
+        Test ->
+            { model | showConfirm = True } ! []
+
+        Test2 ->
+            { model | showConfirm = False } ! []
+
 
 
 -- Paging stuff
@@ -339,6 +353,8 @@ emptyModel : Model
 emptyModel =
     { rows = []
     , gridOperations = Table.init gridConfig
+    , showConfirm = True
+    , confirmText = "There are unsaved changes to Demographics. If you continue, these changes will be lost. Do you want to continue?"
     }
 
 
