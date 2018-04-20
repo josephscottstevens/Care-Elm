@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..))
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
-import Common.Html exposing (viewConfirm)
+import Common.Html exposing (ConfirmDialog, viewConfirm)
 import Http
 import Task
 import Json.Decode as Decode
@@ -30,7 +30,7 @@ subscriptions =
 type alias Model =
     { rows : List Row
     , gridOperations : Table.GridOperations Row Msg
-    , confirmText : Maybe String
+    , confirmData : Maybe (ConfirmDialog Row)
     }
 
 
@@ -67,7 +67,7 @@ view : Model -> Maybe AddEditDataSource -> Html Msg
 view model _ =
     div []
         [ Table.view model.gridOperations SetGridOperations model.rows Nothing
-        , viewConfirm model.confirmText Test Test2
+        , viewConfirm model.confirmData Test Test2
         ]
 
 
@@ -222,7 +222,14 @@ update msg model patientId =
             Debug.crash "todo"
 
         SaveSummaryReportToClientPortal row ->
-            { model | confirmText = Just "Are you sure that you want to save this report in Clinical Portal?" }
+            { model
+                | confirmData =
+                    Just
+                        { data = row
+                        , headerText = "Save to Client Portal"
+                        , message = "Are you sure that you want to save this report in Clinical Portal?"
+                        }
+            }
                 ! []
 
         CloseBillingSession row ->
@@ -278,10 +285,10 @@ update msg model patientId =
                       ]
 
         Test row ->
-            { model | confirmText = Nothing } ! []
+            { model | confirmData = Nothing } ! []
 
         Test2 row ->
-            { model | confirmText = Nothing } ! []
+            { model | confirmData = Nothing } ! []
 
 
 
@@ -354,7 +361,7 @@ emptyModel : Model
 emptyModel =
     { rows = []
     , gridOperations = Table.init gridConfig
-    , confirmText = Just "There are unsaved changes to Demographics. If you continue, these changes will be lost. Do you want to continue?"
+    , confirmData = Nothing
     }
 
 
