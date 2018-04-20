@@ -8,6 +8,7 @@ import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Common.Html exposing (viewConfirm)
 import Http
+import Task
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -29,8 +30,7 @@ subscriptions =
 type alias Model =
     { rows : List Row
     , gridOperations : Table.GridOperations Row Msg
-    , showConfirm : Bool
-    , confirmText : String
+    , confirmText : Maybe String
     }
 
 
@@ -67,7 +67,7 @@ view : Model -> Maybe AddEditDataSource -> Html Msg
 view model _ =
     div []
         [ Table.view model.gridOperations SetGridOperations model.rows Nothing
-        , viewConfirm model.showConfirm model.confirmText Test Test2
+        , viewConfirm model.confirmText Test Test2
         ]
 
 
@@ -184,8 +184,8 @@ type Msg
     | ToggleReviewedDone (Result Http.Error String)
     | ConfirmDialogShow Int
     | ConfirmDialogConfirmed Int
-    | Test
-    | Test2
+    | Test Row
+    | Test2 Row
 
 
 toggleReviewed : Row -> Cmd Msg
@@ -222,7 +222,8 @@ update msg model patientId =
             Debug.crash "todo"
 
         SaveSummaryReportToClientPortal row ->
-            Debug.crash "todo"
+            { model | confirmText = Just "Are you sure that you want to save this report in Clinical Portal?" }
+                ! []
 
         CloseBillingSession row ->
             Debug.crash "todo"
@@ -276,11 +277,11 @@ update msg model patientId =
                                 Functions.displayErrorMessage "Error toggling reviewed status, please try again later"
                       ]
 
-        Test ->
-            { model | showConfirm = True } ! []
+        Test row ->
+            { model | confirmText = Nothing } ! []
 
-        Test2 ->
-            { model | showConfirm = False } ! []
+        Test2 row ->
+            { model | confirmText = Nothing } ! []
 
 
 
@@ -353,8 +354,7 @@ emptyModel : Model
 emptyModel =
     { rows = []
     , gridOperations = Table.init gridConfig
-    , showConfirm = True
-    , confirmText = "There are unsaved changes to Demographics. If you continue, these changes will be lost. Do you want to continue?"
+    , confirmText = Just "There are unsaved changes to Demographics. If you continue, these changes will be lost. Do you want to continue?"
     }
 
 
@@ -363,6 +363,7 @@ gridConfig =
     { domTableId = "BillingTable"
     , sortField = Just "BillingDate"
     , rowsPerPage = 20
-    , toolbar = []
+    , toolbar =
+        []
     , columns = columns
     }
