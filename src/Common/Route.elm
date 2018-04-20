@@ -22,7 +22,7 @@ type Route
     = None
     | Profile
     | Demographics
-      -- | Billing
+    | Billing
     | ClinicalSummaryRoot
     | ClinicalSummary
     | RecordsRoot
@@ -61,7 +61,7 @@ routeByHash =
         , Url.map Demographics (s "people" </> s "_demographics")
 
         -- Other
-        -- , Url.map Billing (s "people" </> s "_insurance")
+        , Url.map Billing (s "people" </> s "_insurance")
         ]
 
 
@@ -143,13 +143,11 @@ routeUrl route =
         None ->
             ""
 
+        Billing ->
+            "#/people/_insurance"
+
         Error t ->
             "#/Error" ++ t
-
-
-
--- Billing ->
---     "#/people/_insurance"
 
 
 routeId : Route -> Int
@@ -225,13 +223,11 @@ routeId route =
         None ->
             0
 
-        Error _ ->
+        Billing ->
             0
 
-
-
--- Billing ->
---     0
+        Error _ ->
+            0
 
 
 getPatientId : Navigation.Location -> Maybe Int
@@ -334,10 +330,8 @@ routeDescription route =
         None ->
             ""
 
+        Billing ->
+            "Billing"
+
         Error t ->
             t
-
-
-
--- Billing ->
---     "Billing"

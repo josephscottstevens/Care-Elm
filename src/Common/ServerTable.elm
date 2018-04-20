@@ -8,6 +8,7 @@ port module Common.ServerTable
         , Operator(..)
         , Control(..)
         , ColumnStyle(..)
+        , defaultRowsPerPage
         , init
         , view
         , intColumn
@@ -81,7 +82,7 @@ type Column data msg
     | StringColumn String String ColumnStyle (data -> Maybe String) String
     | DateTimeColumn String String ColumnStyle (data -> Maybe String) String
     | DateColumn String String ColumnStyle (data -> Maybe String) String
-    | HrefColumn String String ColumnStyle (data -> Maybe String) (data -> Maybe String) String
+    | HrefColumn String String ColumnStyle (data -> Maybe String) (data -> String) String
     | CheckColumn String String ColumnStyle (data -> Bool) String
     | DropdownColumn String ColumnStyle (List ( String, String, data -> msg ))
     | HtmlColumn String String ColumnStyle (data -> Html msg) Control Operator
@@ -107,9 +108,14 @@ dateColumn displayText columnStyle data dataField =
     DateColumn displayText (Functions.idAttr displayText) columnStyle data dataField
 
 
-hrefColumn : String -> ColumnStyle -> (data -> Maybe String) -> (data -> Maybe String) -> String -> Column data msg
-hrefColumn displayText columnStyle displayStr data dataField =
-    HrefColumn displayText (Functions.idAttr displayText) columnStyle displayStr data dataField
+
+-- toMaybe : String -> (Maybe String)
+-- toMaybe
+
+
+hrefColumn : String -> ColumnStyle -> (data -> Maybe String) -> (data -> String) -> String -> Column data msg
+hrefColumn displayText columnStyle data displayStr dataField =
+    HrefColumn displayText (Functions.idAttr displayText) columnStyle data displayStr dataField
 
 
 checkColumn : String -> ColumnStyle -> (data -> Bool) -> String -> Column data msg
@@ -148,7 +154,6 @@ type alias GridOperations data msg =
 
 type alias ServerData =
     { skip : Int
-    , pageSize : Int
     , rowsPerPage : Int
     , totalRows : Int
     , sortField : Maybe String
@@ -166,9 +171,20 @@ type Page
     | Last
 
 
+defaultRowsPerPage : Int
+defaultRowsPerPage =
+    10
+
+
+pageFooterBlockSize : Int
+pageFooterBlockSize =
+    15
+
+
 type alias Config data msg =
     { sortField : Maybe String
     , domTableId : String
+    , rowsPerPage : Int
     , toolbar : List ( String, msg )
     , columns : List (Column data msg)
     }
@@ -179,7 +195,7 @@ init config =
     { selectedId = Nothing
     , openDropdownId = Nothing
     , skip = 0
-    , rowsPerPage = 10
+    , rowsPerPage = config.rowsPerPage
     , totalRows = 0
     , sortField = config.sortField
     , sortAscending = False
@@ -306,13 +322,8 @@ viewTd idx gridOperations toMsg row column =
                     text (Functions.defaultDate (dataToString row))
 
                 HrefColumn _ _ _ dataTodisplayText dataToString _ ->
-                    case dataToString row of
-                        Just t ->
-                            a [ href t, target "_blank" ]
-                                [ text t ]
-
-                        Nothing ->
-                            text ""
+                    a [ href (dataToString row), target "_blank" ]
+                        [ text (dataToString row) ]
 
                 CheckColumn _ _ _ dataToString _ ->
                     div [ class "e-checkcell" ]
@@ -669,12 +680,12 @@ pagingView gridOperations toMsg =
 
         rng =
             List.range 0 totalPages
-                |> List.drop ((gridOperations.skip // 15) * 15)
-                |> List.take 15
+                |> List.drop ((gridOperations.skip // pageFooterBlockSize) * pageFooterBlockSize)
+                |> List.take pageFooterBlockSize
                 |> List.map activeOrNot
 
         firstPageClass =
-            if gridOperations.skip >= 15 then
+            if gridOperations.skip >= pageFooterBlockSize then
                 "e-icon e-mediaback e-firstpage e-default"
             else
                 "e-icon e-mediaback e-firstpagedisabled e-disable"
@@ -686,13 +697,13 @@ pagingView gridOperations toMsg =
                 "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
 
         leftPageBlockClass =
-            if gridOperations.skip >= 15 then
+            if gridOperations.skip >= pageFooterBlockSize then
                 "e-link e-spacing e-PP e-numericitem e-default"
             else
                 "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
 
         rightPageBlockClass =
-            if gridOperations.skip < totalPages - 15 then
+            if gridOperations.skip < totalPages - pageFooterBlockSize then
                 "e-link e-NP e-spacing e-numericitem e-default"
             else
                 "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
@@ -704,7 +715,7 @@ pagingView gridOperations toMsg =
                 "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
 
         lastPageClass =
-            if gridOperations.skip < totalPages - 15 then
+            if gridOperations.skip < totalPages - pageFooterBlockSize then
                 "e-lastpage e-icon e-mediaforward e-default"
             else
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
@@ -785,7 +796,6 @@ decodeGridOperations : Decode.Decoder ServerData
 decodeGridOperations =
     Pipeline.decode ServerData
         |> Pipeline.required "Skip" Decode.int
-        |> Pipeline.required "PageSize" Decode.int
         |> Pipeline.required "RowsPerPage" Decode.int
         |> Pipeline.required "TotalRows" Decode.int
         |> Pipeline.required "SortField" (Decode.maybe Decode.string)

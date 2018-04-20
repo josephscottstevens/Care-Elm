@@ -15,8 +15,8 @@ import Json.Encode as Encode
 init : Int -> Cmd Msg
 init patientId =
     Cmd.batch
-        [ Table.initFilter columns
-        , load patientId <| Table.init gridConfig
+        [ load patientId <| Table.init gridConfig
+        , Table.initFilter columns
         ]
 
 
@@ -130,7 +130,7 @@ columns =
         , Table.stringColumn "Patient's Facility Id" (Width 5) .patientFacilityIdNo "PatientFacilityIdNo"
         , Table.stringColumn "AssignedTo" (Width 5) .assignedTo "AssignedTo"
         , Table.stringColumn "Time Spent" (Width 4) timeSpent "TotalTimeSpent"
-        , Table.hrefColumn "Open Tasks" (Width 3) openTasks (\_ -> Just "#/people/_tasks") "OpenTasks"
+        , Table.hrefColumn "Open Tasks" (Width 3) openTasks (\t -> toString t.openTasks ++ " Tasks") "OpenTasks"
         , Table.dateColumn "CCM Enrollment" (Width 5) .ccmRegistrationDate "CcmRegistrationDate"
         , Table.stringColumn "Billing Codes" (Width 3) .billingCode "BillingCode"
         , Table.htmlColumn "Dx CP RC Al Rx VS" "presentFlagsColumn" filterStyle dxCpRcAlRxVs Table.SixCirclesControl dxCpRcAlRxVsOperator
@@ -345,7 +345,8 @@ emptyModel =
 gridConfig : Table.Config Row Msg
 gridConfig =
     { domTableId = "BillingTable"
-    , sortField = Just "DOB"
+    , sortField = Just "BillingDate"
+    , rowsPerPage = 20
     , toolbar = []
     , columns = columns
     }
