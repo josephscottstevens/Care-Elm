@@ -17,9 +17,10 @@ port module Common.Functions
         , formatDateTime
         , dateTimeToString
         , dateToString
+        , dateFromString
         , dateTime
         , date
-        , dateIndex
+        , getMonthIndex
         , defaultDateTime
         , defaultDate
         , defaultLowerDate
@@ -34,7 +35,7 @@ port module Common.Functions
         , postRequest
         , postRequestWithObject
         , postJsonRequest
-        , getRequestWithObject
+        , getRequestWithParams
         , getDesc
         , getRecordTypeById
         , getId
@@ -178,9 +179,9 @@ defaultIntToString int =
             ""
 
 
-dateIndex : Date.Month -> Int
-dateIndex month =
-    case month of
+getMonthIndex : Date.Date -> Int
+getMonthIndex dt =
+    case Date.month dt of
         Date.Jan ->
             0
 
@@ -241,6 +242,16 @@ dateTimeToString date =
 dateToString : Date.Date -> String
 dateToString date =
     Date.Extra.toUtcFormattedString "MM/dd/yyyy" date
+
+
+dateFromString : String -> Maybe Date.Date
+dateFromString str =
+    case Date.fromString str of
+        Ok t ->
+            Just t
+
+        Err _ ->
+            Nothing
 
 
 dateTime : String -> String
@@ -410,8 +421,8 @@ postJsonRequest body url decoder =
         }
 
 
-getRequestWithObject : String -> List ( String, String ) -> Http.Request String
-getRequestWithObject url params =
+getRequestWithParams : String -> List ( String, String ) -> Http.Request String
+getRequestWithParams url params =
     let
         urlParam =
             params

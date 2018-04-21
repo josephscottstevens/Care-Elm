@@ -87,7 +87,7 @@ update msg model patientId =
 
         GetDate dt ->
             { model
-                | currentMonth = Just (Date.month dt |> Functions.dateIndex)
+                | currentMonth = Just (dt |> Functions.getMonthIndex)
                 , currentYear = Just (Date.year dt)
             }
                 ! []
@@ -97,7 +97,7 @@ update msg model patientId =
 
         GenerateCarePlanLetter ->
             model
-                ! [ Functions.getRequestWithObject
+                ! [ Functions.getRequestWithParams
                         "/People/GetCarePlanFromTasks"
                         [ ( "patientId", toString patientId )
                         , ( "year", model.currentYear |> Maybe.withDefault 0 |> toString )

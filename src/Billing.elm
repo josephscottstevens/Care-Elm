@@ -7,6 +7,7 @@ import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Op
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Common.Html exposing (ConfirmDialog, viewConfirm)
+import Date
 import Http
 import Task
 import Json.Decode as Decode
@@ -180,6 +181,7 @@ type Msg
     | CloseBillingSession Row
     | ToggleBatchClose Row
     | ToggleBatchCloseDone (Result Http.Error String)
+    | SaveSummaryReportToClientPortalDone (Result Http.Error String)
     | ToggleReviewed Row
     | ToggleReviewedDone (Result Http.Error String)
     | ConfirmDialogShow Int
@@ -190,7 +192,7 @@ type Msg
 
 toggleReviewed : Row -> Cmd Msg
 toggleReviewed row =
-    "/Billing/ToggleBillingRecordReviewed"
+    "/Phase2Billing/ToggleBillingRecordReviewed"
         |> Functions.postRequest
             (Encode.object [ ( "billingId", Encode.int row.id ) ])
         |> Http.send ToggleReviewedDone
@@ -237,7 +239,7 @@ update msg model patientId =
 
         ToggleBatchClose row ->
             model
-                ! [ "/Billing/ToggleBatchInvoice"
+                ! [ "/Phase2Billing/ToggleBatchInvoice"
                         |> Functions.postRequest
                             (Encode.object [ ( "billingId", Encode.int row.id ) ])
                         |> Http.send ToggleBatchCloseDone
@@ -247,6 +249,12 @@ update msg model patientId =
             model ! []
 
         ToggleBatchCloseDone (Err t) ->
+            model ! [ Functions.displayErrorMessage (toString t) ]
+
+        SaveSummaryReportToClientPortalDone (Ok t) ->
+            model ! []
+
+        SaveSummaryReportToClientPortalDone (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
 
         ToggleReviewed row ->
@@ -288,7 +296,32 @@ update msg model patientId =
             { model | confirmData = Nothing } ! []
 
         Test2 row ->
-            { model | confirmData = Nothing } ! []
+            let
+                month =
+                    row.billingDate
+                        |> Maybe.andThen Functions.dateFromString
+                        |> Maybe.map Functions.getMonthIndex
+                        |> Maybe.map toString
+                        |> Maybe.withDefault ""
+
+                year =
+                    row.billingDate
+                        |> Maybe.andThen Functions.dateFromString
+                        |> Maybe.map Date.year
+                        |> Maybe.map toString
+                        |> Maybe.withDefault ""
+            in
+                { model | confirmData = Nothing }
+                    ! [ Functions.getRequestWithParams
+                            "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
+                            [ ( "hcoID", toString row.facilityId )
+                            , ( "year", year )
+                            , ( "month", month )
+                            , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
+                            , ( "patientId", toString patientId )
+                            ]
+                            |> Http.send ToggleBatchCloseDone
+                      ]
 
 
 
@@ -351,7 +384,7 @@ load patientId gridOperations =
         , headers = []
         , method = "POST"
         , timeout = Nothing
-        , url = "/People/BillingTest"
+        , url = "/Phase2Billing/BillingCcmGridDataSource"
         , withCredentials = False
         }
         |> Http.send Load
