@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..))
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
-import Common.Html exposing (ConfirmDialog, viewConfirm)
+import Common.Dialog as Dialog
 import Date
 import Http
 import Task
@@ -31,7 +31,7 @@ subscriptions =
 type alias Model =
     { rows : List Row
     , gridOperations : Table.GridOperations Row Msg
-    , confirmData : Maybe (ConfirmDialog Row)
+    , confirmData : Maybe (Dialog.ConfirmDialog Row)
     }
 
 
@@ -68,7 +68,7 @@ view : Model -> Maybe AddEditDataSource -> Html Msg
 view model _ =
     div []
         [ Table.view model.gridOperations SetGridOperations model.rows Nothing
-        , viewConfirm model.confirmData Test Test2
+        , Dialog.viewConfirm model.confirmData SaveCCMMonthlyReportDialog
         ]
 
 
@@ -186,8 +186,7 @@ type Msg
     | ToggleReviewedDone (Result Http.Error String)
     | ConfirmDialogShow Int
     | ConfirmDialogConfirmed Int
-    | Test
-    | Test2 Row
+    | SaveCCMMonthlyReportDialog Bool Row
 
 
 toggleReviewed : Row -> Cmd Msg
@@ -292,10 +291,7 @@ update msg model patientId =
                                 Functions.displayErrorMessage "Error toggling reviewed status, please try again later"
                       ]
 
-        Test ->
-            { model | confirmData = Nothing } ! []
-
-        Test2 row ->
+        SaveCCMMonthlyReportDialog confirmed row ->
             let
                 month =
                     row.billingDate
@@ -311,17 +307,18 @@ update msg model patientId =
                         |> Maybe.map toString
                         |> Maybe.withDefault ""
             in
-                { model | confirmData = Nothing }
-                    ! [ Functions.getRequestWithParams
-                            "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
-                            [ ( "hcoID", toString row.facilityId )
-                            , ( "year", year )
-                            , ( "month", month )
-                            , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
-                            , ( "patientId", toString patientId )
-                            ]
-                            |> Http.send ToggleBatchCloseDone
-                      ]
+                Dialog.dialogConfirm confirmed
+                    model
+                    [ Functions.getRequestWithParams
+                        "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
+                        [ ( "hcoID", toString row.facilityId )
+                        , ( "year", year )
+                        , ( "month", month )
+                        , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
+                        , ( "patientId", toString patientId )
+                        ]
+                        |> Http.send ToggleBatchCloseDone
+                    ]
 
 
 
