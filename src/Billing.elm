@@ -1,7 +1,7 @@
 module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
 import Html exposing (Html, div, text, input)
-import Html.Attributes exposing (class, title, style, checked, type_)
+import Html.Attributes exposing (class, title, style, checked, type_, attribute)
 import Html.Events exposing (onClick)
 import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..))
 import Common.Functions as Functions
@@ -94,7 +94,14 @@ columns =
         toggleReviewed row =
             checkHelper
                 [ checked row.isReviewed
-                , onClick (ShowToggleReviewedDialog row)
+                , if row.isReviewed then
+                    attribute "onclick" "event.preventDefault();"
+                  else
+                    attribute "onClick" ""
+                , if row.isReviewed then
+                    onClick (ShowToggleReviewedDialog row)
+                  else
+                    onClick (ConfirmedToggleReviewedDialog row)
                 ]
 
         dxCpRcAlRxVsOperator =
@@ -184,12 +191,13 @@ type Msg
     | ShowToggleReviewedDialog Row
     | ConfirmedToggleReviewedDialog Row
     | RequestToggleReviewedCompleted (Result Http.Error String)
+    | CloseDialogToggleReviewed Row
       -- Save Summary Report
     | ShowSaveSummaryReportDialog Row
     | ConfirmedSaveSummaryReportDialog Row
     | RequestSaveSummaryReportCompleted (Result Http.Error String)
       -- Common Close Dialog
-    | CloseDialog
+    | CloseDialog Row
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -242,14 +250,14 @@ update msg model patientId =
                         { data = row
                         , headerText = "Confirm"
                         , onConfirm = ConfirmedToggleReviewedDialog
-                        , onCancel = CloseDialog
+                        , onCancel = CloseDialogToggleReviewed
                         , message = "Are you sure you wish to change the reviewed status?"
                         }
             }
                 ! []
 
         ConfirmedToggleReviewedDialog row ->
-            { model | confirmData = Nothing } ! [ toggleReviewed row ]
+            { model | confirmData = Nothing, rows = updateRows model.rows { row | isReviewed = False } } ! [ toggleReviewed row ]
 
         RequestToggleReviewedCompleted (Ok t) ->
             model ! []
@@ -304,8 +312,23 @@ update msg model patientId =
         RequestSaveSummaryReportCompleted (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
 
-        CloseDialog ->
+        CloseDialogToggleReviewed row ->
+            { model | confirmData = Nothing, rows = updateRows model.rows { row | isReviewed = True } } ! []
+
+        CloseDialog _ ->
             { model | confirmData = Nothing } ! []
+
+
+updateRows : List Row -> Row -> List Row
+updateRows rows newRow =
+    List.map
+        (\t ->
+            if t.id == newRow.id then
+                newRow
+            else
+                t
+        )
+        rows
 
 
 toggleReviewed : Row -> Cmd Msg

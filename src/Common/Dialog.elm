@@ -8,7 +8,7 @@ import Html.Events exposing (onInput, onCheck, onClick)
 type alias ConfirmDialog data msg =
     { data : data
     , onConfirm : data -> msg
-    , onCancel : msg
+    , onCancel : data -> msg
     , headerText : String
     , message : String
     }
@@ -50,8 +50,20 @@ viewConfirm maybeData =
                             [ div [ class "col-xs-12 padding-top-10 confirm-message" ] [ text message ]
                             , div [ class "col-xs-12 padding-top-10 padding-bottom-10" ]
                                 [ div [ class "col-xs-12 padding-right-0" ]
-                                    [ input [ type_ "button", class "btn btn-sm btn-default pull-right margin-left-5 confirm-cancel", value "Cancel", onClick onCancel ] []
-                                    , input [ type_ "button", class "btn btn-sm btn-danger pull-right confirm-submit", value "Continue", onClick (onConfirm data) ] []
+                                    [ input
+                                        [ type_ "button"
+                                        , class "btn btn-sm btn-default pull-right margin-left-5 confirm-cancel"
+                                        , value "Cancel"
+                                        , onClick (onCancel data)
+                                        ]
+                                        []
+                                    , input
+                                        [ type_ "button"
+                                        , class "btn btn-sm btn-danger pull-right confirm-submit"
+                                        , value "Continue"
+                                        , onClick (onConfirm data)
+                                        ]
+                                        []
                                     ]
                                 ]
                             ]
