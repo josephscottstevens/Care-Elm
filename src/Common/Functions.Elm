@@ -3,7 +3,7 @@ port module Common.Functions
         ( setLoadingStatus
         , displaySuccessMessage
         , displayErrorMessage
-          -- , error
+        , updateRows
         , idAttr
         , isAlpha
         , isNumber
@@ -123,6 +123,18 @@ deleteDialogShow id =
         , title = "Confirm Delete"
         , id = id
         }
+
+
+updateRows : List { b | id : a } -> { b | id : a } -> List { b | id : a }
+updateRows rows newRow =
+    List.map
+        (\t ->
+            if t.id == newRow.id then
+                newRow
+            else
+                t
+        )
+        rows
 
 
 isAlpha : Char -> Bool

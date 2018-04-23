@@ -148,6 +148,7 @@ columns =
             [ ( "", "Generate Summary Report", GenerateSummaryReport )
             , ( "", "Save Summary Report to Client Portal", ShowSaveSummaryReportDialog )
             , ( "", "Close Billing Session", ShowCloseBillingSessionDialog )
+            , ( "", "Edit CCM Billing", ShowEditCCMBillingDialog )
             ]
         ]
 
@@ -191,10 +192,14 @@ type Msg
     | ShowSaveSummaryReportDialog Row
     | ConfirmedSaveSummaryReportDialog Row
     | RequestSaveSummaryReportCompleted (Result Http.Error String)
-      -- CloseBillingSession
+      -- Close Billing Session
     | ShowCloseBillingSessionDialog Row
     | ConfirmedCloseBillingSessionDialog Row
     | RequestCloseBillingSessionCompleted (Result Http.Error String)
+      -- Edit CCM Billing
+    | ShowEditCCMBillingDialog Row
+    | ConfirmedEditCCMBillingDialog Row
+    | RequestEditCCMBillingCompleted (Result Http.Error String)
       -- Common Close Dialog
     | CloseDialog Row
 
@@ -250,7 +255,7 @@ update msg model patientId =
                 ! []
 
         ConfirmedToggleReviewedDialog row ->
-            { model | confirmData = Nothing, rows = updateRows model.rows { row | isReviewed = False } }
+            { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = False } }
                 ! [ "/Phase2Billing/ToggleBillingRecordReviewed"
                         |> Functions.postRequest
                             (Encode.object [ ( "billingId", Encode.int row.id ) ])
@@ -305,7 +310,7 @@ update msg model patientId =
             Functions.getRequestCompleted model t
 
         CloseDialogToggleReviewed row ->
-            { model | confirmData = Nothing, rows = updateRows model.rows { row | isReviewed = True } } ! []
+            { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = True } } ! []
 
         ShowCloseBillingSessionDialog row ->
             { model
@@ -329,23 +334,35 @@ update msg model patientId =
                         |> Http.send RequestCloseBillingSessionCompleted
                   ]
 
-        RequestCloseBillingSessionCompleted t ->
+        RequestCloseBillingSessionCompleted requestResponse ->
+            case requestResponse of
+                Ok _ ->
+                    model ! [ load patientId model.gridOperations ]
+
+                Err t ->
+                    model ! [ Functions.displayErrorMessage (toString t) ]
+
+        ShowEditCCMBillingDialog row ->
+            { model
+                | confirmData =
+                    Just
+                        { data = row
+                        , headerText = "Edit CCM Billing"
+                        , onConfirm = ConfirmedCloseBillingSessionDialog
+                        , onCancel = CloseDialog
+                        , message = "Are you sure that you want to close this bill?"
+                        }
+            }
+                ! []
+
+        ConfirmedEditCCMBillingDialog row ->
+            Debug.crash "todo"
+
+        RequestEditCCMBillingCompleted t ->
             Functions.getRequestCompleted model t
 
         CloseDialog _ ->
             { model | confirmData = Nothing } ! []
-
-
-updateRows : List Row -> Row -> List Row
-updateRows rows newRow =
-    List.map
-        (\t ->
-            if t.id == newRow.id then
-                newRow
-            else
-                t
-        )
-        rows
 
 
 decodeBillingCcm : Decode.Decoder Row
