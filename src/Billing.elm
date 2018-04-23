@@ -27,10 +27,6 @@ subscriptions =
     Table.updateFilters UpdateFilters
 
 
-
--- viewConfirm : Maybe { b | data : a, headerText : String, message : String, onCancel : msg, onConfirm : a -> msg } -> Html msg
-
-
 type alias Model =
     { rows : List Row
     , gridOperations : Table.GridOperations Row Msg
@@ -151,7 +147,7 @@ columns =
         , Table.dropdownColumn (Width 2)
             [ ( "", "Generate Summary Report", GenerateSummaryReport )
             , ( "", "Save Summary Report to Client Portal", ShowSaveSummaryReportDialog )
-            , ( "", "Close Billing Session", CloseBillingSession )
+            , ( "", "Close Billing Session", ShowCloseBillingSessionDialog )
             ]
         ]
 
@@ -184,7 +180,6 @@ type Msg
     | SetGridOperations (Table.GridOperations Row Msg)
     | UpdateFilters (List Table.Filter)
     | GenerateSummaryReport Row
-    | CloseBillingSession Row
     | ToggleBatchClose Row
     | ToggleBatchCloseDone (Result Http.Error String)
       -- Toggle Reviewed
@@ -196,6 +191,10 @@ type Msg
     | ShowSaveSummaryReportDialog Row
     | ConfirmedSaveSummaryReportDialog Row
     | RequestSaveSummaryReportCompleted (Result Http.Error String)
+      -- CloseBillingSession
+    | ShowCloseBillingSessionDialog Row
+    | ConfirmedCloseBillingSessionDialog Row
+    | RequestCloseBillingSessionCompleted (Result Http.Error String)
       -- Common Close Dialog
     | CloseDialog Row
 
@@ -225,9 +224,6 @@ update msg model patientId =
         GenerateSummaryReport row ->
             Debug.crash "todo"
 
-        CloseBillingSession row ->
-            Debug.crash "todo"
-
         ToggleBatchClose row ->
             model
                 ! [ "/Phase2Billing/ToggleBatchInvoice"
@@ -236,11 +232,8 @@ update msg model patientId =
                         |> Http.send ToggleBatchCloseDone
                   ]
 
-        ToggleBatchCloseDone (Ok t) ->
-            model ! []
-
-        ToggleBatchCloseDone (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+        ToggleBatchCloseDone t ->
+            Functions.getRequestCompleted model t
 
         -- Dialog stuff
         ShowToggleReviewedDialog row ->
@@ -257,13 +250,15 @@ update msg model patientId =
                 ! []
 
         ConfirmedToggleReviewedDialog row ->
-            { model | confirmData = Nothing, rows = updateRows model.rows { row | isReviewed = False } } ! [ toggleReviewed row ]
+            { model | confirmData = Nothing, rows = updateRows model.rows { row | isReviewed = False } }
+                ! [ "/Phase2Billing/ToggleBillingRecordReviewed"
+                        |> Functions.postRequest
+                            (Encode.object [ ( "billingId", Encode.int row.id ) ])
+                        |> Http.send RequestToggleReviewedCompleted
+                  ]
 
-        RequestToggleReviewedCompleted (Ok t) ->
-            model ! []
-
-        RequestToggleReviewedCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+        RequestToggleReviewedCompleted t ->
+            Functions.getRequestCompleted model t
 
         ShowSaveSummaryReportDialog row ->
             { model
@@ -306,14 +301,36 @@ update msg model patientId =
                             |> Http.send RequestSaveSummaryReportCompleted
                       ]
 
-        RequestSaveSummaryReportCompleted (Ok t) ->
-            model ! []
-
-        RequestSaveSummaryReportCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+        RequestSaveSummaryReportCompleted t ->
+            Functions.getRequestCompleted model t
 
         CloseDialogToggleReviewed row ->
             { model | confirmData = Nothing, rows = updateRows model.rows { row | isReviewed = True } } ! []
+
+        ShowCloseBillingSessionDialog row ->
+            { model
+                | confirmData =
+                    Just
+                        { data = row
+                        , headerText = "Close Bill"
+                        , onConfirm = ConfirmedCloseBillingSessionDialog
+                        , onCancel = CloseDialog
+                        , message = "Are you sure that you want to close this bill?"
+                        }
+            }
+                ! []
+
+        ConfirmedCloseBillingSessionDialog row ->
+            { model | confirmData = Nothing }
+                ! [ Functions.getRequestWithParams
+                        "/Phase2Billing/CloseBillingSession"
+                        [ ( "billingId", toString row.id )
+                        ]
+                        |> Http.send RequestCloseBillingSessionCompleted
+                  ]
+
+        RequestCloseBillingSessionCompleted t ->
+            Functions.getRequestCompleted model t
 
         CloseDialog _ ->
             { model | confirmData = Nothing } ! []
@@ -329,14 +346,6 @@ updateRows rows newRow =
                 t
         )
         rows
-
-
-toggleReviewed : Row -> Cmd Msg
-toggleReviewed row =
-    "/Phase2Billing/ToggleBillingRecordReviewed"
-        |> Functions.postRequest
-            (Encode.object [ ( "billingId", Encode.int row.id ) ])
-        |> Http.send RequestToggleReviewedCompleted
 
 
 decodeBillingCcm : Decode.Decoder Row

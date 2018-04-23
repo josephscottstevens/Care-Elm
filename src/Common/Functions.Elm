@@ -36,6 +36,7 @@ port module Common.Functions
         , postRequestWithObject
         , postJsonRequest
         , getRequestWithParams
+        , getRequestCompleted
         , getDesc
         , getRecordTypeById
         , getId
@@ -436,8 +437,17 @@ getRequestWithParams url params =
                 url ++ "?" ++ urlParam
 
 
+getRequestCompleted : a -> Result b value -> ( a, Cmd msg )
+getRequestCompleted model requestResponse =
+    case requestResponse of
+        Ok _ ->
+            model ! []
 
---
+        Err t ->
+            model ! [ displayErrorMessage (toString t) ]
+
+
+
 -- Record helpers
 
 
