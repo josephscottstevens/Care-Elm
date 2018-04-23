@@ -28,8 +28,8 @@ port module Common.ServerTable
         , updateFilter
         )
 
-import Html exposing (Html, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
-import Html.Attributes exposing (class, id, style, type_, target, colspan, classList, href, disabled, checked)
+import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
+import Html.Attributes exposing (class, id, style, type_, target, colspan, classList, href, disabled, checked, attribute)
 import Html.Events as Events
 import Common.Functions as Functions
 import Json.Decode as Decode
@@ -372,10 +372,15 @@ viewTh gridOperations toMsg column =
                     gridOperations.sortAscending
 
         sortClick =
-            Events.onClick (toMsg { gridOperations | sortAscending = newSortDirection, sortField = name })
+            case name of
+                Just _ ->
+                    Events.onClick (toMsg { gridOperations | sortAscending = newSortDirection, sortField = name })
+
+                Nothing ->
+                    attribute "onclick" ""
     in
         th [ class ("e-headercell e-default " ++ Functions.defaultString name), sortClick, getColumnStyle column ]
-            [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
+            [ div [ class "e-headercelldiv e-gridtooltip", sortClick ] headerContent
             ]
 
 
@@ -397,7 +402,7 @@ textHtml t =
         []
 
 
-getColumnStyle : Column data msg -> Html.Attribute msg1
+getColumnStyle : Column data msg -> Attribute msg1
 getColumnStyle column =
     let
         t =
@@ -491,10 +496,19 @@ getServerField column =
 
         HtmlColumn _ _ _ _ _ operator ->
             case operator of
-                CustomSingleOperator op _ ->
-                    Just op
+                NoOperator ->
+                    Nothing
 
-                _ ->
+                Equals serverFieldName ->
+                    Just serverFieldName
+
+                Contains serverFieldName ->
+                    Just serverFieldName
+
+                Between serverFieldName _ ->
+                    Just serverFieldName
+
+                CustomSingleOperator op items ->
                     Nothing
 
 
@@ -546,7 +560,7 @@ rowDropDownDiv idx gridOperations toMsg row dropDownItems =
                     ]
                 ]
 
-        dropDownMenuStyle : Html.Attribute msg
+        dropDownMenuStyle : Attribute msg
         dropDownMenuStyle =
             style
                 [ ( "z-index", "5000" )
@@ -625,7 +639,7 @@ toolbarHelper ( iconStr, event ) =
 -- paging
 
 
-setPagingState : GridOperations data msg -> (GridOperations data msg -> msg) -> Page -> Html.Attribute msg
+setPagingState : GridOperations data msg -> (GridOperations data msg -> msg) -> Page -> Attribute msg
 setPagingState gridOperations toMsg page =
     let
         newIndex =

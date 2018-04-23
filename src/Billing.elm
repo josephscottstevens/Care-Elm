@@ -294,7 +294,7 @@ update msg model patientId =
                         |> Maybe.map toString
                         |> Maybe.withDefault ""
             in
-                model
+                { model | confirmData = Nothing }
                     ! [ Functions.getRequestWithParams
                             "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
                             [ ( "hcoID", toString row.facilityId )
