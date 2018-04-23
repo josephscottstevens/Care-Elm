@@ -9,7 +9,6 @@ import Common.Types exposing (AddEditDataSource)
 import Common.Dialog as Dialog
 import Date
 import Http
-import Task
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -28,10 +27,14 @@ subscriptions =
     Table.updateFilters UpdateFilters
 
 
+
+-- viewConfirm : Maybe { b | data : a, headerText : String, message : String, onCancel : msg, onConfirm : a -> msg } -> Html msg
+
+
 type alias Model =
     { rows : List Row
     , gridOperations : Table.GridOperations Row Msg
-    , confirmData : Maybe (Dialog.ConfirmDialog Row)
+    , confirmData : Maybe (Dialog.ConfirmDialog Row Msg)
     }
 
 
@@ -68,7 +71,7 @@ view : Model -> Maybe AddEditDataSource -> Html Msg
 view model _ =
     div []
         [ Table.view model.gridOperations SetGridOperations model.rows Nothing
-        , Dialog.viewConfirm model.confirmData SaveCCMMonthlyReportDialog
+        , Dialog.viewConfirm model.confirmData
         ]
 
 
@@ -91,10 +94,7 @@ columns =
         toggleReviewed row =
             checkHelper
                 [ checked row.isReviewed
-                , if row.isReviewed == True then
-                    onClick (ToggleReviewed row)
-                  else
-                    onClick (ConfirmDialogShow row.id)
+                , onClick (ShowToggleReviewedDialog row)
                 ]
 
         dxCpRcAlRxVsOperator =
@@ -143,7 +143,7 @@ columns =
         , Table.htmlColumn "Dx CP RC Al Rx VS" "presentFlagsColumn" filterStyle dxCpRcAlRxVs Table.SixCirclesControl dxCpRcAlRxVsOperator
         , Table.dropdownColumn (Width 2)
             [ ( "", "Generate Summary Report", GenerateSummaryReport )
-            , ( "", "Save Summary Report to Client Portal", SaveSummaryReportToClientPortal )
+            , ( "", "Save Summary Report to Client Portal", ShowSaveSummaryReportDialog )
             , ( "", "Close Billing Session", CloseBillingSession )
             ]
         ]
@@ -177,24 +177,19 @@ type Msg
     | SetGridOperations (Table.GridOperations Row Msg)
     | UpdateFilters (List Table.Filter)
     | GenerateSummaryReport Row
-    | SaveSummaryReportToClientPortal Row
     | CloseBillingSession Row
     | ToggleBatchClose Row
     | ToggleBatchCloseDone (Result Http.Error String)
-    | SaveSummaryReportToClientPortalDone (Result Http.Error String)
-    | ToggleReviewed Row
-    | ToggleReviewedDone (Result Http.Error String)
-    | ConfirmDialogShow Int
-    | ConfirmDialogConfirmed Int
-    | SaveCCMMonthlyReportDialog Bool Row
-
-
-toggleReviewed : Row -> Cmd Msg
-toggleReviewed row =
-    "/Phase2Billing/ToggleBillingRecordReviewed"
-        |> Functions.postRequest
-            (Encode.object [ ( "billingId", Encode.int row.id ) ])
-        |> Http.send ToggleReviewedDone
+      -- Toggle Reviewed
+    | ShowToggleReviewedDialog Row
+    | ConfirmedToggleReviewedDialog Row
+    | RequestToggleReviewedCompleted (Result Http.Error String)
+      -- Save Summary Report
+    | ShowSaveSummaryReportDialog Row
+    | ConfirmedSaveSummaryReportDialog Row
+    | RequestSaveSummaryReportCompleted (Result Http.Error String)
+      -- Common Close Dialog
+    | CloseDialog
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -222,17 +217,6 @@ update msg model patientId =
         GenerateSummaryReport row ->
             Debug.crash "todo"
 
-        SaveSummaryReportToClientPortal row ->
-            { model
-                | confirmData =
-                    Just
-                        { data = row
-                        , headerText = "Save to Client Portal"
-                        , message = "Are you sure that you want to save this report in Clinical Portal?"
-                        }
-            }
-                ! []
-
         CloseBillingSession row ->
             Debug.crash "todo"
 
@@ -250,48 +234,43 @@ update msg model patientId =
         ToggleBatchCloseDone (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
 
-        SaveSummaryReportToClientPortalDone (Ok t) ->
-            model ! []
-
-        SaveSummaryReportToClientPortalDone (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
-
-        ToggleReviewed row ->
-            model ! [ toggleReviewed row ]
-
-        ToggleReviewedDone (Ok t) ->
-            model ! []
-
-        ToggleReviewedDone (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
-
-        ConfirmDialogShow id ->
-            model
-                ! [ Functions.customDialogShow
-                        { message = "Are you sure you wish to change the reviewed status?"
-                        , submitText = "Ok"
-                        , title = "Confirm"
-                        , id = id
+        -- Dialog stuff
+        ShowToggleReviewedDialog row ->
+            { model
+                | confirmData =
+                    Just
+                        { data = row
+                        , headerText = "Confirm"
+                        , onConfirm = ConfirmedToggleReviewedDialog
+                        , onCancel = CloseDialog
+                        , message = "Are you sure you wish to change the reviewed status?"
                         }
-                  ]
+            }
+                ! []
 
-        ConfirmDialogConfirmed id ->
-            let
-                row =
-                    model.rows
-                        |> List.filter (\t -> t.id == id)
-                        |> List.head
-            in
-                model
-                    ! [ case row of
-                            Just t ->
-                                toggleReviewed t
+        ConfirmedToggleReviewedDialog row ->
+            { model | confirmData = Nothing } ! [ toggleReviewed row ]
 
-                            Nothing ->
-                                Functions.displayErrorMessage "Error toggling reviewed status, please try again later"
-                      ]
+        RequestToggleReviewedCompleted (Ok t) ->
+            model ! []
 
-        SaveCCMMonthlyReportDialog confirmed row ->
+        RequestToggleReviewedCompleted (Err t) ->
+            model ! [ Functions.displayErrorMessage (toString t) ]
+
+        ShowSaveSummaryReportDialog row ->
+            { model
+                | confirmData =
+                    Just
+                        { data = row
+                        , headerText = "Save to Client Portal"
+                        , onConfirm = ConfirmedSaveSummaryReportDialog
+                        , onCancel = CloseDialog
+                        , message = "Are you sure that you want to save this report in Clinical Portal?"
+                        }
+            }
+                ! []
+
+        ConfirmedSaveSummaryReportDialog row ->
             let
                 month =
                     row.billingDate
@@ -307,22 +286,34 @@ update msg model patientId =
                         |> Maybe.map toString
                         |> Maybe.withDefault ""
             in
-                Dialog.dialogConfirm confirmed
-                    model
-                    [ Functions.getRequestWithParams
-                        "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
-                        [ ( "hcoID", toString row.facilityId )
-                        , ( "year", year )
-                        , ( "month", month )
-                        , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
-                        , ( "patientId", toString patientId )
-                        ]
-                        |> Http.send ToggleBatchCloseDone
-                    ]
+                model
+                    ! [ Functions.getRequestWithParams
+                            "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
+                            [ ( "hcoID", toString row.facilityId )
+                            , ( "year", year )
+                            , ( "month", month )
+                            , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
+                            , ( "patientId", toString patientId )
+                            ]
+                            |> Http.send RequestSaveSummaryReportCompleted
+                      ]
+
+        RequestSaveSummaryReportCompleted (Ok t) ->
+            model ! []
+
+        RequestSaveSummaryReportCompleted (Err t) ->
+            model ! [ Functions.displayErrorMessage (toString t) ]
+
+        CloseDialog ->
+            { model | confirmData = Nothing } ! []
 
 
-
--- Paging stuff
+toggleReviewed : Row -> Cmd Msg
+toggleReviewed row =
+    "/Phase2Billing/ToggleBillingRecordReviewed"
+        |> Functions.postRequest
+            (Encode.object [ ( "billingId", Encode.int row.id ) ])
+        |> Http.send RequestToggleReviewedCompleted
 
 
 decodeBillingCcm : Decode.Decoder Row
