@@ -440,6 +440,12 @@ gridConfig =
     , sortField = Just "BillingDate"
     , rowsPerPage = 20
     , toolbar =
-        []
+        [ text "Billing"
+        , div [ class "submenu_right_items" ]
+            [ div [ class "action_bar" ]
+                [ text "Actions "
+                ]
+            ]
+        ]
     , columns = columns
     }

@@ -20,6 +20,7 @@ port module Common.ServerTable
         , checkColumn
         , htmlColumn
         , textHtml
+        , toolbarButton
         , updateFromServer
         , decodeGridOperations
         , encodeGridOperations
@@ -147,7 +148,7 @@ type alias GridOperations data msg =
     , sortAscending : Bool
     , filters : List Filter
     , domTableId : String
-    , toolbar : List ( String, msg )
+    , toolbar : List (Html msg)
     , columns : List (Column data msg)
     }
 
@@ -185,7 +186,7 @@ type alias Config data msg =
     { sortField : Maybe String
     , domTableId : String
     , rowsPerPage : Int
-    , toolbar : List ( String, msg )
+    , toolbar : List (Html msg)
     , columns : List (Column data msg)
     }
 
@@ -610,18 +611,18 @@ rowDropDownDiv idx gridOperations toMsg row dropDownItems =
             ]
 
 
-viewToolbar : List ( String, msg ) -> Html msg
+viewToolbar : List (Html msg) -> Html msg
 viewToolbar items =
     div [ class "e-gridtoolbar e-toolbar e-js e-widget e-box e-toolbarspan e-tooltip" ]
         [ ul [ class "e-ul e-horizontal" ]
             [ li [ class "e-tooltxt" ]
-                (List.map toolbarHelper items)
+                items
             ]
         ]
 
 
-toolbarHelper : ( String, msg ) -> Html msg
-toolbarHelper ( iconStr, event ) =
+toolbarButton : String -> msg -> Html msg
+toolbarButton iconStr event =
     let
         iconStyle =
             if String.contains "e-disable" iconStr then
