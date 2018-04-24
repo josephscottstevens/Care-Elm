@@ -3,7 +3,7 @@ module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, vi
 import Html exposing (Html, div, text, input)
 import Html.Attributes exposing (class, title, style, checked, type_, attribute)
 import Html.Events exposing (onClick)
-import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..))
+import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..), IdAttrType(IdAttr))
 import Common.Functions as Functions
 import Common.Types exposing (AddEditDataSource)
 import Common.Dialog as Dialog
@@ -129,27 +129,21 @@ columns =
                 , ( "padding-left", "10px" )
                 ]
     in
-        [ Table.htmlColumn "<= 24 Hrs" "lessThan24HoursColumn" (Width 4) isNew Table.FilterIsNewControl (Equals "Is24HoursSinceBilled")
-        , Table.htmlColumn "Reviewed" "reviewedColumn" (Width 4) toggleReviewed Table.CheckBoxControl (Equals "IsReviewed")
-        , Table.htmlColumn "Batch Close" "batchCloseColumn" (Width 4) batchClose Table.CheckBoxControl (Equals "BatchCloseOnInvoiceCompletion")
-        , Table.stringColumn "Facility" (Width 9) .facility "Facility"
-        , Table.htmlColumn "Billing Date" "billingDateColumn" (Width 5) billingDate Table.Last60MonthsControl (Between "BillingDate" "BillingDate")
-        , Table.stringColumn "Main Provider" (Width 5) .mainProvider "MainProvider"
-        , Table.stringColumn "Patient Name" (Width 5) .patientName "PatientName"
-        , Table.dateColumn "DOB" (Width 5) .dob "DoB"
-        , Table.stringColumn "Patient's Facility Id" (Width 5) .patientFacilityIdNo "PatientFacilityIdNo"
-        , Table.stringColumn "AssignedTo" (Width 5) .assignedTo "AssignedTo"
-        , Table.stringColumn "Time Spent" (Width 4) timeSpent "TotalTimeSpent"
-        , Table.hrefColumn "Open Tasks" (Width 3) openTasks (\t -> toString t.openTasks ++ " Tasks") "OpenTasks"
-        , Table.dateColumn "CCM Enrollment" (Width 5) .ccmRegistrationDate "CcmRegistrationDate"
-        , Table.stringColumn "Billing Codes" (Width 3) .billingCode "BillingCode"
-        , Table.htmlColumn "Dx CP RC Al Rx VS" "presentFlagsColumn" filterStyle dxCpRcAlRxVs Table.SixCirclesControl dxCpRcAlRxVsOperator
-        , Table.dropdownColumn (Width 2)
-            [ ( "", "Generate Summary Report", GenerateSummaryReport )
-            , ( "", "Save Summary Report to Client Portal", ShowSaveSummaryReportDialog )
-            , ( "", "Close Billing Session", ShowCloseBillingSessionDialog )
-            , ( "", "Edit CCM Billing", ShowEditCCMBillingDialog )
-            ]
+        [ Table.htmlColumn "<= 24 Hrs" isNew (Width 4) Table.FilterIsNewControl (Equals "Is24HoursSinceBilled") (IdAttr "lessThan24HoursColumn")
+        , Table.htmlColumn "Reviewed" toggleReviewed (Width 4) Table.CheckBoxControl (Equals "IsReviewed") (IdAttr "reviewedColumn")
+        , Table.htmlColumn "Batch Close" batchClose (Width 4) Table.CheckBoxControl (Equals "BatchCloseOnInvoiceCompletion") (IdAttr "batchCloseColumn")
+        , Table.stringColumn "Facility" .facility (Width 9) "Facility"
+        , Table.htmlColumn "Billing Date" billingDate (Width 5) Table.Last60MonthsControl (Between "BillingDate" "BillingDate") (IdAttr "billingDateColumn")
+        , Table.stringColumn "Main Provider" .mainProvider (Width 5) "MainProvider"
+        , Table.stringColumn "Patient Name" .patientName (Width 5) "PatientName"
+        , Table.dateColumn "DOB" .dob (Width 5) "DoB"
+        , Table.stringColumn "Patient's Facility Id" .patientFacilityIdNo (Width 5) "PatientFacilityIdNo"
+        , Table.stringColumn "AssignedTo" .assignedTo (Width 5) "AssignedTo"
+        , Table.stringColumn "Time Spent" timeSpent (Width 4) "TotalTimeSpent"
+        , Table.hrefColumn "Open Tasks" (\t -> ( openTasks t, toString t.openTasks ++ " Tasks" )) (Width 3) "OpenTasks"
+        , Table.dateColumn "CCM Enrollment" .ccmRegistrationDate (Width 5) "CcmRegistrationDate"
+        , Table.stringColumn "Billing Codes" .billingCode (Width 3) "BillingCode"
+        , Table.htmlColumn "Dx CP RC Al Rx VS" dxCpRcAlRxVs filterStyle Table.SixCirclesControl dxCpRcAlRxVsOperator (IdAttr "presentFlagsColumn")
         ]
 
 
@@ -439,6 +433,12 @@ gridConfig =
     { domTableId = "BillingTable"
     , sortField = Just "BillingDate"
     , rowsPerPage = 20
+    , rowDropdownItems =
+        [ ( "", "Generate Summary Report", GenerateSummaryReport )
+        , ( "", "Save Summary Report to Client Portal", ShowSaveSummaryReportDialog )
+        , ( "", "Close Billing Session", ShowCloseBillingSessionDialog )
+        , ( "", "Edit CCM Billing", ShowEditCCMBillingDialog )
+        ]
     , toolbar =
         [ text "Billing"
         , div [ class "submenu_right_items" ]

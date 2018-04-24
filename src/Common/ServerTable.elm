@@ -2,11 +2,12 @@ port module Common.ServerTable
     exposing
         ( GridOperations
         , ServerData
+        , IdAttrType(IdAttr)
         , Config
         , Filter
         , Column
         , Operator(..)
-        , Control(..)
+        , FilterControl(..)
         , ColumnStyle(..)
         , defaultRowsPerPage
         , init
@@ -14,7 +15,6 @@ port module Common.ServerTable
         , intColumn
         , stringColumn
         , dateTimeColumn
-        , dropdownColumn
         , dateColumn
         , hrefColumn
         , checkColumn
@@ -52,7 +52,7 @@ type Operator
     | CustomSingleOperator String (List String)
 
 
-type Control
+type FilterControl
     = TextControl
     | DateControl
     | DateTimeControl
@@ -78,60 +78,117 @@ type ColumnStyle
     | CustomStyle (List ( String, String ))
 
 
-type Column data msg
-    = IntColumn String String ColumnStyle (data -> Maybe Int) String
-    | StringColumn String String ColumnStyle (data -> Maybe String) String
-    | DateTimeColumn String String ColumnStyle (data -> Maybe String) String
-    | DateColumn String String ColumnStyle (data -> Maybe String) String
-    | HrefColumn String String ColumnStyle (data -> Maybe String) (data -> String) String
-    | CheckColumn String String ColumnStyle (data -> Bool) String
-    | DropdownColumn String ColumnStyle (List ( String, String, data -> msg ))
-    | HtmlColumn String String ColumnStyle (data -> Html msg) Control Operator
+type IdAttrType
+    = IdAttr String
 
 
-intColumn : String -> ColumnStyle -> (data -> Maybe Int) -> String -> Column data msg
-intColumn displayText columnStyle data dataField =
-    IntColumn displayText (Functions.idAttr displayText) columnStyle data dataField
+idAttr : IdAttrType -> String
+idAttr t =
+    case t of
+        IdAttr str ->
+            Functions.idAttr str
 
 
-stringColumn : String -> ColumnStyle -> (data -> Maybe String) -> String -> Column data msg
-stringColumn displayText columnStyle data dataField =
-    StringColumn displayText (Functions.idAttr displayText) columnStyle data dataField
+type alias Column data msg =
+    { headerText : String
+    , viewData : data -> Html msg
+    , columnStyle : ColumnStyle
+    , filterControl : FilterControl
+    , operator : Operator
+    , idAttr : IdAttrType
+    }
 
 
-dateTimeColumn : String -> ColumnStyle -> (data -> Maybe String) -> String -> Column data msg
-dateTimeColumn displayText columnStyle data dataField =
-    DateTimeColumn displayText (Functions.idAttr displayText) columnStyle data dataField
+stringColumn : String -> (data -> Maybe String) -> ColumnStyle -> String -> Column data msg
+stringColumn headerText data columnStyle dataField =
+    { headerText = headerText
+    , viewData = data >> \t -> text (Maybe.withDefault "" t)
+    , columnStyle = columnStyle
+    , filterControl = TextControl
+    , operator = Contains dataField
+    , idAttr = IdAttr headerText
+    }
 
 
-dateColumn : String -> ColumnStyle -> (data -> Maybe String) -> String -> Column data msg
-dateColumn displayText columnStyle data dataField =
-    DateColumn displayText (Functions.idAttr displayText) columnStyle data dataField
+intColumn : String -> (data -> Maybe Int) -> ColumnStyle -> String -> Column data msg
+intColumn headerText data columnStyle dataField =
+    { headerText = headerText
+    , viewData = data >> \t -> text (Functions.defaultIntToString t)
+    , columnStyle = columnStyle
+    , filterControl = TextControl
+    , operator = Equals dataField
+    , idAttr = IdAttr headerText
+    }
 
 
-
--- toMaybe : String -> (Maybe String)
--- toMaybe
-
-
-hrefColumn : String -> ColumnStyle -> (data -> Maybe String) -> (data -> String) -> String -> Column data msg
-hrefColumn displayText columnStyle data displayStr dataField =
-    HrefColumn displayText (Functions.idAttr displayText) columnStyle data displayStr dataField
-
-
-checkColumn : String -> ColumnStyle -> (data -> Bool) -> String -> Column data msg
-checkColumn displayText columnStyle data dataField =
-    CheckColumn displayText (Functions.idAttr displayText) columnStyle data dataField
+dateColumn : String -> (data -> Maybe String) -> ColumnStyle -> String -> Column data msg
+dateColumn headerText data columnStyle dataField =
+    { headerText = headerText
+    , viewData = data >> \t -> text (Functions.defaultDate t)
+    , columnStyle = columnStyle
+    , filterControl = DateControl
+    , operator = Equals dataField
+    , idAttr = IdAttr headerText
+    }
 
 
-dropdownColumn : ColumnStyle -> List ( String, String, data -> msg ) -> Column data msg
-dropdownColumn columnStyle items =
-    DropdownColumn "dropdownColumn" columnStyle items
+dateTimeColumn : String -> (data -> Maybe String) -> ColumnStyle -> String -> Column data msg
+dateTimeColumn headerText data columnStyle dataField =
+    { headerText = headerText
+    , viewData = data >> \t -> text (Functions.defaultDateTime t)
+    , columnStyle = columnStyle
+    , filterControl = DateTimeControl
+    , operator = Equals dataField
+    , idAttr = IdAttr headerText
+    }
 
 
-htmlColumn : String -> String -> ColumnStyle -> (data -> Html msg) -> Control -> Operator -> Column data msg
-htmlColumn displayText idAttr columnStyle data control operator =
-    HtmlColumn displayText idAttr columnStyle data control operator
+hrefColumn : String -> (data -> ( Maybe String, String )) -> ColumnStyle -> String -> Column data msg
+hrefColumn headerText data columnStyle dataField =
+    { headerText = headerText
+    , viewData = data >> viewHrefColumn
+    , columnStyle = columnStyle
+    , filterControl = TextControl
+    , operator = Contains dataField
+    , idAttr = IdAttr headerText
+    }
+
+
+viewHrefColumn : ( Maybe String, String ) -> Html msg
+viewHrefColumn ( urlData, textData ) =
+    a [ href (Functions.defaultString urlData), target "_blank" ]
+        [ text textData ]
+
+
+checkColumn : String -> (data -> Bool) -> ColumnStyle -> String -> Column data msg
+checkColumn headerText data columnStyle dataField =
+    { headerText = headerText
+    , viewData = data >> viewCheckColumn
+    , columnStyle = columnStyle
+    , filterControl = CheckBoxControl
+    , operator = Equals dataField
+    , idAttr = IdAttr headerText
+    }
+
+
+viewCheckColumn : Bool -> Html msg
+viewCheckColumn isChecked =
+    div [ class "e-checkcell" ]
+        [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
+            [ input [ type_ "checkbox", disabled True, checked isChecked ] []
+            ]
+        ]
+
+
+htmlColumn : String -> (data -> Html msg) -> ColumnStyle -> FilterControl -> Operator -> IdAttrType -> Column data msg
+htmlColumn headerText data columnStyle filterControl operator idAttr =
+    { headerText = headerText
+    , viewData = data
+    , columnStyle = columnStyle
+    , filterControl = filterControl
+    , operator = operator
+    , idAttr = idAttr
+    }
 
 
 
@@ -148,6 +205,7 @@ type alias GridOperations data msg =
     , sortAscending : Bool
     , filters : List Filter
     , domTableId : String
+    , rowDropdownItems : List ( String, String, data -> msg )
     , toolbar : List (Html msg)
     , columns : List (Column data msg)
     }
@@ -186,6 +244,7 @@ type alias Config data msg =
     { sortField : Maybe String
     , domTableId : String
     , rowsPerPage : Int
+    , rowDropdownItems : List ( String, String, data -> msg )
     , toolbar : List (Html msg)
     , columns : List (Column data msg)
     }
@@ -202,6 +261,7 @@ init config =
     , sortAscending = False
     , filters = buildFilter config.columns
     , domTableId = config.domTableId
+    , rowDropdownItems = config.rowDropdownItems
     , toolbar = config.toolbar
     , columns = config.columns
     }
@@ -217,7 +277,7 @@ view gridOperations toMsg rows maybeCustomRow =
         [ viewToolbar gridOperations.toolbar
         , table [ id gridOperations.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
             [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                [ tr [] (List.map (viewTh gridOperations toMsg) gridOperations.columns)
+                [ tr [] ((List.map (viewTh gridOperations toMsg) gridOperations.columns) ++ [ viewDropdownTh ])
                 , tr [] (List.map viewThFilter gridOperations.columns)
                 ]
             , tbody []
@@ -251,7 +311,7 @@ viewTr gridOperations toMsg rows maybeCustomRow =
                 [ rowClass ctr
                 , selectedStyle ctr
                 ]
-                (List.map (viewTd ctr gridOperations toMsg row) gridOperations.columns)
+                ((List.map (viewTd ctr gridOperations toMsg row) gridOperations.columns) ++ [ rowDropDownDiv ctr gridOperations toMsg row ])
 
         customRowStyle =
             if List.length rows == 0 then
@@ -288,81 +348,50 @@ viewTr gridOperations toMsg rows maybeCustomRow =
                     List.indexedMap standardTr rows
 
 
+tdClass isActive =
+    classList
+        [ ( "e-gridtooltip", True )
+        , ( "e-active", isActive )
+        ]
+
+
+tdStyle =
+    style [ ( "padding-left", "8.4px" ) ]
+
+
 viewTd : Int -> GridOperations data msg -> (GridOperations data msg -> msg) -> data -> Column data msg -> Html msg
 viewTd idx gridOperations toMsg row column =
     let
-        tdClass =
-            classList
-                [ ( "e-gridtooltip", True )
-                , ( "e-active", Just idx == gridOperations.selectedId )
-                ]
-
-        tdStyle =
-            style [ ( "padding-left", "8.4px" ) ]
-
-        tdClick =
-            case column of
-                DropdownColumn _ _ _ ->
-                    disabled False
-
-                _ ->
-                    Events.onClick (toMsg { gridOperations | selectedId = Just idx })
+        isActive =
+            Just idx == gridOperations.selectedId
     in
-        td [ tdClass, tdStyle, tdClick ]
-            [ case column of
-                IntColumn _ _ _ dataToInt _ ->
-                    text (Functions.defaultIntToString (dataToInt row))
-
-                StringColumn _ _ _ dataToString _ ->
-                    text (Maybe.withDefault "" (dataToString row))
-
-                DateTimeColumn _ _ _ dataToString _ ->
-                    text (Functions.defaultDateTime (dataToString row))
-
-                DateColumn _ _ _ dataToString _ ->
-                    text (Functions.defaultDate (dataToString row))
-
-                HrefColumn _ _ _ dataTodisplayText dataToString _ ->
-                    a [ href (dataToString row), target "_blank" ]
-                        [ text (dataToString row) ]
-
-                CheckColumn _ _ _ dataToString _ ->
-                    div [ class "e-checkcell" ]
-                        [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
-                            [ input [ type_ "checkbox", disabled True, checked (dataToString row) ] []
-                            ]
-                        ]
-
-                DropdownColumn _ _ dropDownItems ->
-                    rowDropDownDiv idx gridOperations toMsg row dropDownItems
-
-                HtmlColumn _ _ _ toNode _ _ ->
-                    toNode row
+        td
+            [ tdClass isActive
+            , tdStyle
+            , Events.onClick (toMsg { gridOperations | selectedId = Just idx })
             ]
+            [ column.viewData row ]
 
 
 viewTh : GridOperations data msg -> (GridOperations data msg -> msg) -> Column data msg -> Html msg
 viewTh gridOperations toMsg column =
     let
         name =
-            getServerField column
-
-        displayValue =
-            getColumnDisplayValue column
+            getServerField column.operator
 
         headerContent =
             case gridOperations.sortField of
                 Just t ->
                     if Just t == name then
                         if gridOperations.sortAscending then
-                            [ text displayValue, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
+                            [ text column.headerText, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
                         else
-                            [ text displayValue, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
+                            [ text column.headerText, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
                     else
-                        [ text displayValue ]
+                        [ text column.headerText ]
 
                 Nothing ->
-                    [ text displayValue ]
+                    [ text column.headerText ]
 
         newSortDirection =
             case gridOperations.sortField of
@@ -380,16 +409,23 @@ viewTh gridOperations toMsg column =
                 Nothing ->
                     attribute "onclick" ""
     in
-        th [ class ("e-headercell e-default " ++ Functions.defaultString name), sortClick, getColumnStyle column ]
+        th [ class ("e-headercell e-default " ++ Functions.defaultString name), getColumnStyle column.columnStyle ]
             [ div [ class "e-headercelldiv e-gridtooltip", sortClick ] headerContent
             ]
+
+
+viewDropdownTh : Html msg
+viewDropdownTh =
+    th [ class ("e-headercell e-default dropdownColumn"), style [ ( "width", "14px" ) ] ]
+        [ div [ class "e-headercelldiv e-gridtooltip" ] []
+        ]
 
 
 viewThFilter : Column data msg -> Html msg
 viewThFilter column =
     th [ class "e-filterbarcell e-fltrtemp" ]
         [ div [ class "e-filterdiv e-fltrtempdiv" ]
-            [ input [ id (getColumnIdAttr column) ] []
+            [ input [ id (idAttr column.idAttr) ] []
             ]
         ]
 
@@ -403,151 +439,44 @@ textHtml t =
         []
 
 
-getColumnStyle : Column data msg -> Attribute msg1
-getColumnStyle column =
-    let
-        t =
-            case column of
-                IntColumn _ _ columnStyle _ _ ->
-                    columnStyle
+getColumnStyle : ColumnStyle -> Attribute msg1
+getColumnStyle columnStyle =
+    case columnStyle of
+        NoStyle ->
+            style []
 
-                StringColumn _ _ columnStyle _ _ ->
-                    columnStyle
+        Width int ->
+            style [ ( "width", toString int ++ "%" ) ]
 
-                DateTimeColumn _ _ columnStyle _ _ ->
-                    columnStyle
-
-                DateColumn _ _ columnStyle _ _ ->
-                    columnStyle
-
-                HrefColumn _ _ columnStyle _ _ _ ->
-                    columnStyle
-
-                CheckColumn _ _ columnStyle _ _ ->
-                    columnStyle
-
-                DropdownColumn _ columnStyle _ ->
-                    columnStyle
-
-                HtmlColumn _ _ columnStyle _ _ _ ->
-                    columnStyle
-    in
-        case t of
-            NoStyle ->
-                style []
-
-            Width int ->
-                style [ ( "width", toString int ++ "%" ) ]
-
-            CustomStyle list ->
-                style list
+        CustomStyle list ->
+            style list
 
 
-getColumnDisplayValue : Column data msg -> String
-getColumnDisplayValue column =
-    case column of
-        IntColumn displayText _ _ _ _ ->
-            displayText
-
-        StringColumn displayText _ _ _ _ ->
-            displayText
-
-        DateTimeColumn displayText _ _ _ _ ->
-            displayText
-
-        DateColumn displayText _ _ _ _ ->
-            displayText
-
-        HrefColumn displayText _ _ _ _ _ ->
-            displayText
-
-        CheckColumn displayText _ _ _ _ ->
-            displayText
-
-        DropdownColumn _ _ _ ->
-            ""
-
-        HtmlColumn displayText _ _ _ _ _ ->
-            displayText
-
-
-getServerField : Column data msg -> Maybe String
-getServerField column =
-    case column of
-        IntColumn _ _ _ _ dataField ->
-            Just dataField
-
-        StringColumn _ _ _ _ dataField ->
-            Just dataField
-
-        DateTimeColumn _ _ _ _ dataField ->
-            Just dataField
-
-        DateColumn _ _ _ _ dataField ->
-            Just dataField
-
-        HrefColumn _ _ _ _ _ dataField ->
-            Just dataField
-
-        CheckColumn _ _ _ _ dataField ->
-            Just dataField
-
-        DropdownColumn _ _ _ ->
+getServerField : Operator -> Maybe String
+getServerField operator =
+    case operator of
+        NoOperator ->
             Nothing
 
-        HtmlColumn _ _ _ _ _ operator ->
-            case operator of
-                NoOperator ->
-                    Nothing
+        Equals serverFieldName ->
+            Just serverFieldName
 
-                Equals serverFieldName ->
-                    Just serverFieldName
+        Contains serverFieldName ->
+            Just serverFieldName
 
-                Contains serverFieldName ->
-                    Just serverFieldName
+        Between serverFieldName _ ->
+            Just serverFieldName
 
-                Between serverFieldName _ ->
-                    Just serverFieldName
-
-                CustomSingleOperator op items ->
-                    Nothing
-
-
-getColumnIdAttr : Column data msg -> String
-getColumnIdAttr column =
-    case column of
-        IntColumn _ idAttr _ _ _ ->
-            idAttr
-
-        StringColumn _ idAttr _ _ _ ->
-            idAttr
-
-        DateTimeColumn _ idAttr _ _ _ ->
-            idAttr
-
-        DateColumn _ idAttr _ _ _ ->
-            idAttr
-
-        HrefColumn _ idAttr _ _ _ _ ->
-            idAttr
-
-        CheckColumn _ idAttr _ _ _ ->
-            idAttr
-
-        DropdownColumn idAttr _ _ ->
-            idAttr
-
-        HtmlColumn _ idAttr _ _ _ _ ->
-            idAttr
-                |> Functions.idAttr
+        CustomSingleOperator op items ->
+            Nothing
 
 
 
 -- Custom
 
 
-rowDropDownDiv : Int -> GridOperations data msg -> (GridOperations data msg -> msg) -> data -> List ( String, String, data -> msg ) -> Html msg
-rowDropDownDiv idx gridOperations toMsg row dropDownItems =
+rowDropDownDiv : Int -> GridOperations data msg -> (GridOperations data msg -> msg) -> data -> Html msg
+rowDropDownDiv idx gridOperations toMsg row =
     let
         dropClickEvent event =
             Events.onClick (event row)
@@ -576,7 +505,7 @@ rowDropDownDiv idx gridOperations toMsg row dropDownItems =
                 Just t ->
                     if idx == t then
                         [ ul [ class "e-menu e-js e-widget e-box e-separator" ]
-                            (List.map dropDownMenuItem dropDownItems)
+                            (List.map dropDownMenuItem gridOperations.rowDropdownItems)
                         ]
                     else
                         []
@@ -821,9 +750,9 @@ decodeGridOperations =
 -- filter stuff
 
 
-getControlString : Control -> String
-getControlString control =
-    case control of
+getControlString : FilterControl -> String
+getControlString filterControl =
+    case filterControl of
         TextControl ->
             "text"
 
@@ -892,39 +821,12 @@ buildFilter columns =
     columns
         |> List.map
             (\column ->
-                let
-                    defaultFilter t operator =
-                        { controlType = getControlString t
-                        , columnId = getColumnIdAttr column
-                        , names = getNames operator
-                        , values = List.map (\_ -> "") (getNames operator)
-                        , expressions = getOperators operator
-                        }
-                in
-                    case column of
-                        IntColumn _ _ _ _ dataField ->
-                            defaultFilter TextControl (Equals dataField)
-
-                        StringColumn _ _ _ _ dataField ->
-                            defaultFilter TextControl (Contains dataField)
-
-                        DateTimeColumn _ _ _ _ dataField ->
-                            defaultFilter DateTimeControl (Equals dataField)
-
-                        DateColumn _ _ _ _ dataField ->
-                            defaultFilter DateControl (Equals dataField)
-
-                        HrefColumn _ _ _ _ _ dataField ->
-                            defaultFilter TextControl (Equals dataField)
-
-                        CheckColumn _ _ _ _ dataField ->
-                            defaultFilter CheckBoxControl (Equals dataField)
-
-                        DropdownColumn _ _ _ ->
-                            defaultFilter NoControl NoOperator
-
-                        HtmlColumn _ _ _ _ control operator ->
-                            defaultFilter control operator
+                { controlType = getControlString column.filterControl
+                , columnId = idAttr column.idAttr
+                , names = getNames column.operator
+                , values = List.map (\_ -> "") (getNames column.operator)
+                , expressions = getOperators column.operator
+                }
             )
 
 
