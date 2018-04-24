@@ -30,7 +30,7 @@ subscriptions =
 type alias Model =
     { rows : List Row
     , gridOperations : Table.GridOperations Row Msg
-    , confirmData : Maybe (Dialog.ConfirmDialog Row Msg)
+    , confirmData : Maybe (Dialog.Dialog Row Msg)
     }
 
 
@@ -67,7 +67,7 @@ view : Model -> Maybe AddEditDataSource -> Html Msg
 view model _ =
     div []
         [ Table.view model.gridOperations SetGridOperations model.rows Nothing
-        , Dialog.viewConfirm model.confirmData
+        , Dialog.viewDialog model.confirmData
         ]
 
 
@@ -249,7 +249,7 @@ update msg model patientId =
                         , headerText = "Confirm"
                         , onConfirm = ConfirmedToggleReviewedDialog
                         , onCancel = CloseDialogToggleReviewed
-                        , message = "Are you sure you wish to change the reviewed status?"
+                        , dialogContent = Dialog.Message "Are you sure you wish to change the reviewed status?"
                         }
             }
                 ! []
@@ -273,7 +273,7 @@ update msg model patientId =
                         , headerText = "Save to Client Portal"
                         , onConfirm = ConfirmedSaveSummaryReportDialog
                         , onCancel = CloseDialog
-                        , message = "Are you sure that you want to save this report in Clinical Portal?"
+                        , dialogContent = Dialog.Message "Are you sure that you want to save this report in Clinical Portal?"
                         }
             }
                 ! []
@@ -320,7 +320,7 @@ update msg model patientId =
                         , headerText = "Close Bill"
                         , onConfirm = ConfirmedCloseBillingSessionDialog
                         , onCancel = CloseDialog
-                        , message = "Are you sure that you want to close this bill?"
+                        , dialogContent = Dialog.Message "Are you sure that you want to close this bill?"
                         }
             }
                 ! []
@@ -329,8 +329,7 @@ update msg model patientId =
             { model | confirmData = Nothing }
                 ! [ Functions.getRequestWithParams
                         "/Phase2Billing/CloseBillingSession"
-                        [ ( "billingId", toString row.id )
-                        ]
+                        [ ( "billingId", toString row.id ) ]
                         |> Http.send RequestCloseBillingSessionCompleted
                   ]
 
@@ -350,7 +349,7 @@ update msg model patientId =
                         , headerText = "Edit CCM Billing"
                         , onConfirm = ConfirmedCloseBillingSessionDialog
                         , onCancel = CloseDialog
-                        , message = "Are you sure that you want to close this bill?"
+                        , dialogContent = Dialog.Message "Are you sure that you want to close this bill?"
                         }
             }
                 ! []

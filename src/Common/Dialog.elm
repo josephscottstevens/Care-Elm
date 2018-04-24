@@ -1,24 +1,29 @@
-module Common.Dialog exposing (ConfirmDialog, viewConfirm)
+module Common.Dialog exposing (Dialog, DialogContent(..), viewDialog)
 
 import Html exposing (Html, text, div, span, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, style, checked, tabindex, title, hidden)
 import Html.Events exposing (onInput, onCheck, onClick)
 
 
-type alias ConfirmDialog data msg =
+type DialogContent msg
+    = Message String
+    | Content (Html msg)
+
+
+type alias Dialog data msg =
     { data : data
     , onConfirm : data -> msg
     , onCancel : data -> msg
     , headerText : String
-    , message : String
+    , dialogContent : DialogContent msg
     }
 
 
-viewConfirm : Maybe (ConfirmDialog data msg) -> Html msg
-viewConfirm maybeData =
+viewDialog : Maybe (Dialog data msg) -> Html msg
+viewDialog maybeData =
     div [] <|
         case maybeData of
-            Just { data, headerText, message, onConfirm, onCancel } ->
+            Just { data, onConfirm, onCancel, headerText, dialogContent } ->
                 [ div
                     [ class "e-dialog e-widget e-box e-dialog-wrap e-shadow"
                     , style
@@ -47,7 +52,14 @@ viewConfirm maybeData =
                                 , ( "max-height", " 300px" )
                                 ]
                             ]
-                            [ div [ class "col-xs-12 padding-top-10 confirm-message" ] [ text message ]
+                            [ div [ class "col-xs-12 padding-top-10 confirm-message" ]
+                                [ case dialogContent of
+                                    Message message ->
+                                        text message
+
+                                    Content content ->
+                                        content
+                                ]
                             , div [ class "col-xs-12 padding-top-10 padding-bottom-10" ]
                                 [ div [ class "col-xs-12 padding-right-0" ]
                                     [ input
