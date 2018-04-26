@@ -1,13 +1,8 @@
-module Common.Dialog exposing (Dialog, DialogContent(..), viewDialog)
+module Common.Dialog exposing (Dialog, viewDialog)
 
 import Html exposing (Html, text, div, span, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, style, checked, tabindex, title, hidden)
 import Html.Events exposing (onInput, onCheck, onClick)
-
-
-type DialogContent msg
-    = Message String
-    | Content (Html msg)
 
 
 type alias Dialog data msg =
@@ -15,7 +10,7 @@ type alias Dialog data msg =
     , onConfirm : data -> msg
     , onCancel : data -> msg
     , headerText : String
-    , dialogContent : DialogContent msg
+    , dialogContent : Html msg
     }
 
 
@@ -53,12 +48,7 @@ viewDialog maybeData =
                                 ]
                             ]
                             [ div [ class "col-xs-12 padding-top-10 confirm-message" ]
-                                [ case dialogContent of
-                                    Message message ->
-                                        text message
-
-                                    Content content ->
-                                        content
+                                [ dialogContent
                                 ]
                             , div [ class "col-xs-12 padding-top-10 padding-bottom-10" ]
                                 [ div [ class "col-xs-12 padding-right-0" ]

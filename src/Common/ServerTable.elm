@@ -242,6 +242,7 @@ pageFooterBlockSize =
 
 type alias Config data msg =
     { sortField : Maybe String
+    , sortAscending : Bool
     , domTableId : String
     , rowsPerPage : Int
     , rowDropdownItems : List ( String, String, data -> msg )
@@ -258,7 +259,7 @@ init config =
     , rowsPerPage = config.rowsPerPage
     , totalRows = 0
     , sortField = config.sortField
-    , sortAscending = False
+    , sortAscending = config.sortAscending
     , filters = buildFilter config.columns
     , domTableId = config.domTableId
     , rowDropdownItems = config.rowDropdownItems

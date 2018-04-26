@@ -44,6 +44,7 @@ init patientId =
 
 type Msg
     = LoadData (Result Http.Error ClinicalSummaryResponseData)
+    | GetDate Date
     | UpdateSummary String
     | UpdateCarePlan String
     | UpdateCodeLegalStatus String
@@ -56,7 +57,6 @@ type Msg
     | GenerateCarePlanLetterCompleted (Result Http.Error String)
     | UpdateMonth Dropdown.Msg
     | UpdateYear Dropdown.Msg
-    | GetDate Date
 
 
 view : Model -> Int -> Html Msg

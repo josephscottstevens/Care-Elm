@@ -1,14 +1,16 @@
 module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
-import Html exposing (Html, div, text, input)
+import Html exposing (Html, div, text, input, button)
 import Html.Attributes exposing (class, title, style, checked, type_, attribute)
 import Html.Events exposing (onClick)
 import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..), IdAttrType(IdAttr))
 import Common.Functions as Functions
-import Common.Types exposing (AddEditDataSource)
+import Common.Types exposing (AddEditDataSource, monthDropdown, yearDropdown)
 import Common.Dialog as Dialog
-import Date
+import Common.Dropdown as Dropdown
+import Date exposing (Date)
 import Http
+import Task
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -17,7 +19,7 @@ import Json.Encode as Encode
 init : Int -> Cmd Msg
 init patientId =
     Cmd.batch
-        [ load patientId <| Table.init gridConfig
+        [ load patientId <| Table.init (gridConfig Nothing)
         , Table.initFilter columns
         ]
 
@@ -31,6 +33,41 @@ type alias Model =
     { rows : List Row
     , gridOperations : Table.GridOperations Row Msg
     , confirmData : Maybe (Dialog.Dialog Row Msg)
+    , invoiceReportsDialog : Maybe (Dialog.Dialog InvoiceReportsDialog Msg)
+    , currentMonth : Maybe Int
+    , currentYear : Maybe Int
+    }
+
+
+type alias InvoiceReportsDialog =
+    { currentMonth : Maybe Int
+    , currentYear : Maybe Int
+    , facilityId : Maybe Int
+    , facilityDropState : Dropdown.DropState
+    , monthDropState : Dropdown.DropState
+    , yearDropState : Dropdown.DropState
+    }
+
+
+emptyModel : Model
+emptyModel =
+    { rows = []
+    , gridOperations = Table.init (gridConfig Nothing)
+    , confirmData = Nothing
+    , invoiceReportsDialog = Nothing
+    , currentMonth = Nothing
+    , currentYear = Nothing
+    }
+
+
+emptyInvoiceReportDialog : Maybe Int -> Maybe Int -> InvoiceReportsDialog
+emptyInvoiceReportDialog currentMonth currentYear =
+    { currentMonth = currentMonth
+    , currentYear = currentYear
+    , facilityId = Nothing
+    , facilityDropState = Dropdown.init "facilityDropdown" True
+    , monthDropState = Dropdown.init "monthDropdown" False
+    , yearDropState = Dropdown.init "yearDropdown" False
     }
 
 
@@ -64,10 +101,11 @@ type alias Row =
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
-view model _ =
+view model maybeAddEditDataSource =
     div []
         [ Table.view model.gridOperations SetGridOperations model.rows Nothing
         , Dialog.viewDialog model.confirmData
+        , Dialog.viewDialog model.invoiceReportsDialog
         ]
 
 
@@ -172,6 +210,7 @@ dxCpRcAlRxVs row =
 
 type Msg
     = Load (Result Http.Error LoadResult)
+    | GetDate Date
     | SetGridOperations (Table.GridOperations Row Msg)
     | UpdateFilters (List Table.Filter)
     | GenerateSummaryReport Row
@@ -194,6 +233,13 @@ type Msg
     | ShowEditCCMBillingDialog Row
     | ConfirmedEditCCMBillingDialog Row
     | RequestEditCCMBillingCompleted (Result Http.Error String)
+      -- Invoice Reports
+    | ShowInvoiceReportsDialog AddEditDataSource
+    | ConfirmedInvoiceReportsDialog InvoiceReportsDialog
+    | UpdateFacility InvoiceReportsDialog AddEditDataSource Dropdown.Msg
+    | UpdateMonth InvoiceReportsDialog Dropdown.Msg
+    | UpdateYear InvoiceReportsDialog Dropdown.Msg
+    | CloseInvoiceReportsDialog InvoiceReportsDialog
       -- Common Close Dialog
     | CloseDialog Row
 
@@ -203,10 +249,17 @@ update msg model patientId =
     case msg of
         Load (Ok t) ->
             { model | rows = t.result, gridOperations = Table.updateFromServer t.serverData model.gridOperations }
-                ! []
+                ! [ Task.perform GetDate Date.now ]
 
         Load (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
+
+        GetDate dt ->
+            { model
+                | currentMonth = Just (dt |> Functions.getMonthIndex)
+                , currentYear = Just (Date.year dt)
+            }
+                ! []
 
         SetGridOperations gridOperations ->
             { model | gridOperations = gridOperations }
@@ -234,7 +287,7 @@ update msg model patientId =
         ToggleBatchCloseDone t ->
             Functions.getRequestCompleted model t
 
-        -- Dialog stuff
+        -- Toggle Reviewed
         ShowToggleReviewedDialog row ->
             { model
                 | confirmData =
@@ -243,7 +296,7 @@ update msg model patientId =
                         , headerText = "Confirm"
                         , onConfirm = ConfirmedToggleReviewedDialog
                         , onCancel = CloseDialogToggleReviewed
-                        , dialogContent = Dialog.Message "Are you sure you wish to change the reviewed status?"
+                        , dialogContent = text "Are you sure you wish to change the reviewed status?"
                         }
             }
                 ! []
@@ -259,6 +312,7 @@ update msg model patientId =
         RequestToggleReviewedCompleted t ->
             Functions.getRequestCompleted model t
 
+        -- Save Summary Report
         ShowSaveSummaryReportDialog row ->
             { model
                 | confirmData =
@@ -267,7 +321,7 @@ update msg model patientId =
                         , headerText = "Save to Client Portal"
                         , onConfirm = ConfirmedSaveSummaryReportDialog
                         , onCancel = CloseDialog
-                        , dialogContent = Dialog.Message "Are you sure that you want to save this report in Clinical Portal?"
+                        , dialogContent = text "Are you sure that you want to save this report in Clinical Portal?"
                         }
             }
                 ! []
@@ -303,6 +357,7 @@ update msg model patientId =
         RequestSaveSummaryReportCompleted t ->
             Functions.getRequestCompleted model t
 
+        -- Close Billing Session
         CloseDialogToggleReviewed row ->
             { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = True } } ! []
 
@@ -314,7 +369,7 @@ update msg model patientId =
                         , headerText = "Close Bill"
                         , onConfirm = ConfirmedCloseBillingSessionDialog
                         , onCancel = CloseDialog
-                        , dialogContent = Dialog.Message "Are you sure that you want to close this bill?"
+                        , dialogContent = text "Are you sure that you want to close this bill?"
                         }
             }
                 ! []
@@ -335,6 +390,7 @@ update msg model patientId =
                 Err t ->
                     model ! [ Functions.displayErrorMessage (toString t) ]
 
+        -- Edit CCM Billing
         ShowEditCCMBillingDialog row ->
             { model
                 | confirmData =
@@ -343,7 +399,7 @@ update msg model patientId =
                         , headerText = "Edit CCM Billing"
                         , onConfirm = ConfirmedCloseBillingSessionDialog
                         , onCancel = CloseDialog
-                        , dialogContent = Dialog.Message "Are you sure that you want to close this bill?"
+                        , dialogContent = text "todo"
                         }
             }
                 ! []
@@ -354,6 +410,51 @@ update msg model patientId =
         RequestEditCCMBillingCompleted t ->
             Functions.getRequestCompleted model t
 
+        -- Edit CCM Billing
+        ShowInvoiceReportsDialog addEditDataSource ->
+            { model
+                | invoiceReportsDialog =
+                    Just
+                        { data = emptyInvoiceReportDialog model.currentMonth model.currentYear
+                        , headerText = "Edit CCM Billing"
+                        , onConfirm = ConfirmedInvoiceReportsDialog
+                        , onCancel = CloseInvoiceReportsDialog
+                        , dialogContent = text "todo"
+                        }
+            }
+                ! []
+
+        UpdateFacility invoiceReportsDialog addEditDataSource dropdownMsg ->
+            -- let
+            --     ( newDropState, newId, newMsg ) =
+            --         Dropdown.update dropdownMsg model.facilityDropState model.facilityId monthDropdown
+            -- in
+            --     { model | facilityDropState = newDropState, facilityId = newId } ! [ newMsg ]
+            model ! []
+
+        UpdateMonth invoiceReportsDialog dropdownMsg ->
+            -- let
+            --     ( newDropState, newId, newMsg ) =
+            --         Dropdown.update dropdownMsg model.monthDropState model.currentMonth monthDropdown
+            -- in
+            --     { model | monthDropState = newDropState, currentMonth = newId } ! [ newMsg ]
+            model ! []
+
+        UpdateYear invoiceReportsDialog dropdownMsg ->
+            -- let
+            --     ( newDropState, newId, newMsg ) =
+            --         Dropdown.update dropdownMsg model.yearDropState model.currentYear yearDropdown
+            -- in
+            --     { model | yearDropState = newDropState, currentYear = newId } ! [ newMsg ]
+            model ! []
+
+        CloseInvoiceReportsDialog _ ->
+            { model | invoiceReportsDialog = Nothing } ! []
+
+        ConfirmedInvoiceReportsDialog invoiceReportsDialog ->
+            Debug.crash "todo"
+
+        -- Common Close Dialog
         CloseDialog _ ->
             { model | confirmData = Nothing } ! []
 
@@ -420,19 +521,12 @@ load patientId gridOperations =
         |> Http.send Load
 
 
-emptyModel : Model
-emptyModel =
-    { rows = []
-    , gridOperations = Table.init gridConfig
-    , confirmData = Nothing
-    }
-
-
-gridConfig : Table.Config Row Msg
-gridConfig =
+gridConfig : Maybe AddEditDataSource -> Table.Config Row Msg
+gridConfig maybeAddEditDataSource =
     { domTableId = "BillingTable"
     , sortField = Just "BillingDate"
     , rowsPerPage = 20
+    , sortAscending = False
     , rowDropdownItems =
         [ ( "", "Generate Summary Report", GenerateSummaryReport )
         , ( "", "Save Summary Report to Client Portal", ShowSaveSummaryReportDialog )
@@ -444,6 +538,12 @@ gridConfig =
         , div [ class "submenu_right_items" ]
             [ div [ class "action_bar" ]
                 [ text "Actions "
+                , case maybeAddEditDataSource of
+                    Just addEditDataSource ->
+                        button [ class "btn btn-sm btn-default", onClick (ShowInvoiceReportsDialog addEditDataSource) ] [ text "Invoice Reports" ]
+
+                    Nothing ->
+                        div [] []
                 ]
             ]
         ]
