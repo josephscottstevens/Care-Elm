@@ -31,7 +31,7 @@ subscriptions =
 
 type alias Model =
     { rows : List Row
-    , gridOperations : Table.GridOperations Row Msg
+    , gridOperations : Table.State
     , confirmData : Maybe (Dialog.Dialog Row Msg)
     , invoiceReportsDialog : Maybe (Dialog.Dialog InvoiceReportsDialog Msg)
     , currentMonth : Maybe Int
@@ -211,7 +211,7 @@ dxCpRcAlRxVs row =
 type Msg
     = Load (Result Http.Error LoadResult)
     | GetDate Date
-    | SetGridOperations (Table.GridOperations Row Msg)
+    | SetGridOperations Table.State
     | UpdateFilters (List Table.Filter)
     | GenerateSummaryReport Row
     | ToggleBatchClose Row
@@ -502,7 +502,7 @@ jsonDecodeLoad =
         |> Pipeline.required "GridOperations" Table.decodeGridOperations
 
 
-load : Int -> Table.GridOperations Row Msg -> Cmd Msg
+load : Int -> Table.State -> Cmd Msg
 load patientId gridOperations =
     Http.request
         { body =
