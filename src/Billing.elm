@@ -296,7 +296,7 @@ update msg model patientId =
                         , headerText = "Confirm"
                         , onConfirm = ConfirmedToggleReviewedDialog
                         , onCancel = CloseDialogToggleReviewed
-                        , dialogContent = text "Are you sure you wish to change the reviewed status?"
+                        , dialogContent = \_ -> text "Are you sure you wish to change the reviewed status?"
                         }
             }
                 ! []
@@ -321,7 +321,7 @@ update msg model patientId =
                         , headerText = "Save to Client Portal"
                         , onConfirm = ConfirmedSaveSummaryReportDialog
                         , onCancel = CloseDialog
-                        , dialogContent = text "Are you sure that you want to save this report in Clinical Portal?"
+                        , dialogContent = \_ -> text "Are you sure that you want to save this report in Clinical Portal?"
                         }
             }
                 ! []
@@ -369,7 +369,7 @@ update msg model patientId =
                         , headerText = "Close Bill"
                         , onConfirm = ConfirmedCloseBillingSessionDialog
                         , onCancel = CloseDialog
-                        , dialogContent = text "Are you sure that you want to close this bill?"
+                        , dialogContent = \_ -> text "Are you sure that you want to close this bill?"
                         }
             }
                 ! []
@@ -399,7 +399,7 @@ update msg model patientId =
                         , headerText = "Edit CCM Billing"
                         , onConfirm = ConfirmedCloseBillingSessionDialog
                         , onCancel = CloseDialog
-                        , dialogContent = text "todo"
+                        , dialogContent = \_ -> text "todo"
                         }
             }
                 ! []
@@ -419,7 +419,7 @@ update msg model patientId =
                         , headerText = "Edit CCM Billing"
                         , onConfirm = ConfirmedInvoiceReportsDialog
                         , onCancel = CloseInvoiceReportsDialog
-                        , dialogContent = text "todo"
+                        , dialogContent = viewInvoiceReportsDialog
                         }
             }
                 ! []
@@ -457,6 +457,16 @@ update msg model patientId =
         -- Common Close Dialog
         CloseDialog _ ->
             { model | confirmData = Nothing } ! []
+
+
+viewInvoiceReportsDialog : InvoiceReportsDialog -> Html Msg
+viewInvoiceReportsDialog t =
+    div []
+        [ Html.map (UpdateMonth t) <|
+            Dropdown.view t.monthDropState monthDropdown t.currentMonth
+        , Html.map (UpdateYear t) <|
+            Dropdown.view t.yearDropState yearDropdown t.currentYear
+        ]
 
 
 decodeBillingCcm : Decode.Decoder Row

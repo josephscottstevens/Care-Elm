@@ -10,7 +10,7 @@ type alias Dialog data msg =
     , onConfirm : data -> msg
     , onCancel : data -> msg
     , headerText : String
-    , dialogContent : Html msg
+    , dialogContent : data -> Html msg
     }
 
 
@@ -48,7 +48,7 @@ viewDialog maybeData =
                                 ]
                             ]
                             [ div [ class "col-xs-12 padding-top-10 confirm-message" ]
-                                [ dialogContent
+                                [ dialogContent data
                                 ]
                             , div [ class "col-xs-12 padding-top-10 padding-bottom-10" ]
                                 [ div [ class "col-xs-12 padding-right-0" ]
