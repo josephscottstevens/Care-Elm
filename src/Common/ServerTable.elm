@@ -711,13 +711,11 @@ encodeFilter filter =
         ]
 
 
-encodeGridOperations : State -> Config data msg -> Encode.Value
-encodeGridOperations gridOperations config =
+encodeGridOperations : State -> Int -> Encode.Value
+encodeGridOperations gridOperations rowsPerPage =
     Encode.object
-        [ ( "SelectedId", Functions.maybeVal Encode.int gridOperations.selectedId )
-        , ( "OpenDropdownId", Functions.maybeVal Encode.int gridOperations.openDropdownId )
-        , ( "Skip", Encode.int gridOperations.skip )
-        , ( "RowsPerPage", Encode.int config.rowsPerPage )
+        [ ( "Skip", Encode.int gridOperations.skip )
+        , ( "RowsPerPage", Encode.int rowsPerPage )
         , ( "TotalRows", Encode.int gridOperations.totalRows )
         , ( "SortField", Functions.maybeVal Encode.string gridOperations.sortField )
         , ( "SortAscending", Encode.bool gridOperations.sortAscending )

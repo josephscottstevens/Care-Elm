@@ -19,7 +19,7 @@ import Json.Encode as Encode
 init : Int -> Cmd Msg
 init patientId =
     Cmd.batch
-        [ load patientId <| Table.init (gridConfig Nothing)
+        [ load patientId <| Table.init (Just "BillingDate") columns
         , Table.initFilter columns
         ]
 
@@ -52,7 +52,7 @@ type alias InvoiceReportsDialog =
 emptyModel : Model
 emptyModel =
     { rows = []
-    , gridOperations = Table.init (gridConfig Nothing)
+    , gridOperations = Table.init (Just "BillingDate") columns
     , confirmData = Nothing
     , invoiceReportsDialog = Nothing
     , currentMonth = Nothing
@@ -103,7 +103,7 @@ type alias Row =
 view : Model -> Maybe AddEditDataSource -> Html Msg
 view model maybeAddEditDataSource =
     div []
-        [ Table.view model.gridOperations SetGridOperations model.rows Nothing
+        [ Table.view model.gridOperations (gridConfig maybeAddEditDataSource) model.rows Nothing
         , Dialog.viewDialog model.confirmData
         , Dialog.viewDialog model.invoiceReportsDialog
         ]
@@ -508,7 +508,7 @@ load patientId gridOperations =
         { body =
             Encode.object
                 [ ( "patientId", Encode.int patientId )
-                , ( "gridOperations", Table.encodeGridOperations gridOperations )
+                , ( "gridOperations", Table.encodeGridOperations gridOperations defaultRowsPerPage )
                 ]
                 |> Http.jsonBody
         , expect = Http.expectJson jsonDecodeLoad
@@ -521,12 +521,15 @@ load patientId gridOperations =
         |> Http.send Load
 
 
+defaultRowsPerPage : Int
+defaultRowsPerPage =
+    20
+
+
 gridConfig : Maybe AddEditDataSource -> Table.Config Row Msg
 gridConfig maybeAddEditDataSource =
     { domTableId = "BillingTable"
-    , sortField = Just "BillingDate"
-    , rowsPerPage = 20
-    , sortAscending = False
+    , rowsPerPage = defaultRowsPerPage
     , rowDropdownItems =
         [ ( "", "Generate Summary Report", GenerateSummaryReport )
         , ( "", "Save Summary Report to Client Portal", ShowSaveSummaryReportDialog )
@@ -548,4 +551,5 @@ gridConfig maybeAddEditDataSource =
             ]
         ]
     , columns = columns
+    , toMsg = SetGridOperations
     }
