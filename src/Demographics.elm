@@ -171,14 +171,12 @@ view model =
         , h4 [ class "col-xs-12 padding-h-0 padding-top-10" ] [ text "Demographic Information" ]
         , div rowStyle
             [ dropbox "Prefix" False <|
-                Html.map UpdatePrefix <|
-                    Dropdown.view model.prefixDropState model.drops.prefixDropdown model.prefixId
+                Dropdown.view model.prefixDropState UpdatePrefix model.drops.prefixDropdown model.prefixId
             , nonumberbox "First Name" True model.firstName UpdateFirstName
             , nonumberbox "Middle Name" False model.middle UpdateMiddle
             , nonumberbox "Last Name" True model.lastName UpdateLastName
             , dropbox "Suffix" False <|
-                Html.map UpdateSuffix <|
-                    Dropdown.view model.suffixDropState model.drops.suffixDropdown model.suffixId
+                Dropdown.view model.suffixDropState UpdateSuffix model.drops.suffixDropdown model.suffixId
             , textbox "Nickname" False model.nickName UpdateNickname
             , sfbox "Date of Birth" True
             , textbox "Birth Place" False model.birthPlace UpdateBirthPlace
@@ -193,11 +191,9 @@ view model =
             , sfbox "Gender Identity" False
             , textbox "Gender Identity Note" False model.genderIdentityNote UpdateGenderIdentityNote
             , dropbox "Race" False <|
-                Html.map UpdateRace <|
-                    Dropdown.view model.raceDropState model.drops.raceDropdown model.raceId
+                Dropdown.view model.raceDropState UpdateRace model.drops.raceDropdown model.raceId
             , dropbox "Ethnicity" False <|
-                Html.map UpdateEthnicity <|
-                    Dropdown.view model.ethnicityDropState model.drops.ethnicityDropdown model.ethnicityId
+                Dropdown.view model.ethnicityDropState UpdateEthnicity model.drops.ethnicityDropdown model.ethnicityId
             , sfbox "US Veteran" False
             , sfbox "Religion" False
             , textbox "Email" False model.email UpdateEmail
@@ -273,7 +269,7 @@ viewLanguages dropdownItems lang =
             , style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ]
             , title "Choose language"
             ]
-            [ Html.map (UpdateLanguage lang) <| Dropdown.view lang.dropState dropdownItems lang.languageId ]
+            [ Dropdown.view lang.dropState (UpdateLanguage lang) dropdownItems lang.languageId ]
         , div
             [ class "inline-block"
             , style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ]
@@ -299,7 +295,7 @@ viewPhones dropdownItems phone =
             , style [ ( "width", "100px" ), ( "vertical-align", "middle" ) ]
             , title "Mark as primary"
             ]
-            [ Html.map (UpdatePhoneType phone) <| Dropdown.view phone.dropState dropdownItems phone.phoneNumberTypeId ]
+            [ Dropdown.view phone.dropState (UpdatePhoneType phone) dropdownItems phone.phoneNumberTypeId ]
         , div
             [ class "inline-block"
             , style [ ( "width", "calc(100% - 155px)" ), ( "vertical-align", "middle" ) ]
@@ -394,7 +390,7 @@ viewAddress dropdownItems address =
                 , div [ class "margin-bottom-5" ]
                     [ label [ class "required" ] [ text "State:" ]
                     , div [ class "form-column" ]
-                        [ Html.map (UpdateState address) <| Dropdown.view address.dropState dropdownItems address.stateId
+                        [ Dropdown.view address.dropState (UpdateState address) dropdownItems address.stateId
                         ]
                     ]
                 , div []
@@ -440,9 +436,9 @@ type Msg
     | UpdatePreferredAddress PatientAddress Bool
     | UpdatePreferredPhone PatientPhoneNumber Bool
     | UpdatePreferredLanguage PatientLanguagesMap Bool
-    | UpdateState PatientAddress Dropdown.Msg
-    | UpdatePhoneType PatientPhoneNumber Dropdown.Msg
-    | UpdateLanguage PatientLanguagesMap Dropdown.Msg
+    | UpdateState PatientAddress ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdatePhoneType PatientPhoneNumber ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateLanguage PatientLanguagesMap ( Dropdown.DropState, Maybe Int, Cmd Msg )
       -- Edit
     | UpdateFacilityPtID String
     | UpdateMedicalRecordNo String
@@ -456,10 +452,10 @@ type Msg
     | UpdateSexualOrientationNote String
     | UpdateGenderIdentityNote String
     | UpdateEmail String
-    | UpdatePrefix Dropdown.Msg
-    | UpdateSuffix Dropdown.Msg
-    | UpdateRace Dropdown.Msg
-    | UpdateEthnicity Dropdown.Msg
+    | UpdatePrefix ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateSuffix ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateRace ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateEthnicity ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | InputChanged PatientPhoneNumber (Maybe Int)
     | InputStateChanged PatientPhoneNumber MaskedNumber.State
 
@@ -717,27 +713,15 @@ update msg model _ =
         UpdatePreferredLanguage language _ ->
             { model | patientLanguagesMap = List.map (togglePreferred language.nodeId) model.patientLanguagesMap } ! [ Functions.setUnsavedChanges True ]
 
-        UpdateState t dropdownMsg ->
-            let
-                ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg t.dropState t.stateId model.stateDropdown
-            in
-                updateAddress model { t | dropState = newDropState, stateId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+        UpdateState t ( newDropState, newId, newMsg ) ->
+            updateAddress model { t | dropState = newDropState, stateId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
-        UpdatePhoneType t dropdownMsg ->
-            let
-                ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg t.dropState t.phoneNumberTypeId model.phoneNumberTypeDropdown
-            in
-                updatePhones model { t | dropState = newDropState, phoneNumberTypeId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+        UpdatePhoneType t ( newDropState, newId, newMsg ) ->
+            updatePhones model { t | dropState = newDropState, phoneNumberTypeId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
-        UpdateLanguage t dropdownMsg ->
-            let
-                ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg t.dropState t.languageId model.drops.languageDropdown
-            in
-                updateLanguage model { t | dropState = newDropState, languageId = newId }
-                    ! [ newMsg, Functions.setUnsavedChanges True ]
+        UpdateLanguage t ( newDropState, newId, newMsg ) ->
+            updateLanguage model { t | dropState = newDropState, languageId = newId }
+                ! [ newMsg, Functions.setUnsavedChanges True ]
 
         InputChanged patientPhoneNumber t ->
             updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString t } ! [ Functions.setUnsavedChanges True ]
@@ -782,33 +766,17 @@ update msg model _ =
         UpdateEmail str ->
             { model | email = Just str } ! [ Functions.setUnsavedChanges True ]
 
-        UpdatePrefix dropdownMsg ->
-            let
-                ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg model.prefixDropState model.prefixId model.drops.prefixDropdown
-            in
-                { model | prefixDropState = newDropState, prefixId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+        UpdatePrefix ( newDropState, newId, newMsg ) ->
+            { model | prefixDropState = newDropState, prefixId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
-        UpdateSuffix dropdownMsg ->
-            let
-                ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg model.suffixDropState model.suffixId model.drops.suffixDropdown
-            in
-                { model | suffixDropState = newDropState, suffixId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+        UpdateSuffix ( newDropState, newId, newMsg ) ->
+            { model | suffixDropState = newDropState, suffixId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
-        UpdateRace dropdownMsg ->
-            let
-                ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg model.raceDropState model.raceId model.drops.raceDropdown
-            in
-                { model | raceDropState = newDropState, raceId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+        UpdateRace ( newDropState, newId, newMsg ) ->
+            { model | raceDropState = newDropState, raceId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
-        UpdateEthnicity dropdownMsg ->
-            let
-                ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg model.ethnicityDropState model.ethnicityId model.drops.ethnicityDropdown
-            in
-                { model | ethnicityDropState = newDropState, ethnicityId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+        UpdateEthnicity ( newDropState, newId, newMsg ) ->
+            { model | ethnicityDropState = newDropState, ethnicityId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
 
 

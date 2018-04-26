@@ -1,4 +1,4 @@
-port module Common.Dropdown exposing (DropState, Msg, init, update, view, getDropdownText)
+port module Common.Dropdown exposing (DropState, init, view, getDropdownText)
 
 import Html exposing (Html, div, span, text, li, ul, input)
 import Html.Attributes exposing (style, value, class, readonly, placeholder, tabindex, disabled)
@@ -54,14 +54,6 @@ type SkipAmount
     | Exact Int
 
 
-type Msg
-    = ItemClicked DropdownItem
-    | SetOpenState Bool
-    | OnBlur
-    | OnKey Key
-    | ResetSearchString
-
-
 getIndex : Maybe Int -> List DropdownItem -> Int
 getIndex selectedId dropdownItems =
     dropdownItems
@@ -85,28 +77,34 @@ getId dropdownItems index =
         |> Maybe.withDefault Nothing
 
 
-update : Msg -> DropState -> Maybe Int -> List DropdownItem -> ( DropState, Maybe Int, Cmd msg )
-update msg dropdown selectedId dropdownItems =
-    case msg of
-        ItemClicked item ->
-            ( { dropdown | isOpen = False, searchString = "" }, item.id, Cmd.none )
+onBlur : DropState -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
+onBlur dropState selectedId =
+    ( { dropState | isOpen = False, searchString = "" }, selectedId, Cmd.none )
 
-        SetOpenState newState ->
-            ( { dropdown
-                | isOpen = newState
-                , keyboardSelectedIndex = getIndex selectedId dropdownItems
-              }
-            , selectedId
-            , scrollToDomId dropdown.domId selectedId
-            )
 
-        OnBlur ->
+onItemClicked : DropState -> DropdownItem -> ( DropState, Maybe Int, Cmd msg )
+onItemClicked dropdown dropdownItem =
+    ( { dropdown | isOpen = False, searchString = "" }, dropdownItem.id, Cmd.none )
+
+
+onOpen : DropState -> Maybe Int -> List DropdownItem -> Bool -> ( DropState, Maybe Int, Cmd msg )
+onOpen dropdown selectedId dropdownItems newState =
+    ( { dropdown
+        | isOpen = newState
+        , keyboardSelectedIndex = getIndex selectedId dropdownItems
+      }
+    , selectedId
+    , scrollToDomId dropdown.domId selectedId
+    )
+
+
+onKey : DropState -> Maybe Int -> List DropdownItem -> Key -> ( DropState, Maybe Int, Cmd msg )
+onKey dropdown selectedId dropdownItems key =
+    case key of
+        Esc ->
             ( { dropdown | isOpen = False, searchString = "" }, selectedId, Cmd.none )
 
-        OnKey Esc ->
-            ( { dropdown | isOpen = False, searchString = "" }, selectedId, Cmd.none )
-
-        OnKey Enter ->
+        Enter ->
             let
                 newDropdown =
                     { dropdown | isOpen = False, searchString = "" }
@@ -116,29 +114,31 @@ update msg dropdown selectedId dropdownItems =
                 else
                     ( newDropdown, selectedId, Cmd.none )
 
-        OnKey ArrowUp ->
+        ArrowUp ->
             pickerSkip dropdown (Exact -1) dropdownItems selectedId
 
-        OnKey ArrowDown ->
+        ArrowDown ->
             pickerSkip dropdown (Exact 1) dropdownItems selectedId
 
-        OnKey PageUp ->
+        PageUp ->
             pickerSkip dropdown (Exact -9) dropdownItems selectedId
 
-        OnKey PageDown ->
+        PageDown ->
             pickerSkip dropdown (Exact 9) dropdownItems selectedId
 
-        OnKey Home ->
+        Home ->
             pickerSkip dropdown First dropdownItems selectedId
 
-        OnKey End ->
+        End ->
             pickerSkip dropdown Last dropdownItems selectedId
 
-        OnKey (Searchable char) ->
+        Searchable char ->
             updateSearchString char dropdown dropdownItems selectedId
 
-        ResetSearchString ->
-            ( { dropdown | searchString = "" }, selectedId, Cmd.none )
+
+resetSearchString : DropState -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
+resetSearchString dropState selectedId =
+    ( { dropState | searchString = "" }, selectedId, Cmd.none )
 
 
 pickerSkip : DropState -> SkipAmount -> List DropdownItem -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
@@ -192,19 +192,14 @@ commonWidth =
     ( "min-width", "99.7%" )
 
 
-view : DropState -> List DropdownItem -> Maybe Int -> Html Msg
-view dropdown dropdownItems selectedId =
+view : DropState -> (( DropState, Maybe Int, Cmd msg ) -> msg) -> List DropdownItem -> Maybe Int -> Html msg
+view dropdown toMsg dropdownItems selectedId =
     let
         activeClass =
             if dropdown.isOpen then
                 "e-focus e-popactive"
             else
                 ""
-
-        keyMsgDecoder =
-            Events.keyCode
-                |> Json.Decode.andThen (keyDecoder dropdown)
-                |> Json.Decode.map OnKey
 
         getDropdownText =
             dropdownItems
@@ -219,6 +214,11 @@ view dropdown dropdownItems selectedId =
             else
                 7
 
+        keyMsgDecoder =
+            Events.keyCode
+                |> Json.Decode.andThen (keyDecoder dropdown)
+                |> Json.Decode.map (\t -> toMsg (onKey dropdown selectedId dropdownItems t))
+
         biggestStrLength =
             dropdownItems
                 |> List.map (\t -> String.length t.name * dropdownWidthMultiplier)
@@ -230,14 +230,16 @@ view dropdown dropdownItems selectedId =
         div
             [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
             , if dropdown.isOpen then
-                Events.onBlur OnBlur
+                Events.onBlur (toMsg (onBlur dropdown selectedId))
               else
                 disabled False
             , if dropdown.isOpen then
                 disabled False
               else
-                Events.onClick (SetOpenState True)
-            , tabindex 0 -- Make div focusable, since we need the on blur to trigger for both child elements
+                Events.onClick (toMsg <| onOpen dropdown selectedId dropdownItems True)
+            , tabindex 0
+
+            -- Make div focusable, since we need the on blur to trigger for both child elements
             , style [ ( "position", "relative" ), ( "width", "100%" ) ]
             , class "dropdown-outline"
             ]
@@ -344,13 +346,13 @@ view dropdown dropdownItems selectedId =
                         , ( "-webkit-margin-after", "0" )
                         ]
                     ]
-                    (viewItem dropdown dropdownItems)
+                    (viewItem dropdown toMsg dropdownItems)
                 ]
             ]
 
 
-viewItem : DropState -> List DropdownItem -> List (Html Msg)
-viewItem dropdown dropdownItems =
+viewItem : DropState -> (( DropState, Maybe Int, Cmd msg ) -> msg) -> List DropdownItem -> List (Html msg)
+viewItem dropdown toMsg dropdownItems =
     let
         keyActive =
             [ ( "background-color", "#f4f4f4" ), ( "color", "#333" ) ] ++ [ commonWidth ]
@@ -359,7 +361,7 @@ viewItem dropdown dropdownItems =
             |> List.map
                 (\item ->
                     li
-                        [ Events.onClick (ItemClicked item)
+                        [ Events.onClick (toMsg (onItemClicked dropdown item))
                         , class "noselect dropdown-li"
                         , if dropdown.keyboardSelectedIndex == getIndex item.id dropdownItems && dropdown.isOpen then
                             style keyActive

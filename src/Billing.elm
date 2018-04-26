@@ -236,9 +236,9 @@ type Msg
       -- Invoice Reports
     | ShowInvoiceReportsDialog AddEditDataSource
     | ConfirmedInvoiceReportsDialog InvoiceReportsDialog
-    | UpdateFacility InvoiceReportsDialog AddEditDataSource Dropdown.Msg
-    | UpdateMonth InvoiceReportsDialog Dropdown.Msg
-    | UpdateYear InvoiceReportsDialog Dropdown.Msg
+    | UpdateFacility InvoiceReportsDialog AddEditDataSource ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateMonth InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateYear InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | CloseInvoiceReportsDialog InvoiceReportsDialog
       -- Common Close Dialog
     | CloseDialog Row
@@ -462,10 +462,10 @@ update msg model patientId =
 viewInvoiceReportsDialog : InvoiceReportsDialog -> Html Msg
 viewInvoiceReportsDialog t =
     div []
-        [ Html.map (UpdateMonth t) <|
-            Dropdown.view t.monthDropState monthDropdown t.currentMonth
-        , Html.map (UpdateYear t) <|
-            Dropdown.view t.yearDropState yearDropdown t.currentYear
+        [ Dropdown.view t.monthDropState (UpdateMonth t) monthDropdown t.currentMonth
+
+        -- , Html.map (UpdateYear t) <|
+        --     Dropdown.view t.yearDropState yearDropdown t.currentYear
         ]
 
 

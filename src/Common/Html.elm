@@ -40,7 +40,7 @@ type InputControlType msg
     | DateInput String Common.RequiredType String String
     | FileInput String Common.RequiredType String
     | HtmlElement String (Html msg)
-    | Dropdown String Common.RequiredType Dropdown.DropState (Dropdown.Msg -> msg)
+    | Dropdown String Common.RequiredType Dropdown.DropState (( Dropdown.DropState, Maybe Int, Cmd msg ) -> msg)
 
 
 forId : String -> Html.Attribute msg

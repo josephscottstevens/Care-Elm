@@ -55,8 +55,8 @@ type Msg
     | SaveCompleted (Result Http.Error String)
     | GenerateCarePlanLetter
     | GenerateCarePlanLetterCompleted (Result Http.Error String)
-    | UpdateMonth Dropdown.Msg
-    | UpdateYear Dropdown.Msg
+    | UpdateMonth ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateYear ( Dropdown.DropState, Maybe Int, Cmd Msg )
 
 
 view : Model -> Int -> Html Msg
@@ -133,19 +133,11 @@ update msg model patientId =
                         |> Http.send SaveCompleted
                   ]
 
-        UpdateMonth dropdownMsg ->
-            let
-                ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg model.monthDropState model.currentMonth monthDropdown
-            in
-                { model | monthDropState = newDropState, currentMonth = newId } ! [ newMsg ]
+        UpdateMonth ( newDropState, newId, newMsg ) ->
+            { model | monthDropState = newDropState, currentMonth = newId } ! [ newMsg ]
 
-        UpdateYear dropdownMsg ->
-            let
-                ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg model.yearDropState model.currentYear yearDropdown
-            in
-                { model | yearDropState = newDropState, currentYear = newId } ! [ newMsg ]
+        UpdateYear ( newDropState, newId, newMsg ) ->
+            { model | yearDropState = newDropState, currentYear = newId } ! [ newMsg ]
 
         SaveCompleted (Ok _) ->
             model ! [ displaySuccessMessage "Clinical Summary Saved Successfully!" ]
@@ -196,13 +188,9 @@ generateSummaryDiv model =
         div []
             [ div (inline "34%" "5px") [ text "Generate Summary from Tasks Outcome:" ]
             , div (inline "18%" "")
-                [ Html.map UpdateMonth <|
-                    Dropdown.view model.monthDropState monthDropdown model.currentMonth
-                ]
+                [ Dropdown.view model.monthDropState UpdateMonth monthDropdown model.currentMonth ]
             , div (inline "18%" "")
-                [ Html.map UpdateYear <|
-                    Dropdown.view model.yearDropState yearDropdown model.currentYear
-                ]
+                [ Dropdown.view model.yearDropState UpdateYear yearDropdown model.currentYear ]
             , div (inline "20%" "") [ button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate" ] ]
             ]
 
