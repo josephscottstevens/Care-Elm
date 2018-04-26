@@ -19,7 +19,7 @@ import Json.Encode as Encode
 init : Int -> Cmd Msg
 init patientId =
     Cmd.batch
-        [ load patientId <| Table.init (Just "BillingDate") columns
+        [ load patientId <| Table.init 20 (Just "BillingDate") columns
         , Table.initFilter columns
         ]
 
@@ -52,7 +52,7 @@ type alias InvoiceReportsDialog =
 emptyModel : Model
 emptyModel =
     { rows = []
-    , gridOperations = Table.init (Just "BillingDate") columns
+    , gridOperations = Table.init 20 (Just "BillingDate") columns
     , confirmData = Nothing
     , invoiceReportsDialog = Nothing
     , currentMonth = Nothing
@@ -508,7 +508,7 @@ load patientId gridOperations =
         { body =
             Encode.object
                 [ ( "patientId", Encode.int patientId )
-                , ( "gridOperations", Table.encodeGridOperations gridOperations defaultRowsPerPage )
+                , ( "gridOperations", Table.encodeGridOperations gridOperations )
                 ]
                 |> Http.jsonBody
         , expect = Http.expectJson jsonDecodeLoad
@@ -521,15 +521,9 @@ load patientId gridOperations =
         |> Http.send Load
 
 
-defaultRowsPerPage : Int
-defaultRowsPerPage =
-    20
-
-
 gridConfig : Maybe AddEditDataSource -> Table.Config Row Msg
 gridConfig maybeAddEditDataSource =
     { domTableId = "BillingTable"
-    , rowsPerPage = defaultRowsPerPage
     , rowDropdownItems =
         [ ( "", "Generate Summary Report", GenerateSummaryReport )
         , ( "", "Save Summary Report to Client Portal", ShowSaveSummaryReportDialog )

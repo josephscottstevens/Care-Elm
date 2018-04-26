@@ -203,12 +203,12 @@ type alias State =
     , sortField : Maybe String
     , sortAscending : Bool
     , filters : List Filter
+    , rowsPerPage : Int
     }
 
 
 type alias Config data msg =
     { domTableId : String
-    , rowsPerPage : Int
     , rowDropdownItems : List ( String, String, data -> msg )
     , toolbar : List (Html msg)
     , columns : List (Column data msg)
@@ -216,8 +216,8 @@ type alias Config data msg =
     }
 
 
-init : Maybe String -> List (Column data msg) -> State
-init sortField columns =
+init : Int -> Maybe String -> List (Column data msg) -> State
+init rowsPerPage sortField columns =
     { selectedId = Nothing
     , openDropdownId = Nothing
     , skip = 0
@@ -225,6 +225,7 @@ init sortField columns =
     , sortField = sortField
     , sortAscending = False
     , filters = buildFilter columns
+    , rowsPerPage = rowsPerPage
     }
 
 
@@ -586,7 +587,7 @@ setPagingState gridOperations config page =
                     gridOperations.skip + 1
 
                 Last ->
-                    (gridOperations.totalRows // config.rowsPerPage) - 1
+                    (gridOperations.totalRows // gridOperations.rowsPerPage) - 1
     in
         Events.onClick (config.toMsg { gridOperations | skip = newIndex })
 
@@ -595,7 +596,7 @@ pagingView : State -> Config data msg -> Html msg
 pagingView gridOperations config =
     let
         totalPages =
-            gridOperations.totalRows // config.rowsPerPage
+            gridOperations.totalRows // gridOperations.rowsPerPage
 
         pagingStateClick page =
             setPagingState gridOperations config page
@@ -711,11 +712,11 @@ encodeFilter filter =
         ]
 
 
-encodeGridOperations : State -> Int -> Encode.Value
-encodeGridOperations gridOperations rowsPerPage =
+encodeGridOperations : State -> Encode.Value
+encodeGridOperations gridOperations =
     Encode.object
         [ ( "Skip", Encode.int gridOperations.skip )
-        , ( "RowsPerPage", Encode.int rowsPerPage )
+        , ( "RowsPerPage", Encode.int gridOperations.rowsPerPage )
         , ( "TotalRows", Encode.int gridOperations.totalRows )
         , ( "SortField", Functions.maybeVal Encode.string gridOperations.sortField )
         , ( "SortAscending", Encode.bool gridOperations.sortAscending )
