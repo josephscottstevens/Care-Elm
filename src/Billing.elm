@@ -246,222 +246,214 @@ type Msg
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
-    case msg of
-        Load (Ok t) ->
-            { model | rows = t.result, gridOperations = Table.updateFromServer t.serverData model.gridOperations }
-                ! [ Task.perform GetDate Date.now ]
+    let
+        invoiceReportsUpdate t =
+            { model | invoiceReportsDialog = Dialog.update model.invoiceReportsDialog t }
+    in
+        case msg of
+            Load (Ok t) ->
+                { model | rows = t.result, gridOperations = Table.updateFromServer t.serverData model.gridOperations }
+                    ! [ Task.perform GetDate Date.now ]
 
-        Load (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            Load (Err t) ->
+                model ! [ Functions.displayErrorMessage (toString t) ]
 
-        GetDate dt ->
-            { model
-                | currentMonth = Just (dt |> Functions.getMonthIndex)
-                , currentYear = Just (Date.year dt)
-            }
-                ! []
+            GetDate dt ->
+                { model
+                    | currentMonth = Just (dt |> Functions.getMonthIndex)
+                    , currentYear = Just (Date.year dt)
+                }
+                    ! []
 
-        SetGridOperations gridOperations ->
-            { model | gridOperations = gridOperations }
-                ! [ load patientId gridOperations ]
-
-        UpdateFilters filters ->
-            let
-                gridOperations =
-                    Table.updateFilter filters model.gridOperations
-            in
+            SetGridOperations gridOperations ->
                 { model | gridOperations = gridOperations }
                     ! [ load patientId gridOperations ]
 
-        GenerateSummaryReport row ->
-            Debug.crash "todo"
+            UpdateFilters filters ->
+                let
+                    gridOperations =
+                        Table.updateFilter filters model.gridOperations
+                in
+                    { model | gridOperations = gridOperations }
+                        ! [ load patientId gridOperations ]
 
-        ToggleBatchClose row ->
-            model
-                ! [ "/Phase2Billing/ToggleBatchInvoice"
-                        |> Functions.postRequest
-                            (Encode.object [ ( "billingId", Encode.int row.id ) ])
-                        |> Http.send ToggleBatchCloseDone
-                  ]
+            GenerateSummaryReport row ->
+                Debug.crash "todo"
 
-        ToggleBatchCloseDone t ->
-            Functions.getRequestCompleted model t
-
-        -- Toggle Reviewed
-        ShowToggleReviewedDialog row ->
-            { model
-                | confirmData =
-                    Just
-                        { data = row
-                        , headerText = "Confirm"
-                        , onConfirm = ConfirmedToggleReviewedDialog
-                        , onCancel = CloseDialogToggleReviewed
-                        , dialogContent = \_ -> text "Are you sure you wish to change the reviewed status?"
-                        , dialogOptions = Dialog.defaultDialogOptions
-                        }
-            }
-                ! []
-
-        ConfirmedToggleReviewedDialog row ->
-            { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = False } }
-                ! [ "/Phase2Billing/ToggleBillingRecordReviewed"
-                        |> Functions.postRequest
-                            (Encode.object [ ( "billingId", Encode.int row.id ) ])
-                        |> Http.send RequestToggleReviewedCompleted
-                  ]
-
-        RequestToggleReviewedCompleted t ->
-            Functions.getRequestCompleted model t
-
-        -- Save Summary Report
-        ShowSaveSummaryReportDialog row ->
-            { model
-                | confirmData =
-                    Just
-                        { data = row
-                        , headerText = "Save to Client Portal"
-                        , onConfirm = ConfirmedSaveSummaryReportDialog
-                        , onCancel = CloseDialog
-                        , dialogContent = \_ -> text "Are you sure that you want to save this report in Clinical Portal?"
-                        , dialogOptions = Dialog.defaultDialogOptions
-                        }
-            }
-                ! []
-
-        ConfirmedSaveSummaryReportDialog row ->
-            let
-                month =
-                    row.billingDate
-                        |> Maybe.andThen Functions.dateFromString
-                        |> Maybe.map Functions.getMonthIndex
-                        |> Maybe.map toString
-                        |> Maybe.withDefault ""
-
-                year =
-                    row.billingDate
-                        |> Maybe.andThen Functions.dateFromString
-                        |> Maybe.map Date.year
-                        |> Maybe.map toString
-                        |> Maybe.withDefault ""
-            in
-                { model | confirmData = Nothing }
-                    ! [ Functions.getRequestWithParams
-                            "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
-                            [ ( "hcoID", toString row.facilityId )
-                            , ( "year", year )
-                            , ( "month", month )
-                            , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
-                            , ( "patientId", toString patientId )
-                            ]
-                            |> Http.send RequestSaveSummaryReportCompleted
+            ToggleBatchClose row ->
+                model
+                    ! [ "/Phase2Billing/ToggleBatchInvoice"
+                            |> Functions.postRequest
+                                (Encode.object [ ( "billingId", Encode.int row.id ) ])
+                            |> Http.send ToggleBatchCloseDone
                       ]
 
-        RequestSaveSummaryReportCompleted t ->
-            Functions.getRequestCompleted model t
+            ToggleBatchCloseDone t ->
+                Functions.getRequestCompleted model t
 
-        -- Close Billing Session
-        CloseDialogToggleReviewed row ->
-            { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = True } } ! []
+            -- Toggle Reviewed
+            ShowToggleReviewedDialog row ->
+                { model
+                    | confirmData =
+                        Just
+                            { data = row
+                            , headerText = "Confirm"
+                            , onConfirm = ConfirmedToggleReviewedDialog
+                            , onCancel = CloseDialogToggleReviewed
+                            , dialogContent = \_ -> text "Are you sure you wish to change the reviewed status?"
+                            , dialogOptions = Dialog.defaultDialogOptions
+                            }
+                }
+                    ! []
 
-        ShowCloseBillingSessionDialog row ->
-            { model
-                | confirmData =
-                    Just
-                        { data = row
-                        , headerText = "Close Bill"
-                        , onConfirm = ConfirmedCloseBillingSessionDialog
-                        , onCancel = CloseDialog
-                        , dialogContent = \_ -> text "Are you sure that you want to close this bill?"
-                        , dialogOptions = Dialog.defaultDialogOptions
-                        }
-            }
-                ! []
+            ConfirmedToggleReviewedDialog row ->
+                { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = False } }
+                    ! [ "/Phase2Billing/ToggleBillingRecordReviewed"
+                            |> Functions.postRequest
+                                (Encode.object [ ( "billingId", Encode.int row.id ) ])
+                            |> Http.send RequestToggleReviewedCompleted
+                      ]
 
-        ConfirmedCloseBillingSessionDialog row ->
-            { model | confirmData = Nothing }
-                ! [ Functions.getRequestWithParams
-                        "/Phase2Billing/CloseBillingSession"
-                        [ ( "billingId", toString row.id ) ]
-                        |> Http.send RequestCloseBillingSessionCompleted
-                  ]
+            RequestToggleReviewedCompleted t ->
+                Functions.getRequestCompleted model t
 
-        RequestCloseBillingSessionCompleted requestResponse ->
-            case requestResponse of
-                Ok _ ->
-                    model ! [ load patientId model.gridOperations ]
+            -- Save Summary Report
+            ShowSaveSummaryReportDialog row ->
+                { model
+                    | confirmData =
+                        Just
+                            { data = row
+                            , headerText = "Save to Client Portal"
+                            , onConfirm = ConfirmedSaveSummaryReportDialog
+                            , onCancel = CloseDialog
+                            , dialogContent = \_ -> text "Are you sure that you want to save this report in Clinical Portal?"
+                            , dialogOptions = Dialog.defaultDialogOptions
+                            }
+                }
+                    ! []
 
-                Err t ->
-                    model ! [ Functions.displayErrorMessage (toString t) ]
+            ConfirmedSaveSummaryReportDialog row ->
+                let
+                    month =
+                        row.billingDate
+                            |> Maybe.andThen Functions.dateFromString
+                            |> Maybe.map Functions.getMonthIndex
+                            |> Maybe.map toString
+                            |> Maybe.withDefault ""
 
-        -- Edit CCM Billing
-        ShowEditCCMBillingDialog row ->
-            { model
-                | confirmData =
-                    Just
-                        { data = row
-                        , headerText = "Edit CCM Billing"
-                        , onConfirm = ConfirmedCloseBillingSessionDialog
-                        , onCancel = CloseDialog
-                        , dialogContent = \_ -> text "todo"
-                        , dialogOptions = Dialog.defaultDialogOptions
-                        }
-            }
-                ! []
+                    year =
+                        row.billingDate
+                            |> Maybe.andThen Functions.dateFromString
+                            |> Maybe.map Date.year
+                            |> Maybe.map toString
+                            |> Maybe.withDefault ""
+                in
+                    { model | confirmData = Nothing }
+                        ! [ Functions.getRequestWithParams
+                                "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
+                                [ ( "hcoID", toString row.facilityId )
+                                , ( "year", year )
+                                , ( "month", month )
+                                , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
+                                , ( "patientId", toString patientId )
+                                ]
+                                |> Http.send RequestSaveSummaryReportCompleted
+                          ]
 
-        ConfirmedEditCCMBillingDialog row ->
-            Debug.crash "todo"
+            RequestSaveSummaryReportCompleted t ->
+                Functions.getRequestCompleted model t
 
-        RequestEditCCMBillingCompleted t ->
-            Functions.getRequestCompleted model t
+            -- Close Billing Session
+            CloseDialogToggleReviewed row ->
+                { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = True } } ! []
 
-        -- Edit CCM Billing
-        ShowInvoiceReportsDialog addEditDataSource ->
-            { model
-                | invoiceReportsDialog =
-                    Just
-                        { data = emptyInvoiceReportDialog model.currentMonth model.currentYear
-                        , headerText = "Edit CCM Billing"
-                        , onConfirm = ConfirmedInvoiceReportsDialog
-                        , onCancel = CloseInvoiceReportsDialog
-                        , dialogContent = viewInvoiceReportsDialog addEditDataSource
-                        , dialogOptions = Dialog.defaultDialogOptions
-                        }
-            }
-                ! []
+            ShowCloseBillingSessionDialog row ->
+                { model
+                    | confirmData =
+                        Just
+                            { data = row
+                            , headerText = "Close Bill"
+                            , onConfirm = ConfirmedCloseBillingSessionDialog
+                            , onCancel = CloseDialog
+                            , dialogContent = \_ -> text "Are you sure that you want to close this bill?"
+                            , dialogOptions = Dialog.defaultDialogOptions
+                            }
+                }
+                    ! []
 
-        UpdateFacility invoiceReportsDialog ( newDropState, newId, newMsg ) ->
-            { model
-                | invoiceReportsDialog =
-                    Dialog.update model.invoiceReportsDialog
-                        { invoiceReportsDialog | facilityDropState = newDropState, facilityId = newId }
-            }
-                ! [ newMsg ]
+            ConfirmedCloseBillingSessionDialog row ->
+                { model | confirmData = Nothing }
+                    ! [ Functions.getRequestWithParams
+                            "/Phase2Billing/CloseBillingSession"
+                            [ ( "billingId", toString row.id ) ]
+                            |> Http.send RequestCloseBillingSessionCompleted
+                      ]
 
-        UpdateMonth invoiceReportsDialog ( newDropState, newId, newMsg ) ->
-            -- let
-            --     ( newDropState, newId, newMsg ) =
-            --         Dropdown.update dropdownMsg model.monthDropState model.currentMonth monthDropdown
-            -- in
-            --     { model | monthDropState = newDropState, currentMonth = newId } ! [ newMsg ]
-            model ! [ newMsg ]
+            RequestCloseBillingSessionCompleted requestResponse ->
+                case requestResponse of
+                    Ok _ ->
+                        model ! [ load patientId model.gridOperations ]
 
-        UpdateYear invoiceReportsDialog ( newDropState, newId, newMsg ) ->
-            -- let
-            --     ( newDropState, newId, newMsg ) =
-            --         Dropdown.update dropdownMsg model.yearDropState model.currentYear yearDropdown
-            -- in
-            --     { model | yearDropState = newDropState, currentYear = newId } ! [ newMsg ]
-            model ! [ newMsg ]
+                    Err t ->
+                        model ! [ Functions.displayErrorMessage (toString t) ]
 
-        CloseInvoiceReportsDialog _ ->
-            { model | invoiceReportsDialog = Nothing } ! []
+            -- Edit CCM Billing
+            ShowEditCCMBillingDialog row ->
+                { model
+                    | confirmData =
+                        Just
+                            { data = row
+                            , headerText = "Edit CCM Billing"
+                            , onConfirm = ConfirmedCloseBillingSessionDialog
+                            , onCancel = CloseDialog
+                            , dialogContent = \_ -> text "todo"
+                            , dialogOptions = Dialog.defaultDialogOptions
+                            }
+                }
+                    ! []
 
-        ConfirmedInvoiceReportsDialog invoiceReportsDialog ->
-            Debug.crash "todo"
+            ConfirmedEditCCMBillingDialog row ->
+                Debug.crash "todo"
 
-        -- Common Close Dialog
-        CloseDialog _ ->
-            { model | confirmData = Nothing } ! []
+            RequestEditCCMBillingCompleted t ->
+                Functions.getRequestCompleted model t
+
+            -- Edit CCM Billing
+            ShowInvoiceReportsDialog addEditDataSource ->
+                { model
+                    | invoiceReportsDialog =
+                        Just
+                            { data = emptyInvoiceReportDialog model.currentMonth model.currentYear
+                            , headerText = "Edit CCM Billing"
+                            , onConfirm = ConfirmedInvoiceReportsDialog
+                            , onCancel = CloseInvoiceReportsDialog
+                            , dialogContent = viewInvoiceReportsDialog addEditDataSource
+                            , dialogOptions = Dialog.defaultDialogOptions
+                            }
+                }
+                    ! []
+
+            UpdateFacility invoiceReportsDialog ( newDropState, newId, newMsg ) ->
+                invoiceReportsUpdate { invoiceReportsDialog | facilityDropState = newDropState, facilityId = newId }
+                    ! [ newMsg ]
+
+            UpdateMonth invoiceReportsDialog ( newDropState, newId, newMsg ) ->
+                invoiceReportsUpdate { invoiceReportsDialog | monthDropState = newDropState, currentMonth = newId }
+                    ! [ newMsg ]
+
+            UpdateYear invoiceReportsDialog ( newDropState, newId, newMsg ) ->
+                invoiceReportsUpdate { invoiceReportsDialog | yearDropState = newDropState, currentYear = newId }
+                    ! [ newMsg ]
+
+            CloseInvoiceReportsDialog _ ->
+                { model | invoiceReportsDialog = Nothing } ! []
+
+            ConfirmedInvoiceReportsDialog invoiceReportsDialog ->
+                Debug.crash "todo"
+
+            -- Common Close Dialog
+            CloseDialog _ ->
+                { model | confirmData = Nothing } ! []
 
 
 viewInvoiceReportsDialog : AddEditDataSource -> InvoiceReportsDialog -> Html Msg
