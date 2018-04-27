@@ -104,8 +104,8 @@ view : Model -> Maybe AddEditDataSource -> Html Msg
 view model maybeAddEditDataSource =
     div []
         [ Table.view model.gridOperations (gridConfig maybeAddEditDataSource) model.rows Nothing
-        , Dialog.viewDialog model.confirmData Dialog.defaultDialogOptions
-        , Dialog.viewDialog model.invoiceReportsDialog Dialog.defaultDialogOptions
+        , Dialog.viewDialog model.confirmData
+        , Dialog.viewDialog model.invoiceReportsDialog
         ]
 
 
@@ -297,6 +297,7 @@ update msg model patientId =
                         , onConfirm = ConfirmedToggleReviewedDialog
                         , onCancel = CloseDialogToggleReviewed
                         , dialogContent = \_ -> text "Are you sure you wish to change the reviewed status?"
+                        , dialogOptions = Dialog.defaultDialogOptions
                         }
             }
                 ! []
@@ -322,6 +323,7 @@ update msg model patientId =
                         , onConfirm = ConfirmedSaveSummaryReportDialog
                         , onCancel = CloseDialog
                         , dialogContent = \_ -> text "Are you sure that you want to save this report in Clinical Portal?"
+                        , dialogOptions = Dialog.defaultDialogOptions
                         }
             }
                 ! []
@@ -370,6 +372,7 @@ update msg model patientId =
                         , onConfirm = ConfirmedCloseBillingSessionDialog
                         , onCancel = CloseDialog
                         , dialogContent = \_ -> text "Are you sure that you want to close this bill?"
+                        , dialogOptions = Dialog.defaultDialogOptions
                         }
             }
                 ! []
@@ -400,6 +403,7 @@ update msg model patientId =
                         , onConfirm = ConfirmedCloseBillingSessionDialog
                         , onCancel = CloseDialog
                         , dialogContent = \_ -> text "todo"
+                        , dialogOptions = Dialog.defaultDialogOptions
                         }
             }
                 ! []
@@ -420,6 +424,7 @@ update msg model patientId =
                         , onConfirm = ConfirmedInvoiceReportsDialog
                         , onCancel = CloseInvoiceReportsDialog
                         , dialogContent = viewInvoiceReportsDialog addEditDataSource
+                        , dialogOptions = Dialog.defaultDialogOptions
                         }
             }
                 ! []

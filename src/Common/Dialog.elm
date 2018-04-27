@@ -1,4 +1,4 @@
-module Common.Dialog exposing (Dialog, DialogOptions, defaultDialogOptions, viewDialog, update)
+module Common.Dialog exposing (Dialog, DialogOptions, defaultDialogOptions, simpleDialogOptions, viewDialog, update)
 
 import Html exposing (Html, text, div, span, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, style, checked, tabindex, title, hidden)
@@ -11,6 +11,7 @@ type alias Dialog data msg =
     , onCancel : data -> msg
     , headerText : String
     , dialogContent : data -> Html msg
+    , dialogOptions : DialogOptions
     }
 
 
@@ -35,11 +36,19 @@ defaultDialogOptions =
     }
 
 
-viewDialog : Maybe (Dialog data msg) -> DialogOptions -> Html msg
-viewDialog maybeData dialogOptions =
+simpleDialogOptions : Int -> Int -> DialogOptions
+simpleDialogOptions width height =
+    { defaultDialogOptions
+        | width = toString width
+        , height = toString height
+    }
+
+
+viewDialog : Maybe (Dialog data msg) -> Html msg
+viewDialog maybeData =
     div [] <|
         case maybeData of
-            Just { data, onConfirm, onCancel, headerText, dialogContent } ->
+            Just { data, onConfirm, onCancel, headerText, dialogContent, dialogOptions } ->
                 [ div
                     [ class "e-dialog e-widget e-box e-dialog-wrap e-shadow"
                     , style
