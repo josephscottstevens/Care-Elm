@@ -239,8 +239,8 @@ setRoute maybeRoute model =
 
             --Other
             Just Route.Billing ->
-                setModel Route.Billing (Billing Billing.emptyModel)
-                    ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
+                setModel Route.Billing (Billing (Billing.emptyModel model.windowSize))
+                    ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId model.windowSize) ]
 
             Just Route.None ->
                 setModel Route.None NoPage

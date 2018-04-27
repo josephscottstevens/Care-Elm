@@ -17,11 +17,11 @@ import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 
 
-init : Int -> Cmd Msg
-init patientId =
+init : Int -> Window.Size -> Cmd Msg
+init patientId windowSize =
     Cmd.batch
-        [ load patientId <| Table.init 20 (Just "BillingDate") columns
-        , Table.initFilter columns
+        [ load patientId <| Table.init 20 (Just "BillingDate") (columns windowSize)
+        , Table.initFilter (columns windowSize)
         ]
 
 
@@ -50,10 +50,10 @@ type alias InvoiceReportsDialog =
     }
 
 
-emptyModel : Model
-emptyModel =
+emptyModel : Window.Size -> Model
+emptyModel windowSize =
     { rows = []
-    , gridOperations = Table.init 20 (Just "BillingDate") columns
+    , gridOperations = Table.init 20 (Just "BillingDate") (columns windowSize)
     , confirmData = Nothing
     , invoiceReportsDialog = Nothing
     , currentMonth = Nothing
@@ -551,6 +551,6 @@ gridConfig maybeAddEditDataSource windowSize =
                 ]
             ]
         ]
-    , columns = columns
+    , columns = columns windowSize
     , toMsg = SetGridOperations
     }

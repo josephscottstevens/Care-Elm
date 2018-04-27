@@ -31,16 +31,32 @@ type alias DialogOptions =
 -- TODO, problem... top and left should be calculated, and when draggable is a thing, User shouldn't specify
 -- TODO, in fact.. we never want to specify this, we always want center
 -- open : Window.Size ->
+--windowWidth = 1920
+
+
+defaultWidth : Int
+defaultWidth =
+    500
+
+
+calcLeft : Window.Size -> Int -> String
+calcLeft windowSize dialogWidth =
+    toString (windowSize.width // 2 - dialogWidth) ++ "px"
+
+
+calcTop : Window.Size -> Int -> String
+calcTop windowSize dialogHeight =
+    toString (windowSize.height // 2 - dialogHeight) ++ "px"
 
 
 defaultDialogOptions : Window.Size -> DialogOptions
 defaultDialogOptions windowSize =
-    { width = "500px"
+    { width = toString defaultWidth ++ "px"
     , minWidth = "200px"
     , height = "auto"
     , minHeight = "120px"
     , top = "213px"
-    , left = "423px"
+    , left = calcLeft windowSize defaultWidth
     , windowSize = windowSize
     }
 
@@ -54,6 +70,8 @@ simpleDialogOptions width height windowSize =
         { t
             | width = toString width
             , height = toString height
+            , left = calcLeft windowSize width
+            , top = calcTop windowSize height
         }
 
 
