@@ -104,8 +104,8 @@ view : Model -> Maybe AddEditDataSource -> Html Msg
 view model maybeAddEditDataSource =
     div []
         [ Table.view model.gridOperations (gridConfig maybeAddEditDataSource) model.rows Nothing
-        , Dialog.viewDialog model.confirmData
-        , Dialog.viewDialog model.invoiceReportsDialog
+        , Dialog.viewDialog model.confirmData Dialog.defaultDialogOptions
+        , Dialog.viewDialog model.invoiceReportsDialog Dialog.defaultDialogOptions
         ]
 
 

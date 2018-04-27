@@ -1,4 +1,4 @@
-module Common.Dialog exposing (Dialog, update, viewDialog)
+module Common.Dialog exposing (Dialog, DialogOptions, defaultDialogOptions, viewDialog, update)
 
 import Html exposing (Html, text, div, span, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, style, checked, tabindex, title, hidden)
@@ -14,33 +14,45 @@ type alias Dialog data msg =
     }
 
 
-update : Maybe (Dialog data msg) -> data -> Maybe (Dialog data msg)
-update maybeDialog data =
-    case maybeDialog of
-        Just dialog ->
-            Just { dialog | data = data }
+type alias DialogOptions =
+    { width : String
+    , minWidth : String
+    , height : String
+    , minHeight : String
+    , top : String
+    , left : String
+    }
 
-        Nothing ->
-            Nothing
+
+defaultDialogOptions : DialogOptions
+defaultDialogOptions =
+    { width = "500px"
+    , minWidth = "200px"
+    , height = "auto"
+    , minHeight = "120px"
+    , top = "301px"
+    , left = "509px"
+    }
 
 
-viewDialog : Maybe (Dialog data msg) -> Html msg
-viewDialog maybeData =
+viewDialog : Maybe (Dialog data msg) -> DialogOptions -> Html msg
+viewDialog maybeData dialogOptions =
     div [] <|
         case maybeData of
             Just { data, onConfirm, onCancel, headerText, dialogContent } ->
                 [ div
                     [ class "e-dialog e-widget e-box e-dialog-wrap e-shadow"
                     , style
-                        [ ( "z-index", " 2147483647" )
-                        , ( "width", " 500px" )
-                        , ( "min-width", " 200px" )
-                        , ( "height", " auto" )
-                        , ( "min-height", " 120px" )
-                        , ( "max-height", " 300px" )
-                        , ( "top", " 301px" )
-                        , ( "left", " 509px" )
-                        , ( "position", " absolute" )
+                        [ ( "z-index", "2147483647" )
+                        , ( "width", dialogOptions.width )
+                        , ( "min-width", dialogOptions.minWidth )
+                        , ( "height", "auto" )
+                        , ( "min-height", dialogOptions.minHeight )
+
+                        -- , ( "max-height", "300px" )
+                        , ( "top", dialogOptions.top )
+                        , ( "left", dialogOptions.left )
+                        , ( "position", "absolute" )
                         ]
                     ]
                     [ div [ class "e-titlebar e-header e-dialog e-draggable e-js" ]
@@ -95,3 +107,13 @@ viewDialog maybeData =
 
             Nothing ->
                 []
+
+
+update : Maybe (Dialog data msg) -> data -> Maybe (Dialog data msg)
+update maybeDialog data =
+    case maybeDialog of
+        Just dialog ->
+            Just { dialog | data = data }
+
+        Nothing ->
+            Nothing
