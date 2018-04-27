@@ -3,6 +3,7 @@ module Common.Dialog exposing (Dialog, DialogOptions, defaultDialogOptions, simp
 import Html exposing (Html, text, div, span, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, style, checked, tabindex, title, hidden)
 import Html.Events exposing (onInput, onCheck, onClick)
+import Window
 
 
 type alias Dialog data msg =
@@ -22,26 +23,38 @@ type alias DialogOptions =
     , minHeight : String
     , top : String
     , left : String
+    , windowSize : Window.Size
     }
 
 
-defaultDialogOptions : DialogOptions
-defaultDialogOptions =
+
+-- TODO, problem... top and left should be calculated, and when draggable is a thing, User shouldn't specify
+-- TODO, in fact.. we never want to specify this, we always want center
+-- open : Window.Size ->
+
+
+defaultDialogOptions : Window.Size -> DialogOptions
+defaultDialogOptions windowSize =
     { width = "500px"
     , minWidth = "200px"
     , height = "auto"
     , minHeight = "120px"
-    , top = "301px"
-    , left = "509px"
+    , top = "213px"
+    , left = "423px"
+    , windowSize = windowSize
     }
 
 
-simpleDialogOptions : Int -> Int -> DialogOptions
-simpleDialogOptions width height =
-    { defaultDialogOptions
-        | width = toString width
-        , height = toString height
-    }
+simpleDialogOptions : Int -> Int -> Window.Size -> DialogOptions
+simpleDialogOptions width height windowSize =
+    let
+        t =
+            defaultDialogOptions windowSize
+    in
+        { t
+            | width = toString width
+            , height = toString height
+        }
 
 
 viewDialog : Maybe (Dialog data msg) -> Html msg

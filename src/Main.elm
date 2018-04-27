@@ -14,6 +14,8 @@ import Common.Functions as Functions
 import Common.Types as Common exposing (AddEditDataSource)
 import Common.Route as Route exposing (Route)
 import Navigation
+import Window
+import Task
 import Http exposing (Error)
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (required, decode)
@@ -21,6 +23,7 @@ import Json.Decode.Pipeline exposing (required, decode)
 
 type alias Model =
     { patientId : Int
+    , windowSize : Window.Size
     , page : Page
     , addEditDataSource : Maybe AddEditDataSource
     , route : Route
@@ -54,6 +57,7 @@ init location =
         ( model, cmds ) =
             setRoute (Route.fromLocation location)
                 { patientId = patientId
+                , windowSize = Window.Size 0 0
                 , page = NoPage
                 , addEditDataSource = Nothing
                 , route = Route.None
@@ -62,6 +66,7 @@ init location =
         model
             ! [ Functions.setLoadingStatus False
               , cmds
+              , Task.perform Resize Window.size
               ]
 
 
@@ -69,6 +74,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ pageSubscriptions model.page
+        , Window.resizes Resize
         ]
 
 
@@ -120,7 +126,7 @@ view model =
             Html.map DemographicsMsg (Demographics.view subModel)
 
         Billing subModel ->
-            Html.map BillingMsg (Billing.view subModel model.addEditDataSource)
+            Html.map BillingMsg (Billing.view subModel model.patientId model.addEditDataSource model.windowSize)
 
         ClinicalSummary subModel ->
             Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel model.patientId)
@@ -150,6 +156,7 @@ view model =
 
 type Msg
     = SetRoute (Maybe Route)
+    | Resize Window.Size
     | BillingMsg Billing.Msg
     | ClinicalSummaryMsg ClinicalSummary.Msg
     | PastMedicalHistoryMsg PastMedicalHistory.Msg
@@ -270,6 +277,9 @@ updatePage page msg model =
             ( SetRoute route, _ ) ->
                 setRoute route model
 
+            ( Resize windowSize, _ ) ->
+                { model | windowSize = windowSize } ! []
+
             ( AddEditDataSourceLoaded response, _ ) ->
                 case response of
                     Ok t ->
@@ -316,7 +326,6 @@ getDropDowns : Int -> Cmd Msg
 getDropDowns patientId =
     decode AddEditDataSource
         |> required "facilityId" (Decode.maybe Decode.int)
-        |> required "patientId" Decode.int
         |> required "facilityDropdown" (Decode.list Functions.decodeDropdownItem)
         |> required "providersDropdown" (Decode.list Functions.decodeDropdownItem)
         |> required "recordTypeDropdown" (Decode.list Functions.decodeDropdownItem)
