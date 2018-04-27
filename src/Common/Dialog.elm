@@ -1,4 +1,4 @@
-module Common.Dialog exposing (Dialog, viewDialog)
+module Common.Dialog exposing (Dialog, update, viewDialog)
 
 import Html exposing (Html, text, div, span, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, style, checked, tabindex, title, hidden)
@@ -12,6 +12,16 @@ type alias Dialog data msg =
     , headerText : String
     , dialogContent : data -> Html msg
     }
+
+
+update : Maybe (Dialog data msg) -> data -> Maybe (Dialog data msg)
+update maybeDialog data =
+    case maybeDialog of
+        Just dialog ->
+            Just { dialog | data = data }
+
+        Nothing ->
+            Nothing
 
 
 viewDialog : Maybe (Dialog data msg) -> Html msg

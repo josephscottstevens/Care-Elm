@@ -236,7 +236,7 @@ type Msg
       -- Invoice Reports
     | ShowInvoiceReportsDialog AddEditDataSource
     | ConfirmedInvoiceReportsDialog InvoiceReportsDialog
-    | UpdateFacility InvoiceReportsDialog AddEditDataSource ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateFacility InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateMonth InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateYear InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | CloseInvoiceReportsDialog InvoiceReportsDialog
@@ -419,34 +419,34 @@ update msg model patientId =
                         , headerText = "Edit CCM Billing"
                         , onConfirm = ConfirmedInvoiceReportsDialog
                         , onCancel = CloseInvoiceReportsDialog
-                        , dialogContent = viewInvoiceReportsDialog
+                        , dialogContent = viewInvoiceReportsDialog addEditDataSource
                         }
             }
                 ! []
 
-        UpdateFacility invoiceReportsDialog addEditDataSource dropdownMsg ->
-            -- let
-            --     ( newDropState, newId, newMsg ) =
-            --         Dropdown.update dropdownMsg model.facilityDropState model.facilityId monthDropdown
-            -- in
-            --     { model | facilityDropState = newDropState, facilityId = newId } ! [ newMsg ]
-            model ! []
+        UpdateFacility invoiceReportsDialog ( newDropState, newId, newMsg ) ->
+            { model
+                | invoiceReportsDialog =
+                    Dialog.update model.invoiceReportsDialog
+                        { invoiceReportsDialog | facilityDropState = newDropState, facilityId = newId }
+            }
+                ! [ newMsg ]
 
-        UpdateMonth invoiceReportsDialog dropdownMsg ->
+        UpdateMonth invoiceReportsDialog ( newDropState, newId, newMsg ) ->
             -- let
             --     ( newDropState, newId, newMsg ) =
             --         Dropdown.update dropdownMsg model.monthDropState model.currentMonth monthDropdown
             -- in
             --     { model | monthDropState = newDropState, currentMonth = newId } ! [ newMsg ]
-            model ! []
+            model ! [ newMsg ]
 
-        UpdateYear invoiceReportsDialog dropdownMsg ->
+        UpdateYear invoiceReportsDialog ( newDropState, newId, newMsg ) ->
             -- let
             --     ( newDropState, newId, newMsg ) =
             --         Dropdown.update dropdownMsg model.yearDropState model.currentYear yearDropdown
             -- in
             --     { model | yearDropState = newDropState, currentYear = newId } ! [ newMsg ]
-            model ! []
+            model ! [ newMsg ]
 
         CloseInvoiceReportsDialog _ ->
             { model | invoiceReportsDialog = Nothing } ! []
@@ -459,13 +459,12 @@ update msg model patientId =
             { model | confirmData = Nothing } ! []
 
 
-viewInvoiceReportsDialog : InvoiceReportsDialog -> Html Msg
-viewInvoiceReportsDialog t =
+viewInvoiceReportsDialog : AddEditDataSource -> InvoiceReportsDialog -> Html Msg
+viewInvoiceReportsDialog addEditDataSource t =
     div []
-        [ Dropdown.view t.monthDropState (UpdateMonth t) monthDropdown t.currentMonth
-
-        -- , Html.map (UpdateYear t) <|
-        --     Dropdown.view t.yearDropState yearDropdown t.currentYear
+        [ Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId
+        , Dropdown.view t.monthDropState (UpdateMonth t) monthDropdown t.currentMonth
+        , Dropdown.view t.yearDropState (UpdateYear t) yearDropdown t.currentYear
         ]
 
 
