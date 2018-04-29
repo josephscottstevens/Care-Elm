@@ -419,17 +419,17 @@ update msg model patientId =
             RequestEditCCMBillingCompleted t ->
                 Functions.getRequestCompleted model t
 
-            -- Edit CCM Billing
+            -- Invoice Reports
             ShowInvoiceReportsDialog windowSize addEditDataSource ->
                 { model
                     | invoiceReportsDialog =
                         Just
                             { data = emptyInvoiceReportDialog model.currentMonth model.currentYear
-                            , headerText = "Edit CCM Billing"
+                            , headerText = "Invoice XLS"
                             , onConfirm = ConfirmedInvoiceReportsDialog
                             , onCancel = CloseInvoiceReportsDialog
                             , dialogContent = viewInvoiceReportsDialog addEditDataSource
-                            , dialogOptions = Dialog.defaultDialogOptions windowSize
+                            , dialogOptions = Dialog.simpleDialogOptions 800 500 windowSize
                             }
                 }
                     ! []
@@ -460,7 +460,7 @@ update msg model patientId =
 viewInvoiceReportsDialog : AddEditDataSource -> InvoiceReportsDialog -> Html Msg
 viewInvoiceReportsDialog addEditDataSource t =
     div []
-        [ Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId
+        [ div [ style [ ( "width", "200px" ) ] ] [ Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId ]
         , Dropdown.view t.monthDropState (UpdateMonth t) monthDropdown t.currentMonth
         , Dropdown.view t.yearDropState (UpdateYear t) yearDropdown t.currentYear
         ]

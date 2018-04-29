@@ -17,21 +17,12 @@ type alias Dialog data msg =
 
 
 type alias DialogOptions =
-    { width : String
-    , minWidth : String
-    , height : String
-    , minHeight : String
-    , top : String
-    , left : String
+    { width : Int
+    , height : Int
+    , top : Int
+    , left : Int
     , windowSize : Window.Size
     }
-
-
-
--- TODO, problem... top and left should be calculated, and when draggable is a thing, User shouldn't specify
--- TODO, in fact.. we never want to specify this, we always want center
--- open : Window.Size ->
---windowWidth = 1920
 
 
 defaultWidth : Int
@@ -39,40 +30,44 @@ defaultWidth =
     500
 
 
-calcLeft : Window.Size -> Int -> String
+defaultHeight : Int
+defaultHeight =
+    156
+
+
+toPx : Int -> String
+toPx size =
+    toString size ++ "px"
+
+
+calcLeft : Window.Size -> Int -> Int
 calcLeft windowSize dialogWidth =
-    toString (windowSize.width // 2 - dialogWidth) ++ "px"
+    windowSize.width // 2 - dialogWidth // 2
 
 
-calcTop : Window.Size -> Int -> String
+calcTop : Window.Size -> Int -> Int
 calcTop windowSize dialogHeight =
-    toString (windowSize.height // 2 - dialogHeight) ++ "px"
+    windowSize.height // 2 - dialogHeight // 2 - 118
 
 
 defaultDialogOptions : Window.Size -> DialogOptions
 defaultDialogOptions windowSize =
-    { width = toString defaultWidth ++ "px"
-    , minWidth = "200px"
-    , height = "auto"
-    , minHeight = "120px"
-    , top = "213px"
-    , left = calcLeft windowSize defaultWidth
+    { width = defaultWidth
+    , height = defaultHeight
+    , left = calcLeft windowSize 701
+    , top = calcTop windowSize 319
     , windowSize = windowSize
     }
 
 
 simpleDialogOptions : Int -> Int -> Window.Size -> DialogOptions
 simpleDialogOptions width height windowSize =
-    let
-        t =
-            defaultDialogOptions windowSize
-    in
-        { t
-            | width = toString width
-            , height = toString height
-            , left = calcLeft windowSize width
-            , top = calcTop windowSize height
-        }
+    { width = width
+    , height = height
+    , left = calcLeft windowSize width
+    , top = calcTop windowSize height
+    , windowSize = windowSize
+    }
 
 
 viewDialog : Maybe (Dialog data msg) -> Html msg
@@ -84,32 +79,41 @@ viewDialog maybeData =
                     [ class "e-dialog e-widget e-box e-dialog-wrap e-shadow"
                     , style
                         [ ( "z-index", "2147483647" )
-                        , ( "width", dialogOptions.width )
-                        , ( "min-width", dialogOptions.minWidth )
-                        , ( "height", "auto" )
-                        , ( "min-height", dialogOptions.minHeight )
-
-                        -- , ( "max-height", "300px" )
-                        , ( "top", dialogOptions.top )
-                        , ( "left", dialogOptions.left )
+                        , ( "width", toPx dialogOptions.width )
+                        , ( "min-width", "200px" )
+                        , ( "height", toPx dialogOptions.height )
+                        , ( "min-height", "120px" )
+                        , ( "top", toPx dialogOptions.top )
+                        , ( "left", toPx dialogOptions.left )
                         , ( "position", "absolute" )
                         ]
                     ]
                     [ div [ class "e-titlebar e-header e-dialog e-draggable e-js" ]
-                        [ span [ class "e-title", style [ ( "max-width", "435.6px" ) ] ] [ text headerText ]
+                        [ span
+                            [ class "e-title"
+                            , style [ ( "max-width", dialogOptions.width - 65 |> toPx ) ]
+                            ]
+                            [ text headerText ]
                         , div [ class "e-dialog-icon e-icon e-close", tabindex 0, title "Close" ] []
                         ]
-                    , div [ class "e-dialog-scroller e-scroller e-js e-widget", style [ ( "height", "auto" ), ( "width", "498px" ) ] ]
+                    , div
+                        [ class "e-dialog-scroller e-scroller e-js e-widget"
+                        , style [ ( "height", "auto" ), ( "width", dialogOptions.width - 2 |> toPx ) ]
+                        ]
                         [ div
                             [ style
-                                [ ( "height", " auto" )
-                                , ( "display", " block" )
-                                , ( "min-height", " 71px" )
-                                , ( "width", " 498px" )
-                                , ( "max-height", " 300px" )
+                                [ ( "height", dialogOptions.height - 30 |> toPx )
+                                , ( "display", "block" )
+                                , ( "min-height", "71px" )
+                                , ( "width", dialogOptions.width - 2 |> toPx )
+
+                                -- , ( "max-height", " 300px" )
                                 ]
                             ]
-                            [ div [ class "col-xs-12 padding-top-10 confirm-message" ]
+                            [ div
+                                [ class "col-xs-12 padding-top-10 confirm-message"
+                                , style [ ( "height", dialogOptions.height - 40 - 71 |> toPx ) ]
+                                ]
                                 [ dialogContent data
                                 ]
                             , div [ class "col-xs-12 padding-top-10 padding-bottom-10" ]
