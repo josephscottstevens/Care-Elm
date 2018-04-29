@@ -460,7 +460,7 @@ update msg model patientId =
 viewInvoiceReportsDialog : AddEditDataSource -> InvoiceReportsDialog -> Html Msg
 viewInvoiceReportsDialog addEditDataSource t =
     div []
-        [ div [ style [ ( "width", "200px" ) ] ] [ Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId ]
+        [ Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId
         , Dropdown.view t.monthDropState (UpdateMonth t) monthDropdown t.currentMonth
         , Dropdown.view t.yearDropState (UpdateYear t) yearDropdown t.currentYear
         ]

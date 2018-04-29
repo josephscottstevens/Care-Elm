@@ -210,7 +210,7 @@ view dropdown toMsg dropdownItems selectedId =
 
         dropdownWidthMultiplier =
             if dropdown.showSearchText then
-                11
+                9
             else
                 7
 
