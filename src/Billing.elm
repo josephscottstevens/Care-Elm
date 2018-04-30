@@ -465,28 +465,25 @@ update msg model patientId =
                 { model | confirmData = Nothing } ! []
 
 
-captionStyle : Html.Attribute msg
-captionStyle =
-    style
-        [ ( "font-size", "14px" )
-        , ( "color", "#808080" )
-        , ( "padding", "3px" )
-        , ( "font-weight", "400 !important" )
-        , ( "width", "90%" )
-        ]
-
-
-divider : InputControlType msg
-divider =
+dividerLabel : String -> InputControlType msg
+dividerLabel labelText =
     HtmlElement <|
         div
             [ style
                 [ ( "border-bottom-style", "solid" )
                 , ( "border-bottom-width", "1px" )
                 , ( "border-bottom-color", "rgb(209, 209, 209)" )
+                , ( "font-size", "14px" )
+                , ( "color", "#808080" )
+                , ( "padding", "3px" )
+                , ( "font-weight", "400 !important" )
+                , ( "width", "90%" )
+                , ( "margin-top", "10px" )
+                , ( "margin-bottom", "20px" )
                 ]
             ]
-            []
+            [ text labelText
+            ]
 
 
 viewInvoiceReportsDialog : AddEditDataSource -> InvoiceReportsDialog -> Html Msg
@@ -500,11 +497,10 @@ viewInvoiceReportsDialog addEditDataSource t =
     in
         div [ class "form-horizontal" ]
             [ makeControls { controlAttributes = [ class "col-md-8" ] }
-                [ HtmlElement <|
-                    label [ captionStyle ] [ text "Select Facility" ]
-                , divider
+                [ dividerLabel "Select Facility"
                 , ControlElement "Facility" <|
                     Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId
+                , dividerLabel "Select Month and Year For Billable Patients"
                 , CheckInput "Save to Client Portal" Optional t.saveToClientPortal (UpdateSaveToClientPortal t)
                 ]
             , div [ class "form-group" ]
