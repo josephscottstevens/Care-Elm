@@ -5,9 +5,10 @@ import Html.Attributes exposing (class, title, style, checked, type_, attribute)
 import Html.Events exposing (onClick)
 import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..), IdAttrType(IdAttr))
 import Common.Functions as Functions
-import Common.Types exposing (AddEditDataSource, monthDropdown, yearDropdown)
+import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, monthDropdown, yearDropdown)
 import Common.Dialog as Dialog
 import Common.Dropdown as Dropdown
+import Common.Html exposing (InputControlType(CheckInput, HtmlElement), defaultConfig, fullWidth, makeControls)
 import Date exposing (Date)
 import Http
 import Task
@@ -44,6 +45,7 @@ type alias InvoiceReportsDialog =
     { currentMonth : Maybe Int
     , currentYear : Maybe Int
     , facilityId : Maybe Int
+    , saveToClientPortal : Bool
     , facilityDropState : Dropdown.DropState
     , monthDropState : Dropdown.DropState
     , yearDropState : Dropdown.DropState
@@ -66,6 +68,7 @@ emptyInvoiceReportDialog currentMonth currentYear =
     { currentMonth = currentMonth
     , currentYear = currentYear
     , facilityId = Nothing
+    , saveToClientPortal = False
     , facilityDropState = Dropdown.init "facilityDropdown" True
     , monthDropState = Dropdown.init "monthDropdown" False
     , yearDropState = Dropdown.init "yearDropdown" False
@@ -240,6 +243,7 @@ type Msg
     | UpdateFacility InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateMonth InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateYear InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateSaveToClientPortal InvoiceReportsDialog Bool
     | CloseInvoiceReportsDialog InvoiceReportsDialog
       -- Common Close Dialog
     | CloseDialog Row
@@ -446,6 +450,10 @@ update msg model patientId =
                 openInvoiceReportDialog { invoiceReportsDialog | yearDropState = newDropState, currentYear = newId }
                     ! [ newMsg ]
 
+            UpdateSaveToClientPortal invoiceReportsDialog t ->
+                openInvoiceReportDialog { invoiceReportsDialog | saveToClientPortal = t }
+                    ! []
+
             CloseInvoiceReportsDialog _ ->
                 { model | invoiceReportsDialog = Nothing } ! []
 
@@ -459,11 +467,27 @@ update msg model patientId =
 
 viewInvoiceReportsDialog : AddEditDataSource -> InvoiceReportsDialog -> Html Msg
 viewInvoiceReportsDialog addEditDataSource t =
-    div []
-        [ Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId
-        , Dropdown.view t.monthDropState (UpdateMonth t) monthDropdown t.currentMonth
-        , Dropdown.view t.yearDropState (UpdateYear t) yearDropdown t.currentYear
-        ]
+    let
+        monthDropdown_ =
+            Dropdown.view t.monthDropState (UpdateMonth t) monthDropdown t.currentMonth
+
+        yearDropdown_ =
+            Dropdown.view t.yearDropState (UpdateYear t) yearDropdown t.currentYear
+    in
+        div [ class "form-horizontal" ]
+            [ makeControls { controlAttributes = [ class "col-md-8" ] }
+                [ HtmlElement "Facility" <|
+                    Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId
+                , CheckInput "Save to Client Portal" Optional t.saveToClientPortal (UpdateSaveToClientPortal t)
+                ]
+            , div [ class "form-group" ]
+                [ div [ class fullWidth ]
+                    [ --button [ type_ "button", onClick (Save editData), class "btn btn-sm btn-success" ] [ text "Save" ]
+                      button [ type_ "button", class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ] --onClick CloseDialog,
+                    , button [ type_ "button", class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ] --onClick CloseDialog,
+                    ]
+                ]
+            ]
 
 
 decodeBillingCcm : Decode.Decoder Row
