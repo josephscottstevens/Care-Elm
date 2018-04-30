@@ -5,7 +5,7 @@ import Html.Attributes exposing (class, title, style, checked, type_, attribute)
 import Html.Events exposing (onClick)
 import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..), IdAttrType(IdAttr))
 import Common.Functions as Functions
-import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, monthDropdown, yearDropdown)
+import Common.Types exposing (DialogClose, RequiredType(Optional, Required), AddEditDataSource, monthDropdown, yearDropdown)
 import Common.Dialog as Dialog
 import Common.Dropdown as Dropdown
 import Common.Html exposing (InputControlType(CheckInput, ControlElement, HtmlElement), defaultConfig, fullWidth, makeControls)
@@ -18,11 +18,11 @@ import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 
 
-init : Int -> Window.Size -> Cmd Msg
-init patientId windowSize =
+init : Int -> Cmd Msg
+init patientId =
     Cmd.batch
-        [ load patientId <| Table.init 20 (Just "BillingDate") (columns windowSize)
-        , Table.initFilter (columns windowSize)
+        [ load patientId <| Table.init 20 (Just "BillingDate") columns
+        , Table.initFilter columns
         ]
 
 
@@ -52,10 +52,10 @@ type alias InvoiceReportsDialog =
     }
 
 
-emptyModel : Window.Size -> Model
-emptyModel windowSize =
+emptyModel : Model
+emptyModel =
     { rows = []
-    , gridOperations = Table.init 20 (Just "BillingDate") (columns windowSize)
+    , gridOperations = Table.init 20 (Just "BillingDate") columns
     , confirmData = Nothing
     , invoiceReportsDialog = Nothing
     , currentMonth = Nothing
@@ -104,17 +104,17 @@ type alias Row =
     }
 
 
-view : Model -> Int -> Maybe AddEditDataSource -> Window.Size -> Html Msg
-view model patientId maybeAddEditDataSource windowSize =
+view : Model -> Int -> Maybe AddEditDataSource -> Dialog.RootDialog -> Html Msg
+view model patientId maybeAddEditDataSource rootDialog =
     div []
-        [ Table.view model.gridOperations (gridConfig maybeAddEditDataSource windowSize) model.rows Nothing
-        , Dialog.viewDialog model.confirmData
-        , Dialog.viewDialog model.invoiceReportsDialog
+        [ Table.view model.gridOperations (gridConfig maybeAddEditDataSource) model.rows Nothing
+        , Dialog.viewDialog model.confirmData rootDialog
+        , Dialog.viewDialog model.invoiceReportsDialog rootDialog
         ]
 
 
-columns : Window.Size -> List (Table.Column Row Msg)
-columns windowSize =
+columns : List (Table.Column Row Msg)
+columns =
     let
         checkHelper t =
             div [ class "e-checkcell" ]
@@ -137,7 +137,7 @@ columns windowSize =
                   else
                     attribute "onClick" ""
                 , if row.isReviewed then
-                    onClick (ShowToggleReviewedDialog windowSize row)
+                    onClick (ShowToggleReviewedDialog row)
                   else
                     onClick (ConfirmedToggleReviewedDialog row)
                 ]
@@ -221,32 +221,32 @@ type Msg
     | ToggleBatchClose Row
     | ToggleBatchCloseDone (Result Http.Error String)
       -- Toggle Reviewed
-    | ShowToggleReviewedDialog Window.Size Row
+    | ShowToggleReviewedDialog Row
     | ConfirmedToggleReviewedDialog Row
     | RequestToggleReviewedCompleted (Result Http.Error String)
     | CloseDialogToggleReviewed Row
       -- Save Summary Report
-    | ShowSaveSummaryReportDialog Window.Size Row
+    | ShowSaveSummaryReportDialog Row
     | ConfirmedSaveSummaryReportDialog Row
     | RequestSaveSummaryReportCompleted (Result Http.Error String)
       -- Close Billing Session
-    | ShowCloseBillingSessionDialog Window.Size Row
+    | ShowCloseBillingSessionDialog Row
     | ConfirmedCloseBillingSessionDialog Row
     | RequestCloseBillingSessionCompleted (Result Http.Error String)
       -- Edit CCM Billing
-    | ShowEditCCMBillingDialog Window.Size Row
+    | ShowEditCCMBillingDialog Row
     | ConfirmedEditCCMBillingDialog Row
     | RequestEditCCMBillingCompleted (Result Http.Error String)
       -- Invoice Reports
-    | ShowInvoiceReportsDialog Window.Size AddEditDataSource
+    | ShowInvoiceReportsDialog AddEditDataSource
     | ConfirmedInvoiceReportsDialog InvoiceReportsDialog
     | UpdateFacility InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateMonth InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateYear InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateSaveToClientPortal InvoiceReportsDialog Bool
-    | CloseInvoiceReportsDialog InvoiceReportsDialog
+    | CloseInvoiceReportsDialog
       -- Common Close Dialog
-    | CloseDialog Row
+    | CloseDialog
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
@@ -297,16 +297,16 @@ update msg model patientId =
                 Functions.getRequestCompleted model t
 
             -- Toggle Reviewed
-            ShowToggleReviewedDialog windowSize row ->
+            ShowToggleReviewedDialog row ->
                 { model
                     | confirmData =
                         Just
                             { data = row
                             , headerText = "Confirm"
                             , onConfirm = ConfirmedToggleReviewedDialog
-                            , onCancel = CloseDialogToggleReviewed
+                            , onCancel = CloseDialog
                             , dialogContent = \_ -> text "Are you sure you wish to change the reviewed status?"
-                            , dialogOptions = Dialog.defaultDialogOptions windowSize
+                            , dialogOptions = Dialog.defaultDialogOptions
                             }
                 }
                     ! []
@@ -323,7 +323,7 @@ update msg model patientId =
                 Functions.getRequestCompleted model t
 
             -- Save Summary Report
-            ShowSaveSummaryReportDialog windowSize row ->
+            ShowSaveSummaryReportDialog row ->
                 { model
                     | confirmData =
                         Just
@@ -332,7 +332,7 @@ update msg model patientId =
                             , onConfirm = ConfirmedSaveSummaryReportDialog
                             , onCancel = CloseDialog
                             , dialogContent = \_ -> text "Are you sure that you want to save this report in Clinical Portal?"
-                            , dialogOptions = Dialog.defaultDialogOptions windowSize
+                            , dialogOptions = Dialog.defaultDialogOptions
                             }
                 }
                     ! []
@@ -372,7 +372,7 @@ update msg model patientId =
             CloseDialogToggleReviewed row ->
                 { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = True } } ! []
 
-            ShowCloseBillingSessionDialog windowSize row ->
+            ShowCloseBillingSessionDialog row ->
                 { model
                     | confirmData =
                         Just
@@ -381,7 +381,7 @@ update msg model patientId =
                             , onConfirm = ConfirmedCloseBillingSessionDialog
                             , onCancel = CloseDialog
                             , dialogContent = \_ -> text "Are you sure that you want to close this bill?"
-                            , dialogOptions = Dialog.defaultDialogOptions windowSize
+                            , dialogOptions = Dialog.defaultDialogOptions
                             }
                 }
                     ! []
@@ -403,7 +403,7 @@ update msg model patientId =
                         model ! [ Functions.displayErrorMessage (toString t) ]
 
             -- Edit CCM Billing
-            ShowEditCCMBillingDialog windowSize row ->
+            ShowEditCCMBillingDialog row ->
                 { model
                     | confirmData =
                         Just
@@ -412,7 +412,7 @@ update msg model patientId =
                             , onConfirm = ConfirmedCloseBillingSessionDialog
                             , onCancel = CloseDialog
                             , dialogContent = \_ -> text "todo"
-                            , dialogOptions = Dialog.defaultDialogOptions windowSize
+                            , dialogOptions = Dialog.defaultDialogOptions
                             }
                 }
                     ! []
@@ -424,7 +424,7 @@ update msg model patientId =
                 Functions.getRequestCompleted model t
 
             -- Invoice Reports
-            ShowInvoiceReportsDialog windowSize addEditDataSource ->
+            ShowInvoiceReportsDialog addEditDataSource ->
                 { model
                     | invoiceReportsDialog =
                         Just
@@ -433,7 +433,7 @@ update msg model patientId =
                             , onConfirm = ConfirmedInvoiceReportsDialog
                             , onCancel = CloseInvoiceReportsDialog
                             , dialogContent = viewInvoiceReportsDialog addEditDataSource
-                            , dialogOptions = Dialog.simpleDialogOptions 800 500 windowSize
+                            , dialogOptions = Dialog.simpleDialogOptions 800 500
                             }
                 }
                     ! []
@@ -454,14 +454,14 @@ update msg model patientId =
                 openInvoiceReportDialog { invoiceReportsDialog | saveToClientPortal = t }
                     ! []
 
-            CloseInvoiceReportsDialog _ ->
+            CloseInvoiceReportsDialog ->
                 { model | invoiceReportsDialog = Nothing } ! []
 
             ConfirmedInvoiceReportsDialog invoiceReportsDialog ->
                 Debug.crash "todo"
 
             -- Common Close Dialog
-            CloseDialog _ ->
+            CloseDialog ->
                 { model | confirmData = Nothing } ! []
 
 
@@ -568,14 +568,14 @@ load patientId gridOperations =
         |> Http.send Load
 
 
-gridConfig : Maybe AddEditDataSource -> Window.Size -> Table.Config Row Msg
-gridConfig maybeAddEditDataSource windowSize =
+gridConfig : Maybe AddEditDataSource -> Table.Config Row Msg
+gridConfig maybeAddEditDataSource =
     { domTableId = "BillingTable"
     , rowDropdownItems =
         [ ( "", "Generate Summary Report", GenerateSummaryReport )
-        , ( "", "Save Summary Report to Client Portal", ShowSaveSummaryReportDialog windowSize )
-        , ( "", "Close Billing Session", ShowCloseBillingSessionDialog windowSize )
-        , ( "", "Edit CCM Billing", ShowEditCCMBillingDialog windowSize )
+        , ( "", "Save Summary Report to Client Portal", ShowSaveSummaryReportDialog )
+        , ( "", "Close Billing Session", ShowCloseBillingSessionDialog )
+        , ( "", "Edit CCM Billing", ShowEditCCMBillingDialog )
         ]
     , toolbar =
         [ text "Billing"
@@ -584,13 +584,13 @@ gridConfig maybeAddEditDataSource windowSize =
                 [ text "Actions "
                 , case maybeAddEditDataSource of
                     Just addEditDataSource ->
-                        button [ class "btn btn-sm btn-default", onClick (ShowInvoiceReportsDialog windowSize addEditDataSource) ] [ text "Invoice Reports" ]
+                        button [ class "btn btn-sm btn-default", onClick (ShowInvoiceReportsDialog addEditDataSource) ] [ text "Invoice Reports" ]
 
                     Nothing ->
                         div [] []
                 ]
             ]
         ]
-    , columns = columns windowSize
+    , columns = columns
     , toMsg = SetGridOperations
     }

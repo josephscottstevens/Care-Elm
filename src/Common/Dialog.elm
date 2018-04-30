@@ -1,4 +1,4 @@
-module Common.Dialog exposing (Dialog, DialogOptions, defaultDialogOptions, simpleDialogOptions, viewDialog, update)
+module Common.Dialog exposing (Dialog, DialogOptions, RootDialog, defaultDialogOptions, simpleDialogOptions, viewDialog, update)
 
 import Html exposing (Html, text, div, span, button, input, label, textarea)
 import Html.Attributes exposing (class, type_, id, value, for, name, style, checked, tabindex, title, hidden)
@@ -9,19 +9,23 @@ import Window
 type alias Dialog data msg =
     { data : data
     , onConfirm : data -> msg
-    , onCancel : data -> msg
+    , onCancel : msg
     , headerText : String
     , dialogContent : data -> Html msg
     , dialogOptions : DialogOptions
     }
 
 
+type alias RootDialog =
+    { windowSize : Window.Size
+    , top : Int
+    , left : Int
+    }
+
+
 type alias DialogOptions =
     { width : Int
     , height : Int
-    , top : Int
-    , left : Int
-    , windowSize : Window.Size
     }
 
 
@@ -50,28 +54,22 @@ calcTop windowSize dialogHeight =
     windowSize.height // 2 - dialogHeight // 2 - 118
 
 
-defaultDialogOptions : Window.Size -> DialogOptions
-defaultDialogOptions windowSize =
+defaultDialogOptions : DialogOptions
+defaultDialogOptions =
     { width = defaultWidth
     , height = defaultHeight
-    , left = calcLeft windowSize 701
-    , top = calcTop windowSize 319
-    , windowSize = windowSize
     }
 
 
-simpleDialogOptions : Int -> Int -> Window.Size -> DialogOptions
-simpleDialogOptions width height windowSize =
+simpleDialogOptions : Int -> Int -> DialogOptions
+simpleDialogOptions width height =
     { width = width
     , height = height
-    , left = calcLeft windowSize width
-    , top = calcTop windowSize height
-    , windowSize = windowSize
     }
 
 
-viewDialog : Maybe (Dialog data msg) -> Html msg
-viewDialog maybeData =
+viewDialog : Maybe (Dialog data msg) -> RootDialog -> Html msg
+viewDialog maybeData rootDialog =
     div [] <|
         case maybeData of
             Just { data, onConfirm, onCancel, headerText, dialogContent, dialogOptions } ->
@@ -83,8 +81,8 @@ viewDialog maybeData =
                         , ( "min-width", "200px" )
                         , ( "height", toPx dialogOptions.height )
                         , ( "min-height", "120px" )
-                        , ( "top", toPx dialogOptions.top )
-                        , ( "left", toPx dialogOptions.left )
+                        , ( "top", (calcTop rootDialog.windowSize dialogOptions.height - rootDialog.top) |> toPx )
+                        , ( "left", (calcLeft rootDialog.windowSize dialogOptions.width - rootDialog.left) |> toPx )
                         , ( "position", "absolute" )
                         ]
                     ]
@@ -122,7 +120,7 @@ viewDialog maybeData =
                                         [ type_ "button"
                                         , class "btn btn-sm btn-default pull-right margin-left-5 confirm-cancel"
                                         , value "Cancel"
-                                        , onClick (onCancel data)
+                                        , onClick onCancel
                                         ]
                                         []
                                     , input

@@ -15,6 +15,8 @@ import Common.Types as Common exposing (AddEditDataSource)
 import Common.Route as Route exposing (Route)
 import Navigation
 import Window
+import Common.Dialog as Dialog
+import Common.Types exposing (DialogClose)
 import Task
 import Http exposing (Error)
 import Json.Decode as Decode
@@ -23,7 +25,7 @@ import Json.Decode.Pipeline exposing (required, decode)
 
 type alias Model =
     { patientId : Int
-    , windowSize : Window.Size
+    , rootDialog : Dialog.RootDialog
     , page : Page
     , addEditDataSource : Maybe AddEditDataSource
     , route : Route
@@ -57,7 +59,7 @@ init location =
         ( model, cmds ) =
             setRoute (Route.fromLocation location)
                 { patientId = patientId
-                , windowSize = Window.Size 0 0
+                , rootDialog = { windowSize = Window.Size 0 0, top = 0, left = 0 }
                 , page = NoPage
                 , addEditDataSource = Nothing
                 , route = Route.None
@@ -126,7 +128,7 @@ view model =
             Html.map DemographicsMsg (Demographics.view subModel)
 
         Billing subModel ->
-            Html.map BillingMsg (Billing.view subModel model.patientId model.addEditDataSource model.windowSize)
+            Html.map BillingMsg (Billing.view subModel model.patientId model.addEditDataSource model.rootDialog)
 
         ClinicalSummary subModel ->
             Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel model.patientId)
@@ -239,8 +241,8 @@ setRoute maybeRoute model =
 
             --Other
             Just Route.Billing ->
-                setModel Route.Billing (Billing (Billing.emptyModel model.windowSize))
-                    ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId model.windowSize) ]
+                setModel Route.Billing (Billing Billing.emptyModel)
+                    ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
 
             Just Route.None ->
                 setModel Route.None NoPage
@@ -278,7 +280,11 @@ updatePage page msg model =
                 setRoute route model
 
             ( Resize windowSize, _ ) ->
-                { model | windowSize = windowSize } ! []
+                let
+                    rootDialog =
+                        model.rootDialog
+                in
+                    { model | rootDialog = { rootDialog | windowSize = windowSize } } ! []
 
             ( AddEditDataSourceLoaded response, _ ) ->
                 case response of
