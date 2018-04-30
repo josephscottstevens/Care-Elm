@@ -6,7 +6,7 @@ import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 import Common.Dropdown as Dropdown
-import Common.Html exposing (InputControlType(HtmlElement, AreaInput), makeControls)
+import Common.Html exposing (InputControlType(ControlElement, AreaInput), makeControls)
 import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
 import Http
@@ -164,12 +164,12 @@ update msg model patientId =
 formInputs : Model -> List (InputControlType Msg)
 formInputs model =
     [ AreaInput "Clinical Summary" Optional model.summary UpdateSummary
-    , HtmlElement "" (generateSummaryDiv model)
+    , ControlElement "" (generateSummaryDiv model)
     , AreaInput "Instructions and Care Plan" Optional model.carePlan UpdateCarePlan
     , AreaInput "Code/Legal Status" Optional model.codeLegalStatus UpdateCodeLegalStatus
     , AreaInput "Impairment" Optional model.impairment UpdateImpairment
     , AreaInput "Comments" Optional model.comments UpdateComments
-    , HtmlElement "" (button [ class "btn btn-sm btn-primary", onClick Save ] [ text "Update" ])
+    , ControlElement "" (button [ class "btn btn-sm btn-primary", onClick Save ] [ text "Update" ])
     ]
 
 

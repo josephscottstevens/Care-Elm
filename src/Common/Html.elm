@@ -13,7 +13,7 @@ module Common.Html
             , DropInputWithButton
             , DateInput
             , FileInput
-            , HtmlElement
+            , ControlElement
             , Dropdown
             )
         , makeControls
@@ -39,7 +39,7 @@ type InputControlType msg
     | DropInputWithButton String Common.RequiredType (Maybe Int) String String
     | DateInput String Common.RequiredType String String
     | FileInput String Common.RequiredType String
-    | HtmlElement String (Html msg)
+    | ControlElement String (Html msg)
     | Dropdown String Common.RequiredType Dropdown.DropState (( Dropdown.DropState, Maybe Int, Cmd msg ) -> msg)
 
 
@@ -195,11 +195,11 @@ makeControls config controls =
                             ]
                         ]
 
-                HtmlElement labelText htmlElement ->
+                ControlElement labelText controlElement ->
                     div [ class "form-group" ]
                         [ commonLabel labelText Common.Optional
                         , div config.controlAttributes
-                            [ htmlElement ]
+                            [ controlElement ]
                         ]
 
                 Dropdown labelText requiredType _ event ->
@@ -290,7 +290,7 @@ commonValidation controlType =
                     Nothing ->
                         Just (labelText ++ " is required")
 
-        HtmlElement _ _ ->
+        ControlElement _ _ ->
             Nothing
 
         Dropdown labelText requiredType displayValue _ ->

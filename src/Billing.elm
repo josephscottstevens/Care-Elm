@@ -8,7 +8,7 @@ import Common.Functions as Functions
 import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, monthDropdown, yearDropdown)
 import Common.Dialog as Dialog
 import Common.Dropdown as Dropdown
-import Common.Html exposing (InputControlType(CheckInput, HtmlElement), defaultConfig, fullWidth, makeControls)
+import Common.Html exposing (InputControlType(CheckInput, ControlElement), defaultConfig, fullWidth, makeControls)
 import Date exposing (Date)
 import Http
 import Task
@@ -476,7 +476,7 @@ viewInvoiceReportsDialog addEditDataSource t =
     in
         div [ class "form-horizontal" ]
             [ makeControls { controlAttributes = [ class "col-md-8" ] }
-                [ HtmlElement "Facility" <|
+                [ ControlElement "Facility" <|
                     Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId
                 , CheckInput "Save to Client Portal" Optional t.saveToClientPortal (UpdateSaveToClientPortal t)
                 ]

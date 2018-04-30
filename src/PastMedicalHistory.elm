@@ -3,7 +3,7 @@ port module PastMedicalHistory exposing (Msg, Model, subscriptions, init, update
 import Html exposing (Html, text, div, button, input, h4)
 import Html.Attributes exposing (class, style, type_, disabled, value)
 import Html.Events exposing (onClick)
-import Common.Html exposing (InputControlType(TextInput, AreaInput, DropInput, HtmlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
+import Common.Html exposing (InputControlType(TextInput, AreaInput, DropInput, ControlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
 import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage, DropdownItem)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
 import Json.Decode as Decode
@@ -226,13 +226,13 @@ noteStyle =
 
 formInputs : NewRecord -> List (InputControlType Msg)
 formInputs newRecord =
-    [ HtmlElement "" (div [ noteStyle ] [ text "*Records added from the problem list cannot be edited." ])
+    [ ControlElement "" (div [ noteStyle ] [ text "*Records added from the problem list cannot be edited." ])
     , AreaInput "Description" Required newRecord.description (UpdateDescription newRecord)
     , TextInput "Year" Optional newRecord.year (UpdateYear newRecord)
     , DropInput "Provider" Optional newRecord.sfData.providerId "MainProviderId"
     , TextInput "Facility" Optional newRecord.facility (UpdateFacility newRecord)
     , TextInput "Notes" Optional newRecord.notes (UpdateNotes newRecord)
-    , HtmlElement "Treatment"
+    , ControlElement "Treatment"
         (input
             [ type_ "textbox"
             , class "e-textbox"
@@ -241,7 +241,7 @@ formInputs newRecord =
             ]
             []
         )
-    , HtmlElement "" (div [ noteStyle ] [ text "*Treatment is deprecated." ])
+    , ControlElement "" (div [ noteStyle ] [ text "*Treatment is deprecated." ])
     ]
 
 
