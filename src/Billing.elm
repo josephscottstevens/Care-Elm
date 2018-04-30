@@ -503,12 +503,6 @@ viewInvoiceReportsDialog addEditDataSource t =
                 div [ class "row" ] []
             , dividerLabel ""
             ]
-        , div [ class "form-group" ]
-            [ div [ class fullWidth ]
-                [ button [ type_ "button", onClick (ConfirmedInvoiceReportsDialog t), class "btn btn-sm btn-success" ] [ text "Select" ]
-                , button [ type_ "button", class "btn btn-sm btn-default margin-left-5", onClick (CloseInvoiceReportsDialog t) ] [ text "Cancel" ]
-                ]
-            ]
         ]
 
 
