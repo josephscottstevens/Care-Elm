@@ -14,6 +14,7 @@ module Common.Html
             , DateInput
             , FileInput
             , ControlElement
+            , HtmlElement
             , Dropdown
             )
         , makeControls
@@ -40,6 +41,7 @@ type InputControlType msg
     | DateInput String Common.RequiredType String String
     | FileInput String Common.RequiredType String
     | ControlElement String (Html msg)
+    | HtmlElement (Html msg)
     | Dropdown String Common.RequiredType Dropdown.DropState (( Dropdown.DropState, Maybe Int, Cmd msg ) -> msg)
 
 
@@ -210,6 +212,9 @@ makeControls config controls =
 
                         -- [ Html.map event <| Dropdown.view displayValue ]
                         ]
+
+                HtmlElement t ->
+                    t
     in
         div [] (controls |> List.map common)
 
@@ -295,6 +300,9 @@ commonValidation controlType =
 
         Dropdown labelText requiredType displayValue _ ->
             --todo
+            Nothing
+
+        HtmlElement _ ->
             Nothing
 
 

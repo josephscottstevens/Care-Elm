@@ -1,6 +1,6 @@
 module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
-import Html exposing (Html, div, text, input, button)
+import Html exposing (Html, div, text, input, button, label)
 import Html.Attributes exposing (class, title, style, checked, type_, attribute)
 import Html.Events exposing (onClick)
 import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..), IdAttrType(IdAttr))
@@ -8,7 +8,7 @@ import Common.Functions as Functions
 import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, monthDropdown, yearDropdown)
 import Common.Dialog as Dialog
 import Common.Dropdown as Dropdown
-import Common.Html exposing (InputControlType(CheckInput, ControlElement), defaultConfig, fullWidth, makeControls)
+import Common.Html exposing (InputControlType(CheckInput, ControlElement, HtmlElement), defaultConfig, fullWidth, makeControls)
 import Date exposing (Date)
 import Http
 import Task
@@ -465,6 +465,30 @@ update msg model patientId =
                 { model | confirmData = Nothing } ! []
 
 
+captionStyle : Html.Attribute msg
+captionStyle =
+    style
+        [ ( "font-size", "14px" )
+        , ( "color", "#808080" )
+        , ( "padding", "3px" )
+        , ( "font-weight", "400 !important" )
+        , ( "width", "90%" )
+        ]
+
+
+divider : InputControlType msg
+divider =
+    HtmlElement <|
+        div
+            [ style
+                [ ( "border-bottom-style", "solid" )
+                , ( "border-bottom-width", "1px" )
+                , ( "border-bottom-color", "rgb(209, 209, 209)" )
+                ]
+            ]
+            []
+
+
 viewInvoiceReportsDialog : AddEditDataSource -> InvoiceReportsDialog -> Html Msg
 viewInvoiceReportsDialog addEditDataSource t =
     let
@@ -476,7 +500,10 @@ viewInvoiceReportsDialog addEditDataSource t =
     in
         div [ class "form-horizontal" ]
             [ makeControls { controlAttributes = [ class "col-md-8" ] }
-                [ ControlElement "Facility" <|
+                [ HtmlElement <|
+                    label [ captionStyle ] [ text "Select Facility" ]
+                , divider
+                , ControlElement "Facility" <|
                     Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId
                 , CheckInput "Save to Client Portal" Optional t.saveToClientPortal (UpdateSaveToClientPortal t)
                 ]
