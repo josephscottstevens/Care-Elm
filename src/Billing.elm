@@ -488,29 +488,28 @@ dividerLabel labelText =
 
 viewInvoiceReportsDialog : AddEditDataSource -> InvoiceReportsDialog -> Html Msg
 viewInvoiceReportsDialog addEditDataSource t =
-    let
-        monthDropdown_ =
-            Dropdown.view t.monthDropState (UpdateMonth t) monthDropdown t.currentMonth
-
-        yearDropdown_ =
-            Dropdown.view t.yearDropState (UpdateYear t) yearDropdown t.currentYear
-    in
-        div [ class "form-horizontal" ]
-            [ makeControls { controlAttributes = [ class "col-md-8" ] }
-                [ dividerLabel "Select Facility"
-                , ControlElement "Facility" <|
-                    Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId
-                , dividerLabel "Select Month and Year For Billable Patients"
-                , CheckInput "Save to Client Portal" Optional t.saveToClientPortal (UpdateSaveToClientPortal t)
-                ]
-            , div [ class "form-group" ]
-                [ div [ class fullWidth ]
-                    [ --button [ type_ "button", onClick (Save editData), class "btn btn-sm btn-success" ] [ text "Save" ]
-                      button [ type_ "button", class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ] --onClick CloseDialog,
-                    , button [ type_ "button", class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ] --onClick CloseDialog,
-                    ]
+    div [ class "form-horizontal", style [ ( "padding-left", "40px" ) ] ]
+        [ makeControls { controlAttributes = [ class "col-md-8" ] }
+            [ dividerLabel "Select Facility"
+            , ControlElement "Facility" <|
+                Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId
+            , dividerLabel "Select Month and Year For Billable Patients"
+            , ControlElement "Month" <|
+                Dropdown.view t.monthDropState (UpdateMonth t) monthDropdown t.currentMonth
+            , ControlElement "Year" <|
+                Dropdown.view t.yearDropState (UpdateYear t) yearDropdown t.currentYear
+            , CheckInput "Save to Client Portal" Optional t.saveToClientPortal (UpdateSaveToClientPortal t)
+            , HtmlElement <|
+                div [ class "row" ] []
+            , dividerLabel ""
+            ]
+        , div [ class "form-group" ]
+            [ div [ class fullWidth ]
+                [ button [ type_ "button", onClick (ConfirmedInvoiceReportsDialog t), class "btn btn-sm btn-success" ] [ text "Select" ]
+                , button [ type_ "button", class "btn btn-sm btn-default margin-left-5", onClick (CloseInvoiceReportsDialog t) ] [ text "Cancel" ]
                 ]
             ]
+        ]
 
 
 decodeBillingCcm : Decode.Decoder Row
