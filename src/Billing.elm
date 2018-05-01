@@ -458,8 +458,19 @@ update msg model patientId =
                 { model | invoiceReportsDialog = Nothing } ! []
 
             ConfirmedInvoiceReportsDialog invoiceReportsDialog ->
-                Debug.crash "todo"
+                model
+                    ! Functions.getRequestWithParams
+                        "/Phase2Billing/ValidateCcmRateForInvoice"
+                        [ ( "hcoID", toString row.facilityId )
+                        , ( "year", year )
+                        , ( "month", month )
+                        , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
+                        , ( "patientId", toString patientId )
+                        ]
+                    |> Http.send RequestSaveSummaryReportCompleted
 
+            -- https://test.navcare.com/CCM/ValidateCcmRateForInvoice?facilityId=128&month=4&year=2018&includeOpenBillingRecords=false
+            --https://test.navcare.com/CCM/GetInvoiceReportXls?facilityId=128&saveToClientPortal=false&month=4&year=2018&filePath=&includeOpenBillingRecords=false
             -- Common Close Dialog
             CloseDialog ->
                 { model | confirmData = Nothing } ! []
