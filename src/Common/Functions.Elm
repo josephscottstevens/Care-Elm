@@ -31,8 +31,6 @@ port module Common.Functions
         , setUnsavedChanges
         , deletePrompt
         , deleteConfirmed
-        , uniqueBy
-        , getAt
         )
 
 import Char exposing (isLower, isUpper)
@@ -363,30 +361,3 @@ getId recordType =
 
         Misc ->
             5
-
-
-uniqueBy : (a -> comparable) -> List a -> List a
-uniqueBy f list =
-    uniqueHelp f Set.empty list []
-
-
-uniqueHelp : (a -> comparable) -> Set comparable -> List a -> List a -> List a
-uniqueHelp f existing remaining accumulator =
-    case remaining of
-        [] ->
-            List.reverse accumulator
-
-        first :: rest ->
-            let
-                computedFirst =
-                    f first
-            in
-                if Set.member computedFirst existing then
-                    uniqueHelp f existing rest accumulator
-                else
-                    uniqueHelp f (Set.insert computedFirst existing) rest (first :: accumulator)
-
-
-getAt : Int -> List a -> Maybe a
-getAt idx xs =
-    List.head <| List.drop idx xs

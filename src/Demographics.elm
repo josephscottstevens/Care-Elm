@@ -5,12 +5,13 @@ import Html.Attributes exposing (class, id, type_, style, defaultValue, title, c
 import Html.Events exposing (onClick, onInput, onCheck)
 import Common.Types as Types exposing (DropdownItem, Flags)
 import Common.Dropdown as Dropdown
-import Common.Functions as Functions exposing (decodeDropdownItem)
+import Common.Functions as Functions exposing (decodeDropdownItem, maybeVal)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 import Http
 import Http.Progress as Progress exposing (Progress(..))
+import List.Extra
 import Char
 import MaskedInput.Number as MaskedNumber
 
@@ -81,13 +82,17 @@ init model patientId =
 -- Types
 
 
+type Phone
+    = Home
+    | Work
+    | Cell
+    | Unknown
+
+
 type alias Model =
-    { patientPhoneNumbers : List PatientPhoneNumber
-    , patientAddresses : List PatientAddress
-    , phoneNumberTypeDropdown : List DropdownItem
+    { patientAddresses : List PatientAddress
     , stateDropdown : List DropdownItem
     , primaryAddressIndex : Int
-    , preferredPhoneIndex : Int
     , patientId : Int
     , demographicsId : Maybe Int
     , nickName : Maybe String
@@ -119,6 +124,13 @@ type alias Model =
     , ethnicityDropState : Dropdown.DropState
     , acuityLevelId : Maybe Int
     , acuityLevelDropState : Dropdown.DropState
+    , homePhoneNumber : Maybe Int
+    , cellPhoneNumber : Maybe Int
+    , workPhoneNumber : Maybe Int
+    , homePhoneNumberMaskState : MaskedNumber.State
+    , cellPhoneNumberMaskState : MaskedNumber.State
+    , workPhoneNumberMaskState : MaskedNumber.State
+    , preferredPhoneNumber : Phone
     , nodeCounter : Int
     , progress : Progress ServerResponse
     , demographicsUrl : Maybe String
@@ -163,17 +175,6 @@ type alias HouseholdMember =
     , name : Maybe String
     , relationshipId : Maybe Int
     , comments : Maybe String
-    , dropState : Dropdown.DropState
-    , nodeId : Int
-    }
-
-
-type alias PatientPhoneNumber =
-    { id : Maybe Int
-    , phoneNumber : Maybe String
-    , phoneNumberTypeId : Maybe Int
-    , isPreferred : Bool
-    , maskState : MaskedNumber.State
     , dropState : Dropdown.DropState
     , nodeId : Int
     }
@@ -278,10 +279,63 @@ view model =
         , div [ class "col-xs-12 padding-h-0" ]
             [ div [ class "col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-h-0" ]
                 [ h4 [ class "inline-block required" ] [ text "Phones" ]
-                , div [ class "inline-block e-tooltxt pointer", title "Add new phone number", onClick AddNewPhone ]
-                    [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
+                , div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
+                    [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
+                        [ input [ type_ "radio", style [ ( "margin-top", "0" ) ], checked (model.preferredPhoneNumber == Home), name "phoneGroup", onClick (UpdatePreferredPhoneNumber Home) ] [] ]
+                    , div [ class "inline-block", style [ ( "width", "45px" ), ( "vertical-align", "middle" ) ] ]
+                        [ label [ style [ ( "width", "auto" ), ( "margin-left", "3px" ), ( "padding-top", "0px" ) ] ] [ text ("Home" ++ ":") ]
+                        ]
+                    , div [ class "inline-block" ]
+                        [ MaskedNumber.input
+                            { pattern = "(###) ###-####"
+                            , inputCharacter = '#'
+                            , onInput = UpdateHomePhone
+                            , toMsg = UpdateHomePhoneMaskState
+                            , hasFocus = Nothing
+                            }
+                            [ class "e-textbox", maskStyle ]
+                            model.homePhoneNumberMaskState
+                            model.homePhoneNumber
+                        ]
                     ]
-                , div [] (List.map (viewPhones model.phoneNumberTypeDropdown) model.patientPhoneNumbers)
+                , div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
+                    [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
+                        [ input [ type_ "radio", style [ ( "margin-top", "0" ) ], checked (model.preferredPhoneNumber == Cell), name "phoneGroup", onClick (UpdatePreferredPhoneNumber Cell) ] [] ]
+                    , div [ class "inline-block", style [ ( "width", "45px" ), ( "vertical-align", "middle" ) ] ]
+                        [ label [ style [ ( "width", "auto" ), ( "margin-left", "3px" ), ( "padding-top", "0px" ) ] ] [ text ("Cell" ++ ":") ]
+                        ]
+                    , div [ class "inline-block" ]
+                        [ MaskedNumber.input
+                            { pattern = "(###) ###-####"
+                            , inputCharacter = '#'
+                            , onInput = UpdateCellPhone
+                            , toMsg = UpdateCellPhoneMaskState
+                            , hasFocus = Nothing
+                            }
+                            [ class "e-textbox", maskStyle ]
+                            model.cellPhoneNumberMaskState
+                            model.cellPhoneNumber
+                        ]
+                    ]
+                , div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
+                    [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
+                        [ input [ type_ "radio", style [ ( "margin-top", "0" ) ], checked (model.preferredPhoneNumber == Work), name "phoneGroup", onClick (UpdatePreferredPhoneNumber Work) ] [] ]
+                    , div [ class "inline-block", style [ ( "width", "45px" ), ( "vertical-align", "middle" ) ] ]
+                        [ label [ style [ ( "width", "auto" ), ( "margin-left", "3px" ), ( "padding-top", "0px" ) ] ] [ text ("Work" ++ ":") ]
+                        ]
+                    , div [ class "inline-block" ]
+                        [ MaskedNumber.input
+                            { pattern = "(###) ###-#### ext.#####"
+                            , inputCharacter = '#'
+                            , onInput = UpdateWorkPhone
+                            , toMsg = UpdateWorkPhoneMaskState
+                            , hasFocus = Nothing
+                            }
+                            [ class "e-textbox", maskStyle ]
+                            model.workPhoneNumberMaskState
+                            model.workPhoneNumber
+                        ]
+                    ]
                 ]
             ]
         , div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
@@ -333,21 +387,6 @@ viewLanguages dropdownItems lang =
         , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ], title "Choose language" ]
             [ Html.map (UpdateLanguage lang) <| Dropdown.view lang.dropState dropdownItems lang.languageId ]
         , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "Remove", onClick (RemoveLanguage lang) ]
-            [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
-            ]
-        ]
-
-
-viewPhones : List DropdownItem -> PatientPhoneNumber -> Html Msg
-viewPhones dropdownItems phone =
-    div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
-        [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
-            [ input [ type_ "radio", checked phone.isPreferred, name "phoneGroup", onCheck (UpdatePreferredPhone phone) ] [] ]
-        , div [ class "inline-block", style [ ( "width", "100px" ), ( "vertical-align", "middle" ) ], title "Mark as primary" ]
-            [ Html.map (UpdatePhoneType phone) <| Dropdown.view phone.dropState dropdownItems phone.phoneNumberTypeId ]
-        , div [ class "inline-block", style [ ( "width", "calc(100% - 155px)" ), ( "vertical-align", "middle" ) ] ]
-            [ MaskedNumber.input (inputOptions phone) [ class "e-textbox", maskStyle ] phone.maskState (maybeToInt phone.phoneNumber) ]
-        , div [ class "inline-block", style [ ( "width", "32px" ), ( "vertical-align", "middle" ) ], title "remove", onClick (RemovePhone phone) ]
             [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
             ]
         ]
@@ -552,7 +591,7 @@ viewHouseholdMembers householdMember =
                     ]
                 ]
             ]
-        , div [ class "col-xs-12 col-sm-12 padding-h-0" ]
+        , div [ class "col-xs-12 col-sm-12 padding-h-0 margin-bottom-10" ]
             [ textarea
                 [ maybeValue householdMember.comments
                 , onInput (UpdateHouseholdMemberComments householdMember)
@@ -577,8 +616,6 @@ type Msg
     | Cancel Bool
     | AddNewLanguage
     | RemoveLanguage PatientLanguagesMap
-    | AddNewPhone
-    | RemovePhone PatientPhoneNumber
     | AddNewAddress
     | RemoveAddress PatientAddress
     | AddNewHouseholdMember
@@ -590,13 +627,12 @@ type Msg
     | UpdateCity PatientAddress String
     | UpdateZipcode PatientAddress String
     | UpdatePreferredAddress PatientAddress Bool
-    | UpdatePreferredPhone PatientPhoneNumber Bool
+    | UpdatePreferredPhoneNumber Phone
     | UpdatePreferredLanguage PatientLanguagesMap Bool
     | UpdateState PatientAddress Dropdown.Msg
     | UpdateAddressType PatientAddress Dropdown.Msg
     | UpdateFacilityAddress PatientAddress Dropdown.Msg
     | GetFacilityAddress PatientAddress (Result Http.Error (Maybe FacilityAddress))
-    | UpdatePhoneType PatientPhoneNumber Dropdown.Msg
     | UpdateLanguage PatientLanguagesMap Dropdown.Msg
     | UpdateHouseholdMemberName HouseholdMember String
     | UpdateHouseholdMemberComments HouseholdMember String
@@ -619,8 +655,12 @@ type Msg
     | UpdateSuffix Dropdown.Msg
     | UpdateRace Dropdown.Msg
     | UpdateEthnicity Dropdown.Msg
-    | InputChanged PatientPhoneNumber (Maybe Int)
-    | InputStateChanged PatientPhoneNumber MaskedNumber.State
+    | UpdateCellPhone (Maybe Int)
+    | UpdateHomePhone (Maybe Int)
+    | UpdateWorkPhone (Maybe Int)
+    | UpdateCellPhoneMaskState MaskedNumber.State
+    | UpdateHomePhoneMaskState MaskedNumber.State
+    | UpdateWorkPhoneMaskState MaskedNumber.State
 
 
 updateAddress : Model -> PatientAddress -> Model
@@ -637,22 +677,6 @@ updateAddress model newPatientAddress =
                 model.patientAddresses
     in
         { model | patientAddresses = newAddresses }
-
-
-updatePhones : Model -> PatientPhoneNumber -> Model
-updatePhones model patientPhoneNumber =
-    let
-        newPhoneNumber =
-            List.map
-                (\t ->
-                    if t.nodeId == patientPhoneNumber.nodeId then
-                        patientPhoneNumber
-                    else
-                        t
-                )
-                model.patientPhoneNumbers
-    in
-        { model | patientPhoneNumbers = newPhoneNumber }
 
 
 updateLanguage : Model -> PatientLanguagesMap -> Model
@@ -710,13 +734,6 @@ update msg model =
                         newModel.patientLanguagesMap
                             |> List.indexedMap (\idx t -> { t | nodeId = idx })
 
-                newPatientPhoneNumber =
-                    if List.length newModel.patientPhoneNumbers == 0 then
-                        [ emptyPatientPhoneNumber 0 True ]
-                    else
-                        newModel.patientPhoneNumbers
-                            |> List.indexedMap (\idx t -> { t | nodeId = idx })
-
                 newPatientAddress =
                     if List.length newModel.patientAddresses == 0 then
                         [ emptyPatientAddress 0 True ]
@@ -737,7 +754,6 @@ update msg model =
             in
                 { newModel
                     | patientLanguagesMap = newPatientLanguagesMap
-                    , patientPhoneNumbers = newPatientPhoneNumber
                     , patientAddresses = newPatientAddress
                     , householdMembers = newHouseholdMembers
                     , nodeCounter = 4
@@ -784,9 +800,6 @@ update msg model =
                 newLangs =
                     model.patientLanguagesMap |> List.filter (\t -> t.languageId /= Nothing)
 
-                newPhones =
-                    model.patientPhoneNumbers |> List.filter (\t -> t.phoneNumber /= Nothing)
-
                 newAddresses =
                     model.patientAddresses
                         |> List.filter
@@ -805,7 +818,6 @@ update msg model =
                 newModel =
                     { model
                         | patientLanguagesMap = newLangs
-                        , patientPhoneNumbers = newPhones
                         , patientAddresses = newAddresses
                         , showValidationErrors = False
                     }
@@ -858,36 +870,6 @@ update msg model =
                                 newPatientLanguagesMap
             in
                 { model | patientLanguagesMap = updatedPatientLanguagesMap } ! [ Functions.setUnsavedChanges True ]
-
-        AddNewPhone ->
-            { model
-                | patientPhoneNumbers = model.patientPhoneNumbers ++ [ emptyPatientPhoneNumber model.nodeCounter False ]
-                , nodeCounter = model.nodeCounter + 1
-            }
-                ! [ Functions.setUnsavedChanges True ]
-
-        RemovePhone phone ->
-            let
-                newPatientPhoneNumber =
-                    model.patientPhoneNumbers
-                        |> List.filter (\t -> t.nodeId /= phone.nodeId)
-
-                updatedPatientPhoneNumber =
-                    case List.any (\t -> t.isPreferred == True) newPatientPhoneNumber of
-                        True ->
-                            newPatientPhoneNumber
-
-                        False ->
-                            List.indexedMap
-                                (\t y ->
-                                    if t == 0 then
-                                        { y | isPreferred = True }
-                                    else
-                                        y
-                                )
-                                newPatientPhoneNumber
-            in
-                { model | patientPhoneNumbers = updatedPatientPhoneNumber } ! [ Functions.setUnsavedChanges True ]
 
         AddNewAddress ->
             let
@@ -964,8 +946,8 @@ update msg model =
         UpdatePreferredAddress address _ ->
             { model | patientAddresses = List.map (togglePreferred address.nodeId) model.patientAddresses } ! [ Functions.setUnsavedChanges True ]
 
-        UpdatePreferredPhone phone _ ->
-            { model | patientPhoneNumbers = List.map (togglePreferred phone.nodeId) model.patientPhoneNumbers } ! [ Functions.setUnsavedChanges True ]
+        UpdatePreferredPhoneNumber phone ->
+            { model | preferredPhoneNumber = phone } ! [ Functions.setUnsavedChanges True ]
 
         UpdatePreferredLanguage language _ ->
             { model | patientLanguagesMap = List.map (togglePreferred language.nodeId) model.patientLanguagesMap } ! [ Functions.setUnsavedChanges True ]
@@ -1018,13 +1000,6 @@ update msg model =
         GetFacilityAddress _ (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
 
-        UpdatePhoneType t dropdownMsg ->
-            let
-                ( newDropState, newId, newMsg ) =
-                    Dropdown.update dropdownMsg t.dropState t.phoneNumberTypeId model.phoneNumberTypeDropdown
-            in
-                updatePhones model { t | dropState = newDropState, phoneNumberTypeId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
-
         UpdateLanguage t dropdownMsg ->
             let
                 ( newDropState, newId, newMsg ) =
@@ -1041,11 +1016,47 @@ update msg model =
                 updateHouseholdMembers model { t | dropState = newDropState, relationshipId = newId }
                     ! [ newMsg, Functions.setUnsavedChanges True ]
 
-        InputChanged patientPhoneNumber value ->
-            updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString value } ! [ Functions.setUnsavedChanges True ]
+        UpdateCellPhone t ->
+            let
+                preferredPhoneNumber =
+                    if model.homePhoneNumber == Nothing && model.workPhoneNumber == Nothing then
+                        Cell
+                    else
+                        model.preferredPhoneNumber
+            in
+                { model | cellPhoneNumber = t, preferredPhoneNumber = preferredPhoneNumber }
+                    ! [ Functions.setUnsavedChanges True ]
 
-        InputStateChanged patientPhoneNumber maskState ->
-            updatePhones model { patientPhoneNumber | maskState = maskState } ! [ Functions.setUnsavedChanges True ]
+        UpdateHomePhone t ->
+            let
+                preferredPhoneNumber =
+                    if model.cellPhoneNumber == Nothing && model.workPhoneNumber == Nothing then
+                        Home
+                    else
+                        model.preferredPhoneNumber
+            in
+                { model | homePhoneNumber = t, preferredPhoneNumber = preferredPhoneNumber }
+                    ! [ Functions.setUnsavedChanges True ]
+
+        UpdateWorkPhone t ->
+            let
+                preferredPhoneNumber =
+                    if model.homePhoneNumber == Nothing && model.cellPhoneNumber == Nothing then
+                        Work
+                    else
+                        model.preferredPhoneNumber
+            in
+                { model | workPhoneNumber = t, preferredPhoneNumber = preferredPhoneNumber }
+                    ! [ Functions.setUnsavedChanges True ]
+
+        UpdateCellPhoneMaskState maskState ->
+            { model | cellPhoneNumberMaskState = maskState } ! []
+
+        UpdateHomePhoneMaskState maskState ->
+            { model | homePhoneNumberMaskState = maskState } ! []
+
+        UpdateWorkPhoneMaskState maskState ->
+            { model | workPhoneNumberMaskState = maskState } ! []
 
         -- Edit
         UpdateFacilityPtID str ->
@@ -1123,22 +1134,6 @@ update msg model =
 
 
 -- HELPER Functions
-
-
-inputOptions : PatientPhoneNumber -> MaskedNumber.Options Msg
-inputOptions patientPhoneNumber =
-    let
-        defaultOptions =
-            MaskedNumber.defaultOptions (InputChanged patientPhoneNumber) (InputStateChanged patientPhoneNumber)
-    in
-        if patientPhoneNumber.phoneNumberTypeId == Just 3 then
-            { defaultOptions
-                | pattern = "(###) ###-#### ext.#####"
-            }
-        else
-            { defaultOptions
-                | pattern = "(###) ###-####"
-            }
 
 
 maybeValue : Maybe String -> Html.Attribute msg
@@ -1286,19 +1281,18 @@ requireString fieldName maybeStr =
         Nothing
 
 
-phoneValidation : PatientPhoneNumber -> Maybe String
-phoneValidation phone =
+phoneValidation : Phone -> Maybe Int -> Maybe String
+phoneValidation phone phoneNumber =
     let
         num =
-            Maybe.withDefault "" phone.phoneNumber
+            Maybe.withDefault 0 phoneNumber
+                |> toString
 
         toError str =
             Just (str ++ " '" ++ num ++ "'")
     in
         if String.length num < 10 then
             toError "Incomplete Phone Number"
-        else if String.length num > 0 && phone.phoneNumberTypeId == Nothing then
-            toError "Missing phone type for"
         else
             Nothing
 
@@ -1322,22 +1316,19 @@ addressValidation address =
 phoneDuplicateValidation : Model -> Maybe String
 phoneDuplicateValidation model =
     let
-        uniquePhones =
-            model.patientPhoneNumbers
-                |> Functions.uniqueBy (\t -> Maybe.withDefault "" t.phoneNumber)
-
-        duplicatePhone =
-            List.head uniquePhones
+        phones =
+            [ model.cellPhoneNumber, model.homePhoneNumber, model.workPhoneNumber ]
+                |> List.filterMap identity
     in
-        if List.length model.patientPhoneNumbers == List.length uniquePhones then
+        if List.Extra.allDifferent phones then
             Nothing
         else
-            case duplicatePhone of
-                Just t ->
-                    Just ("Duplicate phone number \"" ++ Maybe.withDefault "" t.phoneNumber ++ "\"")
+            case List.head phones of
+                Just phoneNumber ->
+                    Just ("Duplicate phone number \"" ++ (toString phoneNumber) ++ "\"")
 
                 Nothing ->
-                    Just "Duplicate phone number"
+                    Nothing
 
 
 atleast1 : List a -> String -> Maybe String
@@ -1374,16 +1365,12 @@ validatationErrors model =
                , requireString "Last Name" model.lastName
                , requireString "Date of Birth" model.sfData.dateOfBirth
                , requireInt "Sex at Birth" model.sfData.sexTypeId
-               , model.patientPhoneNumbers
-                    |> Functions.uniqueBy (\t -> Maybe.withDefault "" t.phoneNumber)
-                    |> List.filterMap phoneValidation
-                    |> List.head
                , model.patientAddresses
                     |> List.filterMap addressValidation
                     |> List.head
                , phoneDuplicateValidation model
                , atleast1 model.patientAddresses "At least one address is required."
-               , atleast1 model.patientPhoneNumbers "At least one phone is required."
+               , atleast1 [ model.cellPhoneNumber, model.homePhoneNumber, model.workPhoneNumber ] "At least one phone is required."
                ]
             |> List.filterMap identity
 
@@ -1420,12 +1407,9 @@ emptyModel patientId =
     , sfData = emptySfData
     , patientLanguagesMap = []
     , householdMembers = []
-    , patientPhoneNumbers = []
     , patientAddresses = []
-    , phoneNumberTypeDropdown = []
     , stateDropdown = []
     , primaryAddressIndex = 0
-    , preferredPhoneIndex = 0
     , contactHoursModel = Nothing
     , showValidationErrors = False
     , suffixId = Nothing
@@ -1438,6 +1422,13 @@ emptyModel patientId =
     , ethnicityDropState = Dropdown.init "ethnicityDropdown" False
     , acuityLevelId = Nothing
     , acuityLevelDropState = Dropdown.init "acuityLevelDropdown" False
+    , homePhoneNumber = Nothing
+    , cellPhoneNumber = Nothing
+    , workPhoneNumber = Nothing
+    , homePhoneNumberMaskState = MaskedNumber.initialState
+    , cellPhoneNumberMaskState = MaskedNumber.initialState
+    , workPhoneNumberMaskState = MaskedNumber.initialState
+    , preferredPhoneNumber = Home
     , nodeCounter = 0
     , progress = Progress.None
     , demographicsUrl = Just (getDemographicsUrl patientId)
@@ -1484,18 +1475,6 @@ emptyHouseholdMembers nodeCounter =
     , relationshipId = Nothing
     , comments = Nothing
     , dropState = Dropdown.init "householdMembersDropdown" False
-    , nodeId = nodeCounter
-    }
-
-
-emptyPatientPhoneNumber : Int -> Bool -> PatientPhoneNumber
-emptyPatientPhoneNumber nodeCounter isPreferred =
-    { id = Nothing
-    , phoneNumber = Nothing
-    , phoneNumberTypeId = Nothing
-    , isPreferred = isPreferred
-    , maskState = MaskedNumber.initialState
-    , dropState = Dropdown.init "phoneDropdown" False
     , nodeId = nodeCounter
     }
 
@@ -1566,10 +1545,8 @@ updateModelFromServerMessage serverResponse model =
                     , sfData = { sfDrops | drops = ds }
                     , patientLanguagesMap = d.patientLanguagesMap
                     , householdMembers = d.householdMembers
-                    , patientPhoneNumbers = c.patientPhoneNumbers
                     , patientAddresses = c.patientAddresses
                     , primaryAddressIndex = c.primaryAddressIndex
-                    , preferredPhoneIndex = c.preferredPhoneIndex
                     , contactHoursModel = Just h
                     , suffixId = d.suffixId
                     , prefixId = d.prefixId
@@ -1577,7 +1554,10 @@ updateModelFromServerMessage serverResponse model =
                     , ethnicityId = d.ethnicityId
                     , acuityLevelId = d.acuityLevelId
                     , stateDropdown = c.stateDropdown
-                    , phoneNumberTypeDropdown = c.phoneNumberTypeDropdown
+                    , preferredPhoneNumber = d.preferredPhoneNumber
+                    , homePhoneNumber = d.homePhoneNumber
+                    , cellPhoneNumber = d.cellPhoneNumber
+                    , workPhoneNumber = d.workPhoneNumber
                     , drops = ds
                 }
 
@@ -1614,22 +1594,62 @@ type alias DemographicsInformationModel =
     , raceId : Maybe Int
     , ethnicityId : Maybe Int
     , acuityLevelId : Maybe Int
+    , preferredPhoneNumber : Phone
+    , homePhoneNumber : Maybe Int
+    , cellPhoneNumber : Maybe Int
+    , workPhoneNumber : Maybe Int
     }
 
 
 type alias ContactInformationModel =
-    { patientPhoneNumbers : List PatientPhoneNumber
-    , patientAddresses : List PatientAddress
-    , phoneNumberTypeDropdown : List DropdownItem
+    { patientAddresses : List PatientAddress
     , stateDropdown : List DropdownItem
     , primaryAddressIndex : Int
-    , preferredPhoneIndex : Int
     }
 
 
 type ServerResponse
     = ServerSuccess DemographicsInformationModel ContactInformationModel Decode.Value DropdownSource
     | ServerFail String
+
+
+decodePhone : Decode.Decoder Phone
+decodePhone =
+    (Decode.maybe Decode.int)
+        |> Decode.andThen
+            (\t ->
+                case t of
+                    Just 0 ->
+                        Decode.succeed Home
+
+                    Just 1 ->
+                        Decode.succeed Cell
+
+                    Just 2 ->
+                        Decode.succeed Work
+
+                    Just 3 ->
+                        Decode.succeed Unknown
+
+                    somethingElse ->
+                        Decode.fail <| "unknown phone: " ++ (toString somethingElse)
+            )
+
+
+encodePhone : Phone -> Int
+encodePhone phone =
+    case phone of
+        Home ->
+            0
+
+        Cell ->
+            1
+
+        Work ->
+            2
+
+        Unknown ->
+            3
 
 
 decodeServerResponse : Decode.Decoder ServerResponse
@@ -1668,17 +1688,18 @@ decodeDemographicsInformationModel =
         |> Pipeline.required "RaceId" (Decode.maybe Decode.int)
         |> Pipeline.required "EthnicityId" (Decode.maybe Decode.int)
         |> Pipeline.required "AcuityLevelId" (Decode.maybe Decode.int)
+        |> Pipeline.required "PreferredPhoneNumber" decodePhone
+        |> Pipeline.required "HomePhoneNumber" (Decode.maybe Decode.int)
+        |> Pipeline.required "CellPhoneNumber" (Decode.maybe Decode.int)
+        |> Pipeline.required "WorkPhoneNumber" (Decode.maybe Decode.int)
 
 
 decodeContactInformationModel : Decode.Decoder ContactInformationModel
 decodeContactInformationModel =
     Pipeline.decode ContactInformationModel
-        |> Pipeline.required "PatientPhoneNumbers" (Decode.list decodePatientPhoneNumber)
         |> Pipeline.required "PatientAddresses" (Decode.list decodePatientAddress)
-        |> Pipeline.required "PhoneNumberTypeDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "StateDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "PrimaryAddressIndex" Decode.int
-        |> Pipeline.required "PreferredPhoneIndex" Decode.int
 
 
 decodePatientLanguagesMap : Decode.Decoder PatientLanguagesMap
@@ -1699,18 +1720,6 @@ decodeHouseholdMembers =
         |> Pipeline.required "RelationshipId" (Decode.maybe Decode.int)
         |> Pipeline.required "Comments" (Decode.maybe Decode.string)
         |> Pipeline.hardcoded (Dropdown.init "householdMembersDropdown" False)
-        |> Pipeline.hardcoded 0
-
-
-decodePatientPhoneNumber : Decode.Decoder PatientPhoneNumber
-decodePatientPhoneNumber =
-    Pipeline.decode PatientPhoneNumber
-        |> Pipeline.required "Id" (Decode.maybe Decode.int)
-        |> Pipeline.required "PhoneNumber" (Decode.maybe Decode.string)
-        |> Pipeline.required "PhoneNumberTypeId" (Decode.maybe Decode.int)
-        |> Pipeline.required "IsPreferred" Decode.bool
-        |> Pipeline.hardcoded MaskedNumber.initialState
-        |> Pipeline.hardcoded (Dropdown.init "phoneTypeDropdown" False)
         |> Pipeline.hardcoded 0
 
 
@@ -1820,11 +1829,6 @@ encodeHouseholdMembers householdMember =
         ]
 
 
-maybeVal : (a -> Encode.Value) -> Maybe a -> Encode.Value
-maybeVal encoder =
-    Maybe.map encoder >> Maybe.withDefault Encode.null
-
-
 encodeDemographicsInformationModel : Model -> Encode.Value
 encodeDemographicsInformationModel model =
     Encode.object
@@ -1860,6 +1864,10 @@ encodeDemographicsInformationModel model =
         , ( "PatientLanguagesMap", Encode.list (List.map encodePatientLanguagesMap model.patientLanguagesMap) )
         , ( "HouseholdMembers", Encode.list (List.map encodeHouseholdMembers model.householdMembers) )
         , ( "AcuityLevelId", maybeVal Encode.int model.acuityLevelId )
+        , ( "PreferredPhoneNumber", Encode.int (encodePhone model.preferredPhoneNumber) )
+        , ( "CellPhoneNumber", maybeVal Encode.int model.cellPhoneNumber )
+        , ( "HomePhoneNumber", maybeVal Encode.int model.homePhoneNumber )
+        , ( "WorkPhoneNumber", maybeVal Encode.int model.workPhoneNumber )
         ]
 
 
@@ -1867,7 +1875,6 @@ encodeContactInformationModel : Model -> Encode.Value
 encodeContactInformationModel model =
     Encode.object
         [ ( "PatientAddresses", Encode.list (List.map encodePatientAddress model.patientAddresses) )
-        , ( "PatientPhoneNumbers", Encode.list (List.map encodePatientPhoneNumber model.patientPhoneNumbers) )
         , ( "FacilityId", maybeVal Encode.int model.sfData.facilityId )
         ]
 
@@ -1889,22 +1896,11 @@ encodePatientAddress address =
         ]
 
 
-encodePatientPhoneNumber : PatientPhoneNumber -> Encode.Value
-encodePatientPhoneNumber phone =
-    Encode.object
-        [ ( "Id", maybeVal Encode.int phone.id )
-        , ( "PhoneNumber", maybeVal Encode.string phone.phoneNumber )
-        , ( "PhoneNumberTypeId", maybeVal Encode.int phone.phoneNumberTypeId )
-        , ( "IsPreferred", Encode.bool phone.isPreferred )
-        ]
-
-
 encodeBody : Model -> Encode.Value
 encodeBody model =
     Encode.object
         [ ( "demographicsInformation", encodeDemographicsInformationModel model )
         , ( "contactInformation", encodeContactInformationModel model )
-        , ( "phones", Encode.list (List.map encodePatientPhoneNumber model.patientPhoneNumbers) )
         , ( "addresses", Encode.list (List.map encodePatientAddress model.patientAddresses) )
         , ( "languages", Encode.list (List.map encodePatientLanguagesMap model.patientLanguagesMap) )
         ]

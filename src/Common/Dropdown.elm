@@ -4,6 +4,7 @@ import Html exposing (Html, div, span, text, li, ul, input)
 import Html.Attributes exposing (style, value, class, readonly, placeholder, tabindex, disabled)
 import Html.Events as Events
 import Json.Decode
+import List.Extra
 import Common.Types exposing (DropdownItem)
 import Common.Functions as Functions
 import Char
@@ -80,7 +81,7 @@ getIndex selectedId dropdownItems =
 getId : List DropdownItem -> Int -> Maybe Int
 getId dropdownItems index =
     dropdownItems
-        |> Functions.getAt index
+        |> List.Extra.getAt index
         |> Maybe.map .id
         |> Maybe.withDefault Nothing
 
