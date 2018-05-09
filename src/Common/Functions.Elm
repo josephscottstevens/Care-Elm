@@ -30,6 +30,7 @@ port module Common.Functions
         , defaultIntStr
         , maybeVal
         , maybeStringToInt
+        , getResponseProp
         , getResponseError
         , decodeDropdownItem
         , postRequest
@@ -368,6 +369,13 @@ maybeStringToInt str =
 
         Err _ ->
             Nothing
+
+
+getResponseProp : String -> String -> Maybe String
+getResponseProp response propertyName =
+    response
+        |> Decode.decodeString (Decode.at [ "AdditionalData", propertyName ] Decode.string)
+        |> Result.toMaybe
 
 
 getResponseError : String -> Maybe String

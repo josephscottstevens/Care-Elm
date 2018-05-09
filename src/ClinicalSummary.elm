@@ -106,14 +106,8 @@ update msg model patientId =
                         |> Http.send GenerateCarePlanLetterCompleted
                   ]
 
-        GenerateCarePlanLetterCompleted (Ok newData) ->
-            { model
-                | summary =
-                    newData
-                        |> Decode.decodeString (Decode.at [ "AdditionalData", "carePlan" ] Decode.string)
-                        |> Result.toMaybe
-            }
-                ! []
+        GenerateCarePlanLetterCompleted (Ok response) ->
+            { model | summary = Functions.getResponseProp response "carePlan" } ! []
 
         GenerateCarePlanLetterCompleted (Err t) ->
             model ! [ displayErrorMessage (toString t) ]

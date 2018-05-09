@@ -496,11 +496,7 @@ update msg model patientId =
             InvoiceReportsDialogExcelCompleted requestResponse ->
                 case requestResponse of
                     Ok response ->
-                        case
-                            response
-                                |> Decode.decodeString (Decode.at [ "AdditionalData", "fileName" ] Decode.string)
-                                |> Result.toMaybe
-                        of
+                        case Functions.getResponseProp response "fileName" of
                             Just fileName ->
                                 model
                                     ! [ Functions.displaySuccessMessage "Invoice report created successfully."
