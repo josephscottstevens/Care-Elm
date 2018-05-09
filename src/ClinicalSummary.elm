@@ -97,7 +97,7 @@ update msg model patientId =
 
         GenerateCarePlanLetter ->
             model
-                ! [ Functions.getRequestWithParams
+                ! [ Functions.getStringRequestWithParams
                         "/People/GetCarePlanFromTasks"
                         [ ( "patientId", toString patientId )
                         , ( "year", model.currentYear |> Maybe.withDefault 0 |> toString )
@@ -120,7 +120,7 @@ update msg model patientId =
 
         Save ->
             model
-                ! [ Functions.postRequestWithObject
+                ! [ Functions.postStringRequestWithObject
                         "/People/UpdateClinicalSummary"
                         [ ( "Id", maybeVal Encode.int <| model.id )
                         , ( "PatientId", Encode.int <| patientId )

@@ -92,7 +92,7 @@ viewDialog maybeData rootDialog =
                             , style [ ( "max-width", dialogOptions.width - 65 |> toPx ) ]
                             ]
                             [ text headerText ]
-                        , div [ class "e-dialog-icon e-icon e-close", tabindex 0, title "Close" ] []
+                        , div [ class "e-dialog-icon e-icon e-close", tabindex 0, title "Close", onClick onCancel ] []
                         ]
                     , div
                         [ class "e-dialog-scroller e-scroller e-js e-widget"

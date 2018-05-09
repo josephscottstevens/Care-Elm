@@ -34,8 +34,9 @@ port module Common.Functions
         , decodeDropdownItem
         , postRequest
         , postRequestWithObject
-        , postJsonRequest
+        , postStringRequestWithObject
         , getRequestWithParams
+        , getStringRequestWithParams
         , getRequestCompleted
         , getDesc
         , getRecordTypeById
@@ -46,6 +47,7 @@ port module Common.Functions
         , customDialogShow
         , deleteDialogShow
         , dialogConfirmed
+        , openFile
         , uniqueBy
         , getAt
         )
@@ -108,6 +110,9 @@ port customDialogShow : CustomDialog -> Cmd msg
 
 
 port customDialogConfirmed : (CustomDialog -> msg) -> Sub msg
+
+
+port openFile : String -> Cmd msg
 
 
 dialogConfirmed : (Int -> msg) -> Sub msg
@@ -408,8 +413,21 @@ postRequest body url =
         }
 
 
-postRequestWithObject : String -> List ( String, Encode.Value ) -> Http.Request String
-postRequestWithObject url object =
+postRequestWithObject : String -> List ( String, Encode.Value ) -> Decode.Decoder a -> Http.Request a
+postRequestWithObject url object decoder =
+    Http.request
+        { body = Encode.object object |> Http.jsonBody
+        , expect = Http.expectJson decoder
+        , headers = []
+        , method = "POST"
+        , timeout = Nothing
+        , url = url
+        , withCredentials = False
+        }
+
+
+postStringRequestWithObject : String -> List ( String, Encode.Value ) -> Http.Request String
+postStringRequestWithObject url object =
     Http.request
         { body = Encode.object object |> Http.jsonBody
         , expect = Http.expectString
@@ -421,21 +439,23 @@ postRequestWithObject url object =
         }
 
 
-postJsonRequest : Encode.Value -> String -> Decoder a -> Http.Request a
-postJsonRequest body url decoder =
-    Http.request
-        { body = body |> Http.jsonBody
-        , expect = Http.expectJson decoder
-        , headers = []
-        , method = "POST"
-        , timeout = Nothing
-        , url = url
-        , withCredentials = False
-        }
-
-
-getRequestWithParams : String -> List ( String, String ) -> Http.Request String
+getRequestWithParams : String -> List ( String, String ) -> Decoder a -> Http.Request a
 getRequestWithParams url params =
+    let
+        urlParam =
+            params
+                |> List.map (\( t, y ) -> t ++ "=" ++ y)
+                |> List.foldr (\t y -> t ++ "&" ++ y) ""
+    in
+        Http.get <|
+            if urlParam == "" then
+                url
+            else
+                url ++ "?" ++ urlParam
+
+
+getStringRequestWithParams : String -> List ( String, String ) -> Http.Request String
+getStringRequestWithParams url params =
     let
         urlParam =
             params

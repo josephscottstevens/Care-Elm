@@ -5,14 +5,13 @@ import Html.Attributes exposing (class, title, style, checked, type_, attribute)
 import Html.Events exposing (onClick)
 import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..), IdAttrType(IdAttr))
 import Common.Functions as Functions
-import Common.Types exposing (DialogClose, RequiredType(Optional, Required), AddEditDataSource, monthDropdown, yearDropdown)
+import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, monthDropdown, yearDropdown)
 import Common.Dialog as Dialog
 import Common.Dropdown as Dropdown
 import Common.Html exposing (InputControlType(CheckInput, ControlElement, HtmlElement), defaultConfig, fullWidth, makeControls)
 import Date exposing (Date)
 import Http
 import Task
-import Window
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -239,12 +238,14 @@ type Msg
     | RequestEditCCMBillingCompleted (Result Http.Error String)
       -- Invoice Reports
     | ShowInvoiceReportsDialog AddEditDataSource
-    | ConfirmedInvoiceReportsDialog InvoiceReportsDialog
+    | ConfirmedInvoiceReportsDialog AddEditDataSource InvoiceReportsDialog
     | UpdateFacility InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateMonth InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateYear InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateSaveToClientPortal InvoiceReportsDialog Bool
     | CloseInvoiceReportsDialog
+    | InvoiceReportsDialogCompleted ( Int, Int, Int, Bool ) (Result Http.Error String)
+    | InvoiceReportsDialogExcelCompleted (Result Http.Error String)
       -- Common Close Dialog
     | CloseDialog
 
@@ -354,7 +355,7 @@ update msg model patientId =
                             |> Maybe.withDefault ""
                 in
                     { model | confirmData = Nothing }
-                        ! [ Functions.getRequestWithParams
+                        ! [ Functions.getStringRequestWithParams
                                 "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
                                 [ ( "hcoID", toString row.facilityId )
                                 , ( "year", year )
@@ -388,7 +389,7 @@ update msg model patientId =
 
             ConfirmedCloseBillingSessionDialog row ->
                 { model | confirmData = Nothing }
-                    ! [ Functions.getRequestWithParams
+                    ! [ Functions.getStringRequestWithParams
                             "/Phase2Billing/CloseBillingSession"
                             [ ( "billingId", toString row.id ) ]
                             |> Http.send RequestCloseBillingSessionCompleted
@@ -430,7 +431,7 @@ update msg model patientId =
                         Just
                             { data = emptyInvoiceReportDialog model.currentMonth model.currentYear
                             , headerText = "Invoice XLS"
-                            , onConfirm = ConfirmedInvoiceReportsDialog
+                            , onConfirm = ConfirmedInvoiceReportsDialog addEditDataSource
                             , onCancel = CloseInvoiceReportsDialog
                             , dialogContent = viewInvoiceReportsDialog addEditDataSource
                             , dialogOptions = Dialog.simpleDialogOptions 800 500
@@ -451,26 +452,67 @@ update msg model patientId =
                     ! [ newMsg ]
 
             UpdateSaveToClientPortal invoiceReportsDialog t ->
-                openInvoiceReportDialog { invoiceReportsDialog | saveToClientPortal = t }
-                    ! []
+                openInvoiceReportDialog { invoiceReportsDialog | saveToClientPortal = t } ! []
 
             CloseInvoiceReportsDialog ->
                 { model | invoiceReportsDialog = Nothing } ! []
 
-            ConfirmedInvoiceReportsDialog invoiceReportsDialog ->
-                model
-                    ! Functions.getRequestWithParams
-                        "/Phase2Billing/ValidateCcmRateForInvoice"
-                        [ ( "hcoID", toString row.facilityId )
-                        , ( "year", year )
-                        , ( "month", month )
-                        , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
-                        , ( "patientId", toString patientId )
-                        ]
-                    |> Http.send RequestSaveSummaryReportCompleted
+            ConfirmedInvoiceReportsDialog addEditDataSource invoiceReportsDialog ->
+                case ( invoiceReportsDialog.currentMonth, invoiceReportsDialog.currentMonth, invoiceReportsDialog.facilityId ) of
+                    ( Just month, Just year, Just facilityId ) ->
+                        { model | invoiceReportsDialog = Nothing }
+                            ! [ Functions.getStringRequestWithParams
+                                    "/CCM/ValidateCcmRateForInvoice"
+                                    [ ( "facilityId", toString facilityId )
+                                    , ( "month", toString month )
+                                    , ( "year", toString year )
+                                    , ( "saveToClientPortal", String.toLower <| toString invoiceReportsDialog.saveToClientPortal )
+                                    , ( "includeOpenBillingRecords", "false" )
+                                    ]
+                                    |> Http.send (InvoiceReportsDialogCompleted ( facilityId, year, month, invoiceReportsDialog.saveToClientPortal ))
+                              ]
 
-            -- https://test.navcare.com/CCM/ValidateCcmRateForInvoice?facilityId=128&month=4&year=2018&includeOpenBillingRecords=false
-            --https://test.navcare.com/CCM/GetInvoiceReportXls?facilityId=128&saveToClientPortal=false&month=4&year=2018&filePath=&includeOpenBillingRecords=false
+                    _ ->
+                        { model | invoiceReportsDialog = Nothing } ! []
+
+            InvoiceReportsDialogCompleted ( facilityId, year, month, saveToClientPortal ) requestResponse ->
+                case requestResponse of
+                    Ok _ ->
+                        model
+                            ! [ Functions.postStringRequestWithObject
+                                    "/CCM/GetInvoiceReportXls"
+                                    [ ( "facilityId", Encode.int facilityId )
+                                    , ( "year", Encode.int year )
+                                    , ( "month", Encode.int month )
+                                    , ( "saveToClientPortal", Encode.bool saveToClientPortal )
+                                    , ( "includeOpenBillingRecords", Encode.bool False )
+                                    ]
+                                    |> Http.send InvoiceReportsDialogExcelCompleted
+                              ]
+
+                    Err t ->
+                        model ! [ Functions.displayErrorMessage (toString t) ]
+
+            InvoiceReportsDialogExcelCompleted requestResponse ->
+                case requestResponse of
+                    Ok response ->
+                        case
+                            response
+                                |> Decode.decodeString (Decode.at [ "AdditionalData", "fileName" ] Decode.string)
+                                |> Result.toMaybe
+                        of
+                            Just fileName ->
+                                model
+                                    ! [ Functions.displaySuccessMessage "Invoice report created successfully."
+                                      , Functions.openFile ("/CCM/DownloadMonthlyInvoice?fileName=" ++ fileName)
+                                      ]
+
+                            Nothing ->
+                                model ! [ Functions.displayErrorMessage ("Cannot download file right now, please try again later") ]
+
+                    Err t ->
+                        model ! [ Functions.displayErrorMessage (toString t) ]
+
             -- Common Close Dialog
             CloseDialog ->
                 { model | confirmData = Nothing } ! []

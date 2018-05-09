@@ -16,7 +16,6 @@ import Common.Route as Route exposing (Route)
 import Navigation
 import Window
 import Common.Dialog as Dialog
-import Common.Types exposing (DialogClose)
 import Task
 import Http exposing (Error)
 import Json.Decode as Decode
