@@ -15,6 +15,7 @@ import Task
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Dialogs.InvoiceReportsDialog as InvoiceReportsDialog
 
 
 init : Int -> Cmd Msg
@@ -40,17 +41,6 @@ type alias Model =
     }
 
 
-type alias InvoiceReportsDialog =
-    { currentMonth : Maybe Int
-    , currentYear : Maybe Int
-    , facilityId : Maybe Int
-    , saveToClientPortal : Bool
-    , facilityDropState : Dropdown.DropState
-    , monthDropState : Dropdown.DropState
-    , yearDropState : Dropdown.DropState
-    }
-
-
 emptyModel : Model
 emptyModel =
     { rows = []
@@ -59,18 +49,6 @@ emptyModel =
     , invoiceReportsDialog = Nothing
     , currentMonth = Nothing
     , currentYear = Nothing
-    }
-
-
-emptyInvoiceReportDialog : Maybe Int -> Maybe Int -> InvoiceReportsDialog
-emptyInvoiceReportDialog currentMonth currentYear =
-    { currentMonth = currentMonth
-    , currentYear = currentYear
-    , facilityId = Nothing
-    , saveToClientPortal = False
-    , facilityDropState = Dropdown.init "facilityDropdown" True
-    , monthDropState = Dropdown.init "monthDropdown" False
-    , yearDropState = Dropdown.init "yearDropdown" False
     }
 
 
@@ -236,16 +214,8 @@ type Msg
     | ShowEditCCMBillingDialog Row
     | ConfirmedEditCCMBillingDialog Row
     | RequestEditCCMBillingCompleted (Result Http.Error String)
-      -- Invoice Reports
-    | ShowInvoiceReportsDialog AddEditDataSource
-    | ConfirmedInvoiceReportsDialog AddEditDataSource InvoiceReportsDialog
-    | UpdateFacility InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
-    | UpdateMonth InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
-    | UpdateYear InvoiceReportsDialog ( Dropdown.DropState, Maybe Int, Cmd Msg )
-    | UpdateSaveToClientPortal InvoiceReportsDialog Bool
-    | CloseInvoiceReportsDialog
-    | InvoiceReportsDialogCompleted ( Int, Int, Int, Bool ) (Result Http.Error String)
-    | InvoiceReportsDialogExcelCompleted (Result Http.Error String)
+      -- CCM Summary Reports
+    | ShowCCMSummaryReportsDialog AddEditDataSource
       -- Common Close Dialog
     | CloseDialog
 
@@ -424,135 +394,13 @@ update msg model patientId =
             RequestEditCCMBillingCompleted t ->
                 Functions.getRequestCompleted model t
 
-            -- Invoice Reports
-            ShowInvoiceReportsDialog addEditDataSource ->
-                { model
-                    | invoiceReportsDialog =
-                        Just
-                            { data = emptyInvoiceReportDialog model.currentMonth model.currentYear
-                            , headerText = "Invoice XLS"
-                            , onConfirm = ConfirmedInvoiceReportsDialog addEditDataSource
-                            , onCancel = CloseInvoiceReportsDialog
-                            , dialogContent = viewInvoiceReportsDialog addEditDataSource
-                            , dialogOptions = Dialog.simpleDialogOptions 800 500
-                            }
-                }
-                    ! []
-
-            UpdateFacility invoiceReportsDialog ( newDropState, newId, newMsg ) ->
-                openInvoiceReportDialog { invoiceReportsDialog | facilityDropState = newDropState, facilityId = newId }
-                    ! [ newMsg ]
-
-            UpdateMonth invoiceReportsDialog ( newDropState, newId, newMsg ) ->
-                openInvoiceReportDialog { invoiceReportsDialog | monthDropState = newDropState, currentMonth = newId }
-                    ! [ newMsg ]
-
-            UpdateYear invoiceReportsDialog ( newDropState, newId, newMsg ) ->
-                openInvoiceReportDialog { invoiceReportsDialog | yearDropState = newDropState, currentYear = newId }
-                    ! [ newMsg ]
-
-            UpdateSaveToClientPortal invoiceReportsDialog t ->
-                openInvoiceReportDialog { invoiceReportsDialog | saveToClientPortal = t } ! []
-
-            CloseInvoiceReportsDialog ->
-                { model | invoiceReportsDialog = Nothing } ! []
-
-            ConfirmedInvoiceReportsDialog addEditDataSource invoiceReportsDialog ->
-                case ( invoiceReportsDialog.currentMonth, invoiceReportsDialog.currentMonth, invoiceReportsDialog.facilityId ) of
-                    ( Just month, Just year, Just facilityId ) ->
-                        { model | invoiceReportsDialog = Nothing }
-                            ! [ Functions.getStringRequestWithParams
-                                    "/CCM/ValidateCcmRateForInvoice"
-                                    [ ( "facilityId", toString facilityId )
-                                    , ( "month", toString month )
-                                    , ( "year", toString year )
-                                    , ( "saveToClientPortal", String.toLower <| toString invoiceReportsDialog.saveToClientPortal )
-                                    , ( "includeOpenBillingRecords", "false" )
-                                    ]
-                                    |> Http.send (InvoiceReportsDialogCompleted ( facilityId, year, month, invoiceReportsDialog.saveToClientPortal ))
-                              ]
-
-                    _ ->
-                        { model | invoiceReportsDialog = Nothing } ! []
-
-            InvoiceReportsDialogCompleted ( facilityId, year, month, saveToClientPortal ) requestResponse ->
-                case requestResponse of
-                    Ok _ ->
-                        model
-                            ! [ Functions.postStringRequestWithObject
-                                    "/CCM/GetInvoiceReportXls"
-                                    [ ( "facilityId", Encode.int facilityId )
-                                    , ( "year", Encode.int year )
-                                    , ( "month", Encode.int month )
-                                    , ( "saveToClientPortal", Encode.bool saveToClientPortal )
-                                    , ( "includeOpenBillingRecords", Encode.bool False )
-                                    ]
-                                    |> Http.send InvoiceReportsDialogExcelCompleted
-                              ]
-
-                    Err t ->
-                        model ! [ Functions.displayErrorMessage (toString t) ]
-
-            InvoiceReportsDialogExcelCompleted requestResponse ->
-                case requestResponse of
-                    Ok response ->
-                        case Functions.getResponseProp response "fileName" of
-                            Just fileName ->
-                                model
-                                    ! [ Functions.displaySuccessMessage "Invoice report created successfully."
-                                      , Functions.openFile ("/CCM/DownloadMonthlyInvoice?fileName=" ++ fileName)
-                                      ]
-
-                            Nothing ->
-                                model ! [ Functions.displayErrorMessage ("Cannot download file right now, please try again later") ]
-
-                    Err t ->
-                        model ! [ Functions.displayErrorMessage (toString t) ]
+            -- CCM Summary Reports
+            ShowCCMSummaryReportsDialog addEditDataSource ->
+                model ! []
 
             -- Common Close Dialog
             CloseDialog ->
                 { model | confirmData = Nothing } ! []
-
-
-dividerLabel : String -> InputControlType msg
-dividerLabel labelText =
-    HtmlElement <|
-        div
-            [ style
-                [ ( "border-bottom-style", "solid" )
-                , ( "border-bottom-width", "1px" )
-                , ( "border-bottom-color", "rgb(209, 209, 209)" )
-                , ( "font-size", "14px" )
-                , ( "color", "#808080" )
-                , ( "padding", "3px" )
-                , ( "font-weight", "400 !important" )
-                , ( "width", "90%" )
-                , ( "margin-top", "10px" )
-                , ( "margin-bottom", "20px" )
-                ]
-            ]
-            [ text labelText
-            ]
-
-
-viewInvoiceReportsDialog : AddEditDataSource -> InvoiceReportsDialog -> Html Msg
-viewInvoiceReportsDialog addEditDataSource t =
-    div [ class "form-horizontal", style [ ( "padding-left", "40px" ) ] ]
-        [ makeControls { controlAttributes = [ class "col-md-8" ] }
-            [ dividerLabel "Select Facility"
-            , ControlElement "Facility" <|
-                Dropdown.view t.facilityDropState (UpdateFacility t) addEditDataSource.facilities t.facilityId
-            , dividerLabel "Select Month and Year For Billable Patients"
-            , ControlElement "Month" <|
-                Dropdown.view t.monthDropState (UpdateMonth t) monthDropdown t.currentMonth
-            , ControlElement "Year" <|
-                Dropdown.view t.yearDropState (UpdateYear t) yearDropdown t.currentYear
-            , CheckInput "Save to Client Portal" Optional t.saveToClientPortal (UpdateSaveToClientPortal t)
-            , HtmlElement <|
-                div [ class "row" ] []
-            , dividerLabel ""
-            ]
-        ]
 
 
 decodeBillingCcm : Decode.Decoder Row
@@ -627,19 +475,20 @@ gridConfig maybeAddEditDataSource =
         , ( "", "Edit CCM Billing", ShowEditCCMBillingDialog )
         ]
     , toolbar =
-        [ text "Billing"
-        , div [ class "submenu_right_items" ]
-            [ div [ class "action_bar" ]
-                [ text "Actions "
-                , case maybeAddEditDataSource of
-                    Just addEditDataSource ->
-                        button [ class "btn btn-sm btn-default", onClick (ShowInvoiceReportsDialog addEditDataSource) ] [ text "Invoice Reports" ]
-
-                    Nothing ->
-                        div [] []
+        case maybeAddEditDataSource of
+            Just addEditDataSource ->
+                [ text "Billing"
+                , div [ class "submenu_right_items" ]
+                    [ div [ class "action_bar" ]
+                        [ text "Actions "
+                        , button [ class "btn btn-sm btn-default", onClick (ShowInvoiceReportsDialog addEditDataSource) ] [ text "Invoice Reports" ]
+                        , button [ class "btn btn-sm btn-default", onClick (ShowCCMSummaryReportsDialog addEditDataSource) ] [ text "CCM Summary Reports" ]
+                        ]
+                    ]
                 ]
-            ]
-        ]
+
+            Nothing ->
+                []
     , columns = columns
     , toMsg = SetGridOperations
     }
