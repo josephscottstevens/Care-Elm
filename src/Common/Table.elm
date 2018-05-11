@@ -1,26 +1,27 @@
 module Common.Table
     exposing
-        ( State
-        , Column
+        ( Column
         , Config
-        , init
-        , view
-        , intColumn
-        , stringColumn
+        , State
+        , checkColumn
+        , dateColumn
         , dateTimeColumn
         , dropdownColumn
-        , dateColumn
         , hrefColumn
         , hrefColumnExtra
-        , checkColumn
         , htmlColumn
+        , init
+        , intColumn
+        , stringColumn
+        , view
         )
 
-import Html exposing (Html, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
-import Html.Attributes exposing (class, id, style, type_, target, colspan, classList, href, disabled, checked)
-import Html.Events as Events
 import Common.Functions as Functions
+import Html exposing (Html, a, button, div, input, li, span, table, tbody, td, text, th, thead, tr, ul)
+import Html.Attributes exposing (checked, class, classList, colspan, disabled, href, id, style, target, type_)
+import Html.Events as Events
 import Json.Encode as Encode
+
 
 
 -- Data Types
@@ -150,20 +151,20 @@ view state rows config maybeCustomRow =
         totalRows =
             List.length rows
     in
-        div [ class "e-grid e-js e-waitingpopup" ]
-            [ viewToolbar config.toolbar
-            , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
-                [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                    [ tr [] (List.map (viewTh state config) config.columns)
+    div [ class "e-grid e-js e-waitingpopup" ]
+        [ viewToolbar config.toolbar
+        , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
+            [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
+                [ tr [] (List.map (viewTh state config) config.columns)
 
-                    -- This is for filters, this can come at a later time
-                    -- , tr [] (List.map (viewThFilter state config) config.columns)
-                    ]
-                , tbody []
-                    (viewTr state filteredRows config maybeCustomRow)
+                -- This is for filters, this can come at a later time
+                -- , tr [] (List.map (viewThFilter state config) config.columns)
                 ]
-            , pagingView state totalRows filteredRows config.toMsg
+            , tbody []
+                (viewTr state filteredRows config maybeCustomRow)
             ]
+        , pagingView state totalRows filteredRows config.toMsg
+        ]
 
 
 viewTr : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> List (Html msg)
@@ -175,6 +176,7 @@ viewTr state rows config maybeCustomRow =
                     [ ( "background-color", "#66aaff" )
                     , ( "background", "#66aaff" )
                     ]
+
                  else
                     [ ( "", "" ) ]
                 )
@@ -195,6 +197,7 @@ viewTr state rows config maybeCustomRow =
         customRowStyle =
             if List.length rows == 0 then
                 style []
+
             else
                 style
                     [ ( "border-bottom-color", "#cecece" )
@@ -209,23 +212,24 @@ viewTr state rows config maybeCustomRow =
                 , ( "margin-left", "5px" )
                 ]
     in
-        case maybeCustomRow of
-            Just customRow ->
-                tr [ customRowStyle ]
-                    [ td [ colspan (List.length config.columns), customCellStyle ]
-                        [ customRow
-                        ]
+    case maybeCustomRow of
+        Just customRow ->
+            tr [ customRowStyle ]
+                [ td [ colspan (List.length config.columns), customCellStyle ]
+                    [ customRow
                     ]
-                    :: List.indexedMap standardTr rows
+                ]
+                :: List.indexedMap standardTr rows
 
-            Nothing ->
-                if List.length rows == 0 then
-                    [ tr []
-                        [ td [] [ text "No records to display" ]
-                        ]
+        Nothing ->
+            if List.length rows == 0 then
+                [ tr []
+                    [ td [] [ text "No records to display" ]
                     ]
-                else
-                    List.indexedMap standardTr rows
+                ]
+
+            else
+                List.indexedMap standardTr rows
 
 
 viewTh : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
@@ -238,8 +242,10 @@ viewTh state config column =
             if state.sortField == name then
                 if not state.sortAscending then
                     [ text name, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
+
                 else
                     [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
+
             else
                 [ text name ]
 
@@ -249,9 +255,9 @@ viewTh state config column =
         sortClick =
             Events.onClick (config.toMsg { state | sortAscending = newSortDirection, sortField = name })
     in
-        th [ class ("e-headercell e-default " ++ name), sortClick ]
-            [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
-            ]
+    th [ class ("e-headercell e-default " ++ name), sortClick ]
+        [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
+        ]
 
 
 viewThFilter : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
@@ -284,45 +290,45 @@ viewTd state row config column =
                 _ ->
                     Events.onClick (config.toMsg { state | selectedId = Just row.id })
     in
-        td [ tdClass, tdStyle, tdClick ]
-            [ case column of
-                IntColumn _ dataToInt _ ->
-                    text (Functions.defaultIntToString (dataToInt row))
+    td [ tdClass, tdStyle, tdClick ]
+        [ case column of
+            IntColumn _ dataToInt _ ->
+                text (Functions.defaultIntToString (dataToInt row))
 
-                StringColumn _ dataToString _ ->
-                    text (Maybe.withDefault "" (dataToString row))
+            StringColumn _ dataToString _ ->
+                text (Maybe.withDefault "" (dataToString row))
 
-                DateTimeColumn _ dataToString _ ->
-                    text (Functions.defaultDateTime (dataToString row))
+            DateTimeColumn _ dataToString _ ->
+                text (Functions.defaultDateTime (dataToString row))
 
-                DateColumn _ dataToString _ ->
-                    text (Functions.defaultDate (dataToString row))
+            DateColumn _ dataToString _ ->
+                text (Functions.defaultDate (dataToString row))
 
-                HrefColumn _ displayText dataToString _ ->
-                    case dataToString row of
-                        Just t ->
-                            a [ href t, target "_blank" ]
-                                [ text t ]
+            HrefColumn _ displayText dataToString _ ->
+                case dataToString row of
+                    Just t ->
+                        a [ href t, target "_blank" ]
+                            [ text t ]
 
-                        Nothing ->
-                            text ""
+                    Nothing ->
+                        text ""
 
-                HrefColumnExtra _ toNode ->
-                    toNode row
+            HrefColumnExtra _ toNode ->
+                toNode row
 
-                CheckColumn _ dataToString _ ->
-                    div [ class "e-checkcell" ]
-                        [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
-                            [ input [ type_ "checkbox", disabled True, checked (dataToString row) ] []
-                            ]
+            CheckColumn _ dataToString _ ->
+                div [ class "e-checkcell" ]
+                    [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
+                        [ input [ type_ "checkbox", disabled True, checked (dataToString row) ] []
                         ]
+                    ]
 
-                DropdownColumn dropDownItems ->
-                    rowDropDownDiv state config.toMsg row dropDownItems
+            DropdownColumn dropDownItems ->
+                rowDropDownDiv state config.toMsg row dropDownItems
 
-                HtmlColumn _ dataToString _ ->
-                    textHtml (Maybe.withDefault "" (dataToString row))
-            ]
+            HtmlColumn _ dataToString _ ->
+                textHtml (Maybe.withDefault "" (dataToString row))
+        ]
 
 
 textHtml : String -> Html msg
@@ -401,6 +407,7 @@ rowDropDownDiv state toMsg row dropDownItems =
                         [ ul [ class "e-menu e-js e-widget e-box e-separator" ]
                             (List.map dropDownMenuItem dropDownItems)
                         ]
+
                     else
                         []
 
@@ -424,14 +431,14 @@ rowDropDownDiv state toMsg row dropDownItems =
         blurEvent =
             Events.onBlur (toMsg { state | openDropdownId = Nothing })
     in
-        div []
-            [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ id "contextMenuButton", type_ "button", btnClass, clickEvent, blurEvent, btnStyle ]
-                    [ div [ id "editButtonMenu", dropDownMenuStyle ]
-                        dropMenu
-                    ]
+    div []
+        [ div [ style [ ( "text-align", "right" ) ] ]
+            [ button [ id "contextMenuButton", type_ "button", btnClass, clickEvent, blurEvent, btnStyle ]
+                [ div [ id "editButtonMenu", dropDownMenuStyle ]
+                    dropMenu
                 ]
             ]
+        ]
 
 
 viewToolbar : List ( String, msg ) -> Html msg
@@ -450,13 +457,14 @@ toolbarHelper ( iconStr, event ) =
         iconStyle =
             if String.contains "e-disable" iconStr then
                 style []
+
             else
                 style [ ( "cursor", "pointer" ) ]
 
         iconClass =
             "e-addnewitem e-toolbaricons e-icon " ++ iconStr
     in
-        a [ class iconClass, Events.onClick event, iconStyle, id "btnNewRecord" ] []
+    a [ class iconClass, Events.onClick event, iconStyle, id "btnNewRecord" ] []
 
 
 
@@ -472,8 +480,10 @@ setPagingState state totalRows toMsg page =
         bounded t =
             if t > lastIndex then
                 lastIndex
+
             else if t < 0 then
                 0
+
             else
                 t
 
@@ -500,7 +510,7 @@ setPagingState state totalRows toMsg page =
                 Last ->
                     lastIndex
     in
-        Events.onClick (toMsg { state | pageIndex = newIndex })
+    Events.onClick (toMsg { state | pageIndex = newIndex })
 
 
 pagingView : State -> Int -> List { data | id : Int } -> (State -> msg) -> Html msg
@@ -517,14 +527,15 @@ pagingView state totalRows rows toMsg =
                 activeOrNotText =
                     if pageIndex == state.pageIndex then
                         "e-currentitem e-active"
+
                     else
                         "e-default"
             in
-                div
-                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText)
-                    , pagingStateClick (Index pageIndex)
-                    ]
-                    [ text (toString (pageIndex + 1)) ]
+            div
+                [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText)
+                , pagingStateClick (Index pageIndex)
+                ]
+                [ text (toString (pageIndex + 1)) ]
 
         rng =
             List.range 0 lastIndex
@@ -535,36 +546,42 @@ pagingView state totalRows rows toMsg =
         firstPageClass =
             if state.pageIndex > 1 then
                 "e-icon e-mediaback e-firstpage e-default"
+
             else
                 "e-icon e-mediaback e-firstpagedisabled e-disable"
 
         leftPageClass =
             if state.pageIndex > 0 then
                 "e-icon e-arrowheadleft-2x e-prevpage e-default"
+
             else
                 "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
 
         leftPageBlockClass =
             if state.pageIndex >= blockSize then
                 "e-link e-spacing e-PP e-numericitem e-default"
+
             else
                 "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
 
         rightPageBlockClass =
             if state.pageIndex < lastIndex - blockSize then
                 "e-link e-NP e-spacing e-numericitem e-default"
+
             else
                 "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
 
         rightPageClass =
             if state.pageIndex < lastIndex then
                 "e-nextpage e-icon e-arrowheadright-2x e-default"
+
             else
                 "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
 
         lastPageClass =
             if state.pageIndex < lastIndex then
                 "e-lastpage e-icon e-mediaforward e-default"
+
             else
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
 
@@ -577,28 +594,29 @@ pagingView state totalRows rows toMsg =
                     toString <|
                         if lastIndex < 1 then
                             1
+
                         else
                             lastIndex + 1
 
                 totalItemsText =
                     toString totalRows
             in
-                currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
+            currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
     in
-        div [ class "e-pager e-js e-pager" ]
-            [ div [ class "e-pagercontainer" ]
-                [ div [ class firstPageClass, pagingStateClick First ] []
-                , div [ class leftPageClass, pagingStateClick Previous ] []
-                , a [ class leftPageBlockClass, pagingStateClick PreviousBlock ] [ text "..." ]
-                , div [ class "e-numericcontainer e-default" ] rng
-                , a [ class rightPageBlockClass, pagingStateClick NextBlock ] [ text "..." ]
-                , div [ class rightPageClass, pagingStateClick Next ] []
-                , div [ class lastPageClass, pagingStateClick Last ] []
-                ]
-            , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
-                [ span [ class "e-pagermsg" ] [ text pagerText ]
-                ]
+    div [ class "e-pager e-js e-pager" ]
+        [ div [ class "e-pagercontainer" ]
+            [ div [ class firstPageClass, pagingStateClick First ] []
+            , div [ class leftPageClass, pagingStateClick Previous ] []
+            , a [ class leftPageBlockClass, pagingStateClick PreviousBlock ] [ text "..." ]
+            , div [ class "e-numericcontainer e-default" ] rng
+            , a [ class rightPageBlockClass, pagingStateClick NextBlock ] [ text "..." ]
+            , div [ class rightPageClass, pagingStateClick Next ] []
+            , div [ class lastPageClass, pagingStateClick Last ] []
             ]
+        , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
+            [ span [ class "e-pagermsg" ] [ text pagerText ]
+            ]
+        ]
 
 
 
@@ -624,6 +642,7 @@ applySorter isReversed sorter data =
         IncOrDec sort ->
             if isReversed then
                 List.reverse (sort data)
+
             else
                 sort data
 
@@ -639,30 +658,35 @@ findSorter selectedColumn columnData =
                 IntColumn name _ sorter ->
                     if name == selectedColumn then
                         Just sorter
+
                     else
                         findSorter selectedColumn remainingColumnData
 
                 StringColumn name _ sorter ->
                     if name == selectedColumn then
                         Just sorter
+
                     else
                         findSorter selectedColumn remainingColumnData
 
                 DateTimeColumn name _ sorter ->
                     if name == selectedColumn then
                         Just sorter
+
                     else
                         findSorter selectedColumn remainingColumnData
 
                 DateColumn name _ sorter ->
                     if name == selectedColumn then
                         Just sorter
+
                     else
                         findSorter selectedColumn remainingColumnData
 
                 HrefColumn name _ _ sorter ->
                     if name == selectedColumn then
                         Just sorter
+
                     else
                         findSorter selectedColumn remainingColumnData
 
@@ -672,6 +696,7 @@ findSorter selectedColumn columnData =
                 CheckColumn name _ sorter ->
                     if name == selectedColumn then
                         Just sorter
+
                     else
                         findSorter selectedColumn remainingColumnData
 
@@ -681,6 +706,7 @@ findSorter selectedColumn columnData =
                 HtmlColumn name _ sorter ->
                     if name == selectedColumn then
                         Just sorter
+
                     else
                         findSorter selectedColumn remainingColumnData
 
