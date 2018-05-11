@@ -1,18 +1,18 @@
-module ClinicalSummary exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
+module ClinicalSummary exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
+import Common.Dropdown as Dropdown
+import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
+import Common.Html exposing (InputControlType(AreaInput, ControlElement), makeControls)
+import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown)
 import Date exposing (Date)
-import Task
-import Html exposing (Html, text, div, button, h4)
+import Html exposing (Html, button, div, h4, text)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
-import Common.Dropdown as Dropdown
-import Common.Html exposing (InputControlType(ControlElement, AreaInput), makeControls)
-import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown)
-import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
 import Http
 import Json.Decode as Decode
-import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required)
+import Json.Encode as Encode
+import Task
 
 
 subscriptions : Sub Msg
@@ -71,7 +71,7 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
         LoadData (Ok newData) ->
-            { model
+            ( { model
                 | id = newData.id
                 , comments = newData.comments
                 , carePlan = newData.carePlan
@@ -79,80 +79,108 @@ update msg model patientId =
                 , impairment = newData.impairment
                 , summary = newData.summary
                 , facilityId = newData.facilityId
-            }
-                ! [ Task.perform GetDate Date.now ]
+              }
+            , Task.perform GetDate Date.now
+            )
 
         LoadData (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            ( model
+            , displayErrorMessage (toString t)
+            )
 
         GetDate dt ->
-            { model
+            ( { model
                 | currentMonth = Just (dt |> Functions.getMonthIndex)
                 , currentYear = Just (Date.year dt)
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         UpdateClinicalSummary t ->
-            { model | summary = Just t } ! []
+            ( { model | summary = Just t }
+            , Cmd.none
+            )
 
         GenerateCarePlanLetter ->
-            model
-                ! [ Functions.getStringRequestWithParams
-                        "/People/GetCarePlanFromTasks"
-                        [ ( "patientId", toString patientId )
-                        , ( "year", model.currentYear |> Maybe.withDefault 0 |> toString )
-                        , ( "month", model.currentMonth |> Maybe.map (\t -> t + 1) |> Maybe.withDefault 0 |> toString )
-                        ]
-                        |> Http.send GenerateCarePlanLetterCompleted
-                  ]
+            ( model
+            , Functions.getStringRequestWithParams
+                "/People/GetCarePlanFromTasks"
+                [ ( "patientId", toString patientId )
+                , ( "year", model.currentYear |> Maybe.withDefault 0 |> toString )
+                , ( "month", model.currentMonth |> Maybe.map (\t -> t + 1) |> Maybe.withDefault 0 |> toString )
+                ]
+                |> Http.send GenerateCarePlanLetterCompleted
+            )
 
         GenerateCarePlanLetterCompleted (Ok response) ->
-            { model | summary = Functions.getResponseProp response "carePlan" } ! []
+            ( { model | summary = Functions.getResponseProp response "carePlan" }
+            , Cmd.none
+            )
 
         GenerateCarePlanLetterCompleted (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            ( model
+            , displayErrorMessage (toString t)
+            )
 
         Save ->
-            model
-                ! [ Functions.postStringRequestWithObject
-                        "/People/UpdateClinicalSummary"
-                        [ ( "Id", maybeVal Encode.int <| model.id )
-                        , ( "PatientId", Encode.int <| patientId )
-                        , ( "Summary", maybeVal Encode.string <| model.summary )
-                        , ( "CarePlan", maybeVal Encode.string <| model.carePlan )
-                        , ( "Impairment", maybeVal Encode.string <| model.impairment )
-                        , ( "CodeLegalStatus", maybeVal Encode.string <| model.codeLegalStatus )
-                        , ( "Comments", maybeVal Encode.string <| model.comments )
-                        ]
-                        |> Http.send SaveCompleted
-                  ]
+            ( model
+            , Functions.postStringRequestWithObject
+                "/People/UpdateClinicalSummary"
+                [ ( "Id", maybeVal Encode.int <| model.id )
+                , ( "PatientId", Encode.int <| patientId )
+                , ( "Summary", maybeVal Encode.string <| model.summary )
+                , ( "CarePlan", maybeVal Encode.string <| model.carePlan )
+                , ( "Impairment", maybeVal Encode.string <| model.impairment )
+                , ( "CodeLegalStatus", maybeVal Encode.string <| model.codeLegalStatus )
+                , ( "Comments", maybeVal Encode.string <| model.comments )
+                ]
+                |> Http.send SaveCompleted
+            )
 
         UpdateMonth ( newDropState, newId, newMsg ) ->
-            { model | monthDropState = newDropState, currentMonth = newId } ! [ newMsg ]
+            ( { model | monthDropState = newDropState, currentMonth = newId }
+            , newMsg
+            )
 
         UpdateYear ( newDropState, newId, newMsg ) ->
-            { model | yearDropState = newDropState, currentYear = newId } ! [ newMsg ]
+            ( { model | yearDropState = newDropState, currentYear = newId }
+            , newMsg
+            )
 
         SaveCompleted (Ok _) ->
-            model ! [ displaySuccessMessage "Clinical Summary Saved Successfully!" ]
+            ( model
+            , displaySuccessMessage "Clinical Summary Saved Successfully!"
+            )
 
         SaveCompleted (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            ( model
+            , displayErrorMessage (toString t)
+            )
 
         UpdateSummary str ->
-            { model | summary = Just str } ! []
+            ( { model | summary = Just str }
+            , Cmd.none
+            )
 
         UpdateCarePlan str ->
-            { model | carePlan = Just str } ! []
+            ( { model | carePlan = Just str }
+            , Cmd.none
+            )
 
         UpdateCodeLegalStatus str ->
-            { model | codeLegalStatus = Just str } ! []
+            ( { model | codeLegalStatus = Just str }
+            , Cmd.none
+            )
 
         UpdateImpairment str ->
-            { model | impairment = Just str } ! []
+            ( { model | impairment = Just str }
+            , Cmd.none
+            )
 
         UpdateComments str ->
-            { model | comments = Just str } ! []
+            ( { model | comments = Just str }
+            , Cmd.none
+            )
 
 
 formInputs : Model -> List (InputControlType Msg)
@@ -179,14 +207,14 @@ generateSummaryDiv model =
             , class "col-md-2 padding-h-0"
             ]
     in
-        div []
-            [ div (inline "34%" "5px") [ text "Generate Summary from Tasks Outcome:" ]
-            , div (inline "18%" "")
-                [ Dropdown.view model.monthDropState UpdateMonth monthDropdown model.currentMonth ]
-            , div (inline "18%" "")
-                [ Dropdown.view model.yearDropState UpdateYear yearDropdown model.currentYear ]
-            , div (inline "20%" "") [ button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate" ] ]
-            ]
+    div []
+        [ div (inline "34%" "5px") [ text "Generate Summary from Tasks Outcome:" ]
+        , div (inline "18%" "")
+            [ Dropdown.view model.monthDropState UpdateMonth monthDropdown model.currentMonth ]
+        , div (inline "18%" "")
+            [ Dropdown.view model.yearDropState UpdateYear yearDropdown model.currentYear ]
+        , div (inline "20%" "") [ button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate" ] ]
+        ]
 
 
 decodeClinicalSummary : Decode.Decoder ClinicalSummaryResponseData

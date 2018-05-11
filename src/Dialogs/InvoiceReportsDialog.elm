@@ -1,14 +1,14 @@
-module Dialogs.InvoiceReportsDialog exposing (State, Msg, update, view)
+module Dialogs.InvoiceReportsDialog exposing (Msg, State, update, view)
 
 --init
 
-import Html exposing (Html, div, text, input, button, label)
-import Html.Attributes exposing (class, title, style, checked, type_, attribute)
-import Common.Functions as Functions
-import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, monthDropdown, yearDropdown, DropdownItem)
 import Common.Dialog as Dialog
 import Common.Dropdown as Dropdown
+import Common.Functions as Functions
 import Common.Html exposing (InputControlType(CheckInput, ControlElement, HtmlElement), defaultConfig, fullWidth, makeControls)
+import Common.Types exposing (AddEditDataSource, DropdownItem, RequiredType(Optional, Required), monthDropdown, yearDropdown)
+import Html exposing (Html, button, div, input, label, text)
+import Html.Attributes exposing (attribute, checked, class, style, title, type_)
 import Http
 import Json.Encode as Encode
 
@@ -87,74 +87,91 @@ update : Msg -> State -> ( State, Cmd Msg )
 update msg model =
     case msg of
         UpdateFacility ( newDropState, newId, newMsg ) ->
-            { model | facilityDropState = newDropState, facilityId = newId }
-                ! [ newMsg ]
+            ( { model | facilityDropState = newDropState, facilityId = newId }
+            , newMsg
+            )
 
         UpdateMonth ( newDropState, newId, newMsg ) ->
-            { model | monthDropState = newDropState, currentMonth = newId }
-                ! [ newMsg ]
+            ( { model | monthDropState = newDropState, currentMonth = newId }
+            , newMsg
+            )
 
         UpdateYear ( newDropState, newId, newMsg ) ->
-            { model | yearDropState = newDropState, currentYear = newId }
-                ! [ newMsg ]
+            ( { model | yearDropState = newDropState, currentYear = newId }
+            , newMsg
+            )
 
         UpdateSaveToClientPortal t ->
-            { model | saveToClientPortal = not t } ! []
+            ( { model | saveToClientPortal = not t }
+            , Cmd.none
+            )
 
         Close ->
-            { model | showDialog = False } ! []
+            ( { model | showDialog = False }
+            , Cmd.none
+            )
 
         Confirmed invoiceReportsDialog ->
             case ( model.currentMonth, model.currentMonth, model.facilityId ) of
                 ( Just month, Just year, Just facilityId ) ->
-                    { model | showDialog = False }
-                        ! [ Functions.getStringRequestWithParams
-                                "/CCM/ValidateCcmRateForInvoice"
-                                [ ( "facilityId", toString facilityId )
-                                , ( "month", toString month )
-                                , ( "year", toString year )
-                                , ( "saveToClientPortal", String.toLower <| toString model.saveToClientPortal )
-                                , ( "includeOpenBillingRecords", "false" )
-                                ]
-                                |> Http.send (RequestCompleted ( facilityId, year, month, model.saveToClientPortal ))
-                          ]
+                    ( { model | showDialog = False }
+                    , Functions.getStringRequestWithParams
+                        "/CCM/ValidateCcmRateForInvoice"
+                        [ ( "facilityId", toString facilityId )
+                        , ( "month", toString month )
+                        , ( "year", toString year )
+                        , ( "saveToClientPortal", String.toLower <| toString model.saveToClientPortal )
+                        , ( "includeOpenBillingRecords", "false" )
+                        ]
+                        |> Http.send (RequestCompleted ( facilityId, year, month, model.saveToClientPortal ))
+                    )
 
                 _ ->
-                    { model | showDialog = False } ! []
+                    ( { model | showDialog = False }
+                    , Cmd.none
+                    )
 
         RequestCompleted ( facilityId, year, month, saveToClientPortal ) requestResponse ->
             case requestResponse of
                 Ok _ ->
-                    model
-                        ! [ Functions.postStringRequestWithObject
-                                "/CCM/GetInvoiceReportXls"
-                                [ ( "facilityId", Encode.int facilityId )
-                                , ( "year", Encode.int year )
-                                , ( "month", Encode.int month )
-                                , ( "saveToClientPortal", Encode.bool saveToClientPortal )
-                                , ( "includeOpenBillingRecords", Encode.bool False )
-                                ]
-                                |> Http.send ExcelCompleted
-                          ]
+                    ( model
+                    , Functions.postStringRequestWithObject
+                        "/CCM/GetInvoiceReportXls"
+                        [ ( "facilityId", Encode.int facilityId )
+                        , ( "year", Encode.int year )
+                        , ( "month", Encode.int month )
+                        , ( "saveToClientPortal", Encode.bool saveToClientPortal )
+                        , ( "includeOpenBillingRecords", Encode.bool False )
+                        ]
+                        |> Http.send ExcelCompleted
+                    )
 
                 Err t ->
-                    model ! [ Functions.displayErrorMessage (toString t) ]
+                    ( model
+                    , Functions.displayErrorMessage (toString t)
+                    )
 
         ExcelCompleted requestResponse ->
             case requestResponse of
                 Ok response ->
                     case Functions.getResponseProp response "fileName" of
                         Just fileName ->
-                            model
-                                ! [ Functions.displaySuccessMessage "Invoice report created successfully."
-                                  , Functions.openFile ("/CCM/DownloadMonthlyInvoice?fileName=" ++ fileName)
-                                  ]
+                            ( model
+                            , Cmd.batch
+                                [ Functions.displaySuccessMessage "Invoice report created successfully."
+                                , Functions.openFile ("/CCM/DownloadMonthlyInvoice?fileName=" ++ fileName)
+                                ]
+                            )
 
                         Nothing ->
-                            model ! [ Functions.displayErrorMessage ("Cannot download file right now, please try again later") ]
+                            ( model
+                            , Functions.displayErrorMessage "Cannot download file right now, please try again later"
+                            )
 
                 Err t ->
-                    model ! [ Functions.displayErrorMessage (toString t) ]
+                    ( model
+                    , Functions.displayErrorMessage (toString t)
+                    )
 
 
 emptyInvoiceReportDialog : Maybe Int -> Maybe Int -> List DropdownItem -> State

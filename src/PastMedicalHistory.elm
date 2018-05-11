@@ -1,16 +1,16 @@
-port module PastMedicalHistory exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
+port module PastMedicalHistory exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
-import Html exposing (Html, text, div, button, input, h4)
-import Html.Attributes exposing (class, style, type_, disabled, value)
-import Html.Events exposing (onClick)
-import Common.Html exposing (InputControlType(TextInput, AreaInput, DropInput, ControlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
-import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage, DropdownItem)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
-import Json.Decode as Decode
-import Json.Encode as Encode
-import Json.Decode.Pipeline exposing (decode, required)
+import Common.Html exposing (InputControlType(AreaInput, ControlElement, DropInput, TextInput), defaultConfig, fullWidth, getValidationErrors, makeControls)
 import Common.Table as Table
+import Common.Types exposing (AddEditDataSource, DropdownItem, MenuMessage, RequiredType(Optional, Required))
+import Html exposing (Html, button, div, h4, input, text)
+import Html.Attributes exposing (class, disabled, style, type_, value)
+import Html.Events exposing (onClick)
 import Http
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (decode, required)
+import Json.Encode as Encode
 
 
 port initPastMedicalHistory : SfData -> Cmd msg
@@ -102,88 +102,131 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
         LoadData (Ok newData) ->
-            { model | rows = newData } ! []
+            ( { model | rows = newData }
+            , Cmd.none
+            )
 
         LoadData (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            ( model
+            , displayErrorMessage (toString t)
+            )
 
         Cancel ->
-            { model | state = Grid } ! []
+            ( { model | state = Grid }
+            , Cmd.none
+            )
 
         Save row ->
             if List.length (getValidationErrors (formInputs row)) > 0 then
-                { model | showValidationErrors = True } ! []
+                ( { model | showValidationErrors = True }
+                , Cmd.none
+                )
+
             else
-                model
-                    ! [ "/People/AddUpdatePastMedicalHistories"
-                            |> Functions.postRequest (encodeNewRow row patientId)
-                            |> Http.send SaveCompleted
-                      , setUnsavedChanges False
-                      ]
+                ( model
+                , Cmd.batch
+                    [ "/People/AddUpdatePastMedicalHistories"
+                        |> Functions.postRequest (encodeNewRow row patientId)
+                        |> Http.send SaveCompleted
+                    , setUnsavedChanges False
+                    ]
+                )
 
         SaveCompleted (Ok _) ->
-            { model | state = Grid } ! [ displaySuccessMessage "Past Medical History Saved Successfully!", load patientId ]
+            ( { model | state = Grid }
+            , Cmd.batch [ displaySuccessMessage "Past Medical History Saved Successfully!", load patientId ]
+            )
 
         SaveCompleted (Err t) ->
-            { model | state = Grid } ! [ displayErrorMessage (toString t), load patientId ]
+            ( { model | state = Grid }
+            , Cmd.batch [ displayErrorMessage (toString t), load patientId ]
+            )
 
         Add addEditDataSource ->
-            { model | state = AddEdit (newRecord addEditDataSource Nothing) }
-                ! [ initPastMedicalHistory <| SfData Nothing addEditDataSource.providers ]
+            ( { model | state = AddEdit (newRecord addEditDataSource Nothing) }
+            , initPastMedicalHistory <| SfData Nothing addEditDataSource.providers
+            )
 
         Edit addEditDataSource row ->
-            { model | state = AddEdit (newRecord addEditDataSource (Just row)) }
-                ! [ initPastMedicalHistory <| SfData row.providerId addEditDataSource.providers ]
+            ( { model | state = AddEdit (newRecord addEditDataSource (Just row)) }
+            , initPastMedicalHistory <| SfData row.providerId addEditDataSource.providers
+            )
 
         SetTableState newState ->
-            { model | tableState = newState } ! []
+            ( { model | tableState = newState }
+            , Cmd.none
+            )
 
         DeletePrompt row ->
-            model ! [ Functions.deleteDialogShow row.id ]
+            ( model
+            , Functions.deleteDialogShow row.id
+            )
 
         DeletePastMedicalHistoryConfirmed rowId ->
-            { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
-                ! [ Http.send DeleteCompleted <|
-                        Http.getString ("/People/DeletePastMedicalHistory?id=" ++ toString rowId)
-                  ]
+            ( { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
+            , Http.send DeleteCompleted <|
+                Http.getString ("/People/DeletePastMedicalHistory?id=" ++ toString rowId)
+            )
 
         DeleteCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ Functions.displayErrorMessage t, load patientId ]
+                    ( model
+                    , Cmd.batch [ Functions.displayErrorMessage t, load patientId ]
+                    )
 
                 Nothing ->
-                    model ! [ Functions.displaySuccessMessage "Record deleted successfully!" ]
+                    ( model
+                    , Functions.displaySuccessMessage "Record deleted successfully!"
+                    )
 
         DeleteCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayErrorMessage (toString t)
+            )
 
         SendMenuMessage recordId ->
-            model ! [ sendMenuMessage (MenuMessage "PastMedicalHistoryDelete" recordId Nothing Nothing) ]
+            ( model
+            , sendMenuMessage (MenuMessage "PastMedicalHistoryDelete" recordId Nothing Nothing)
+            )
 
         NoOp ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         -- Updates
         UpdateDescription newRecord str ->
-            { model | state = AddEdit { newRecord | description = Just str } } ! []
+            ( { model | state = AddEdit { newRecord | description = Just str } }
+            , Cmd.none
+            )
 
         UpdateYear newRecord str ->
-            { model | state = AddEdit { newRecord | year = Just str } } ! []
+            ( { model | state = AddEdit { newRecord | year = Just str } }
+            , Cmd.none
+            )
 
         UpdateFacility newRecord str ->
-            { model | state = AddEdit { newRecord | facility = Just str } } ! []
+            ( { model | state = AddEdit { newRecord | facility = Just str } }
+            , Cmd.none
+            )
 
         UpdateNotes newRecord str ->
-            { model | state = AddEdit { newRecord | notes = Just str } } ! []
+            ( { model | state = AddEdit { newRecord | notes = Just str } }
+            , Cmd.none
+            )
 
         UpdatePastMedicalHistory sfData ->
             case model.state of
                 Grid ->
-                    model ! []
+                    ( model
+                    , Cmd.none
+                    )
 
                 AddEdit newRecord ->
-                    { model | state = AddEdit { newRecord | sfData = sfData } } ! []
+                    ( { model | state = AddEdit { newRecord | sfData = sfData } }
+                    , Cmd.none
+                    )
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
@@ -203,20 +246,21 @@ view model addEditDataSource =
                 validationErrorsDiv =
                     if model.showValidationErrors == True && List.length errors > 0 then
                         div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
+
                     else
                         div [] []
             in
-                div [ class "form-horizontal" ]
-                    [ validationErrorsDiv
-                    , h4 [] [ text "Past Medical History" ]
-                    , makeControls defaultConfig (formInputs newRecord)
-                    , div [ class "form-group" ]
-                        [ div [ class fullWidth ]
-                            [ button [ type_ "button", onClick (Save newRecord), class "btn btn-sm btn-success" ] [ text "Save" ]
-                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
-                            ]
+            div [ class "form-horizontal" ]
+                [ validationErrorsDiv
+                , h4 [] [ text "Past Medical History" ]
+                , makeControls defaultConfig (formInputs newRecord)
+                , div [ class "form-group" ]
+                    [ div [ class fullWidth ]
+                        [ button [ type_ "button", onClick (Save newRecord), class "btn btn-sm btn-success" ] [ text "Save" ]
+                        , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
                         ]
                     ]
+                ]
 
 
 noteStyle : Html.Attribute msg

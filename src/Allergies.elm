@@ -1,16 +1,16 @@
-module Allergies exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
+module Allergies exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
-import Html exposing (Html, text, div, button, h4)
+import Common.Functions as Functions exposing (maybeVal, sendMenuMessage, setUnsavedChanges)
+import Common.Html exposing (InputControlType(TextInput), defaultConfig, fullWidth, getValidationErrors, makeControls)
+import Common.Table as Table
+import Common.Types exposing (AddEditDataSource, MenuMessage, RequiredType(Optional, Required))
+import Html exposing (Html, button, div, h4, text)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
-import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), AddEditDataSource)
-import Common.Functions as Functions exposing (sendMenuMessage, setUnsavedChanges, maybeVal)
-import Common.Html exposing (InputControlType(TextInput), getValidationErrors, defaultConfig, fullWidth, makeControls)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
-import Common.Table as Table
 
 
 subscriptions : Sub Msg
@@ -70,19 +70,20 @@ view model _ =
                     validationErrorsDiv =
                         if model.showValidationErrors == True && List.length errors > 0 then
                             div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
+
                         else
                             div [] []
                 in
-                    div [ class "form-horizontal" ]
-                        [ validationErrorsDiv
-                        , makeControls defaultConfig (formInputs editData)
-                        , div [ class "form-group" ]
-                            [ div [ class fullWidth ]
-                                [ button [ type_ "button", onClick (Save editData), class "btn btn-sm btn-success" ] [ text "Save" ]
-                                , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
-                                ]
+                div [ class "form-horizontal" ]
+                    [ validationErrorsDiv
+                    , makeControls defaultConfig (formInputs editData)
+                    , div [ class "form-group" ]
+                        [ div [ class fullWidth ]
+                            [ button [ type_ "button", onClick (Save editData), class "btn btn-sm btn-success" ] [ text "Save" ]
+                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
                             ]
                         ]
+                    ]
         ]
 
 
@@ -106,88 +107,123 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     let
         updateAddNew t =
-            t ! [ setUnsavedChanges True ]
+            ( t
+            , setUnsavedChanges True
+            )
     in
-        case msg of
-            Load (Ok t) ->
-                { model | rows = t } ! [ Functions.setLoadingStatus False ]
+    case msg of
+        Load (Ok t) ->
+            ( { model | rows = t }
+            , Functions.setLoadingStatus False
+            )
 
-            Load (Err t) ->
-                model ! [ Functions.displayErrorMessage (toString t) ]
+        Load (Err t) ->
+            ( model
+            , Functions.displayErrorMessage (toString t)
+            )
 
-            SetTableState newState ->
-                { model | tableState = newState } ! []
+        SetTableState newState ->
+            ( { model | tableState = newState }
+            , Cmd.none
+            )
 
-            SendMenuMessage recordId messageType ->
-                model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
+        SendMenuMessage recordId messageType ->
+            ( model
+            , sendMenuMessage (MenuMessage messageType recordId Nothing Nothing)
+            )
 
-            DeletePrompt row ->
-                model ! [ Functions.deleteDialogShow row.id ]
+        DeletePrompt row ->
+            ( model
+            , Functions.deleteDialogShow row.id
+            )
 
-            DeleteConfirmed rowId ->
+        DeleteConfirmed rowId ->
+            let
+                rows =
+                    model.rows |> List.filter (\t -> t.id /= rowId)
+            in
+            ( { model | rows = rows }
+            , Http.getString ("/People/AllergiesDelete?id=" ++ toString rowId)
+                |> Http.send DeleteCompleted
+            )
+
+        DeleteCompleted (Ok responseMsg) ->
+            case Functions.getResponseError responseMsg of
+                Just t ->
+                    ( model
+                    , Cmd.batch [ Functions.displayErrorMessage t, load patientId ]
+                    )
+
+                Nothing ->
+                    ( model
+                    , Functions.displaySuccessMessage "Record deleted successfully!"
+                    )
+
+        DeleteCompleted (Err t) ->
+            ( model
+            , Functions.displayErrorMessage (toString t)
+            )
+
+        Add ->
+            ( { model | editData = Just (getEditData Nothing) }
+            , Cmd.none
+            )
+
+        Edit row ->
+            ( { model | editData = Just (getEditData (Just row)) }
+            , Cmd.none
+            )
+
+        -- edit
+        Save editData ->
+            if List.length (getValidationErrors (formInputs editData)) > 0 then
+                ( { model | showValidationErrors = True }
+                , Cmd.none
+                )
+
+            else
                 let
-                    rows =
-                        model.rows |> List.filter (\t -> t.id /= rowId)
+                    body =
+                        encodeEditData editData patientId
                 in
-                    { model | rows = rows }
-                        ! [ Http.getString ("/People/AllergiesDelete?id=" ++ toString rowId)
-                                |> Http.send DeleteCompleted
-                          ]
+                ( model
+                , Cmd.batch
+                    [ Functions.postRequest body "/People/AllergiesAddEdit"
+                        |> Http.send SaveCompleted
+                    , setUnsavedChanges False
+                    ]
+                )
 
-            DeleteCompleted (Ok responseMsg) ->
-                case Functions.getResponseError responseMsg of
-                    Just t ->
-                        model ! [ Functions.displayErrorMessage t, load patientId ]
+        SaveCompleted (Ok responseMsg) ->
+            case Functions.getResponseError responseMsg of
+                Just t ->
+                    ( model
+                    , Functions.displayErrorMessage t
+                    )
 
-                    Nothing ->
-                        model ! [ Functions.displaySuccessMessage "Record deleted successfully!" ]
+                Nothing ->
+                    ( { model | editData = Nothing }
+                    , Cmd.batch
+                        [ Functions.displaySuccessMessage "Save completed successfully!"
+                        , load patientId
+                        ]
+                    )
 
-            DeleteCompleted (Err t) ->
-                model ! [ Functions.displayErrorMessage (toString t) ]
+        SaveCompleted (Err t) ->
+            ( model
+            , Functions.displayErrorMessage (toString t)
+            )
 
-            Add ->
-                { model | editData = Just (getEditData Nothing) } ! []
+        Cancel ->
+            ( { model | editData = Nothing }
+            , setUnsavedChanges False
+            )
 
-            Edit row ->
-                { model | editData = Just (getEditData (Just row)) } ! []
+        UpdateAllergy editData t ->
+            updateAddNew { model | editData = Just { editData | allergy = Just t } }
 
-            -- edit
-            Save editData ->
-                if List.length (getValidationErrors (formInputs editData)) > 0 then
-                    { model | showValidationErrors = True } ! []
-                else
-                    let
-                        body =
-                            encodeEditData editData patientId
-                    in
-                        model
-                            ! [ Functions.postRequest body "/People/AllergiesAddEdit"
-                                    |> Http.send SaveCompleted
-                              , setUnsavedChanges False
-                              ]
-
-            SaveCompleted (Ok responseMsg) ->
-                case Functions.getResponseError responseMsg of
-                    Just t ->
-                        model ! [ Functions.displayErrorMessage t ]
-
-                    Nothing ->
-                        { model | editData = Nothing }
-                            ! [ Functions.displaySuccessMessage "Save completed successfully!"
-                              , load patientId
-                              ]
-
-            SaveCompleted (Err t) ->
-                model ! [ Functions.displayErrorMessage (toString t) ]
-
-            Cancel ->
-                { model | editData = Nothing } ! [ setUnsavedChanges False ]
-
-            UpdateAllergy editData t ->
-                updateAddNew { model | editData = Just { editData | allergy = Just t } }
-
-            UpdateReaction editData t ->
-                updateAddNew { model | editData = Just { editData | reaction = Just t } }
+        UpdateReaction editData t ->
+            updateAddNew { model | editData = Just { editData | reaction = Just t } }
 
 
 gridConfig : Table.Config Row Msg
