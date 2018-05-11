@@ -1,16 +1,16 @@
-port module PastMedicalHistory exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
+port module PastMedicalHistory exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
-import Html exposing (Html, text, div, button, input, h4)
-import Html.Attributes exposing (class, style, type_, disabled, value)
-import Html.Events exposing (onClick)
-import Common.Html exposing (InputControlType(TextInput, AreaInput, DropInput, ControlElement), makeControls, defaultConfig, getValidationErrors, fullWidth)
-import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, MenuMessage, DropdownItem)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
-import Json.Decode as Decode
-import Json.Encode as Encode
-import Json.Decode.Pipeline exposing (decode, required)
+import Common.Html exposing (InputControlType(AreaInput, ControlElement, DropInput, TextInput), defaultConfig, fullWidth, getValidationErrors, makeControls)
 import Common.Table as Table
+import Common.Types exposing (AddEditDataSource, DropdownItem, MenuMessage, RequiredType(Optional, Required))
+import Html exposing (Html, button, div, h4, input, text)
+import Html.Attributes exposing (class, disabled, style, type_, value)
+import Html.Events exposing (onClick)
 import Http
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (decode, required)
+import Json.Encode as Encode
 
 
 port initPastMedicalHistory : SfData -> Cmd msg
@@ -113,6 +113,7 @@ update msg model patientId =
         Save row ->
             if List.length (getValidationErrors (formInputs row)) > 0 then
                 { model | showValidationErrors = True } ! []
+
             else
                 model
                     ! [ "/People/AddUpdatePastMedicalHistories"
@@ -203,20 +204,21 @@ view model addEditDataSource =
                 validationErrorsDiv =
                     if model.showValidationErrors == True && List.length errors > 0 then
                         div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
+
                     else
                         div [] []
             in
-                div [ class "form-horizontal" ]
-                    [ validationErrorsDiv
-                    , h4 [] [ text "Past Medical History" ]
-                    , makeControls defaultConfig (formInputs newRecord)
-                    , div [ class "form-group" ]
-                        [ div [ class fullWidth ]
-                            [ button [ type_ "button", onClick (Save newRecord), class "btn btn-sm btn-success" ] [ text "Save" ]
-                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
-                            ]
+            div [ class "form-horizontal" ]
+                [ validationErrorsDiv
+                , h4 [] [ text "Past Medical History" ]
+                , makeControls defaultConfig (formInputs newRecord)
+                , div [ class "form-group" ]
+                    [ div [ class fullWidth ]
+                        [ button [ type_ "button", onClick (Save newRecord), class "btn btn-sm btn-success" ] [ text "Save" ]
+                        , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
                         ]
                     ]
+                ]
 
 
 noteStyle : Html.Attribute msg

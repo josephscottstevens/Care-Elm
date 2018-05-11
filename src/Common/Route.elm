@@ -1,21 +1,21 @@
 module Common.Route
     exposing
         ( Route(..)
-        , getPatientId
+        , back
         , fromLocation
+        , getPatientId
         , href
         , modifyUrl
-        , back
-        , routeUrl
         , routeDescription
         , routeId
+        , routeUrl
         )
 
-import Navigation
 import Common.Types as Common
 import Html exposing (Attribute)
 import Html.Attributes as Attr
-import UrlParser as Url exposing ((</>), (<?>), Parser, oneOf, parseHash, s, parsePath, intParam)
+import Navigation
+import UrlParser as Url exposing ((</>), (<?>), Parser, intParam, oneOf, parseHash, parsePath, s)
 
 
 type Route
@@ -256,6 +256,7 @@ fromLocation : Navigation.Location -> Maybe Route
 fromLocation location =
     if String.isEmpty location.hash then
         parsePath routeByUrl location
+
     else
         parseHash routeByHash location
 
