@@ -1,24 +1,24 @@
-port module Hospitilizations exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
+port module Hospitilizations exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
 
-import Common.Functions as Functions exposing (defaultString, maybeVal, sendMenuMessage, setUnsavedChanges)
-import Common.Html
-    exposing
-        ( InputControlType(AreaInput, CheckInput, DateInput, DropInput, DropInputWithButton, KnockInput, TextInput)
-        , defaultConfig
-        , fullWidth
-        , getValidationErrors
-        , makeControls
-        )
-import Common.Route as Route
-import Common.Table as Table
-import Common.Types exposing (AddEditDataSource, DropdownItem, MenuMessage, RequiredType(Optional, Required))
-import Html exposing (Html, button, div, h4, text)
+import Html exposing (Html, text, div, button, h4)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
+import Common.Types exposing (MenuMessage, RequiredType(Optional, Required), DropdownItem, AddEditDataSource)
+import Common.Functions as Functions exposing (defaultString, sendMenuMessage, setUnsavedChanges, maybeVal)
+import Common.Route as Route
+import Common.Html
+    exposing
+        ( InputControlType(CheckInput, DropInputWithButton, AreaInput, TextInput, DateInput, KnockInput, DropInput)
+        , getValidationErrors
+        , defaultConfig
+        , fullWidth
+        , makeControls
+        )
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Common.Table as Table
 
 
 port initHospitilizations : SyncfusionData -> Cmd msg
@@ -138,20 +138,19 @@ view model addEditDataSource =
                 validationErrorsDiv =
                     if model.showValidationErrors == True && List.length errors > 0 then
                         div [ class "error margin-bottom-10" ] (List.map (\t -> div [] [ text t ]) errors)
-
                     else
                         div [] []
             in
-            div [ class "form-horizontal" ]
-                [ validationErrorsDiv
-                , makeControls defaultConfig (formInputs editData)
-                , div [ class "form-group" ]
-                    [ div [ class fullWidth ]
-                        [ button [ type_ "button", onClick (Save editData), class "btn btn-sm btn-success" ] [ text "Save" ]
-                        , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
+                div [ class "form-horizontal" ]
+                    [ validationErrorsDiv
+                    , makeControls defaultConfig (formInputs editData)
+                    , div [ class "form-group" ]
+                        [ div [ class fullWidth ]
+                            [ button [ type_ "button", onClick (Save editData), class "btn btn-sm btn-success" ] [ text "Save" ]
+                            , button [ type_ "button", onClick Cancel, class "btn btn-sm btn-default margin-left-5" ] [ text "Cancel" ]
+                            ]
                         ]
                     ]
-                ]
 
 
 type Msg
@@ -179,108 +178,107 @@ update msg model patientId =
         updateAddNew t =
             t ! [ setUnsavedChanges True ]
     in
-    case msg of
-        Load (Ok t) ->
-            getLoadedState model t ! [ Functions.setLoadingStatus False ]
+        case msg of
+            Load (Ok t) ->
+                getLoadedState model t ! [ Functions.setLoadingStatus False ]
 
-        Load (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            Load (Err t) ->
+                model ! [ Functions.displayErrorMessage (toString t) ]
 
-        SetTableState newState ->
-            { model | tableState = newState } ! []
+            SetTableState newState ->
+                { model | tableState = newState } ! []
 
-        SendMenuMessage recordId messageType ->
-            model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
+            SendMenuMessage recordId messageType ->
+                model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
-        DeletePrompt row ->
-            model ! [ Functions.deleteDialogShow row.id ]
+            DeletePrompt row ->
+                model ! [ Functions.deleteDialogShow row.id ]
 
-        DeleteHospitilizationConfirmed rowId ->
-            let
-                newHospitilizations =
-                    model.rows |> List.filter (\t -> t.id /= rowId)
-            in
-            { model | rows = newHospitilizations }
-                ! [ deleteHospitilization rowId DeleteCompleted ]
+            DeleteHospitilizationConfirmed rowId ->
+                let
+                    newHospitilizations =
+                        model.rows |> List.filter (\t -> t.id /= rowId)
+                in
+                    { model | rows = newHospitilizations }
+                        ! [ deleteHospitilization rowId DeleteCompleted ]
 
-        DeleteCompleted (Ok responseMsg) ->
-            case Functions.getResponseError responseMsg of
-                Just t ->
-                    model ! [ Functions.displayErrorMessage t, load patientId ]
+            DeleteCompleted (Ok responseMsg) ->
+                case Functions.getResponseError responseMsg of
+                    Just t ->
+                        model ! [ Functions.displayErrorMessage t, load patientId ]
 
-                Nothing ->
-                    model ! [ Functions.displaySuccessMessage "Record deleted successfully!" ]
+                    Nothing ->
+                        model ! [ Functions.displaySuccessMessage "Record deleted successfully!" ]
 
-        DeleteCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            DeleteCompleted (Err t) ->
+                model ! [ Functions.displayErrorMessage (toString t) ]
 
-        Add addEditDataSource ->
-            let
-                editData =
-                    getEditData addEditDataSource Nothing
-            in
-            { model | editData = Just editData } ! [ initHospitilizations editData.sfData ]
+            Add addEditDataSource ->
+                let
+                    editData =
+                        getEditData addEditDataSource Nothing
+                in
+                    { model | editData = Just editData } ! [ initHospitilizations editData.sfData ]
 
-        Edit addEditDataSource row ->
-            let
-                editData =
-                    getEditData addEditDataSource (Just row)
-            in
-            { model | editData = Just editData } ! [ initHospitilizations editData.sfData ]
+            Edit addEditDataSource row ->
+                let
+                    editData =
+                        getEditData addEditDataSource (Just row)
+                in
+                    { model | editData = Just editData } ! [ initHospitilizations editData.sfData ]
 
-        -- edit
-        Save editData ->
-            if List.length (getValidationErrors (formInputs editData)) > 0 then
-                { model | showValidationErrors = True } ! []
-
-            else
-                model
-                    ! [ "/People/AddEditHospitilization"
-                            |> Functions.postRequest (encodeEditData editData patientId)
-                            |> Http.send SaveCompleted
-                      , setUnsavedChanges False
-                      ]
-
-        SaveCompleted (Ok responseMsg) ->
-            case Functions.getResponseError responseMsg of
-                Just t ->
-                    model ! [ Functions.displayErrorMessage t ]
-
-                Nothing ->
+            -- edit
+            Save editData ->
+                if List.length (getValidationErrors (formInputs editData)) > 0 then
+                    { model | showValidationErrors = True } ! []
+                else
                     model
-                        ! [ Functions.displaySuccessMessage "Save completed successfully!"
-                          , Route.modifyUrl Route.Hospitilizations
+                        ! [ "/People/AddEditHospitilization"
+                                |> Functions.postRequest (encodeEditData editData patientId)
+                                |> Http.send SaveCompleted
+                          , setUnsavedChanges False
                           ]
 
-        SaveCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            SaveCompleted (Ok responseMsg) ->
+                case Functions.getResponseError responseMsg of
+                    Just t ->
+                        model ! [ Functions.displayErrorMessage t ]
 
-        NoOp ->
-            model ! []
+                    Nothing ->
+                        model
+                            ! [ Functions.displaySuccessMessage "Save completed successfully!"
+                              , Route.modifyUrl Route.Hospitilizations
+                              ]
 
-        Cancel ->
-            model ! [ setUnsavedChanges False, Route.modifyUrl Route.Hospitilizations ]
+            SaveCompleted (Err t) ->
+                model ! [ Functions.displayErrorMessage (toString t) ]
 
-        UpdateHospitilizationsInitData sfData ->
-            let
-                newEditData =
-                    case model.editData of
-                        Just editData ->
-                            Just { editData | sfData = sfData }
+            NoOp ->
+                model ! []
 
-                        Nothing ->
-                            Nothing
-            in
-            { model | editData = newEditData } ! []
+            Cancel ->
+                model ! [ setUnsavedChanges False, Route.modifyUrl Route.Hospitilizations ]
 
-        UpdatePatientReported editData t ->
-            updateAddNew { model | editData = Just { editData | patientReported = t } }
+            UpdateHospitilizationsInitData sfData ->
+                let
+                    newEditData =
+                        case model.editData of
+                            Just editData ->
+                                Just { editData | sfData = sfData }
 
-        UpdateChiefComplaint editData t ->
-            updateAddNew { model | editData = Just { editData | chiefComplaint = Just t } }
+                            Nothing ->
+                                Nothing
+                in
+                    { model | editData = newEditData } ! []
 
-        UpdateDischargeRecommendations editData t ->
-            updateAddNew { model | editData = Just { editData | dischargeRecommendations = Just t } }
+            UpdatePatientReported editData t ->
+                updateAddNew { model | editData = Just { editData | patientReported = t } }
+
+            UpdateChiefComplaint editData t ->
+                updateAddNew { model | editData = Just { editData | chiefComplaint = Just t } }
+
+            UpdateDischargeRecommendations editData t ->
+                updateAddNew { model | editData = Just { editData | dischargeRecommendations = Just t } }
 
 
 getColumns : Maybe AddEditDataSource -> List (Table.Column Row Msg)
@@ -296,17 +294,17 @@ getColumns addEditDataSource =
                 Nothing ->
                     []
     in
-    [ Table.intColumn "ID" (\t -> Just <| t.id)
-    , Table.stringColumn "Facility Name" (\t -> t.facilityName)
-    , Table.dateColumn "Date Of Admission" (\t -> t.dateOfAdmission)
-    , Table.stringColumn "Admit Problem" (\t -> t.admitProblem)
-    , Table.dateColumn "Date Of Discharge" (\t -> t.dateOfDischarge)
-    , Table.stringColumn "Discharge Problem" (\t -> t.dischargeProblem)
-    , Table.stringColumn "Svc Type" (\t -> t.serviceType)
-    , Table.checkColumn "Is From TCM" (\t -> t.fromTcm)
-    , Table.hrefColumnExtra "File" hrefCustom
-    , Table.dropdownColumn dropDownItems
-    ]
+        [ Table.intColumn "ID" (\t -> Just <| t.id)
+        , Table.stringColumn "Facility Name" (\t -> t.facilityName)
+        , Table.dateColumn "Date Of Admission" (\t -> t.dateOfAdmission)
+        , Table.stringColumn "Admit Problem" (\t -> t.admitProblem)
+        , Table.dateColumn "Date Of Discharge" (\t -> t.dateOfDischarge)
+        , Table.stringColumn "Discharge Problem" (\t -> t.dischargeProblem)
+        , Table.stringColumn "Svc Type" (\t -> t.serviceType)
+        , Table.checkColumn "Is From TCM" (\t -> t.fromTcm)
+        , Table.hrefColumnExtra "File" hrefCustom
+        , Table.dropdownColumn dropDownItems
+        ]
 
 
 hrefCustom : { a | recordId : Maybe Int } -> Html Msg
@@ -435,26 +433,25 @@ getHospitilizationsInitData addEditDataSource maybeRow =
         row =
             Maybe.withDefault emptyRow maybeRow
     in
-    { id =
-        if row.id == -1 then
-            Nothing
-
-        else
-            Just row.id
-    , facilities = addEditDataSource.facilities
-    , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
-    , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
-    , facilityId = addEditDataSource.facilityId
-    , admitDiagnosisId = row.admitDiagnosisId
-    , dischargeDiagnosisId = row.dischargeDiagnosisId
-    , facilityId2 = row.facilityId2
-    , hospitalServiceTypeId = row.hospitalServiceTypeId
-    , dischargePhysicianId = row.dischargePhysicianId
-    , dateOfAdmission = row.dateOfAdmission
-    , dateOfDischarge = row.dateOfDischarge
-    , dateOfAdmission2 = row.dateOfAdmission2
-    , dateOfDischarge2 = row.dateOfDischarge2
-    }
+        { id =
+            if row.id == -1 then
+                Nothing
+            else
+                Just row.id
+        , facilities = addEditDataSource.facilities
+        , hospitilizationServiceTypes = addEditDataSource.hospitilizationServiceTypes
+        , hospitalizationDischargePhysicians = addEditDataSource.hospitalizationDischargePhysicians
+        , facilityId = addEditDataSource.facilityId
+        , admitDiagnosisId = row.admitDiagnosisId
+        , dischargeDiagnosisId = row.dischargeDiagnosisId
+        , facilityId2 = row.facilityId2
+        , hospitalServiceTypeId = row.hospitalServiceTypeId
+        , dischargePhysicianId = row.dischargePhysicianId
+        , dateOfAdmission = row.dateOfAdmission
+        , dateOfDischarge = row.dateOfDischarge
+        , dateOfAdmission2 = row.dateOfAdmission2
+        , dateOfDischarge2 = row.dateOfDischarge2
+        }
 
 
 encodeEditData : EditData -> Int -> Encode.Value
