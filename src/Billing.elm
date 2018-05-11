@@ -35,7 +35,7 @@ type alias Model =
     { rows : List Row
     , gridOperations : Table.State
     , confirmData : Maybe (Dialog.Dialog Row Msg)
-    , invoiceReportsDialog : Maybe (Dialog.Dialog InvoiceReportsDialog Msg)
+    , invoiceReportsDialog : Maybe (Dialog.Dialog InvoiceReportsDialog.State InvoiceReportsDialog.Msg)
     , currentMonth : Maybe Int
     , currentYear : Maybe Int
     }
@@ -85,8 +85,9 @@ view : Model -> Int -> Maybe AddEditDataSource -> Dialog.RootDialog -> Html Msg
 view model patientId maybeAddEditDataSource rootDialog =
     div []
         [ Table.view model.gridOperations (gridConfig maybeAddEditDataSource) model.rows Nothing
-        , Dialog.viewDialog model.confirmData rootDialog
-        , Dialog.viewDialog model.invoiceReportsDialog rootDialog
+
+        -- , Dialog.viewDialog model.confirmData rootDialog
+        -- , Dialog.viewDialog model.invoiceReportsDialog rootDialog
         ]
 
 
@@ -216,6 +217,9 @@ type Msg
     | RequestEditCCMBillingCompleted (Result Http.Error String)
       -- CCM Summary Reports
     | ShowCCMSummaryReportsDialog AddEditDataSource
+      -- Invoice Reports Dialog
+    | ShowInvoiceReportsDialog AddEditDataSource
+    | UpdateInvoiceReportsDialog InvoiceReportsDialog.Msg InvoiceReportsDialog.State
       -- Common Close Dialog
     | CloseDialog
 
@@ -397,6 +401,13 @@ update msg model patientId =
             -- CCM Summary Reports
             ShowCCMSummaryReportsDialog addEditDataSource ->
                 model ! []
+
+            -- Invoice Reports Dialog
+            ShowInvoiceReportsDialog addEditDataSource ->
+                Debug.crash "Todo"
+
+            UpdateInvoiceReportsDialog invoiceMsg dialogState ->
+                Debug.crash "Todo"
 
             -- Common Close Dialog
             CloseDialog ->
