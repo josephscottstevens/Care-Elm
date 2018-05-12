@@ -1,14 +1,13 @@
-module Dialogs.InvoiceReportsDialog exposing (State, Msg, update, view)
+module Dialogs.InvoiceReportsDialog exposing (Msg, State, update, view)
 
 --init
 
-import Html exposing (Html, div, text, input, button, label)
-import Html.Attributes exposing (class, title, style, checked, type_, attribute)
-import Common.Functions as Functions
-import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, monthDropdown, yearDropdown, DropdownItem)
-import Common.Dialog as Dialog
 import Common.Dropdown as Dropdown
-import Common.Html exposing (InputControlType(CheckInput, ControlElement, HtmlElement), defaultConfig, fullWidth, makeControls)
+import Common.Functions as Functions
+import Common.Html exposing (InputControlType(CheckInput, ControlElement, HtmlElement), makeControls)
+import Common.Types exposing (DropdownItem, RequiredType(Optional), monthDropdown, yearDropdown)
+import Html exposing (Html, div, text)
+import Html.Attributes exposing (class, style)
 import Http
 import Json.Encode as Encode
 
@@ -151,27 +150,25 @@ update msg model =
                                   ]
 
                         Nothing ->
-                            model ! [ Functions.displayErrorMessage ("Cannot download file right now, please try again later") ]
+                            model ! [ Functions.displayErrorMessage "Cannot download file right now, please try again later" ]
 
                 Err t ->
                     model ! [ Functions.displayErrorMessage (toString t) ]
 
 
-emptyInvoiceReportDialog : Maybe Int -> Maybe Int -> List DropdownItem -> State
-emptyInvoiceReportDialog currentMonth currentYear facilities =
-    { currentMonth = currentMonth
-    , currentYear = currentYear
-    , facilityId = Nothing
-    , saveToClientPortal = False
-    , facilities = facilities
-    , facilityDropState = Dropdown.init "facilityDropdown" True
-    , monthDropState = Dropdown.init "monthDropdown" False
-    , yearDropState = Dropdown.init "yearDropdown" False
-    , showDialog = False
-    }
 
-
-
+-- emptyInvoiceReportDialog : Maybe Int -> Maybe Int -> List DropdownItem -> State
+-- emptyInvoiceReportDialog currentMonth currentYear facilities =
+--     { currentMonth = currentMonth
+--     , currentYear = currentYear
+--     , facilityId = Nothing
+--     , saveToClientPortal = False
+--     , facilities = facilities
+--     , facilityDropState = Dropdown.init "facilityDropdown" True
+--     , monthDropState = Dropdown.init "monthDropdown" False
+--     , yearDropState = Dropdown.init "yearDropdown" False
+--     , showDialog = False
+--     }
 -- init : Maybe Int -> Maybe Int -> AddEditDataSource -> Dialog.Dialog State Msg
 -- init currentMonth currentYear addEditDataSource =
 --     { data = emptyInvoiceReportDialog currentMonth currentYear addEditDataSource.facilities

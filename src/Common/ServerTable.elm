@@ -1,38 +1,38 @@
 port module Common.ServerTable
     exposing
-        ( State
-        , ServerData
-        , IdAttrType(IdAttr)
+        ( Column
+        , ColumnStyle(..)
         , Config
         , Filter
-        , Column
-        , Operator(..)
         , FilterControl(..)
-        , ColumnStyle(..)
+        , IdAttrType(IdAttr)
+        , Operator(..)
+        , ServerData
+        , State
+        , checkColumn
+        , dateColumn
+        , dateTimeColumn
+        , decodeGridOperations
         , defaultRowsPerPage
+        , encodeGridOperations
+        , hrefColumn
+        , htmlColumn
         , init
-        , view
+        , initFilter
         , intColumn
         , stringColumn
-        , dateTimeColumn
-        , dateColumn
-        , hrefColumn
-        , checkColumn
-        , htmlColumn
         , textHtml
         , toolbarButton
-        , updateFromServer
-        , decodeGridOperations
-        , encodeGridOperations
-        , initFilter
-        , updateFilters
         , updateFilter
+        , updateFilters
+        , updateFromServer
+        , view
         )
 
-import Html exposing (Html, Attribute, div, table, th, td, tr, thead, tbody, text, button, ul, li, a, span, input)
-import Html.Attributes exposing (class, id, style, type_, target, colspan, classList, href, disabled, checked, attribute)
-import Html.Events as Events
 import Common.Functions as Functions
+import Html exposing (Attribute, Html, a, button, div, input, li, span, table, tbody, td, text, th, thead, tr, ul)
+import Html.Attributes exposing (attribute, checked, class, classList, colspan, disabled, href, id, style, target, type_)
+import Html.Events as Events
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -102,7 +102,7 @@ type alias Column data msg =
 stringColumn : String -> (data -> Maybe String) -> ColumnStyle -> String -> Column data msg
 stringColumn headerText data columnStyle dataField =
     { headerText = headerText
-    , viewData = data >> \t -> text (Maybe.withDefault "" t)
+    , viewData = data >> (\t -> text (Maybe.withDefault "" t))
     , columnStyle = columnStyle
     , filterControl = TextControl
     , operator = Contains dataField
@@ -113,7 +113,7 @@ stringColumn headerText data columnStyle dataField =
 intColumn : String -> (data -> Maybe Int) -> ColumnStyle -> String -> Column data msg
 intColumn headerText data columnStyle dataField =
     { headerText = headerText
-    , viewData = data >> \t -> text (Functions.defaultIntToString t)
+    , viewData = data >> (\t -> text (Functions.defaultIntToString t))
     , columnStyle = columnStyle
     , filterControl = TextControl
     , operator = Equals dataField
@@ -124,7 +124,7 @@ intColumn headerText data columnStyle dataField =
 dateColumn : String -> (data -> Maybe String) -> ColumnStyle -> String -> Column data msg
 dateColumn headerText data columnStyle dataField =
     { headerText = headerText
-    , viewData = data >> \t -> text (Functions.defaultDate t)
+    , viewData = data >> (\t -> text (Functions.defaultDate t))
     , columnStyle = columnStyle
     , filterControl = DateControl
     , operator = Equals dataField
@@ -135,7 +135,7 @@ dateColumn headerText data columnStyle dataField =
 dateTimeColumn : String -> (data -> Maybe String) -> ColumnStyle -> String -> Column data msg
 dateTimeColumn headerText data columnStyle dataField =
     { headerText = headerText
-    , viewData = data >> \t -> text (Functions.defaultDateTime t)
+    , viewData = data >> (\t -> text (Functions.defaultDateTime t))
     , columnStyle = columnStyle
     , filterControl = DateTimeControl
     , operator = Equals dataField
@@ -268,7 +268,7 @@ view gridOperations config rows maybeCustomRow =
         [ viewToolbar config.toolbar
         , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
             [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                [ tr [] ((List.map (viewTh gridOperations config) config.columns) ++ [ viewDropdownTh ])
+                [ tr [] (List.map (viewTh gridOperations config) config.columns ++ [ viewDropdownTh ])
                 , tr [] (List.map viewThFilter config.columns)
                 ]
             , tbody []
@@ -287,6 +287,7 @@ viewTr gridOperations config rows maybeCustomRow =
                     [ ( "background-color", "#66aaff" )
                     , ( "background", "#66aaff" )
                     ]
+
                  else
                     [ ( "", "" ) ]
                 )
@@ -302,11 +303,12 @@ viewTr gridOperations config rows maybeCustomRow =
                 [ rowClass ctr
                 , selectedStyle ctr
                 ]
-                ((List.map (viewTd ctr gridOperations config row) config.columns) ++ [ rowDropDownDiv ctr gridOperations config row ])
+                (List.map (viewTd ctr gridOperations config row) config.columns ++ [ rowDropDownDiv ctr gridOperations config row ])
 
         customRowStyle =
             if List.length rows == 0 then
                 style []
+
             else
                 style
                     [ ( "border-bottom-color", "#cecece" )
@@ -321,24 +323,26 @@ viewTr gridOperations config rows maybeCustomRow =
                 , ( "margin-left", "5px" )
                 ]
     in
-        case maybeCustomRow of
-            Just customRow ->
-                tr [ customRowStyle ]
-                    [ td [ colspan (List.length config.columns), customCellStyle ]
-                        [ customRow ]
+    case maybeCustomRow of
+        Just customRow ->
+            tr [ customRowStyle ]
+                [ td [ colspan (List.length config.columns), customCellStyle ]
+                    [ customRow ]
+                ]
+                :: List.indexedMap standardTr rows
+
+        Nothing ->
+            if List.length rows == 0 then
+                [ tr []
+                    [ td [] [ text "No records to display" ]
                     ]
-                    :: List.indexedMap standardTr rows
+                ]
 
-            Nothing ->
-                if List.length rows == 0 then
-                    [ tr []
-                        [ td [] [ text "No records to display" ]
-                        ]
-                    ]
-                else
-                    List.indexedMap standardTr rows
+            else
+                List.indexedMap standardTr rows
 
 
+tdClass : Bool -> Attribute msg
 tdClass isActive =
     classList
         [ ( "e-gridtooltip", True )
@@ -346,6 +350,7 @@ tdClass isActive =
         ]
 
 
+tdStyle : Attribute msg
 tdStyle =
     style [ ( "padding-left", "8.4px" ) ]
 
@@ -356,12 +361,12 @@ viewTd idx gridOperations config row column =
         isActive =
             Just idx == gridOperations.selectedId
     in
-        td
-            [ tdClass isActive
-            , tdStyle
-            , Events.onClick (config.toMsg { gridOperations | selectedId = Just idx })
-            ]
-            [ column.viewData row ]
+    td
+        [ tdClass isActive
+        , tdStyle
+        , Events.onClick (config.toMsg { gridOperations | selectedId = Just idx })
+        ]
+        [ column.viewData row ]
 
 
 viewTh : State -> Config data msg -> Column data msg -> Html msg
@@ -376,8 +381,10 @@ viewTh gridOperations config column =
                     if Just t == name then
                         if gridOperations.sortAscending then
                             [ text column.headerText, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
+
                         else
                             [ text column.headerText, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
+
                     else
                         [ text column.headerText ]
 
@@ -387,7 +394,7 @@ viewTh gridOperations config column =
         newSortDirection =
             case gridOperations.sortField of
                 Just _ ->
-                    (not gridOperations.sortAscending)
+                    not gridOperations.sortAscending
 
                 Nothing ->
                     gridOperations.sortAscending
@@ -400,14 +407,14 @@ viewTh gridOperations config column =
                 Nothing ->
                     attribute "onclick" ""
     in
-        th [ class ("e-headercell e-default " ++ Functions.defaultString name), getColumnStyle column.columnStyle ]
-            [ div [ class "e-headercelldiv e-gridtooltip", sortClick ] headerContent
-            ]
+    th [ class ("e-headercell e-default " ++ Functions.defaultString name), getColumnStyle column.columnStyle ]
+        [ div [ class "e-headercelldiv e-gridtooltip", sortClick ] headerContent
+        ]
 
 
 viewDropdownTh : Html msg
 viewDropdownTh =
-    th [ class ("e-headercell e-default dropdownColumn"), style [ ( "width", "14px" ) ] ]
+    th [ class "e-headercell e-default dropdownColumn", style [ ( "width", "14px" ) ] ]
         [ div [ class "e-headercelldiv e-gridtooltip" ] []
         ]
 
@@ -498,6 +505,7 @@ rowDropDownDiv idx gridOperations config row =
                         [ ul [ class "e-menu e-js e-widget e-box e-separator" ]
                             (List.map dropDownMenuItem config.rowDropdownItems)
                         ]
+
                     else
                         []
 
@@ -521,14 +529,14 @@ rowDropDownDiv idx gridOperations config row =
         blurEvent =
             Events.onBlur (config.toMsg { gridOperations | openDropdownId = Nothing })
     in
-        div []
-            [ div [ style [ ( "text-align", "right" ) ] ]
-                [ button [ id "contextMenuButton", type_ "button", btnClass, clickEvent, blurEvent, btnStyle ]
-                    [ div [ id "editButtonMenu", dropDownMenuStyle ]
-                        dropMenu
-                    ]
+    div []
+        [ div [ style [ ( "text-align", "right" ) ] ]
+            [ button [ id "contextMenuButton", type_ "button", btnClass, clickEvent, blurEvent, btnStyle ]
+                [ div [ id "editButtonMenu", dropDownMenuStyle ]
+                    dropMenu
                 ]
             ]
+        ]
 
 
 viewToolbar : List (Html msg) -> Html msg
@@ -547,13 +555,14 @@ toolbarButton iconStr event =
         iconStyle =
             if String.contains "e-disable" iconStr then
                 style []
+
             else
                 style [ ( "cursor", "pointer" ) ]
 
         iconClass =
             "e-addnewitem e-toolbaricons e-icon " ++ iconStr
     in
-        a [ class iconClass, Events.onClick event, iconStyle ] []
+    a [ class iconClass, Events.onClick event, iconStyle ] []
 
 
 
@@ -571,6 +580,7 @@ setPagingState gridOperations config page =
                 Previous ->
                     if gridOperations.skip > 0 then
                         gridOperations.skip - 1
+
                     else
                         0
 
@@ -589,7 +599,7 @@ setPagingState gridOperations config page =
                 Last ->
                     (gridOperations.totalRows // gridOperations.rowsPerPage) - 1
     in
-        Events.onClick (config.toMsg { gridOperations | skip = newIndex })
+    Events.onClick (config.toMsg { gridOperations | skip = newIndex })
 
 
 pagingView : State -> Config data msg -> Html msg
@@ -606,12 +616,13 @@ pagingView gridOperations config =
                 activeOrNotText =
                     if skip == gridOperations.skip then
                         "e-currentitem e-active"
+
                     else
                         "e-default"
             in
-                div
-                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), pagingStateClick (Index skip) ]
-                    [ text (toString (skip + 1)) ]
+            div
+                [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), pagingStateClick (Index skip) ]
+                [ text (toString (skip + 1)) ]
 
         rng =
             List.range 0 totalPages
@@ -622,36 +633,42 @@ pagingView gridOperations config =
         firstPageClass =
             if gridOperations.skip >= pageFooterBlockSize then
                 "e-icon e-mediaback e-firstpage e-default"
+
             else
                 "e-icon e-mediaback e-firstpagedisabled e-disable"
 
         leftPageClass =
             if gridOperations.skip > 0 then
                 "e-icon e-arrowheadleft-2x e-prevpage e-default"
+
             else
                 "e-icon e-arrowheadleft-2x e-prevpagedisabled e-disable"
 
         leftPageBlockClass =
             if gridOperations.skip >= pageFooterBlockSize then
                 "e-link e-spacing e-PP e-numericitem e-default"
+
             else
                 "e-link e-nextprevitemdisabled e-disable e-spacing e-PP"
 
         rightPageBlockClass =
             if gridOperations.skip < totalPages - pageFooterBlockSize then
                 "e-link e-NP e-spacing e-numericitem e-default"
+
             else
                 "e-link e-NP e-spacing e-nextprevitemdisabled e-disable"
 
         rightPageClass =
             if gridOperations.skip < totalPages then
                 "e-nextpage e-icon e-arrowheadright-2x e-default"
+
             else
                 "e-icon e-arrowheadright-2x e-nextpagedisabled e-disable"
 
         lastPageClass =
             if gridOperations.skip < totalPages - pageFooterBlockSize then
                 "e-lastpage e-icon e-mediaforward e-default"
+
             else
                 "e-icon e-mediaforward e-animate e-lastpagedisabled e-disable"
 
@@ -664,28 +681,29 @@ pagingView gridOperations config =
                     toString <|
                         if totalPages < 1 then
                             1
+
                         else
                             totalPages + 1
 
                 totalItemsText =
                     toString gridOperations.totalRows
             in
-                currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
+            currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
     in
-        div [ class "e-pager e-js e-pager" ]
-            [ div [ class "e-pagercontainer" ]
-                [ div [ class firstPageClass, pagingStateClick First ] []
-                , div [ class leftPageClass, pagingStateClick Previous ] []
-                , a [ class leftPageBlockClass, pagingStateClick PreviousBlock ] [ text "..." ]
-                , div [ class "e-numericcontainer e-default" ] rng
-                , a [ class rightPageBlockClass, pagingStateClick NextBlock ] [ text "..." ]
-                , div [ class rightPageClass, pagingStateClick Next ] []
-                , div [ class lastPageClass, pagingStateClick Last ] []
-                ]
-            , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
-                [ span [ class "e-pagermsg" ] [ text pagerText ]
-                ]
+    div [ class "e-pager e-js e-pager" ]
+        [ div [ class "e-pagercontainer" ]
+            [ div [ class firstPageClass, pagingStateClick First ] []
+            , div [ class leftPageClass, pagingStateClick Previous ] []
+            , a [ class leftPageBlockClass, pagingStateClick PreviousBlock ] [ text "..." ]
+            , div [ class "e-numericcontainer e-default" ] rng
+            , a [ class rightPageBlockClass, pagingStateClick NextBlock ] [ text "..." ]
+            , div [ class rightPageClass, pagingStateClick Next ] []
+            , div [ class lastPageClass, pagingStateClick Last ] []
             ]
+        , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
+            [ span [ class "e-pagermsg" ] [ text pagerText ]
+            ]
+        ]
 
 
 
