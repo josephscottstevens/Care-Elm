@@ -1,9 +1,10 @@
 port module LastKnownVitals exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
-import Common.Functions as Functions exposing (defaultDate, maybeVal, sendMenuMessage, setUnsavedChanges)
-import Common.Html exposing (InputControlType(DateInput, TextInput), defaultConfig, fullWidth, getValidationErrors, makeControls)
+import Common.Dates as Functions
+import Common.Functions as Functions exposing (maybeVal, sendMenuMessage, setUnsavedChanges)
+import Common.Html exposing (InputControlType(..), defaultConfig, fullWidth, getValidationErrors, makeControls)
 import Common.Table as Table
-import Common.Types exposing (AddEditDataSource, MenuMessage, RequiredType(Optional, Required))
+import Common.Types exposing (AddEditDataSource, MenuMessage, RequiredType(..))
 import Html exposing (Html, button, div, h4, text)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
@@ -11,6 +12,7 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Time
 
 
 port initLastKnownVitals : Maybe String -> Cmd msg
@@ -78,7 +80,9 @@ formInputs editData =
     , TextInput "WT" Required editData.wt (UpdateWt editData)
     , TextInput "HT" Required editData.ht (UpdateHt editData)
     , TextInput "BMI" Required editData.bmi (UpdateBmi editData)
-    , DateInput "Date" Optional (defaultDate editData.date) "DateId"
+
+    -- TODO
+    -- , DateInput "Date" Optional (defaultDate editData.date) "DateId"
     ]
 
 
@@ -142,87 +146,121 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     let
         updateAddNew t =
-            t ! [ setUnsavedChanges True ]
+            ( t
+            , setUnsavedChanges True
+            )
     in
     case msg of
         Load (Ok t) ->
-            { model | rows = t } ! [ Functions.setLoadingStatus False ]
+            ( { model | rows = t }
+            , Functions.setLoadingStatus False
+            )
 
         Load (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         SetTableState newState ->
-            { model | tableState = newState } ! []
+            ( { model | tableState = newState }
+            , Cmd.none
+            )
 
         SendMenuMessage recordId messageType ->
-            model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
+            ( model
+            , sendMenuMessage (MenuMessage messageType recordId Nothing Nothing)
+            )
 
         DeletePrompt row ->
-            model ! [ Functions.deleteDialogShow row.id ]
+            ( model
+            , Functions.deleteDialogShow row.id
+            )
 
         DeleteConfirmed rowId ->
             let
                 rows =
                     model.rows |> List.filter (\t -> t.id /= rowId)
             in
-            { model | rows = rows }
-                ! [ Http.getString ("/People/LastKnownVitalsDelete?id=" ++ toString rowId)
-                        |> Http.send DeleteCompleted
-                  ]
+            ( { model | rows = rows }
+            , Http.getString ("/People/LastKnownVitalsDelete?id=" ++ String.fromInt rowId)
+                |> Http.send DeleteCompleted
+            )
 
         DeleteCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ Functions.displayErrorMessage t, load patientId ]
+                    ( model
+                    , Cmd.batch [ Functions.displayErrorMessage t, load patientId ]
+                    )
 
                 Nothing ->
-                    model ! [ Functions.displaySuccessMessage "Record deleted successfully!" ]
+                    ( model
+                    , Functions.displaySuccessMessage "Record deleted successfully!"
+                    )
 
         DeleteCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         Add ->
-            { model | editData = Just (getEditData Nothing) } ! [ initLastKnownVitals Nothing ]
+            ( { model | editData = Just (getEditData Nothing) }
+            , initLastKnownVitals Nothing
+            )
 
         Edit row ->
             let
                 editData =
                     getEditData (Just row)
             in
-            { model | editData = Just editData } ! [ initLastKnownVitals editData.date ]
+            ( { model | editData = Just editData }
+            , initLastKnownVitals editData.date
+            )
 
         -- edit
         Save editData ->
             if List.length (getValidationErrors (formInputs editData)) > 0 then
-                { model | showValidationErrors = True } ! []
+                ( { model | showValidationErrors = True }
+                , Cmd.none
+                )
 
             else
                 let
                     body =
                         encodeEditData editData patientId
                 in
-                model
-                    ! [ Functions.postRequest body "/People/LastKnownVitalsAddEdit"
-                            |> Http.send SaveCompleted
-                      , setUnsavedChanges False
-                      ]
+                ( model
+                , Cmd.batch
+                    [ Functions.postRequest body "/People/LastKnownVitalsAddEdit"
+                        |> Http.send SaveCompleted
+                    , setUnsavedChanges False
+                    ]
+                )
 
         SaveCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ Functions.displayErrorMessage t ]
+                    ( model
+                    , Functions.displayErrorMessage t
+                    )
 
                 Nothing ->
-                    { model | editData = Nothing }
-                        ! [ Functions.displaySuccessMessage "Save completed successfully!"
-                          , load patientId
-                          ]
+                    ( { model | editData = Nothing }
+                    , Cmd.batch
+                        [ Functions.displaySuccessMessage "Save completed successfully!"
+                        , load patientId
+                        ]
+                    )
 
         SaveCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         Cancel ->
-            { model | editData = Nothing } ! [ setUnsavedChanges False ]
+            ( { model | editData = Nothing }
+            , setUnsavedChanges False
+            )
 
         UpdateBp editData t ->
             updateAddNew { model | editData = Just { editData | bp = Just t } }
@@ -254,7 +292,7 @@ update msg model patientId =
                     updateAddNew { model | editData = Just { editData | date = t } }
 
                 Nothing ->
-                    Debug.crash "whoops"
+                    Debug.todo "whoops"
 
 
 gridConfig : Table.Config Row Msg
@@ -339,7 +377,7 @@ encodeEditData newRecord patientId =
 
 decodeHospitilizationsRow : Decode.Decoder Row
 decodeHospitilizationsRow =
-    Pipeline.decode Row
+    Decode.succeed Row
         |> Pipeline.required "Id" Decode.int
         |> Pipeline.required "BP" (Decode.maybe Decode.string)
         |> Pipeline.required "HR" (Decode.maybe Decode.string)
@@ -355,5 +393,5 @@ decodeHospitilizationsRow =
 load : Int -> Cmd Msg
 load patientId =
     Decode.list decodeHospitilizationsRow
-        |> Http.get ("/People/LastKnownVitalsGrid?patientId=" ++ toString patientId)
+        |> Http.get ("/People/LastKnownVitalsGrid?patientId=" ++ String.fromInt patientId)
         |> Http.send Load

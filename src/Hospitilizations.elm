@@ -3,7 +3,7 @@ port module Hospitilizations exposing (Model, Msg, emptyModel, init, subscriptio
 import Common.Functions as Functions exposing (defaultString, maybeVal, sendMenuMessage, setUnsavedChanges)
 import Common.Html
     exposing
-        ( InputControlType(AreaInput, CheckInput, DateInput, DropInput, DropInputWithButton, KnockInput, TextInput)
+        ( InputControlType(..)
         , defaultConfig
         , fullWidth
         , getValidationErrors
@@ -11,7 +11,7 @@ import Common.Html
         )
 import Common.Route as Route
 import Common.Table as Table
-import Common.Types exposing (AddEditDataSource, DropdownItem, MenuMessage, RequiredType(Optional, Required))
+import Common.Types exposing (AddEditDataSource, DropdownItem, MenuMessage, RequiredType(..))
 import Html exposing (Html, button, div, h4, text)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
@@ -177,89 +177,133 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     let
         updateAddNew t =
-            t ! [ setUnsavedChanges True ]
+            ( t
+            , setUnsavedChanges True
+            )
     in
     case msg of
         Load (Ok t) ->
-            getLoadedState model t ! [ Functions.setLoadingStatus False ]
+            ( getLoadedState model t
+            , Functions.setLoadingStatus False
+            )
 
         Load (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         SetTableState newState ->
-            { model | tableState = newState } ! []
+            ( { model | tableState = newState }
+            , Cmd.none
+            )
 
         SendMenuMessage recordId messageType ->
-            model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
+            ( model
+            , sendMenuMessage (MenuMessage messageType recordId Nothing Nothing)
+            )
 
         DeletePrompt row ->
-            model ! [ Functions.deleteDialogShow row.id ]
+            ( model
+            , Functions.deleteDialogShow row.id
+            )
 
         DeleteHospitilizationConfirmed rowId ->
             let
                 newHospitilizations =
                     model.rows |> List.filter (\t -> t.id /= rowId)
             in
-            { model | rows = newHospitilizations }
-                ! [ deleteHospitilization rowId DeleteCompleted ]
+            ( { model | rows = newHospitilizations }
+            , deleteHospitilization rowId DeleteCompleted
+            )
 
         DeleteCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ Functions.displayErrorMessage t, load patientId ]
+                    ( model
+                    , Cmd.batch [ Functions.displayErrorMessage t, load patientId ]
+                    )
 
                 Nothing ->
-                    model ! [ Functions.displaySuccessMessage "Record deleted successfully!" ]
+                    ( model
+                    , Functions.displaySuccessMessage "Record deleted successfully!"
+                    )
 
         DeleteCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         Add addEditDataSource ->
             let
                 editData =
                     getEditData addEditDataSource Nothing
             in
-            { model | editData = Just editData } ! [ initHospitilizations editData.sfData ]
+            ( { model | editData = Just editData }
+            , initHospitilizations editData.sfData
+            )
 
         Edit addEditDataSource row ->
             let
                 editData =
                     getEditData addEditDataSource (Just row)
             in
-            { model | editData = Just editData } ! [ initHospitilizations editData.sfData ]
+            ( { model | editData = Just editData }
+            , initHospitilizations editData.sfData
+            )
 
         -- edit
         Save editData ->
             if List.length (getValidationErrors (formInputs editData)) > 0 then
-                { model | showValidationErrors = True } ! []
+                ( { model | showValidationErrors = True }
+                , Cmd.none
+                )
 
             else
-                model
-                    ! [ "/People/AddEditHospitilization"
-                            |> Functions.postRequest (encodeEditData editData patientId)
-                            |> Http.send SaveCompleted
-                      , setUnsavedChanges False
-                      ]
+                ( model
+                , Cmd.batch
+                    [ "/People/AddEditHospitilization"
+                        |> Functions.postRequest (encodeEditData editData patientId)
+                        |> Http.send SaveCompleted
+                    , setUnsavedChanges False
+                    ]
+                )
 
         SaveCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ Functions.displayErrorMessage t ]
+                    ( model
+                    , Functions.displayErrorMessage t
+                    )
 
                 Nothing ->
-                    model
-                        ! [ Functions.displaySuccessMessage "Save completed successfully!"
-                          , Route.modifyUrl Route.Hospitilizations
-                          ]
+                    ( model
+                    , Cmd.batch
+                        [ Functions.displaySuccessMessage "Save completed successfully!"
+
+                        --TODO, what was this doing?
+                        -- , Route.modifyUrl Route.Hospitilizations
+                        ]
+                    )
 
         SaveCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         NoOp ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         Cancel ->
-            model ! [ setUnsavedChanges False, Route.modifyUrl Route.Hospitilizations ]
+            ( model
+            , Cmd.batch
+                [ setUnsavedChanges False
+
+                --TODO, what was this doing?
+                -- Route.modifyUrl Route.Hospitilizations
+                ]
+            )
 
         UpdateHospitilizationsInitData sfData ->
             let
@@ -271,7 +315,9 @@ update msg model patientId =
                         Nothing ->
                             Nothing
             in
-            { model | editData = newEditData } ! []
+            ( { model | editData = newEditData }
+            , Cmd.none
+            )
 
         UpdatePatientReported editData t ->
             updateAddNew { model | editData = Just { editData | patientReported = t } }
@@ -336,7 +382,7 @@ gridConfig addEditDataSource =
 
 decodeRow : Decode.Decoder Row
 decodeRow =
-    Pipeline.decode Row
+    Decode.succeed Row
         |> Pipeline.required "Id" Decode.int
         |> Pipeline.required "FacilityName" (Decode.maybe Decode.string)
         |> Pipeline.required "DateOfAdmission" (Decode.maybe Decode.string)
@@ -362,9 +408,9 @@ decodeRow =
         |> Pipeline.required "DateOfDischarge2" (Decode.maybe Decode.string)
 
 
-deleteHospitilization : a -> (Result Http.Error String -> msg) -> Cmd msg
+deleteHospitilization : Int -> (Result Http.Error String -> msg) -> Cmd msg
 deleteHospitilization rowId deleteCompleted =
-    Http.send deleteCompleted <| Http.getString ("/People/DeleteHospitilization?id=" ++ toString rowId)
+    Http.send deleteCompleted <| Http.getString ("/People/DeleteHospitilization?id=" ++ String.fromInt rowId)
 
 
 getLoadedState : Model -> List Row -> Model
@@ -481,5 +527,5 @@ encodeEditData newRecord patientId =
 load : Int -> Cmd Msg
 load patientId =
     Decode.list decodeRow
-        |> Http.get ("/People/HospitilizationsGrid?patientId=" ++ toString patientId)
+        |> Http.get ("/People/HospitilizationsGrid?patientId=" ++ String.fromInt patientId)
         |> Http.send Load

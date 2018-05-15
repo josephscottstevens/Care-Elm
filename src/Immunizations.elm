@@ -1,9 +1,9 @@
 module Immunizations exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
 import Common.Functions as Functions exposing (maybeVal, sendMenuMessage, setUnsavedChanges)
-import Common.Html exposing (InputControlType(TextInput), defaultConfig, fullWidth, getValidationErrors, makeControls)
+import Common.Html exposing (InputControlType(..), defaultConfig, fullWidth, getValidationErrors, makeControls)
 import Common.Table as Table
-import Common.Types exposing (AddEditDataSource, MenuMessage, RequiredType(Optional, Required))
+import Common.Types exposing (AddEditDataSource, MenuMessage, RequiredType(..))
 import Html exposing (Html, button, div, h4, text)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
@@ -115,80 +115,114 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     let
         updateAddNew t =
-            t ! [ setUnsavedChanges True ]
+            ( t
+            , setUnsavedChanges True
+            )
     in
     case msg of
         Load (Ok t) ->
-            { model | rows = t } ! [ Functions.setLoadingStatus False ]
+            ( { model | rows = t }
+            , Functions.setLoadingStatus False
+            )
 
         Load (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         SetTableState newState ->
-            { model | tableState = newState } ! []
+            ( { model | tableState = newState }
+            , Cmd.none
+            )
 
         SendMenuMessage recordId messageType ->
-            model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
+            ( model
+            , sendMenuMessage (MenuMessage messageType recordId Nothing Nothing)
+            )
 
         DeletePrompt row ->
-            model ! [ Functions.deleteDialogShow row.id ]
+            ( model
+            , Functions.deleteDialogShow row.id
+            )
 
         DeleteConfirmed rowId ->
             let
                 rows =
                     model.rows |> List.filter (\t -> t.id /= rowId)
             in
-            { model | rows = rows }
-                ! [ Http.getString ("/People/ImmunizationsDelete?id=" ++ toString rowId)
-                        |> Http.send DeleteCompleted
-                  ]
+            ( { model | rows = rows }
+            , Http.getString ("/People/ImmunizationsDelete?id=" ++ String.fromInt rowId)
+                |> Http.send DeleteCompleted
+            )
 
         DeleteCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ Functions.displayErrorMessage t, load patientId ]
+                    ( model
+                    , Cmd.batch [ Functions.displayErrorMessage t, load patientId ]
+                    )
 
                 Nothing ->
-                    model ! [ Functions.displaySuccessMessage "Record deleted successfully!" ]
+                    ( model
+                    , Functions.displaySuccessMessage "Record deleted successfully!"
+                    )
 
         DeleteCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         Add ->
-            { model | editData = Just (getEditData Nothing) } ! []
+            ( { model | editData = Just (getEditData Nothing) }
+            , Cmd.none
+            )
 
         Edit row ->
-            { model | editData = Just (getEditData (Just row)) } ! []
+            ( { model | editData = Just (getEditData (Just row)) }
+            , Cmd.none
+            )
 
         -- edit
         Save editData ->
             if List.length (getValidationErrors (formInputs editData)) > 0 then
-                { model | showValidationErrors = True } ! []
+                ( { model | showValidationErrors = True }
+                , Cmd.none
+                )
 
             else
-                model
-                    ! [ "/People/ImmunizationsAddEdit"
-                            |> Functions.postRequest (encodeEditData editData patientId)
-                            |> Http.send SaveCompleted
-                      , setUnsavedChanges False
-                      ]
+                ( model
+                , Cmd.batch
+                    [ "/People/ImmunizationsAddEdit"
+                        |> Functions.postRequest (encodeEditData editData patientId)
+                        |> Http.send SaveCompleted
+                    , setUnsavedChanges False
+                    ]
+                )
 
         SaveCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ Functions.displayErrorMessage t ]
+                    ( model
+                    , Functions.displayErrorMessage t
+                    )
 
                 Nothing ->
-                    { model | editData = Nothing }
-                        ! [ Functions.displaySuccessMessage "Save completed successfully!"
-                          , load patientId
-                          ]
+                    ( { model | editData = Nothing }
+                    , Cmd.batch
+                        [ Functions.displaySuccessMessage "Save completed successfully!"
+                        , load patientId
+                        ]
+                    )
 
         SaveCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         Cancel ->
-            { model | editData = Nothing } ! [ setUnsavedChanges False ]
+            ( { model | editData = Nothing }
+            , setUnsavedChanges False
+            )
 
         UpdateVaccination editData t ->
             updateAddNew { model | editData = Just { editData | vaccination = Just t } }
@@ -269,7 +303,7 @@ encodeEditData newRecord patientId =
 
 decodeHospitilizationsRow : Decode.Decoder Row
 decodeHospitilizationsRow =
-    Pipeline.decode Row
+    Decode.succeed Row
         |> Pipeline.required "Id" Decode.int
         |> Pipeline.required "Vaccination" (Decode.maybe Decode.string)
         |> Pipeline.required "Year" (Decode.maybe Decode.string)
@@ -280,5 +314,5 @@ decodeHospitilizationsRow =
 load : Int -> Cmd Msg
 load patientId =
     Decode.list decodeHospitilizationsRow
-        |> Http.get ("/People/ImmunizationsGrid?patientId=" ++ toString patientId)
+        |> Http.get ("/People/ImmunizationsGrid?patientId=" ++ String.fromInt patientId)
         |> Http.send Load

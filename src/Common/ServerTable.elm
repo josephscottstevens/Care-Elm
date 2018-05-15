@@ -5,7 +5,7 @@ port module Common.ServerTable
         , Config
         , Filter
         , FilterControl(..)
-        , IdAttrType(IdAttr)
+        , IdAttrType(..)
         , Operator(..)
         , ServerData
         , State
@@ -29,6 +29,7 @@ port module Common.ServerTable
         , view
         )
 
+import Common.Dates as Functions
 import Common.Functions as Functions
 import Html exposing (Attribute, Html, a, button, div, input, li, span, table, tbody, td, text, th, thead, tr, ul)
 import Html.Attributes exposing (attribute, checked, class, classList, colspan, disabled, href, id, style, target, type_)
@@ -36,6 +37,7 @@ import Html.Events as Events
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Time exposing (Posix)
 
 
 port initFilters : List Filter -> Cmd msg
@@ -82,8 +84,8 @@ type IdAttrType
     = IdAttr String
 
 
-idAttr : IdAttrType -> String
-idAttr t =
+toIdAttr : IdAttrType -> String
+toIdAttr t =
     case t of
         IdAttr str ->
             Functions.idAttr str
@@ -121,10 +123,17 @@ intColumn headerText data columnStyle dataField =
     }
 
 
-dateColumn : String -> (data -> Maybe String) -> ColumnStyle -> String -> Column data msg
+dateColumn : String -> (data -> Maybe Posix) -> ColumnStyle -> String -> Column data msg
 dateColumn headerText data columnStyle dataField =
     { headerText = headerText
-    , viewData = data >> (\t -> text (Functions.defaultDate t))
+    , viewData =
+        data
+            >> (\t ->
+                    t
+                        |> Maybe.map Functions.dateToString
+                        |> Maybe.withDefault ""
+                        |> text
+               )
     , columnStyle = columnStyle
     , filterControl = DateControl
     , operator = Equals dataField
@@ -132,10 +141,17 @@ dateColumn headerText data columnStyle dataField =
     }
 
 
-dateTimeColumn : String -> (data -> Maybe String) -> ColumnStyle -> String -> Column data msg
+dateTimeColumn : String -> (data -> Maybe Posix) -> ColumnStyle -> String -> Column data msg
 dateTimeColumn headerText data columnStyle dataField =
     { headerText = headerText
-    , viewData = data >> (\t -> text (Functions.defaultDateTime t))
+    , viewData =
+        data
+            >> (\t ->
+                    t
+                        |> Maybe.map Functions.dateTimeToString
+                        |> Maybe.withDefault ""
+                        |> text
+               )
     , columnStyle = columnStyle
     , filterControl = DateTimeControl
     , operator = Equals dataField
@@ -174,7 +190,7 @@ checkColumn headerText data columnStyle dataField =
 viewCheckColumn : Bool -> Html msg
 viewCheckColumn isChecked =
     div [ class "e-checkcell" ]
-        [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
+        [ div [ class "e-checkcelldiv", style "text-align" "center" ]
             [ input [ type_ "checkbox", disabled True, checked isChecked ] []
             ]
         ]
@@ -266,7 +282,7 @@ view : State -> Config data msg -> List data -> Maybe (Html msg) -> Html msg
 view gridOperations config rows maybeCustomRow =
     div [ class "e-grid e-js e-waitingpopup" ]
         [ viewToolbar config.toolbar
-        , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
+        , table [ id config.domTableId, class "e-table", style "border-collapse" "collapse" ]
             [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
                 [ tr [] (List.map (viewTh gridOperations config) config.columns ++ [ viewDropdownTh ])
                 , tr [] (List.map viewThFilter config.columns)
@@ -282,51 +298,47 @@ viewTr : State -> Config data msg -> List data -> Maybe (Html msg) -> List (Html
 viewTr gridOperations config rows maybeCustomRow =
     let
         selectedStyle idx =
-            style
-                (if Just idx == gridOperations.selectedId then
-                    [ ( "background-color", "#66aaff" )
-                    , ( "background", "#66aaff" )
-                    ]
+            if Just idx == gridOperations.selectedId then
+                [ style "background-color" "#66aaff"
+                , style "background" "#66aaff"
+                ]
 
-                 else
-                    [ ( "", "" ) ]
-                )
+            else
+                [ style "" "" ]
 
         rowClass ctr =
             classList
-                [ ( "e-row", ctr % 2 == 0 )
-                , ( "e-alt_row", ctr % 2 == 1 )
+                [ ( "e-row", modBy ctr 2 == 0 )
+                , ( "e-alt_row", modBy ctr 2 == 1 )
                 ]
 
         standardTr ctr row =
             tr
-                [ rowClass ctr
-                , selectedStyle ctr
-                ]
+                ([ rowClass ctr
+                 ]
+                    ++ selectedStyle ctr
+                )
                 (List.map (viewTd ctr gridOperations config row) config.columns ++ [ rowDropDownDiv ctr gridOperations config row ])
 
         customRowStyle =
             if List.length rows == 0 then
-                style []
+                [ style "" "" ]
 
             else
-                style
-                    [ ( "border-bottom-color", "#cecece" )
-                    , ( "border-bottom-width", "1px" )
-                    , ( "border-bottom-style", "solid" )
-                    ]
-
-        customCellStyle =
-            style
-                [ ( "background-color", "white" )
-                , ( "padding-top", "10px" )
-                , ( "margin-left", "5px" )
+                [ style "border-bottom-color" "#cecece"
+                , style "border-bottom-width" "1px"
+                , style "border-bottom-style" "solid"
                 ]
     in
     case maybeCustomRow of
         Just customRow ->
-            tr [ customRowStyle ]
-                [ td [ colspan (List.length config.columns), customCellStyle ]
+            tr customRowStyle
+                [ td
+                    [ colspan (List.length config.columns)
+                    , style "background-color" "white"
+                    , style "padding-top" "10px"
+                    , style "margin-left" "5px"
+                    ]
                     [ customRow ]
                 ]
                 :: List.indexedMap standardTr rows
@@ -352,7 +364,7 @@ tdClass isActive =
 
 tdStyle : Attribute msg
 tdStyle =
-    style [ ( "padding-left", "8.4px" ) ]
+    style "padding-left" "8.4px"
 
 
 viewTd : Int -> State -> Config data msg -> data -> Column data msg -> Html msg
@@ -407,14 +419,14 @@ viewTh gridOperations config column =
                 Nothing ->
                     attribute "onclick" ""
     in
-    th [ class ("e-headercell e-default " ++ Functions.defaultString name), getColumnStyle column.columnStyle ]
+    th ([ class ("e-headercell e-default " ++ Functions.defaultString name) ] ++ getColumnStyle column.columnStyle)
         [ div [ class "e-headercelldiv e-gridtooltip", sortClick ] headerContent
         ]
 
 
 viewDropdownTh : Html msg
 viewDropdownTh =
-    th [ class "e-headercell e-default dropdownColumn", style [ ( "width", "14px" ) ] ]
+    th [ class "e-headercell e-default dropdownColumn", style "width" "14px" ]
         [ div [ class "e-headercelldiv e-gridtooltip" ] []
         ]
 
@@ -423,7 +435,7 @@ viewThFilter : Column data msg -> Html msg
 viewThFilter column =
     th [ class "e-filterbarcell e-fltrtemp" ]
         [ div [ class "e-filterdiv e-fltrtempdiv" ]
-            [ input [ id (idAttr column.idAttr) ] []
+            [ input [ id (toIdAttr column.idAttr) ] []
             ]
         ]
 
@@ -437,17 +449,17 @@ textHtml t =
         []
 
 
-getColumnStyle : ColumnStyle -> Attribute msg1
+getColumnStyle : ColumnStyle -> List (Attribute msg1)
 getColumnStyle columnStyle =
     case columnStyle of
         NoStyle ->
-            style []
+            [ style "" "" ]
 
         Width int ->
-            style [ ( "width", toString int ++ "%" ) ]
+            [ style "width" (String.fromInt int ++ "%") ]
 
         CustomStyle list ->
-            style list
+            list |> List.map (\( t, y ) -> style t y)
 
 
 getServerField : Operator -> Maybe String
@@ -488,15 +500,14 @@ rowDropDownDiv idx gridOperations config row =
                     ]
                 ]
 
-        dropDownMenuStyle : Attribute msg
+        dropDownMenuStyle : List (Attribute msg)
         dropDownMenuStyle =
-            style
-                [ ( "z-index", "5000" )
-                , ( "position", "absolute" )
-                , ( "display", "block" )
-                , ( "left", "-173px" )
-                , ( "width", "178.74px" )
-                ]
+            [ style "z-index" "5000"
+            , style "position" "absolute"
+            , style "display" "block"
+            , style "left" "-173px"
+            , style "width" "178.74px"
+            ]
 
         dropMenu =
             case gridOperations.openDropdownId of
@@ -516,7 +527,7 @@ rowDropDownDiv idx gridOperations config row =
             class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
 
         btnStyle =
-            style [ ( "position", "relative" ) ]
+            style "position" "relative"
 
         clickEvent =
             case gridOperations.openDropdownId of
@@ -530,9 +541,9 @@ rowDropDownDiv idx gridOperations config row =
             Events.onBlur (config.toMsg { gridOperations | openDropdownId = Nothing })
     in
     div []
-        [ div [ style [ ( "text-align", "right" ) ] ]
+        [ div [ style "text-align" "right" ]
             [ button [ id "contextMenuButton", type_ "button", btnClass, clickEvent, blurEvent, btnStyle ]
-                [ div [ id "editButtonMenu", dropDownMenuStyle ]
+                [ div ([ id "editButtonMenu" ] ++ dropDownMenuStyle)
                     dropMenu
                 ]
             ]
@@ -554,10 +565,10 @@ toolbarButton iconStr event =
     let
         iconStyle =
             if String.contains "e-disable" iconStr then
-                style []
+                style "" ""
 
             else
-                style [ ( "cursor", "pointer" ) ]
+                style "cursor" "pointer"
 
         iconClass =
             "e-addnewitem e-toolbaricons e-icon " ++ iconStr
@@ -622,7 +633,7 @@ pagingView gridOperations config =
             in
             div
                 [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText), pagingStateClick (Index skip) ]
-                [ text (toString (skip + 1)) ]
+                [ text (String.fromInt (skip + 1)) ]
 
         rng =
             List.range 0 totalPages
@@ -675,10 +686,10 @@ pagingView gridOperations config =
         pagerText =
             let
                 currentPageText =
-                    toString (gridOperations.skip + 1)
+                    String.fromInt (gridOperations.skip + 1)
 
                 totalPagesText =
-                    toString <|
+                    String.fromInt <|
                         if totalPages < 1 then
                             1
 
@@ -686,7 +697,7 @@ pagingView gridOperations config =
                             totalPages + 1
 
                 totalItemsText =
-                    toString gridOperations.totalRows
+                    String.fromInt gridOperations.totalRows
             in
             currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
     in
@@ -700,7 +711,7 @@ pagingView gridOperations config =
             , div [ class rightPageClass, pagingStateClick Next ] []
             , div [ class lastPageClass, pagingStateClick Last ] []
             ]
-        , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
+        , div [ class "e-parentmsgbar", style "text-align" "right" ]
             [ span [ class "e-pagermsg" ] [ text pagerText ]
             ]
         ]
@@ -723,10 +734,10 @@ updateFromServer serverData dt =
 encodeFilter : Filter -> Encode.Value
 encodeFilter filter =
     Encode.object
-        [ ( "names", Encode.list (List.map Encode.string filter.names) )
+        [ ( "names", Encode.list Encode.string filter.names )
         , ( "controlType", Encode.string filter.controlType )
-        , ( "values", Encode.list (List.map Encode.string filter.values) )
-        , ( "expressions", Encode.list (List.map Encode.string filter.expressions) )
+        , ( "values", Encode.list Encode.string filter.values )
+        , ( "expressions", Encode.list Encode.string filter.expressions )
         ]
 
 
@@ -738,13 +749,13 @@ encodeGridOperations gridOperations =
         , ( "TotalRows", Encode.int gridOperations.totalRows )
         , ( "SortField", Functions.maybeVal Encode.string gridOperations.sortField )
         , ( "SortAscending", Encode.bool gridOperations.sortAscending )
-        , ( "filters", Encode.list (List.map encodeFilter gridOperations.filters) )
+        , ( "filters", Encode.list encodeFilter gridOperations.filters )
         ]
 
 
 decodeGridOperations : Decode.Decoder ServerData
 decodeGridOperations =
-    Pipeline.decode ServerData
+    Decode.succeed ServerData
         |> Pipeline.required "Skip" Decode.int
         |> Pipeline.required "RowsPerPage" Decode.int
         |> Pipeline.required "TotalRows" Decode.int
@@ -828,7 +839,7 @@ buildFilter columns =
         |> List.map
             (\column ->
                 { controlType = getControlString column.filterControl
-                , columnId = idAttr column.idAttr
+                , columnId = toIdAttr column.idAttr
                 , names = getNames column.operator
                 , values = List.map (\_ -> "") (getNames column.operator)
                 , expressions = getOperators column.operator

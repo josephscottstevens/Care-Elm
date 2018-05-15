@@ -1,10 +1,10 @@
 module Billing exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
+import Common.Dates as Functions
 import Common.Dialog as Dialog
 import Common.Functions as Functions
-import Common.ServerTable as Table exposing (ColumnStyle(CustomStyle, Width), IdAttrType(IdAttr), Operator(..))
+import Common.ServerTable as Table exposing (ColumnStyle(..), IdAttrType(..), Operator(..))
 import Common.Types exposing (AddEditDataSource)
-import Date exposing (Date)
 import Dialogs.InvoiceReportsDialog as InvoiceReportsDialog
 import Html exposing (Html, button, div, input, text)
 import Html.Attributes exposing (attribute, checked, class, style, title, type_)
@@ -14,6 +14,7 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 import Task
+import Time
 
 
 init : Int -> Cmd Msg
@@ -94,7 +95,7 @@ columns =
     let
         checkHelper t =
             div [ class "e-checkcell" ]
-                [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
+                [ div [ class "e-checkcelldiv", style "text-align" "center" ]
                     [ input (type_ "checkbox" :: t) []
                     ]
                 ]
@@ -130,19 +131,17 @@ columns =
             else
                 text ""
 
-        billingDate t =
-            t.billingDate
-                |> Functions.formatDateTime "MMMM YYYY"
-                |> Maybe.withDefault ""
-                |> text
-
-        timeSpent t =
-            t.totalTimeSpent
-                |> Maybe.map Functions.ticksToSeconds
-                |> Maybe.map Functions.secondsToHHMMSS
-
+        -- billingDate t =
+        --     t.billingDate
+        --         |> Functions.formatDateTime "MMMM YYYY"
+        --         |> Maybe.withDefault ""
+        --         |> text
+        -- timeSpent t =
+        --     t.totalTimeSpent
+        --         |> Maybe.map Functions.ticksToSeconds
+        --         |> Maybe.map Functions.secondsToHHMMSS
         openTasks t =
-            Just (toString t.openTasks ++ " Tasks")
+            Just (String.fromInt t.openTasks ++ " Tasks")
 
         filterStyle =
             CustomStyle
@@ -154,15 +153,19 @@ columns =
     , Table.htmlColumn "Reviewed" toggleReviewed (Width 4) Table.CheckBoxControl (Equals "IsReviewed") (IdAttr "reviewedColumn")
     , Table.htmlColumn "Batch Close" batchClose (Width 4) Table.CheckBoxControl (Equals "BatchCloseOnInvoiceCompletion") (IdAttr "batchCloseColumn")
     , Table.stringColumn "Facility" .facility (Width 9) "Facility"
-    , Table.htmlColumn "Billing Date" billingDate (Width 5) Table.Last60MonthsControl (Between "BillingDate" "BillingDate") (IdAttr "billingDateColumn")
+
+    -- , Table.htmlColumn "Billing Date" billingDate (Width 5) Table.Last60MonthsControl (Between "BillingDate" "BillingDate") (IdAttr "billingDateColumn")
     , Table.stringColumn "Main Provider" .mainProvider (Width 5) "MainProvider"
     , Table.stringColumn "Patient Name" .patientName (Width 5) "PatientName"
-    , Table.dateColumn "DOB" .dob (Width 5) "DoB"
+
+    -- , Table.dateColumn "DOB" .dob (Width 5) "DoB"
     , Table.stringColumn "Patient's Facility Id" .patientFacilityIdNo (Width 5) "PatientFacilityIdNo"
     , Table.stringColumn "AssignedTo" .assignedTo (Width 5) "AssignedTo"
-    , Table.stringColumn "Time Spent" timeSpent (Width 4) "TotalTimeSpent"
-    , Table.hrefColumn "Open Tasks" (\t -> ( openTasks t, toString t.openTasks ++ " Tasks" )) (Width 3) "OpenTasks"
-    , Table.dateColumn "CCM Enrollment" .ccmRegistrationDate (Width 5) "CcmRegistrationDate"
+
+    -- , Table.stringColumn "Time Spent" timeSpent (Width 4) "TotalTimeSpent"
+    , Table.hrefColumn "Open Tasks" (\t -> ( openTasks t, String.fromInt t.openTasks ++ " Tasks" )) (Width 3) "OpenTasks"
+
+    -- , Table.dateColumn "CCM Enrollment" .ccmRegistrationDate (Width 5) "CcmRegistrationDate"
     , Table.stringColumn "Billing Codes" .billingCode (Width 3) "BillingCode"
     , Table.htmlColumn "Dx CP RC Al Rx VS" dxCpRcAlRxVs filterStyle Table.SixCirclesControl dxCpRcAlRxVsOperator (IdAttr "presentFlagsColumn")
     ]
@@ -173,13 +176,16 @@ dxCpRcAlRxVs row =
     let
         getStyle t =
             if t then
-                style [ ( "background-color", "currentColor" ) ]
+                [ style "background-color" "currentColor"
+                ]
 
             else
-                style [ ( "background-color", "white" ), ( "border", "1.4px solid" ) ]
+                [ style "background-color" "white"
+                , style "border" "1.4px solid"
+                ]
 
         fullCircle ( t, titleText ) =
-            div [ title titleText, class "circle", getStyle t ] []
+            div ([ title titleText, class "circle" ] ++ getStyle t) []
     in
     [ ( row.dxPresent, "Chronic Diagnoses present?" )
     , ( row.carePlanPresent, "Care Plan present?" )
@@ -194,7 +200,7 @@ dxCpRcAlRxVs row =
 
 type Msg
     = Load (Result Http.Error LoadResult)
-    | GetDate Date
+    | GetDate Time.Posix
     | SetGridOperations Table.State
     | UpdateFilters (List Table.Filter)
     | GenerateSummaryReport Row
@@ -234,48 +240,54 @@ update msg model patientId =
     in
     case msg of
         Load (Ok t) ->
-            { model | rows = t.result, gridOperations = Table.updateFromServer t.serverData model.gridOperations }
-                ! [ Task.perform GetDate Date.now ]
+            ( { model | rows = t.result, gridOperations = Table.updateFromServer t.serverData model.gridOperations }
+            , Task.perform GetDate Time.now
+            )
 
         Load (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         GetDate dt ->
-            { model
-                | currentMonth = Just (dt |> Functions.getMonthIndex)
-                , currentYear = Just (Date.year dt)
-            }
-                ! []
+            ( { model
+                | currentMonth = Just (Functions.monthIndex dt)
+                , currentYear = Just (Time.toYear Time.utc dt)
+              }
+            , Cmd.none
+            )
 
         SetGridOperations gridOperations ->
-            { model | gridOperations = gridOperations }
-                ! [ load patientId gridOperations ]
+            ( { model | gridOperations = gridOperations }
+            , load patientId gridOperations
+            )
 
         UpdateFilters filters ->
             let
                 gridOperations =
                     Table.updateFilter filters model.gridOperations
             in
-            { model | gridOperations = gridOperations }
-                ! [ load patientId gridOperations ]
+            ( { model | gridOperations = gridOperations }
+            , load patientId gridOperations
+            )
 
         GenerateSummaryReport row ->
-            Debug.crash "todo"
+            Debug.todo "todo"
 
         ToggleBatchClose row ->
-            model
-                ! [ "/Phase2Billing/ToggleBatchInvoice"
-                        |> Functions.postRequest
-                            (Encode.object [ ( "billingId", Encode.int row.id ) ])
-                        |> Http.send ToggleBatchCloseDone
-                  ]
+            ( model
+            , "/Phase2Billing/ToggleBatchInvoice"
+                |> Functions.postRequest
+                    (Encode.object [ ( "billingId", Encode.int row.id ) ])
+                |> Http.send ToggleBatchCloseDone
+            )
 
         ToggleBatchCloseDone t ->
             Functions.getRequestCompleted model t
 
         -- Toggle Reviewed
         ShowToggleReviewedDialog row ->
-            { model
+            ( { model
                 | confirmData =
                     Just
                         { data = row
@@ -285,23 +297,24 @@ update msg model patientId =
                         , dialogContent = \_ -> text "Are you sure you wish to change the reviewed status?"
                         , dialogOptions = Dialog.defaultDialogOptions
                         }
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         ConfirmedToggleReviewedDialog row ->
-            { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = False } }
-                ! [ "/Phase2Billing/ToggleBillingRecordReviewed"
-                        |> Functions.postRequest
-                            (Encode.object [ ( "billingId", Encode.int row.id ) ])
-                        |> Http.send RequestToggleReviewedCompleted
-                  ]
+            ( { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = False } }
+            , "/Phase2Billing/ToggleBillingRecordReviewed"
+                |> Functions.postRequest
+                    (Encode.object [ ( "billingId", Encode.int row.id ) ])
+                |> Http.send RequestToggleReviewedCompleted
+            )
 
         RequestToggleReviewedCompleted t ->
             Functions.getRequestCompleted model t
 
         -- Save Summary Report
         ShowSaveSummaryReportDialog row ->
-            { model
+            ( { model
                 | confirmData =
                     Just
                         { data = row
@@ -311,46 +324,49 @@ update msg model patientId =
                         , dialogContent = \_ -> text "Are you sure that you want to save this report in Clinical Portal?"
                         , dialogOptions = Dialog.defaultDialogOptions
                         }
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         ConfirmedSaveSummaryReportDialog row ->
-            let
-                month =
-                    row.billingDate
-                        |> Maybe.andThen Functions.dateFromString
-                        |> Maybe.map Functions.getMonthIndex
-                        |> Maybe.map toString
-                        |> Maybe.withDefault ""
+            Debug.todo "todo"
 
-                year =
-                    row.billingDate
-                        |> Maybe.andThen Functions.dateFromString
-                        |> Maybe.map Date.year
-                        |> Maybe.map toString
-                        |> Maybe.withDefault ""
-            in
-            { model | confirmData = Nothing }
-                ! [ Functions.getStringRequestWithParams
-                        "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
-                        [ ( "hcoID", toString row.facilityId )
-                        , ( "year", year )
-                        , ( "month", month )
-                        , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
-                        , ( "patientId", toString patientId )
-                        ]
-                        |> Http.send RequestSaveSummaryReportCompleted
-                  ]
-
+        -- let
+        --     month =
+        --         row.billingDate
+        --             |> Maybe.andThen Functions.dateFromString
+        --             |> Maybe.map Functions.monthIndex
+        --             |> Maybe.map String.fromInt
+        --             |> Maybe.withDefault ""
+        --     year =
+        --         row.billingDate
+        --             |> Maybe.andThen Functions.dateFromString
+        --             |> Maybe.map Date.year
+        --             |> Maybe.map String.fromInt
+        --             |> Maybe.withDefault ""
+        -- in
+        -- ( { model | confirmData = Nothing }
+        -- , Functions.getStringRequestWithParams
+        --     "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
+        --     [ ( "hcoID", String.fromInt row.facilityId )
+        --     , ( "year", year )
+        --     , ( "month", month )
+        --     , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
+        --     , ( "patientId", String.fromInt patientId )
+        --     ]
+        --     |> Http.send RequestSaveSummaryReportCompleted
+        -- )
         RequestSaveSummaryReportCompleted t ->
             Functions.getRequestCompleted model t
 
         -- Close Billing Session
         CloseDialogToggleReviewed row ->
-            { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = True } } ! []
+            ( { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = True } }
+            , Cmd.none
+            )
 
         ShowCloseBillingSessionDialog row ->
-            { model
+            ( { model
                 | confirmData =
                     Just
                         { data = row
@@ -360,28 +376,33 @@ update msg model patientId =
                         , dialogContent = \_ -> text "Are you sure that you want to close this bill?"
                         , dialogOptions = Dialog.defaultDialogOptions
                         }
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         ConfirmedCloseBillingSessionDialog row ->
-            { model | confirmData = Nothing }
-                ! [ Functions.getStringRequestWithParams
-                        "/Phase2Billing/CloseBillingSession"
-                        [ ( "billingId", toString row.id ) ]
-                        |> Http.send RequestCloseBillingSessionCompleted
-                  ]
+            ( { model | confirmData = Nothing }
+            , Functions.getStringRequestWithParams
+                "/Phase2Billing/CloseBillingSession"
+                [ ( "billingId", String.fromInt row.id ) ]
+                |> Http.send RequestCloseBillingSessionCompleted
+            )
 
         RequestCloseBillingSessionCompleted requestResponse ->
             case requestResponse of
                 Ok _ ->
-                    model ! [ load patientId model.gridOperations ]
+                    ( model
+                    , load patientId model.gridOperations
+                    )
 
                 Err t ->
-                    model ! [ Functions.displayErrorMessage (toString t) ]
+                    ( model
+                    , Functions.displayError t
+                    )
 
         -- Edit CCM Billing
         ShowEditCCMBillingDialog row ->
-            { model
+            ( { model
                 | confirmData =
                     Just
                         { data = row
@@ -391,34 +412,39 @@ update msg model patientId =
                         , dialogContent = \_ -> text "todo"
                         , dialogOptions = Dialog.defaultDialogOptions
                         }
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         ConfirmedEditCCMBillingDialog row ->
-            Debug.crash "todo"
+            Debug.todo "todo"
 
         RequestEditCCMBillingCompleted t ->
             Functions.getRequestCompleted model t
 
         -- CCM Summary Reports
         ShowCCMSummaryReportsDialog addEditDataSource ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         -- Invoice Reports Dialog
         ShowInvoiceReportsDialog addEditDataSource ->
-            Debug.crash "Todo"
+            Debug.todo "Todo"
 
         UpdateInvoiceReportsDialog invoiceMsg dialogState ->
-            Debug.crash "Todo"
+            Debug.todo "Todo"
 
         -- Common Close Dialog
         CloseDialog ->
-            { model | confirmData = Nothing } ! []
+            ( { model | confirmData = Nothing }
+            , Cmd.none
+            )
 
 
 decodeBillingCcm : Decode.Decoder Row
 decodeBillingCcm =
-    Pipeline.decode Row
+    Decode.succeed Row
         |> Pipeline.required "ID" Decode.int
         |> Pipeline.required "Facility" (Decode.maybe Decode.string)
         |> Pipeline.required "FacilityId" Decode.int
@@ -454,7 +480,7 @@ type alias LoadResult =
 
 jsonDecodeLoad : Decode.Decoder LoadResult
 jsonDecodeLoad =
-    Pipeline.decode LoadResult
+    Decode.succeed LoadResult
         |> Pipeline.required "Data" (Decode.list decodeBillingCcm)
         |> Pipeline.required "GridOperations" Table.decodeGridOperations
 

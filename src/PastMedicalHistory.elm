@@ -1,15 +1,15 @@
 port module PastMedicalHistory exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
-import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
-import Common.Html exposing (InputControlType(AreaInput, ControlElement, DropInput, TextInput), defaultConfig, fullWidth, getValidationErrors, makeControls)
+import Common.Functions as Functions exposing (displaySuccessMessage, maybeVal, sendMenuMessage, setUnsavedChanges)
+import Common.Html exposing (InputControlType(..), defaultConfig, fullWidth, getValidationErrors, makeControls)
 import Common.Table as Table
-import Common.Types exposing (AddEditDataSource, DropdownItem, MenuMessage, RequiredType(Optional, Required))
+import Common.Types exposing (AddEditDataSource, DropdownItem, MenuMessage, RequiredType(..))
 import Html exposing (Html, button, div, h4, input, text)
 import Html.Attributes exposing (class, disabled, style, type_, value)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
 
 
@@ -102,89 +102,131 @@ update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
     case msg of
         LoadData (Ok newData) ->
-            { model | rows = newData } ! []
+            ( { model | rows = newData }
+            , Cmd.none
+            )
 
         LoadData (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         Cancel ->
-            { model | state = Grid } ! []
+            ( { model | state = Grid }
+            , Cmd.none
+            )
 
         Save row ->
             if List.length (getValidationErrors (formInputs row)) > 0 then
-                { model | showValidationErrors = True } ! []
+                ( { model | showValidationErrors = True }
+                , Cmd.none
+                )
 
             else
-                model
-                    ! [ "/People/AddUpdatePastMedicalHistories"
-                            |> Functions.postRequest (encodeNewRow row patientId)
-                            |> Http.send SaveCompleted
-                      , setUnsavedChanges False
-                      ]
+                ( model
+                , Cmd.batch
+                    [ "/People/AddUpdatePastMedicalHistories"
+                        |> Functions.postRequest (encodeNewRow row patientId)
+                        |> Http.send SaveCompleted
+                    , setUnsavedChanges False
+                    ]
+                )
 
         SaveCompleted (Ok _) ->
-            { model | state = Grid } ! [ displaySuccessMessage "Past Medical History Saved Successfully!", load patientId ]
+            ( { model | state = Grid }
+            , Cmd.batch [ displaySuccessMessage "Past Medical History Saved Successfully!", load patientId ]
+            )
 
         SaveCompleted (Err t) ->
-            { model | state = Grid } ! [ displayErrorMessage (toString t), load patientId ]
+            ( { model | state = Grid }
+            , Cmd.batch [ Functions.displayError t, load patientId ]
+            )
 
         Add addEditDataSource ->
-            { model | state = AddEdit (newRecord addEditDataSource Nothing) }
-                ! [ initPastMedicalHistory <| SfData Nothing addEditDataSource.providers ]
+            ( { model | state = AddEdit (emptyNewRecord addEditDataSource Nothing) }
+            , initPastMedicalHistory <| SfData Nothing addEditDataSource.providers
+            )
 
         Edit addEditDataSource row ->
-            { model | state = AddEdit (newRecord addEditDataSource (Just row)) }
-                ! [ initPastMedicalHistory <| SfData row.providerId addEditDataSource.providers ]
+            ( { model | state = AddEdit (emptyNewRecord addEditDataSource (Just row)) }
+            , initPastMedicalHistory <| SfData row.providerId addEditDataSource.providers
+            )
 
         SetTableState newState ->
-            { model | tableState = newState } ! []
+            ( { model | tableState = newState }
+            , Cmd.none
+            )
 
         DeletePrompt row ->
-            model ! [ Functions.deleteDialogShow row.id ]
+            ( model
+            , Functions.deleteDialogShow row.id
+            )
 
         DeletePastMedicalHistoryConfirmed rowId ->
-            { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
-                ! [ Http.send DeleteCompleted <|
-                        Http.getString ("/People/DeletePastMedicalHistory?id=" ++ toString rowId)
-                  ]
+            ( { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
+            , Http.send DeleteCompleted <|
+                Http.getString ("/People/DeletePastMedicalHistory?id=" ++ String.fromInt rowId)
+            )
 
         DeleteCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ Functions.displayErrorMessage t, load patientId ]
+                    ( model
+                    , Cmd.batch [ Functions.displayErrorMessage t, load patientId ]
+                    )
 
                 Nothing ->
-                    model ! [ Functions.displaySuccessMessage "Record deleted successfully!" ]
+                    ( model
+                    , Functions.displaySuccessMessage "Record deleted successfully!"
+                    )
 
         DeleteCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         SendMenuMessage recordId ->
-            model ! [ sendMenuMessage (MenuMessage "PastMedicalHistoryDelete" recordId Nothing Nothing) ]
+            ( model
+            , sendMenuMessage (MenuMessage "PastMedicalHistoryDelete" recordId Nothing Nothing)
+            )
 
         NoOp ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         -- Updates
         UpdateDescription newRecord str ->
-            { model | state = AddEdit { newRecord | description = Just str } } ! []
+            ( { model | state = AddEdit { newRecord | description = Just str } }
+            , Cmd.none
+            )
 
         UpdateYear newRecord str ->
-            { model | state = AddEdit { newRecord | year = Just str } } ! []
+            ( { model | state = AddEdit { newRecord | year = Just str } }
+            , Cmd.none
+            )
 
         UpdateFacility newRecord str ->
-            { model | state = AddEdit { newRecord | facility = Just str } } ! []
+            ( { model | state = AddEdit { newRecord | facility = Just str } }
+            , Cmd.none
+            )
 
         UpdateNotes newRecord str ->
-            { model | state = AddEdit { newRecord | notes = Just str } } ! []
+            ( { model | state = AddEdit { newRecord | notes = Just str } }
+            , Cmd.none
+            )
 
         UpdatePastMedicalHistory sfData ->
             case model.state of
                 Grid ->
-                    model ! []
+                    ( model
+                    , Cmd.none
+                    )
 
                 AddEdit newRecord ->
-                    { model | state = AddEdit { newRecord | sfData = sfData } } ! []
+                    ( { model | state = AddEdit { newRecord | sfData = sfData } }
+                    , Cmd.none
+                    )
 
 
 view : Model -> Maybe AddEditDataSource -> Html Msg
@@ -221,14 +263,16 @@ view model addEditDataSource =
                 ]
 
 
-noteStyle : Html.Attribute msg
+noteStyle : List (Html.Attribute msg)
 noteStyle =
-    style [ ( "color", "#969696" ), ( "font-size", "12px" ) ]
+    [ style "color" "#969696"
+    , style "font-size" "12px"
+    ]
 
 
 formInputs : NewRecord -> List (InputControlType Msg)
 formInputs newRecord =
-    [ ControlElement "" (div [ noteStyle ] [ text "*Records added from the problem list cannot be edited." ])
+    [ ControlElement "" (div noteStyle [ text "*Records added from the problem list cannot be edited." ])
     , AreaInput "Description" Required newRecord.description (UpdateDescription newRecord)
     , TextInput "Year" Optional newRecord.year (UpdateYear newRecord)
     , DropInput "Provider" Optional newRecord.sfData.providerId "MainProviderId"
@@ -243,7 +287,7 @@ formInputs newRecord =
             ]
             []
         )
-    , ControlElement "" (div [ noteStyle ] [ text "*Treatment is deprecated." ])
+    , ControlElement "" (div noteStyle [ text "*Treatment is deprecated." ])
     ]
 
 
@@ -279,7 +323,7 @@ gridConfig addEditDataSource =
 
 decodeRow : Decode.Decoder Row
 decodeRow =
-    decode Row
+    Decode.succeed Row
         |> required "Id" Decode.int
         |> required "Description" (Decode.maybe Decode.string)
         |> required "Year" (Decode.maybe Decode.string)
@@ -306,9 +350,9 @@ encodeNewRow newRecord patientId =
         ]
 
 
-newRecord : AddEditDataSource -> Maybe Row -> NewRecord
-newRecord addEditDataSource row =
-    case row of
+emptyNewRecord : AddEditDataSource -> Maybe Row -> NewRecord
+emptyNewRecord addEditDataSource maybeRow =
+    case maybeRow of
         Just row ->
             { id = Just row.id
             , description = row.description
@@ -346,5 +390,5 @@ emptyModel =
 load : Int -> Cmd Msg
 load patientId =
     Decode.list decodeRow
-        |> Http.get ("/People/PastMedicalHistoriesGrid?patientId=" ++ toString patientId)
+        |> Http.get ("/People/PastMedicalHistoriesGrid?patientId=" ++ String.fromInt patientId)
         |> Http.send LoadData

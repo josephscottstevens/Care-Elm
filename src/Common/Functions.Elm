@@ -1,57 +1,59 @@
-port module Common.Functions
-    exposing
-        ( CustomDialog
-        , customDialogShow
-        , date
-        , dateFromString
-        , dateTime
-        , dateTimeToString
-        , dateToString
-        , decodeDropdownItem
-        , defaultBool
-        , defaultDate
-        , defaultDateTime
-        , defaultInt
-        , defaultIntStr
-        , defaultIntToString
-        , defaultLower
-        , defaultLowerDate
-        , defaultLowerDateTime
-        , defaultMaybeMsg
-        , defaultString
-        , deleteDialogShow
-        , dialogConfirmed
-        , displayErrorMessage
-        , displaySuccessMessage
-        , formatDateTime
-        , getAt
-        , getDesc
-        , getId
-        , getMonthIndex
-        , getRecordTypeById
-        , getRequestCompleted
-        , getRequestWithParams
-        , getResponseError
-        , getResponseProp
-        , getStringRequestWithParams
-        , idAttr
-        , isAlpha
-        , isNumber
-        , maybeStringToInt
-        , maybeVal
-        , noHash
-        , openFile
-        , postRequest
-        , postRequestWithObject
-        , postStringRequestWithObject
-        , secondsToHHMMSS
-        , sendMenuMessage
-        , setLoadingStatus
-        , setUnsavedChanges
-        , ticksToSeconds
-        , uniqueBy
-        , updateRows
-        )
+port module Common.Functions exposing (..)
+
+-- exposing
+--     ( CustomDialog
+--     , customDialogShow
+--     , date
+--     , dateFromString
+--     , dateTime
+--     , dateTimeToString
+--     , dateToString
+--     , decodeDropdownItem
+--     , defaultBool
+--     , defaultDate
+--     , defaultDateTime
+--     , defaultInt
+--     , defaultIntStr
+--     , defaultIntToString
+--     , defaultLower
+--     , defaultLowerDate
+--     , defaultLowerDateTime
+--     , defaultMaybeMsg
+--     , defaultString
+--     , deleteDialogShow
+--     , dialogConfirmed
+--     , displayErrorMessage
+--     , displaySuccessMessage
+--     , formatDateTime
+--     , getAt
+--     , getDesc
+--     , getId
+--     , getMonthIndex
+--     , getRecordTypeById
+--     , getRequestCompleted
+--     , getRequestWithParams
+--     , getResponseError
+--     , getResponseProp
+--     , getStringRequestWithParams
+--     , idAttr
+--     , isAlpha
+--     , isNumber
+--     , maybeStringToInt
+--     , maybeVal
+--     , noHash
+--     , openFile
+--     , postRequest
+--     , postRequestWithObject
+--     , postStringRequestWithObject
+--     , secondsToHHMMSS
+--     , sendMenuMessage
+--     , setLoadingStatus
+--     , setUnsavedChanges
+--     , ticksToSeconds
+--     , uniqueBy
+--     , updateRows
+--     )
+--TODO, remove me
 
 import Char exposing (isLower, isUpper)
 import Common.Types
@@ -59,25 +61,14 @@ import Common.Types
         ( AddEditDataSource
         , DropdownItem
         , MenuMessage
-        , RecordType
-            ( CallRecordings
-            , Enrollment
-            , Hospitalizations
-            , Labs
-            , Legal
-            , Misc
-            , PreviousHistories
-            , PrimaryCare
-            , Radiology
-            , Specialty
-            )
+        , RecordType(..)
         )
-import Date
 import Http
 import Json.Decode as Decode exposing (Decoder, decodeString, field, int, maybe, string)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as Encode
 import Set exposing (Set)
+import Time exposing (Month, Posix, Zone)
 
 
 
@@ -114,6 +105,11 @@ port customDialogConfirmed : (CustomDialog -> msg) -> Sub msg
 
 
 port openFile : String -> Cmd msg
+
+
+displayError : Http.Error -> Cmd msg
+displayError httpError =
+    displayErrorMessage (getError httpError)
 
 
 dialogConfirmed : (Int -> msg) -> Sub msg
@@ -193,58 +189,16 @@ defaultIntToString : Maybe Int -> String
 defaultIntToString int =
     case int of
         Just t ->
-            toString t
+            String.fromInt t
 
         Nothing ->
             ""
 
 
-getMonthIndex : Date.Date -> Int
-getMonthIndex dt =
-    case Date.month dt of
-        Date.Jan ->
-            0
 
-        Date.Feb ->
-            1
-
-        Date.Mar ->
-            2
-
-        Date.Apr ->
-            3
-
-        Date.May ->
-            4
-
-        Date.Jun ->
-            5
-
-        Date.Jul ->
-            6
-
-        Date.Aug ->
-            7
-
-        Date.Sep ->
-            8
-
-        Date.Oct ->
-            9
-
-        Date.Nov ->
-            10
-
-        Date.Dec ->
-            11
-
-
-formatDateTime : String -> Maybe String -> Maybe String
-formatDateTime format maybeStr =
-    Debug.crash "TODO"
-
-
-
+-- formatDateTime : String -> Maybe String -> Maybe String
+-- formatDateTime format maybeStr =
+--     Debug.todo "TODO"
 -- case maybeStr of
 --     Just str ->
 --         case Date.fromString str of
@@ -254,133 +208,69 @@ formatDateTime format maybeStr =
 --                 Nothing
 --     Nothing ->
 --         Nothing
-
-
-dateTimeToString : Date.Date -> String
-dateTimeToString date =
-    Debug.crash "TODO"
-
-
-
--- Common.Date.toUtcFormattedString "MM/dd/yyyy hh:mm:ss a" date
-
-
-dateToString : Date.Date -> String
-dateToString date =
-    Debug.crash "TODO"
-
-
-
--- Common.Date.toUtcFormattedString "MM/dd/yyyy" date
-
-
-dateFromString : String -> Maybe Date.Date
-dateFromString str =
-    case Date.fromString str of
-        Ok t ->
-            Just t
-
-        Err _ ->
-            Nothing
-
-
-dateTime : String -> String
-dateTime str =
-    case Date.fromString str of
-        Ok date ->
-            dateTimeToString date
-
-        Err _ ->
-            ""
-
-
-date : String -> String
-date str =
-    case Date.fromString str of
-        Ok t ->
-            dateToString t
-
-        Err _ ->
-            ""
-
-
-defaultDateTime : Maybe String -> String
-defaultDateTime str =
-    dateTime (defaultString str)
-
-
-defaultDate : Maybe String -> String
-defaultDate str =
-    date (defaultString str)
-
-
-defaultLowerDate : Maybe String -> String
-defaultLowerDate str =
-    String.toLower (date (defaultString str))
-
-
-defaultLowerDateTime : Maybe String -> String
-defaultLowerDateTime str =
-    String.toLower (dateTime (defaultString str))
-
-
-ticksToSeconds : Int -> Int
-ticksToSeconds t =
-    t // 10000000
-
-
-secondsToHHMMSS : Int -> String
-secondsToHHMMSS t =
-    let
-        hours =
-            t // 3600
-
-        minutes =
-            (t - (hours * 3600)) // 60
-
-        seconds =
-            t - (hours * 3600) - (minutes * 60)
-
-        toSpacedString int =
-            if int < 10 then
-                "0" ++ toString int
-
-            else
-                toString int
-
-        pad str =
-            "[" ++ str ++ "]"
-    in
-    [ hours, minutes, seconds ]
-        |> List.map toSpacedString
-        |> List.foldr (\t y -> t ++ ":" ++ y) ""
-        |> String.dropRight 1
-        |> pad
-
-
-defaultIntStr : String -> Int
-defaultIntStr str =
-    case String.toInt str of
-        Ok t ->
-            t
-
-        Err _ ->
-            0
+-- dateFromString : String -> Maybe Date.Date
+-- dateFromString str =
+--     case Date.fromString str of
+--         Ok t ->
+--             Just t
+--         Err _ ->
+--             Nothing
+-- dateTime : String -> String
+-- dateTime str =
+--     case Date.fromString str of
+--         Ok date ->
+--             dateTimeToString date
+--         Err _ ->
+--             ""
+-- date : String -> String
+-- date str =
+--     case Date.fromString str of
+--         Ok t ->
+--             dateToString t
+--         Err _ ->
+--             ""
+-- defaultDateTime : Maybe String -> String
+-- defaultDateTime str =
+--     dateTime (defaultString str)
+-- defaultDate : Maybe String -> String
+-- defaultDate str =
+--     date (defaultString str)
+-- defaultLowerDate : Maybe String -> String
+-- defaultLowerDate str =
+--     String.toLower (date (defaultString str))
+-- defaultLowerDateTime : Maybe String -> String
+-- defaultLowerDateTime str =
+--     String.toLower (dateTime (defaultString str))
+-- ticksToSeconds : Int -> Int
+-- ticksToSeconds t =
+--     t // 10000000
+-- secondsToHHMMSS : Int -> String
+-- secondsToHHMMSS t =
+--     let
+--         hours =
+--             t // 3600
+--         minutes =
+--             (t - (hours * 3600)) // 60
+--         seconds =
+--             t - (hours * 3600) - (minutes * 60)
+--         toSpacedString int =
+--             if int < 10 then
+--                 "0" ++ String.fromInt int
+--             else
+--                 String.fromInt int
+--         pad str =
+--             "[" ++ str ++ "]"
+--     in
+--     [ hours, minutes, seconds ]
+--         |> List.map toSpacedString
+--         |> List.foldr (\t y -> t ++ ":" ++ y) ""
+--         |> String.dropRight 1
+--         |> pad
 
 
 maybeVal : (a -> Encode.Value) -> Maybe a -> Encode.Value
 maybeVal encoder =
     Maybe.map encoder >> Maybe.withDefault Encode.null
-
-
-maybeStringToInt : String -> Maybe Int
-maybeStringToInt str =
-    case String.toInt str of
-        Ok t ->
-            Just t
-
-        Err _ ->
-            Nothing
 
 
 getResponseProp : String -> String -> Maybe String
@@ -411,7 +301,7 @@ getResponseError str =
 
 decodeDropdownItem : Decoder DropdownItem
 decodeDropdownItem =
-    decode DropdownItem
+    Decode.succeed DropdownItem
         |> required "Id" (maybe Decode.int)
         |> required "Name" Decode.string
 
@@ -491,17 +381,45 @@ getStringRequestWithParams url params =
             url ++ "?" ++ urlParam
 
 
-getRequestCompleted : a -> Result b value -> ( a, Cmd msg )
+
+-- getRequestCompleted : a -> Result b value -> ( a, Cmd msg )
+
+
 getRequestCompleted model requestResponse =
     case requestResponse of
         Ok _ ->
-            model ! []
+            ( model, Cmd.none )
 
-        Err t ->
-            model ! [ displayErrorMessage (toString t) ]
+        Err err ->
+            ( model, displayErrorMessage (getError err) )
+
+
+getError : Http.Error -> String
+getError err =
+    case err of
+        Http.BadUrl str ->
+            "Error, Invalid URL: " ++ str
+
+        Http.Timeout ->
+            "Server is running slow, please try again later."
+
+        Http.NetworkError ->
+            "Network Error"
+
+        Http.BadStatus str ->
+            -- case str of
+            --     Http.Response (responseStr) ->
+            "Bad Status: "
+
+        -- ++ responseStr
+        Http.BadPayload str1 str2 ->
+            -- case str2 of
+            -- Http.Response (responseStr) ->
+            "Bad Payload: "
 
 
 
+-- ++ str1 ++ " - " ++ responseStr
 -- Record helpers
 
 

@@ -9,5 +9,7 @@
         "**/node_modules": true,
         "**/elm-stuff": true
     },
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "elm.makeCommand": "C:\\Repos\\Care-Elm\\elm make",
+    "editor.codeActionsOnSaveTimeout": 75000
 }

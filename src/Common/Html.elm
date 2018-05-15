@@ -1,19 +1,6 @@
 module Common.Html
     exposing
-        ( InputControlType
-            ( AreaInput
-            , CheckInput
-            , ControlElement
-            , DateInput
-            , DropInput
-            , DropInputWithButton
-            , Dropdown
-            , FileInput
-            , HtmlElement
-            , KnockInput
-            , NumrInput
-            , TextInput
-            )
+        ( InputControlType(..)
         , controlWidth
         , defaultConfig
         , fullWidth
@@ -75,11 +62,6 @@ controlWidth =
     "col-sm-8 col-md-5 col-lg-4"
 
 
-checkStyle : Html.Attribute msg
-checkStyle =
-    style [ ( "height", "20px" ), ( "width", "20px" ), ( "margin-top", "2px" ) ]
-
-
 type alias Config msg =
     { controlAttributes : List (Html.Attribute msg)
     }
@@ -122,7 +104,7 @@ makeControls config controls =
                                 , nameAttr labelText
                                 , idAttr labelText
                                 , onInput event
-                                , value <| toString displayValue
+                                , value <| String.fromInt displayValue
                                 ]
                                 []
                             ]
@@ -134,7 +116,9 @@ makeControls config controls =
                         , div config.controlAttributes
                             [ input
                                 [ type_ "checkbox"
-                                , checkStyle
+                                , style "height" "20px"
+                                , style "width" "20px"
+                                , style "margin-top" "2px"
                                 , nameAttr labelText
                                 , idAttr labelText
                                 , onCheck event
@@ -192,7 +176,13 @@ makeControls config controls =
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes [ input [ type_ "text", class "e-textbox", value displayValue ] [] ]
                         , div [ class labelWidth ]
-                            [ input [ type_ "file", name "UploadFile", id "UploadFile", style [ ( "display", "none" ) ] ] []
+                            [ input
+                                [ type_ "file"
+                                , name "UploadFile"
+                                , id "UploadFile"
+                                , style "display" "none"
+                                ]
+                                []
                             , label [ for "UploadFile", class "sf-file-upload" ] [ text "Browse Files" ]
                             ]
                         ]
@@ -280,7 +270,7 @@ commonValidation controlType =
             is requiredType <| requiredStr labelText displayValue
 
         NumrInput labelText requiredType displayValue _ ->
-            is requiredType (requiredStr labelText (toString displayValue))
+            is requiredType (requiredStr labelText (String.fromInt displayValue))
 
         CheckInput _ _ _ _ ->
             Nothing

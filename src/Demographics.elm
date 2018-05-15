@@ -54,7 +54,7 @@ subscriptions =
 init : Int -> Cmd Msg
 init patientId =
     decodeServerResponse
-        |> Http.get ("/People/GetDemographicsInformation?patientId=" ++ toString patientId)
+        |> Http.get ("/People/GetDemographicsInformation?patientId=" ++ String.fromInt patientId)
         |> Http.send Load
 
 
@@ -232,32 +232,28 @@ view model =
         ]
 
 
-vertCent : ( String, String )
-vertCent =
-    ( "vertical-align", "middle" )
 
-
-maybeToInt : Maybe String -> Maybe Int
-maybeToInt maybeStr =
-    case maybeStr of
-        Just str ->
-            case String.filter Functions.isNumber str |> String.toInt of
-                Ok t ->
-                    Just t
-
-                Err _ ->
-                    Nothing
-
-        Nothing ->
-            Nothing
+-- maybeToInt : Maybe String -> Maybe Int
+-- maybeToInt maybeStr =
+--     case maybeStr of
+--         Just str ->
+--             case String.filter Functions.isNumber str |> String.toInt of
+--                 Ok t ->
+--                     Just t
+--                 Err _ ->
+--                     Nothing
+--         Nothing ->
+--             Nothing
 
 
 viewLanguages : List DropdownItem -> PatientLanguagesMap -> Html Msg
 viewLanguages dropdownItems lang =
-    div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
+    div [ class "margin-bottom-5", style "width" "350px" ]
         [ div
             [ class "inline-block "
-            , style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ]
+            , style "width" "22px"
+            , style "padding-top" "5px"
+            , style "vertical-align" "middle"
             , title "Mark as preferred"
             ]
             [ input
@@ -270,13 +266,15 @@ viewLanguages dropdownItems lang =
             ]
         , div
             [ class "inline-block"
-            , style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ]
+            , style "width" "calc(100% - 50px)"
+            , style "vertical-align" "middle"
             , title "Choose language"
             ]
             [ Dropdown.view lang.dropState (UpdateLanguage lang) dropdownItems lang.languageId ]
         , div
             [ class "inline-block"
-            , style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ]
+            , style "width" "20px"
+            , style "vertical-align" "middle"
             , title "Remove"
             , onClick (RemoveLanguage lang)
             ]
@@ -287,28 +285,33 @@ viewLanguages dropdownItems lang =
 
 viewPhones : List DropdownItem -> PatientPhoneNumber -> Html Msg
 viewPhones dropdownItems phone =
-    div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
+    div [ class "margin-bottom-5", style "width" "350px" ]
         [ div
             [ class "inline-block "
-            , style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ]
+            , style "width" "22px"
+            , style "padding-top" "5px"
+            , style "vertical-align" "middle"
             , title "Mark as preferred"
             ]
             [ input [ type_ "radio", checked phone.isPreferred, name "phoneGroup", onCheck (UpdatePreferredPhone phone) ] [] ]
         , div
             [ class "inline-block"
-            , style [ ( "width", "100px" ), ( "vertical-align", "middle" ) ]
+            , style "width" "100px"
+            , style "vertical-align" "middle"
             , title "Mark as primary"
             ]
             [ Dropdown.view phone.dropState (UpdatePhoneType phone) dropdownItems phone.phoneNumberTypeId ]
         , div
             [ class "inline-block"
-            , style [ ( "width", "calc(100% - 155px)" ), ( "vertical-align", "middle" ) ]
+            , style "width" "calc(100% - 155px)"
+            , style "vertical-align" "middle"
             ]
             [-- MaskedNumber.input (inputOptions phone) [ class "e-textbox", maskStyle ] phone.maskState (maybeToInt phone.phoneNumber)
             ]
         , div
             [ class "inline-block"
-            , style [ ( "width", "32px" ), ( "vertical-align", "middle" ) ]
+            , style "width" "32px"
+            , style "vertical-align" "middle"
             , title "remove"
             , onClick (RemovePhone phone)
             ]
@@ -325,22 +328,28 @@ viewAddress dropdownItems address =
                 [ input
                     [ type_ "radio"
                     , checked address.isPreferred
-                    , style [ ( "margin-top", "0px" ), vertCent ]
+                    , style "margin-top" "0px"
+                    , style "vertical-align" "middle"
                     , onCheck (UpdatePreferredAddress address)
                     , name "addressGroup"
                     ]
                     []
-                , label [ style [ ( "margin-bottom", "0px" ), ( "margin-left", "4px" ) ] ] [ text "Primary" ]
+                , label
+                    [ style "margin-bottom" "0px"
+                    , style "margin-left" "4px"
+                    ]
+                    [ text "Primary" ]
                 ]
-            , div [ class "col-xs-6 padding-h-0 inline-block", style [ vertCent ], title "Remove", onClick (RemoveAddress address) ]
+            , div [ class "col-xs-6 padding-h-0 inline-block", style "vertical-align" "middle", title "Remove", onClick (RemoveAddress address) ]
                 [ span
-                    [ style [ ( "padding-right", "20px" ), ( "padding-top", "5px" ) ]
+                    [ style "padding-right" "20px"
+                    , style "padding-top" "5px"
                     , class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer pull-right"
                     ]
                     []
                 ]
             ]
-        , div [ class "col-xs-12 padding-h-0", style [ ( "padding-bottom", "20px" ) ] ]
+        , div [ class "col-xs-12 padding-h-0", style "padding-bottom" "20px" ]
             [ div [ class "col-xs-12 col-sm-6 padding-h-0" ]
                 [ div []
                     [ label [ class "required" ] [ text "Address Line 1:" ]
@@ -519,7 +528,7 @@ updateLanguage model patientLanguagesMap =
     { model | patientLanguagesMap = newPatientLanguagesMap }
 
 
-togglePreferred : Int -> { c | nodeId : Int, isPreferred : a } -> { c | isPreferred : Bool, nodeId : Int }
+togglePreferred : Int -> { c | nodeId : Int, isPreferred : Bool } -> { c | isPreferred : Bool, nodeId : Int }
 togglePreferred nodeId t =
     if t.nodeId == nodeId then
         { t | isPreferred = True }
@@ -560,22 +569,29 @@ update msg model _ =
                         newModel.patientAddresses
                             |> List.indexedMap (\idx t -> { t | nodeId = idx })
             in
-            { newModel
+            ( { newModel
                 | patientLanguagesMap = newPatientLanguagesMap
                 , patientPhoneNumbers = newPatientPhoneNumber
                 , patientAddresses = newPatientAddress
                 , nodeCounter = 3
-            }
-                ! [ initDemographics newModel.sfData, Functions.setLoadingStatus False ]
+              }
+            , Cmd.batch [ initDemographics newModel.sfData, Functions.setLoadingStatus False ]
+            )
 
         Load (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         InitDemographicsDone _ ->
-            model ! [ initContactHours model.contactHoursModel ]
+            ( model
+            , initContactHours model.contactHoursModel
+            )
 
         UpdateDemographics sfData ->
-            { model | sfData = sfData } ! []
+            ( { model | sfData = sfData }
+            , Cmd.none
+            )
 
         Save _ ->
             let
@@ -598,28 +614,39 @@ update msg model _ =
                     }
             in
             if List.length (validatationErrors newModel) > 0 then
-                { model | showValidationErrors = True } ! [ scrollToError ]
+                ( { model | showValidationErrors = True }
+                , scrollToError
+                )
 
             else
-                newModel ! [ save (encodeBody newModel), Functions.setLoadingStatus True ]
+                ( newModel
+                , Cmd.batch [ save (encodeBody newModel), Functions.setLoadingStatus True ]
+                )
 
         SaveCompleted (Ok responseMsg) ->
             case Functions.getResponseError responseMsg of
                 Just t ->
-                    model ! [ Functions.displayErrorMessage t, Functions.setLoadingStatus False ]
+                    ( model
+                    , Cmd.batch [ Functions.displayErrorMessage t, Functions.setLoadingStatus False ]
+                    )
 
                 Nothing ->
-                    model ! [ Functions.displaySuccessMessage "Save completed successfully!", Functions.setLoadingStatus False ]
+                    ( model
+                    , Cmd.batch [ Functions.displaySuccessMessage "Save completed successfully!", Functions.setLoadingStatus False ]
+                    )
 
         SaveCompleted (Err t) ->
-            model ! [ Functions.displayErrorMessage (toString t) ]
+            ( model
+            , Functions.displayError t
+            )
 
         AddNewLanguage ->
-            { model
+            ( { model
                 | patientLanguagesMap = model.patientLanguagesMap ++ [ emptyPatientLanguagesMap model.nodeCounter False ]
                 , nodeCounter = model.nodeCounter + 1
-            }
-                ! [ Functions.setUnsavedChanges True ]
+              }
+            , Functions.setUnsavedChanges True
+            )
 
         RemoveLanguage lang ->
             let
@@ -643,14 +670,17 @@ update msg model _ =
                                 )
                                 newPatientLanguagesMap
             in
-            { model | patientLanguagesMap = updatedPatientLanguagesMap } ! [ Functions.setUnsavedChanges True ]
+            ( { model | patientLanguagesMap = updatedPatientLanguagesMap }
+            , Functions.setUnsavedChanges True
+            )
 
         AddNewPhone ->
-            { model
+            ( { model
                 | patientPhoneNumbers = model.patientPhoneNumbers ++ [ emptyPatientPhoneNumber model.nodeCounter False ]
                 , nodeCounter = model.nodeCounter + 1
-            }
-                ! [ Functions.setUnsavedChanges True ]
+              }
+            , Functions.setUnsavedChanges True
+            )
 
         RemovePhone phone ->
             let
@@ -674,14 +704,17 @@ update msg model _ =
                                 )
                                 newPatientPhoneNumber
             in
-            { model | patientPhoneNumbers = updatedPatientPhoneNumber } ! [ Functions.setUnsavedChanges True ]
+            ( { model | patientPhoneNumbers = updatedPatientPhoneNumber }
+            , Functions.setUnsavedChanges True
+            )
 
         AddNewAddress ->
-            { model
+            ( { model
                 | patientAddresses = model.patientAddresses ++ [ emptyPatientAddress model.nodeCounter False ]
                 , nodeCounter = model.nodeCounter + 1
-            }
-                ! [ Functions.setUnsavedChanges True ]
+              }
+            , Functions.setUnsavedChanges True
+            )
 
         RemoveAddress address ->
             let
@@ -705,96 +738,153 @@ update msg model _ =
                                 )
                                 newAddress
             in
-            { model | patientAddresses = updatedAddress } ! [ Functions.setUnsavedChanges True ]
+            ( { model | patientAddresses = updatedAddress }
+            , Functions.setUnsavedChanges True
+            )
 
         -- Nested Controls
         UpdateAddressLine1 patientAddress str ->
-            updateAddress model { patientAddress | addressLine1 = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( updateAddress model { patientAddress | addressLine1 = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateAddressLine2 patientAddress str ->
-            updateAddress model { patientAddress | addressLine2 = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( updateAddress model { patientAddress | addressLine2 = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateAddressLine3 patientAddress str ->
-            updateAddress model { patientAddress | addressLine3 = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( updateAddress model { patientAddress | addressLine3 = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateCity patientAddress str ->
-            updateAddress model { patientAddress | city = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( updateAddress model { patientAddress | city = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateZipcode patientAddress str ->
-            updateAddress model { patientAddress | zipCode = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( updateAddress model { patientAddress | zipCode = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdatePreferredAddress address _ ->
-            { model | patientAddresses = List.map (togglePreferred address.nodeId) model.patientAddresses } ! [ Functions.setUnsavedChanges True ]
+            ( { model | patientAddresses = List.map (togglePreferred address.nodeId) model.patientAddresses }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdatePreferredPhone phone _ ->
-            { model | patientPhoneNumbers = List.map (togglePreferred phone.nodeId) model.patientPhoneNumbers } ! [ Functions.setUnsavedChanges True ]
+            ( { model | patientPhoneNumbers = List.map (togglePreferred phone.nodeId) model.patientPhoneNumbers }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdatePreferredLanguage language _ ->
-            { model | patientLanguagesMap = List.map (togglePreferred language.nodeId) model.patientLanguagesMap } ! [ Functions.setUnsavedChanges True ]
+            ( { model | patientLanguagesMap = List.map (togglePreferred language.nodeId) model.patientLanguagesMap }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateState t ( newDropState, newId, newMsg ) ->
-            updateAddress model { t | dropState = newDropState, stateId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+            ( updateAddress model { t | dropState = newDropState, stateId = newId }
+            , Cmd.batch [ newMsg, Functions.setUnsavedChanges True ]
+            )
 
         UpdatePhoneType t ( newDropState, newId, newMsg ) ->
-            updatePhones model { t | dropState = newDropState, phoneNumberTypeId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+            ( updatePhones model { t | dropState = newDropState, phoneNumberTypeId = newId }
+            , Cmd.batch [ newMsg, Functions.setUnsavedChanges True ]
+            )
 
         UpdateLanguage t ( newDropState, newId, newMsg ) ->
-            updateLanguage model { t | dropState = newDropState, languageId = newId }
-                ! [ newMsg, Functions.setUnsavedChanges True ]
+            ( updateLanguage model { t | dropState = newDropState, languageId = newId }
+            , Cmd.batch [ newMsg, Functions.setUnsavedChanges True ]
+            )
 
         InputChanged patientPhoneNumber t ->
-            updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map toString t } ! [ Functions.setUnsavedChanges True ]
+            ( updatePhones model { patientPhoneNumber | phoneNumber = Maybe.map String.fromInt t }
+            , Functions.setUnsavedChanges True
+            )
 
         -- InputStateChanged patientPhoneNumber maskState ->
         --     updatePhones model { patientPhoneNumber | maskState = maskState } ! [ Functions.setUnsavedChanges True ]
         -- Edit
         UpdateFacilityPtID str ->
-            { model | facilityPtID = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( { model | facilityPtID = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateMedicalRecordNo str ->
-            { model | mrn = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( { model | mrn = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdatePatientAccountNo str ->
-            { model | patientAccountNumber = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( { model | patientAccountNumber = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateFirstName str ->
-            { model | firstName = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( { model | firstName = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateMiddle str ->
-            { model | middle = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( { model | middle = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateLastName str ->
-            { model | lastName = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( { model | lastName = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateNickname str ->
-            { model | nickName = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( { model | nickName = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateBirthPlace str ->
-            { model | birthPlace = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( { model | birthPlace = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateSSN str ->
-            { model | ssn = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( { model | ssn = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateSexualOrientationNote str ->
-            { model | sexualOrientationNote = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( { model | sexualOrientationNote = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateGenderIdentityNote str ->
-            { model | genderIdentityNote = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( { model | genderIdentityNote = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdateEmail str ->
-            { model | email = Just str } ! [ Functions.setUnsavedChanges True ]
+            ( { model | email = Just str }
+            , Functions.setUnsavedChanges True
+            )
 
         UpdatePrefix ( newDropState, newId, newMsg ) ->
-            { model | prefixDropState = newDropState, prefixId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+            ( { model | prefixDropState = newDropState, prefixId = newId }
+            , Cmd.batch [ newMsg, Functions.setUnsavedChanges True ]
+            )
 
         UpdateSuffix ( newDropState, newId, newMsg ) ->
-            { model | suffixDropState = newDropState, suffixId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+            ( { model | suffixDropState = newDropState, suffixId = newId }
+            , Cmd.batch [ newMsg, Functions.setUnsavedChanges True ]
+            )
 
         UpdateRace ( newDropState, newId, newMsg ) ->
-            { model | raceDropState = newDropState, raceId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+            ( { model | raceDropState = newDropState, raceId = newId }
+            , Cmd.batch [ newMsg, Functions.setUnsavedChanges True ]
+            )
 
         UpdateEthnicity ( newDropState, newId, newMsg ) ->
-            { model | ethnicityDropState = newDropState, ethnicityId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+            ( { model | ethnicityDropState = newDropState, ethnicityId = newId }
+            , Cmd.batch [ newMsg, Functions.setUnsavedChanges True ]
+            )
 
 
 
@@ -854,9 +944,10 @@ noNumbers =
     attribute "onkeypress" "return event.charCode < 48 || event.charCode > 57"
 
 
-maskStyle : Html.Attribute msg
-maskStyle =
-    style [ ( "margin-left", "5px" ), ( "margin-top", "5px" ) ]
+
+-- maskStyle : Html.Attribute msg
+-- maskStyle =
+--     style [ ( "margin-left", "5px" ), ( "margin-top", "5px" ) ]
 
 
 maxLength : Maybe Int -> Html.Attribute msg
@@ -1220,7 +1311,7 @@ type ServerResponse
 
 decodeServerResponse : Decode.Decoder ServerResponse
 decodeServerResponse =
-    Pipeline.decode ServerSuccess
+    Decode.succeed ServerSuccess
         |> Pipeline.required "demographicsInformationModel" decodeDemographicsInformationModel
         |> Pipeline.required "contactInformationModel" decodeContactInformationModel
         |> Pipeline.required "contactHoursModel" Decode.value
@@ -1229,7 +1320,7 @@ decodeServerResponse =
 
 decodeDemographicsInformationModel : Decode.Decoder DemographicsInformationModel
 decodeDemographicsInformationModel =
-    Pipeline.decode DemographicsInformationModel
+    Decode.succeed DemographicsInformationModel
         |> Pipeline.required "PatientId" Decode.int
         |> Pipeline.required "DemographicsId" (Decode.maybe Decode.int)
         |> Pipeline.required "NickName" (Decode.maybe Decode.string)
@@ -1254,7 +1345,7 @@ decodeDemographicsInformationModel =
 
 decodeContactInformationModel : Decode.Decoder ContactInformationModel
 decodeContactInformationModel =
-    Pipeline.decode ContactInformationModel
+    Decode.succeed ContactInformationModel
         |> Pipeline.required "PatientPhoneNumbers" (Decode.list decodePatientPhoneNumber)
         |> Pipeline.required "PatientAddresses" (Decode.list decodePatientAddress)
         |> Pipeline.required "PhoneNumberTypeDropdown" (Decode.list decodeDropdownItem)
@@ -1265,7 +1356,7 @@ decodeContactInformationModel =
 
 decodePatientLanguagesMap : Decode.Decoder PatientLanguagesMap
 decodePatientLanguagesMap =
-    Pipeline.decode PatientLanguagesMap
+    Decode.succeed PatientLanguagesMap
         |> Pipeline.required "Id" (Decode.maybe Decode.int)
         |> Pipeline.required "LanguageId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
@@ -1275,7 +1366,7 @@ decodePatientLanguagesMap =
 
 decodePatientPhoneNumber : Decode.Decoder PatientPhoneNumber
 decodePatientPhoneNumber =
-    Pipeline.decode PatientPhoneNumber
+    Decode.succeed PatientPhoneNumber
         |> Pipeline.required "Id" (Decode.maybe Decode.int)
         |> Pipeline.required "PhoneNumber" (Decode.maybe Decode.string)
         |> Pipeline.required "PhoneNumberTypeId" (Decode.maybe Decode.int)
@@ -1287,7 +1378,7 @@ decodePatientPhoneNumber =
 
 decodePatientAddress : Decode.Decoder PatientAddress
 decodePatientAddress =
-    Pipeline.decode PatientAddress
+    Decode.succeed PatientAddress
         |> Pipeline.required "Id" (Decode.maybe Decode.int)
         |> Pipeline.required "AddressLine1" (Decode.maybe Decode.string)
         |> Pipeline.required "AddressLine2" (Decode.maybe Decode.string)
@@ -1302,7 +1393,7 @@ decodePatientAddress =
 
 decodeSfData : Decode.Decoder SfData
 decodeSfData =
-    Pipeline.decode SfData
+    Decode.succeed SfData
         |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
         |> Pipeline.required "MainProviderId" (Decode.maybe Decode.int)
         |> Pipeline.required "CareCoordinatorId" (Decode.maybe Decode.int)
@@ -1336,7 +1427,7 @@ type alias DropdownSource =
 
 decodeLists : Decode.Decoder DropdownSource
 decodeLists =
-    Pipeline.decode DropdownSource
+    Decode.succeed DropdownSource
         |> Pipeline.required "LanguageDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "EthnicityDropdown" (Decode.list decodeDropdownItem)
         |> Pipeline.required "SexTypeDropdown" (Decode.list decodeDropdownItem)
@@ -1402,15 +1493,15 @@ encodeDemographicsInformationModel model =
         , ( "DateOfBirth", maybeVal Encode.string model.sfData.dateOfBirth )
         , ( "DateOfDeath", maybeVal Encode.string model.sfData.dateOfDeath )
         , ( "VIP", maybeVal Encode.bool model.sfData.vip )
-        , ( "PatientLanguagesMap", Encode.list (List.map encodePatientLanguagesMap model.patientLanguagesMap) )
+        , ( "PatientLanguagesMap", Encode.list encodePatientLanguagesMap model.patientLanguagesMap )
         ]
 
 
 encodeContactInformationModel : Model -> Encode.Value
 encodeContactInformationModel model =
     Encode.object
-        [ ( "PatientAddresses", Encode.list (List.map encodePatientAddress model.patientAddresses) )
-        , ( "PatientPhoneNumbers", Encode.list (List.map encodePatientPhoneNumber model.patientPhoneNumbers) )
+        [ ( "PatientAddresses", Encode.list encodePatientAddress model.patientAddresses )
+        , ( "PatientPhoneNumbers", Encode.list encodePatientPhoneNumber model.patientPhoneNumbers )
         ]
 
 
@@ -1450,9 +1541,9 @@ encodeBody model =
     Encode.object
         [ ( "demographicsInformation", encodeDemographicsInformationModel model )
         , ( "contactInformation", encodeContactInformationModel model )
-        , ( "phones", Encode.list (List.map encodePatientPhoneNumber model.patientPhoneNumbers) )
-        , ( "addresses", Encode.list (List.map encodePatientAddress model.patientAddresses) )
-        , ( "languages", Encode.list (List.map encodePatientLanguagesMap model.patientLanguagesMap) )
+        , ( "phones", Encode.list encodePatientPhoneNumber model.patientPhoneNumbers )
+        , ( "addresses", Encode.list encodePatientAddress model.patientAddresses )
+        , ( "languages", Encode.list encodePatientLanguagesMap model.patientLanguagesMap )
 
         -- , ( "TZ", Encode.string contactsData.tZ )
         -- , ( "WDStr", Encode.string contactsData.wDStr )

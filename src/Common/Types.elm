@@ -1,6 +1,12 @@
 module Common.Types exposing (..)
 
 
+type alias WindowSize =
+    { width : Int
+    , height : Int
+    }
+
+
 type alias FilterState =
     { name : String
     , value : String

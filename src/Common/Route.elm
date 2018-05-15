@@ -1,11 +1,11 @@
 module Common.Route
     exposing
         ( Route(..)
+        , modifyUrl
         , back
-        , fromLocation
+        , toRoute
         , getPatientId
         , href
-        , modifyUrl
         , routeDescription
         , routeId
         , routeUrl
@@ -14,9 +14,9 @@ module Common.Route
 import Common.Types as Common
 import Html exposing (Attribute)
 import Html.Attributes as Attr
-import Navigation
-import UrlParser as Url exposing ((</>), (<?>), Parser, intParam, oneOf, parseHash, parsePath, s)
-
+import Browser.Navigation as Navigation
+import Url.Parser as Url exposing (Url, (</>), (<?>), Parser, int, oneOf, fragment, parse, s)
+import Url.Parser.Query as Query
 
 type Route
     = None
@@ -230,10 +230,10 @@ routeId route =
             0
 
 
-getPatientId : Navigation.Location -> Maybe Int
-getPatientId location =
-    location
-        |> parsePath (s "people" <?> intParam "patientId")
+getPatientId : Url -> Maybe Int
+getPatientId url =
+    url
+        |> parse (s "people" <?> Query.int "patientId")
         |> Maybe.andThen identity
 
 
@@ -241,25 +241,34 @@ href : Route -> Attribute msg
 href route =
     Attr.href (routeUrl route)
 
-
 modifyUrl : Route -> Cmd msg
 modifyUrl =
-    routeUrl >> Navigation.newUrl
-
+    routeUrl >> Navigation.pushUrl
 
 back : Cmd msg
 back =
     Navigation.back 1
 
 
-fromLocation : Navigation.Location -> Maybe Route
-fromLocation location =
-    if String.isEmpty location.hash then
-        parsePath routeByUrl location
+-- toRoute : Url -> Maybe Route
+-- fromLocation url =
+--     case url.fragment of
+--         Just _ ->
+--             parse (fragment (routeByHash url))
 
-    else
-        parseHash routeByHash location
+--         Nothing ->
+--             parse routeByUrl url
 
+
+toRoute : String -> Route
+toRoute url =   
+    Demographics
+    -- case Url.toUrl of
+    --     Just _ ->
+    --         parse (fragment (routeByHash url))
+
+    --     Nothing ->
+    --         parse routeByUrl url
 
 routeDescription : Route -> String
 routeDescription route =

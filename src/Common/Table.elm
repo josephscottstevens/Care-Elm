@@ -16,11 +16,13 @@ module Common.Table
         , view
         )
 
+import Common.Dates as Functions
 import Common.Functions as Functions
 import Html exposing (Html, a, button, div, input, li, span, table, tbody, td, text, th, thead, tr, ul)
 import Html.Attributes exposing (checked, class, classList, colspan, disabled, href, id, style, target, type_)
 import Html.Events as Events
 import Json.Encode as Encode
+import Time
 
 
 
@@ -141,7 +143,7 @@ view : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Ma
 view state rows config maybeCustomRow =
     let
         sortedRows =
-            sort state config.columns rows
+            sortBy state config.columns rows
 
         filteredRows =
             sortedRows
@@ -153,7 +155,7 @@ view state rows config maybeCustomRow =
     in
     div [ class "e-grid e-js e-waitingpopup" ]
         [ viewToolbar config.toolbar
-        , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
+        , table [ id config.domTableId, class "e-table", style "border-collapse" "collapse" ]
             [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
                 [ tr [] (List.map (viewTh state config) config.columns)
 
@@ -171,51 +173,48 @@ viewTr : State -> List { data | id : Int } -> Config { data | id : Int } msg -> 
 viewTr state rows config maybeCustomRow =
     let
         selectedStyle row =
-            style
-                (if Just row.id == state.selectedId then
-                    [ ( "background-color", "#66aaff" )
-                    , ( "background", "#66aaff" )
-                    ]
+            if Just row.id == state.selectedId then
+                [ style "background-color" "#66aaff"
+                , style "background" "#66aaff"
+                ]
 
-                 else
-                    [ ( "", "" ) ]
-                )
+            else
+                [ style "" "" ]
 
         rowClass ctr =
             classList
-                [ ( "e-row", ctr % 2 == 0 )
-                , ( "e-alt_row", ctr % 2 == 1 )
+                [ ( "e-row", modBy ctr 2 == 0 )
+                , ( "e-alt_row", modBy ctr 2 == 1 )
                 ]
 
         standardTr ctr row =
             tr
-                [ rowClass ctr
-                , selectedStyle row
-                ]
+                ([ rowClass ctr
+                 ]
+                    ++ selectedStyle row
+                )
                 (List.map (viewTd state row config) config.columns)
 
         customRowStyle =
             if List.length rows == 0 then
-                style []
+                [ style "" "" ]
 
             else
-                style
-                    [ ( "border-bottom-color", "#cecece" )
-                    , ( "border-bottom-width", "1px" )
-                    , ( "border-bottom-style", "solid" )
-                    ]
+                [ style "border-bottom-color" "#cecece"
+                , style "border-bottom-width" "1px"
+                , style "border-bottom-style" "solid"
+                ]
 
         customCellStyle =
-            style
-                [ ( "background-color", "white" )
-                , ( "padding-top", "10px" )
-                , ( "margin-left", "5px" )
-                ]
+            [ style "background-color" "white"
+            , style "padding-top" "10px"
+            , style "margin-left" "5px"
+            ]
     in
     case maybeCustomRow of
         Just customRow ->
-            tr [ customRowStyle ]
-                [ td [ colspan (List.length config.columns), customCellStyle ]
+            tr customRowStyle
+                [ td ([ colspan (List.length config.columns) ] ++ customCellStyle)
                     [ customRow
                     ]
                 ]
@@ -281,7 +280,7 @@ viewTd state row config column =
                 ]
 
         tdStyle =
-            style [ ( "padding-left", "8.4px" ) ]
+            style "padding-left" "8.4px"
 
         tdClick =
             case column of
@@ -300,11 +299,15 @@ viewTd state row config column =
                 text (Maybe.withDefault "" (dataToString row))
 
             DateTimeColumn _ dataToString _ ->
-                text (Functions.defaultDateTime (dataToString row))
+                text ""
 
+            -- TODO
+            -- text (Functions.defaultDateTimeToString (dataToString row))
             DateColumn _ dataToString _ ->
-                text (Functions.defaultDate (dataToString row))
+                text ""
 
+            -- TODO
+            --text (Functions.defaultDateToString (dataToString row))
             HrefColumn _ displayText dataToString _ ->
                 case dataToString row of
                     Just t ->
@@ -319,7 +322,7 @@ viewTd state row config column =
 
             CheckColumn _ dataToString _ ->
                 div [ class "e-checkcell" ]
-                    [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
+                    [ div [ class "e-checkcelldiv", style "text-align" "center" ]
                         [ input [ type_ "checkbox", disabled True, checked (dataToString row) ] []
                         ]
                     ]
@@ -391,15 +394,14 @@ rowDropDownDiv state toMsg row dropDownItems =
                     ]
                 ]
 
-        dropDownMenuStyle : Html.Attribute msg
+        dropDownMenuStyle : List (Html.Attribute msg)
         dropDownMenuStyle =
-            style
-                [ ( "z-index", "5000" )
-                , ( "position", "absolute" )
-                , ( "display", "block" )
-                , ( "left", "-173px" )
-                , ( "width", "178.74px" )
-                ]
+            [ style "z-index" "5000"
+            , style "position" "absolute"
+            , style "display" "block"
+            , style "left" "-173px"
+            , style "width" "178.74px"
+            ]
 
         dropMenu =
             case state.openDropdownId of
@@ -419,7 +421,7 @@ rowDropDownDiv state toMsg row dropDownItems =
             class "btn btn-sm btn-default fa fa-angle-down btn-context-menu editDropDown"
 
         btnStyle =
-            style [ ( "position", "relative" ) ]
+            style "position" "relative"
 
         clickEvent =
             case state.openDropdownId of
@@ -433,9 +435,9 @@ rowDropDownDiv state toMsg row dropDownItems =
             Events.onBlur (toMsg { state | openDropdownId = Nothing })
     in
     div []
-        [ div [ style [ ( "text-align", "right" ) ] ]
+        [ div [ style "text-align" "right" ]
             [ button [ id "contextMenuButton", type_ "button", btnClass, clickEvent, blurEvent, btnStyle ]
-                [ div [ id "editButtonMenu", dropDownMenuStyle ]
+                [ div ([ id "editButtonMenu" ] ++ dropDownMenuStyle)
                     dropMenu
                 ]
             ]
@@ -457,10 +459,10 @@ toolbarHelper ( iconStr, event ) =
     let
         iconStyle =
             if String.contains "e-disable" iconStr then
-                style []
+                style "" ""
 
             else
-                style [ ( "cursor", "pointer" ) ]
+                style "cursor" "pointer"
 
         iconClass =
             "e-addnewitem e-toolbaricons e-icon " ++ iconStr
@@ -536,7 +538,7 @@ pagingView state totalRows rows toMsg =
                 [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText)
                 , pagingStateClick (Index pageIndex)
                 ]
-                [ text (toString (pageIndex + 1)) ]
+                [ text (String.fromInt (pageIndex + 1)) ]
 
         rng =
             List.range 0 lastIndex
@@ -589,10 +591,10 @@ pagingView state totalRows rows toMsg =
         pagerText =
             let
                 currentPageText =
-                    toString (state.pageIndex + 1)
+                    String.fromInt (state.pageIndex + 1)
 
                 totalPagesText =
-                    toString <|
+                    String.fromInt <|
                         if lastIndex < 1 then
                             1
 
@@ -600,7 +602,7 @@ pagingView state totalRows rows toMsg =
                             lastIndex + 1
 
                 totalItemsText =
-                    toString totalRows
+                    String.fromInt totalRows
             in
             currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
     in
@@ -614,7 +616,7 @@ pagingView state totalRows rows toMsg =
             , div [ class rightPageClass, pagingStateClick Next ] []
             , div [ class lastPageClass, pagingStateClick Last ] []
             ]
-        , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
+        , div [ class "e-parentmsgbar", style "text-align" "right" ]
             [ span [ class "e-pagermsg" ] [ text pagerText ]
             ]
         ]
@@ -624,8 +626,8 @@ pagingView state totalRows rows toMsg =
 -- Sorting
 
 
-sort : State -> List (Column { data | id : Int } msg) -> List { data | id : Int } -> List { data | id : Int }
-sort state columnData data =
+sortBy : State -> List (Column { data | id : Int } msg) -> List { data | id : Int } -> List { data | id : Int }
+sortBy state columnData data =
     case findSorter state.sortField columnData of
         Nothing ->
             data
@@ -727,6 +729,21 @@ defaultIntSort t =
     increasingOrDecreasingBy (Functions.defaultIntToString << t)
 
 
+boolToInt : Bool -> Int
+
+
+
+--TODO, test if this sorts the same way the other columns do
+
+
+boolToInt bool =
+    if bool then
+        0
+
+    else
+        1
+
+
 defaultBoolSort : ({ data | id : Int } -> Bool) -> Sorter data
 defaultBoolSort t =
-    increasingOrDecreasingBy (toString << t)
+    increasingOrDecreasingBy (boolToInt << t)

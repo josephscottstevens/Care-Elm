@@ -1,12 +1,12 @@
-port module Common.Dropdown exposing (DropState, init, view, getDropdownText)
+port module Common.Dropdown exposing (DropState, getDropdownText, init, view)
 
-import Html exposing (Html, div, span, text, li, ul, input)
-import Html.Attributes exposing (style, value, class, readonly, placeholder, tabindex, disabled)
+import Char
+import Common.Functions as Functions
+import Common.Types exposing (DropdownItem)
+import Html exposing (Html, div, input, li, span, text, ul)
+import Html.Attributes exposing (class, disabled, placeholder, readonly, style, tabindex, value)
 import Html.Events as Events
 import Json.Decode
-import Common.Types exposing (DropdownItem)
-import Common.Functions as Functions
-import Char
 
 
 port dropdownMenuScroll : String -> Cmd msg
@@ -61,6 +61,7 @@ getIndex selectedId dropdownItems =
             (\idx t ->
                 if t.id == selectedId then
                     Just idx
+
                 else
                     Nothing
             )
@@ -109,10 +110,11 @@ onKey dropdown selectedId dropdownItems key =
                 newDropdown =
                     { dropdown | isOpen = False, searchString = "" }
             in
-                if dropdown.isOpen then
-                    ( newDropdown, getId dropdownItems dropdown.keyboardSelectedIndex, Cmd.none )
-                else
-                    ( newDropdown, selectedId, Cmd.none )
+            if dropdown.isOpen then
+                ( newDropdown, getId dropdownItems dropdown.keyboardSelectedIndex, Cmd.none )
+
+            else
+                ( newDropdown, selectedId, Cmd.none )
 
         ArrowUp ->
             pickerSkip dropdown (Exact -1) dropdownItems selectedId
@@ -158,8 +160,10 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
         newIndex =
             if newIndexCalc < 0 then
                 0
+
             else if newIndexCalc >= List.length dropdownItems then
                 List.length dropdownItems - 1
+
             else
                 newIndexCalc
 
@@ -172,10 +176,11 @@ pickerSkip dropdown skipAmount dropdownItems selectedId =
                 , searchString = ""
             }
     in
-        if dropdown.isOpen then
-            ( newDropdown, selectedId, scrollToDomId dropdown.domId newSelectedId )
-        else
-            ( newDropdown, Just newIndex, Cmd.none )
+    if dropdown.isOpen then
+        ( newDropdown, selectedId, scrollToDomId dropdown.domId newSelectedId )
+
+    else
+        ( newDropdown, Just newIndex, Cmd.none )
 
 
 getDropdownText : List DropdownItem -> Maybe Int -> String
@@ -187,9 +192,9 @@ getDropdownText dropdownItems selectedId =
         |> Maybe.withDefault ""
 
 
-commonWidth : ( String, String )
+commonWidth : Html.Attribute msg
 commonWidth =
-    ( "min-width", "99.7%" )
+    style  "min-width" "99.7%" 
 
 
 view : DropState -> (( DropState, Maybe Int, Cmd msg ) -> msg) -> List DropdownItem -> Maybe Int -> Html msg
@@ -198,26 +203,22 @@ view dropdown toMsg dropdownItems selectedId =
         activeClass =
             if dropdown.isOpen then
                 "e-focus e-popactive"
+
             else
                 ""
 
-        getDropdownText =
-            dropdownItems
-                |> List.filter (\t -> t.id == selectedId)
-                |> List.map .name
-                |> List.head
-                |> Maybe.withDefault ""
 
         dropdownWidthMultiplier =
             if dropdown.showSearchText then
                 9
+
             else
                 7
-
+        
         keyMsgDecoder =
             Events.keyCode
-                |> Json.Decode.andThen (keyDecoder dropdown)
-                |> Json.Decode.map (\t -> toMsg (onKey dropdown selectedId dropdownItems t))
+                |> Json.Decode.andThen (keyDecoder dropdown)    
+                |> Json.Decode.map (\t ->  { message = toMsg (onKey dropdown selectedId dropdownItems t),  stopPropagation = True, preventDefault = True } )
 
         biggestStrLength =
             dropdownItems
@@ -227,151 +228,162 @@ view dropdown toMsg dropdownItems selectedId =
                 |> List.head
                 |> Maybe.withDefault 150
     in
-        div
-            [ Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
-            , if dropdown.isOpen then
-                Events.onBlur (toMsg (onBlur dropdown selectedId))
-              else
-                disabled False
-            , if dropdown.isOpen then
-                disabled False
-              else
-                Events.onClick (toMsg <| onOpen dropdown selectedId dropdownItems True)
-            , tabindex 0
+    div
+        [ Events.custom "keydown" keyMsgDecoder
+        , if dropdown.isOpen then
+            Events.onBlur (toMsg (onBlur dropdown selectedId))
 
-            -- Make div focusable, since we need the on blur to trigger for both child elements
-            , style [ ( "position", "relative" ), ( "width", "100%" ) ]
-            , class "dropdown-outline"
+          else
+            disabled False
+        , if dropdown.isOpen then
+            disabled False
+
+          else
+            Events.onClick (toMsg <| onOpen dropdown selectedId dropdownItems True)
+        , tabindex 0
+
+        -- Make div focusable, since we need the on blur to trigger for both child elements
+        , style "position" "relative" 
+        , style  "width" "100%"
+        , class "dropdown-outline"
+        ]
+        [ span
+            [ class ("e-ddl e-widget " ++ activeClass)
+            , style "width" "100%" 
             ]
             [ span
-                [ class ("e-ddl e-widget " ++ activeClass)
-                , style [ ( "width", "100%" ) ]
+                [ class "e-in-wrap e-box"
                 ]
-                [ span
-                    [ class "e-in-wrap e-box"
+                [ input
+                    [ class "noselect e-input"
+                    , readonly True
+                    , value (getDropdownText dropdownItems selectedId)
+                    , tabindex -1 -- Make it so you cannot set focus via tabbing, we need root div to have the focus
+                    , disabled True -- Make it so you cannot click to set focus, we need root div to have the focus
+                    , placeholder "Choose..."
                     ]
-                    [ input
-                        [ class "noselect e-input"
-                        , readonly True
-                        , value getDropdownText
-                        , tabindex -1 -- Make it so you cannot set focus via tabbing, we need root div to have the focus
-                        , disabled True -- Make it so you cannot click to set focus, we need root div to have the focus
-                        , placeholder "Choose..."
-                        ]
-                        []
-                    , span [ class "e-select" ]
-                        [ span [ class "e-icon e-arrow-sans-down" ] []
-                        ]
+                    []
+                , span [ class "e-select" ]
+                    [ span [ class "e-icon e-arrow-sans-down" ] []
                     ]
-                ]
-            , div
-                [ style
-                    [ if dropdown.isOpen then
-                        ( "display", "block" )
-                      else
-                        ( "display", "none" )
-                    , ( "width", toString biggestStrLength ++ "px" )
-                    , ( "position", "absolute" )
-                    , ( "top", "32px" )
-                    , ( "height", "42px" )
-                    , ( "border-top-left-radius", "4px" )
-                    , ( "border-top-right-radius", "4px" )
-                    , ( "border-color", "#cecece" )
-                    , ( "border-style", "solid" )
-                    , ( "border-width", "1px 1px 0 1px" )
-                    , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
-                    , ( "padding", "0" )
-                    , ( "margin", "0" )
-                    , ( "background-color", "white" )
-                    , ( "max-height", "152px" )
-                    , ( "overflow-x", "hidden" )
-                    , ( "overflow-y", "hidden" )
-                    , ( "z-index", "100" )
-                    , ( "min-width", "99.7%" )
-                    ]
-                ]
-                [ if dropdown.showSearchText then
-                    span
-                        [ class "e-atc e-search"
-                        , style
-                            [ ( "min-width", "96%" )
-                            , ( "margin-left", "8px" )
-                            , ( "margin-right", "6px" )
-                            , ( "margin-top", "6px" )
-                            ]
-                        ]
-                        [ span [ class "e-in-wrap" ]
-                            [ input
-                                [ class "noselect e-input"
-                                , value dropdown.searchString
-                                ]
-                                []
-                            , span [ class "e-icon e-search", style [ ( "width", "14px" ), ( "right", "10px" ), ( "color", "#cecece" ), ( "position", "absolute" ) ] ] []
-                            ]
-                        ]
-                  else
-                    text ""
-                ]
-            , div
-                [ style
-                    [ if dropdown.isOpen then
-                        ( "display", "block" )
-                      else
-                        ( "display", "none" )
-                    , ( "width", toString biggestStrLength ++ "px" )
-                    , ( "position", "absolute" )
-                    , if dropdown.showSearchText then
-                        ( "top", "74px" )
-                      else
-                        ( "top", "32px" )
-                    , ( "border-radius", "4px" )
-                    , ( "border-top-left-radius", "0" )
-                    , ( "border-top-right-radius", "0" )
-                    , ( "box-shadow", "0 1px 2px rgba(0,0,0,.24)" )
-                    , ( "padding", "0" )
-                    , ( "margin", "0" )
-                    , ( "background-color", "white" )
-                    , ( "max-height", "152px" )
-                    , ( "overflow-x", "hidden" )
-                    , ( "overflow-y", "scroll" )
-                    , ( "z-index", "100" )
-                    , ( "min-width", "99.7%" )
-                    ]
-                , class "dropdown-ul"
-                ]
-                [ ul
-                    [ style
-                        [ ( "padding-left", "0" )
-                        , ( "padding-right", "1px" )
-                        , ( "-webkit-margin-after", "0" )
-                        ]
-                    ]
-                    (viewItem dropdown toMsg dropdownItems)
                 ]
             ]
+        , div
+            [ 
+                 if dropdown.isOpen then
+                    style "display" "block" 
+
+                  else
+                    style "display" "none" 
+                  , style "width" ( String.fromInt biggestStrLength ++ "px" )
+                  , style "position" "absolute" 
+                  , style "top" "32px" 
+                  , style "height" "42px" 
+                  , style "border-top-left-radius" "4px" 
+                  , style "border-top-right-radius" "4px" 
+                  , style "border-color" "#cecece" 
+                  , style "border-style" "solid" 
+                  , style "border-width" "1px 1px 0 1px" 
+                  , style "box-shadow" "0 1px 2px rgba(0,0,0,.24)" 
+                  , style "padding" "0" 
+                  , style "margin" "0" 
+                  , style "background-color" "white" 
+                  , style "max-height" "152px" 
+                  , style "overflow-x" "hidden" 
+                  , style "overflow-y" "hidden" 
+                  , style "z-index" "100" 
+                  , style "min-width" "99.7%" 
+                
+            ]
+            [ if dropdown.showSearchText then
+                span
+                    [ class "e-atc e-search"
+                    , style "min-width" "96%" 
+                    , style "margin-left" "8px"
+                    , style "margin-right" "6px"
+                    , style "margin-top" "6px"
+                    ]
+                    [ span [ class "e-in-wrap" ]
+                        [ input
+                            [ class "noselect e-input"
+                            , value dropdown.searchString
+                            ]
+                            []
+                        , span 
+                            [ class "e-icon e-search"
+                            , style "width" "14px" 
+                            , style "right" "10px" 
+                            , style "color" "#cecece"
+                            , style "position" "absolute" 
+                             
+                              ] []
+                        ]
+                    ]
+
+              else
+                text ""
+            ]
+        , div
+            [ 
+                if dropdown.isOpen then
+                    style "display" "block" 
+                  else
+                    style "display" "none" 
+                , style "width" (String.fromInt biggestStrLength ++ "px" )
+                , style "position" "absolute" 
+                , if dropdown.showSearchText then
+                    style "top" "74px" 
+
+                  else
+                    style "top" "32px" 
+                , style "border-radius" "4px" 
+                , style "border-top-left-radius" "0" 
+                , style "border-top-right-radius" "0" 
+                , style "box-shadow" "0 1px 2px rgba(0,0,0,.24)" 
+                , style "padding" "0" 
+                , style "margin" "0" 
+                , style "background-color" "white" 
+                , style "max-height" "152px" 
+                , style "overflow-x" "hidden" 
+                , style "overflow-y" "scroll" 
+                , style "z-index" "100" 
+                , style "min-width" "99.7%" 
+                
+            , class "dropdown-ul"
+            ]
+            [ ul
+                [ 
+                    style "padding-left" "0" 
+                    , style "padding-right" "1px" 
+                    , style "-webkit-margin-after" "0" 
+                ]
+                (viewItem dropdown toMsg dropdownItems)
+            ]
+        ]
 
 
 viewItem : DropState -> (( DropState, Maybe Int, Cmd msg ) -> msg) -> List DropdownItem -> List (Html msg)
 viewItem dropdown toMsg dropdownItems =
     let
-        keyActive =
-            [ ( "background-color", "#f4f4f4" ), ( "color", "#333" ) ] ++ [ commonWidth ]
+        keyActive t =
+            if dropdown.keyboardSelectedIndex == getIndex t.id dropdownItems && dropdown.isOpen then
+                [ style "background-color" "#f4f4f4" 
+                , style "color" "#333"
+                ]
+            else
+                [ ]
     in
-        (dropdownItems
-            |> List.map
-                (\item ->
-                    li
-                        [ Events.onClick (toMsg (onItemClicked dropdown item))
-                        , class "noselect dropdown-li"
-                        , if dropdown.keyboardSelectedIndex == getIndex item.id dropdownItems && dropdown.isOpen then
-                            style keyActive
-                          else
-                            style [ commonWidth ]
-                        , Html.Attributes.id (dropdown.domId ++ "-" ++ Functions.defaultIntToString item.id)
-                        ]
-                        [ text item.name ]
-                )
-        )
+    dropdownItems
+        |> List.map
+            (\item ->
+                li
+                    ([ Events.onClick (toMsg (onItemClicked dropdown item))
+                    , class "noselect dropdown-li"
+                    , commonWidth
+                    , Html.Attributes.id (dropdown.domId ++ "-" ++ Functions.defaultIntToString item.id)
+                    ] ++ keyActive item)
+                    [ text item.name ]
+            )
 
 
 updateSearchString : Char -> DropState -> List DropdownItem -> Maybe Int -> ( DropState, Maybe Int, Cmd msg )
@@ -379,8 +391,9 @@ updateSearchString searchChar dropdown dropdownItems selectedId =
     let
         searchString =
             -- Manage backspace character
-            if searchChar == '\x08' then
+            if searchChar == '\u{0008}' then
                 String.dropRight 1 dropdown.searchString
+
             else
                 dropdown.searchString ++ String.toLower (String.fromChar searchChar)
 
@@ -389,18 +402,18 @@ updateSearchString searchChar dropdown dropdownItems selectedId =
                 |> List.filter (\t -> String.startsWith searchString (String.toLower t.name))
                 |> List.head
     in
-        case maybeSelectedItem of
-            Just t ->
-                ( { dropdown
-                    | searchString = searchString
-                    , keyboardSelectedIndex = getIndex t.id dropdownItems
-                  }
-                , selectedId
-                , scrollToDomId dropdown.domId t.id
-                )
+    case maybeSelectedItem of
+        Just t ->
+            ( { dropdown
+                | searchString = searchString
+                , keyboardSelectedIndex = getIndex t.id dropdownItems
+              }
+            , selectedId
+            , scrollToDomId dropdown.domId t.id
+            )
 
-            Nothing ->
-                ( dropdown, selectedId, Cmd.none )
+        Nothing ->
+            ( dropdown, selectedId, Cmd.none )
 
 
 keyDecoder : DropState -> Int -> Json.Decode.Decoder Key
@@ -413,47 +426,49 @@ keyDecoder dropdown keyCode =
         key =
             Json.Decode.succeed
     in
-        case keyCode of
-            13 ->
-                key Enter
+    case keyCode of
+        13 ->
+            key Enter
 
-            27 ->
-                -- Consume Esc only if the Menu is open
-                if dropdown.isOpen then
-                    pass
-                else
-                    key Esc
+        27 ->
+            -- Consume Esc only if the Menu is open
+            if dropdown.isOpen then
+                pass
 
-            -- 32 ->
-            --     key Space
-            33 ->
-                key PageUp
+            else
+                key Esc
 
-            34 ->
-                key PageDown
+        -- 32 ->
+        --     key Space
+        33 ->
+            key PageUp
 
-            35 ->
-                key End
+        34 ->
+            key PageDown
 
-            36 ->
-                key Home
+        35 ->
+            key End
 
-            38 ->
-                key ArrowUp
+        36 ->
+            key Home
 
-            40 ->
-                key ArrowDown
+        38 ->
+            key ArrowUp
 
-            _ ->
-                let
-                    char =
-                        Char.fromCode keyCode
+        40 ->
+            key ArrowDown
 
-                    isAlpha char =
-                        (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
-                in
-                    -- Backspace is "searchable" because it can be used to modify the search string
-                    if isAlpha char || Char.isDigit char || char == '\x08' then
-                        key (Searchable char)
-                    else
-                        pass
+        _ ->
+            let
+                char =
+                    Char.fromCode keyCode
+
+                isAlpha t =
+                    (t >= 'a' && t <= 'z') || (t >= 'A' && t <= 'Z')
+            in
+            -- Backspace is "searchable" because it can be used to modify the search string
+            if isAlpha char || Char.isDigit char || char == '\u{0008}' then
+                key (Searchable char)
+
+            else
+                pass

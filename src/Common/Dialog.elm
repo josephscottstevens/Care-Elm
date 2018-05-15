@@ -1,9 +1,13 @@
 module Common.Dialog exposing (Dialog, DialogOptions, RootDialog, defaultDialogOptions, simpleDialogOptions, update, viewDialog)
 
+import Common.Types exposing (WindowSize)
 import Html exposing (Html, div, input, span, text)
 import Html.Attributes exposing (class, style, tabindex, title, type_, value)
 import Html.Events exposing (onClick)
-import Window
+
+
+
+-- import Window
 
 
 type alias Dialog data msg =
@@ -17,7 +21,7 @@ type alias Dialog data msg =
 
 
 type alias RootDialog =
-    { windowSize : Window.Size
+    { windowSize : WindowSize
     , top : Int
     , left : Int
     }
@@ -41,17 +45,17 @@ defaultHeight =
 
 toPx : Int -> String
 toPx size =
-    toString size ++ "px"
+    String.fromInt size ++ "px"
 
 
-calcLeft : Window.Size -> Int -> Int
-calcLeft windowSize dialogWidth =
-    windowSize.width // 2 - dialogWidth // 2
+calcLeft : ( Int, Int ) -> Int -> Int
+calcLeft ( w, h ) dialogWidth =
+    w // 2 - dialogWidth // 2
 
 
-calcTop : Window.Size -> Int -> Int
-calcTop windowSize dialogHeight =
-    windowSize.height // 2 - dialogHeight // 2 - 118
+calcTop : ( Int, Int ) -> Int -> Int
+calcTop ( w, h ) dialogHeight =
+    h // 2 - dialogHeight // 2 - 118
 
 
 defaultDialogOptions : DialogOptions
@@ -73,42 +77,39 @@ viewDialog { data, onConfirm, onCancel, headerText, dialogContent, dialogOptions
     div []
         [ div
             [ class "e-dialog e-widget e-box e-dialog-wrap e-shadow"
-            , style
-                [ ( "z-index", "2147483647" )
-                , ( "width", toPx dialogOptions.width )
-                , ( "min-width", "200px" )
-                , ( "height", toPx dialogOptions.height )
-                , ( "min-height", "120px" )
-                , ( "top", (calcTop rootDialog.windowSize dialogOptions.height - rootDialog.top) |> toPx )
-                , ( "left", (calcLeft rootDialog.windowSize dialogOptions.width - rootDialog.left) |> toPx )
-                , ( "position", "absolute" )
-                ]
+            , style "z-index" "2147483647"
+            , style "width" (toPx dialogOptions.width)
+            , style "min-width" "200px"
+            , style "height" (toPx dialogOptions.height)
+            , style "min-height" "120px"
+
+            -- TODO
+            -- , ( "top", (calcTop rootDialog.windowSize dialogOptions.height - rootDialog.top) |> toPx )
+            -- , ( "left", (calcLeft rootDialog.windowSize dialogOptions.width - rootDialog.left) |> toPx )
+            , style "position" "absolute"
             ]
             [ div [ class "e-titlebar e-header e-dialog e-draggable e-js" ]
                 [ span
                     [ class "e-title"
-                    , style [ ( "max-width", dialogOptions.width - 65 |> toPx ) ]
+                    , style "max-width" (dialogOptions.width - 65 |> toPx)
                     ]
                     [ text headerText ]
                 , div [ class "e-dialog-icon e-icon e-close", tabindex 0, title "Close", onClick onCancel ] []
                 ]
             , div
                 [ class "e-dialog-scroller e-scroller e-js e-widget"
-                , style [ ( "height", "auto" ), ( "width", dialogOptions.width - 2 |> toPx ) ]
+                , style "height" "auto"
+                , style "width" (dialogOptions.width - 2 |> toPx)
                 ]
                 [ div
-                    [ style
-                        [ ( "height", dialogOptions.height - 30 |> toPx )
-                        , ( "display", "block" )
-                        , ( "min-height", "71px" )
-                        , ( "width", dialogOptions.width - 2 |> toPx )
-
-                        -- , ( "max-height", " 300px" )
-                        ]
+                    [ style "height" (dialogOptions.height - 30 |> toPx)
+                    , style "display" "block"
+                    , style "min-height" "71px"
+                    , style "width" (dialogOptions.width - 2 |> toPx)
                     ]
                     [ div
                         [ class "col-xs-12 padding-top-10 confirm-message"
-                        , style [ ( "height", dialogOptions.height - 40 - 71 |> toPx ) ]
+                        , style "height" (dialogOptions.height - 40 - 71 |> toPx)
                         ]
                         [ dialogContent data
                         ]
@@ -135,12 +136,10 @@ viewDialog { data, onConfirm, onCancel, headerText, dialogContent, dialogOptions
             ]
         , div
             [ class "e-overlay"
-            , style
-                [ ( "z-index", " 2147483646" )
-                , ( "top", " 0px" )
-                , ( "left", " 0px" )
-                , ( "position", " fixed" )
-                ]
+            , style "z-index" " 2147483646"
+            , style "top" " 0px"
+            , style "left" " 0px"
+            , style "position" " fixed"
             ]
             []
         ]
