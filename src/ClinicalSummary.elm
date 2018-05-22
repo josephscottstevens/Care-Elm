@@ -1,18 +1,18 @@
-module ClinicalSummary exposing (Msg, Model, subscriptions, init, update, view, emptyModel)
+module ClinicalSummary exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
+import Common.Dropdown as Dropdown
+import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
+import Common.Html exposing (InputControlType(AreaInput, ControlElement), makeControls)
+import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown)
 import Date exposing (Date)
-import Task
-import Html exposing (Html, text, div, button, h4)
+import Html exposing (Html, button, div, h4, text)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
-import Common.Dropdown as Dropdown
-import Common.Html exposing (InputControlType(ControlElement, AreaInput), makeControls)
-import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown)
-import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
 import Http
 import Json.Decode as Decode
-import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required)
+import Json.Encode as Encode
+import Task
 
 
 subscriptions : Sub Msg
@@ -179,14 +179,14 @@ generateSummaryDiv model =
             , class "col-md-2 padding-h-0"
             ]
     in
-        div []
-            [ div (inline "34%" "5px") [ text "Generate Summary from Tasks Outcome:" ]
-            , div (inline "18%" "")
-                [ Dropdown.view model.monthDropState UpdateMonth monthDropdown model.currentMonth ]
-            , div (inline "18%" "")
-                [ Dropdown.view model.yearDropState UpdateYear yearDropdown model.currentYear ]
-            , div (inline "20%" "") [ button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate" ] ]
-            ]
+    div []
+        [ div (inline "34%" "5px") [ text "Generate Summary from Tasks Outcome:" ]
+        , div (inline "18%" "")
+            [ Dropdown.view model.monthDropState UpdateMonth monthDropdown model.currentMonth ]
+        , div (inline "18%" "")
+            [ Dropdown.view model.yearDropState UpdateYear yearDropdown model.currentYear ]
+        , div (inline "20%" "") [ button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate" ] ]
+        ]
 
 
 decodeClinicalSummary : Decode.Decoder ClinicalSummaryResponseData

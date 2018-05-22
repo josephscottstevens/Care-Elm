@@ -1,33 +1,33 @@
 module Common.Html
     exposing
-        ( fullWidth
-        , labelWidth
-        , controlWidth
-        , InputControlType
-            ( TextInput
-            , NumrInput
+        ( InputControlType
+            ( AreaInput
             , CheckInput
-            , AreaInput
-            , KnockInput
+            , ControlElement
+            , DateInput
             , DropInput
             , DropInputWithButton
-            , DateInput
-            , FileInput
-            , ControlElement
-            , HtmlElement
             , Dropdown
+            , FileInput
+            , HtmlElement
+            , KnockInput
+            , NumrInput
+            , TextInput
             )
-        , makeControls
-        , getValidationErrors
+        , controlWidth
         , defaultConfig
+        , fullWidth
+        , getValidationErrors
+        , labelWidth
+        , makeControls
         )
 
-import Html exposing (Html, text, div, span, button, input, label, textarea)
-import Html.Attributes exposing (class, type_, id, value, for, name, style, checked, tabindex, title, hidden)
-import Html.Events exposing (onInput, onCheck, onClick)
+import Common.Dropdown as Dropdown
 import Common.Functions exposing (isAlpha)
 import Common.Types as Common
-import Common.Dropdown as Dropdown
+import Html exposing (Html, button, div, input, label, span, text, textarea)
+import Html.Attributes exposing (checked, class, for, hidden, id, name, style, tabindex, title, type_, value)
+import Html.Events exposing (onCheck, onClick, onInput)
 
 
 type InputControlType msg
@@ -216,7 +216,7 @@ makeControls config controls =
                 HtmlElement t ->
                     t
     in
-        div [] (controls |> List.map common)
+    div [] (controls |> List.map common)
 
 
 commonLabel : String -> Common.RequiredType -> Html msg
@@ -233,7 +233,7 @@ commonLabel labelText requiredType =
             else
                 labelText ++ ":"
     in
-        label [ class (labelWidth ++ " " ++ isRequiredStr requiredType), forId labelText ] [ text formattedLabelText ]
+    label [ class (labelWidth ++ " " ++ isRequiredStr requiredType), forId labelText ] [ text formattedLabelText ]
 
 
 getValidationErrors : List (InputControlType msg) -> List String

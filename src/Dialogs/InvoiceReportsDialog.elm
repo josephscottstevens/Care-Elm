@@ -1,14 +1,14 @@
-module Dialogs.InvoiceReportsDialog exposing (State, Msg, update, view)
+module Dialogs.InvoiceReportsDialog exposing (Msg, State, update, view)
 
 --init
 
-import Html exposing (Html, div, text, input, button, label)
-import Html.Attributes exposing (class, title, style, checked, type_, attribute)
-import Common.Functions as Functions
-import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, monthDropdown, yearDropdown, DropdownItem)
 import Common.Dialog as Dialog
 import Common.Dropdown as Dropdown
+import Common.Functions as Functions
 import Common.Html exposing (InputControlType(CheckInput, ControlElement, HtmlElement), defaultConfig, fullWidth, makeControls)
+import Common.Types exposing (AddEditDataSource, DropdownItem, RequiredType(Optional, Required), monthDropdown, yearDropdown)
+import Html exposing (Html, button, div, input, label, text)
+import Html.Attributes exposing (attribute, checked, class, style, title, type_)
 import Http
 import Json.Encode as Encode
 
@@ -151,7 +151,7 @@ update msg model =
                                   ]
 
                         Nothing ->
-                            model ! [ Functions.displayErrorMessage ("Cannot download file right now, please try again later") ]
+                            model ! [ Functions.displayErrorMessage "Cannot download file right now, please try again later" ]
 
                 Err t ->
                     model ! [ Functions.displayErrorMessage (toString t) ]

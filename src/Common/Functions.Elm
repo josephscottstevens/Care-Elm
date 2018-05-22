@@ -1,84 +1,84 @@
 port module Common.Functions
     exposing
-        ( setLoadingStatus
-        , displaySuccessMessage
+        ( CustomDialog
+        , customDialogShow
+        , date
+        , dateFromString
+        , dateTime
+        , dateTimeToString
+        , dateToString
+        , decodeDropdownItem
+        , defaultBool
+        , defaultDate
+        , defaultDateTime
+        , defaultInt
+        , defaultIntStr
+        , defaultIntToString
+        , defaultLower
+        , defaultLowerDate
+        , defaultLowerDateTime
+        , defaultMaybeMsg
+        , defaultString
+        , deleteDialogShow
+        , dialogConfirmed
         , displayErrorMessage
-        , updateRows
+        , displaySuccessMessage
+        , formatDateTime
+        , getAt
+        , getDesc
+        , getId
+        , getMonthIndex
+        , getRecordTypeById
+        , getRequestCompleted
+        , getRequestWithParams
+        , getResponseError
+        , getResponseProp
+        , getStringRequestWithParams
         , idAttr
         , isAlpha
         , isNumber
-        , noHash
-        , defaultMaybeMsg
-        , defaultString
-        , defaultLower
-        , defaultBool
-        , defaultInt
-        , defaultIntToString
-        , formatDateTime
-        , dateTimeToString
-        , dateToString
-        , dateFromString
-        , dateTime
-        , date
-        , getMonthIndex
-        , defaultDateTime
-        , defaultDate
-        , defaultLowerDate
-        , defaultLowerDateTime
-        , ticksToSeconds
-        , secondsToHHMMSS
-        , defaultIntStr
-        , maybeVal
         , maybeStringToInt
-        , getResponseProp
-        , getResponseError
-        , decodeDropdownItem
+        , maybeVal
+        , noHash
+        , openFile
         , postRequest
         , postRequestWithObject
         , postStringRequestWithObject
-        , getRequestWithParams
-        , getStringRequestWithParams
-        , getRequestCompleted
-        , getDesc
-        , getRecordTypeById
-        , getId
+        , secondsToHHMMSS
         , sendMenuMessage
+        , setLoadingStatus
         , setUnsavedChanges
-        , CustomDialog
-        , customDialogShow
-        , deleteDialogShow
-        , dialogConfirmed
-        , openFile
+        , ticksToSeconds
         , uniqueBy
-        , getAt
+        , updateRows
         )
 
 import Char exposing (isLower, isUpper)
-import Date
-import Date.Extra
-import Json.Encode as Encode
-import Json.Decode as Decode exposing (Decoder, maybe, string, int, field, decodeString)
-import Set exposing (Set)
-import Json.Decode.Pipeline exposing (required, decode)
-import Http
 import Common.Types
     exposing
-        ( DropdownItem
-        , AddEditDataSource
+        ( AddEditDataSource
+        , DropdownItem
         , MenuMessage
         , RecordType
-            ( PrimaryCare
-            , Specialty
-            , Labs
-            , Radiology
-            , Hospitalizations
-            , Legal
-            , CallRecordings
-            , PreviousHistories
+            ( CallRecordings
             , Enrollment
+            , Hospitalizations
+            , Labs
+            , Legal
             , Misc
+            , PreviousHistories
+            , PrimaryCare
+            , Radiology
+            , Specialty
             )
         )
+import Date
+import Date.Extra
+import Http
+import Json.Decode as Decode exposing (Decoder, decodeString, field, int, maybe, string)
+import Json.Decode.Pipeline exposing (decode, required)
+import Json.Encode as Encode
+import Set exposing (Set)
 
 
 -- import Common.Route as Route exposing (Route)
@@ -339,11 +339,11 @@ secondsToHHMMSS t =
         pad str =
             "[" ++ str ++ "]"
     in
-        [ hours, minutes, seconds ]
-            |> List.map toSpacedString
-            |> List.foldr (\t y -> t ++ ":" ++ y) ""
-            |> String.dropRight 1
-            |> pad
+    [ hours, minutes, seconds ]
+        |> List.map toSpacedString
+        |> List.foldr (\t y -> t ++ ":" ++ y) ""
+        |> String.dropRight 1
+        |> pad
 
 
 defaultIntStr : String -> Int
@@ -455,11 +455,11 @@ getRequestWithParams url params =
                 |> List.map (\( t, y ) -> t ++ "=" ++ y)
                 |> List.foldr (\t y -> t ++ "&" ++ y) ""
     in
-        Http.get <|
-            if urlParam == "" then
-                url
-            else
-                url ++ "?" ++ urlParam
+    Http.get <|
+        if urlParam == "" then
+            url
+        else
+            url ++ "?" ++ urlParam
 
 
 getStringRequestWithParams : String -> List ( String, String ) -> Http.Request String
@@ -470,11 +470,11 @@ getStringRequestWithParams url params =
                 |> List.map (\( t, y ) -> t ++ "=" ++ y)
                 |> List.foldr (\t y -> t ++ "&" ++ y) ""
     in
-        Http.getString <|
-            if urlParam == "" then
-                url
-            else
-                url ++ "?" ++ urlParam
+    Http.getString <|
+        if urlParam == "" then
+            url
+        else
+            url ++ "?" ++ urlParam
 
 
 getRequestCompleted : a -> Result b value -> ( a, Cmd msg )
@@ -617,10 +617,10 @@ uniqueHelp f existing remaining accumulator =
                 computedFirst =
                     f first
             in
-                if Set.member computedFirst existing then
-                    uniqueHelp f existing rest accumulator
-                else
-                    uniqueHelp f (Set.insert computedFirst existing) rest (first :: accumulator)
+            if Set.member computedFirst existing then
+                uniqueHelp f existing rest accumulator
+            else
+                uniqueHelp f (Set.insert computedFirst existing) rest (first :: accumulator)
 
 
 getAt : Int -> List a -> Maybe a

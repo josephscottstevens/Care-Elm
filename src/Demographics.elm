@@ -1,4 +1,4 @@
-port module Demographics exposing (..)
+port module Demographics exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
 import Char
 import Common.Dropdown as Dropdown
@@ -30,16 +30,14 @@ port addNewAddress : SfAddress -> Cmd msg
 port updateDemographicsAddressMoveInDate : (SfAddress -> msg) -> Sub msg
 
 
-port initContactHours : Maybe Decode.Value -> Cmd msg
+
+-- port initContactHours : Maybe Decode.Value -> Cmd msg
 
 
 port updateDemographics : (SfData -> msg) -> Sub msg
 
 
 port startSave : (Bool -> msg) -> Sub msg
-
-
-port cancel : (Bool -> msg) -> Sub msg
 
 
 port save : Encode.Value -> Cmd msg
@@ -80,9 +78,25 @@ type Phone
 
 
 type alias Model =
-    { patientAddresses : List PatientAddress
+    { facilityId : Maybe Int
+    , facilityDropState : Dropdown.DropState
+    , patientAddresses : List PatientAddress
     , stateDropdown : List DropdownItem
     , primaryAddressIndex : Int
+    , mainProviderId : Maybe Int
+    , mainProviderDropState : Dropdown.DropState
+    , careCoordinatorId : Maybe Int
+    , careCoordinatorDropState : Dropdown.DropState
+    , sexTypeId : Maybe Int
+    , sexTypeDropState : Dropdown.DropState
+    , sexualOrientationId : Maybe Int
+    , sexualOrientationDropState : Dropdown.DropState
+    , genderIdentityId : Maybe Int
+    , genderIdentityDropState : Dropdown.DropState
+    , uSVeteranId : Maybe Int
+    , uSVeteranDropState : Dropdown.DropState
+    , religionId : Maybe Int
+    , religionDropState : Dropdown.DropState
     , patientId : Int
     , demographicsId : Maybe Int
     , nickName : Maybe String
@@ -127,18 +141,9 @@ type alias Model =
 
 
 type alias SfData =
-    { facilityId : Maybe Int
-    , mainProviderId : Maybe Int
-    , careCoordinatorId : Maybe Int
-    , sexTypeId : Maybe Int
-    , sexualOrientationId : Maybe Int
-    , genderIdentityId : Maybe Int
-    , uSVeteranId : Maybe Int
-    , religionId : Maybe Int
-    , dateOfBirth : Maybe String
+    { dateOfBirth : Maybe String
     , dateOfDeath : Maybe String
     , vip : Maybe Bool
-    , drops : DropdownSource
     }
 
 
@@ -197,10 +202,6 @@ type alias FacilityAddress =
     }
 
 
-
--- VIEW
-
-
 view : Model -> Html Msg
 view model =
     div [ id "demographicInformationForm", class "col-xs-12 padding-h-0" ]
@@ -209,14 +210,17 @@ view model =
             [ viewValidationErrors model
             ]
         , div rowStyle
-            [ sfbox "Facility" True
+            [ dropbox "Facility" True <|
+                Dropdown.view model.facilityDropState UpdateFacility model.drops.facilityDropdown model.facilityId
             , textbox "Patient's Facility ID No" model.facilityPtIDRequired model.facilityPtID UpdateFacilityPtID
             , textbox "Medical Record No" model.mrnRequired model.mrn UpdateMedicalRecordNo
             , textbox "Patient Account No" False model.patientAccountNumber UpdatePatientAccountNo
             ]
         , div rowStyle
-            [ sfbox "Main Provider" True
-            , sfbox "Care Coordinator" True
+            [ dropbox "Main Provider" True <|
+                Dropdown.view model.mainProviderDropState UpdateMainProvider model.drops.mainProviderDropdown model.mainProviderId
+            , dropbox "Care Coordinator" True <|
+                Dropdown.view model.careCoordinatorDropState UpdateCareCoordinator model.drops.careCoordinatorDropdown model.careCoordinatorId
             ]
         , h4 [ class "col-xs-12 padding-h-0 padding-top-10" ] [ text "Demographic Information" ]
         , div rowStyle
@@ -237,8 +241,10 @@ view model =
             ]
         , div rowStyle
             [ sfbox "VIP" False
-            , sfbox "Sex at Birth" True
-            , sfbox "Sexual Orientation" False
+            , dropbox "Sex at Birth" True <|
+                Dropdown.view model.sexTypeDropState UpdateSexType model.drops.sexTypeDropdown model.sexTypeId
+            , dropbox "Sexual Orientation" False <|
+                Dropdown.view model.sexualOrientationDropState UpdateSexualOrientation model.drops.sexualOrientationDropdown model.sexualOrientationId
             , textbox "Sexual Orientation Note" False model.sexualOrientationNote UpdateSexualOrientationNote
             , sfbox "Gender Identity" False
             , textbox "Gender Identity Note" False model.genderIdentityNote UpdateGenderIdentityNote
@@ -246,8 +252,10 @@ view model =
                 Dropdown.view model.raceDropState UpdateRace model.drops.raceDropdown model.raceId
             , dropbox "Ethnicity" False <|
                 Dropdown.view model.ethnicityDropState UpdateEthnicity model.drops.ethnicityDropdown model.ethnicityId
-            , sfbox "US Veteran" False
-            , sfbox "Religion" False
+            , dropbox "US Veteran" False <|
+                Dropdown.view model.uSVeteranDropState UpdateUSVeteran model.drops.uSVeteranDropdown model.uSVeteranId
+            , dropbox "Religion" False <|
+                Dropdown.view model.religionDropState UpdateReligion model.drops.religionDropdown model.religionId
             , textbox "Email" False model.email UpdateEmail
             ]
         , div [ class "col-xs-12 padding-h-0 padding-top-10" ]
@@ -347,21 +355,6 @@ vertCent =
     ( "vertical-align", "middle" )
 
 
-maybeToInt : Maybe String -> Maybe Int
-maybeToInt maybeStr =
-    case maybeStr of
-        Just str ->
-            case String.filter isNumber str |> String.toInt of
-                Ok t ->
-                    Just t
-
-                Err _ ->
-                    Nothing
-
-        Nothing ->
-            Nothing
-
-
 viewLanguages : List DropdownItem -> PatientLanguagesMap -> Html Msg
 viewLanguages dropdownItems lang =
     div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
@@ -393,10 +386,10 @@ viewAddress stateDropdownItems facilityDropdownItems address =
             thisOrThat .address address.addressLine1
 
         addressLine2 =
-            thisOrThat (\t -> Nothing) address.addressLine2
+            thisOrThat (\_ -> Nothing) address.addressLine2
 
         addressLine3 =
-            thisOrThat (\t -> Nothing) address.addressLine3
+            thisOrThat (\_ -> Nothing) address.addressLine3
 
         city =
             thisOrThat .city address.city
@@ -582,10 +575,6 @@ viewHouseholdMembers householdMember =
         ]
 
 
-
---UPDATE
-
-
 type Msg
     = Load (Result Http.Error ServerResponse)
     | UpdateDemographics SfData
@@ -617,7 +606,15 @@ type Msg
     | UpdateHouseholdMemberComments HouseholdMember String
     | UpdateHouseholdMemberRelationship HouseholdMember ( Dropdown.DropState, Maybe Int, Cmd Msg )
       -- Edit
+    | UpdateFacility ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateFacilityPtID String
+    | UpdateMainProvider ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateCareCoordinator ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateSexType ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateSexualOrientation ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateGenderIdentity ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateUSVeteran ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateReligion ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateMedicalRecordNo String
     | UpdatePatientAccountNo String
     | UpdateFirstName String
@@ -749,7 +746,9 @@ update msg model _ =
                   ]
 
         InitDemographicsDone _ ->
-            model ! [ initContactHours model.contactHoursModel ]
+            model
+                ! [--initContactHours model.contactHoursModel
+                  ]
 
         UpdateDemographicsAddressMoveInDate address ->
             let
@@ -945,9 +944,9 @@ update msg model _ =
                 ! [ newMsg
                   , Functions.setUnsavedChanges True
                   , case newId of
-                        Just id ->
+                        Just facilityId ->
                             Decode.maybe decodeFacilityAddress
-                                |> Http.get ("/People/GetFacilityAddress?facilityId=" ++ toString id)
+                                |> Http.get ("/People/GetFacilityAddress?facilityId=" ++ toString facilityId)
                                 |> Http.send (GetFacilityAddress newAddress)
 
                         Nothing ->
@@ -1009,8 +1008,32 @@ update msg model _ =
             { model | workPhoneNumberMaskState = maskState } ! []
 
         -- Edit
+        UpdateFacility ( newDropState, newId, newMsg ) ->
+            { model | facilityDropState = newDropState, facilityId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+
         UpdateFacilityPtID str ->
             { model | facilityPtID = Just str } ! [ Functions.setUnsavedChanges True ]
+
+        UpdateMainProvider ( newDropState, newId, newMsg ) ->
+            { model | mainProviderDropState = newDropState, mainProviderId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateCareCoordinator ( newDropState, newId, newMsg ) ->
+            { model | careCoordinatorDropState = newDropState, careCoordinatorId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateSexType ( newDropState, newId, newMsg ) ->
+            { model | sexTypeDropState = newDropState, sexTypeId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateSexualOrientation ( newDropState, newId, newMsg ) ->
+            { model | sexualOrientationDropState = newDropState, sexualOrientationId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateGenderIdentity ( newDropState, newId, newMsg ) ->
+            { model | genderIdentityDropState = newDropState, genderIdentityId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateUSVeteran ( newDropState, newId, newMsg ) ->
+            { model | uSVeteranDropState = newDropState, uSVeteranId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateReligion ( newDropState, newId, newMsg ) ->
+            { model | religionDropState = newDropState, religionId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateMedicalRecordNo str ->
             { model | mrn = Just str } ! [ Functions.setUnsavedChanges True ]
@@ -1085,11 +1108,6 @@ isAlpha char =
     Char.isLower char || Char.isUpper char
 
 
-isNumber : Char -> Bool
-isNumber char =
-    Char.isDigit char
-
-
 isRequiredClass : Bool -> Html.Attribute msg
 isRequiredClass isRequired =
     case isRequired of
@@ -1112,11 +1130,6 @@ commonStructureWithCustomAttr displayText isRequired attr t =
 commonStructure : String -> Bool -> Html msg -> Html msg
 commonStructure displayText isRequired t =
     commonStructureWithCustomAttr displayText isRequired (class "") t
-
-
-onlyNumbers : Html.Attribute msg
-onlyNumbers =
-    attribute "onkeypress" "return event.charCode >= 48 && event.charCode <= 57"
 
 
 noNumbers : Html.Attribute msg
@@ -1150,17 +1163,6 @@ textbox displayText isRequired maybeStr event =
     textboxInner Nothing displayText isRequired maybeStr event
 
 
-textboxWithMax : Int -> String -> Bool -> Maybe String -> (String -> msg) -> Html msg
-textboxWithMax maxLength displayText isRequired maybeStr event =
-    textboxInner (Just maxLength) displayText isRequired maybeStr event
-
-
-numberbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
-numberbox displayText isRequired maybeStr event =
-    commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr, onlyNumbers, class "e-textbox", onInput event ] []
-
-
 nonumberbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
 nonumberbox displayText isRequired maybeStr event =
     commonStructure displayText isRequired <|
@@ -1179,17 +1181,6 @@ sfbox displayText isRequired =
         input [ type_ "text", idAttr displayText, class "e-textbox" ] []
 
 
-sfcheckbox : String -> Bool -> Maybe String -> Html msg
-sfcheckbox displayText isRequired maybeStr =
-    commonStructureWithCustomAttr displayText isRequired (style [ ( "height", "34px" ) ]) <|
-        input [ type_ "checkbox", idAttr displayText, class "e-checkbox" ] []
-
-
-defaultErrorMsg : String
-defaultErrorMsg =
-    "Please provide a value for all required(*) fields."
-
-
 requireInt : String -> Maybe Int -> Maybe String
 requireInt fieldName maybeInt =
     case maybeInt of
@@ -1206,22 +1197,6 @@ requireString fieldName maybeStr =
     if Maybe.withDefault "" maybeStr == "" then
         Just (fieldName ++ " is required")
         --Just defaultErrorMsg
-    else
-        Nothing
-
-
-phoneValidation : Phone -> Maybe Int -> Maybe String
-phoneValidation phone phoneNumber =
-    let
-        num =
-            Maybe.withDefault 0 phoneNumber
-                |> toString
-
-        toError str =
-            Just (str ++ " '" ++ num ++ "'")
-    in
-    if String.length num < 10 then
-        toError "Incomplete Phone Number"
     else
         Nothing
 
@@ -1287,13 +1262,13 @@ validatationErrors model =
     in
     maybeRequired1
         ++ maybeRequired2
-        ++ [ requireInt "Facility" model.sfData.facilityId
-           , requireInt "Main Provider" model.sfData.mainProviderId
-           , requireInt "Care Coordinator" model.sfData.careCoordinatorId
+        ++ [ requireInt "Facility" model.facilityId
+           , requireInt "Main Provider" model.mainProviderId
+           , requireInt "Care Coordinator" model.careCoordinatorId
            , requireString "First Name" model.firstName
            , requireString "Last Name" model.lastName
            , requireString "Date of Birth" model.sfData.dateOfBirth
-           , requireInt "Sex at Birth" model.sfData.sexTypeId
+           , requireInt "Sex at Birth" model.sexTypeId
            , model.patientAddresses
                 |> List.filterMap addressValidation
                 |> List.head
@@ -1317,7 +1292,23 @@ viewValidationErrors model =
 
 emptyModel : Int -> Model
 emptyModel patientId =
-    { patientId = patientId
+    { facilityId = Nothing
+    , facilityDropState = Dropdown.init "facilityDropdown" True
+    , mainProviderId = Nothing
+    , mainProviderDropState = Dropdown.init "mainProviderDropdown" True
+    , careCoordinatorId = Nothing
+    , careCoordinatorDropState = Dropdown.init "careCoordinatorDropdown" True
+    , sexTypeId = Nothing
+    , sexTypeDropState = Dropdown.init "sexTypeDropdown" False
+    , sexualOrientationId = Nothing
+    , sexualOrientationDropState = Dropdown.init "sexualOrientationDropdown" False
+    , genderIdentityId = Nothing
+    , genderIdentityDropState = Dropdown.init "genderIdentityDropdown" False
+    , uSVeteranId = Nothing
+    , uSVeteranDropState = Dropdown.init "uSVeteranDropdown" False
+    , religionId = Nothing
+    , religionDropState = Dropdown.init "religionDropdown" False
+    , patientId = patientId
     , demographicsId = Nothing
     , nickName = Nothing
     , ssn = Nothing
@@ -1365,18 +1356,9 @@ emptyModel patientId =
 
 emptySfData : SfData
 emptySfData =
-    { facilityId = Nothing
-    , careCoordinatorId = Nothing
-    , mainProviderId = Nothing
-    , sexTypeId = Nothing
-    , sexualOrientationId = Nothing
-    , genderIdentityId = Nothing
-    , uSVeteranId = Nothing
-    , religionId = Nothing
-    , dateOfBirth = Nothing
+    { dateOfBirth = Nothing
     , dateOfDeath = Nothing
     , vip = Nothing
-    , drops = emptyDrops
     }
 
 
@@ -1443,11 +1425,19 @@ emptyDrops =
 updateModelFromServerMessage : ServerResponse -> Model -> Model
 updateModelFromServerMessage { d, c, h, ds } model =
     let
-        sfDrops =
+        sfData =
             d.sfData
     in
     { model
         | demographicsId = d.demographicsId
+        , facilityId = d.facilityId
+        , mainProviderId = d.mainProviderId
+        , careCoordinatorId = d.careCoordinatorId
+        , sexTypeId = d.sexTypeId
+        , sexualOrientationId = d.genderIdentityId
+        , genderIdentityId = d.genderIdentityId
+        , uSVeteranId = d.uSVeteranId
+        , religionId = d.religionId
         , nickName = d.nickName
         , ssn = d.ssn
         , lastName = d.lastName
@@ -1462,7 +1452,7 @@ updateModelFromServerMessage { d, c, h, ds } model =
         , sexualOrientationNote = d.sexualOrientationNote
         , genderIdentityNote = d.genderIdentityNote
         , email = d.email
-        , sfData = { sfDrops | drops = ds }
+        , sfData = sfData
         , patientLanguagesMap = d.patientLanguagesMap
         , householdMembers = d.householdMembers
         , patientAddresses = c.patientAddresses
@@ -1487,7 +1477,15 @@ updateModelFromServerMessage { d, c, h, ds } model =
 
 
 type alias DemographicsInformationModel =
-    { patientId : Int
+    { facilityId : Maybe Int
+    , mainProviderId : Maybe Int
+    , careCoordinatorId : Maybe Int
+    , sexTypeId : Maybe Int
+    , sexualOrientationId : Maybe Int
+    , genderIdentityId : Maybe Int
+    , uSVeteranId : Maybe Int
+    , religionId : Maybe Int
+    , patientId : Int
     , demographicsId : Maybe Int
     , nickName : Maybe String
     , ssn : Maybe String
@@ -1584,6 +1582,14 @@ decodeServerResponse =
 decodeDemographicsInformationModel : Decode.Decoder DemographicsInformationModel
 decodeDemographicsInformationModel =
     Pipeline.decode DemographicsInformationModel
+        |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
+        |> Pipeline.required "MainProviderId" (Decode.maybe Decode.int)
+        |> Pipeline.required "CareCoordinatorId" (Decode.maybe Decode.int)
+        |> Pipeline.required "SexTypeId" (Decode.maybe Decode.int)
+        |> Pipeline.required "SexualOrientationId" (Decode.maybe Decode.int)
+        |> Pipeline.required "GenderIdentityId" (Decode.maybe Decode.int)
+        |> Pipeline.required "USVeteranId" (Decode.maybe Decode.int)
+        |> Pipeline.required "ReligionId" (Decode.maybe Decode.int)
         |> Pipeline.required "PatientId" Decode.int
         |> Pipeline.required "DemographicsId" (Decode.maybe Decode.int)
         |> Pipeline.required "NickName" (Decode.maybe Decode.string)
@@ -1667,18 +1673,9 @@ decodePatientAddress =
 decodeSfData : Decode.Decoder SfData
 decodeSfData =
     Pipeline.decode SfData
-        |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
-        |> Pipeline.required "MainProviderId" (Decode.maybe Decode.int)
-        |> Pipeline.required "CareCoordinatorId" (Decode.maybe Decode.int)
-        |> Pipeline.required "SexTypeId" (Decode.maybe Decode.int)
-        |> Pipeline.required "SexualOrientationId" (Decode.maybe Decode.int)
-        |> Pipeline.required "GenderIdentityId" (Decode.maybe Decode.int)
-        |> Pipeline.required "USVeteranId" (Decode.maybe Decode.int)
-        |> Pipeline.required "ReligionId" (Decode.maybe Decode.int)
         |> Pipeline.required "DateOfBirth" (Decode.maybe Decode.string)
         |> Pipeline.required "DateOfDeath" (Decode.maybe Decode.string)
         |> Pipeline.required "VIP" (Decode.maybe Decode.bool)
-        |> Pipeline.hardcoded emptyDrops
 
 
 decodeFacilityAddress : Decode.Decoder FacilityAddress
@@ -1766,18 +1763,18 @@ encodeDemographicsInformationModel model =
         , ( "SexualOrientationNote", maybeVal Encode.string model.sexualOrientationNote )
         , ( "GenderIdentityNote", maybeVal Encode.string model.genderIdentityNote )
         , ( "Email", maybeVal Encode.string model.email )
-        , ( "FacilityId", maybeVal Encode.int model.sfData.facilityId )
-        , ( "MainProviderId", maybeVal Encode.int model.sfData.mainProviderId )
-        , ( "CareCoordinatorId", maybeVal Encode.int model.sfData.careCoordinatorId )
+        , ( "FacilityId", maybeVal Encode.int model.facilityId )
+        , ( "MainProviderId", maybeVal Encode.int model.mainProviderId )
+        , ( "CareCoordinatorId", maybeVal Encode.int model.careCoordinatorId )
         , ( "PrefixId", maybeVal Encode.int model.prefixId )
-        , ( "SexTypeId", maybeVal Encode.int model.sfData.sexTypeId )
-        , ( "SexualOrientationId", maybeVal Encode.int model.sfData.sexualOrientationId )
+        , ( "SexTypeId", maybeVal Encode.int model.sexTypeId )
+        , ( "SexualOrientationId", maybeVal Encode.int model.sexualOrientationId )
         , ( "SuffixId", maybeVal Encode.int model.suffixId )
-        , ( "GenderIdentityId", maybeVal Encode.int model.sfData.genderIdentityId )
+        , ( "GenderIdentityId", maybeVal Encode.int model.genderIdentityId )
         , ( "RaceId", maybeVal Encode.int model.raceId )
         , ( "EthnicityId", maybeVal Encode.int model.ethnicityId )
-        , ( "USVeteranId", maybeVal Encode.int model.sfData.uSVeteranId )
-        , ( "ReligionId", maybeVal Encode.int model.sfData.religionId )
+        , ( "USVeteranId", maybeVal Encode.int model.uSVeteranId )
+        , ( "ReligionId", maybeVal Encode.int model.religionId )
         , ( "DateOfBirth", maybeVal Encode.string model.sfData.dateOfBirth )
         , ( "DateOfDeath", maybeVal Encode.string model.sfData.dateOfDeath )
         , ( "VIP", maybeVal Encode.bool model.sfData.vip )
@@ -1795,7 +1792,7 @@ encodeContactInformationModel : Model -> Encode.Value
 encodeContactInformationModel model =
     Encode.object
         [ ( "PatientAddresses", Encode.list (List.map encodePatientAddress model.patientAddresses) )
-        , ( "FacilityId", maybeVal Encode.int model.sfData.facilityId )
+        , ( "FacilityId", maybeVal Encode.int model.facilityId )
         ]
 
 
