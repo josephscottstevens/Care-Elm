@@ -1,64 +1,64 @@
 port module Common.Functions
     exposing
-        ( setLoadingStatus
-        , displaySuccessMessage
-        , displayErrorMessage
-        , isAlpha
-        , defaultMaybeMsg
-        , defaultString
-        , defaultLower
-        , defaultBool
-        , defaultInt
-        , defaultIntToString
+        ( date
+        , dateTime
         , dateTimeToString
         , dateToString
-        , dateTime
-        , date
-        , defaultDateTime
+        , decodeDropdownItem
+        , defaultBool
         , defaultDate
+        , defaultDateTime
+        , defaultInt
+        , defaultIntStr
+        , defaultIntToString
+        , defaultLower
         , defaultLowerDate
         , defaultLowerDateTime
-        , defaultIntStr
-        , maybeVal
-        , maybeStringToInt
-        , getResponseError
-        , decodeDropdownItem
-        , postRequest
-        , getDesc
-        , getRecordTypeById
-        , getId
-        , sendMenuMessage
-        , setUnsavedChanges
-        , deletePrompt
+        , defaultMaybeMsg
+        , defaultString
         , deleteConfirmed
+        , deletePrompt
+        , displayErrorMessage
+        , displaySuccessMessage
+        , getDesc
+        , getId
+        , getRecordTypeById
+        , getResponseError
+        , isAlpha
+        , maybeStringToInt
+        , maybeVal
+        , postRequest
+        , sendMenuMessage
+        , setLoadingStatus
+        , setUnsavedChanges
         )
 
 import Char exposing (isLower, isUpper)
-import Date
-import Date.Extra
-import Json.Encode as Encode
-import Json.Decode as Decode exposing (Decoder, maybe, string, int, field, decodeString)
-import Set exposing (Set)
-import Json.Decode.Pipeline exposing (required, decode)
-import Http
 import Common.Types
     exposing
-        ( DropdownItem
-        , AddEditDataSource
+        ( AddEditDataSource
+        , DropdownItem
         , MenuMessage
         , RecordType
-            ( PrimaryCare
-            , Specialty
-            , Labs
-            , Radiology
-            , Hospitalizations
-            , Legal
-            , CallRecordings
-            , PreviousHistories
+            ( CallRecordings
             , Enrollment
+            , Hospitalizations
+            , Labs
+            , Legal
             , Misc
+            , PreviousHistories
+            , PrimaryCare
+            , Radiology
+            , Specialty
             )
         )
+import Date
+import Date.Extra
+import Http
+import Json.Decode as Decode exposing (Decoder, decodeString, field, int, maybe, string)
+import Json.Decode.Pipeline exposing (decode, required)
+import Json.Encode as Encode
+import Set exposing (Set)
 
 
 -- import Common.Route as Route exposing (Route)
@@ -133,12 +133,12 @@ defaultIntToString int =
 
 dateTimeToString : Date.Date -> String
 dateTimeToString date =
-    Date.Extra.toFormattedString "MM/dd/yyyy hh:mm:ss a" date
+    Date.Extra.toUtcFormattedString "MM/dd/yyyy hh:mm:ss a" date
 
 
 dateToString : Date.Date -> String
 dateToString date =
-    Date.Extra.toFormattedString "MM/dd/yyyy" date
+    Date.Extra.toUtcFormattedString "MM/dd/yyyy" date
 
 
 dateTime : String -> String
