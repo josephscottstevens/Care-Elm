@@ -1,24 +1,20 @@
 port module Demographics exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
-import Char
-import Common.Dropdown as Dropdown
+import Common.Dropdown as Dropdown exposing (defaultDropConfig)
 import Common.Functions as Functions exposing (decodeDropdownItem, maybeVal)
 import Common.Types as Types exposing (DropdownItem)
-import Html exposing (Html, div, h4, input, label, span, text, textarea)
-import Html.Attributes exposing (attribute, checked, class, defaultValue, disabled, hidden, id, maxlength, name, style, title, type_)
+import Html exposing (Html, b, div, h4, input, label, option, select, span, table, tbody, td, text, textarea, tr)
+import Html.Attributes exposing (attribute, checked, class, colspan, defaultValue, disabled, hidden, id, maxlength, name, style, title, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
-import List.Extra
+import List.Extra as List
 import MaskedInput.Number as MaskedNumber
 
 
 port initDemographics : SfData -> Cmd msg
-
-
-port initDemographicsDone : (String -> msg) -> Sub msg
 
 
 port initDemographicsAddress : List SfAddress -> Cmd msg
@@ -30,44 +26,28 @@ port addNewAddress : SfAddress -> Cmd msg
 port updateDemographicsAddressMoveInDate : (SfAddress -> msg) -> Sub msg
 
 
-
--- port initContactHours : Maybe Decode.Value -> Cmd msg
-
-
 port updateDemographics : (SfData -> msg) -> Sub msg
 
 
-port startSave : (Bool -> msg) -> Sub msg
-
-
-port save : Encode.Value -> Cmd msg
-
-
-port scrollTo : String -> Cmd msg
+port saveSuccess : Int -> Cmd msg
 
 
 scrollToError : Cmd msg
 scrollToError =
-    scrollTo "#ErrorDiv"
+    Functions.scrollTo "#ErrorDiv"
 
 
 subscriptions : Sub Msg
 subscriptions =
     Sub.batch
         [ updateDemographics UpdateDemographics
-        , initDemographicsDone InitDemographicsDone
         , updateDemographicsAddressMoveInDate UpdateDemographicsAddressMoveInDate
-        , startSave Save
         ]
 
 
 init : Int -> Cmd Msg
 init patientId =
     load patientId
-
-
-
--- Types
 
 
 type Phone
@@ -116,7 +96,15 @@ type alias Model =
     , sfData : SfData
     , patientLanguagesMap : List PatientLanguagesMap
     , householdMembers : List HouseholdMember
-    , contactHoursModel : Maybe Decode.Value
+
+    -- Start Contact Hours
+    , tZ : List SelectList
+    , weekData : List DayData
+    , selectedTimeZoneId : Maybe Int
+    , selectedTimeZoneDropState : Dropdown.DropState
+    , showContactValidationErrors : Bool
+
+    -- End Contact Hours
     , showValidationErrors : Bool
     , suffixId : Maybe Int
     , suffixDropState : Dropdown.DropState
@@ -207,7 +195,7 @@ view model =
     div [ id "demographicInformationForm", class "col-xs-12 padding-h-0" ]
         [ h4 [ class "col-xs-12 padding-h-0" ] [ text "Assigned To" ]
         , div [ class "col-xs-12 padding-h-0 padding-bottom-10", id "ErrorDiv" ]
-            [ viewValidationErrors model
+            [ viewValidationErrorsDiv model (validatationErrors model)
             ]
         , div rowStyle
             [ dropbox "Facility" True <|
@@ -345,6 +333,13 @@ view model =
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
                 , div [] (List.map viewHouseholdMembers model.householdMembers)
+                ]
+            ]
+        , viewContactHours model
+        , div [ class "col-xs-12 padding-h-0 padding-top-10 padding-bottom-10" ]
+            [ div [ class "col-xs-12 padding-h-0 padding-top-10" ]
+                [ input [ type_ "button", class "btn btn-sm btn-success", value "Save", onClick Save ] []
+                , input [ type_ "button", class "btn btn-sm btn-default margin-left-5", value "Reset", onClick Cancel ] []
                 ]
             ]
         ]
@@ -578,10 +573,10 @@ viewHouseholdMembers householdMember =
 type Msg
     = Load (Result Http.Error ServerResponse)
     | UpdateDemographics SfData
-    | InitDemographicsDone String
     | UpdateDemographicsAddressMoveInDate SfAddress
-    | Save Bool
-    | SaveCompleted (Result Http.Error String)
+    | Save
+    | SaveCompleted (Result Http.Error DemographicsResponse)
+    | Cancel
     | AddNewLanguage
     | RemoveLanguage PatientLanguagesMap
     | AddNewAddress
@@ -605,6 +600,12 @@ type Msg
     | UpdateHouseholdMemberName HouseholdMember String
     | UpdateHouseholdMemberComments HouseholdMember String
     | UpdateHouseholdMemberRelationship HouseholdMember ( Dropdown.DropState, Maybe Int, Cmd Msg )
+      -- Nested Contact Hours
+    | UpdateContactTimeZone ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdatePreferred DayData Bool
+    | UpdateTimingOptions DayData ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateBeginTime DayData ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateEndTime DayData ( Dropdown.DropState, Maybe Int, Cmd Msg )
       -- Edit
     | UpdateFacility ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateFacilityPtID String
@@ -687,6 +688,22 @@ updateHouseholdMembers model householdMember =
     { model | householdMembers = newHouseholdMembers }
 
 
+updateContactHours : Model -> DayData -> Model
+updateContactHours model dayData =
+    let
+        weekData =
+            List.map
+                (\t ->
+                    if t.idx == dayData.idx then
+                        dayData
+                    else
+                        t
+                )
+                model.weekData
+    in
+    { model | weekData = weekData }
+
+
 togglePreferred : Int -> { c | nodeId : Int, isPreferred : a } -> { c | isPreferred : Bool, nodeId : Int }
 togglePreferred nodeId t =
     if t.nodeId == nodeId then
@@ -696,7 +713,7 @@ togglePreferred nodeId t =
 
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
-update msg model _ =
+update msg model patientId =
     case msg of
         Load (Ok serverResponse) ->
             let
@@ -745,11 +762,6 @@ update msg model _ =
                   , Functions.setLoadingStatus False
                   ]
 
-        InitDemographicsDone _ ->
-            model
-                ! [--initContactHours model.contactHoursModel
-                  ]
-
         UpdateDemographicsAddressMoveInDate address ->
             let
                 patientAddresses =
@@ -769,7 +781,7 @@ update msg model _ =
         UpdateDemographics sfData ->
             { model | sfData = sfData } ! []
 
-        Save _ ->
+        Save ->
             let
                 newLangs =
                     model.patientLanguagesMap |> List.filter (\t -> t.languageId /= Nothing)
@@ -794,23 +806,34 @@ update msg model _ =
                         | patientLanguagesMap = newLangs
                         , patientAddresses = newAddresses
                         , showValidationErrors = False
+                        , showContactValidationErrors = False
                     }
             in
-            if List.length (validatationErrors newModel) > 0 then
-                { model | showValidationErrors = True } ! [ scrollToError ]
+            if isAllContactDaysValid model.weekData then
+                if List.length (validatationErrors newModel) > 0 then
+                    { model | showValidationErrors = True, showContactValidationErrors = False } ! [ scrollToError ]
+                else
+                    newModel ! [ Functions.setLoadingStatus True, save newModel ]
             else
-                newModel ! [ save (encodeBody newModel), Functions.setLoadingStatus True ]
+                { model | showContactValidationErrors = True } ! []
 
-        SaveCompleted (Ok responseMsg) ->
-            case Functions.getResponseError responseMsg of
-                Just t ->
-                    model ! [ Functions.displayErrorMessage t, Functions.setLoadingStatus False ]
+        SaveCompleted (Ok response) ->
+            case ( response.success, response.patientId ) of
+                ( _, Just newPatientId ) ->
+                    model
+                        ! [ Functions.displaySuccessMessage "Save completed successfully!"
+                          , Functions.setLoadingStatus False
+                          , saveSuccess newPatientId
+                          ]
 
-                Nothing ->
-                    model ! [ Functions.displaySuccessMessage "Save completed successfully!", Functions.setLoadingStatus False ]
+                _ ->
+                    model ! [ Functions.displayErrorMessage response.message ]
 
         SaveCompleted (Err t) ->
             model ! [ Functions.displayErrorMessage (toString t) ]
+
+        Cancel ->
+            model ! [ load patientId ]
 
         AddNewLanguage ->
             { model
@@ -965,6 +988,26 @@ update msg model _ =
         UpdateHouseholdMemberRelationship t ( newDropState, newId, newMsg ) ->
             updateHouseholdMembers model { t | dropState = newDropState, relationshipId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
 
+        -- Begin Contact Hours
+        UpdateContactTimeZone ( newDropState, newId, newMsg ) ->
+            { model | selectedTimeZoneDropState = newDropState, selectedTimeZoneId = newId } ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdatePreferred dayData t ->
+            updateContactHours model { dayData | preferredDay = t } ! [ Functions.setUnsavedChanges True ]
+
+        UpdateTimingOptions dayData ( newDropState, newId, newMsg ) ->
+            updateContactHours model { dayData | timingInstructionsDropState = newDropState, timingInstructionsSelectedId = newId }
+                ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateBeginTime dayData ( newDropState, newId, newMsg ) ->
+            updateContactHours model { dayData | beginTimeDropState = newDropState, beginTimeSelectedId = newId }
+                ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        UpdateEndTime dayData ( newDropState, newId, newMsg ) ->
+            updateContactHours model { dayData | endTimeDropState = newDropState, endTimeSelectedId = newId }
+                ! [ newMsg, Functions.setUnsavedChanges True ]
+
+        -- End Contact Hours
         UpdateCellPhone t ->
             let
                 preferredPhoneNumber =
@@ -1098,16 +1141,6 @@ rowStyle =
     [ class "col-xs-12 col-sm-12 col-md-5 col-lg-4 padding-left-0" ]
 
 
-idAttr : String -> Html.Attribute msg
-idAttr str =
-    id (String.filter isAlpha str ++ "Id")
-
-
-isAlpha : Char -> Bool
-isAlpha char =
-    Char.isLower char || Char.isUpper char
-
-
 isRequiredClass : Bool -> Html.Attribute msg
 isRequiredClass isRequired =
     case isRequired of
@@ -1155,7 +1188,7 @@ maxLength maybeMax =
 textboxInner : Maybe Int -> String -> Bool -> Maybe String -> (String -> msg) -> Html msg
 textboxInner maybeMax displayText isRequired maybeStr event =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr, class "e-textbox", onInput event, maxLength maybeMax ] []
+        input [ type_ "text", id (Functions.idAttr displayText), maybeValue maybeStr, class "e-textbox", onInput event, maxLength maybeMax ] []
 
 
 textbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
@@ -1166,7 +1199,7 @@ textbox displayText isRequired maybeStr event =
 nonumberbox : String -> Bool -> Maybe String -> (String -> msg) -> Html msg
 nonumberbox displayText isRequired maybeStr event =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, maybeValue maybeStr, noNumbers, class "e-textbox", onInput event ] []
+        input [ type_ "text", id (Functions.idAttr displayText), maybeValue maybeStr, noNumbers, class "e-textbox", onInput event ] []
 
 
 dropbox : String -> Bool -> Html msg -> Html msg
@@ -1178,7 +1211,7 @@ dropbox displayText isRequired t =
 sfbox : String -> Bool -> Html msg
 sfbox displayText isRequired =
     commonStructure displayText isRequired <|
-        input [ type_ "text", idAttr displayText, class "e-textbox" ] []
+        input [ type_ "text", id (Functions.idAttr displayText), class "e-textbox" ] []
 
 
 requireInt : String -> Maybe Int -> Maybe String
@@ -1224,7 +1257,7 @@ phoneDuplicateValidation model =
             [ model.cellPhoneNumber, model.homePhoneNumber, model.workPhoneNumber ]
                 |> List.filterMap identity
     in
-    if List.Extra.allDifferent phones then
+    if List.allDifferent phones then
         Nothing
     else
         case List.head phones of
@@ -1285,29 +1318,24 @@ viewValidationErrorsDiv model errors =
         (List.map (\t -> div [] [ text t ]) errors)
 
 
-viewValidationErrors : Model -> Html msg
-viewValidationErrors model =
-    viewValidationErrorsDiv model (validatationErrors model)
-
-
 emptyModel : Int -> Model
 emptyModel patientId =
     { facilityId = Nothing
-    , facilityDropState = Dropdown.init "facilityDropdown" True
+    , facilityDropState = Dropdown.init { defaultDropConfig | domId = "facilityDropdown", showSearchText = True }
     , mainProviderId = Nothing
-    , mainProviderDropState = Dropdown.init "mainProviderDropdown" True
+    , mainProviderDropState = Dropdown.init { defaultDropConfig | domId = "mainProviderDropdown", showSearchText = True }
     , careCoordinatorId = Nothing
-    , careCoordinatorDropState = Dropdown.init "careCoordinatorDropdown" True
+    , careCoordinatorDropState = Dropdown.init { defaultDropConfig | domId = "careCoordinatorDropdown", showSearchText = True }
     , sexTypeId = Nothing
-    , sexTypeDropState = Dropdown.init "sexTypeDropdown" False
+    , sexTypeDropState = Dropdown.init { defaultDropConfig | domId = "sexTypeDropdown" }
     , sexualOrientationId = Nothing
-    , sexualOrientationDropState = Dropdown.init "sexualOrientationDropdown" False
+    , sexualOrientationDropState = Dropdown.init { defaultDropConfig | domId = "sexualOrientationDropdown" }
     , genderIdentityId = Nothing
-    , genderIdentityDropState = Dropdown.init "genderIdentityDropdown" False
+    , genderIdentityDropState = Dropdown.init { defaultDropConfig | domId = "genderIdentityDropdown" }
     , uSVeteranId = Nothing
-    , uSVeteranDropState = Dropdown.init "uSVeteranDropdown" False
+    , uSVeteranDropState = Dropdown.init { defaultDropConfig | domId = "uSVeteranDropdown" }
     , religionId = Nothing
-    , religionDropState = Dropdown.init "religionDropdown" False
+    , religionDropState = Dropdown.init { defaultDropConfig | domId = "religionDropdown" }
     , patientId = patientId
     , demographicsId = Nothing
     , nickName = Nothing
@@ -1330,18 +1358,26 @@ emptyModel patientId =
     , patientAddresses = []
     , stateDropdown = []
     , primaryAddressIndex = 0
-    , contactHoursModel = Nothing
+
+    -- Start Contact Hours
+    , tZ = []
+    , weekData = []
+    , selectedTimeZoneId = Nothing
+    , selectedTimeZoneDropState = Dropdown.init { defaultDropConfig | domId = "selectedTimeZone" }
+    , showContactValidationErrors = False
+
+    -- End Contact Hours
     , showValidationErrors = False
     , suffixId = Nothing
-    , suffixDropState = Dropdown.init "suffixDropdown" False
+    , suffixDropState = Dropdown.init { defaultDropConfig | domId = "suffixDropdown" }
     , prefixId = Nothing
-    , prefixDropState = Dropdown.init "prefixDropdown" False
+    , prefixDropState = Dropdown.init { defaultDropConfig | domId = "prefixDropdown" }
     , raceId = Nothing
-    , raceDropState = Dropdown.init "raceDropdown" False
+    , raceDropState = Dropdown.init { defaultDropConfig | domId = "raceDropdown" }
     , ethnicityId = Nothing
-    , ethnicityDropState = Dropdown.init "ethnicityDropdown" False
+    , ethnicityDropState = Dropdown.init { defaultDropConfig | domId = "ethnicityDropdown" }
     , acuityLevelId = Nothing
-    , acuityLevelDropState = Dropdown.init "acuityLevelDropdown" False
+    , acuityLevelDropState = Dropdown.init { defaultDropConfig | domId = "acuityLevelDropdown" }
     , homePhoneNumber = Nothing
     , cellPhoneNumber = Nothing
     , workPhoneNumber = Nothing
@@ -1367,7 +1403,7 @@ emptyPatientLanguagesMap nodeCounter isPreferred =
     { id = Nothing
     , languageId = Nothing
     , isPreferred = isPreferred
-    , dropState = Dropdown.init "languageDropdown" False
+    , dropState = Dropdown.init { defaultDropConfig | domId = "languageDropdown" }
     , nodeId = nodeCounter
     }
 
@@ -1378,7 +1414,7 @@ emptyHouseholdMembers nodeCounter =
     , name = Nothing
     , relationshipId = Nothing
     , comments = Nothing
-    , dropState = Dropdown.init "householdMembersDropdown" False
+    , dropState = Dropdown.init { defaultDropConfig | domId = "householdMembersDropdown" }
     , nodeId = nodeCounter
     }
 
@@ -1397,9 +1433,9 @@ emptyPatientAddress nodeCounter isPreferred =
     , facilityAddress = Nothing
     , facilityAddressId = Nothing
     , addressType = Nothing
-    , facilityAddressDropState = Dropdown.init "facilityAddressDropdown" False
-    , addressTypeDropState = Dropdown.init "addressDropdown" False
-    , addressStateDropState = Dropdown.init "stateDropdown" False
+    , facilityAddressDropState = Dropdown.init { defaultDropConfig | domId = "facilityAddressDropdown" }
+    , addressTypeDropState = Dropdown.init { defaultDropConfig | domId = "addressDropdown" }
+    , addressStateDropState = Dropdown.init { defaultDropConfig | domId = "stateDropdown" }
     , nodeId = nodeCounter
     }
 
@@ -1423,11 +1459,7 @@ emptyDrops =
 
 
 updateModelFromServerMessage : ServerResponse -> Model -> Model
-updateModelFromServerMessage { d, c, h, ds } model =
-    let
-        sfData =
-            d.sfData
-    in
+updateModelFromServerMessage { d, c, contactHoursModel, ds } model =
     { model
         | demographicsId = d.demographicsId
         , facilityId = d.facilityId
@@ -1452,12 +1484,19 @@ updateModelFromServerMessage { d, c, h, ds } model =
         , sexualOrientationNote = d.sexualOrientationNote
         , genderIdentityNote = d.genderIdentityNote
         , email = d.email
-        , sfData = sfData
+        , sfData = d.sfData
         , patientLanguagesMap = d.patientLanguagesMap
         , householdMembers = d.householdMembers
         , patientAddresses = c.patientAddresses
         , primaryAddressIndex = c.primaryAddressIndex
-        , contactHoursModel = Just h
+
+        -- Start Contact Hours
+        , tZ = contactHoursModel.tZ
+        , weekData = List.indexedMap dayDataFromServer contactHoursModel.weekData
+        , selectedTimeZoneId = contactHoursModel.selectedTimeZoneId
+        , selectedTimeZoneDropState = contactHoursModel.selectedTimeZoneDropState
+
+        -- End Contact Hours
         , suffixId = d.suffixId
         , prefixId = d.prefixId
         , raceId = d.raceId
@@ -1523,10 +1562,343 @@ type alias ContactInformationModel =
     }
 
 
+
+-- Contact Hours section, sectioned off because of the ICK factor.
+
+
+timeZoneDropdown : List DropdownItem
+timeZoneDropdown =
+    [ DropdownItem (Just 0) "Central Standard Time"
+    , DropdownItem (Just 1) "Eastern Standard Time"
+    , DropdownItem (Just 2) "Mountain Standard Time"
+    , DropdownItem (Just 3) "Pacific Standard Time"
+    , DropdownItem (Just 4) "Coordinated Universal Time"
+    ]
+
+
+type TimingOption
+    = Anytime
+    | Between
+    | Before
+    | After
+
+
+timingOption : Maybe Int -> TimingOption
+timingOption dropdownId =
+    case dropdownId of
+        Just 0 ->
+            Anytime
+
+        Just 1 ->
+            Between
+
+        Just 2 ->
+            Before
+
+        Just 3 ->
+            After
+
+        _ ->
+            Debug.crash "Invalid Timing Option"
+
+
+timingOptionsDropdown : List DropdownItem
+timingOptionsDropdown =
+    [ DropdownItem (Just 0) "Anytime"
+    , DropdownItem (Just 1) "Between"
+    , DropdownItem (Just 2) "Before"
+    , DropdownItem (Just 3) "After"
+    ]
+
+
+encodeContactHoursModel : ContactHoursModel -> Encode.Value
+encodeContactHoursModel contactHoursModel =
+    Encode.object
+        [ ( "TZ", Encode.list (List.map encodeSelectList contactHoursModel.tZ) )
+        ]
+
+
+encodeSelectList : SelectList -> Encode.Value
+encodeSelectList selectList =
+    Encode.object
+        [ ( "Disabled", Encode.bool selectList.disabled )
+        , ( "Group", maybeVal Encode.string selectList.group )
+        , ( "Selected", Encode.bool selectList.selected )
+        , ( "Text", maybeVal Encode.string selectList.text )
+        , ( "Value", maybeVal Encode.string selectList.value )
+        ]
+
+
+encodeDayData : DayData -> Encode.Value
+encodeDayData dayData =
+    let
+        maybeBeginTime =
+            dayData.beginTime
+                |> List.filter (\t -> t.selected)
+                |> List.head
+
+        maybeEndTime =
+            dayData.endTime
+                |> List.filter (\t -> t.selected)
+                |> List.head
+
+        maybeTimingInstructions =
+            dayData.timingInstructions
+                |> List.filter (\t -> t.selected)
+                |> List.head
+    in
+    case ( maybeBeginTime, maybeEndTime, maybeTimingInstructions ) of
+        ( Just beginTime, Just endTime, Just timingInstructions ) ->
+            Encode.object
+                [ ( "BeginTime", encodeSelectList beginTime )
+                , ( "EndTime", encodeSelectList endTime )
+                , ( "PreferredDay", Encode.bool dayData.preferredDay )
+                , ( "TimingInstructions", encodeSelectList timingInstructions )
+                , ( "WeekDay", maybeVal Encode.string dayData.weekDay )
+                ]
+
+        _ ->
+            Debug.crash "invalid contact hours"
+
+
+decodeContactHoursModel : Decode.Decoder ContactHoursModel
+decodeContactHoursModel =
+    Pipeline.decode ContactHoursModel
+        |> Pipeline.required "TZ" (Decode.list decodeSelectList)
+        |> Pipeline.required "WeekData" (Decode.list decodeDayData)
+        |> Pipeline.required "SelectedTimeZoneId" (Decode.maybe Decode.int)
+        |> Pipeline.hardcoded (Dropdown.init { defaultDropConfig | domId = "selectedTimeZone" })
+
+
+decodeSelectList : Decode.Decoder SelectList
+decodeSelectList =
+    Pipeline.decode SelectList
+        |> Pipeline.required "Disabled" Decode.bool
+        |> Pipeline.required "Group" (Decode.maybe Decode.string)
+        |> Pipeline.optional "Selected" Decode.bool False
+        |> Pipeline.required "Text" (Decode.maybe Decode.string)
+        |> Pipeline.required "Value" (Decode.maybe Decode.string)
+
+
+decodeDayData : Decode.Decoder ServerDayData
+decodeDayData =
+    Pipeline.decode ServerDayData
+        |> Pipeline.required "WeekDay" (Decode.maybe Decode.string)
+        |> Pipeline.required "PreferredDay" Decode.bool
+        |> Pipeline.required "TimingInstructions" (Decode.list decodeSelectList)
+        |> Pipeline.required "BeginTime" (Decode.list decodeSelectList)
+        |> Pipeline.required "EndTime" (Decode.list decodeSelectList)
+
+
+dayDataFromServer : Int -> ServerDayData -> DayData
+dayDataFromServer idx serverDayData =
+    { idx = idx
+    , weekDay = serverDayData.weekDay
+    , preferredDay = serverDayData.preferredDay
+    , timingInstructions = serverDayData.timingInstructions
+    , timingInstructionsSelectedId = List.findIndex (\t -> t.selected) serverDayData.timingInstructions
+    , timingInstructionsDropState =
+        Dropdown.init
+            { defaultDropConfig
+                | domId = "timingInstructions" ++ toString idx
+                , width = Dropdown.Exactly 100
+                , height = Dropdown.Exactly 18
+            }
+    , beginTime = serverDayData.beginTime
+    , beginTimeSelectedId = List.findIndex (\t -> t.selected) serverDayData.beginTime
+    , beginTimeDropState =
+        Dropdown.init
+            { defaultDropConfig
+                | domId = "beginTime" ++ toString idx
+                , width = Dropdown.Exactly 100
+                , height = Dropdown.Exactly 18
+            }
+    , endTime = serverDayData.endTime
+    , endTimeSelectedId = List.findIndex (\t -> t.selected) serverDayData.endTime
+    , endTimeDropState =
+        Dropdown.init
+            { defaultDropConfig
+                | domId = "endTime" ++ toString idx
+                , width = Dropdown.Exactly 100
+                , height = Dropdown.Exactly 18
+            }
+    }
+
+
+type alias ServerDayData =
+    { weekDay : Maybe String
+    , preferredDay : Bool
+    , timingInstructions : List SelectList
+    , beginTime : List SelectList
+    , endTime : List SelectList
+    }
+
+
+type alias DayData =
+    { idx : Int
+    , weekDay : Maybe String
+    , preferredDay : Bool
+    , timingInstructions : List SelectList
+    , timingInstructionsSelectedId : Maybe Int
+    , timingInstructionsDropState : Dropdown.DropState
+    , beginTime : List SelectList
+    , beginTimeSelectedId : Maybe Int
+    , beginTimeDropState : Dropdown.DropState
+    , endTime : List SelectList
+    , endTimeSelectedId : Maybe Int
+    , endTimeDropState : Dropdown.DropState
+    }
+
+
+type alias ContactHoursModel =
+    { tZ : List SelectList
+    , weekData : List ServerDayData
+    , selectedTimeZoneId : Maybe Int
+    , selectedTimeZoneDropState : Dropdown.DropState
+    }
+
+
+type alias SelectList =
+    { disabled : Bool
+    , group : Maybe String
+    , selected : Bool
+    , text : Maybe String
+    , value : Maybe String
+    }
+
+
+viewContactHours : Model -> Html Msg
+viewContactHours model =
+    div [ id "DemographicsForm", class "col-xs-12 col-sm-8 col-md-10 padding-h-0" ]
+        [ h4 [ class "col-xs-12 padding-h-0 padding-top-0" ] [ text "Contact Hours" ]
+        , div [ class "col-xs-12 padding-h-0 col-sm-12 col-md-12 padding-h-0" ]
+            [ if isAllContactDaysValid model.weekData then
+                div [] []
+              else
+                div [ id "MasterPCHError", class "error" ]
+                    [ text "Errors with contact hours must be corrected before submission"
+                    ]
+            , table [ class "PatientContactHoursGrid" ]
+                [ tbody []
+                    ([ tr [ class "padding-h-0" ]
+                        [ td [ colspan 1, style [ ( "display", "block" ), ( "width", "250px" ), ( "padding-top", "10px" ), ( "padding-bottom", "10px" ) ] ]
+                            [ Dropdown.view model.selectedTimeZoneDropState UpdateContactTimeZone timeZoneDropdown model.selectedTimeZoneId
+                            ]
+                        ]
+                     , tr [ class "col-xs-12 padding-h-0" ]
+                        [ td [ class "Day" ] [ b [] [ text "Day" ] ]
+                        , td [ class "Preferred" ] [ b [] [ text "Preferred" ] ]
+                        , td [ class "TimingOptions" ] [ b [] [ text "Timing Options" ] ]
+                        , td [ class "Times" ] [ b [] [ text "Begin Time" ] ]
+                        , td [ class "Times" ] [ b [] [ text "End Time" ] ]
+                        ]
+                     ]
+                        ++ List.indexedMap viewContactHoursRow model.weekData
+                    )
+                ]
+            ]
+        ]
+
+
+isAllContactDaysValid : List DayData -> Bool
+isAllContactDaysValid weekData =
+    List.all isContactDayValid weekData
+
+
+isContactDayValid : DayData -> Bool
+isContactDayValid dayData =
+    let
+        beginId =
+            Maybe.withDefault -1 dayData.beginTimeSelectedId
+
+        endId =
+            Maybe.withDefault -1 dayData.endTimeSelectedId
+
+        isOptionBetween =
+            dayData.timingInstructionsSelectedId == Just 1
+    in
+    if isOptionBetween then
+        if beginId <= endId then
+            True
+        else
+            False
+    else
+        True
+
+
+viewContactHoursRow : Int -> DayData -> Html Msg
+viewContactHoursRow idx dayData =
+    let
+        beginTimeEnabled =
+            case timingOption dayData.timingInstructionsSelectedId of
+                Anytime ->
+                    False
+
+                Between ->
+                    True
+
+                Before ->
+                    True
+
+                After ->
+                    True
+
+        endTimeEnabled =
+            case timingOption dayData.timingInstructionsSelectedId of
+                Anytime ->
+                    False
+
+                Between ->
+                    True
+
+                Before ->
+                    False
+
+                After ->
+                    False
+
+        beforeError =
+            if isContactDayValid dayData then
+                []
+            else
+                [ b [ style [ ( "color", "red" ), ( "font-size", "0.75em" ) ] ]
+                    [ text "Must fall before End Time"
+                    ]
+                ]
+    in
+    tr [ class "col-xs-12 padding-h-0" ]
+        [ td [ class "Day" ]
+            [ b [ style [ ( "text-align", "right" ) ] ] [ text (Functions.defaultString dayData.weekDay) ]
+            ]
+        , td [ class "Preferred" ]
+            [ input [ type_ "checkbox", checked dayData.preferredDay, onCheck (UpdatePreferred dayData) ] []
+            ]
+        , td [ class "TimingOptions" ]
+            [ Dropdown.view dayData.timingInstructionsDropState (UpdateTimingOptions dayData) timingOptionsDropdown dayData.timingInstructionsSelectedId
+            ]
+        , td [ class "Times" ] <|
+            [ Dropdown.viewWithEnabled beginTimeEnabled dayData.beginTimeDropState (UpdateBeginTime dayData) (List.map selectListToDropdownItem dayData.beginTime) dayData.beginTimeSelectedId
+            ]
+                ++ beforeError
+        , td [ class "Times" ]
+            [ Dropdown.viewWithEnabled endTimeEnabled dayData.endTimeDropState (UpdateEndTime dayData) (List.map selectListToDropdownItem dayData.endTime) dayData.endTimeSelectedId
+            ]
+        ]
+
+
+selectListToDropdownItem : SelectList -> DropdownItem
+selectListToDropdownItem selectList =
+    DropdownItem (Functions.stringToInt (Functions.defaultString selectList.value)) (Functions.defaultString selectList.text)
+
+
+
+-- End Contact Hours section
+
+
 type alias ServerResponse =
     { d : DemographicsInformationModel
     , c : ContactInformationModel
-    , h : Decode.Value
+    , contactHoursModel : ContactHoursModel
     , ds : DropdownSource
     }
 
@@ -1575,7 +1947,7 @@ decodeServerResponse =
     Pipeline.decode ServerResponse
         |> Pipeline.required "demographicsInformationModel" decodeDemographicsInformationModel
         |> Pipeline.required "contactInformationModel" decodeContactInformationModel
-        |> Pipeline.required "contactHoursModel" Decode.value
+        |> Pipeline.required "contactHoursModel" decodeContactHoursModel
         |> Pipeline.required "demographicLists" decodeLists
 
 
@@ -1634,7 +2006,7 @@ decodePatientLanguagesMap =
         |> Pipeline.required "Id" (Decode.maybe Decode.int)
         |> Pipeline.required "LanguageId" (Decode.maybe Decode.int)
         |> Pipeline.required "IsPreferred" Decode.bool
-        |> Pipeline.hardcoded (Dropdown.init "languageDropdown" False)
+        |> Pipeline.hardcoded (Dropdown.init { defaultDropConfig | domId = "languageDropdown" })
         |> Pipeline.hardcoded 0
 
 
@@ -1645,7 +2017,7 @@ decodeHouseholdMembers =
         |> Pipeline.required "Name" (Decode.maybe Decode.string)
         |> Pipeline.required "RelationshipId" (Decode.maybe Decode.int)
         |> Pipeline.required "Comments" (Decode.maybe Decode.string)
-        |> Pipeline.hardcoded (Dropdown.init "householdMembersDropdown" False)
+        |> Pipeline.hardcoded (Dropdown.init { defaultDropConfig | domId = "householdMembersDropdown" })
         |> Pipeline.hardcoded 0
 
 
@@ -1664,9 +2036,9 @@ decodePatientAddress =
         |> Pipeline.required "AddressType" (Decode.maybe Decode.int)
         |> Pipeline.required "FacilityAddress" (Decode.maybe decodeFacilityAddress)
         |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
-        |> Pipeline.hardcoded (Dropdown.init "facilityAddressDropdown" False)
-        |> Pipeline.hardcoded (Dropdown.init "stateDropdown" False)
-        |> Pipeline.hardcoded (Dropdown.init "addressDropdown" False)
+        |> Pipeline.hardcoded (Dropdown.init { defaultDropConfig | domId = "facilityAddressDropdown" })
+        |> Pipeline.hardcoded (Dropdown.init { defaultDropConfig | domId = "stateDropdown" })
+        |> Pipeline.hardcoded (Dropdown.init { defaultDropConfig | domId = "addressDropdown" })
         |> Pipeline.hardcoded 0
 
 
@@ -1813,14 +2185,19 @@ encodePatientAddress address =
         ]
 
 
-encodeBody : Model -> Encode.Value
-encodeBody model =
-    Encode.object
-        [ ( "demographicsInformation", encodeDemographicsInformationModel model )
-        , ( "contactInformation", encodeContactInformationModel model )
-        , ( "addresses", Encode.list (List.map encodePatientAddress model.patientAddresses) )
-        , ( "languages", Encode.list (List.map encodePatientLanguagesMap model.patientLanguagesMap) )
-        ]
+type alias DemographicsResponse =
+    { success : Bool
+    , message : String
+    , patientId : Maybe Int
+    }
+
+
+decodeDemographicsResponse : Decode.Decoder DemographicsResponse
+decodeDemographicsResponse =
+    Pipeline.decode DemographicsResponse
+        |> Pipeline.required "success" Decode.bool
+        |> Pipeline.required "message" Decode.string
+        |> Pipeline.required "patientId" (Decode.maybe Decode.int)
 
 
 load : Int -> Cmd Msg
@@ -1828,3 +2205,25 @@ load patientId =
     decodeServerResponse
         |> Http.get ("/People/GetDemographicsInformation?patientId=" ++ toString patientId)
         |> Http.send Load
+
+
+save : Model -> Cmd Msg
+save model =
+    let
+        timeZoneText =
+            Functions.getDropdownItemById model.selectedTimeZoneId timeZoneDropdown
+
+        encodeStr t =
+            Encode.string (Encode.encode 0 t)
+    in
+    Functions.customPostRequest
+        [ ( "demographicsInformation", encodeStr <| encodeDemographicsInformationModel model )
+        , ( "contactInformation", encodeStr <| encodeContactInformationModel model )
+        , ( "addresses", encodeStr <| Encode.list (List.map encodePatientAddress model.patientAddresses) )
+        , ( "languages", encodeStr <| Encode.list (List.map encodePatientLanguagesMap model.patientLanguagesMap) )
+        , ( "TZ", maybeVal Encode.string timeZoneText )
+        , ( "WDStr", encodeStr <| Encode.list (List.map encodeDayData model.weekData) )
+        ]
+        "/people/SaveDemographics"
+        (Http.expectJson decodeDemographicsResponse)
+        |> Http.send SaveCompleted

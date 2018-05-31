@@ -22,7 +22,7 @@ module Common.Html
         , makeControls
         )
 
-import Common.Dropdown as Dropdown
+import Common.Dropdown as Dropdown exposing (defaultDropConfig)
 import Common.Functions exposing (isAlpha)
 import Common.Types as Common
 import Html exposing (Html, button, div, input, label, span, text, textarea)

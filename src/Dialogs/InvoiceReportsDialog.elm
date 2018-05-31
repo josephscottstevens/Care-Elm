@@ -3,7 +3,7 @@ module Dialogs.InvoiceReportsDialog exposing (Msg, State, update, view)
 --init
 
 import Common.Dialog as Dialog
-import Common.Dropdown as Dropdown
+import Common.Dropdown as Dropdown exposing (defaultDropConfig)
 import Common.Functions as Functions
 import Common.Html exposing (InputControlType(CheckInput, ControlElement, HtmlElement), defaultConfig, fullWidth, makeControls)
 import Common.Types exposing (AddEditDataSource, DropdownItem, RequiredType(Optional, Required), monthDropdown, yearDropdown)
@@ -126,14 +126,15 @@ update msg model =
             case requestResponse of
                 Ok _ ->
                     model
-                        ! [ Functions.postStringRequestWithObject
-                                "/CCM/GetInvoiceReportXls"
+                        ! [ Functions.customPostRequest
                                 [ ( "facilityId", Encode.int facilityId )
                                 , ( "year", Encode.int year )
                                 , ( "month", Encode.int month )
                                 , ( "saveToClientPortal", Encode.bool saveToClientPortal )
                                 , ( "includeOpenBillingRecords", Encode.bool False )
                                 ]
+                                "/CCM/GetInvoiceReportXls"
+                                Http.expectString
                                 |> Http.send ExcelCompleted
                           ]
 
@@ -164,9 +165,9 @@ emptyInvoiceReportDialog currentMonth currentYear facilities =
     , facilityId = Nothing
     , saveToClientPortal = False
     , facilities = facilities
-    , facilityDropState = Dropdown.init "facilityDropdown" True
-    , monthDropState = Dropdown.init "monthDropdown" False
-    , yearDropState = Dropdown.init "yearDropdown" False
+    , facilityDropState = Dropdown.init { defaultDropConfig | domId = "facilityDropdown", showSearchText = True }
+    , monthDropState = Dropdown.init { defaultDropConfig | domId = "monthDropdown" }
+    , yearDropState = Dropdown.init { defaultDropConfig | domId = "yearDropdown" }
     , showDialog = False
     }
 

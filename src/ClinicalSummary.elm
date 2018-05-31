@@ -1,6 +1,6 @@
 module ClinicalSummary exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
-import Common.Dropdown as Dropdown
+import Common.Dropdown as Dropdown exposing (defaultDropConfig)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
 import Common.Html exposing (InputControlType(AreaInput, ControlElement), makeControls)
 import Common.Types exposing (RequiredType(Optional), monthDropdown, yearDropdown)
@@ -114,8 +114,7 @@ update msg model patientId =
 
         Save ->
             model
-                ! [ Functions.postStringRequestWithObject
-                        "/People/UpdateClinicalSummary"
+                ! [ Functions.customPostRequest
                         [ ( "Id", maybeVal Encode.int <| model.id )
                         , ( "PatientId", Encode.int <| patientId )
                         , ( "Summary", maybeVal Encode.string <| model.summary )
@@ -124,6 +123,8 @@ update msg model patientId =
                         , ( "CodeLegalStatus", maybeVal Encode.string <| model.codeLegalStatus )
                         , ( "Comments", maybeVal Encode.string <| model.comments )
                         ]
+                        "/People/UpdateClinicalSummary"
+                        Http.expectString
                         |> Http.send SaveCompleted
                   ]
 
@@ -223,6 +224,6 @@ emptyModel =
     , summary = Nothing
     , currentMonth = Nothing
     , currentYear = Nothing
-    , monthDropState = Dropdown.init "monthDropdown" False
-    , yearDropState = Dropdown.init "yearDropdown" False
+    , monthDropState = Dropdown.init { defaultDropConfig | domId = "monthDropdown" }
+    , yearDropState = Dropdown.init { defaultDropConfig | domId = "yearDropdown" }
     }

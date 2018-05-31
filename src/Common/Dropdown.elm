@@ -1,10 +1,20 @@
-port module Common.Dropdown exposing (DropState, getDropdownText, init, view)
+port module Common.Dropdown
+    exposing
+        ( DropConfig
+        , DropState
+        , Size(..)
+        , defaultDropConfig
+        , getDropdownText
+        , init
+        , view
+        , viewWithEnabled
+        )
 
 import Char
 import Common.Functions as Functions
 import Common.Types exposing (DropdownItem)
 import Html exposing (Html, div, input, li, span, text, ul)
-import Html.Attributes exposing (class, disabled, placeholder, readonly, style, tabindex, value)
+import Html.Attributes exposing (class, classList, disabled, placeholder, readonly, style, tabindex, value)
 import Html.Events as Events
 import Json.Decode
 
@@ -26,16 +36,42 @@ type alias DropState =
     , searchString : String
     , domId : String
     , showSearchText : Bool
+    , width : Size
+    , height : Size
     }
 
 
-init : String -> Bool -> DropState
-init domId showSearchText =
+type Size
+    = Exactly Int
+    | Auto
+
+
+type alias DropConfig =
+    { domId : String
+    , showSearchText : Bool
+    , width : Size
+    , height : Size
+    }
+
+
+defaultDropConfig : DropConfig
+defaultDropConfig =
+    { domId = ""
+    , showSearchText = False
+    , width = Auto
+    , height = Auto
+    }
+
+
+init : DropConfig -> DropState
+init { domId, showSearchText, width, height } =
     { isOpen = False
     , keyboardSelectedIndex = 0
     , searchString = ""
     , domId = domId
     , showSearchText = showSearchText
+    , width = width
+    , height = height
     }
 
 
@@ -82,7 +118,7 @@ getId dropdownItems index =
 
 onBlur : DropState -> Maybe Int -> String -> ( DropState, Maybe Int, Cmd msg )
 onBlur dropState selectedId customTargetId =
-    if customTargetId == (dropState.domId ++ "filterInput") then
+    if customTargetId == (dropState.domId ++ "filterInput") || customTargetId == (dropState.domId ++ "root") then
         ( dropState
         , selectedId
         , Cmd.none
@@ -99,7 +135,7 @@ onClick dropdown selectedId dropdownItems customTarget =
     if dropdown.isOpen then
         if customTarget.className == "noselect dropdown-li" then
             ( { dropdown | isOpen = False, searchString = "" }
-            , Functions.maybeStringToInt (String.slice 17 9999 customTarget.id)
+            , Functions.stringToInt (String.slice (String.length dropdown.domId + 1) 9999 customTarget.id)
             , Cmd.none
             )
         else
@@ -237,14 +273,32 @@ focusOut tagger =
     Events.on "focusout" (Json.Decode.map tagger (Json.Decode.oneOf [ customRelatedAt, Json.Decode.succeed "" ]))
 
 
+noProp : Html.Attribute msg
+noProp =
+    disabled False
+
+
 view : DropState -> (( DropState, Maybe Int, Cmd msg ) -> msg) -> List DropdownItem -> Maybe Int -> Html msg
 view dropdown toMsg dropdownItems selectedId =
+    viewWithEnabled True dropdown toMsg dropdownItems selectedId
+
+
+viewWithEnabled : Bool -> DropState -> (( DropState, Maybe Int, Cmd msg ) -> msg) -> List DropdownItem -> Maybe Int -> Html msg
+viewWithEnabled isEnabled dropdown toMsg dropdownItems selectedId =
     let
-        activeClass =
-            if dropdown.isOpen then
-                "e-focus e-popactive"
+        dropdownWidthMultiplier =
+            if dropdown.showSearchText then
+                9
             else
-                ""
+                7
+
+        getWidth dropdownItem =
+            case dropdown.width of
+                Exactly width ->
+                    width
+
+                Auto ->
+                    String.length dropdownItem.name * dropdownWidthMultiplier
 
         getDropdownText =
             dropdownItems
@@ -253,12 +307,6 @@ view dropdown toMsg dropdownItems selectedId =
                 |> List.head
                 |> Maybe.withDefault ""
 
-        dropdownWidthMultiplier =
-            if dropdown.showSearchText then
-                9
-            else
-                7
-
         keyMsgDecoder =
             Events.keyCode
                 |> Json.Decode.andThen (keyDecoder dropdown)
@@ -266,20 +314,20 @@ view dropdown toMsg dropdownItems selectedId =
 
         biggestStrLength =
             dropdownItems
-                |> List.map (\t -> String.length t.name * dropdownWidthMultiplier)
-                |> List.sortBy identity
+                |> List.map getWidth
+                |> List.sort
                 |> List.reverse
                 |> List.head
                 |> Maybe.withDefault 150
     in
     div
         [ Html.Attributes.id (dropdown.domId ++ "root")
-        , Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
-        , customClick (\t -> toMsg <| onClick dropdown selectedId dropdownItems t)
-        , if dropdown.isOpen then
-            focusOut (\t -> toMsg <| onBlur dropdown selectedId t)
+        , if isEnabled then
+            Events.onWithOptions "keydown" { stopPropagation = True, preventDefault = True } keyMsgDecoder
           else
-            disabled False
+            noProp
+        , customClick (\t -> toMsg <| onClick dropdown selectedId dropdownItems t)
+        , focusOut (\t -> toMsg <| onBlur dropdown selectedId t)
         , tabindex 1
 
         -- Make div focusable, since we need the on blur to trigger for both child elements
@@ -287,14 +335,40 @@ view dropdown toMsg dropdownItems selectedId =
         , class "dropdown-outline"
         ]
         [ span
-            [ class ("e-ddl e-widget " ++ activeClass)
-            , style [ ( "width", "100%" ) ]
+            [ classList
+                [ ( "e-ddl", True )
+                , ( "e-widget", True )
+                , ( "e-focus ", dropdown.isOpen )
+                , ( "e-popactive", dropdown.isOpen )
+                ]
+            , style
+                [ case dropdown.width of
+                    Exactly width ->
+                        ( "width", toString width ++ "px" )
+
+                    Auto ->
+                        ( "width", "100%" )
+                , case dropdown.height of
+                    Exactly height ->
+                        ( "height", toString height ++ "px" )
+
+                    Auto ->
+                        ( "height", "auto" )
+                ]
             ]
             [ span
-                [ class "e-in-wrap e-box"
+                [ classList
+                    [ ( "e-in-wrap", True )
+                    , ( "e-box", True )
+                    , ( "e-disable", not isEnabled )
+                    ]
                 ]
                 [ input
-                    [ class "noselect e-input"
+                    [ classList
+                        [ ( "noselect", True )
+                        , ( "e-input", True )
+                        , ( "e-disable", not isEnabled )
+                        ]
                     , readonly True
                     , value getDropdownText
                     , tabindex -1 -- Make it so you cannot set focus via tabbing, we need root div to have the focus
@@ -302,7 +376,12 @@ view dropdown toMsg dropdownItems selectedId =
                     , placeholder "Choose..."
                     ]
                     []
-                , span [ class "e-select" ]
+                , span
+                    [ classList
+                        [ ( "e-select", True )
+                        , ( "e-disable", not isEnabled )
+                        ]
+                    ]
                     [ span [ class "e-icon e-arrow-sans-down" ] []
                     ]
                 ]

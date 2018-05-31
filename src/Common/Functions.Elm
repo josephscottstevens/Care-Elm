@@ -2,6 +2,7 @@ port module Common.Functions
     exposing
         ( CustomDialog
         , customDialogShow
+        , customPostRequest
         , date
         , dateFromString
         , dateTime
@@ -26,6 +27,7 @@ port module Common.Functions
         , formatDateTime
         , getAt
         , getDesc
+        , getDropdownItemById
         , getId
         , getMonthIndex
         , getRecordTypeById
@@ -37,19 +39,19 @@ port module Common.Functions
         , idAttr
         , isAlpha
         , isNumber
-        , maybeStringToInt
         , maybeVal
         , noHash
         , openFile
         , postRequest
-        , postRequestWithObject
-        , postStringRequestWithObject
+        , scrollTo
         , secondsToHHMMSS
         , sendMenuMessage
         , setLoadingStatus
         , setUnsavedChanges
+        , stringToInt
         , ticksToSeconds
         , uniqueBy
+        , updatePatientId
         , updateRows
         )
 
@@ -75,13 +77,19 @@ import Common.Types
 import Date
 import Date.Extra
 import Http
-import Json.Decode as Decode exposing (Decoder, decodeString, field, int, maybe, string)
+import Json.Decode as Decode exposing (Decoder, field, int, maybe, string)
 import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode
 import Set exposing (Set)
 
 
 -- import Common.Route as Route exposing (Route)
+
+
+port updatePatientId : (Int -> msg) -> Sub msg
+
+
+port scrollTo : String -> Cmd msg
 
 
 port setLoadingStatus : Bool -> Cmd msg
@@ -361,8 +369,8 @@ maybeVal encoder =
     Maybe.map encoder >> Maybe.withDefault Encode.null
 
 
-maybeStringToInt : String -> Maybe Int
-maybeStringToInt str =
+stringToInt : String -> Maybe Int
+stringToInt str =
     case String.toInt str of
         Ok t ->
             Just t
@@ -380,9 +388,9 @@ getResponseProp response propertyName =
 
 getResponseError : String -> Maybe String
 getResponseError str =
-    case decodeString (field "Error" int) str of
+    case Decode.decodeString (field "Error" int) str of
         Ok _ ->
-            case decodeString (field "Message" string) str of
+            case Decode.decodeString (field "Message" string) str of
                 Ok t ->
                     Just t
 
@@ -404,6 +412,14 @@ decodeDropdownItem =
         |> required "Name" Decode.string
 
 
+getDropdownItemById : Maybe Int -> List DropdownItem -> Maybe String
+getDropdownItemById id dropdownItems =
+    dropdownItems
+        |> List.filter (\t -> t.id == id)
+        |> List.map .name
+        |> List.head
+
+
 
 -- Http helpers
 
@@ -421,24 +437,11 @@ postRequest body url =
         }
 
 
-postRequestWithObject : String -> List ( String, Encode.Value ) -> Decode.Decoder a -> Http.Request a
-postRequestWithObject url object decoder =
+customPostRequest : List ( String, Encode.Value ) -> String -> Http.Expect a -> Http.Request a
+customPostRequest object url expect =
     Http.request
         { body = Encode.object object |> Http.jsonBody
-        , expect = Http.expectJson decoder
-        , headers = []
-        , method = "POST"
-        , timeout = Nothing
-        , url = url
-        , withCredentials = False
-        }
-
-
-postStringRequestWithObject : String -> List ( String, Encode.Value ) -> Http.Request String
-postStringRequestWithObject url object =
-    Http.request
-        { body = Encode.object object |> Http.jsonBody
-        , expect = Http.expectString
+        , expect = expect
         , headers = []
         , method = "POST"
         , timeout = Nothing

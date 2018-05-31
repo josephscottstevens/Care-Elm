@@ -1,21 +1,21 @@
-module Billing exposing (Msg, Model, emptyModel, subscriptions, init, update, view)
+module Billing exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
-import Html exposing (Html, div, text, input, button, label)
-import Html.Attributes exposing (class, title, style, checked, type_, attribute)
-import Html.Events exposing (onClick)
-import Common.ServerTable as Table exposing (ColumnStyle(Width, CustomStyle), Operator(..), IdAttrType(IdAttr))
-import Common.Functions as Functions
-import Common.Types exposing (RequiredType(Optional, Required), AddEditDataSource, monthDropdown, yearDropdown)
 import Common.Dialog as Dialog
-import Common.Dropdown as Dropdown
+import Common.Dropdown as Dropdown exposing (defaultDropConfig)
+import Common.Functions as Functions
 import Common.Html exposing (InputControlType(CheckInput, ControlElement, HtmlElement), defaultConfig, fullWidth, makeControls)
+import Common.ServerTable as Table exposing (ColumnStyle(CustomStyle, Width), IdAttrType(IdAttr), Operator(..))
+import Common.Types exposing (AddEditDataSource, RequiredType(Optional, Required), monthDropdown, yearDropdown)
 import Date exposing (Date)
+import Dialogs.InvoiceReportsDialog as InvoiceReportsDialog
+import Html exposing (Html, button, div, input, label, text)
+import Html.Attributes exposing (attribute, checked, class, style, title, type_)
+import Html.Events exposing (onClick)
 import Http
-import Task
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
-import Dialogs.InvoiceReportsDialog as InvoiceReportsDialog
+import Task
 
 
 init : Int -> Cmd Msg
@@ -149,22 +149,22 @@ columns =
                 , ( "padding-left", "10px" )
                 ]
     in
-        [ Table.htmlColumn "<= 24 Hrs" isNew (Width 4) Table.FilterIsNewControl (Equals "Is24HoursSinceBilled") (IdAttr "lessThan24HoursColumn")
-        , Table.htmlColumn "Reviewed" toggleReviewed (Width 4) Table.CheckBoxControl (Equals "IsReviewed") (IdAttr "reviewedColumn")
-        , Table.htmlColumn "Batch Close" batchClose (Width 4) Table.CheckBoxControl (Equals "BatchCloseOnInvoiceCompletion") (IdAttr "batchCloseColumn")
-        , Table.stringColumn "Facility" .facility (Width 9) "Facility"
-        , Table.htmlColumn "Billing Date" billingDate (Width 5) Table.Last60MonthsControl (Between "BillingDate" "BillingDate") (IdAttr "billingDateColumn")
-        , Table.stringColumn "Main Provider" .mainProvider (Width 5) "MainProvider"
-        , Table.stringColumn "Patient Name" .patientName (Width 5) "PatientName"
-        , Table.dateColumn "DOB" .dob (Width 5) "DoB"
-        , Table.stringColumn "Patient's Facility Id" .patientFacilityIdNo (Width 5) "PatientFacilityIdNo"
-        , Table.stringColumn "AssignedTo" .assignedTo (Width 5) "AssignedTo"
-        , Table.stringColumn "Time Spent" timeSpent (Width 4) "TotalTimeSpent"
-        , Table.hrefColumn "Open Tasks" (\t -> ( openTasks t, toString t.openTasks ++ " Tasks" )) (Width 3) "OpenTasks"
-        , Table.dateColumn "CCM Enrollment" .ccmRegistrationDate (Width 5) "CcmRegistrationDate"
-        , Table.stringColumn "Billing Codes" .billingCode (Width 3) "BillingCode"
-        , Table.htmlColumn "Dx CP RC Al Rx VS" dxCpRcAlRxVs filterStyle Table.SixCirclesControl dxCpRcAlRxVsOperator (IdAttr "presentFlagsColumn")
-        ]
+    [ Table.htmlColumn "<= 24 Hrs" isNew (Width 4) Table.FilterIsNewControl (Equals "Is24HoursSinceBilled") (IdAttr "lessThan24HoursColumn")
+    , Table.htmlColumn "Reviewed" toggleReviewed (Width 4) Table.CheckBoxControl (Equals "IsReviewed") (IdAttr "reviewedColumn")
+    , Table.htmlColumn "Batch Close" batchClose (Width 4) Table.CheckBoxControl (Equals "BatchCloseOnInvoiceCompletion") (IdAttr "batchCloseColumn")
+    , Table.stringColumn "Facility" .facility (Width 9) "Facility"
+    , Table.htmlColumn "Billing Date" billingDate (Width 5) Table.Last60MonthsControl (Between "BillingDate" "BillingDate") (IdAttr "billingDateColumn")
+    , Table.stringColumn "Main Provider" .mainProvider (Width 5) "MainProvider"
+    , Table.stringColumn "Patient Name" .patientName (Width 5) "PatientName"
+    , Table.dateColumn "DOB" .dob (Width 5) "DoB"
+    , Table.stringColumn "Patient's Facility Id" .patientFacilityIdNo (Width 5) "PatientFacilityIdNo"
+    , Table.stringColumn "AssignedTo" .assignedTo (Width 5) "AssignedTo"
+    , Table.stringColumn "Time Spent" timeSpent (Width 4) "TotalTimeSpent"
+    , Table.hrefColumn "Open Tasks" (\t -> ( openTasks t, toString t.openTasks ++ " Tasks" )) (Width 3) "OpenTasks"
+    , Table.dateColumn "CCM Enrollment" .ccmRegistrationDate (Width 5) "CcmRegistrationDate"
+    , Table.stringColumn "Billing Codes" .billingCode (Width 3) "BillingCode"
+    , Table.htmlColumn "Dx CP RC Al Rx VS" dxCpRcAlRxVs filterStyle Table.SixCirclesControl dxCpRcAlRxVsOperator (IdAttr "presentFlagsColumn")
+    ]
 
 
 dxCpRcAlRxVs : Row -> Html msg
@@ -179,15 +179,15 @@ dxCpRcAlRxVs row =
         fullCircle ( t, titleText ) =
             div [ title titleText, class "circle", getStyle t ] []
     in
-        [ ( row.dxPresent, "Chronic Diagnoses present?" )
-        , ( row.carePlanPresent, "Care Plan present?" )
-        , ( row.recordingPresent, "Recorded call present?" )
-        , ( row.allergiesPresent, "Allergies present?" )
-        , ( row.medsPresent, "Medication present?" )
-        , ( row.vitalsPresent, "Vitals Signs present?" )
-        ]
-            |> List.map fullCircle
-            |> div [ class "circleMargin" ]
+    [ ( row.dxPresent, "Chronic Diagnoses present?" )
+    , ( row.carePlanPresent, "Care Plan present?" )
+    , ( row.recordingPresent, "Recorded call present?" )
+    , ( row.allergiesPresent, "Allergies present?" )
+    , ( row.medsPresent, "Medication present?" )
+    , ( row.vitalsPresent, "Vitals Signs present?" )
+    ]
+        |> List.map fullCircle
+        |> div [ class "circleMargin" ]
 
 
 type Msg
@@ -230,188 +230,188 @@ update msg model patientId =
         openInvoiceReportDialog t =
             { model | invoiceReportsDialog = Dialog.update model.invoiceReportsDialog t }
     in
-        case msg of
-            Load (Ok t) ->
-                { model | rows = t.result, gridOperations = Table.updateFromServer t.serverData model.gridOperations }
-                    ! [ Task.perform GetDate Date.now ]
+    case msg of
+        Load (Ok t) ->
+            { model | rows = t.result, gridOperations = Table.updateFromServer t.serverData model.gridOperations }
+                ! [ Task.perform GetDate Date.now ]
 
-            Load (Err t) ->
-                model ! [ Functions.displayErrorMessage (toString t) ]
+        Load (Err t) ->
+            model ! [ Functions.displayErrorMessage (toString t) ]
 
-            GetDate dt ->
-                { model
-                    | currentMonth = Just (dt |> Functions.getMonthIndex)
-                    , currentYear = Just (Date.year dt)
-                }
-                    ! []
+        GetDate dt ->
+            { model
+                | currentMonth = Just (dt |> Functions.getMonthIndex)
+                , currentYear = Just (Date.year dt)
+            }
+                ! []
 
-            SetGridOperations gridOperations ->
-                { model | gridOperations = gridOperations }
-                    ! [ load patientId gridOperations ]
+        SetGridOperations gridOperations ->
+            { model | gridOperations = gridOperations }
+                ! [ load patientId gridOperations ]
 
-            UpdateFilters filters ->
-                let
-                    gridOperations =
-                        Table.updateFilter filters model.gridOperations
-                in
-                    { model | gridOperations = gridOperations }
-                        ! [ load patientId gridOperations ]
+        UpdateFilters filters ->
+            let
+                gridOperations =
+                    Table.updateFilter filters model.gridOperations
+            in
+            { model | gridOperations = gridOperations }
+                ! [ load patientId gridOperations ]
 
-            GenerateSummaryReport row ->
-                Debug.crash "todo"
+        GenerateSummaryReport row ->
+            Debug.crash "todo"
 
-            ToggleBatchClose row ->
-                model
-                    ! [ "/Phase2Billing/ToggleBatchInvoice"
-                            |> Functions.postRequest
-                                (Encode.object [ ( "billingId", Encode.int row.id ) ])
-                            |> Http.send ToggleBatchCloseDone
-                      ]
+        ToggleBatchClose row ->
+            model
+                ! [ "/Phase2Billing/ToggleBatchInvoice"
+                        |> Functions.postRequest
+                            (Encode.object [ ( "billingId", Encode.int row.id ) ])
+                        |> Http.send ToggleBatchCloseDone
+                  ]
 
-            ToggleBatchCloseDone t ->
-                Functions.getRequestCompleted model t
+        ToggleBatchCloseDone t ->
+            Functions.getRequestCompleted model t
 
-            -- Toggle Reviewed
-            ShowToggleReviewedDialog row ->
-                { model
-                    | confirmData =
-                        Just
-                            { data = row
-                            , headerText = "Confirm"
-                            , onConfirm = ConfirmedToggleReviewedDialog
-                            , onCancel = CloseDialog
-                            , dialogContent = \_ -> text "Are you sure you wish to change the reviewed status?"
-                            , dialogOptions = Dialog.defaultDialogOptions
-                            }
-                }
-                    ! []
+        -- Toggle Reviewed
+        ShowToggleReviewedDialog row ->
+            { model
+                | confirmData =
+                    Just
+                        { data = row
+                        , headerText = "Confirm"
+                        , onConfirm = ConfirmedToggleReviewedDialog
+                        , onCancel = CloseDialog
+                        , dialogContent = \_ -> text "Are you sure you wish to change the reviewed status?"
+                        , dialogOptions = Dialog.defaultDialogOptions
+                        }
+            }
+                ! []
 
-            ConfirmedToggleReviewedDialog row ->
-                { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = False } }
-                    ! [ "/Phase2Billing/ToggleBillingRecordReviewed"
-                            |> Functions.postRequest
-                                (Encode.object [ ( "billingId", Encode.int row.id ) ])
-                            |> Http.send RequestToggleReviewedCompleted
-                      ]
+        ConfirmedToggleReviewedDialog row ->
+            { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = False } }
+                ! [ "/Phase2Billing/ToggleBillingRecordReviewed"
+                        |> Functions.postRequest
+                            (Encode.object [ ( "billingId", Encode.int row.id ) ])
+                        |> Http.send RequestToggleReviewedCompleted
+                  ]
 
-            RequestToggleReviewedCompleted t ->
-                Functions.getRequestCompleted model t
+        RequestToggleReviewedCompleted t ->
+            Functions.getRequestCompleted model t
 
-            -- Save Summary Report
-            ShowSaveSummaryReportDialog row ->
-                { model
-                    | confirmData =
-                        Just
-                            { data = row
-                            , headerText = "Save to Client Portal"
-                            , onConfirm = ConfirmedSaveSummaryReportDialog
-                            , onCancel = CloseDialog
-                            , dialogContent = \_ -> text "Are you sure that you want to save this report in Clinical Portal?"
-                            , dialogOptions = Dialog.defaultDialogOptions
-                            }
-                }
-                    ! []
+        -- Save Summary Report
+        ShowSaveSummaryReportDialog row ->
+            { model
+                | confirmData =
+                    Just
+                        { data = row
+                        , headerText = "Save to Client Portal"
+                        , onConfirm = ConfirmedSaveSummaryReportDialog
+                        , onCancel = CloseDialog
+                        , dialogContent = \_ -> text "Are you sure that you want to save this report in Clinical Portal?"
+                        , dialogOptions = Dialog.defaultDialogOptions
+                        }
+            }
+                ! []
 
-            ConfirmedSaveSummaryReportDialog row ->
-                let
-                    month =
-                        row.billingDate
-                            |> Maybe.andThen Functions.dateFromString
-                            |> Maybe.map Functions.getMonthIndex
-                            |> Maybe.map toString
-                            |> Maybe.withDefault ""
+        ConfirmedSaveSummaryReportDialog row ->
+            let
+                month =
+                    row.billingDate
+                        |> Maybe.andThen Functions.dateFromString
+                        |> Maybe.map Functions.getMonthIndex
+                        |> Maybe.map toString
+                        |> Maybe.withDefault ""
 
-                    year =
-                        row.billingDate
-                            |> Maybe.andThen Functions.dateFromString
-                            |> Maybe.map Date.year
-                            |> Maybe.map toString
-                            |> Maybe.withDefault ""
-                in
-                    { model | confirmData = Nothing }
-                        ! [ Functions.getStringRequestWithParams
-                                "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
-                                [ ( "hcoID", toString row.facilityId )
-                                , ( "year", year )
-                                , ( "month", month )
-                                , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
-                                , ( "patientId", toString patientId )
-                                ]
-                                |> Http.send RequestSaveSummaryReportCompleted
-                          ]
+                year =
+                    row.billingDate
+                        |> Maybe.andThen Functions.dateFromString
+                        |> Maybe.map Date.year
+                        |> Maybe.map toString
+                        |> Maybe.withDefault ""
+            in
+            { model | confirmData = Nothing }
+                ! [ Functions.getStringRequestWithParams
+                        "/Phase2Billing/SaveCCMMonthlyReportInClientPortal"
+                        [ ( "hcoID", toString row.facilityId )
+                        , ( "year", year )
+                        , ( "month", month )
+                        , ( "filePath", "clinical\\CCMMonthlySummaryReport.pdf" )
+                        , ( "patientId", toString patientId )
+                        ]
+                        |> Http.send RequestSaveSummaryReportCompleted
+                  ]
 
-            RequestSaveSummaryReportCompleted t ->
-                Functions.getRequestCompleted model t
+        RequestSaveSummaryReportCompleted t ->
+            Functions.getRequestCompleted model t
 
-            -- Close Billing Session
-            CloseDialogToggleReviewed row ->
-                { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = True } } ! []
+        -- Close Billing Session
+        CloseDialogToggleReviewed row ->
+            { model | confirmData = Nothing, rows = Functions.updateRows model.rows { row | isReviewed = True } } ! []
 
-            ShowCloseBillingSessionDialog row ->
-                { model
-                    | confirmData =
-                        Just
-                            { data = row
-                            , headerText = "Close Bill"
-                            , onConfirm = ConfirmedCloseBillingSessionDialog
-                            , onCancel = CloseDialog
-                            , dialogContent = \_ -> text "Are you sure that you want to close this bill?"
-                            , dialogOptions = Dialog.defaultDialogOptions
-                            }
-                }
-                    ! []
+        ShowCloseBillingSessionDialog row ->
+            { model
+                | confirmData =
+                    Just
+                        { data = row
+                        , headerText = "Close Bill"
+                        , onConfirm = ConfirmedCloseBillingSessionDialog
+                        , onCancel = CloseDialog
+                        , dialogContent = \_ -> text "Are you sure that you want to close this bill?"
+                        , dialogOptions = Dialog.defaultDialogOptions
+                        }
+            }
+                ! []
 
-            ConfirmedCloseBillingSessionDialog row ->
-                { model | confirmData = Nothing }
-                    ! [ Functions.getStringRequestWithParams
-                            "/Phase2Billing/CloseBillingSession"
-                            [ ( "billingId", toString row.id ) ]
-                            |> Http.send RequestCloseBillingSessionCompleted
-                      ]
+        ConfirmedCloseBillingSessionDialog row ->
+            { model | confirmData = Nothing }
+                ! [ Functions.getStringRequestWithParams
+                        "/Phase2Billing/CloseBillingSession"
+                        [ ( "billingId", toString row.id ) ]
+                        |> Http.send RequestCloseBillingSessionCompleted
+                  ]
 
-            RequestCloseBillingSessionCompleted requestResponse ->
-                case requestResponse of
-                    Ok _ ->
-                        model ! [ load patientId model.gridOperations ]
+        RequestCloseBillingSessionCompleted requestResponse ->
+            case requestResponse of
+                Ok _ ->
+                    model ! [ load patientId model.gridOperations ]
 
-                    Err t ->
-                        model ! [ Functions.displayErrorMessage (toString t) ]
+                Err t ->
+                    model ! [ Functions.displayErrorMessage (toString t) ]
 
-            -- Edit CCM Billing
-            ShowEditCCMBillingDialog row ->
-                { model
-                    | confirmData =
-                        Just
-                            { data = row
-                            , headerText = "Edit CCM Billing"
-                            , onConfirm = ConfirmedCloseBillingSessionDialog
-                            , onCancel = CloseDialog
-                            , dialogContent = \_ -> text "todo"
-                            , dialogOptions = Dialog.defaultDialogOptions
-                            }
-                }
-                    ! []
+        -- Edit CCM Billing
+        ShowEditCCMBillingDialog row ->
+            { model
+                | confirmData =
+                    Just
+                        { data = row
+                        , headerText = "Edit CCM Billing"
+                        , onConfirm = ConfirmedCloseBillingSessionDialog
+                        , onCancel = CloseDialog
+                        , dialogContent = \_ -> text "todo"
+                        , dialogOptions = Dialog.defaultDialogOptions
+                        }
+            }
+                ! []
 
-            ConfirmedEditCCMBillingDialog row ->
-                Debug.crash "todo"
+        ConfirmedEditCCMBillingDialog row ->
+            Debug.crash "todo"
 
-            RequestEditCCMBillingCompleted t ->
-                Functions.getRequestCompleted model t
+        RequestEditCCMBillingCompleted t ->
+            Functions.getRequestCompleted model t
 
-            -- CCM Summary Reports
-            ShowCCMSummaryReportsDialog addEditDataSource ->
-                model ! []
+        -- CCM Summary Reports
+        ShowCCMSummaryReportsDialog addEditDataSource ->
+            model ! []
 
-            -- Invoice Reports Dialog
-            ShowInvoiceReportsDialog addEditDataSource ->
-                Debug.crash "Todo"
+        -- Invoice Reports Dialog
+        ShowInvoiceReportsDialog addEditDataSource ->
+            Debug.crash "Todo"
 
-            UpdateInvoiceReportsDialog invoiceMsg dialogState ->
-                Debug.crash "Todo"
+        UpdateInvoiceReportsDialog invoiceMsg dialogState ->
+            Debug.crash "Todo"
 
-            -- Common Close Dialog
-            CloseDialog ->
-                { model | confirmData = Nothing } ! []
+        -- Common Close Dialog
+        CloseDialog ->
+            { model | confirmData = Nothing } ! []
 
 
 decodeBillingCcm : Decode.Decoder Row

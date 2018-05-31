@@ -127,3 +127,9 @@ yearDropdown =
     , DropdownItem (Just 2024) "2024"
     , DropdownItem (Just 2025) "2025"
     ]
+
+
+timeZoneDropdown : List DropdownItem
+timeZoneDropdown =
+    [ DropdownItem (Just 0) "Central Standard Time"
+    ]

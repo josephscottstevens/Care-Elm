@@ -75,6 +75,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ pageSubscriptions model.page
+        , Functions.updatePatientId UpdatePatientId
         , Window.resizes Resize
         ]
 
@@ -158,6 +159,7 @@ view model =
 type Msg
     = SetRoute (Maybe Route)
     | Resize Window.Size
+    | UpdatePatientId Int
     | BillingMsg Billing.Msg
     | ClinicalSummaryMsg ClinicalSummary.Msg
     | PastMedicalHistoryMsg PastMedicalHistory.Msg
@@ -284,6 +286,14 @@ updatePage page msg model =
                     model.rootDialog
             in
             { model | rootDialog = { rootDialog | windowSize = windowSize } } ! []
+
+        ( UpdatePatientId newPatientId, _ ) ->
+            { model | patientId = newPatientId }
+                ! [ if newPatientId == model.patientId then
+                        Cmd.none
+                    else
+                        Navigation.newUrl ("./?patientId=" ++ toString newPatientId)
+                  ]
 
         ( AddEditDataSourceLoaded response, _ ) ->
             case response of
