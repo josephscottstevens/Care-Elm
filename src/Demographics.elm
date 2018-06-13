@@ -234,7 +234,8 @@ view model =
             , dropbox "Sexual Orientation" False <|
                 Dropdown.view model.sexualOrientationDropState UpdateSexualOrientation model.drops.sexualOrientationDropdown model.sexualOrientationId
             , textbox "Sexual Orientation Note" False model.sexualOrientationNote UpdateSexualOrientationNote
-            , sfbox "Gender Identity" False
+            , dropbox "Gender Identity" False <|
+                Dropdown.view model.genderIdentityDropState UpdateGenderIdentity model.drops.genderIdentityDropdown model.genderIdentityId
             , textbox "Gender Identity Note" False model.genderIdentityNote UpdateGenderIdentityNote
             , dropbox "Race" False <|
                 Dropdown.view model.raceDropState UpdateRace model.drops.raceDropdown model.raceId

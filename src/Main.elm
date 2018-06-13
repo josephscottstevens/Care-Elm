@@ -1,11 +1,10 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Allergies
 import Billing
 import ClinicalSummary
 import Common.Dialog as Dialog
 import Common.Functions as Functions
-import Common.Route as Route exposing (Route)
 import Common.Types as Common exposing (AddEditDataSource)
 import Demographics
 import Hospitilizations
@@ -22,12 +21,17 @@ import Task
 import Window
 
 
+port loadAddEditDataSource : (AddEditDataSource -> msg) -> Sub msg
+
+
+port updatePatientId : (Maybe Int -> msg) -> Sub msg
+
+
 type alias Model =
     { patientId : Int
     , rootDialog : Dialog.RootDialog
     , page : Page
     , addEditDataSource : Maybe AddEditDataSource
-    , route : Route
     }
 
 
@@ -46,22 +50,21 @@ type Page
     | Error String
 
 
-init : Navigation.Location -> ( Model, Cmd Msg )
-init location =
+type alias Flags =
+    { page : String
+    , patientId : Int
+    }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
     let
-        maybePatientId =
-            Route.getPatientId location
-
-        patientId =
-            Maybe.withDefault -1 maybePatientId
-
         ( model, cmds ) =
-            setRoute (Route.fromLocation location)
-                { patientId = patientId
+            pageInit flags.page
+                { patientId = flags.patientId
                 , rootDialog = { windowSize = Window.Size 0 0, top = 0, left = 0 }
                 , page = NoPage
                 , addEditDataSource = Nothing
-                , route = Route.None
                 }
     in
     model
@@ -157,8 +160,7 @@ view model =
 
 
 type Msg
-    = SetRoute (Maybe Route)
-    | Resize Window.Size
+    = Resize Window.Size
     | UpdatePatientId Int
     | BillingMsg Billing.Msg
     | ClinicalSummaryMsg ClinicalSummary.Msg
@@ -172,8 +174,8 @@ type Msg
     | AddEditDataSourceLoaded (Result Http.Error AddEditDataSource)
 
 
-setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
-setRoute maybeRoute model =
+pageInit : String -> Model -> ( Model, Cmd Msg )
+pageInit pageStr model =
     let
         getDropdownsCmd =
             case model.addEditDataSource of
@@ -189,75 +191,86 @@ setRoute maybeRoute model =
             ]
                 ++ t
 
-        setModel route page =
-            { model | page = page, route = route }
+        setModel page =
+            { model | page = page }
+
+        setRecordsModel recordType =
+            setModel (Records (Records.emptyModel recordType))
+                ! cmds [ Cmd.map RecordsMsg (Records.init recordType model.patientId) ]
     in
-    case maybeRoute of
+    case pageStr of
         -- Patients\Profile
-        Just Route.Profile ->
-            setModel Route.Demographics (Demographics (Demographics.emptyModel model.patientId))
+        "demographics" ->
+            setModel (Demographics (Demographics.emptyModel model.patientId))
                 ! cmds [ Cmd.map DemographicsMsg (Demographics.init model.patientId) ]
 
-        Just Route.Demographics ->
-            setModel Route.Demographics (Demographics (Demographics.emptyModel model.patientId))
-                ! cmds [ Cmd.map DemographicsMsg (Demographics.init model.patientId) ]
+        -- --People\Records
+        "primarycarerecords" ->
+            setRecordsModel Common.PrimaryCare
 
-        --People/ClinicalSummary
-        Just Route.ClinicalSummaryRoot ->
-            setModel Route.ClinicalSummaryRoot (ClinicalSummary ClinicalSummary.emptyModel)
-                ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
+        "specialtyrecords" ->
+            setRecordsModel Common.Specialty
 
-        Just Route.ClinicalSummary ->
-            setModel Route.ClinicalSummary (ClinicalSummary ClinicalSummary.emptyModel)
-                ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
+        "labrecords" ->
+            setRecordsModel Common.Labs
 
-        Just Route.PastMedicalHistory ->
-            setModel Route.PastMedicalHistory (PastMedicalHistory PastMedicalHistory.emptyModel)
-                ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
+        "radiologyrecords" ->
+            setRecordsModel Common.Radiology
 
-        Just Route.Hospitilizations ->
-            setModel Route.Hospitilizations (Hospitilizations Hospitilizations.emptyModel)
-                ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
+        --"hospitalizationrecords" ->
+        --    setRecordsModel Common.Hospitalizations
+        "legalrecords" ->
+            setRecordsModel Common.Legal
 
-        Just Route.Immunizations ->
-            setModel Route.Immunizations (Immunizations Immunizations.emptyModel)
-                ! cmds [ Cmd.map ImmunizationsMsg (Immunizations.init model.patientId) ]
+        "miscrecords" ->
+            setRecordsModel Common.Misc
 
-        Just Route.Allergies ->
-            setModel Route.Allergies (Allergies Allergies.emptyModel)
-                ! cmds [ Cmd.map AllergiesMsg (Allergies.init model.patientId) ]
+        "enrollmentrecords" ->
+            setRecordsModel Common.Enrollment
 
-        Just Route.LastKnownVitals ->
-            setModel Route.LastKnownVitals (LastKnownVitals LastKnownVitals.emptyModel)
-                ! cmds [ Cmd.map LastKnownVitalsMsg (LastKnownVitals.init model.patientId) ]
+        "previoushistoryrecords" ->
+            setRecordsModel Common.PreviousHistories
 
-        --People/Records
-        Just Route.RecordsRoot ->
-            setModel (Route.Records Common.PrimaryCare) (Records (Records.emptyModel Common.PrimaryCare))
-                ! cmds [ Cmd.map RecordsMsg (Records.init Common.PrimaryCare model.patientId) ]
+        "callrecordingrecords" ->
+            setRecordsModel Common.CallRecordings
 
-        Just (Route.Records t) ->
-            setModel (Route.Records t) (Records (Records.emptyModel t))
-                ! cmds [ Cmd.map RecordsMsg (Records.init t model.patientId) ]
-
-        --Other
-        Just Route.Billing ->
-            setModel Route.Billing (Billing Billing.emptyModel)
-                ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
-
-        Just Route.None ->
-            setModel Route.None NoPage
-                ! []
-
-        Just (Route.Error str) ->
-            setModel (Route.Error str) (Error str)
-                ! []
-
-        Nothing ->
+        -- --People/ClinicalSummary
+        -- Just Route.ClinicalSummaryRoot ->
+        --     setModel Route.ClinicalSummaryRoot (ClinicalSummary ClinicalSummary.emptyModel)
+        --         ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
+        -- Just Route.ClinicalSummary ->
+        --     setModel Route.ClinicalSummary (ClinicalSummary ClinicalSummary.emptyModel)
+        --         ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
+        -- Just Route.PastMedicalHistory ->
+        --     setModel Route.PastMedicalHistory (PastMedicalHistory PastMedicalHistory.emptyModel)
+        --         ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
+        -- Just Route.Hospitilizations ->
+        --     setModel Route.Hospitilizations (Hospitilizations Hospitilizations.emptyModel)
+        --         ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
+        -- Just Route.Immunizations ->
+        --     setModel Route.Immunizations (Immunizations Immunizations.emptyModel)
+        --         ! cmds [ Cmd.map ImmunizationsMsg (Immunizations.init model.patientId) ]
+        -- Just Route.Allergies ->
+        --     setModel Route.Allergies (Allergies Allergies.emptyModel)
+        --         ! cmds [ Cmd.map AllergiesMsg (Allergies.init model.patientId) ]
+        -- Just Route.LastKnownVitals ->
+        --     setModel Route.LastKnownVitals (LastKnownVitals LastKnownVitals.emptyModel)
+        --         ! cmds [ Cmd.map LastKnownVitalsMsg (LastKnownVitals.init model.patientId) ]
+        -- --Other
+        -- Just Route.Billing ->
+        --     setModel Route.Billing (Billing Billing.emptyModel)
+        --         ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
+        -- Just Route.None ->
+        --     setModel Route.None NoPage
+        --         ! []
+        -- Just (Route.Error str) ->
+        --     setModel (Route.Error str) (Error str)
+        --         ! []
+        _ ->
             -- setModel (Route.Error "no route provided, map me in Route.routeHash")
             --     (Error "no route provided, map me in Route.routeHash")
             --     ! []
-            setModel Route.None NoPage
+            setModel NoPage
                 ! []
 
 
@@ -277,9 +290,6 @@ updatePage page msg model =
             { model | page = toModel newModel } ! [ Cmd.map toMsg newCmd ]
     in
     case ( msg, page ) of
-        ( SetRoute route, _ ) ->
-            setRoute route model
-
         ( Resize windowSize, _ ) ->
             let
                 rootDialog =
@@ -353,9 +363,9 @@ getDropDowns patientId =
         |> Http.send AddEditDataSourceLoaded
 
 
-main : Program Never Model Msg
+main : Program Flags Model Msg
 main =
-    Navigation.program (Route.fromLocation >> SetRoute)
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update

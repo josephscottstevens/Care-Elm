@@ -9,7 +9,6 @@ import Common.Html
         , getValidationErrors
         , makeControls
         )
-import Common.Route as Route
 import Common.Table as Table
 import Common.Types exposing (AddEditDataSource, DropdownItem, MenuMessage, RequiredType(Optional, Required))
 import Html exposing (Html, button, div, h4, text)
@@ -245,9 +244,9 @@ update msg model patientId =
                     model ! [ Functions.displayErrorMessage t ]
 
                 Nothing ->
-                    model
+                    { model | editData = Nothing }
                         ! [ Functions.displaySuccessMessage "Save completed successfully!"
-                          , Route.modifyUrl Route.Hospitilizations
+                          , load patientId
                           ]
 
         SaveCompleted (Err t) ->
@@ -257,7 +256,8 @@ update msg model patientId =
             model ! []
 
         Cancel ->
-            model ! [ setUnsavedChanges False, Route.modifyUrl Route.Hospitilizations ]
+            { model | editData = Nothing }
+                ! [ setUnsavedChanges False, load patientId ]
 
         UpdateHospitilizationsInitData sfData ->
             let
