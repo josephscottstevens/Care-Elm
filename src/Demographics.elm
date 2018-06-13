@@ -825,6 +825,7 @@ update msg model patientId =
                         ! [ Functions.displaySuccessMessage "Save completed successfully!"
                           , Functions.setLoadingStatus False
                           , saveSuccess newPatientId
+                          , Functions.setUnsavedChanges False
                           ]
 
                 _ ->
@@ -834,7 +835,7 @@ update msg model patientId =
             model ! [ Functions.displayErrorMessage (toString t) ]
 
         Cancel ->
-            model ! [ load patientId ]
+            model ! [ load patientId, Functions.scrollTo "div.body-content" ]
 
         AddNewLanguage ->
             { model
@@ -997,15 +998,30 @@ update msg model patientId =
             updateContactHours model { dayData | preferredDay = t } ! [ Functions.setUnsavedChanges True ]
 
         UpdateTimingOptions dayData ( newDropState, newId, newMsg ) ->
-            updateContactHours model { dayData | timingInstructionsDropState = newDropState, timingInstructionsSelectedId = newId }
+            updateContactHours model
+                { dayData
+                    | timingInstructionsDropState = newDropState
+                    , timingInstructionsSelectedId = newId
+                    , timingInstructions = List.indexedMap (\idx t -> { t | selected = Just idx == newId }) dayData.timingInstructions
+                }
                 ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateBeginTime dayData ( newDropState, newId, newMsg ) ->
-            updateContactHours model { dayData | beginTimeDropState = newDropState, beginTimeSelectedId = newId }
+            updateContactHours model
+                { dayData
+                    | beginTimeDropState = newDropState
+                    , beginTimeSelectedId = newId
+                    , beginTime = List.indexedMap (\idx t -> { t | selected = Just idx == newId }) dayData.beginTime
+                }
                 ! [ newMsg, Functions.setUnsavedChanges True ]
 
         UpdateEndTime dayData ( newDropState, newId, newMsg ) ->
-            updateContactHours model { dayData | endTimeDropState = newDropState, endTimeSelectedId = newId }
+            updateContactHours model
+                { dayData
+                    | endTimeDropState = newDropState
+                    , endTimeSelectedId = newId
+                    , endTime = List.indexedMap (\idx t -> { t | selected = Just idx == newId }) dayData.endTime
+                }
                 ! [ newMsg, Functions.setUnsavedChanges True ]
 
         -- End Contact Hours
@@ -1494,7 +1510,7 @@ updateModelFromServerMessage { d, c, contactHoursModel, ds } model =
         -- Start Contact Hours
         , tZ = contactHoursModel.tZ
         , weekData = List.indexedMap dayDataFromServer contactHoursModel.weekData
-        , selectedTimeZoneId = contactHoursModel.selectedTimeZoneId
+        , selectedTimeZoneId = List.findIndex (\t -> t.selected) contactHoursModel.tZ
         , selectedTimeZoneDropState = contactHoursModel.selectedTimeZoneDropState
 
         -- End Contact Hours
