@@ -14,7 +14,7 @@ import Char
 import Common.Functions as Functions
 import Common.Types exposing (DropdownItem)
 import Html exposing (Html, div, input, li, span, text, ul)
-import Html.Attributes exposing (class, classList, disabled, placeholder, readonly, style, tabindex, value)
+import Html.Attributes exposing (class, classList, defaultValue, disabled, placeholder, readonly, style, tabindex)
 import Html.Events as Events
 import Json.Decode
 
@@ -370,7 +370,7 @@ viewWithEnabled isEnabled dropdown toMsg dropdownItems selectedId =
                         , ( "e-disable", not isEnabled )
                         ]
                     , readonly True
-                    , value getDropdownText
+                    , defaultValue getDropdownText
                     , tabindex -1 -- Make it so you cannot set focus via tabbing, we need root div to have the focus
                     , disabled True -- Make it so you cannot click to set focus, we need root div to have the focus
                     , placeholder "Choose..."
@@ -425,7 +425,7 @@ viewWithEnabled isEnabled dropdown toMsg dropdownItems selectedId =
                     [ span [ class "e-in-wrap" ]
                         [ input
                             [ class "e-input"
-                            , value dropdown.searchString
+                            , defaultValue dropdown.searchString
                             , tabindex 0
                             , Html.Attributes.id (dropdown.domId ++ "filterInput")
                             ]

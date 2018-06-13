@@ -26,7 +26,7 @@ import Common.Dropdown as Dropdown exposing (defaultDropConfig)
 import Common.Functions exposing (isAlpha)
 import Common.Types as Common
 import Html exposing (Html, button, div, input, label, span, text, textarea)
-import Html.Attributes exposing (checked, class, for, hidden, id, name, style, tabindex, title, type_, value)
+import Html.Attributes exposing (checked, class, defaultValue, for, hidden, id, name, style, tabindex, title, type_)
 import Html.Events exposing (onCheck, onClick, onInput)
 
 
@@ -106,7 +106,7 @@ makeControls config controls =
                                 , nameAttr labelText
                                 , idAttr labelText
                                 , onInput event
-                                , value (Maybe.withDefault "" displayValue)
+                                , defaultValue (Maybe.withDefault "" displayValue)
                                 ]
                                 []
                             ]
@@ -122,7 +122,7 @@ makeControls config controls =
                                 , nameAttr labelText
                                 , idAttr labelText
                                 , onInput event
-                                , value <| toString displayValue
+                                , defaultValue <| toString displayValue
                                 ]
                                 []
                             ]
@@ -152,7 +152,7 @@ makeControls config controls =
                                 [ idAttr labelText
                                 , class "e-textbox"
                                 , onInput event
-                                , value (Maybe.withDefault "" displayValue)
+                                , defaultValue (Maybe.withDefault "" displayValue)
                                 ]
                                 []
                             ]
@@ -184,13 +184,13 @@ makeControls config controls =
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
                         , div config.controlAttributes
-                            [ input [ type_ "text", id syncfusionId, value displayValue ] [] ]
+                            [ input [ type_ "text", id syncfusionId, defaultValue displayValue ] [] ]
                         ]
 
                 FileInput labelText requiredType displayValue ->
                     div [ class "form-group" ]
                         [ commonLabel labelText requiredType
-                        , div config.controlAttributes [ input [ type_ "text", class "e-textbox", value displayValue ] [] ]
+                        , div config.controlAttributes [ input [ type_ "text", class "e-textbox", defaultValue displayValue ] [] ]
                         , div [ class labelWidth ]
                             [ input [ type_ "file", name "UploadFile", id "UploadFile", style [ ( "display", "none" ) ] ] []
                             , label [ for "UploadFile", class "sf-file-upload" ] [ text "Browse Files" ]
