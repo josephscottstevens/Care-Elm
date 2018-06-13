@@ -58,7 +58,7 @@ init sortedColumnName =
     , pageIndex = 0
     , rowsPerPage = 20
     , sortField = sortedColumnName
-    , sortAscending = True
+    , sortAscending = False
     }
 
 
@@ -299,13 +299,8 @@ viewTd state row config column =
                 text (Functions.defaultDate (dataToString row))
 
             HrefColumn _ displayText dataToString _ ->
-                case dataToString row of
-                    Just t ->
-                        a [ href t, target "_blank" ]
-                            [ text t ]
-
-                    Nothing ->
-                        text ""
+                --TODO, how do I want to display empty? I think.. it is hide the href, not go to an empty url right?
+                a [ href (Maybe.withDefault "" (dataToString row)), target "_blank" ] [ text displayText ]
 
             HrefColumnExtra _ toNode ->
                 toNode row
@@ -623,9 +618,9 @@ applySorter isReversed sorter data =
 
         IncOrDec sort ->
             if isReversed then
-                List.reverse (sort data)
-            else
                 sort data
+            else
+                List.reverse (sort data)
 
 
 findSorter : String -> List (Column { data | id : Int } msg) -> Maybe (Sorter { data | id : Int })

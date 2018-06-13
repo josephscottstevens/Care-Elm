@@ -24,9 +24,6 @@ import Window
 port loadAddEditDataSource : (AddEditDataSource -> msg) -> Sub msg
 
 
-port updatePatientId : (Maybe Int -> msg) -> Sub msg
-
-
 type alias Model =
     { patientId : Int
     , rootDialog : Dialog.RootDialog
