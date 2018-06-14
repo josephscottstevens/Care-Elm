@@ -9,5 +9,6 @@
         "**/node_modules": true,
         "**/elm-stuff": true
     },
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSaveTimeout": 999999
 }
