@@ -37,6 +37,7 @@ type RecordType
     | PreviousHistories
     | Enrollment
     | Misc
+    | ContinuityOfCareDocument
 
 
 type alias AddEditDataSource =

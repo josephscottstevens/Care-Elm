@@ -61,18 +61,7 @@ import Common.Types
         ( AddEditDataSource
         , DropdownItem
         , MenuMessage
-        , RecordType
-            ( CallRecordings
-            , Enrollment
-            , Hospitalizations
-            , Labs
-            , Legal
-            , Misc
-            , PreviousHistories
-            , PrimaryCare
-            , Radiology
-            , Specialty
-            )
+        , RecordType(..)
         )
 import Date
 import Date.Extra
@@ -527,6 +516,9 @@ getDesc recordType =
         Misc ->
             "Miscellaneous Records"
 
+        ContinuityOfCareDocument ->
+            "Continuity of Care Document"
+
 
 getRecordTypeById : Maybe Int -> Maybe RecordType
 getRecordTypeById maybeInt =
@@ -602,6 +594,9 @@ getId recordType =
 
         Misc ->
             5
+
+        ContinuityOfCareDocument ->
+            13
 
 
 uniqueBy : (a -> comparable) -> List a -> List a

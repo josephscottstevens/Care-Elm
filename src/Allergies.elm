@@ -204,6 +204,7 @@ gridConfig =
             , ( "e-contextdelete", "Delete", DeletePrompt )
             ]
         ]
+    , onDoubleClick = Just Edit
     }
 
 

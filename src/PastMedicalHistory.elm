@@ -272,6 +272,13 @@ gridConfig addEditDataSource =
                 Nothing ->
                     []
         ]
+    , onDoubleClick =
+        case addEditDataSource of
+            Just t ->
+                Just (Edit t)
+
+            Nothing ->
+                Nothing
     }
 
 

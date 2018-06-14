@@ -221,6 +221,7 @@ gridConfig =
         [ ( "e-addnew", Add ) ]
     , toMsg = SetTableState
     , columns = getColumns
+    , onDoubleClick = Just Edit
     }
 
 

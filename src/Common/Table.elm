@@ -124,6 +124,9 @@ type alias Config data msg =
     , toolbar : List ( String, msg )
     , toMsg : State -> msg
     , columns : List (Column { data | id : Int } msg)
+
+    --, onDropdownClick : Maybe ({ data | id : Int } -> msg)
+    , onDoubleClick : Maybe ({ data | id : Int } -> msg)
     }
 
 
@@ -276,6 +279,19 @@ viewTd state row config column =
         tdStyle =
             style [ ( "padding-left", "8.4px" ) ]
 
+        tdDoubleClick =
+            case column of
+                DropdownColumn _ ->
+                    disabled False
+
+                _ ->
+                    case config.onDoubleClick of
+                        Just onDoubleClick ->
+                            Events.onDoubleClick (onDoubleClick row)
+
+                        Nothing ->
+                            disabled False
+
         tdClick =
             case column of
                 DropdownColumn _ ->
@@ -284,7 +300,7 @@ viewTd state row config column =
                 _ ->
                     Events.onClick (config.toMsg { state | selectedId = Just row.id })
     in
-    td [ tdClass, tdStyle, tdClick ]
+    td [ tdClass, tdStyle, tdClick, tdDoubleClick ]
         [ case column of
             IntColumn _ dataToInt _ ->
                 text (Functions.defaultIntToString (dataToInt row))
@@ -431,12 +447,15 @@ rowDropDownDiv state toMsg row dropDownItems =
 
 viewToolbar : List ( String, msg ) -> Html msg
 viewToolbar items =
-    div [ class "e-gridtoolbar e-toolbar e-js e-widget e-box e-toolbarspan e-tooltip" ]
-        [ ul [ class "e-ul e-horizontal" ]
-            [ li [ class "e-tooltxt" ]
-                (List.map toolbarHelper items)
+    if List.length items > 0 then
+        div [ class "e-gridtoolbar e-toolbar e-js e-widget e-box e-toolbarspan e-tooltip" ]
+            [ ul [ class "e-ul e-horizontal" ]
+                [ li [ class "e-tooltxt" ]
+                    (List.map toolbarHelper items)
+                ]
             ]
-        ]
+    else
+        text ""
 
 
 toolbarHelper : ( String, msg ) -> Html msg

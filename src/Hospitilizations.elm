@@ -329,6 +329,13 @@ gridConfig addEditDataSource =
                 [ ( "e-addnew e-disable", NoOp ) ]
     , toMsg = SetTableState
     , columns = getColumns addEditDataSource
+    , onDoubleClick =
+        case addEditDataSource of
+            Just t ->
+                Just (Edit t)
+
+            Nothing ->
+                Nothing
     }
 
 

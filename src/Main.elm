@@ -231,6 +231,9 @@ pageInit pageStr model =
         "callrecordingrecords" ->
             setRecordsModel Common.CallRecordings
 
+        "continuityofcaredocument" ->
+            setRecordsModel Common.ContinuityOfCareDocument
+
         -- --People/ClinicalSummary
         -- Just Route.ClinicalSummaryRoot ->
         --     setModel Route.ClinicalSummaryRoot (ClinicalSummary ClinicalSummary.emptyModel)

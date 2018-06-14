@@ -432,6 +432,10 @@ getColumns recordType =
                 Common.Misc ->
                     commonColumns
 
+                Common.ContinuityOfCareDocument ->
+                    [ Table.dateTimeColumn "Date" .date
+                    ]
+
         lastColumns =
             [ Table.dropdownColumn (dropdownItems recordType)
             ]
@@ -648,6 +652,11 @@ formInputs editData =
                     firstColumns
                         ++ TextInput "Title" Optional editData.title (UpdateTitle editData)
                         :: lastControls
+
+                Common.ContinuityOfCareDocument ->
+                    firstColumns
+                        ++ [ FileInput "Upload Record File" Required editData.sfData.fileName
+                           ]
     in
     columns
 
@@ -656,14 +665,26 @@ gridConfig : RecordType -> Maybe AddEditDataSource -> Table.Config Row Msg
 gridConfig recordType addEditDataSource =
     { domTableId = "RecordTable"
     , toolbar =
-        case addEditDataSource of
-            Just t ->
-                [ ( "e-addnew e-loaded", Add t recordType ) ]
+        case recordType of
+            Common.ContinuityOfCareDocument ->
+                []
 
-            Nothing ->
-                [ ( "e-addnew e-disable", NoOp ) ]
+            _ ->
+                case addEditDataSource of
+                    Just t ->
+                        [ ( "e-addnew e-loaded", Add t recordType ) ]
+
+                    Nothing ->
+                        [ ( "e-addnew e-disable", NoOp ) ]
     , toMsg = SetTableState
     , columns = getColumns recordType
+    , onDoubleClick =
+        case recordType of
+            Common.CallRecordings ->
+                Nothing
+
+            _ ->
+                Just (SendMenuMessage recordType "ViewFile")
     }
 
 
@@ -672,6 +693,9 @@ dropdownItems recordType =
     case recordType of
         Common.CallRecordings ->
             [ ( "e-edit", "Mark As Consent", SendMenuMessage recordType "MarkAsConsent" ) ]
+
+        Common.ContinuityOfCareDocument ->
+            [ ( "e-download", "View File", SendMenuMessage recordType "ViewFile" ) ]
 
         _ ->
             [ ( "e-sync", "Transfer", SendMenuMessage recordType "Transfer" )
