@@ -14,7 +14,7 @@ import Char
 import Common.Functions as Functions
 import Common.Types exposing (DropdownItem)
 import Html exposing (Html, div, input, li, span, text, ul)
-import Html.Attributes exposing (class, classList, defaultValue, disabled, placeholder, readonly, style, tabindex)
+import Html.Attributes exposing (class, classList, defaultValue, disabled, hidden, placeholder, readonly, style, tabindex)
 import Html.Events as Events
 import Json.Decode
 
@@ -412,38 +412,36 @@ viewWithEnabled isEnabled dropdown toMsg dropdownItems selectedId =
                 , ( "min-width", "99.7%" )
                 ]
             ]
-            [ if dropdown.showSearchText then
-                span
-                    [ class "e-atc e-search"
-                    , style
-                        [ ( "min-width", "96%" )
-                        , ( "margin-left", "8px" )
-                        , ( "margin-right", "6px" )
-                        , ( "margin-top", "6px" )
-                        ]
+            [ span
+                [ class "e-atc e-search"
+                , hidden (not dropdown.showSearchText)
+                , style
+                    [ ( "min-width", "96%" )
+                    , ( "margin-left", "8px" )
+                    , ( "margin-right", "6px" )
+                    , ( "margin-top", "6px" )
                     ]
-                    [ span [ class "e-in-wrap" ]
-                        [ input
-                            [ class "e-input"
-                            , defaultValue dropdown.searchString
-                            , tabindex 0
-                            , Html.Attributes.id (dropdown.domId ++ "filterInput")
-                            ]
-                            []
-                        , span
-                            [ class "e-icon e-search"
-                            , style
-                                [ ( "width", "14px" )
-                                , ( "right", "10px" )
-                                , ( "color", "#cecece" )
-                                , ( "position", "absolute" )
-                                ]
-                            ]
-                            []
+                ]
+                [ span [ class "e-in-wrap" ]
+                    [ input
+                        [ class "e-input"
+                        , defaultValue dropdown.searchString
+                        , tabindex 0
+                        , Html.Attributes.id (dropdown.domId ++ "filterInput")
                         ]
+                        []
+                    , span
+                        [ class "e-icon e-search"
+                        , style
+                            [ ( "width", "14px" )
+                            , ( "right", "10px" )
+                            , ( "color", "#cecece" )
+                            , ( "position", "absolute" )
+                            ]
+                        ]
+                        []
                     ]
-              else
-                text ""
+                ]
             ]
         , div
             [ style

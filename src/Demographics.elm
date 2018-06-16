@@ -273,7 +273,7 @@ view model =
                             , toMsg = UpdateHomePhoneMaskState
                             , hasFocus = Nothing
                             }
-                            [ class "e-textbox", maskStyle ]
+                            [ class "e-textbox", maskStyle, id "homePhoneId" ]
                             model.homePhoneNumberMaskState
                             model.homePhoneNumber
                         ]
@@ -292,7 +292,7 @@ view model =
                             , toMsg = UpdateCellPhoneMaskState
                             , hasFocus = Nothing
                             }
-                            [ class "e-textbox", maskStyle ]
+                            [ class "e-textbox", maskStyle, id "cellPhoneId" ]
                             model.cellPhoneNumberMaskState
                             model.cellPhoneNumber
                         ]
@@ -311,7 +311,7 @@ view model =
                             , toMsg = UpdateWorkPhoneMaskState
                             , hasFocus = Nothing
                             }
-                            [ class "e-textbox", maskStyle ]
+                            [ class "e-textbox", maskStyle, id "workPhoneId" ]
                             model.workPhoneNumberMaskState
                             model.workPhoneNumber
                         ]
@@ -339,8 +339,8 @@ view model =
         , viewContactHours model
         , div [ class "col-xs-12 padding-h-0 padding-top-10 padding-bottom-10" ]
             [ div [ class "col-xs-12 padding-h-0 padding-top-10" ]
-                [ input [ type_ "button", class "btn btn-sm btn-success", value "Save", onClick Save ] []
-                , input [ type_ "button", class "btn btn-sm btn-default margin-left-5", value "Reset", onClick Cancel ] []
+                [ input [ type_ "button", class "btn btn-sm btn-success", value "Save", onClick Save, id "saveId" ] []
+                , input [ type_ "button", class "btn btn-sm btn-default margin-left-5", value "Reset", onClick Cancel, id "cancelId" ] []
                 ]
             ]
         ]
@@ -478,13 +478,29 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                 [ div [ sm6 ]
                     [ label [ labelPad, class "required" ] [ text "Address Line 1:" ]
                     , div [ class "DemographicsInputDiv" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue addressLine1, disabled isDisabled, onInput (UpdateAddressLine1 address) ] []
+                        [ input
+                            [ class "e-textbox"
+                            , type_ "text"
+                            , maybeValue addressLine1
+                            , disabled isDisabled
+                            , onInput (UpdateAddressLine1 address)
+                            , id ("addressLine1Id" ++ toString address.nodeId)
+                            ]
+                            []
                         ]
                     ]
                 , div [ sm6 ]
                     [ label [ labelPad, class "required" ] [ text "City:" ]
                     , div [ class "DemographicsInputDiv2" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue city, disabled isDisabled, onInput (UpdateCity address) ] []
+                        [ input
+                            [ class "e-textbox"
+                            , type_ "text"
+                            , maybeValue city
+                            , disabled isDisabled
+                            , onInput (UpdateCity address)
+                            , id ("cityId" ++ toString address.nodeId)
+                            ]
+                            []
                         ]
                     ]
                 ]
@@ -492,14 +508,29 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                 [ div [ sm6 ]
                     [ label [ labelPad ] [ text "Address Line 2:" ]
                     , div [ class "DemographicsInputDiv" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue addressLine2, disabled isDisabled, onInput (UpdateAddressLine2 address) ] []
+                        [ input
+                            [ class "e-textbox"
+                            , type_ "text"
+                            , maybeValue addressLine2
+                            , disabled isDisabled
+                            , onInput (UpdateAddressLine2 address)
+                            , id ("addressLine2Id" ++ toString address.nodeId)
+                            ]
+                            []
                         ]
                     ]
                 , div [ sm6 ]
                     [ label [ labelPad, class "required" ] [ text "State:" ]
                     , if isDisabled then
                         div [ class "DemographicsInputDiv2" ]
-                            [ input [ class "e-textbox", type_ "text", maybeValue <| Just (Dropdown.getDropdownText stateDropdownItems stateId), disabled True ] []
+                            [ input
+                                [ class "e-textbox"
+                                , type_ "text"
+                                , maybeValue <| Just (Dropdown.getDropdownText stateDropdownItems stateId)
+                                , disabled True
+                                , id ("stateId" ++ toString address.nodeId)
+                                ]
+                                []
                             ]
                       else
                         div [ class "DemographicsInputDiv2 margin-bottom-5" ]
@@ -511,13 +542,30 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                 [ div [ sm6 ]
                     [ label [ labelPad ] [ text "Apt./Room No.:" ]
                     , div [ class "DemographicsInputDiv" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue addressLine3, disabled isDisabled, onInput (UpdateAddressLine3 address) ] []
+                        [ input
+                            [ class "e-textbox"
+                            , type_ "text"
+                            , maybeValue addressLine3
+                            , disabled isDisabled
+                            , onInput (UpdateAddressLine3 address)
+                            , id ("addressLine3Id" ++ toString address.nodeId)
+                            ]
+                            []
                         ]
                     ]
                 , div [ sm6 ]
                     [ label [ labelPad, class "required" ] [ text "Zip Code:" ]
                     , div [ class "DemographicsInputDiv2" ]
-                        [ input [ class "e-textbox", type_ "text", maybeValue zipCode, disabled isDisabled, onInput (UpdateZipcode address), maxlength 5 ] []
+                        [ input
+                            [ class "e-textbox"
+                            , type_ "text"
+                            , maybeValue zipCode
+                            , disabled isDisabled
+                            , onInput (UpdateZipcode address)
+                            , maxlength 5
+                            , id ("zipCodeId" ++ toString address.nodeId)
+                            ]
+                            []
                         ]
                     ]
                 ]
@@ -2054,8 +2102,8 @@ decodePatientAddress =
         |> Pipeline.required "FacilityAddress" (Decode.maybe decodeFacilityAddress)
         |> Pipeline.required "FacilityId" (Decode.maybe Decode.int)
         |> Pipeline.hardcoded (Dropdown.init { defaultDropConfig | domId = "facilityAddressDropdown" })
+        |> Pipeline.hardcoded (Dropdown.init { defaultDropConfig | domId = "addressTypeDropdown" })
         |> Pipeline.hardcoded (Dropdown.init { defaultDropConfig | domId = "stateDropdown" })
-        |> Pipeline.hardcoded (Dropdown.init { defaultDropConfig | domId = "addressDropdown" })
         |> Pipeline.hardcoded 0
 
 
