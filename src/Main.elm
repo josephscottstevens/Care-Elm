@@ -7,8 +7,6 @@ import Common.Dialog as Dialog
 import Common.Functions as Functions
 import Common.Types as Common exposing (AddEditDataSource)
 import Demographics
-import Dom
-import Dom.Scroll
 import Hospitilizations
 import Html exposing (Html, div)
 import Http exposing (Error)
@@ -27,6 +25,9 @@ port loadAddEditDataSource : (AddEditDataSource -> msg) -> Sub msg
 
 
 port documentScroll : (Float -> msg) -> Sub msg
+
+
+port updateScrollY : Bool -> Cmd msg
 
 
 type alias Model =
@@ -164,7 +165,6 @@ view model =
 
 type Msg
     = Resize Window.Size
-    | UpdateScrollY (Result Dom.Error Float)
     | DocumentScroll Float
     | UpdatePatientId Int
     | BillingMsg Billing.Msg
@@ -304,7 +304,7 @@ updatePage page msg model =
                     model.rootDialog
             in
             { model | rootDialog = { rootDialog | windowSize = windowSize } }
-                ! [ Task.attempt UpdateScrollY (Dom.Scroll.y "body-id")
+                ! [ updateScrollY True
                   ]
 
         ( DocumentScroll windowScrollY, _ ) ->
@@ -313,18 +313,6 @@ updatePage page msg model =
                     model.rootDialog
             in
             { model | rootDialog = { rootDialog | windowScrollY = windowScrollY } } ! []
-
-        ( UpdateScrollY result, _ ) ->
-            let
-                rootDialog =
-                    model.rootDialog
-            in
-            case result of
-                Err err ->
-                    model ! [ Functions.displayErrorMessage (toString err) ]
-
-                Ok scrollY ->
-                    { model | rootDialog = { rootDialog | windowScrollY = scrollY } } ! []
 
         ( UpdatePatientId newPatientId, _ ) ->
             { model | patientId = newPatientId }
