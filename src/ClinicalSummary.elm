@@ -1,5 +1,6 @@
 module ClinicalSummary exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
+import Common.Dialog as Dialog
 import Common.Dropdown as Dropdown exposing (defaultDropConfig)
 import Common.Functions as Functions exposing (displayErrorMessage, displaySuccessMessage, maybeVal)
 import Common.Html exposing (InputControlType(AreaInput, ControlElement), makeControls)
@@ -59,11 +60,11 @@ type Msg
     | UpdateYear ( Dropdown.DropState, Maybe Int, Cmd Msg )
 
 
-view : Model -> Int -> Html Msg
-view model _ =
+view : Model -> Dialog.RootDialog -> Int -> Html Msg
+view model rootDialog _ =
     div [ class "form-horizontal" ]
         [ h4 [] [ text "Clinical Summary" ]
-        , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs model)
+        , makeControls { controlAttributes = [ class "col-md-8" ] } (formInputs rootDialog model)
         ]
 
 
@@ -156,10 +157,10 @@ update msg model patientId =
             { model | comments = Just str } ! []
 
 
-formInputs : Model -> List (InputControlType Msg)
-formInputs model =
+formInputs : Dialog.RootDialog -> Model -> List (InputControlType Msg)
+formInputs rootDialog model =
     [ AreaInput "Clinical Summary" Optional model.summary UpdateSummary
-    , ControlElement "" (generateSummaryDiv model)
+    , ControlElement "" (generateSummaryDiv rootDialog model)
     , AreaInput "Instructions and Care Plan" Optional model.carePlan UpdateCarePlan
     , AreaInput "Code/Legal Status" Optional model.codeLegalStatus UpdateCodeLegalStatus
     , AreaInput "Impairment" Optional model.impairment UpdateImpairment
@@ -168,8 +169,8 @@ formInputs model =
     ]
 
 
-generateSummaryDiv : Model -> Html Msg
-generateSummaryDiv model =
+generateSummaryDiv : Dialog.RootDialog -> Model -> Html Msg
+generateSummaryDiv rootDialog model =
     let
         inline widthPercent topPadding =
             [ style
@@ -179,13 +180,16 @@ generateSummaryDiv model =
                 ]
             , class "col-md-2 padding-h-0"
             ]
+
+        dropView =
+            Dropdown.view rootDialog
     in
     div []
         [ div (inline "34%" "5px") [ text "Generate Summary from Tasks Outcome:" ]
         , div (inline "18%" "")
-            [ Dropdown.view model.monthDropState UpdateMonth monthDropdown model.currentMonth ]
+            [ dropView model.monthDropState UpdateMonth monthDropdown model.currentMonth ]
         , div (inline "18%" "")
-            [ Dropdown.view model.yearDropState UpdateYear yearDropdown model.currentYear ]
+            [ dropView model.yearDropState UpdateYear yearDropdown model.currentYear ]
         , div (inline "20%" "") [ button [ class "btn btn-sm btn-default", onClick GenerateCarePlanLetter ] [ text "Generate" ] ]
         ]
 

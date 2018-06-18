@@ -18,6 +18,7 @@ type alias Dialog data msg =
 
 type alias RootDialog =
     { windowSize : Window.Size
+    , windowScrollY : Float
     , top : Int
     , left : Int
     }

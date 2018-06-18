@@ -1,5 +1,6 @@
 port module Demographics exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
+import Common.Dialog as Dialog
 import Common.Dropdown as Dropdown exposing (defaultDropConfig)
 import Common.Functions as Functions exposing (decodeDropdownItem, maybeVal)
 import Common.Types as Types exposing (DropdownItem)
@@ -190,8 +191,12 @@ type alias FacilityAddress =
     }
 
 
-view : Model -> Html Msg
-view model =
+view : Dialog.RootDialog -> Model -> Html Msg
+view rootDialog model =
+    let
+        dropView =
+            Dropdown.view rootDialog
+    in
     div [ id "demographicInformationForm", class "col-xs-12 padding-h-0" ]
         [ h4 [ class "col-xs-12 padding-h-0" ] [ text "Assigned To" ]
         , div [ class "col-xs-12 padding-h-0 padding-bottom-10", id "ErrorDiv" ]
@@ -199,52 +204,52 @@ view model =
             ]
         , div rowStyle
             [ dropbox "Facility" True <|
-                Dropdown.view model.facilityDropState UpdateFacility model.drops.facilityDropdown model.facilityId
+                dropView model.facilityDropState UpdateFacility model.drops.facilityDropdown model.facilityId
             , textbox "Patient's Facility ID No" model.facilityPtIDRequired model.facilityPtID UpdateFacilityPtID
             , textbox "Medical Record No" model.mrnRequired model.mrn UpdateMedicalRecordNo
             , textbox "Patient Account No" False model.patientAccountNumber UpdatePatientAccountNo
             ]
         , div rowStyle
             [ dropbox "Main Provider" True <|
-                Dropdown.view model.mainProviderDropState UpdateMainProvider model.drops.mainProviderDropdown model.mainProviderId
+                dropView model.mainProviderDropState UpdateMainProvider model.drops.mainProviderDropdown model.mainProviderId
             , dropbox "Care Coordinator" True <|
-                Dropdown.view model.careCoordinatorDropState UpdateCareCoordinator model.drops.careCoordinatorDropdown model.careCoordinatorId
+                dropView model.careCoordinatorDropState UpdateCareCoordinator model.drops.careCoordinatorDropdown model.careCoordinatorId
             ]
         , h4 [ class "col-xs-12 padding-h-0 padding-top-10" ] [ text "Demographic Information" ]
         , div rowStyle
             [ dropbox "Prefix" False <|
-                Dropdown.view model.prefixDropState UpdatePrefix model.drops.prefixDropdown model.prefixId
+                dropView model.prefixDropState UpdatePrefix model.drops.prefixDropdown model.prefixId
             , nonumberbox "First Name" True model.firstName UpdateFirstName
             , nonumberbox "Middle Name" False model.middle UpdateMiddle
             , nonumberbox "Last Name" True model.lastName UpdateLastName
             , dropbox "Suffix" False <|
-                Dropdown.view model.suffixDropState UpdateSuffix model.drops.suffixDropdown model.suffixId
+                dropView model.suffixDropState UpdateSuffix model.drops.suffixDropdown model.suffixId
             , textbox "Nickname" False model.nickName UpdateNickname
             , sfbox "Date of Birth" True
             , textbox "Birth Place" False model.birthPlace UpdateBirthPlace
             , sfbox "Date of Death" False
             , textbox "SSN" False model.ssn UpdateSSN
             , dropbox "Acuity Level" False <|
-                Dropdown.view model.acuityLevelDropState UpdateAcuityLevel Types.acuityLevelDropdown model.acuityLevelId
+                dropView model.acuityLevelDropState UpdateAcuityLevel Types.acuityLevelDropdown model.acuityLevelId
             ]
         , div rowStyle
             [ sfbox "VIP" False
             , dropbox "Sex at Birth" True <|
-                Dropdown.view model.sexTypeDropState UpdateSexType model.drops.sexTypeDropdown model.sexTypeId
+                dropView model.sexTypeDropState UpdateSexType model.drops.sexTypeDropdown model.sexTypeId
             , dropbox "Sexual Orientation" False <|
-                Dropdown.view model.sexualOrientationDropState UpdateSexualOrientation model.drops.sexualOrientationDropdown model.sexualOrientationId
+                dropView model.sexualOrientationDropState UpdateSexualOrientation model.drops.sexualOrientationDropdown model.sexualOrientationId
             , textbox "Sexual Orientation Note" False model.sexualOrientationNote UpdateSexualOrientationNote
             , dropbox "Gender Identity" False <|
-                Dropdown.view model.genderIdentityDropState UpdateGenderIdentity model.drops.genderIdentityDropdown model.genderIdentityId
+                dropView model.genderIdentityDropState UpdateGenderIdentity model.drops.genderIdentityDropdown model.genderIdentityId
             , textbox "Gender Identity Note" False model.genderIdentityNote UpdateGenderIdentityNote
             , dropbox "Race" False <|
-                Dropdown.view model.raceDropState UpdateRace model.drops.raceDropdown model.raceId
+                dropView model.raceDropState UpdateRace model.drops.raceDropdown model.raceId
             , dropbox "Ethnicity" False <|
-                Dropdown.view model.ethnicityDropState UpdateEthnicity model.drops.ethnicityDropdown model.ethnicityId
+                dropView model.ethnicityDropState UpdateEthnicity model.drops.ethnicityDropdown model.ethnicityId
             , dropbox "US Veteran" False <|
-                Dropdown.view model.uSVeteranDropState UpdateUSVeteran model.drops.uSVeteranDropdown model.uSVeteranId
+                dropView model.uSVeteranDropState UpdateUSVeteran model.drops.uSVeteranDropdown model.uSVeteranId
             , dropbox "Religion" False <|
-                Dropdown.view model.religionDropState UpdateReligion model.drops.religionDropdown model.religionId
+                dropView model.religionDropState UpdateReligion model.drops.religionDropdown model.religionId
             , textbox "Email" False model.email UpdateEmail
             ]
         , div [ class "col-xs-12 padding-h-0 padding-top-10" ]
@@ -253,7 +258,7 @@ view model =
                 , div [ class "inline-block e-tooltxt pointer", title "Add new language", onClick AddNewLanguage ]
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
-                , div [] (List.map (viewLanguages model.drops.languageDropdown) model.patientLanguagesMap)
+                , div [] (List.map (viewLanguages rootDialog model.drops.languageDropdown) model.patientLanguagesMap)
                 ]
             ]
         , div [ class "col-xs-12 padding-h-0" ]
@@ -324,7 +329,7 @@ view model =
                 , div [ class "inline-block e-tooltxt pointer", title "Add new address", onClick AddNewAddress ]
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
-                , div [] (List.map (viewAddress model.stateDropdown model.drops.facilityDropdown) model.patientAddresses)
+                , div [] (List.map (viewAddress rootDialog model.stateDropdown model.drops.facilityDropdown) model.patientAddresses)
                 ]
             ]
         , div [ class "col-xs-12 padding-h-0 margin-bottom-5" ]
@@ -333,10 +338,10 @@ view model =
                 , div [ class "inline-block e-tooltxt pointer", title "Add new household member", onClick AddNewHouseholdMember ]
                     [ span [ class "e-addnewitem e-toolbaricons e-icon e-addnew" ] []
                     ]
-                , div [] (List.map viewHouseholdMembers model.householdMembers)
+                , div [] (List.map (\t -> viewHouseholdMembers rootDialog t) model.householdMembers)
                 ]
             ]
-        , viewContactHours model
+        , viewContactHours rootDialog model
         , div [ class "col-xs-12 padding-h-0 padding-top-10 padding-bottom-10" ]
             [ div [ class "col-xs-12 padding-h-0 padding-top-10" ]
                 [ input [ type_ "button", class "btn btn-sm btn-success", value "Save", onClick Save, id "saveId" ] []
@@ -351,22 +356,29 @@ vertCent =
     ( "vertical-align", "middle" )
 
 
-viewLanguages : List DropdownItem -> PatientLanguagesMap -> Html Msg
-viewLanguages dropdownItems lang =
+viewLanguages : Dialog.RootDialog -> List DropdownItem -> PatientLanguagesMap -> Html Msg
+viewLanguages rootDialog dropdownItems lang =
+    let
+        dropView =
+            Dropdown.view rootDialog
+    in
     div [ class "margin-bottom-5", style [ ( "width", "350px" ) ] ]
         [ div [ class "inline-block ", style [ ( "width", "22px" ), ( "padding-top", "5px" ), ( "vertical-align", "middle" ) ], title "Mark as preferred" ]
             [ input [ type_ "radio", checked lang.isPreferred, name "languageGroup", onCheck (UpdatePreferredLanguage lang) ] [] ]
         , div [ class "inline-block", style [ ( "width", "calc(100% - 50px)" ), ( "vertical-align", "middle" ) ], title "Choose language" ]
-            [ Dropdown.view lang.dropState (UpdateLanguage lang) dropdownItems lang.languageId ]
+            [ dropView lang.dropState (UpdateLanguage lang) dropdownItems lang.languageId ]
         , div [ class "inline-block", style [ ( "width", "20px" ), ( "vertical-align", "middle" ) ], title "Remove", onClick (RemoveLanguage lang) ]
             [ span [ class "e-cancel e-toolbaricons e-icon e-cancel margin-bottom-5 pointer" ] []
             ]
         ]
 
 
-viewAddress : List DropdownItem -> List DropdownItem -> PatientAddress -> Html Msg
-viewAddress stateDropdownItems facilityDropdownItems address =
+viewAddress : Dialog.RootDialog -> List DropdownItem -> List DropdownItem -> PatientAddress -> Html Msg
+viewAddress rootDialog stateDropdownItems facilityDropdownItems address =
     let
+        dropView =
+            Dropdown.view rootDialog
+
         helper t =
             address.facilityAddress
                 |> Maybe.map t
@@ -419,7 +431,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                         div []
                             [ label [ labelPad ] [ text "Facility:" ]
                             , div [ class "DemographicsInputDiv2" ]
-                                [ Dropdown.view address.facilityAddressDropState (UpdateFacilityAddress address) facilityDropdownItems address.facilityAddressId
+                                [ dropView address.facilityAddressDropState (UpdateFacilityAddress address) facilityDropdownItems address.facilityAddressId
                                 ]
                             ]
 
@@ -454,7 +466,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                 [ div [ sm6 ]
                     [ label [ labelPad ] [ text "Address Type:" ]
                     , div [ class "DemographicsInputDiv" ]
-                        [ Dropdown.view address.addressTypeDropState (UpdateAddressType address) Types.addressTypeDropdown address.addressType
+                        [ dropView address.addressTypeDropState (UpdateAddressType address) Types.addressTypeDropdown address.addressType
                         ]
                     ]
                 , div [ sm6 ]
@@ -534,7 +546,7 @@ viewAddress stateDropdownItems facilityDropdownItems address =
                             ]
                       else
                         div [ class "DemographicsInputDiv2 margin-bottom-5" ]
-                            [ Dropdown.view address.addressStateDropState (UpdateState address) stateDropdownItems stateId
+                            [ dropView address.addressStateDropState (UpdateState address) stateDropdownItems stateId
                             ]
                     ]
                 ]
@@ -573,8 +585,12 @@ viewAddress stateDropdownItems facilityDropdownItems address =
         ]
 
 
-viewHouseholdMembers : HouseholdMember -> Html Msg
-viewHouseholdMembers householdMember =
+viewHouseholdMembers : Dialog.RootDialog -> HouseholdMember -> Html Msg
+viewHouseholdMembers rootDialog householdMember =
+    let
+        dropView =
+            Dropdown.view rootDialog
+    in
     div [ class "multi-address-template", style [ ( "padding-bottom", "20px" ) ] ]
         [ div [ class "col-xs-12 col-sm-6 padding-h-0" ]
             [ div []
@@ -594,7 +610,7 @@ viewHouseholdMembers householdMember =
             [ div []
                 [ label [] [ text "Relationships:" ]
                 , div [ class "form-column" ]
-                    [ Dropdown.view householdMember.dropState (UpdateHouseholdMemberRelationship householdMember) Types.relationshipsDropdown householdMember.relationshipId
+                    [ dropView householdMember.dropState (UpdateHouseholdMemberRelationship householdMember) Types.relationshipsDropdown householdMember.relationshipId
                     ]
                 ]
             ]
@@ -1832,8 +1848,12 @@ type alias SelectList =
     }
 
 
-viewContactHours : Model -> Html Msg
-viewContactHours model =
+viewContactHours : Dialog.RootDialog -> Model -> Html Msg
+viewContactHours rootDialog model =
+    let
+        dropView =
+            Dropdown.view rootDialog
+    in
     div [ id "DemographicsForm", class "col-xs-12 col-sm-8 col-md-10 padding-h-0" ]
         [ h4 [ class "col-xs-12 padding-h-0 padding-top-0" ] [ text "Contact Hours" ]
         , div [ class "col-xs-12 padding-h-0 col-sm-12 col-md-12 padding-h-0" ]
@@ -1847,7 +1867,7 @@ viewContactHours model =
                 [ tbody []
                     ([ tr [ class "padding-h-0" ]
                         [ td [ colspan 1, style [ ( "display", "block" ), ( "width", "250px" ), ( "padding-top", "10px" ), ( "padding-bottom", "10px" ) ] ]
-                            [ Dropdown.view model.selectedTimeZoneDropState UpdateContactTimeZone timeZoneDropdown model.selectedTimeZoneId
+                            [ dropView model.selectedTimeZoneDropState UpdateContactTimeZone timeZoneDropdown model.selectedTimeZoneId
                             ]
                         ]
                      , tr [ class "col-xs-12 padding-h-0" ]
@@ -1858,7 +1878,7 @@ viewContactHours model =
                         , td [ class "Times" ] [ b [] [ text "End Time" ] ]
                         ]
                      ]
-                        ++ List.indexedMap viewContactHoursRow model.weekData
+                        ++ List.indexedMap (\t -> viewContactHoursRow rootDialog t) model.weekData
                     )
                 ]
             ]
@@ -1891,8 +1911,8 @@ isContactDayValid dayData =
         True
 
 
-viewContactHoursRow : Int -> DayData -> Html Msg
-viewContactHoursRow idx dayData =
+viewContactHoursRow : Dialog.RootDialog -> Int -> DayData -> Html Msg
+viewContactHoursRow rootDialog idx dayData =
     let
         beginTimeEnabled =
             case timingOption dayData.timingInstructionsSelectedId of
@@ -1939,14 +1959,14 @@ viewContactHoursRow idx dayData =
             [ input [ type_ "checkbox", checked dayData.preferredDay, onCheck (UpdatePreferred dayData) ] []
             ]
         , td [ class "TimingOptions" ]
-            [ Dropdown.view dayData.timingInstructionsDropState (UpdateTimingOptions dayData) timingOptionsDropdown dayData.timingInstructionsSelectedId
+            [ Dropdown.view rootDialog dayData.timingInstructionsDropState (UpdateTimingOptions dayData) timingOptionsDropdown dayData.timingInstructionsSelectedId
             ]
         , td [ class "Times" ] <|
-            [ Dropdown.viewWithEnabled beginTimeEnabled dayData.beginTimeDropState (UpdateBeginTime dayData) (List.map selectListToDropdownItem dayData.beginTime) dayData.beginTimeSelectedId
+            [ Dropdown.viewWithEnabled rootDialog beginTimeEnabled dayData.beginTimeDropState (UpdateBeginTime dayData) (List.map selectListToDropdownItem dayData.beginTime) dayData.beginTimeSelectedId
             ]
                 ++ beforeError
         , td [ class "Times" ]
-            [ Dropdown.viewWithEnabled endTimeEnabled dayData.endTimeDropState (UpdateEndTime dayData) (List.map selectListToDropdownItem dayData.endTime) dayData.endTimeSelectedId
+            [ Dropdown.viewWithEnabled rootDialog endTimeEnabled dayData.endTimeDropState (UpdateEndTime dayData) (List.map selectListToDropdownItem dayData.endTime) dayData.endTimeSelectedId
             ]
         ]
 

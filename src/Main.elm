@@ -7,6 +7,8 @@ import Common.Dialog as Dialog
 import Common.Functions as Functions
 import Common.Types as Common exposing (AddEditDataSource)
 import Demographics
+import Dom
+import Dom.Scroll
 import Hospitilizations
 import Html exposing (Html, div)
 import Http exposing (Error)
@@ -17,11 +19,14 @@ import LastKnownVitals
 import Navigation
 import PastMedicalHistory
 import Records
-import Task
+import Task exposing (Task)
 import Window
 
 
 port loadAddEditDataSource : (AddEditDataSource -> msg) -> Sub msg
+
+
+port documentScroll : (Float -> msg) -> Sub msg
 
 
 type alias Model =
@@ -59,7 +64,7 @@ init flags =
         ( model, cmds ) =
             pageInit flags.page
                 { patientId = flags.patientId
-                , rootDialog = { windowSize = Window.Size 0 0, top = 0, left = 0 }
+                , rootDialog = { windowSize = Window.Size 0 0, top = 0, left = 0, windowScrollY = 0.0 }
                 , page = NoPage
                 , addEditDataSource = Nothing
                 }
@@ -77,6 +82,7 @@ subscriptions model =
         [ pageSubscriptions model.page
         , Functions.updatePatientId UpdatePatientId
         , Window.resizes Resize
+        , documentScroll DocumentScroll
         ]
 
 
@@ -125,13 +131,13 @@ view model =
             Html.map RecordsMsg (Records.view subModel model.addEditDataSource)
 
         Demographics subModel ->
-            Html.map DemographicsMsg (Demographics.view subModel)
+            Html.map DemographicsMsg (Demographics.view model.rootDialog subModel)
 
         Billing subModel ->
             Html.map BillingMsg (Billing.view subModel model.patientId model.addEditDataSource model.rootDialog)
 
         ClinicalSummary subModel ->
-            Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel model.patientId)
+            Html.map ClinicalSummaryMsg (ClinicalSummary.view subModel model.rootDialog model.patientId)
 
         PastMedicalHistory subModel ->
             Html.map PastMedicalHistoryMsg (PastMedicalHistory.view subModel model.addEditDataSource)
@@ -158,6 +164,8 @@ view model =
 
 type Msg
     = Resize Window.Size
+    | UpdateScrollY (Result Dom.Error Float)
+    | DocumentScroll Float
     | UpdatePatientId Int
     | BillingMsg Billing.Msg
     | ClinicalSummaryMsg ClinicalSummary.Msg
@@ -295,7 +303,28 @@ updatePage page msg model =
                 rootDialog =
                     model.rootDialog
             in
-            { model | rootDialog = { rootDialog | windowSize = windowSize } } ! []
+            { model | rootDialog = { rootDialog | windowSize = windowSize } }
+                ! [ Task.attempt UpdateScrollY (Dom.Scroll.y "body-id")
+                  ]
+
+        ( DocumentScroll windowScrollY, _ ) ->
+            let
+                rootDialog =
+                    model.rootDialog
+            in
+            { model | rootDialog = { rootDialog | windowScrollY = windowScrollY } } ! []
+
+        ( UpdateScrollY result, _ ) ->
+            let
+                rootDialog =
+                    model.rootDialog
+            in
+            case result of
+                Err err ->
+                    model ! [ Functions.displayErrorMessage (toString err) ]
+
+                Ok scrollY ->
+                    { model | rootDialog = { rootDialog | windowScrollY = scrollY } } ! []
 
         ( UpdatePatientId newPatientId, _ ) ->
             { model | patientId = newPatientId }

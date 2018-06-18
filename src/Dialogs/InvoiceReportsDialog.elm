@@ -33,13 +33,14 @@ view state =
             div [ class "form-horizontal", style [ ( "padding-left", "40px" ) ] ]
                 [ makeControls { controlAttributes = [ class "col-md-8" ] }
                     [ dividerLabel "Select Facility"
-                    , ControlElement "Facility" <|
-                        Dropdown.view t.facilityDropState UpdateFacility t.facilities t.facilityId
-                    , dividerLabel "Select Month and Year For Billable Patients"
-                    , ControlElement "Month" <|
-                        Dropdown.view t.monthDropState UpdateMonth monthDropdown t.currentMonth
-                    , ControlElement "Year" <|
-                        Dropdown.view t.yearDropState UpdateYear yearDropdown t.currentYear
+
+                    -- , ControlElement "Facility" <|
+                    --     Dropdown.view t.facilityDropState UpdateFacility t.facilities t.facilityId
+                    -- , dividerLabel "Select Month and Year For Billable Patients"
+                    -- , ControlElement "Month" <|
+                    --     Dropdown.view t.monthDropState UpdateMonth monthDropdown t.currentMonth
+                    -- , ControlElement "Year" <|
+                    --     Dropdown.view t.yearDropState UpdateYear yearDropdown t.currentYear
                     , CheckInput "Save to Client Portal" Optional t.saveToClientPortal UpdateSaveToClientPortal
                     , HtmlElement <|
                         div [ class "row" ] []

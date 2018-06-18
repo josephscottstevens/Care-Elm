@@ -11,15 +11,29 @@ port module Common.Dropdown
         )
 
 import Char
+import Common.Dialog as Dialog
+import Common.DomHelper as DOM
 import Common.Functions as Functions
 import Common.Types exposing (DropdownItem)
 import Html exposing (Html, div, input, li, span, text, ul)
 import Html.Attributes exposing (class, classList, defaultValue, disabled, hidden, placeholder, readonly, style, tabindex)
 import Html.Events as Events
-import Json.Decode
+import Json.Decode as Decode
+
+
+type alias BoundingRect =
+    { nodeTop : Int
+    , nodeBottom : Int
+    , pageHeight : Int
+    }
 
 
 port dropdownMenuScroll : String -> Cmd msg
+
+
+
+-- port getBoundingRect : String -> Cmd msg
+-- port updateBoundingRect : (BoundingRect -> msg) -> Sub msg
 
 
 port focusOn : String -> Cmd msg
@@ -38,6 +52,7 @@ type alias DropState =
     , showSearchText : Bool
     , width : Size
     , height : Size
+    , y : Float
     }
 
 
@@ -63,6 +78,10 @@ defaultDropConfig =
     }
 
 
+
+--( DropState, (BoundingRect -> msg) -> Sub msg )
+
+
 init : DropConfig -> DropState
 init { domId, showSearchText, width, height } =
     { isOpen = False
@@ -72,6 +91,7 @@ init { domId, showSearchText, width, height } =
     , showSearchText = showSearchText
     , width = width
     , height = height
+    , y = 0.0
     }
 
 
@@ -134,7 +154,7 @@ onClick : DropState -> Maybe Int -> List DropdownItem -> CustomTarget -> ( DropS
 onClick dropdown selectedId dropdownItems customTarget =
     if dropdown.isOpen then
         if customTarget.className == "noselect dropdown-li" then
-            ( { dropdown | isOpen = False, searchString = "" }
+            ( { dropdown | isOpen = False, searchString = "", y = customTarget.rect.top }
             , Functions.stringToInt (String.slice (String.length dropdown.domId + 1) 9999 customTarget.id)
             , Cmd.none
             )
@@ -147,6 +167,7 @@ onClick dropdown selectedId dropdownItems customTarget =
         ( { dropdown
             | isOpen = True
             , keyboardSelectedIndex = getIndex selectedId dropdownItems
+            , y = customTarget.rect.top
           }
         , selectedId
         , Cmd.batch
@@ -248,29 +269,31 @@ commonWidth =
 type alias CustomTarget =
     { className : String
     , id : String
+    , rect : DOM.Rectangle
     }
 
 
-customAt : Json.Decode.Decoder CustomTarget
+customAt : Decode.Decoder CustomTarget
 customAt =
-    Json.Decode.map2 CustomTarget
-        (Json.Decode.at [ "target", "className" ] Json.Decode.string)
-        (Json.Decode.at [ "target", "id" ] Json.Decode.string)
+    Decode.map3 CustomTarget
+        (Decode.at [ "target", "className" ] Decode.string)
+        (Decode.at [ "target", "id" ] Decode.string)
+        (DOM.target DOM.boundingClientRect)
 
 
 customClick : (CustomTarget -> msg) -> Html.Attribute msg
 customClick tagger =
-    Events.on "click" (Json.Decode.map tagger customAt)
+    Events.on "click" (Decode.map tagger customAt)
 
 
-customRelatedAt : Json.Decode.Decoder String
+customRelatedAt : Decode.Decoder String
 customRelatedAt =
-    Json.Decode.at [ "relatedTarget", "id" ] Json.Decode.string
+    Decode.at [ "relatedTarget", "id" ] Decode.string
 
 
 focusOut : (String -> msg) -> Html.Attribute msg
 focusOut tagger =
-    Events.on "focusout" (Json.Decode.map tagger (Json.Decode.oneOf [ customRelatedAt, Json.Decode.succeed "" ]))
+    Events.on "focusout" (Decode.map tagger (Decode.oneOf [ customRelatedAt, Decode.succeed "" ]))
 
 
 noProp : Html.Attribute msg
@@ -278,13 +301,13 @@ noProp =
     disabled False
 
 
-view : DropState -> (( DropState, Maybe Int, Cmd msg ) -> msg) -> List DropdownItem -> Maybe Int -> Html msg
-view dropdown toMsg dropdownItems selectedId =
-    viewWithEnabled True dropdown toMsg dropdownItems selectedId
+view : Dialog.RootDialog -> DropState -> (( DropState, Maybe Int, Cmd msg ) -> msg) -> List DropdownItem -> Maybe Int -> Html msg
+view rootDialog dropdown toMsg dropdownItems selectedId =
+    viewWithEnabled rootDialog True dropdown toMsg dropdownItems selectedId
 
 
-viewWithEnabled : Bool -> DropState -> (( DropState, Maybe Int, Cmd msg ) -> msg) -> List DropdownItem -> Maybe Int -> Html msg
-viewWithEnabled isEnabled dropdown toMsg dropdownItems selectedId =
+viewWithEnabled : Dialog.RootDialog -> Bool -> DropState -> (( DropState, Maybe Int, Cmd msg ) -> msg) -> List DropdownItem -> Maybe Int -> Html msg
+viewWithEnabled rootDialog isEnabled dropdown toMsg dropdownItems selectedId =
     let
         dropdownWidthMultiplier =
             if dropdown.showSearchText then
@@ -309,8 +332,8 @@ viewWithEnabled isEnabled dropdown toMsg dropdownItems selectedId =
 
         keyMsgDecoder =
             Events.keyCode
-                |> Json.Decode.andThen (keyDecoder dropdown)
-                |> Json.Decode.map (\t -> toMsg (onKey dropdown selectedId dropdownItems t))
+                |> Decode.andThen (keyDecoder dropdown)
+                |> Decode.map (\t -> toMsg (onKey dropdown selectedId dropdownItems t))
 
         biggestStrLength =
             dropdownItems
@@ -319,6 +342,33 @@ viewWithEnabled isEnabled dropdown toMsg dropdownItems selectedId =
                 |> List.reverse
                 |> List.head
                 |> Maybe.withDefault 150
+
+        dropdownItemsCount =
+            List.length dropdownItems
+
+        dropItemHeight =
+            30.0
+
+        dropItemPadding =
+            4.5125
+
+        dropListHeight =
+            if dropdownItemsCount >= 5 then
+                152.0
+            else
+                (toFloat dropdownItemsCount * dropItemHeight) - 2.0
+
+        estimatedHeight =
+            if dropdown.showSearchText then
+                dropListHeight + 42.0 + dropItemHeight + dropItemPadding
+            else
+                dropListHeight + dropItemHeight + dropItemPadding
+
+        bottomOfPagePadding =
+            if dropdown.y + estimatedHeight > rootDialog.windowScrollY + toFloat rootDialog.windowSize.height then
+                estimatedHeight
+            else
+                0
     in
     div
         [ Html.Attributes.id (dropdown.domId ++ "root")
@@ -369,6 +419,7 @@ viewWithEnabled isEnabled dropdown toMsg dropdownItems selectedId =
                         , ( "e-input", True )
                         , ( "e-disable", not isEnabled )
                         ]
+                    , Html.Attributes.id (dropdown.domId ++ "-input")
                     , readonly True
                     , defaultValue getDropdownText
                     , tabindex -1 -- Make it so you cannot set focus via tabbing, we need root div to have the focus
@@ -394,7 +445,7 @@ viewWithEnabled isEnabled dropdown toMsg dropdownItems selectedId =
                     ( "display", "none" )
                 , ( "width", toString biggestStrLength ++ "px" )
                 , ( "position", "absolute" )
-                , ( "top", "32px" )
+                , ( "top", toString (32 - bottomOfPagePadding) ++ "px" )
                 , ( "height", "42px" )
                 , ( "border-top-left-radius", "4px" )
                 , ( "border-top-right-radius", "4px" )
@@ -452,9 +503,9 @@ viewWithEnabled isEnabled dropdown toMsg dropdownItems selectedId =
                 , ( "width", toString biggestStrLength ++ "px" )
                 , ( "position", "absolute" )
                 , if dropdown.showSearchText then
-                    ( "top", "74px" )
+                    ( "top", toString (74 - bottomOfPagePadding) ++ "px" )
                   else
-                    ( "top", "32px" )
+                    ( "top", toString (32 - bottomOfPagePadding) ++ "px" )
                 , ( "border-radius", "4px" )
                 , ( "border-top-left-radius", "0" )
                 , ( "border-top-right-radius", "0" )
@@ -533,15 +584,15 @@ updateSearchString searchChar dropdown dropdownItems selectedId =
             )
 
 
-keyDecoder : DropState -> Int -> Json.Decode.Decoder Key
+keyDecoder : DropState -> Int -> Decode.Decoder Key
 keyDecoder dropdown keyCode =
     let
         -- This is necessary to ensure that the key is not consumed and can propagate to the parent
         pass =
-            Json.Decode.fail ""
+            Decode.fail ""
 
         key =
-            Json.Decode.succeed
+            Decode.succeed
     in
     case keyCode of
         13 ->
