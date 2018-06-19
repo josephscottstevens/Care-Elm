@@ -30,7 +30,7 @@ port updateDemographicsAddressMoveInDate : (SfAddress -> msg) -> Sub msg
 port updateDemographics : (SfData -> msg) -> Sub msg
 
 
-port saveSuccess : Int -> Cmd msg
+port saveDemographics : Int -> Cmd msg
 
 
 scrollToError : Cmd msg
@@ -888,7 +888,7 @@ update msg model patientId =
                     model
                         ! [ Functions.displaySuccessMessage "Save completed successfully!"
                           , Functions.setLoadingStatus False
-                          , saveSuccess newPatientId
+                          , saveDemographics newPatientId
                           , Functions.setUnsavedChanges False
                           ]
 
