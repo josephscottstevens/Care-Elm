@@ -1,14 +1,12 @@
 module Billing exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
 import Common.Dialog as Dialog
-import Common.Dropdown as Dropdown exposing (defaultDropConfig)
 import Common.Functions as Functions
-import Common.Html exposing (InputControlType(CheckInput, ControlElement, HtmlElement), defaultConfig, fullWidth, makeControls)
 import Common.ServerTable as Table exposing (ColumnStyle(CustomStyle, Width), IdAttrType(IdAttr), Operator(..))
-import Common.Types exposing (AddEditDataSource, RequiredType(Optional, Required), monthDropdown, yearDropdown)
+import Common.Types exposing (AddEditDataSource)
 import Date exposing (Date)
 import Dialogs.InvoiceReportsDialog as InvoiceReportsDialog
-import Html exposing (Html, button, div, input, label, text)
+import Html exposing (Html, button, div, input, text)
 import Html.Attributes exposing (attribute, checked, class, style, title, type_)
 import Html.Events exposing (onClick)
 import Http

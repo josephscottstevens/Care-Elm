@@ -22,12 +22,12 @@ module Common.Html
         , makeControls
         )
 
-import Common.Dropdown as Dropdown exposing (defaultDropConfig)
+import Common.Dropdown as Dropdown
 import Common.Functions exposing (isAlpha)
 import Common.Types as Common
-import Html exposing (Html, button, div, input, label, span, text, textarea)
-import Html.Attributes exposing (checked, class, defaultValue, for, hidden, id, name, style, tabindex, title, type_)
-import Html.Events exposing (onCheck, onClick, onInput)
+import Html exposing (Html, button, div, input, label, text, textarea)
+import Html.Attributes exposing (checked, class, defaultValue, for, id, name, style, type_)
+import Html.Events exposing (onCheck, onInput)
 
 
 type InputControlType msg

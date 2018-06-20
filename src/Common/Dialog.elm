@@ -1,8 +1,8 @@
 module Common.Dialog exposing (Dialog, DialogOptions, RootDialog, defaultDialogOptions, simpleDialogOptions, view)
 
-import Html exposing (Html, button, div, input, label, span, text, textarea)
-import Html.Attributes exposing (checked, class, for, hidden, id, name, style, tabindex, title, type_, value)
-import Html.Events exposing (onCheck, onClick, onInput)
+import Html exposing (Html, div, input, span, text)
+import Html.Attributes exposing (class, style, tabindex, title, type_, value)
+import Html.Events exposing (onClick)
 import Window
 
 

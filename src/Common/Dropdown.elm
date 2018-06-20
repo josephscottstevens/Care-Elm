@@ -21,13 +21,6 @@ import Html.Events as Events
 import Json.Decode as Decode
 
 
-type alias BoundingRect =
-    { nodeTop : Int
-    , nodeBottom : Int
-    , pageHeight : Int
-    }
-
-
 port dropdownMenuScroll : String -> Cmd msg
 
 

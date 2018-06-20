@@ -72,9 +72,6 @@ import Json.Encode as Encode
 import Set exposing (Set)
 
 
--- import Common.Route as Route exposing (Route)
-
-
 port updatePatientId : (Int -> msg) -> Sub msg
 
 

@@ -51,7 +51,6 @@ type Msg
     | UpdateCodeLegalStatus String
     | UpdateImpairment String
     | UpdateComments String
-    | UpdateClinicalSummary String
     | Save
     | SaveCompleted (Result Http.Error String)
     | GenerateCarePlanLetter
@@ -92,9 +91,6 @@ update msg model patientId =
                 , currentYear = Just (Date.year dt)
             }
                 ! []
-
-        UpdateClinicalSummary t ->
-            { model | summary = Just t } ! []
 
         GenerateCarePlanLetter ->
             model

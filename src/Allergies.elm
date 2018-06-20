@@ -1,9 +1,9 @@
 module Allergies exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
-import Common.Functions as Functions exposing (maybeVal, sendMenuMessage, setUnsavedChanges)
+import Common.Functions as Functions exposing (maybeVal, setUnsavedChanges)
 import Common.Html exposing (InputControlType(TextInput), defaultConfig, fullWidth, getValidationErrors, makeControls)
 import Common.Table as Table
-import Common.Types exposing (AddEditDataSource, MenuMessage, RequiredType(Optional, Required))
+import Common.Types exposing (AddEditDataSource, RequiredType(Optional, Required))
 import Html exposing (Html, button, div, h4, text)
 import Html.Attributes exposing (class, type_)
 import Html.Events exposing (onClick)
@@ -94,7 +94,6 @@ type Msg
     | DeleteCompleted (Result Http.Error String)
     | Add
     | Edit Row
-    | SendMenuMessage Int String
     | Save EditData
     | SaveCompleted (Result Http.Error String)
     | Cancel
@@ -117,9 +116,6 @@ update msg model patientId =
 
         SetTableState newState ->
             { model | tableState = newState } ! []
-
-        SendMenuMessage recordId messageType ->
-            model ! [ sendMenuMessage (MenuMessage messageType recordId Nothing Nothing) ]
 
         DeletePrompt row ->
             model ! [ Functions.deleteDialogShow row.id ]

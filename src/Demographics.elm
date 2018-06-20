@@ -4,7 +4,7 @@ import Common.Dialog as Dialog
 import Common.Dropdown as Dropdown exposing (defaultDropConfig)
 import Common.Functions as Functions exposing (decodeDropdownItem, maybeVal)
 import Common.Types as Types exposing (DropdownItem)
-import Html exposing (Html, b, div, h4, input, label, option, select, span, table, tbody, td, text, textarea, tr)
+import Html exposing (Html, b, div, h4, input, label, select, span, table, tbody, td, text, textarea, tr)
 import Html.Attributes exposing (attribute, checked, class, colspan, defaultValue, disabled, hidden, id, maxlength, name, style, title, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Http

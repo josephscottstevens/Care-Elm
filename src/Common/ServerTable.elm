@@ -458,7 +458,7 @@ getServerField operator =
         Between serverFieldName _ ->
             Just serverFieldName
 
-        CustomSingleOperator op items ->
+        CustomSingleOperator _ _ ->
             Nothing
 
 
