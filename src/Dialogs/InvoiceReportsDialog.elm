@@ -1,4 +1,4 @@
-module Dialogs.InvoiceReportsDialog exposing (Msg, State, update, view)
+module Dialogs.InvoiceReportsDialog exposing (Msg, State, init, update, view)
 
 --init
 
@@ -159,8 +159,8 @@ update msg model =
                     model ! [ Functions.displayErrorMessage (toString t) ]
 
 
-emptyInvoiceReportDialog : Maybe Int -> Maybe Int -> List DropdownItem -> State
-emptyInvoiceReportDialog currentMonth currentYear facilities =
+init : Maybe Int -> Maybe Int -> List DropdownItem -> State
+init currentMonth currentYear facilities =
     { currentMonth = currentMonth
     , currentYear = currentYear
     , facilityId = Nothing

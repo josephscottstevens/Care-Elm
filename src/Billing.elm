@@ -35,7 +35,7 @@ type alias Model =
     { rows : List Row
     , gridOperations : Table.State
     , confirmData : Maybe (Dialog.Dialog Row Msg)
-    , invoiceReportsDialog : Maybe (Dialog.Dialog InvoiceReportsDialog.State InvoiceReportsDialog.Msg)
+    , invoiceReportsDialog : Maybe InvoiceReportsDialog.State
     , currentMonth : Maybe Int
     , currentYear : Maybe Int
     }
@@ -46,6 +46,8 @@ emptyModel =
     { rows = []
     , gridOperations = Table.init 20 (Just "BillingDate") columns
     , confirmData = Nothing
+
+    -- todo
     , invoiceReportsDialog = Nothing
     , currentMonth = Nothing
     , currentYear = Nothing
@@ -87,12 +89,7 @@ view model patientId maybeAddEditDataSource rootDialog =
         [ Table.view model.gridOperations (gridConfig maybeAddEditDataSource) model.rows Nothing
 
         -- , Dialog.viewDialog model.confirmData rootDialog
-        , case model.invoiceReportsDialog of
-            Just t ->
-                Html.map UpdateInvoiceReportsDialog (Dialog.viewDialog t rootDialog)
-
-            Nothing ->
-                text ""
+        , Html.map UpdateInvoiceReportsDialog (InvoiceReportsDialog.view model.invoiceReportsDialog)
         ]
 
 
@@ -231,10 +228,6 @@ type Msg
 
 update : Msg -> Model -> Int -> ( Model, Cmd Msg )
 update msg model patientId =
-    let
-        openInvoiceReportDialog t =
-            { model | invoiceReportsDialog = Dialog.update model.invoiceReportsDialog t }
-    in
     case msg of
         Load (Ok t) ->
             { model | rows = t.result, gridOperations = Table.updateFromServer t.serverData model.gridOperations }
@@ -409,10 +402,21 @@ update msg model patientId =
 
         -- Invoice Reports Dialog
         ShowInvoiceReportsDialog addEditDataSource ->
-            Debug.crash "Todo"
+            { model | invoiceReportsDialog = Just (InvoiceReportsDialog.init Nothing Nothing []) }
+                ! []
 
         UpdateInvoiceReportsDialog invoiceMsg ->
-            Debug.crash "Todo"
+            case model.invoiceReportsDialog of
+                Just invoiceReportsDialog ->
+                    let
+                        ( newState, newCmd ) =
+                            InvoiceReportsDialog.update invoiceMsg invoiceReportsDialog
+                    in
+                    { model | invoiceReportsDialog = Just newState }
+                        ! []
+
+                Nothing ->
+                    Debug.crash "That shouldn't happen"
 
         -- Common Close Dialog
         CloseDialog ->
