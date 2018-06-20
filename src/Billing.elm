@@ -85,10 +85,6 @@ type alias Row =
 
 view : Model -> Int -> Maybe AddEditDataSource -> Dialog.RootDialog -> Html Msg
 view model patientId maybeAddEditDataSource rootDialog =
-    let
-        x =
-            1
-    in
     div []
         [ Table.view model.gridOperations (gridConfig maybeAddEditDataSource) model.rows Nothing
 
@@ -402,7 +398,10 @@ update msg model patientId =
 
         -- Invoice Reports Dialog
         ShowInvoiceReportsDialog addEditDataSource ->
-            { model | invoiceReportsDialog = Just (InvoiceReportsDialog.init Nothing Nothing []) }
+            { model
+                | invoiceReportsDialog =
+                    Just (InvoiceReportsDialog.init model.currentMonth model.currentYear addEditDataSource.facilities)
+            }
                 ! []
 
         UpdateInvoiceReportsDialog invoiceMsg ->
@@ -412,8 +411,8 @@ update msg model patientId =
                         ( newState, newCmd ) =
                             InvoiceReportsDialog.update invoiceMsg invoiceReportsDialog
                     in
-                    { model | invoiceReportsDialog = Just newState }
-                        ! []
+                    { model | invoiceReportsDialog = newState }
+                        ! [ Cmd.map UpdateInvoiceReportsDialog newCmd ]
 
                 Nothing ->
                     Debug.crash "That shouldn't happen"
