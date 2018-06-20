@@ -1,4 +1,4 @@
-module Common.Dialog exposing (Dialog, DialogOptions, RootDialog, defaultDialogOptions, simpleDialogOptions, update, viewDialog)
+module Common.Dialog exposing (Dialog, DialogOptions, RootDialog, defaultDialogOptions, simpleDialogOptions, view)
 
 import Html exposing (Html, button, div, input, label, span, text, textarea)
 import Html.Attributes exposing (checked, class, for, hidden, id, name, style, tabindex, title, type_, value)
@@ -6,13 +6,12 @@ import Html.Events exposing (onCheck, onClick, onInput)
 import Window
 
 
-type alias Dialog data msg =
-    { data : data
-    , onConfirm : data -> msg
+type alias Dialog msg =
+    { onConfirm : msg
     , onCancel : msg
     , headerText : String
-    , dialogContent : data -> Html msg
     , dialogOptions : DialogOptions
+    , dialogContent : Html msg
     }
 
 
@@ -69,8 +68,8 @@ simpleDialogOptions width height =
     }
 
 
-viewDialog : Dialog data msg -> RootDialog -> Html msg
-viewDialog { data, onConfirm, onCancel, headerText, dialogContent, dialogOptions } rootDialog =
+view : RootDialog -> Dialog msg -> Html msg
+view rootDialog { onConfirm, onCancel, headerText, dialogOptions, dialogContent } =
     div []
         [ div
             [ class "e-dialog e-widget e-box e-dialog-wrap e-shadow"
@@ -111,7 +110,7 @@ viewDialog { data, onConfirm, onCancel, headerText, dialogContent, dialogOptions
                         [ class "col-xs-12 padding-top-10 confirm-message"
                         , style [ ( "height", dialogOptions.height - 40 - 71 |> toPx ) ]
                         ]
-                        [ dialogContent data
+                        [ dialogContent
                         ]
                     , div [ class "col-xs-12 padding-top-10 padding-bottom-10" ]
                         [ div [ class "col-xs-12 padding-right-0" ]
@@ -126,7 +125,7 @@ viewDialog { data, onConfirm, onCancel, headerText, dialogContent, dialogOptions
                                 [ type_ "button"
                                 , class "btn btn-sm btn-danger pull-right confirm-submit"
                                 , value "Continue"
-                                , onClick (onConfirm data)
+                                , onClick onConfirm
                                 ]
                                 []
                             ]
@@ -145,13 +144,3 @@ viewDialog { data, onConfirm, onCancel, headerText, dialogContent, dialogOptions
             ]
             []
         ]
-
-
-update : Maybe (Dialog data msg) -> data -> Maybe (Dialog data msg)
-update maybeDialog data =
-    case maybeDialog of
-        Just dialog ->
-            Just { dialog | data = data }
-
-        Nothing ->
-            Nothing

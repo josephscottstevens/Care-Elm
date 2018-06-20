@@ -34,7 +34,7 @@ subscriptions =
 type alias Model =
     { rows : List Row
     , gridOperations : Table.State
-    , confirmData : Maybe (Dialog.Dialog Row Msg)
+    , confirmData : Maybe (Dialog.Dialog Msg)
     , invoiceReportsDialog : Maybe InvoiceReportsDialog.State
     , currentMonth : Maybe Int
     , currentYear : Maybe Int
@@ -85,11 +85,15 @@ type alias Row =
 
 view : Model -> Int -> Maybe AddEditDataSource -> Dialog.RootDialog -> Html Msg
 view model patientId maybeAddEditDataSource rootDialog =
+    let
+        x =
+            1
+    in
     div []
         [ Table.view model.gridOperations (gridConfig maybeAddEditDataSource) model.rows Nothing
 
         -- , Dialog.viewDialog model.confirmData rootDialog
-        , Html.map UpdateInvoiceReportsDialog (InvoiceReportsDialog.view model.invoiceReportsDialog)
+        , Html.map UpdateInvoiceReportsDialog (InvoiceReportsDialog.view rootDialog model.invoiceReportsDialog)
         ]
 
 
@@ -274,11 +278,10 @@ update msg model patientId =
             { model
                 | confirmData =
                     Just
-                        { data = row
-                        , headerText = "Confirm"
-                        , onConfirm = ConfirmedToggleReviewedDialog
+                        { headerText = "Confirm"
+                        , onConfirm = ConfirmedToggleReviewedDialog row
                         , onCancel = CloseDialog
-                        , dialogContent = \_ -> text "Are you sure you wish to change the reviewed status?"
+                        , dialogContent = text "Are you sure you wish to change the reviewed status?"
                         , dialogOptions = Dialog.defaultDialogOptions
                         }
             }
@@ -300,11 +303,10 @@ update msg model patientId =
             { model
                 | confirmData =
                     Just
-                        { data = row
-                        , headerText = "Save to Client Portal"
-                        , onConfirm = ConfirmedSaveSummaryReportDialog
+                        { headerText = "Save to Client Portal"
+                        , onConfirm = ConfirmedSaveSummaryReportDialog row
                         , onCancel = CloseDialog
-                        , dialogContent = \_ -> text "Are you sure that you want to save this report in Clinical Portal?"
+                        , dialogContent = text "Are you sure that you want to save this report in Clinical Portal?"
                         , dialogOptions = Dialog.defaultDialogOptions
                         }
             }
@@ -349,11 +351,10 @@ update msg model patientId =
             { model
                 | confirmData =
                     Just
-                        { data = row
-                        , headerText = "Close Bill"
-                        , onConfirm = ConfirmedCloseBillingSessionDialog
+                        { headerText = "Close Bill"
+                        , onConfirm = ConfirmedCloseBillingSessionDialog row
                         , onCancel = CloseDialog
-                        , dialogContent = \_ -> text "Are you sure that you want to close this bill?"
+                        , dialogContent = text "Are you sure that you want to close this bill?"
                         , dialogOptions = Dialog.defaultDialogOptions
                         }
             }
@@ -380,11 +381,10 @@ update msg model patientId =
             { model
                 | confirmData =
                     Just
-                        { data = row
-                        , headerText = "Edit CCM Billing"
-                        , onConfirm = ConfirmedCloseBillingSessionDialog
+                        { headerText = "Edit CCM Billing"
+                        , onConfirm = ConfirmedCloseBillingSessionDialog row
                         , onCancel = CloseDialog
-                        , dialogContent = \_ -> text "todo"
+                        , dialogContent = text "todo"
                         , dialogOptions = Dialog.defaultDialogOptions
                         }
             }

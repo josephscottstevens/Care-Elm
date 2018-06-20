@@ -26,27 +26,34 @@ type alias State =
     }
 
 
-view : Maybe State -> Html Msg
-view state =
-    case state of
-        Just t ->
-            div [ class "form-horizontal", style [ ( "padding-left", "40px" ) ] ]
-                [ makeControls { controlAttributes = [ class "col-md-8" ] }
-                    [ dividerLabel "Select Facility"
+view : Dialog.RootDialog -> Maybe State -> Html Msg
+view rootDialog maybeState =
+    case maybeState of
+        Just state ->
+            Dialog.view rootDialog
+                { onConfirm = Confirmed
+                , onCancel = Close
+                , headerText = "test header"
+                , dialogOptions = Dialog.defaultDialogOptions
+                , dialogContent =
+                    div [ class "form-horizontal", style [ ( "padding-left", "40px" ) ] ]
+                        [ makeControls { controlAttributes = [ class "col-md-8" ] }
+                            [ dividerLabel "Select Facility"
 
-                    -- , ControlElement "Facility" <|
-                    --     Dropdown.view t.facilityDropState UpdateFacility t.facilities t.facilityId
-                    -- , dividerLabel "Select Month and Year For Billable Patients"
-                    -- , ControlElement "Month" <|
-                    --     Dropdown.view t.monthDropState UpdateMonth monthDropdown t.currentMonth
-                    -- , ControlElement "Year" <|
-                    --     Dropdown.view t.yearDropState UpdateYear yearDropdown t.currentYear
-                    , CheckInput "Save to Client Portal" Optional t.saveToClientPortal UpdateSaveToClientPortal
-                    , HtmlElement <|
-                        div [ class "row" ] []
-                    , dividerLabel ""
-                    ]
-                ]
+                            -- , ControlElement "Facility" <|
+                            --     Dropdown.view t.facilityDropState UpdateFacility t.facilities t.facilityId
+                            -- , dividerLabel "Select Month and Year For Billable Patients"
+                            -- , ControlElement "Month" <|
+                            --     Dropdown.view t.monthDropState UpdateMonth monthDropdown t.currentMonth
+                            -- , ControlElement "Year" <|
+                            --     Dropdown.view t.yearDropState UpdateYear yearDropdown t.currentYear
+                            , CheckInput "Save to Client Portal" Optional state.saveToClientPortal UpdateSaveToClientPortal
+                            , HtmlElement <|
+                                div [ class "row" ] []
+                            , dividerLabel ""
+                            ]
+                        ]
+                }
 
         Nothing ->
             text ""
@@ -74,7 +81,7 @@ dividerLabel labelText =
 
 
 type Msg
-    = Confirmed State
+    = Confirmed
     | UpdateFacility ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateMonth ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateYear ( Dropdown.DropState, Maybe Int, Cmd Msg )
@@ -105,7 +112,7 @@ update msg model =
         Close ->
             { model | showDialog = False } ! []
 
-        Confirmed invoiceReportsDialog ->
+        Confirmed ->
             case ( model.currentMonth, model.currentMonth, model.facilityId ) of
                 ( Just month, Just year, Just facilityId ) ->
                     { model | showDialog = False }
