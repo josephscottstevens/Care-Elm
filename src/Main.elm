@@ -242,6 +242,11 @@ pageInit pageStr model =
         "continuityofcaredocument" ->
             setRecordsModel Common.ContinuityOfCareDocument
 
+        --Other
+        "insurance" ->
+            setModel (Billing Billing.emptyModel)
+                ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
+
         -- --People/ClinicalSummary
         -- Just Route.ClinicalSummaryRoot ->
         --     setModel Route.ClinicalSummaryRoot (ClinicalSummary ClinicalSummary.emptyModel)
@@ -264,10 +269,6 @@ pageInit pageStr model =
         -- Just Route.LastKnownVitals ->
         --     setModel Route.LastKnownVitals (LastKnownVitals LastKnownVitals.emptyModel)
         --         ! cmds [ Cmd.map LastKnownVitalsMsg (LastKnownVitals.init model.patientId) ]
-        -- --Other
-        -- Just Route.Billing ->
-        --     setModel Route.Billing (Billing Billing.emptyModel)
-        --         ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
         -- Just Route.None ->
         --     setModel Route.None NoPage
         --         ! []

@@ -87,7 +87,12 @@ view model patientId maybeAddEditDataSource rootDialog =
         [ Table.view model.gridOperations (gridConfig maybeAddEditDataSource) model.rows Nothing
 
         -- , Dialog.viewDialog model.confirmData rootDialog
-        -- , Dialog.viewDialog model.invoiceReportsDialog rootDialog
+        , case model.invoiceReportsDialog of
+            Just t ->
+                Html.map UpdateInvoiceReportsDialog (Dialog.viewDialog t rootDialog)
+
+            Nothing ->
+                text ""
         ]
 
 
@@ -219,7 +224,7 @@ type Msg
     | ShowCCMSummaryReportsDialog AddEditDataSource
       -- Invoice Reports Dialog
     | ShowInvoiceReportsDialog AddEditDataSource
-    | UpdateInvoiceReportsDialog InvoiceReportsDialog.Msg InvoiceReportsDialog.State
+    | UpdateInvoiceReportsDialog InvoiceReportsDialog.Msg
       -- Common Close Dialog
     | CloseDialog
 
@@ -406,7 +411,7 @@ update msg model patientId =
         ShowInvoiceReportsDialog addEditDataSource ->
             Debug.crash "Todo"
 
-        UpdateInvoiceReportsDialog invoiceMsg dialogState ->
+        UpdateInvoiceReportsDialog invoiceMsg ->
             Debug.crash "Todo"
 
         -- Common Close Dialog
