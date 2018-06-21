@@ -16,6 +16,7 @@ module Common.Html
             )
         , controlWidth
         , defaultConfig
+        , dividerLabel
         , fullWidth
         , getValidationErrors
         , labelWidth
@@ -326,3 +327,24 @@ isRequiredStr requiredType =
 
         Common.Optional ->
             ""
+
+
+dividerLabel : String -> InputControlType msg
+dividerLabel labelText =
+    HtmlElement <|
+        div
+            [ style
+                [ ( "border-bottom-style", "solid" )
+                , ( "border-bottom-width", "1px" )
+                , ( "border-bottom-color", "rgb(209, 209, 209)" )
+                , ( "font-size", "14px" )
+                , ( "color", "#808080" )
+                , ( "padding", "3px" )
+                , ( "font-weight", "400 !important" )
+                , ( "width", "90%" )
+                , ( "margin-top", "10px" )
+                , ( "margin-bottom", "20px" )
+                ]
+            ]
+            [ text labelText
+            ]

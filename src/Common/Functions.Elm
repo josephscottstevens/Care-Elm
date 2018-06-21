@@ -1,23 +1,16 @@
 port module Common.Functions
     exposing
         ( CustomDialog
+        , clientDate
+        , clientDateTime
         , customDialogShow
         , customPostRequest
-        , date
         , dateFromString
-        , dateTime
-        , dateTimeToString
-        , dateToString
         , decodeDropdownItem
         , defaultBool
-        , defaultDate
-        , defaultDateTime
         , defaultInt
         , defaultIntStr
         , defaultIntToString
-        , defaultLower
-        , defaultLowerDate
-        , defaultLowerDateTime
         , defaultMaybeMsg
         , defaultString
         , deleteDialogShow
@@ -46,6 +39,8 @@ port module Common.Functions
         , scrollTo
         , secondsToHHMMSS
         , sendMenuMessage
+        , serverDate
+        , serverDateTime
         , setLoadingStatus
         , setUnsavedChanges
         , stringToInt
@@ -247,14 +242,34 @@ formatDateTime format maybeStr =
             Nothing
 
 
-dateTimeToString : Date.Date -> String
-dateTimeToString date =
-    Date.Extra.toUtcFormattedString "MM/dd/yyyy hh:mm:ss a" date
+dateHelper : Maybe String -> (Date.Date -> String) -> String
+dateHelper maybeStr dateFormat =
+    case Date.fromString (defaultString maybeStr) of
+        Ok t ->
+            dateFormat t
+
+        Err _ ->
+            ""
 
 
-dateToString : Date.Date -> String
-dateToString date =
-    Date.Extra.toUtcFormattedString "MM/dd/yyyy" date
+clientDateTime : Maybe String -> String
+clientDateTime str =
+    dateHelper str (Date.Extra.toUtcFormattedString "MM/dd/yyyy hh:mm:ss a")
+
+
+clientDate : Maybe String -> String
+clientDate str =
+    dateHelper str (Date.Extra.toUtcFormattedString "MM/dd/yyyy")
+
+
+serverDateTime : Maybe String -> String
+serverDateTime str =
+    dateHelper str (Date.Extra.toFormattedString "MM/dd/yyyy hh:mm:ss a")
+
+
+serverDate : Maybe String -> String
+serverDate str =
+    dateHelper str (Date.Extra.toFormattedString "MM/dd/yyyy")
 
 
 dateFromString : String -> Maybe Date.Date
@@ -265,46 +280,6 @@ dateFromString str =
 
         Err _ ->
             Nothing
-
-
-dateTime : String -> String
-dateTime str =
-    case Date.fromString str of
-        Ok date ->
-            dateTimeToString date
-
-        Err _ ->
-            ""
-
-
-date : String -> String
-date str =
-    case Date.fromString str of
-        Ok t ->
-            dateToString t
-
-        Err _ ->
-            ""
-
-
-defaultDateTime : Maybe String -> String
-defaultDateTime str =
-    dateTime (defaultString str)
-
-
-defaultDate : Maybe String -> String
-defaultDate str =
-    date (defaultString str)
-
-
-defaultLowerDate : Maybe String -> String
-defaultLowerDate str =
-    String.toLower (date (defaultString str))
-
-
-defaultLowerDateTime : Maybe String -> String
-defaultLowerDateTime str =
-    String.toLower (dateTime (defaultString str))
 
 
 ticksToSeconds : Int -> Int

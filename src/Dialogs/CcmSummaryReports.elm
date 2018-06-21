@@ -1,11 +1,11 @@
-module Dialogs.InvoiceReportsDialog exposing (Msg, State, init, update, view)
+module Dialogs.CcmSummaryReports exposing (Msg, State, init, update, view)
 
 --init
 
 import Common.Dialog as Dialog
 import Common.Dropdown as Dropdown exposing (defaultDropConfig)
 import Common.Functions as Functions
-import Common.Html exposing (InputControlType(CheckInput, ControlElement, HtmlElement), defaultConfig, dividerLabel, fullWidth, makeControls)
+import Common.Html exposing (InputControlType(CheckInput, ControlElement, HtmlElement, KnockInput), defaultConfig, dividerLabel, fullWidth, makeControls)
 import Common.Types exposing (AddEditDataSource, DropdownItem, RequiredType(Optional, Required), monthDropdown, yearDropdown)
 import Html exposing (Html, button, div, input, label, text)
 import Html.Attributes exposing (attribute, checked, class, style, title, type_)
@@ -14,42 +14,49 @@ import Json.Encode as Encode
 
 
 type alias State =
-    { currentMonth : Maybe Int
-    , currentYear : Maybe Int
-    , facilityId : Maybe Int
-    , saveToClientPortal : Bool
+    { facilityId : Maybe Int
     , facilities : List DropdownItem
     , facilityDropState : Dropdown.DropState
-    , monthDropState : Dropdown.DropState
-    , yearDropState : Dropdown.DropState
+    , sfData : SfData
+    , saveToClientPortal : Bool
+    , includeCcmOpenTasks : Bool
+    , hideClinicalSummaryFields : Bool
+    , saveToPreviousHistories : Bool
+    , fileId : String
+    , files : List DropdownItem
+    , fileDropState : Dropdown.DropState
     }
 
 
 view : Dialog.RootDialog -> Maybe State -> Html Msg
 view rootDialog state =
-    let
-        dropView =
-            Dropdown.view rootDialog
-    in
     case state of
         Just t ->
             Dialog.view rootDialog
                 { onConfirm = Confirmed
                 , onCancel = Close
-                , headerText = "Invoice XLS"
+                , headerText = "Batch Individual"
                 , dialogOptions = Dialog.simpleDialogOptions 800 500
                 , dialogContent =
                     div [ class "form-horizontal", style [ ( "padding-left", "40px" ) ] ]
                         [ makeControls { controlAttributes = [ class "col-md-8" ] }
                             [ dividerLabel "Select Facility"
                             , ControlElement "Facility" <|
-                                dropView t.facilityDropState UpdateFacility t.facilities t.facilityId
-                            , dividerLabel "Select Month and Year For Billable Patients"
-                            , ControlElement "Month" <|
-                                dropView t.monthDropState UpdateMonth monthDropdown t.currentMonth
-                            , ControlElement "Year" <|
-                                dropView t.yearDropState UpdateYear yearDropdown t.currentYear
+                                Dropdown.view rootDialog t.facilityDropState UpdateFacility t.facilities t.facilityId
+                            , dividerLabel "Select Date Interval For Billable Patients"
+                            , KnockInput "Start Date" Required "StartDate"
+                            , KnockInput "End Date" Required "EndDate"
                             , CheckInput "Save to Client Portal" Optional t.saveToClientPortal UpdateSaveToClientPortal
+                            , CheckInput "Include CCM Open Tasks" Optional t.includeCcmOpenTasks UpdateIncludeCcmOpenTasks
+                            , CheckInput "Hide Clinical Summary Fields" Optional t.hideClinicalSummaryFields UpdateHideClinicalSummaryFields
+                            , CheckInput "Save to Previous Histories" Optional t.saveToPreviousHistories UpdateSaveToPreviousHistories
+                            , HtmlElement <|
+                                div [ class "row" ] []
+                            , if t.saveToClientPortal then
+                                ControlElement "Facility" <|
+                                    Dropdown.view rootDialog t.fileDropState UpdateFile t.files t.fileId
+                              else
+                                text ""
                             , HtmlElement <|
                                 div [ class "row" ] []
                             , dividerLabel ""
@@ -61,12 +68,21 @@ view rootDialog state =
             text ""
 
 
+type alias SfData =
+    { startDate : Maybe String
+    , endDate : Maybe String
+    }
+
+
 type Msg
     = Confirmed
     | UpdateFacility ( Dropdown.DropState, Maybe Int, Cmd Msg )
-    | UpdateMonth ( Dropdown.DropState, Maybe Int, Cmd Msg )
-    | UpdateYear ( Dropdown.DropState, Maybe Int, Cmd Msg )
+    | UpdateSfData SfData
+    | UpdateFile ( Dropdown.DropState, Maybe Int, Cmd Msg )
     | UpdateSaveToClientPortal Bool
+    | UpdateIncludeCcmOpenTasks Bool
+    | UpdateHideClinicalSummaryFields Bool
+    | UpdateSaveToPreviousHistories Bool
     | Close
     | RequestCompleted ( Int, Int, Int, Bool ) (Result Http.Error String)
     | ExcelCompleted (Result Http.Error String)
@@ -80,18 +96,33 @@ update msg model =
             , newMsg
             )
 
-        UpdateMonth ( newDropState, newId, newMsg ) ->
+        UpdateFile ( newDropState, newId, newMsg ) ->
             ( Just { model | monthDropState = newDropState, currentMonth = newId }
             , newMsg
             )
 
-        UpdateYear ( newDropState, newId, newMsg ) ->
-            ( Just { model | yearDropState = newDropState, currentYear = newId }
-            , newMsg
+        UpdateSfData sfData ->
+            ( Just { model | sfData = sfData }
+            , Cmd.none
             )
 
         UpdateSaveToClientPortal t ->
             ( Just { model | saveToClientPortal = not t }
+            , Cmd.none
+            )
+
+        UpdateIncludeCcmOpenTasks t ->
+            ( Just { model | includeCcmOpenTasks = not t }
+            , Cmd.none
+            )
+
+        UpdateHideClinicalSummaryFields t ->
+            ( Just { model | hideClinicalSummaryFields = not t }
+            , Cmd.none
+            )
+
+        UpdateSaveToPreviousHistories t ->
+            ( Just { model | saveToPreviousHistories = not t }
             , Cmd.none
             )
 
@@ -178,12 +209,37 @@ init currentMonth currentYear facilities =
 
 
 
--- init : Maybe Int -> Maybe Int -> AddEditDataSource -> Dialog.Dialog State Msg
--- init currentMonth currentYear addEditDataSource =
---     { data = emptyInvoiceReportDialog currentMonth currentYear addEditDataSource.facilities
---     , headerText = "Invoice XLS"
---     , onConfirm = Confirmed
---     , onCancel = Close
---     , dialogContent = view
---     , dialogOptions = Dialog.simpleDialogOptions 800 500
---     }
+-- Functions.getStringRequestWithParams
+--     "/CommonForms/CustomRangeFilterViewPartial"
+--     [ ( "billingProcess", "false" )
+--     , ( "saveAsFileType", "zip" )
+--     , ( "batchCcmIndividualReports", "true" )
+--     ]
+-- public class CCMCustomRangeFilterFormModel
+-- {
+--     public int ReportHcoId { get; set; }
+--     public DateTime StartDate { get; set; }
+--     public DateTime EndDate { get; set; }
+--     public DateTime CurrentDate { get; set; }
+--     public string SaveAsFileType { get; set; }
+--     public bool BillingProcess { get; set; }
+--     public bool BatchCcmIndividualReports { get; set; }
+--     public bool BatchTcmI29DayReports { get; set; }
+--     public bool IsTCM { get; set; }
+--     public bool IncludeOpenBillingRecords { get; set; }
+-- }
+-- public ActionResult CustomRangeFilterViewPartial
+--     ( bool billingProcess = false
+--     , string saveAsFileType = null
+--     , bool batchCcmIndividualReports = false
+--     , bool batchTcmI29DayReports=false
+--     , bool isTCM = false
+--     , bool includeOpenBillingRecords = false
+--     )
+-- buttonSettings.ClientSideEvents.Click =
+-- """function(s,e){
+--     window.billingProcess = false;
+--     window.saveAsFileType = 'zip';
+--     window.batchCcmIndividualReports = true;
+--     PopupCCMBatchMonthlyIndividualFilterPopup.Show();
+--     }";"""

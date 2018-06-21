@@ -309,10 +309,10 @@ viewTd state row config column =
                 text (Maybe.withDefault "" (dataToString row))
 
             DateTimeColumn _ dataToString _ ->
-                text (Functions.defaultDateTime (dataToString row))
+                text (Functions.serverDateTime (dataToString row))
 
             DateColumn _ dataToString _ ->
-                text (Functions.defaultDate (dataToString row))
+                text (Functions.serverDate (dataToString row))
 
             HrefColumn _ displayText dataToString _ ->
                 --TODO, how do I want to display empty? I think.. it is hide the href, not go to an empty url right?

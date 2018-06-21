@@ -475,7 +475,7 @@ viewAddress rootDialog stateDropdownItems facilityDropdownItems address =
                         [ input
                             [ type_ "text"
                             , id ("MoveInDate" ++ toString address.nodeId)
-                            , maybeValue <| Just <| Functions.defaultDate address.moveInDate
+                            , maybeValue <| Just <| Functions.clientDate address.moveInDate
                             ]
                             []
                         ]

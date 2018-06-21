@@ -1,6 +1,6 @@
 port module LastKnownVitals exposing (Model, Msg, emptyModel, init, subscriptions, update, view)
 
-import Common.Functions as Functions exposing (defaultDate, maybeVal, sendMenuMessage, setUnsavedChanges)
+import Common.Functions as Functions exposing (maybeVal, sendMenuMessage, setUnsavedChanges)
 import Common.Html exposing (InputControlType(DateInput, TextInput), defaultConfig, fullWidth, getValidationErrors, makeControls)
 import Common.Table as Table
 import Common.Types exposing (AddEditDataSource, MenuMessage, RequiredType(Optional, Required))
@@ -78,7 +78,7 @@ formInputs editData =
     , TextInput "WT" Required editData.wt (UpdateWt editData)
     , TextInput "HT" Required editData.ht (UpdateHt editData)
     , TextInput "BMI" Required editData.bmi (UpdateBmi editData)
-    , DateInput "Date" Optional (defaultDate editData.date) "DateId"
+    , DateInput "Date" Optional (Functions.clientDate editData.date) "DateId"
     ]
 
 

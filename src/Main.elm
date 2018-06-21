@@ -222,8 +222,9 @@ pageInit pageStr model =
         "radiologyrecords" ->
             setRecordsModel Common.Radiology
 
-        --"hospitalizationrecords" ->
-        --    setRecordsModel Common.Hospitalizations
+        "hospitalizationrecords" ->
+            setRecordsModel Common.Hospitalizations
+
         "legalrecords" ->
             setRecordsModel Common.Legal
 
@@ -243,44 +244,37 @@ pageInit pageStr model =
             setRecordsModel Common.ContinuityOfCareDocument
 
         --Other
-        "insurance" ->
+        "billing" ->
             setModel (Billing Billing.emptyModel)
                 ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
 
-        -- --People/ClinicalSummary
-        -- Just Route.ClinicalSummaryRoot ->
-        --     setModel Route.ClinicalSummaryRoot (ClinicalSummary ClinicalSummary.emptyModel)
-        --         ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
-        -- Just Route.ClinicalSummary ->
-        --     setModel Route.ClinicalSummary (ClinicalSummary ClinicalSummary.emptyModel)
-        --         ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
-        -- Just Route.PastMedicalHistory ->
-        --     setModel Route.PastMedicalHistory (PastMedicalHistory PastMedicalHistory.emptyModel)
-        --         ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
-        -- Just Route.Hospitilizations ->
-        --     setModel Route.Hospitilizations (Hospitilizations Hospitilizations.emptyModel)
-        --         ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
-        -- Just Route.Immunizations ->
-        --     setModel Route.Immunizations (Immunizations Immunizations.emptyModel)
-        --         ! cmds [ Cmd.map ImmunizationsMsg (Immunizations.init model.patientId) ]
-        -- Just Route.Allergies ->
-        --     setModel Route.Allergies (Allergies Allergies.emptyModel)
-        --         ! cmds [ Cmd.map AllergiesMsg (Allergies.init model.patientId) ]
-        -- Just Route.LastKnownVitals ->
-        --     setModel Route.LastKnownVitals (LastKnownVitals LastKnownVitals.emptyModel)
-        --         ! cmds [ Cmd.map LastKnownVitalsMsg (LastKnownVitals.init model.patientId) ]
-        -- Just Route.None ->
-        --     setModel Route.None NoPage
-        --         ! []
-        -- Just (Route.Error str) ->
-        --     setModel (Route.Error str) (Error str)
-        --         ! []
+        --People/ClinicalSummary
+        "clinicalsummary" ->
+            setModel (ClinicalSummary ClinicalSummary.emptyModel)
+                ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
+
+        "pastmedicalhistory" ->
+            setModel (PastMedicalHistory PastMedicalHistory.emptyModel)
+                ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
+
+        "hospitalizations" ->
+            setModel (Hospitilizations Hospitilizations.emptyModel)
+                ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
+
+        "immunizations" ->
+            setModel (Immunizations Immunizations.emptyModel)
+                ! cmds [ Cmd.map ImmunizationsMsg (Immunizations.init model.patientId) ]
+
+        "allergies" ->
+            setModel (Allergies Allergies.emptyModel)
+                ! cmds [ Cmd.map AllergiesMsg (Allergies.init model.patientId) ]
+
+        "vitals" ->
+            setModel (LastKnownVitals LastKnownVitals.emptyModel)
+                ! cmds [ Cmd.map LastKnownVitalsMsg (LastKnownVitals.init model.patientId) ]
+
         _ ->
-            -- setModel (Route.Error "no route provided, map me in Route.routeHash")
-            --     (Error "no route provided, map me in Route.routeHash")
-            --     ! []
-            setModel NoPage
-                ! []
+            setModel NoPage ! []
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

@@ -124,7 +124,7 @@ intColumn headerText data columnStyle dataField =
 dateColumn : String -> (data -> Maybe String) -> ColumnStyle -> String -> Column data msg
 dateColumn headerText data columnStyle dataField =
     { headerText = headerText
-    , viewData = data >> (\t -> text (Functions.defaultDate t))
+    , viewData = data >> (\t -> text (Functions.serverDate t))
     , columnStyle = columnStyle
     , filterControl = DateControl
     , operator = Equals dataField
@@ -135,7 +135,7 @@ dateColumn headerText data columnStyle dataField =
 dateTimeColumn : String -> (data -> Maybe String) -> ColumnStyle -> String -> Column data msg
 dateTimeColumn headerText data columnStyle dataField =
     { headerText = headerText
-    , viewData = data >> (\t -> text (Functions.defaultDateTime t))
+    , viewData = data >> (\t -> text (Functions.serverDateTime t))
     , columnStyle = columnStyle
     , filterControl = DateTimeControl
     , operator = Equals dataField
