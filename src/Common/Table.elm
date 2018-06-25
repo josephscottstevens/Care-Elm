@@ -239,18 +239,15 @@ viewTh state config column =
 
         headerContent =
             if state.sortField == name then
-                if not state.sortAscending then
+                if state.sortAscending then
                     [ text name, span [ class "e-icon e-ascending e-rarrowup-2x" ] [] ]
                 else
                     [ text name, span [ class "e-icon e-ascending e-rarrowdown-2x" ] [] ]
             else
                 [ text name ]
 
-        newSortDirection =
-            not state.sortAscending
-
         sortClick =
-            Events.onClick (config.toMsg { state | sortAscending = newSortDirection, sortField = name })
+            Events.onClick (config.toMsg { state | sortAscending = not state.sortAscending, sortField = name })
     in
     th [ class ("e-headercell e-default " ++ name), sortClick ]
         [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent

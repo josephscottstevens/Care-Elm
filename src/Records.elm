@@ -154,15 +154,15 @@ view model addEditDataSource =
         config =
             gridConfig model.recordType addEditDataSource
     in
-    div []
-        [ h4 [] [ text (Functions.getDesc model.recordType) ]
-        , case model.editData of
-            Just editData ->
-                Table.view model.tableState model.rows config (Just <| viewEditData editData)
+        div []
+            [ h4 [] [ text (Functions.getDesc model.recordType) ]
+            , case model.editData of
+                Just editData ->
+                    Table.view model.tableState model.rows config (Just <| viewEditData editData)
 
-            Nothing ->
-                Table.view model.tableState model.rows config Nothing
-        ]
+                Nothing ->
+                    Table.view model.tableState model.rows config Nothing
+            ]
 
 
 viewEditData : EditData -> Html Msg
@@ -194,9 +194,9 @@ viewEditData editData =
                 ]
             ]
     in
-    div
-        [ class "form-horizontal" ]
-        (validationErrorsDiv :: inputControls ++ footerControls)
+        div
+            [ class "form-horizontal" ]
+            (validationErrorsDiv :: inputControls ++ footerControls)
 
 
 type Msg
@@ -235,127 +235,127 @@ update msg model patientId =
         updateAddNew t =
             { model | editData = Just t } ! [ Functions.setUnsavedChanges True ]
     in
-    case msg of
-        Load (Ok t) ->
-            { model | rows = t } ! [ Functions.setLoadingStatus False ]
+        case msg of
+            Load (Ok t) ->
+                { model | rows = t } ! [ Functions.setLoadingStatus False ]
 
-        Load (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            Load (Err t) ->
+                model ! [ displayErrorMessage (toString t) ]
 
-        Add addEditDataSource recordType ->
-            let
-                editData =
-                    createEditData addEditDataSource recordType
-            in
-            { model | editData = Just editData }
-                ! [ initRecordAddNew editData.sfData ]
+            Add addEditDataSource recordType ->
+                let
+                    editData =
+                        createEditData addEditDataSource recordType
+                in
+                    { model | editData = Just editData }
+                        ! [ initRecordAddNew editData.sfData ]
 
-        SetTableState newState ->
-            { model | tableState = newState } ! []
+            SetTableState newState ->
+                { model | tableState = newState } ! []
 
-        SendMenuMessage recordType messageType row ->
-            { model | rows = flipConsent model.rows row.id recordType }
-                ! [ sendMenuMessage (getMenuMessage model.rows recordType row.id messageType) ]
+            SendMenuMessage recordType messageType row ->
+                { model | rows = flipConsent model.rows row.id recordType }
+                    ! [ sendMenuMessage (getMenuMessage model.rows recordType row.id messageType) ]
 
-        DeletePrompt row ->
-            model ! [ Functions.deleteDialogShow row.id ]
+            DeletePrompt row ->
+                model ! [ Functions.deleteDialogShow row.id ]
 
-        DeleteConfirmed rowId ->
-            { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
-                ! [ Http.getString ("/People/DeleteRecord?recordId=" ++ toString rowId)
-                        |> Http.send DeleteCompleted
-                  ]
-
-        DeleteCompleted (Ok responseMsg) ->
-            case Functions.getResponseError responseMsg of
-                Just t ->
-                    model ! [ displayErrorMessage t ]
-
-                Nothing ->
-                    model ! [ displaySuccessMessage "Record deleted successfully!" ]
-
-        DeleteCompleted (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
-
-        EditTask taskId ->
-            model ! [ editTask taskId ]
-
-        NoOp ->
-            model ! []
-
-        -- Edit
-        AddNewFacility ->
-            model ! [ addNewFacility Nothing ]
-
-        AddNewPhysician ->
-            model ! [ addNewPhysician Nothing ]
-
-        Save editData ->
-            if List.length (getValidationErrors (formInputs editData)) > 0 then
-                { model | editData = Just { editData | showValidationErrors = True } } ! []
-            else
-                model
-                    ! [ "/People/AddNewRecord"
-                            |> Functions.postRequest (encodeRecord editData patientId)
-                            |> Http.send (SaveCompleted editData.recordType)
-                      , Functions.setUnsavedChanges False
+            DeleteConfirmed rowId ->
+                { model | rows = model.rows |> List.filter (\t -> t.id /= rowId) }
+                    ! [ Http.getString ("/People/DeleteRecord?recordId=" ++ toString rowId)
+                            |> Http.send DeleteCompleted
                       ]
 
-        SaveCompleted recordType (Ok responseMsg) ->
-            case Functions.getResponseError responseMsg of
-                Just t ->
-                    { model | editData = Nothing } ! [ displayErrorMessage t ]
+            DeleteCompleted (Ok responseMsg) ->
+                case Functions.getResponseError responseMsg of
+                    Just t ->
+                        model ! [ displayErrorMessage t ]
 
-                Nothing ->
-                    { model | editData = Nothing }
-                        ! [ displaySuccessMessage "Save completed successfully!"
-                          , loadRecords model.recordType patientId
+                    Nothing ->
+                        model ! [ displaySuccessMessage "Record deleted successfully!" ]
+
+            DeleteCompleted (Err t) ->
+                model ! [ displayErrorMessage (toString t) ]
+
+            EditTask taskId ->
+                model ! [ editTask taskId ]
+
+            NoOp ->
+                model ! []
+
+            -- Edit
+            AddNewFacility ->
+                model ! [ addNewFacility Nothing ]
+
+            AddNewPhysician ->
+                model ! [ addNewPhysician Nothing ]
+
+            Save editData ->
+                if List.length (getValidationErrors (formInputs editData)) > 0 then
+                    { model | editData = Just { editData | showValidationErrors = True } } ! []
+                else
+                    model
+                        ! [ "/People/AddNewRecord"
+                                |> Functions.postRequest (encodeRecord editData patientId)
+                                |> Http.send (SaveCompleted editData.recordType)
+                          , Functions.setUnsavedChanges False
                           ]
 
-        SaveCompleted _ (Err t) ->
-            model ! [ displayErrorMessage (toString t) ]
+            SaveCompleted recordType (Ok responseMsg) ->
+                case Functions.getResponseError responseMsg of
+                    Just t ->
+                        { model | editData = Nothing } ! [ displayErrorMessage t ]
 
-        Cancel ->
-            { model | editData = Nothing } ! [ Functions.setUnsavedChanges False ]
+                    Nothing ->
+                        { model | editData = Nothing }
+                            ! [ displaySuccessMessage "Save completed successfully!"
+                              , loadRecords model.recordType patientId
+                              ]
 
-        UpdateRecordAddNew sfData ->
-            case model.editData of
-                Just editData ->
-                    { model | editData = Just { editData | sfData = sfData } } ! []
+            SaveCompleted _ (Err t) ->
+                model ! [ displayErrorMessage (toString t) ]
 
-                Nothing ->
-                    model ! [ displayErrorMessage "Cannot update edit data while null" ]
+            Cancel ->
+                { model | editData = Nothing } ! [ Functions.setUnsavedChanges False ]
 
-        UpdateTitle editData str ->
-            updateAddNew { editData | title = Just str }
+            UpdateRecordAddNew sfData ->
+                case model.editData of
+                    Just editData ->
+                        { model | editData = Just { editData | sfData = sfData } } ! []
 
-        UpdateSpecialty editData str ->
-            updateAddNew { editData | specialty = Just str }
+                    Nothing ->
+                        model ! [ displayErrorMessage "Cannot update edit data while null" ]
 
-        UpdateProvider editData str ->
-            updateAddNew { editData | provider = Just str }
+            UpdateTitle editData str ->
+                updateAddNew { editData | title = Just str }
 
-        UpdateComments editData str ->
-            updateAddNew { editData | comments = Just str }
+            UpdateSpecialty editData str ->
+                updateAddNew { editData | specialty = Just str }
 
-        UpdateCallSid editData str ->
-            updateAddNew { editData | callSid = Just str }
+            UpdateProvider editData str ->
+                updateAddNew { editData | provider = Just str }
 
-        UpdateRecordingSid editData str ->
-            updateAddNew { editData | recording = Just str }
+            UpdateComments editData str ->
+                updateAddNew { editData | comments = Just str }
 
-        UpdateDuration editData str ->
-            updateAddNew { editData | duration = Functions.defaultIntStr str }
+            UpdateCallSid editData str ->
+                updateAddNew { editData | callSid = Just str }
 
-        -- Hospitilizations
-        UpdateIsExistingHospitilization editData bool ->
-            updateAddNew { editData | isExistingHospitilization = bool }
+            UpdateRecordingSid editData str ->
+                updateAddNew { editData | recording = Just str }
 
-        UpdatePatientReported editData bool ->
-            updateAddNew { editData | patientReported = bool }
+            UpdateDuration editData str ->
+                updateAddNew { editData | duration = Functions.defaultIntStr str }
 
-        UpdateDischargeDiagnosis editData str ->
-            updateAddNew { editData | dischargeDiagnosis = Just str }
+            -- Hospitilizations
+            UpdateIsExistingHospitilization editData bool ->
+                updateAddNew { editData | isExistingHospitilization = bool }
+
+            UpdatePatientReported editData bool ->
+                updateAddNew { editData | patientReported = bool }
+
+            UpdateDischargeDiagnosis editData str ->
+                updateAddNew { editData | dischargeDiagnosis = Just str }
 
 
 getColumns : RecordType -> List (Table.Column Row Msg)
@@ -440,7 +440,7 @@ getColumns recordType =
             [ Table.dropdownColumn (dropdownItems recordType)
             ]
     in
-    List.append firstColumns lastColumns
+        List.append firstColumns lastColumns
 
 
 hrefCustom : { a | taskId : Maybe Int, taskTitle : Maybe String } -> Html Msg
@@ -495,9 +495,9 @@ loadRecords recordType patientId =
         url =
             "/People/PatientRecordsGrid?patientId=" ++ toString patientId ++ "&recordTypeId=" ++ toString recordTypeId
     in
-    Decode.field "list" (Decode.list decodeRow)
-        |> Http.get url
-        |> Http.send Load
+        Decode.field "list" (Decode.list decodeRow)
+            |> Http.get url
+            |> Http.send Load
 
 
 getMenuMessage : List Row -> Common.RecordType -> Int -> String -> Common.MenuMessage
@@ -512,7 +512,7 @@ getMenuMessage rows recordType recordId messageType =
         recordTypeId =
             Just <| Functions.getId recordType
     in
-    Common.MenuMessage messageType recordId recordTypeId maybeVerbalConsent
+        Common.MenuMessage messageType recordId recordTypeId maybeVerbalConsent
 
 
 flipConsent : List Row -> Int -> Common.RecordType -> List Row
@@ -658,7 +658,7 @@ formInputs editData =
                         ++ [ FileInput "Upload Record File" Required editData.sfData.fileName
                            ]
     in
-    columns
+        columns
 
 
 gridConfig : RecordType -> Maybe AddEditDataSource -> Table.Config Row Msg

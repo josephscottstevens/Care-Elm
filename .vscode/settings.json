@@ -9,6 +9,13 @@
         "**/node_modules": true,
         "**/elm-stuff": true
     },
+    "git.enableSmartCommit": true,
+    "window.zoomLevel": 1,
+    "git.confirmSync": false,
+    "editor.tabSize": 2,
+    "git.autofetch": true,
+    "explorer.confirmDragAndDrop": false,
     "editor.formatOnSave": true,
-    "editor.codeActionsOnSaveTimeout": 999999
+    "editor.renderWhitespace": "none",
+    "editor.codeActionsOnSaveTimeout": 75000
 }
