@@ -50,7 +50,6 @@ type Page
     | LastKnownVitals LastKnownVitals.Model
       -- Other
     | NoPage
-    | Error String
 
 
 type alias Flags =
@@ -70,11 +69,11 @@ init flags =
                 , addEditDataSource = Nothing
                 }
     in
-    model
-        ! [ Functions.setLoadingStatus False
-          , cmds
-          , Task.perform Resize Window.size
-          ]
+        model
+            ! [ Functions.setLoadingStatus False
+              , cmds
+              , Task.perform Resize Window.size
+              ]
 
 
 subscriptions : Model -> Sub Msg
@@ -121,9 +120,6 @@ pageSubscriptions page =
         NoPage ->
             Sub.none
 
-        Error _ ->
-            Sub.none
-
 
 view : Model -> Html Msg
 view model =
@@ -158,9 +154,6 @@ view model =
         -- Other
         NoPage ->
             div [] []
-
-        Error str ->
-            div [] [ Html.text str ]
 
 
 type Msg
@@ -203,78 +196,78 @@ pageInit pageStr model =
             setModel (Records (Records.emptyModel recordType))
                 ! cmds [ Cmd.map RecordsMsg (Records.init recordType model.patientId) ]
     in
-    case pageStr of
-        -- Patients\Profile
-        "demographics" ->
-            setModel (Demographics (Demographics.emptyModel model.patientId))
-                ! cmds [ Cmd.map DemographicsMsg (Demographics.init model.patientId) ]
+        case pageStr of
+            -- Patients\Profile
+            "demographics" ->
+                setModel (Demographics (Demographics.emptyModel model.patientId))
+                    ! cmds [ Cmd.map DemographicsMsg (Demographics.init model.patientId) ]
 
-        -- --People\Records
-        "primarycarerecords" ->
-            setRecordsModel Common.PrimaryCare
+            -- --People\Records
+            "primarycarerecords" ->
+                setRecordsModel Common.PrimaryCare
 
-        "specialtyrecords" ->
-            setRecordsModel Common.Specialty
+            "specialtyrecords" ->
+                setRecordsModel Common.Specialty
 
-        "labrecords" ->
-            setRecordsModel Common.Labs
+            "labrecords" ->
+                setRecordsModel Common.Labs
 
-        "radiologyrecords" ->
-            setRecordsModel Common.Radiology
+            "radiologyrecords" ->
+                setRecordsModel Common.Radiology
 
-        "hospitalizationrecords" ->
-            setRecordsModel Common.Hospitalizations
+            "hospitalizationrecords" ->
+                setRecordsModel Common.Hospitalizations
 
-        "legalrecords" ->
-            setRecordsModel Common.Legal
+            "legalrecords" ->
+                setRecordsModel Common.Legal
 
-        "miscrecords" ->
-            setRecordsModel Common.Misc
+            "miscrecords" ->
+                setRecordsModel Common.Misc
 
-        "enrollmentrecords" ->
-            setRecordsModel Common.Enrollment
+            "enrollmentrecords" ->
+                setRecordsModel Common.Enrollment
 
-        "previoushistoryrecords" ->
-            setRecordsModel Common.PreviousHistories
+            "previoushistoryrecords" ->
+                setRecordsModel Common.PreviousHistories
 
-        "callrecordingrecords" ->
-            setRecordsModel Common.CallRecordings
+            "callrecordingrecords" ->
+                setRecordsModel Common.CallRecordings
 
-        "continuityofcaredocument" ->
-            setRecordsModel Common.ContinuityOfCareDocument
+            "continuityofcaredocument" ->
+                setRecordsModel Common.ContinuityOfCareDocument
 
-        --Other
-        "billing" ->
-            setModel (Billing Billing.emptyModel)
-                ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
+            --Other
+            "billing" ->
+                setModel (Billing Billing.emptyModel)
+                    ! cmds [ Cmd.map BillingMsg (Billing.init model.patientId) ]
 
-        --People/ClinicalSummary
-        "clinicalsummary" ->
-            setModel (ClinicalSummary ClinicalSummary.emptyModel)
-                ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
+            --People/ClinicalSummary
+            "clinicalsummary" ->
+                setModel (ClinicalSummary ClinicalSummary.emptyModel)
+                    ! cmds [ Cmd.map ClinicalSummaryMsg (ClinicalSummary.init model.patientId) ]
 
-        "pastmedicalhistory" ->
-            setModel (PastMedicalHistory PastMedicalHistory.emptyModel)
-                ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
+            "pastmedicalhistory" ->
+                setModel (PastMedicalHistory PastMedicalHistory.emptyModel)
+                    ! cmds [ Cmd.map PastMedicalHistoryMsg (PastMedicalHistory.init model.patientId) ]
 
-        "hospitalizations" ->
-            setModel (Hospitilizations Hospitilizations.emptyModel)
-                ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
+            "hospitalizations" ->
+                setModel (Hospitilizations Hospitilizations.emptyModel)
+                    ! cmds [ Cmd.map HospitilizationsMsg (Hospitilizations.init model.patientId) ]
 
-        "immunizations" ->
-            setModel (Immunizations Immunizations.emptyModel)
-                ! cmds [ Cmd.map ImmunizationsMsg (Immunizations.init model.patientId) ]
+            "immunizations" ->
+                setModel (Immunizations Immunizations.emptyModel)
+                    ! cmds [ Cmd.map ImmunizationsMsg (Immunizations.init model.patientId) ]
 
-        "allergies" ->
-            setModel (Allergies Allergies.emptyModel)
-                ! cmds [ Cmd.map AllergiesMsg (Allergies.init model.patientId) ]
+            "allergies" ->
+                setModel (Allergies Allergies.emptyModel)
+                    ! cmds [ Cmd.map AllergiesMsg (Allergies.init model.patientId) ]
 
-        "vitals" ->
-            setModel (LastKnownVitals LastKnownVitals.emptyModel)
-                ! cmds [ Cmd.map LastKnownVitalsMsg (LastKnownVitals.init model.patientId) ]
+            "vitals" ->
+                setModel (LastKnownVitals LastKnownVitals.emptyModel)
+                    ! cmds [ Cmd.map LastKnownVitalsMsg (LastKnownVitals.init model.patientId) ]
 
-        _ ->
-            setModel NoPage ! []
+            _ ->
+                setModel NoPage ! []
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -290,73 +283,74 @@ updatePage page msg model =
                 ( newModel, newCmd ) =
                     subUpdate subMsg subModel model.patientId
             in
-            { model | page = toModel newModel } ! [ Cmd.map toMsg newCmd ]
+                { model | page = toModel newModel } ! [ Cmd.map toMsg newCmd ]
     in
-    case ( msg, page ) of
-        ( Resize windowSize, _ ) ->
-            let
-                rootDialog =
-                    model.rootDialog
-            in
-            { model | rootDialog = { rootDialog | windowSize = windowSize } }
-                ! [ updateScrollY True
-                  ]
+        case ( msg, page ) of
+            ( Resize windowSize, _ ) ->
+                let
+                    rootDialog =
+                        model.rootDialog
+                in
+                    { model | rootDialog = { rootDialog | windowSize = windowSize } }
+                        ! [ updateScrollY True
+                          ]
 
-        ( DocumentScroll windowScrollY, _ ) ->
-            let
-                rootDialog =
-                    model.rootDialog
-            in
-            { model | rootDialog = { rootDialog | windowScrollY = windowScrollY } } ! []
+            ( DocumentScroll windowScrollY, _ ) ->
+                let
+                    rootDialog =
+                        model.rootDialog
+                in
+                    { model | rootDialog = { rootDialog | windowScrollY = windowScrollY } } ! []
 
-        ( UpdatePatientId newPatientId, _ ) ->
-            { model | patientId = newPatientId }
-                ! [ if newPatientId == model.patientId then
-                        Cmd.none
-                    else
-                        Navigation.newUrl ("./?patientId=" ++ toString newPatientId)
-                  ]
+            ( UpdatePatientId newPatientId, _ ) ->
+                { model | patientId = newPatientId }
+                    ! [ if newPatientId == model.patientId then
+                            Cmd.none
+                        else
+                            Navigation.newUrl ("./?patientId=" ++ toString newPatientId)
+                      ]
 
-        ( AddEditDataSourceLoaded response, _ ) ->
-            case response of
-                Ok t ->
-                    { model | addEditDataSource = Just t } ! []
+            ( AddEditDataSourceLoaded response, _ ) ->
+                case response of
+                    Ok t ->
+                        { model | addEditDataSource = Just t } ! []
 
-                Err t ->
-                    { model | page = Error (toString t) } ! []
+                    Err t ->
+                        { model | page = NoPage }
+                            ! [ Functions.displayErrorMessage (toString t) ]
 
-        ( DemographicsMsg subMsg, Demographics subModel ) ->
-            toPage Demographics DemographicsMsg Demographics.update subMsg subModel
+            ( DemographicsMsg subMsg, Demographics subModel ) ->
+                toPage Demographics DemographicsMsg Demographics.update subMsg subModel
 
-        ( PastMedicalHistoryMsg subMsg, PastMedicalHistory subModel ) ->
-            toPage PastMedicalHistory PastMedicalHistoryMsg PastMedicalHistory.update subMsg subModel
+            ( PastMedicalHistoryMsg subMsg, PastMedicalHistory subModel ) ->
+                toPage PastMedicalHistory PastMedicalHistoryMsg PastMedicalHistory.update subMsg subModel
 
-        ( BillingMsg subMsg, Billing subModel ) ->
-            toPage Billing BillingMsg Billing.update subMsg subModel
+            ( BillingMsg subMsg, Billing subModel ) ->
+                toPage Billing BillingMsg Billing.update subMsg subModel
 
-        ( HospitilizationsMsg subMsg, Hospitilizations subModel ) ->
-            toPage Hospitilizations HospitilizationsMsg Hospitilizations.update subMsg subModel
+            ( HospitilizationsMsg subMsg, Hospitilizations subModel ) ->
+                toPage Hospitilizations HospitilizationsMsg Hospitilizations.update subMsg subModel
 
-        ( ClinicalSummaryMsg subMsg, ClinicalSummary subModel ) ->
-            toPage ClinicalSummary ClinicalSummaryMsg ClinicalSummary.update subMsg subModel
+            ( ClinicalSummaryMsg subMsg, ClinicalSummary subModel ) ->
+                toPage ClinicalSummary ClinicalSummaryMsg ClinicalSummary.update subMsg subModel
 
-        ( RecordsMsg subMsg, Records subModel ) ->
-            toPage Records RecordsMsg Records.update subMsg subModel
+            ( RecordsMsg subMsg, Records subModel ) ->
+                toPage Records RecordsMsg Records.update subMsg subModel
 
-        ( AllergiesMsg subMsg, Allergies subModel ) ->
-            toPage Allergies AllergiesMsg Allergies.update subMsg subModel
+            ( AllergiesMsg subMsg, Allergies subModel ) ->
+                toPage Allergies AllergiesMsg Allergies.update subMsg subModel
 
-        ( ImmunizationsMsg subMsg, Immunizations subModel ) ->
-            toPage Immunizations ImmunizationsMsg Immunizations.update subMsg subModel
+            ( ImmunizationsMsg subMsg, Immunizations subModel ) ->
+                toPage Immunizations ImmunizationsMsg Immunizations.update subMsg subModel
 
-        ( LastKnownVitalsMsg subMsg, LastKnownVitals subModel ) ->
-            toPage LastKnownVitals LastKnownVitalsMsg LastKnownVitals.update subMsg subModel
+            ( LastKnownVitalsMsg subMsg, LastKnownVitals subModel ) ->
+                toPage LastKnownVitals LastKnownVitalsMsg LastKnownVitals.update subMsg subModel
 
-        _ ->
-            --{ model | page = Error <| "Missing Page\\Message " ++ toString page ++ " !!!__-__!!! " ++ toString msg } ! []
-            -- above line is useful for debugging, but when releasing, needs to be this
-            -- because, what if you save, move away from the page, then receive confirmation previous thing saved, we don't care at this point
-            model ! []
+            _ ->
+                --{ model | page = Error <| "Missing Page\\Message " ++ toString page ++ " !!!__-__!!! " ++ toString msg } ! []
+                -- above line is useful for debugging, but when releasing, needs to be this
+                -- because, what if you save, move away from the page, then receive confirmation previous thing saved, we don't care at this point
+                model ! []
 
 
 getDropDowns : Int -> Cmd Msg
