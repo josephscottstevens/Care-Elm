@@ -10,7 +10,7 @@ import Common.Html
         , makeControls
         )
 import Common.Table as Table
-import Common.Types as Common exposing (AddEditDataSource, DropdownItem, RecordType, RequiredType(Optional, Required))
+import Common.Types as Common exposing (AddEditDataSource, DropdownItem, RecordType(..), RequiredType(Optional, Required))
 import Html exposing (Html, button, div, h4, text)
 import Html.Attributes exposing (class, id, type_, value)
 import Html.Events exposing (onClick)
@@ -535,9 +535,8 @@ flipConsent rows recordId recordType =
 formInputs : EditData -> List (InputControlType Msg)
 formInputs editData =
     let
-        firstColumns =
-            [ DropInput "Facility" Required editData.sfData.facilityId "FacilityId"
-            ]
+        firstColumn =
+            DropInput "Facility" Required editData.sfData.facilityId "FacilityId"
 
         lastControls =
             [ AreaInput "Comments" Required editData.comments (UpdateComments editData)
@@ -545,11 +544,11 @@ formInputs editData =
             ]
 
         defaultFields =
-            firstColumns
-                ++ [ DateInput "Date of Visit" Required (defaultString editData.sfData.timeVisit) "TimeVisitId"
-                   , TextInput "Doctor of Visit" Optional editData.provider (UpdateProvider editData)
-                   , TextInput "Specialty of Visit" Optional editData.specialty (UpdateSpecialty editData)
-                   ]
+            [ firstColumn
+            , DateInput "Date of Visit" Required (defaultString editData.sfData.timeVisit) "TimeVisitId"
+            , TextInput "Doctor of Visit" Optional editData.provider (UpdateProvider editData)
+            , TextInput "Specialty of Visit" Optional editData.specialty (UpdateSpecialty editData)
+            ]
                 ++ lastControls
 
         columns =
@@ -561,30 +560,31 @@ formInputs editData =
                     defaultFields
 
                 Common.Labs ->
-                    firstColumns
-                        ++ [ DateInput "Date of Labs Collected" Required (defaultString editData.sfData.timeVisit) "TimeVisitId"
-                           , DateInput "Date of Labs Accessioned" Required (defaultString editData.sfData.timeAcc) "TimeAccId"
-                           , TextInput "Name of Lab" Optional editData.title (UpdateTitle editData)
-                           , TextInput "Provider of Lab" Optional editData.provider (UpdateProvider editData)
-                           ]
+                    [ firstColumn
+                    , DateInput "Date of Labs Collected" Required (defaultString editData.sfData.timeVisit) "TimeVisitId"
+                    , DateInput "Date of Labs Accessioned" Required (defaultString editData.sfData.timeAcc) "TimeAccId"
+                    , TextInput "Name of Lab" Optional editData.title (UpdateTitle editData)
+                    , TextInput "Provider of Lab" Optional editData.provider (UpdateProvider editData)
+                    ]
                         ++ lastControls
 
                 Common.Radiology ->
-                    firstColumns
-                        ++ [ DateInput "Date of Study was done" Required (defaultString editData.sfData.timeVisit) "TimeVisitId"
-                           , DateInput "Date of Study Accessioned" Required (defaultString editData.sfData.timeAcc) "TimeAccId"
-                           , TextInput "Name of Study" Optional editData.title (UpdateTitle editData)
-                           , TextInput "Provider of Study" Optional editData.provider (UpdateProvider editData)
-                           ]
+                    [ firstColumn
+                    , DateInput "Date of Study was done" Required (defaultString editData.sfData.timeVisit) "TimeVisitId"
+                    , DateInput "Date of Study Accessioned" Required (defaultString editData.sfData.timeAcc) "TimeAccId"
+                    , TextInput "Name of Study" Optional editData.title (UpdateTitle editData)
+                    , TextInput "Provider of Study" Optional editData.provider (UpdateProvider editData)
+                    ]
                         ++ lastControls
 
                 Common.Misc ->
                     defaultFields
 
                 Common.Legal ->
-                    firstColumns
-                        ++ TextInput "Title" Optional editData.title (UpdateTitle editData)
-                        :: lastControls
+                    [ firstColumn
+                    , TextInput "Title" Optional editData.title (UpdateTitle editData)
+                    ]
+                        ++ lastControls
 
                 Common.Hospitalizations ->
                     case editData.isExistingHospitilization of
@@ -633,30 +633,31 @@ formInputs editData =
                                 ++ lastControls
 
                 Common.CallRecordings ->
-                    firstColumns
-                        ++ [ TextInput "Call Sid" Required editData.callSid (UpdateCallSid editData)
-                           , TextInput "Recording Sid" Required editData.recording (UpdateRecordingSid editData)
-                           , NumrInput "Duration" Required editData.duration (UpdateDuration editData)
-                           , DateInput "Recording Date" Required (defaultString editData.sfData.recordingDate) "RecordingDateId"
-                           , DropInput "User" Required editData.sfData.userId "UserId"
-                           , DropInput "Task" Optional editData.sfData.taskId "TaskId"
-                           ]
+                    [ firstColumn
+                    , TextInput "Call Sid" Required editData.callSid (UpdateCallSid editData)
+                    , TextInput "Recording Sid" Required editData.recording (UpdateRecordingSid editData)
+                    , NumrInput "Duration" Required editData.duration (UpdateDuration editData)
+                    , DateInput "Recording Date" Required (defaultString editData.sfData.recordingDate) "RecordingDateId"
+                    , DropInput "User" Required editData.sfData.userId "UserId"
+                    , DropInput "Task" Optional editData.sfData.taskId "TaskId"
+                    ]
 
                 Common.PreviousHistories ->
-                    firstColumns
-                        ++ [ DateInput "Report Date" Required (defaultString editData.sfData.reportDate) "ReportDateId"
-                           , FileInput "Upload Record File" Required editData.sfData.fileName
-                           ]
+                    [ firstColumn
+                    , DateInput "Report Date" Required (defaultString editData.sfData.reportDate) "ReportDateId"
+                    , FileInput "Upload Record File" Required editData.sfData.fileName
+                    ]
 
                 Common.Enrollment ->
-                    firstColumns
-                        ++ TextInput "Title" Optional editData.title (UpdateTitle editData)
-                        :: lastControls
+                    [ firstColumn
+                    , TextInput "Title" Optional editData.title (UpdateTitle editData)
+                    ]
+                        ++ lastControls
 
                 Common.ContinuityOfCareDocument ->
-                    firstColumns
-                        ++ [ FileInput "Upload Record File" Required editData.sfData.fileName
-                           ]
+                    [ firstColumn
+                    , FileInput "Upload Record File" Required editData.sfData.fileName
+                    ]
     in
         columns
 
@@ -747,12 +748,24 @@ encodeRecord editData patientId =
 
 emptyModel : RecordType -> Model
 emptyModel recordType =
-    { rows = []
-    , dropDownState = -1
-    , tableState = Table.init "Date"
-    , editData = Nothing
-    , recordType = recordType
-    }
+    let
+        sortColumn =
+            case recordType of
+                CallRecordings ->
+                    "Date"
+
+                ContinuityOfCareDocument ->
+                    "Date"
+
+                _ ->
+                    "Date Collected"
+    in
+        { rows = []
+        , dropDownState = -1
+        , tableState = Table.init sortColumn
+        , editData = Nothing
+        , recordType = recordType
+        }
 
 
 createEditData : AddEditDataSource -> RecordType -> EditData
