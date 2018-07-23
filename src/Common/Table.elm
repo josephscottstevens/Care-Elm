@@ -153,20 +153,20 @@ view state rows config maybeCustomRow =
         totalRows =
             List.length rows
     in
-    div [ class "e-grid e-js e-waitingpopup" ]
-        [ viewToolbar config.toolbar
-        , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
-            [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
-                [ tr [] (List.map (viewTh state config) config.columns)
+        div [ class "e-grid e-js e-waitingpopup" ]
+            [ viewToolbar config.toolbar
+            , table [ id config.domTableId, class "e-table", style [ ( "border-collapse", "collapse" ) ] ]
+                [ thead [ class "e-gridheader e-columnheader e-hidelines" ]
+                    [ tr [] (List.map (viewTh state config) config.columns)
 
-                -- This is for filters, this can come at a later time
-                -- , tr [] (List.map (viewThFilter state config) config.columns)
+                    -- This is for filters, this can come at a later time
+                    -- , tr [] (List.map (viewThFilter state config) config.columns)
+                    ]
+                , tbody []
+                    (viewTr state filteredRows config maybeCustomRow)
                 ]
-            , tbody []
-                (viewTr state filteredRows config maybeCustomRow)
+            , pagingView state totalRows filteredRows config.toMsg
             ]
-        , pagingView state totalRows filteredRows config.toMsg
-        ]
 
 
 viewTr : State -> List { data | id : Int } -> Config { data | id : Int } msg -> Maybe (Html msg) -> List (Html msg)
@@ -212,23 +212,23 @@ viewTr state rows config maybeCustomRow =
                 , ( "margin-left", "5px" )
                 ]
     in
-    case maybeCustomRow of
-        Just customRow ->
-            tr [ customRowStyle ]
-                [ td [ colspan (List.length config.columns), customCellStyle ]
-                    [ customRow
+        case maybeCustomRow of
+            Just customRow ->
+                tr [ customRowStyle ]
+                    [ td [ colspan (List.length config.columns), customCellStyle ]
+                        [ customRow
+                        ]
                     ]
-                ]
-                :: List.indexedMap standardTr rows
+                    :: List.indexedMap standardTr rows
 
-        Nothing ->
-            if List.length rows == 0 then
-                [ tr []
-                    [ td [] [ text "No records to display" ]
+            Nothing ->
+                if List.length rows == 0 then
+                    [ tr []
+                        [ td [] [ text "No records to display" ]
+                        ]
                     ]
-                ]
-            else
-                List.indexedMap standardTr rows
+                else
+                    List.indexedMap standardTr rows
 
 
 viewTh : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
@@ -249,9 +249,9 @@ viewTh state config column =
         sortClick =
             Events.onClick (config.toMsg { state | sortAscending = not state.sortAscending, sortField = name })
     in
-    th [ class ("e-headercell e-default " ++ name), sortClick ]
-        [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
-        ]
+        th [ class ("e-headercell e-default " ++ name), sortClick ]
+            [ div [ class "e-headercelldiv e-gridtooltip" ] headerContent
+            ]
 
 
 viewThFilter : State -> Config { data | id : Int } msg -> Column { data | id : Int } msg -> Html msg
@@ -297,40 +297,40 @@ viewTd state row config column =
                 _ ->
                     Events.onClick (config.toMsg { state | selectedId = Just row.id })
     in
-    td [ tdClass, tdStyle, tdClick, tdDoubleClick ]
-        [ case column of
-            IntColumn _ dataToInt _ ->
-                text (Functions.defaultIntToString (dataToInt row))
+        td [ tdClass, tdStyle, tdClick, tdDoubleClick ]
+            [ case column of
+                IntColumn _ dataToInt _ ->
+                    text (Functions.defaultIntToString (dataToInt row))
 
-            StringColumn _ dataToString _ ->
-                text (Maybe.withDefault "" (dataToString row))
+                StringColumn _ dataToString _ ->
+                    text (Maybe.withDefault "" (dataToString row))
 
-            DateTimeColumn _ dataToString _ ->
-                text (Functions.serverDateTime (dataToString row))
+                DateTimeColumn _ dataToString _ ->
+                    text (Functions.serverDateTime (dataToString row))
 
-            DateColumn _ dataToString _ ->
-                text (Functions.serverDate (dataToString row))
+                DateColumn _ dataToString _ ->
+                    text (Functions.serverDate (dataToString row))
 
-            HrefColumn _ displayText dataToString _ ->
-                --TODO, how do I want to display empty? I think.. it is hide the href, not go to an empty url right?
-                a [ href (Maybe.withDefault "" (dataToString row)), target "_blank" ] [ text displayText ]
+                HrefColumn _ displayText dataToString _ ->
+                    --TODO, how do I want to display empty? I think.. it is hide the href, not go to an empty url right?
+                    a [ href (Maybe.withDefault "" (dataToString row)), target "_blank" ] [ text displayText ]
 
-            HrefColumnExtra _ toNode ->
-                toNode row
+                HrefColumnExtra _ toNode ->
+                    toNode row
 
-            CheckColumn _ dataToString _ ->
-                div [ class "e-checkcell" ]
-                    [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
-                        [ input [ type_ "checkbox", disabled True, checked (dataToString row) ] []
+                CheckColumn _ dataToString _ ->
+                    div [ class "e-checkcell" ]
+                        [ div [ class "e-checkcelldiv", style [ ( "text-align", "center" ) ] ]
+                            [ input [ type_ "checkbox", disabled True, checked (dataToString row) ] []
+                            ]
                         ]
-                    ]
 
-            DropdownColumn dropDownItems ->
-                rowDropDownDiv state config.toMsg row dropDownItems
+                DropdownColumn dropDownItems ->
+                    rowDropDownDiv state config.toMsg row dropDownItems
 
-            HtmlColumn _ dataToString _ ->
-                textHtml (Maybe.withDefault "" (dataToString row))
-        ]
+                HtmlColumn _ dataToString _ ->
+                    textHtml (Maybe.withDefault "" (dataToString row))
+            ]
 
 
 textHtml : String -> Html msg
@@ -432,14 +432,14 @@ rowDropDownDiv state toMsg row dropDownItems =
         blurEvent =
             Events.onBlur (toMsg { state | openDropdownId = Nothing })
     in
-    div []
-        [ div [ style [ ( "text-align", "right" ) ] ]
-            [ button [ id "contextMenuButton", type_ "button", btnClass, clickEvent, blurEvent, btnStyle ]
-                [ div [ id "editButtonMenu", dropDownMenuStyle ]
-                    dropMenu
+        div []
+            [ div [ style [ ( "text-align", "right" ) ] ]
+                [ button [ id "contextMenuButton", type_ "button", btnClass, clickEvent, blurEvent, btnStyle ]
+                    [ div [ id "editButtonMenu", dropDownMenuStyle ]
+                        dropMenu
+                    ]
                 ]
             ]
-        ]
 
 
 viewToolbar : List ( String, msg ) -> Html msg
@@ -467,7 +467,7 @@ toolbarHelper ( iconStr, event ) =
         iconClass =
             "e-addnewitem e-toolbaricons e-icon " ++ iconStr
     in
-    a [ class iconClass, Events.onClick event, iconStyle, id "btnNewRecord" ] []
+        a [ class iconClass, Events.onClick event, iconStyle, id "btnNewRecord" ] []
 
 
 
@@ -511,7 +511,7 @@ setPagingState state totalRows toMsg page =
                 Last ->
                     lastIndex
     in
-    Events.onClick (toMsg { state | pageIndex = newIndex })
+        Events.onClick (toMsg { state | pageIndex = newIndex })
 
 
 pagingView : State -> Int -> List { data | id : Int } -> (State -> msg) -> Html msg
@@ -531,11 +531,11 @@ pagingView state totalRows rows toMsg =
                     else
                         "e-default"
             in
-            div
-                [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText)
-                , pagingStateClick (Index pageIndex)
-                ]
-                [ text (toString (pageIndex + 1)) ]
+                div
+                    [ class ("e-link e-numericitem e-spacing " ++ activeOrNotText)
+                    , pagingStateClick (Index pageIndex)
+                    ]
+                    [ text (toString (pageIndex + 1)) ]
 
         rng =
             List.range 0 lastIndex
@@ -594,22 +594,22 @@ pagingView state totalRows rows toMsg =
                 totalItemsText =
                     toString totalRows
             in
-            currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
+                currentPageText ++ " of " ++ totalPagesText ++ " pages (" ++ totalItemsText ++ " items)"
     in
-    div [ class "e-pager e-js e-pager" ]
-        [ div [ class "e-pagercontainer" ]
-            [ div [ class firstPageClass, pagingStateClick First ] []
-            , div [ class leftPageClass, pagingStateClick Previous ] []
-            , a [ class leftPageBlockClass, pagingStateClick PreviousBlock ] [ text "..." ]
-            , div [ class "e-numericcontainer e-default" ] rng
-            , a [ class rightPageBlockClass, pagingStateClick NextBlock ] [ text "..." ]
-            , div [ class rightPageClass, pagingStateClick Next ] []
-            , div [ class lastPageClass, pagingStateClick Last ] []
+        div [ class "e-pager e-js e-pager" ]
+            [ div [ class "e-pagercontainer" ]
+                [ div [ class firstPageClass, pagingStateClick First ] []
+                , div [ class leftPageClass, pagingStateClick Previous ] []
+                , a [ class leftPageBlockClass, pagingStateClick PreviousBlock ] [ text "..." ]
+                , div [ class "e-numericcontainer e-default" ] rng
+                , a [ class rightPageBlockClass, pagingStateClick NextBlock ] [ text "..." ]
+                , div [ class rightPageClass, pagingStateClick Next ] []
+                , div [ class lastPageClass, pagingStateClick Last ] []
+                ]
+            , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
+                [ span [ class "e-pagermsg" ] [ text pagerText ]
+                ]
             ]
-        , div [ class "e-parentmsgbar", style [ ( "text-align", "right" ) ] ]
-            [ span [ class "e-pagermsg" ] [ text pagerText ]
-            ]
-        ]
 
 
 
